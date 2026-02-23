@@ -44,8 +44,14 @@
   margin-bottom: 0.75rem;
 }
 
+.createRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .createInput {
-  width: 100%;
+  flex: 1;
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--border-default);
   border-radius: 6px;
@@ -53,6 +59,7 @@
   box-sizing: border-box;
   background: var(--bg-input);
   color: var(--text-primary);
+  min-width: 0;
 }
 
 .createInput:focus {
@@ -119,7 +126,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.6rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -131,6 +138,16 @@
   font-size: 1.1rem;
   flex-shrink: 0;
   line-height: 1;
+  align-self: flex-start;
+  margin-top: 0.15rem;
+}
+
+.listText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .listName {
@@ -144,17 +161,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
 }
 
 .listCount {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   color: var(--text-placeholder);
   white-space: nowrap;
-  background: var(--bg-hover);
-  padding: 0.15rem 0.45rem;
-  border-radius: 10px;
-  flex-shrink: 0;
 }
 
 .sharedBadge {
@@ -172,12 +184,13 @@
 .menuWrap {
   position: relative;
   flex-shrink: 0;
+  margin-right: 0.5rem;
 }
 
 .menuBtn {
   background: none;
   border: none;
-  color: var(--text-icon);
+  color: var(--text-secondary);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.3rem 0.45rem;
@@ -188,7 +201,8 @@
 
 .menuBtn:hover {
   color: var(--text-primary);
-  background: var(--bg-hover-strong);
+  background: var(--border-default);
+  border-radius: 6px;
 }
 
 @media (hover: hover) {
@@ -197,7 +211,7 @@
   }
 
   .listItem:hover .menuBtn {
-    color: var(--text-icon);
+    color: var(--text-secondary);
   }
 }
 

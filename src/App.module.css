@@ -80,7 +80,7 @@
 }
 
 .sidebar {
-  width: 240px;
+  width: 320px;
   flex-shrink: 0;
   position: sticky;
   top: 1rem;

@@ -20,6 +20,7 @@ export const ListSelector = ({
   onShareClick,
 }) => {
   const [newName, setNewName] = useState('');
+  const [newEmoji, setNewEmoji] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
@@ -44,8 +45,9 @@ export const ListSelector = ({
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
-    onCreate(trimmed);
+    onCreate(trimmed, newEmoji);
     setNewName('');
+    setNewEmoji(null);
     setIsCreating(false);
   };
 
@@ -117,11 +119,13 @@ export const ListSelector = ({
               onClick={() => onSelect(list.id)}
             >
               {list.emoji && <span className={styles.listEmoji}>{list.emoji}</span>}
-              <span className={styles.listName}>
-                {list.name}
-                {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
+              <span className={styles.listText}>
+                <span className={styles.listName}>
+                  {list.name}
+                  {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
+                </span>
+                <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
               </span>
-              <span className={styles.listCount}>{list.itemCount ?? 0}</span>
             </button>
 
             <div className={styles.menuWrap} ref={isMenuOpen ? menuRef : null}>
@@ -198,14 +202,17 @@ export const ListSelector = ({
 
       {isCreating && (
         <form className={styles.createForm} onSubmit={handleCreate}>
-          <input
-            className={styles.createInput}
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="List name..."
-            autoFocus
-          />
+          <div className={styles.createRow}>
+            <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
+            <input
+              className={styles.createInput}
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="List name..."
+              autoFocus
+            />
+          </div>
           <button className={styles.createBtn} type="submit" disabled={!newName.trim()}>
             Create
           </button>
