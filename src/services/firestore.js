@@ -31,8 +31,6 @@ const itemDoc = (userId, listId, itemId) => doc(db, 'users', userId, 'lists', li
 const historyCol = (userId) => collection(db, 'users', userId, 'history');
 const storesCol = (userId) => collection(db, 'users', userId, 'stores');
 const storeDoc = (userId, storeId) => doc(db, 'users', userId, 'stores', storeId);
-const categoriesCol = (userId) => collection(db, 'users', userId, 'customCategories');
-const categoryDoc = (userId, catId) => doc(db, 'users', userId, 'customCategories', catId);
 
 // ---------------------------------------------------------------------------
 // Lists
@@ -172,54 +170,7 @@ export const subscribeHistory = (userId, callback) => {
 };
 
 // ---------------------------------------------------------------------------
-// Custom Categories
-// ---------------------------------------------------------------------------
-
-/** Creates a new custom category. Returns the generated ID. */
-export const createCustomCategory = async (userId, category) => {
-  const ref = await addDoc(categoriesCol(userId), {
-    ...category,
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
-};
-
-/** Updates a custom category. */
-export const updateCustomCategory = async (userId, catId, updates) => {
-  await updateDoc(categoryDoc(userId, catId), updates);
-};
-
-/** Deletes a custom category. */
-export const deleteCustomCategory = async (userId, catId) => {
-  await deleteDoc(categoryDoc(userId, catId));
-};
-
-/** Saves the full ordered array of custom categories (for reordering). */
-export const saveCustomCategoryOrder = async (userId, categories) => {
-  const batch = writeBatch(db);
-  categories.forEach((cat, index) => {
-    batch.update(categoryDoc(userId, cat.id), { order: index });
-  });
-  await batch.commit();
-};
-
-/**
- * Subscribes to custom categories in real-time.
- * @returns {Function} Unsubscribe function
- */
-export const subscribeCustomCategories = (userId, callback) => {
-  const q = query(categoriesCol(userId), orderBy('order', 'asc'));
-  return onSnapshot(q, (snapshot) => {
-    const categories = snapshot.docs.map((d) => ({
-      id: d.id,
-      ...d.data(),
-    }));
-    callback(categories);
-  });
-};
-
-// ---------------------------------------------------------------------------
-// Stores
+// Stores (categories are embedded as a field on each store document)
 // ---------------------------------------------------------------------------
 
 /** Creates a new store. Returns the generated ID. */

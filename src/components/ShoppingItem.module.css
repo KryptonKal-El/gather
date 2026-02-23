@@ -145,29 +145,6 @@
   flex-shrink: 0;
 }
 
-.aisleWrapper {
-  position: relative;
-}
-
-.aisleBadge {
-  font-size: 0.65rem;
-  font-family: inherit;
-  color: #546e7a;
-  padding: 0.15rem 0.45rem;
-  border-radius: 10px;
-  border: 1px solid #b0bec5;
-  white-space: nowrap;
-  font-weight: 600;
-  cursor: pointer;
-  background: #eceff1;
-  transition: opacity 0.15s, box-shadow 0.15s;
-}
-
-.aisleBadge:hover {
-  opacity: 0.85;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
-}
-
 .deleteBtn {
   background: none;
   border: none;

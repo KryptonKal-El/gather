@@ -7,15 +7,14 @@ import { AddItemForm } from './components/AddItemForm.jsx';
 import { ShoppingList } from './components/ShoppingList.jsx';
 import { Suggestions } from './components/Suggestions.jsx';
 import { RecipePanel } from './components/RecipePanel.jsx';
-import { CategoryManager } from './components/CategoryManager.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import styles from './App.module.css';
 
 /**
  * Root application component.
  * Gates content behind authentication.
- * Composes the list selector, item form, shopping list, suggestions, recipe panel,
- * category manager, and store manager.
+ * Composes the list selector, item form, shopping list, suggestions,
+ * recipe panel, and store manager.
  */
 export const App = () => {
   const { user, isLoading, signOut } = useAuth();
@@ -26,9 +25,9 @@ export const App = () => {
     activeList?.items ?? [],
   );
 
-  const handleAddItem = (name, storeId = null, aisle = null) => {
+  const handleAddItem = (name, storeId = null) => {
     if (!activeList) return;
-    actions.addItem(activeList.id, name, storeId, aisle);
+    actions.addItem(activeList.id, name, storeId);
   };
 
   const handleAddItems = (items) => {
@@ -59,11 +58,6 @@ export const App = () => {
   const handleUpdateStore = (itemId, newStoreId) => {
     if (!activeList) return;
     actions.updateItem(activeList.id, itemId, { store: newStoreId });
-  };
-
-  const handleUpdateAisle = (itemId, newAisle) => {
-    if (!activeList) return;
-    actions.updateItem(activeList.id, itemId, { aisle: newAisle });
   };
 
   if (isLoading) {
@@ -111,13 +105,11 @@ export const App = () => {
               <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
               <ShoppingList
                 items={activeList.items}
-                customCategories={state.customCategories}
                 stores={state.stores}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}
                 onUpdateStore={handleUpdateStore}
-                onUpdateAisle={handleUpdateAisle}
                 onClearChecked={handleClearChecked}
               />
               <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
@@ -128,13 +120,6 @@ export const App = () => {
                 onUpdate={actions.updateStore}
                 onDelete={actions.deleteStore}
                 onReorder={actions.reorderStores}
-              />
-              <CategoryManager
-                customCategories={state.customCategories}
-                onAdd={actions.addCustomCategory}
-                onUpdate={actions.updateCustomCategory}
-                onDelete={actions.deleteCustomCategory}
-                onReorder={actions.reorderCustomCategories}
               />
             </>
           ) : (

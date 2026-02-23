@@ -5,13 +5,12 @@
  */
 import { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import { increment } from 'firebase/firestore';
-import { categorizeItem } from '../utils/categories.js';
+import { categorizeItem, DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { useAuth } from './AuthContext.jsx';
 import {
   subscribeLists,
   subscribeItems,
   subscribeHistory,
-  subscribeCustomCategories,
   subscribeStores,
   createList as fsCreateList,
   updateList as fsUpdateList,
@@ -22,10 +21,6 @@ import {
   removeItem as fsRemoveItem,
   clearCheckedItems,
   addHistoryEntry,
-  createCustomCategory,
-  updateCustomCategory as fsUpdateCustomCategory,
-  deleteCustomCategory as fsDeleteCustomCategory,
-  saveCustomCategoryOrder,
   createStore as fsCreateStore,
   updateStore as fsUpdateStore,
   deleteStore as fsDeleteStore,
@@ -49,7 +44,6 @@ export const ShoppingListProvider = ({ children }) => {
   const [activeListId, setActiveListId] = useState(null);
   const [activeItems, setActiveItems] = useState([]);
   const [history, setHistory] = useState([]);
-  const [customCategories, setCustomCategories] = useState([]);
   const [stores, setStores] = useState([]);
 
   // Track whether we've auto-selected a list on initial load
@@ -65,7 +59,6 @@ export const ShoppingListProvider = ({ children }) => {
     }
     return subscribeLists(userId, (newLists) => {
       setLists(newLists);
-      // Auto-select first list on initial load
       if (!hasAutoSelected.current && newLists.length > 0) {
         setActiveListId(newLists[0].id);
         hasAutoSelected.current = true;
@@ -91,15 +84,6 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeHistory(userId, setHistory);
   }, [userId]);
 
-  // Subscribe to custom categories
-  useEffect(() => {
-    if (!userId) {
-      setCustomCategories([]);
-      return;
-    }
-    return subscribeCustomCategories(userId, setCustomCategories);
-  }, [userId]);
-
   // Subscribe to stores
   useEffect(() => {
     if (!userId) {
@@ -110,7 +94,21 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId]);
 
   // -----------------------------------------------------------------------
-  // Actions (same API surface as before)
+  // Helpers
+  // -----------------------------------------------------------------------
+
+  /**
+   * Returns the categories array for a given store, or DEFAULT_CATEGORIES
+   * if no store is specified or the store is not found.
+   */
+  const getCategoriesForStore = useCallback((storeId) => {
+    if (!storeId) return DEFAULT_CATEGORIES;
+    const store = stores.find((s) => s.id === storeId);
+    return store?.categories ?? DEFAULT_CATEGORIES;
+  }, [stores]);
+
+  // -----------------------------------------------------------------------
+  // Actions
   // -----------------------------------------------------------------------
 
   const createListAction = useCallback(async (name) => {
@@ -139,37 +137,38 @@ export const ShoppingListProvider = ({ children }) => {
     setActiveListId(id);
   }, []);
 
-  const addItemAction = useCallback(async (listId, rawName, storeId = null, aisle = null) => {
+  const addItemAction = useCallback(async (listId, rawName, storeId = null) => {
     if (!userId) return;
     const name = capitalize(rawName.trim());
+    const categories = getCategoriesForStore(storeId);
     const item = {
       name,
-      category: categorizeItem(name, customCategories),
+      category: categorizeItem(name, categories),
       isChecked: false,
       store: storeId,
-      aisle,
     };
     await fsAddItem(userId, listId, item);
     await addHistoryEntry(userId, name);
-  }, [userId, customCategories]);
+  }, [userId, getCategoriesForStore]);
 
   const addItemsAction = useCallback(async (listId, items) => {
     if (!userId) return;
     const prepared = items.map((item) => {
       const name = capitalize(item.name.trim());
+      const storeId = item.store ?? null;
+      const categories = getCategoriesForStore(storeId);
       return {
         name,
-        category: item.category ?? categorizeItem(name, customCategories),
+        category: item.category ?? categorizeItem(name, categories),
         isChecked: false,
-        store: item.store ?? null,
-        aisle: item.aisle ?? null,
+        store: storeId,
       };
     });
     await fsAddItems(userId, listId, prepared);
     for (const item of prepared) {
       await addHistoryEntry(userId, item.name);
     }
-  }, [userId, customCategories]);
+  }, [userId, getCategoriesForStore]);
 
   const toggleItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
@@ -177,7 +176,6 @@ export const ShoppingListProvider = ({ children }) => {
     if (!item) return;
     const nowChecked = !item.isChecked;
     await fsUpdateItem(userId, listId, itemId, { isChecked: nowChecked });
-    // Checked items don't count, so adjust itemCount accordingly
     await fsUpdateList(userId, listId, { itemCount: increment(nowChecked ? -1 : 1) });
   }, [userId, activeItems]);
 
@@ -185,7 +183,6 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userId) return;
     const item = activeItems.find((i) => i.id === itemId);
     await fsRemoveItem(userId, listId, itemId);
-    // Only decrement if the item was unchecked (checked items aren't in the count)
     if (item && !item.isChecked) {
       await fsUpdateList(userId, listId, { itemCount: increment(-1) });
     }
@@ -203,40 +200,12 @@ export const ShoppingListProvider = ({ children }) => {
     await clearCheckedItems(userId, listId, checkedIds);
   }, [userId, activeItems]);
 
-  const addCustomCategoryAction = useCallback(async (name, color, keywords) => {
-    if (!userId) return;
-    const key = `custom_${Date.now()}`;
-    await createCustomCategory(userId, {
-      key,
-      name,
-      color,
-      keywords: keywords ?? [],
-      order: customCategories.length,
-    });
-  }, [userId, customCategories.length]);
-
-  const updateCustomCategoryAction = useCallback(async (id, updates) => {
-    if (!userId) return;
-    await fsUpdateCustomCategory(userId, id, updates);
-  }, [userId]);
-
-  const deleteCustomCategoryAction = useCallback(async (id) => {
-    if (!userId) return;
-    await fsDeleteCustomCategory(userId, id);
-  }, [userId]);
-
-  const reorderCustomCategoriesAction = useCallback(async (categories) => {
-    if (!userId) return;
-    setCustomCategories(categories); // optimistic update for smooth drag
-    await saveCustomCategoryOrder(userId, categories);
-  }, [userId]);
-
   const addStoreAction = useCallback(async (name, color) => {
     if (!userId) return;
     await fsCreateStore(userId, {
       name,
       color,
-      aisles: [],
+      categories: DEFAULT_CATEGORIES,
       order: stores.length,
     });
   }, [userId, stores.length]);
@@ -258,14 +227,13 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId]);
 
   // -----------------------------------------------------------------------
-  // Build the context value matching the old API shape
+  // Build the context value
   // -----------------------------------------------------------------------
 
   const state = {
     lists,
     activeListId,
     history,
-    customCategories,
     stores,
   };
 
@@ -280,17 +248,12 @@ export const ShoppingListProvider = ({ children }) => {
     removeItem: removeItemAction,
     updateItem: updateItemAction,
     clearChecked: clearCheckedAction,
-    addCustomCategory: addCustomCategoryAction,
-    updateCustomCategory: updateCustomCategoryAction,
-    deleteCustomCategory: deleteCustomCategoryAction,
-    reorderCustomCategories: reorderCustomCategoriesAction,
     addStore: addStoreAction,
     updateStore: updateStoreAction,
     deleteStore: deleteStoreAction,
     reorderStores: reorderStoresAction,
   };
 
-  // Build activeList object matching old shape (list + its items)
   const activeListMeta = lists.find((l) => l.id === activeListId) ?? null;
   const activeList = activeListMeta
     ? { ...activeListMeta, items: activeItems }

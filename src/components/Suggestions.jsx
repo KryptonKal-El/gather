@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
-import { CATEGORY_LABELS, CATEGORY_COLORS } from '../utils/categories.js';
+import { getAllCategoryColors } from '../utils/categories.js';
+
+const CATEGORY_COLORS = getAllCategoryColors();
 import styles from './Suggestions.module.css';
 
 /**

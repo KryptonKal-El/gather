@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
+import { CATEGORIES, DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ShoppingItem } from './ShoppingItem.jsx';
 import styles from './ShoppingList.module.css';
@@ -13,13 +13,11 @@ const CategoryGroup = ({
   grouped,
   allLabels,
   allColors,
-  customCategories,
   stores,
   onToggle,
   onRemove,
   onUpdateCategory,
   onUpdateStore,
-  onUpdateAisle,
 }) => (
   <>
     {categoryOrder.map((cat) => {
@@ -39,13 +37,11 @@ const CategoryGroup = ({
             <ShoppingItem
               key={item.id}
               item={item}
-              customCategories={customCategories}
               stores={stores}
               onToggle={() => onToggle(item.id)}
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
               onUpdateStore={onUpdateStore}
-              onUpdateAisle={onUpdateAisle}
             />
           ))}
         </div>
@@ -71,16 +67,17 @@ const groupByCategory = (items) => {
  * Displays the shopping list items grouped by store at the top level,
  * then by category within each store. Items without a store appear
  * in an "Unassigned" section. Checked items appear at the bottom.
+ *
+ * Category labels/colors within each store section use that store's
+ * categories. Unassigned items use global DEFAULT_CATEGORIES.
  */
 export const ShoppingList = ({
   items,
-  customCategories,
   stores,
   onToggle,
   onRemove,
   onUpdateCategory,
   onUpdateStore,
-  onUpdateAisle,
   onClearChecked,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -94,17 +91,12 @@ export const ShoppingList = ({
     );
   }
 
-  const allLabels = getAllCategoryLabels(customCategories);
-  const allColors = getAllCategoryColors(customCategories);
-  const categoryOrder = getAllCategoryKeys(customCategories);
-
   const unchecked = items.filter((i) => !i.isChecked);
   const checkedItems = items.filter((i) => i.isChecked);
 
-  // If no stores exist, fall back to category-only grouping
   const hasStores = stores.length > 0;
 
-  // Build store map for lookups
+  // Build store map
   const storeMap = {};
   for (const s of stores) {
     storeMap[s.id] = s;
@@ -122,17 +114,20 @@ export const ShoppingList = ({
     }
   }
 
-  const categoryGroupProps = {
-    categoryOrder,
-    allLabels,
-    allColors,
-    customCategories,
+  // Default categories for unassigned section
+  const defaultLabels = getAllCategoryLabels();
+  const defaultColors = getAllCategoryColors();
+  const defaultOrder = getAllCategoryKeys();
+
+  const defaultGroupProps = {
+    categoryOrder: defaultOrder,
+    allLabels: defaultLabels,
+    allColors: defaultColors,
     stores,
     onToggle,
     onRemove,
     onUpdateCategory,
     onUpdateStore,
-    onUpdateAisle,
   };
 
   return (
@@ -142,6 +137,10 @@ export const ShoppingList = ({
         const storeItems = byStore[store.id];
         if (!storeItems?.length) return null;
         const grouped = groupByCategory(storeItems);
+        const storeCats = store.categories ?? DEFAULT_CATEGORIES;
+        const storeLabels = getAllCategoryLabels(storeCats);
+        const storeColors = getAllCategoryColors(storeCats);
+        const storeOrder = getAllCategoryKeys(storeCats);
         return (
           <div key={store.id} className={styles.storeSection}>
             <h3 className={styles.storeTitle}>
@@ -153,13 +152,23 @@ export const ShoppingList = ({
               <span className={styles.count}>{storeItems.length}</span>
             </h3>
             <div className={styles.storeBody}>
-              <CategoryGroup grouped={grouped} {...categoryGroupProps} />
+              <CategoryGroup
+                categoryOrder={storeOrder}
+                grouped={grouped}
+                allLabels={storeLabels}
+                allColors={storeColors}
+                stores={stores}
+                onToggle={onToggle}
+                onRemove={onRemove}
+                onUpdateCategory={onUpdateCategory}
+                onUpdateStore={onUpdateStore}
+              />
             </div>
           </div>
         );
       })}
 
-      {/* Unassigned items (no store or stores feature not used) */}
+      {/* Unassigned items */}
       {unassigned.length > 0 && (
         <div className={hasStores ? styles.storeSection : undefined}>
           {hasStores && (
@@ -170,7 +179,7 @@ export const ShoppingList = ({
             </h3>
           )}
           <div className={hasStores ? styles.storeBody : undefined}>
-            <CategoryGroup grouped={groupByCategory(unassigned)} {...categoryGroupProps} />
+            <CategoryGroup grouped={groupByCategory(unassigned)} {...defaultGroupProps} />
           </div>
         </div>
       )}
@@ -201,13 +210,11 @@ export const ShoppingList = ({
             <ShoppingItem
               key={item.id}
               item={item}
-              customCategories={customCategories}
               stores={stores}
               onToggle={() => onToggle(item.id)}
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
               onUpdateStore={onUpdateStore}
-              onUpdateAisle={onUpdateAisle}
             />
           ))}
         </div>
@@ -218,17 +225,14 @@ export const ShoppingList = ({
 
 ShoppingList.propTypes = {
   items: PropTypes.array.isRequired,
-  customCategories: PropTypes.array,
   stores: PropTypes.array,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
   onUpdateStore: PropTypes.func.isRequired,
-  onUpdateAisle: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
 };
 
 ShoppingList.defaultProps = {
-  customCategories: [],
   stores: [],
 };

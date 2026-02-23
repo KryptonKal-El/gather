@@ -10,25 +10,38 @@ const PRESET_COLORS = [
   '#0277bd', '#558b2f', '#7b1fa2',
 ];
 
+const CATEGORY_PRESET_COLORS = [
+  '#4caf50', '#2196f3', '#e53935', '#ff9800', '#00bcd4',
+  '#795548', '#9c27b0', '#ffc107', '#ff5722', '#607d8b',
+  '#e91e63', '#9e9e9e', '#1565c0', '#6a1b9a', '#00838f',
+  '#2e7d32', '#ef6c00', '#4527a0',
+];
+
 /**
- * Inline aisle manager for a single store.
- * Allows adding, renaming, deleting, and reordering aisles.
+ * Inline category editor for a single store.
+ * Supports add, remove (with confirm), rename, reorder, color picker,
+ * and keyword editing for each category.
  */
-const AisleEditor = ({ aisles, onSave }) => {
-  const [localAisles, setLocalAisles] = useState(aisles);
-  const [newAisle, setNewAisle] = useState('');
+const StoreCategoryEditor = ({ categories, onSave }) => {
+  const [localCats, setLocalCats] = useState(categories);
+  const [newName, setNewName] = useState('');
+  const [newColor, setNewColor] = useState(CATEGORY_PRESET_COLORS[0]);
   const [editingIndex, setEditingIndex] = useState(-1);
-  const [editValue, setEditValue] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editColor, setEditColor] = useState('');
+  const [editKeywords, setEditKeywords] = useState('');
   const [confirmingDeleteIndex, setConfirmingDeleteIndex] = useState(-1);
 
-  const isDirty = JSON.stringify(localAisles) !== JSON.stringify(aisles);
+  const isDirty = JSON.stringify(localCats) !== JSON.stringify(categories);
 
   const handleAdd = () => {
-    const trimmed = newAisle.trim();
+    const trimmed = newName.trim();
     if (!trimmed) return;
-    if (localAisles.some((a) => a.toLowerCase() === trimmed.toLowerCase())) return;
-    setLocalAisles([...localAisles, trimmed]);
-    setNewAisle('');
+    if (localCats.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return;
+    const key = `custom_${Date.now()}`;
+    setLocalCats([...localCats, { key, name: trimmed, color: newColor, keywords: [] }]);
+    setNewName('');
+    setNewColor(CATEGORY_PRESET_COLORS[0]);
   };
 
   const handleAddKeyDown = (e) => {
@@ -39,144 +52,210 @@ const AisleEditor = ({ aisles, onSave }) => {
   };
 
   const handleDelete = (index) => {
-    setLocalAisles(localAisles.filter((_, i) => i !== index));
+    setLocalCats(localCats.filter((_, i) => i !== index));
     setConfirmingDeleteIndex(-1);
   };
 
-  const handleStartRename = (index) => {
+  const handleStartEdit = (index) => {
+    const cat = localCats[index];
     setEditingIndex(index);
-    setEditValue(localAisles[index]);
+    setEditName(cat.name);
+    setEditColor(cat.color);
+    setEditKeywords(cat.keywords.join(', '));
   };
 
-  const handleSaveRename = () => {
-    const trimmed = editValue.trim();
+  const handleSaveEdit = () => {
+    const trimmed = editName.trim();
     if (!trimmed) {
       setEditingIndex(-1);
       return;
     }
-    const updated = [...localAisles];
-    updated[editingIndex] = trimmed;
-    setLocalAisles(updated);
+    const updated = [...localCats];
+    updated[editingIndex] = {
+      ...updated[editingIndex],
+      name: trimmed,
+      color: editColor,
+      keywords: editKeywords
+        .split(',')
+        .map((kw) => kw.trim())
+        .filter(Boolean),
+    };
+    setLocalCats(updated);
     setEditingIndex(-1);
   };
 
-  const handleRenameKeyDown = (e) => {
-    if (e.key === 'Enter') handleSaveRename();
+  const handleEditKeyDown = (e) => {
+    if (e.key === 'Enter') handleSaveEdit();
     if (e.key === 'Escape') setEditingIndex(-1);
   };
 
   const handleMoveUp = (index) => {
     if (index === 0) return;
-    const reordered = [...localAisles];
+    const reordered = [...localCats];
     [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
-    setLocalAisles(reordered);
+    setLocalCats(reordered);
   };
 
   const handleMoveDown = (index) => {
-    if (index === localAisles.length - 1) return;
-    const reordered = [...localAisles];
+    if (index === localCats.length - 1) return;
+    const reordered = [...localCats];
     [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
-    setLocalAisles(reordered);
+    setLocalCats(reordered);
   };
 
   const handleSaveAll = () => {
-    onSave(localAisles);
+    onSave(localCats);
   };
 
   return (
-    <div className={styles.aisleEditor}>
-      <h5 className={styles.aisleTitle}>Aisles ({localAisles.length})</h5>
+    <div className={styles.catEditor}>
+      <h5 className={styles.catTitle}>Categories ({localCats.length})</h5>
 
-      {localAisles.length === 0 && (
-        <p className={styles.aisleEmpty}>No aisles yet.</p>
+      {localCats.length === 0 && (
+        <p className={styles.catEmpty}>No categories. Add one below.</p>
       )}
 
-      <div className={styles.aisleList}>
-        {localAisles.map((aisle, index) => (
-          <div key={`${aisle}-${index}`} className={styles.aisleRow}>
+      <div className={styles.catList}>
+        {localCats.map((cat, index) => (
+          <div key={`${cat.key}-${index}`} className={styles.catRow}>
             {editingIndex === index ? (
-              <input
-                type="text"
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                onKeyDown={handleRenameKeyDown}
-                onBlur={handleSaveRename}
-                className={styles.aisleRenameInput}
-                autoFocus
-              />
-            ) : (
-              <span
-                className={styles.aisleName}
-                onDoubleClick={() => handleStartRename(index)}
-              >
-                {aisle}
-              </span>
-            )}
-            <div className={styles.aisleActions}>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={() => handleMoveUp(index)}
-                disabled={index === 0}
-                aria-label="Move up"
-                title="Move up"
-              >
-                ↑
-              </button>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={() => handleMoveDown(index)}
-                disabled={index === localAisles.length - 1}
-                aria-label="Move down"
-                title="Move down"
-              >
-                ↓
-              </button>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                onClick={() => handleStartRename(index)}
-                aria-label="Rename"
-                title="Rename"
-              >
-                ✎
-              </button>
-              <button
-                type="button"
-                className={`${styles.iconBtn} ${styles.deleteIcon}`}
-                onClick={() => setConfirmingDeleteIndex(index)}
-                aria-label={`Delete ${aisle}`}
-                title="Delete"
-              >
-                ×
-              </button>
-              {confirmingDeleteIndex === index && (
-                <ConfirmDialog
-                  message={`Delete aisle "${aisle}"?`}
-                  onConfirm={() => handleDelete(index)}
-                  onCancel={() => setConfirmingDeleteIndex(-1)}
+              <div className={styles.catEditForm}>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={handleEditKeyDown}
+                  className={styles.catRenameInput}
+                  placeholder="Category name"
+                  autoFocus
                 />
-              )}
-            </div>
+                <div className={styles.catEditColorPicker}>
+                  {CATEGORY_PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`${styles.catColorSwatch} ${editColor === c ? styles.catColorSelected : ''}`}
+                      style={{ backgroundColor: c }}
+                      onClick={() => setEditColor(c)}
+                      aria-label={`Color ${c}`}
+                    />
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  value={editKeywords}
+                  onChange={(e) => setEditKeywords(e.target.value)}
+                  onKeyDown={handleEditKeyDown}
+                  className={styles.catRenameInput}
+                  placeholder="Keywords (comma-separated)"
+                />
+                <div className={styles.catEditActions}>
+                  <button
+                    type="button"
+                    className={styles.catEditSaveBtn}
+                    onClick={handleSaveEdit}
+                  >
+                    Done
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.catEditCancelBtn}
+                    onClick={() => setEditingIndex(-1)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span
+                  className={styles.catBadge}
+                  style={{ backgroundColor: cat.color }}
+                >
+                  {cat.name}
+                </span>
+                <span className={styles.catKeywordCount}>
+                  {cat.keywords.length} keywords
+                </span>
+                <div className={styles.catActions}>
+                  <button
+                    type="button"
+                    className={styles.iconBtn}
+                    onClick={() => handleMoveUp(index)}
+                    disabled={index === 0}
+                    aria-label="Move up"
+                    title="Move up"
+                  >
+                    &uarr;
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.iconBtn}
+                    onClick={() => handleMoveDown(index)}
+                    disabled={index === localCats.length - 1}
+                    aria-label="Move down"
+                    title="Move down"
+                  >
+                    &darr;
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.iconBtn}
+                    onClick={() => handleStartEdit(index)}
+                    aria-label="Edit"
+                    title="Edit"
+                  >
+                    &#9998;
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.iconBtn} ${styles.deleteIcon}`}
+                    onClick={() => setConfirmingDeleteIndex(index)}
+                    aria-label={`Delete ${cat.name}`}
+                    title="Delete"
+                  >
+                    &times;
+                  </button>
+                  {confirmingDeleteIndex === index && (
+                    <ConfirmDialog
+                      message={`Delete category "${cat.name}"?`}
+                      onConfirm={() => handleDelete(index)}
+                      onCancel={() => setConfirmingDeleteIndex(-1)}
+                    />
+                  )}
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>
 
-      <div className={styles.aisleAddRow}>
+      <div className={styles.catAddRow}>
         <input
           type="text"
-          value={newAisle}
-          onChange={(e) => setNewAisle(e.target.value)}
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
           onKeyDown={handleAddKeyDown}
-          className={styles.aisleAddInput}
-          placeholder="New aisle name..."
+          className={styles.catAddInput}
+          placeholder="New category name..."
         />
+        <div className={styles.catAddColorPicker}>
+          {CATEGORY_PRESET_COLORS.slice(0, 6).map((c) => (
+            <button
+              key={c}
+              type="button"
+              className={`${styles.catColorSwatch} ${newColor === c ? styles.catColorSelected : ''}`}
+              style={{ backgroundColor: c }}
+              onClick={() => setNewColor(c)}
+              aria-label={`Color ${c}`}
+            />
+          ))}
+        </div>
         <button
           type="button"
-          className={styles.aisleAddBtn}
+          className={styles.catAddBtn}
           onClick={handleAdd}
-          disabled={!newAisle.trim()}
+          disabled={!newName.trim()}
         >
           Add
         </button>
@@ -185,10 +264,10 @@ const AisleEditor = ({ aisles, onSave }) => {
       {isDirty && (
         <button
           type="button"
-          className={styles.aisleSaveBtn}
+          className={styles.catSaveBtn}
           onClick={handleSaveAll}
         >
-          Save Aisles
+          Save Categories
         </button>
       )}
     </div>
@@ -197,7 +276,7 @@ const AisleEditor = ({ aisles, onSave }) => {
 
 /**
  * Panel for managing stores: create, rename, delete, pick color, reorder,
- * and manage aisles per store.
+ * and manage categories per store.
  */
 export const StoreManager = ({
   stores,
@@ -213,7 +292,7 @@ export const StoreManager = ({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
-  const [aisleExpandedId, setAisleExpandedId] = useState(null);
+  const [catExpandedId, setCatExpandedId] = useState(null);
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -255,12 +334,12 @@ export const StoreManager = ({
     onReorder(reordered);
   };
 
-  const handleSaveAisles = (storeId, aisles) => {
-    onUpdate(storeId, { aisles });
+  const handleSaveCategories = (storeId, categories) => {
+    onUpdate(storeId, { categories });
   };
 
-  const toggleAisleExpanded = (storeId) => {
-    setAisleExpandedId((prev) => (prev === storeId ? null : storeId));
+  const toggleCatExpanded = (storeId) => {
+    setCatExpandedId((prev) => (prev === storeId ? null : storeId));
   };
 
   return (
@@ -270,7 +349,7 @@ export const StoreManager = ({
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
-        <span className={styles.toggleIcon}>{isOpen ? '−' : '+'}</span>
+        <span className={styles.toggleIcon}>{isOpen ? '\u2212' : '+'}</span>
         Manage Stores
       </button>
 
@@ -337,18 +416,18 @@ export const StoreManager = ({
                         >
                           {store.name}
                         </span>
-                        <span className={styles.aisleCount}>
-                          {store.aisles?.length ?? 0} aisles
+                        <span className={styles.catCount}>
+                          {store.categories?.length ?? 0} categories
                         </span>
                         <div className={styles.itemActions}>
                           <button
                             type="button"
                             className={styles.iconBtn}
-                            onClick={() => toggleAisleExpanded(store.id)}
-                            aria-label="Manage aisles"
-                            title="Manage aisles"
+                            onClick={() => toggleCatExpanded(store.id)}
+                            aria-label="Manage categories"
+                            title="Manage categories"
                           >
-                            {aisleExpandedId === store.id ? '▾' : '▸'}
+                            {catExpandedId === store.id ? '\u25BE' : '\u25B8'}
                           </button>
                           <button
                             type="button"
@@ -358,7 +437,7 @@ export const StoreManager = ({
                             aria-label="Move up"
                             title="Move up"
                           >
-                            ↑
+                            &uarr;
                           </button>
                           <button
                             type="button"
@@ -368,7 +447,7 @@ export const StoreManager = ({
                             aria-label="Move down"
                             title="Move down"
                           >
-                            ↓
+                            &darr;
                           </button>
                           <button
                             type="button"
@@ -377,7 +456,7 @@ export const StoreManager = ({
                             aria-label="Edit"
                             title="Edit"
                           >
-                            ✎
+                            &#9998;
                           </button>
                           <button
                             type="button"
@@ -386,7 +465,7 @@ export const StoreManager = ({
                             aria-label={`Delete ${store.name}`}
                             title="Delete"
                           >
-                            ×
+                            &times;
                           </button>
                           {confirmingDeleteId === store.id && (
                             <ConfirmDialog
@@ -400,10 +479,10 @@ export const StoreManager = ({
                           )}
                         </div>
                       </div>
-                      {aisleExpandedId === store.id && (
-                        <AisleEditor
-                          aisles={store.aisles ?? []}
-                          onSave={(aisles) => handleSaveAisles(store.id, aisles)}
+                      {catExpandedId === store.id && (
+                        <StoreCategoryEditor
+                          categories={store.categories ?? []}
+                          onSave={(cats) => handleSaveCategories(store.id, cats)}
                         />
                       )}
                     </>
@@ -450,7 +529,14 @@ StoreManager.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       color: PropTypes.string.isRequired,
-      aisles: PropTypes.arrayOf(PropTypes.string),
+      categories: PropTypes.arrayOf(
+        PropTypes.shape({
+          key: PropTypes.string.isRequired,
+          name: PropTypes.string.isRequired,
+          color: PropTypes.string.isRequired,
+          keywords: PropTypes.arrayOf(PropTypes.string).isRequired,
+        })
+      ),
     })
   ).isRequired,
   onAdd: PropTypes.func.isRequired,

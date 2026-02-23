@@ -255,15 +255,15 @@
   color: #333;
 }
 
-/* --- Aisle editor --- */
+/* --- Category editor (per-store) --- */
 
-.aisleCount {
+.catCount {
   font-size: 0.75rem;
   color: #999;
   white-space: nowrap;
 }
 
-.aisleEditor {
+.catEditor {
   padding: 0.75rem;
   border-top: 1px solid #eee;
   display: flex;
@@ -272,7 +272,7 @@
   background: #fafafa;
 }
 
-.aisleTitle {
+.catTitle {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -281,61 +281,150 @@
   margin: 0;
 }
 
-.aisleEmpty {
+.catEmpty {
   font-size: 0.8rem;
   color: #bbb;
   margin: 0;
 }
 
-.aisleList {
+.catList {
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
 }
 
-.aisleRow {
+.catRow {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.25rem 0;
 }
 
-.aisleName {
-  flex: 1;
-  font-size: 0.85rem;
-  color: #444;
-  cursor: default;
-  user-select: none;
+.catBadge {
+  font-size: 0.7rem;
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.aisleRenameInput {
-  flex: 1;
-  padding: 0.25rem 0.5rem;
+.catKeywordCount {
+  font-size: 0.7rem;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.catActions {
+  display: flex;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.catEditForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+
+.catRenameInput {
+  width: 100%;
+  padding: 0.3rem 0.5rem;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 0.85rem;
   font-family: inherit;
   outline: none;
+  box-sizing: border-box;
 }
 
-.aisleRenameInput:focus {
+.catRenameInput:focus {
   border-color: #1565c0;
 }
 
-.aisleActions {
+.catEditColorPicker {
   display: flex;
-  gap: 0.2rem;
-  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 0.25rem;
 }
 
-.aisleAddRow {
+.catColorSwatch {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  padding: 0;
+}
+
+.catColorSwatch:hover {
+  transform: scale(1.15);
+}
+
+.catColorSelected {
+  border-color: #333;
+  transform: scale(1.15);
+}
+
+.catEditActions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.catEditSaveBtn {
+  flex: 1;
+  padding: 0.3rem 0.6rem;
+  background: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.catEditSaveBtn:hover {
+  background: #0d47a1;
+}
+
+.catEditCancelBtn {
+  flex: 1;
+  padding: 0.3rem 0.6rem;
+  background: white;
+  color: #777;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.catEditCancelBtn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.catAddRow {
   display: flex;
   gap: 0.4rem;
   margin-top: 0.25rem;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.aisleAddInput {
+.catAddInput {
   flex: 1;
+  min-width: 100px;
   padding: 0.35rem 0.5rem;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -345,11 +434,16 @@
   transition: border-color 0.15s;
 }
 
-.aisleAddInput:focus {
+.catAddInput:focus {
   border-color: #1565c0;
 }
 
-.aisleAddBtn {
+.catAddColorPicker {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.catAddBtn {
   padding: 0.35rem 0.75rem;
   background: #e3f2fd;
   color: #1565c0;
@@ -362,16 +456,16 @@
   transition: background 0.15s;
 }
 
-.aisleAddBtn:hover:not(:disabled) {
+.catAddBtn:hover:not(:disabled) {
   background: #bbdefb;
 }
 
-.aisleAddBtn:disabled {
+.catAddBtn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-.aisleSaveBtn {
+.catSaveBtn {
   padding: 0.4rem 0.75rem;
   background: #4caf50;
   color: white;
@@ -385,6 +479,6 @@
   margin-top: 0.25rem;
 }
 
-.aisleSaveBtn:hover {
+.catSaveBtn:hover {
   background: #388e3c;
 }

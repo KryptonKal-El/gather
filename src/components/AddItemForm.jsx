@@ -67,30 +67,12 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
     setHighlightedIndex(-1);
   };
 
-  const [selectedAisle, setSelectedAisle] = useState('');
-
-  // Find aisles for the currently selected store
-  const selectedStoreObj = selectedStore
-    ? stores.find((s) => s.id === selectedStore)
-    : null;
-  const availableAisles = selectedStoreObj?.aisles ?? [];
-
-  // Reset aisle when store changes
-  const prevStoreRef = useRef(selectedStore);
-  useEffect(() => {
-    if (prevStoreRef.current !== selectedStore) {
-      setSelectedAisle('');
-      prevStoreRef.current = selectedStore;
-    }
-  }, [selectedStore]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = value.trim();
     if (!trimmed) return;
-    onAdd(trimmed, selectedStore || null, selectedAisle || null);
+    onAdd(trimmed, selectedStore || null);
     setValue('');
-    setSelectedAisle('');
     setIsDropdownOpen(false);
     setHighlightedIndex(-1);
   };
@@ -167,21 +149,6 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
           {stores.map((store) => (
             <option key={store.id} value={store.id}>
               {store.name}
-            </option>
-          ))}
-        </select>
-      )}
-      {availableAisles.length > 0 && (
-        <select
-          className={styles.aisleSelect}
-          value={selectedAisle}
-          onChange={(e) => setSelectedAisle(e.target.value)}
-          aria-label="Assign to aisle"
-        >
-          <option value="">No aisle</option>
-          {availableAisles.map((aisle) => (
-            <option key={aisle} value={aisle}>
-              {aisle}
             </option>
           ))}
         </select>
