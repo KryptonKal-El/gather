@@ -116,6 +116,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .clearBtn {
@@ -124,10 +126,11 @@
   background: none;
   border: 1px solid var(--danger);
   border-radius: 6px;
-  padding: 0.3rem 0.75rem;
+  padding: 0.45rem 0.85rem;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
 .clearBtn:hover {

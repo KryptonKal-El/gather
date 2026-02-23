@@ -2,6 +2,7 @@
   position: fixed;
   bottom: 1.5rem;
   right: 1.5rem;
+  left: 1.5rem;
   z-index: 10000;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
@@ -12,6 +13,7 @@
   align-items: center;
   gap: 1rem;
   max-width: 380px;
+  margin-left: auto;
   animation: slideUp 0.25s ease;
 }
 
@@ -29,12 +31,12 @@
 }
 
 .updateBtn {
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 0.9rem;
   background: var(--primary);
   color: var(--bg-card);
   border: none;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -45,12 +47,12 @@
 }
 
 .dismissBtn {
-  padding: 0.4rem 0.85rem;
+  padding: 0.5rem 0.9rem;
   background: var(--cancel-bg);
   color: var(--text-secondary);
   border: none;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;

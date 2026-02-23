@@ -5,6 +5,7 @@
   padding: 0.75rem 1rem;
   border-radius: 8px;
   transition: background 0.15s, opacity 0.2s;
+  flex-wrap: wrap;
 }
 
 .item:hover {
@@ -97,11 +98,11 @@
 }
 
 .qtyBtn {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border: none;
   background: var(--bg-hover);
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-family: inherit;
   color: var(--text-secondary);
   cursor: pointer;
@@ -119,22 +120,22 @@
 .qtyValue {
   font-size: 0.8rem;
   font-weight: 600;
-  min-width: 1.4rem;
+  min-width: 1.6rem;
   text-align: center;
   color: var(--text-primary);
   border-left: 1px solid var(--border-default);
   border-right: 1px solid var(--border-default);
-  line-height: 1.4rem;
+  line-height: 1.75rem;
 }
 
 .priceDisplay {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-family: inherit;
   color: var(--text-tertiary);
   background: var(--bg-hover);
   border: 1px solid var(--border-default);
   border-radius: 6px;
-  padding: 0.15rem 0.4rem;
+  padding: 0.3rem 0.5rem;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.15s, border-color 0.15s;
@@ -151,7 +152,7 @@
   border: 1px solid var(--primary);
   border-radius: 6px;
   overflow: hidden;
-  height: 1.5rem;
+  height: 1.85rem;
 }
 
 .priceCurrency {
@@ -205,10 +206,10 @@
 }
 
 .storeBadge {
-  font-size: 0.65rem;
+  font-size: 0.7rem;
   font-family: inherit;
   color: white;
-  padding: 0.15rem 0.45rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 10px;
   border: 1px dashed rgba(255, 255, 255, 0.5);
   white-space: nowrap;
@@ -231,7 +232,7 @@
   font-size: 0.7rem;
   font-family: inherit;
   color: white;
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.55rem;
   border-radius: 12px;
   border: none;
   white-space: nowrap;
@@ -305,7 +306,7 @@
   color: var(--text-icon);
   font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.5rem;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
 }
@@ -313,4 +314,38 @@
 .deleteBtn:hover {
   color: var(--danger);
   background: var(--danger-tint);
+}
+
+@media (max-width: 480px) {
+  .item {
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .meta {
+    order: 5;
+    width: 100%;
+    padding-left: calc(1.2rem + 0.5rem);
+  }
+
+  .badges {
+    order: 6;
+    padding-left: calc(1.2rem + 0.5rem);
+  }
+
+  .qtyBtn {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.9rem;
+  }
+
+  .qtyValue {
+    min-width: 1.8rem;
+    line-height: 2rem;
+  }
+
+  .picker {
+    right: auto;
+    left: 0;
+  }
 }

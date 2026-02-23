@@ -26,7 +26,7 @@
   background: none;
   border: 1px solid var(--primary);
   border-radius: 6px;
-  padding: 0.3rem 0.75rem;
+  padding: 0.45rem 0.85rem;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.15s, color 0.15s;
@@ -70,6 +70,11 @@
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.15s;
+}
+
+.createBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
 }
 
 .createBtn:disabled {
@@ -156,10 +161,10 @@
 .shareBtn {
   background: none;
   border: none;
-  color: transparent;
+  color: var(--text-icon);
   font-size: 0.8rem;
   cursor: pointer;
-  padding: 0.3rem 0.35rem;
+  padding: 0.4rem;
   border-radius: 4px;
   transition: color 0.1s;
   line-height: 1;
@@ -168,10 +173,10 @@
 .deleteBtn {
   background: none;
   border: none;
-  color: transparent;
+  color: var(--text-icon);
   font-size: 0.9rem;
   cursor: pointer;
-  padding: 0.4rem 0.6rem;
+  padding: 0.4rem 0.5rem;
   border-radius: 4px;
   transition: color 0.1s;
 }
@@ -179,30 +184,39 @@
 .editBtn {
   background: none;
   border: none;
-  color: transparent;
+  color: var(--text-icon);
   font-size: 0.85rem;
   cursor: pointer;
-  padding: 0.3rem 0.4rem;
+  padding: 0.4rem;
   border-radius: 4px;
   transition: color 0.1s;
 }
 
-.listItem:hover .deleteBtn,
-.listItem:hover .editBtn,
-.listItem:hover .shareBtn {
-  color: var(--text-icon);
+/* On devices with hover capability, hide buttons until row hover */
+@media (hover: hover) {
+  .shareBtn,
+  .deleteBtn,
+  .editBtn {
+    color: transparent;
+  }
+
+  .listItem:hover .deleteBtn,
+  .listItem:hover .editBtn,
+  .listItem:hover .shareBtn {
+    color: var(--text-icon);
+  }
 }
 
 .editBtn:hover {
-  color: var(--text-tertiary) !important;
+  color: var(--text-tertiary);
 }
 
 .shareBtn:hover {
-  color: var(--info) !important;
+  color: var(--info);
 }
 
 .deleteBtn:hover {
-  color: var(--danger) !important;
+  color: var(--danger);
 }
 
 .editRow {

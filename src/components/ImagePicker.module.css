@@ -176,6 +176,12 @@
   gap: 0.5rem;
 }
 
+@media (max-width: 400px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .gridCell {
   display: flex;
   flex-direction: column;

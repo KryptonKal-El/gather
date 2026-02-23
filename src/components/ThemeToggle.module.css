@@ -11,6 +11,7 @@
   cursor: pointer;
   transition: var(--theme-transition);
   padding: 0;
+  flex-shrink: 0;
 }
 
 .toggle:hover {

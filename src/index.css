@@ -181,6 +181,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -195,6 +196,27 @@ button {
   font-family: inherit;
 }
 
-input, textarea {
+input, textarea, select {
   font-family: inherit;
+}
+
+/* Global focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow-subtle);
+}
+
+/* iOS zoom prevention: inputs must be >= 16px */
+@media (max-width: 480px) {
+  input, textarea, select {
+    font-size: 16px;
+  }
 }

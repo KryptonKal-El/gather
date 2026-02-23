@@ -76,11 +76,11 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
   }, [onClose]);
 
   return createPortal(
-    <div className={styles.backdrop} onMouseDown={handleBackdropClick}>
+    <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal} ref={modalRef}>
         <div className={styles.header}>
           <h3 className={styles.title}>Item Image</h3>
-          <button type="button" className={styles.closeBtn} onClick={onClose}>
+          <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Close">
             &times;
           </button>
         </div>

@@ -106,8 +106,8 @@
   background: none;
   border: 1px solid var(--border-medium);
   border-radius: 4px;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2rem;
+  height: 2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -172,8 +172,8 @@
 }
 
 .colorSwatch {
-  width: 1.4rem;
-  height: 1.4rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -212,7 +212,7 @@
 }
 
 .addBtn:hover:not(:disabled) {
-  background: var(--info-darker);
+  background: var(--info-dark);
 }
 
 .addBtn:disabled {
@@ -235,7 +235,7 @@
 }
 
 .saveBtn:hover {
-  background: var(--info-darker);
+  background: var(--info-dark);
 }
 
 .cancelBtn {
@@ -358,8 +358,8 @@
 }
 
 .catColorSwatch {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -396,7 +396,7 @@
 }
 
 .catEditSaveBtn:hover {
-  background: var(--info-darker);
+  background: var(--info-dark);
 }
 
 .catEditCancelBtn {
