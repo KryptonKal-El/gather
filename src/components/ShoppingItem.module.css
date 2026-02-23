@@ -126,21 +126,21 @@
 }
 
 .priceDisplay {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-family: inherit;
-  color: var(--text-tertiary);
-  background: var(--bg-hover);
-  border: 1px solid var(--border-default);
-  border-radius: 6px;
-  padding: 0.3rem 0.5rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: none;
+  border: none;
+  padding: 0.3rem 0.35rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
 .priceDisplay:hover {
   background: var(--primary-tint);
-  border-color: var(--primary);
 }
 
 .priceEdit {
@@ -185,12 +185,6 @@
   outline: none;
 }
 
-.lineTotal {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--primary-dark);
-  white-space: nowrap;
-}
 
 .badges {
   display: flex;

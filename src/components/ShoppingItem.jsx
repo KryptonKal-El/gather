@@ -204,11 +204,8 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
             onClick={handlePriceClick}
             title="Set price"
           >
-            {price !== null ? `$${price.toFixed(2)}` : '$–'}
+            {lineTotal !== null ? `$${lineTotal.toFixed(2)}` : '$–'}
           </button>
-        )}
-        {lineTotal !== null && (
-          <span className={styles.lineTotal}>{`$${lineTotal.toFixed(2)}`}</span>
         )}
       </div>
       <div className={styles.badges}>
