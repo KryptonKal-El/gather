@@ -124,41 +124,40 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
     <div className={styles.catEditor}>
       <div className={styles.catHeader}>
         <h5 className={styles.catTitle}>Categories ({localCats.length})</h5>
-        <div className={styles.copyWrapper}>
+        <button
+          type="button"
+          className={styles.copyBtn}
+          onClick={() => setIsCopyMenuOpen(!isCopyMenuOpen)}
+        >
+          {isCopyMenuOpen ? 'Cancel' : 'Copy from\u2026'}
+        </button>
+      </div>
+
+      {isCopyMenuOpen && (
+        <div className={styles.copyMenu}>
           <button
             type="button"
-            className={styles.copyBtn}
-            onClick={() => setIsCopyMenuOpen(!isCopyMenuOpen)}
+            className={styles.copyMenuOption}
+            onClick={handleCopyDefaults}
           >
-            Copy from...
+            Default categories ({DEFAULT_CATEGORIES.length})
           </button>
-          {isCopyMenuOpen && (
-            <div className={styles.copyMenu}>
-              <button
-                type="button"
-                className={styles.copyMenuOption}
-                onClick={handleCopyDefaults}
-              >
-                Default categories ({DEFAULT_CATEGORIES.length})
-              </button>
-              {otherStores.map((s) => (
-                <button
-                  key={s.id}
-                  type="button"
-                  className={styles.copyMenuOption}
-                  onClick={() => handleCopyFromStore(s)}
-                >
-                  <span
-                    className={styles.copyMenuDot}
-                    style={{ backgroundColor: s.color }}
-                  />
-                  {s.name} ({s.categories?.length ?? 0})
-                </button>
-              ))}
-            </div>
-          )}
+          {otherStores.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className={styles.copyMenuOption}
+              onClick={() => handleCopyFromStore(s)}
+            >
+              <span
+                className={styles.copyMenuDot}
+                style={{ backgroundColor: s.color }}
+              />
+              {s.name} ({s.categories?.length ?? 0})
+            </button>
+          ))}
         </div>
-      </div>
+      )}
 
       {localCats.length === 0 && (
         <p className={styles.catEmpty}>No categories. Add one below.</p>
