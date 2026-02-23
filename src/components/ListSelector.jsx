@@ -88,29 +88,33 @@ export const ListSelector = ({
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>
-            <EmojiPicker value={editEmoji} onSelect={setEditEmoji} />
-            <input
-              className={styles.editInput}
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onKeyDown={(e) => handleEditKeyDown(e, list.id)}
-              autoFocus
-            />
-            <button
-              type="button"
-              className={styles.saveBtn}
-              onClick={() => handleSaveEdit(list.id)}
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              className={styles.cancelBtn}
-              onClick={() => setEditingId(null)}
-            >
-              Cancel
-            </button>
+            <div className={styles.editTop}>
+              <EmojiPicker value={editEmoji} onSelect={setEditEmoji} />
+              <input
+                className={styles.editInput}
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => handleEditKeyDown(e, list.id)}
+                autoFocus
+              />
+            </div>
+            <div className={styles.editActions}>
+              <button
+                type="button"
+                className={styles.saveBtn}
+                onClick={() => handleSaveEdit(list.id)}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setEditingId(null)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         ) : (
           <>

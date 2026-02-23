@@ -265,9 +265,21 @@
 .editRow {
   flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.4rem;
   padding: 0.35rem 0.5rem;
+}
+
+.editTop {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .editInput {
