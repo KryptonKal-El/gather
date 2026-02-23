@@ -137,7 +137,7 @@ export const ShoppingListProvider = ({ children }) => {
     setActiveListId(id);
   }, []);
 
-  const addItemAction = useCallback(async (listId, rawName, storeId = null, quantity = 1, price = null) => {
+  const addItemAction = useCallback(async (listId, rawName, storeId = null) => {
     if (!userId) return;
     const name = capitalize(rawName.trim());
     const categories = getCategoriesForStore(storeId);
@@ -146,8 +146,8 @@ export const ShoppingListProvider = ({ children }) => {
       category: categorizeItem(name, categories),
       isChecked: false,
       store: storeId,
-      quantity: quantity ?? 1,
-      price: price ?? null,
+      quantity: 1,
+      price: null,
     };
     await fsAddItem(userId, listId, item);
     await addHistoryEntry(userId, name);

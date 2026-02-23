@@ -25,9 +25,9 @@ export const App = () => {
     activeList?.items ?? [],
   );
 
-  const handleAddItem = (name, storeId = null, quantity = 1, price = null) => {
+  const handleAddItem = (name, storeId = null) => {
     if (!activeList) return;
-    actions.addItem(activeList.id, name, storeId, quantity, price);
+    actions.addItem(activeList.id, name, storeId);
   };
 
   const handleAddItems = (items) => {
