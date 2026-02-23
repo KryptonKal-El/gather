@@ -143,7 +143,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
       <button
         type="button"
-        className={`${styles.thumbnail} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
+        className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
         onClick={() => setIsImagePickerOpen(true)}
         title="Set item image"
       >
