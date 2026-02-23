@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#4caf50"/>
+  <g transform="translate(256, 220)">
+    <!-- Cart body -->
+    <path d="M-120,-60 L-90,-60 L-50,40 L100,40 L120,-30 L-40,-30" fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Cart wheels -->
+    <circle cx="-30" cy="70" r="16" fill="white"/>
+    <circle cx="80" cy="70" r="16" fill="white"/>
+  </g>
+  <!-- AI text -->
+  <text x="256" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="100" font-weight="800" fill="white" opacity="0.9">AI</text>
+</svg>

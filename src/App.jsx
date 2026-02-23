@@ -11,6 +11,7 @@ import { RecipePanel } from './components/RecipePanel.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
 import { ThemeToggle } from './components/ThemeToggle.jsx';
+import { PWAPrompt } from './components/PWAPrompt.jsx';
 import styles from './App.module.css';
 
 /**
@@ -158,6 +159,8 @@ export const App = () => {
           />
         );
       })()}
+
+      <PWAPrompt />
     </div>
   );
 };

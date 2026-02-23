@@ -1,0 +1,72 @@
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 10000;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--overlay-strong);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 380px;
+  animation: slideUp 0.25s ease;
+}
+
+.message {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.updateBtn {
+  padding: 0.4rem 0.85rem;
+  background: var(--primary);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.updateBtn:hover {
+  background: var(--primary-hover);
+}
+
+.dismissBtn {
+  padding: 0.4rem 0.85rem;
+  background: var(--cancel-bg);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.dismissBtn:hover {
+  background: var(--cancel-hover);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
