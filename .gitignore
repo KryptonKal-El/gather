@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment files
+.env
+.env.local
+
 # Symlinked toolkit dirs (don't commit these)
 agents
 skills

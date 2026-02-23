@@ -1,19 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
+import { useAuth } from '../context/AuthContext.jsx';
+import { uploadItemImage } from '../services/imageStorage.js';
+import { ImagePicker } from './ImagePicker.jsx';
 import styles from './ShoppingItem.module.css';
 
 /**
- * A single shopping list item row with checkbox, name, quantity, price,
- * clickable category badge, clickable store badge, and delete button.
- * Quantity and price are editable inline. The category picker shows
+ * A single shopping list item row with optional image thumbnail, checkbox,
+ * name, quantity, price, clickable category badge, clickable store badge,
+ * and delete button.
+ * Quantity, price, and image are editable inline. The category picker shows
  * the assigned store's categories (or global defaults).
  */
 export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+  const { user } = useAuth();
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
   const [isEditingPrice, setIsEditingPrice] = useState(false);
   const [priceValue, setPriceValue] = useState('');
+  const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const categoryPickerRef = useRef(null);
   const storePickerRef = useRef(null);
   const priceInputRef = useRef(null);
@@ -106,8 +113,46 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     }
   }, [isEditingPrice]);
 
+  const imageUrl = item.imageUrl ?? null;
+
+  const handleSelectImageUrl = (url) => {
+    onUpdateItem(item.id, { imageUrl: url });
+    setIsImagePickerOpen(false);
+  };
+
+  const handleUploadImage = async (file) => {
+    if (!user?.uid) return;
+    setIsUploadingImage(true);
+    try {
+      const url = await uploadItemImage(user.uid, item.id, file);
+      onUpdateItem(item.id, { imageUrl: url });
+      setIsImagePickerOpen(false);
+    } catch (err) {
+      console.error(`Failed to upload image for item ${item.id}:`, err);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    onUpdateItem(item.id, { imageUrl: null });
+    setIsImagePickerOpen(false);
+  };
+
   return (
     <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
+      <button
+        type="button"
+        className={`${styles.thumbnail} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
+        onClick={() => setIsImagePickerOpen(true)}
+        title="Set item image"
+      >
+        {imageUrl ? (
+          <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
+        ) : (
+          <span className={styles.thumbnailPlaceholder}>+</span>
+        )}
+      </button>
       <label className={styles.label}>
         <input
           type="checkbox"
@@ -243,6 +288,16 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
       >
         x
       </button>
+      {isImagePickerOpen && (
+        <ImagePicker
+          itemName={item.name}
+          currentImageUrl={imageUrl}
+          onSelectUrl={handleSelectImageUrl}
+          onUpload={handleUploadImage}
+          onRemove={handleRemoveImage}
+          onClose={() => setIsImagePickerOpen(false)}
+        />
+      )}
     </div>
   );
 };
@@ -256,6 +311,7 @@ ShoppingItem.propTypes = {
     store: PropTypes.string,
     quantity: PropTypes.number,
     price: PropTypes.number,
+    imageUrl: PropTypes.string,
   }).isRequired,
   stores: PropTypes.array,
   onToggle: PropTypes.func.isRequired,

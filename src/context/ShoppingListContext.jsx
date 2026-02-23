@@ -148,6 +148,7 @@ export const ShoppingListProvider = ({ children }) => {
       store: storeId,
       quantity: 1,
       price: null,
+      imageUrl: null,
     };
     await fsAddItem(userId, listId, item);
     await addHistoryEntry(userId, name);
@@ -166,6 +167,7 @@ export const ShoppingListProvider = ({ children }) => {
         store: storeId,
         quantity: item.quantity ?? 1,
         price: item.price ?? null,
+        imageUrl: item.imageUrl ?? null,
       };
     });
     await fsAddItems(userId, listId, prepared);

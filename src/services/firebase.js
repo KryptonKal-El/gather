@@ -1,10 +1,11 @@
 /**
  * Firebase app initialization and service exports.
- * Provides the shared app instance, Firestore database, and Auth.
+ * Provides the shared app instance, Firestore database, Auth, and Storage.
  */
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDlpjSwH0irRXjqvnON5ywtq6UR5AH0ehE',
@@ -20,3 +21,4 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+export const storage = getStorage(app);
