@@ -1,6 +1,6 @@
 /**
  * Authentication context using Firebase Auth.
- * Supports Google sign-in and anonymous sign-in.
+ * Supports Apple sign-in, Google sign-in, and anonymous sign-in.
  * Provides user state, loading state, and auth actions to the component tree.
  */
 import { createContext, useState, useEffect, useContext } from 'react';
@@ -10,12 +10,16 @@ import {
   signInAnonymously,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
+  OAuthProvider,
 } from 'firebase/auth';
 import { auth } from '../services/firebase.js';
 
 export const AuthContext = createContext(null);
 
 const googleProvider = new GoogleAuthProvider();
+const appleProvider = new OAuthProvider('apple.com');
+appleProvider.addScope('email');
+appleProvider.addScope('name');
 
 /** Provides auth state and actions to the app. */
 export const AuthProvider = ({ children }) => {
@@ -39,6 +43,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signInWithApple = async () => {
+    try {
+      await signInWithPopup(auth, appleProvider);
+    } catch (err) {
+      console.error('Apple sign-in failed:', err);
+      throw err;
+    }
+  };
+
   const signInAsGuest = async () => {
     try {
       await signInAnonymously(auth);
@@ -58,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInAsGuest, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInAsGuest, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -67,7 +80,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInAsGuest: Function, signOut: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInAsGuest: Function, signOut: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

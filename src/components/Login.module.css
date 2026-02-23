@@ -40,6 +40,38 @@
   gap: 0.75rem;
 }
 
+.appleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #000;
+  border: 1px solid #000;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.appleBtn:hover:not(:disabled) {
+  background: #222;
+  box-shadow: 0 2px 8px var(--overlay-light);
+}
+
+.appleBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.appleIcon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .googleBtn {
   display: flex;
   align-items: center;
