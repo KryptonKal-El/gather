@@ -175,6 +175,12 @@
   gap: 0.5rem;
 }
 
+.gridCell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
 .gridItem {
   aspect-ratio: 1;
   border: 2px solid #e0e0e0;
@@ -196,6 +202,37 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.credit {
+  font-size: 0.6rem;
+  color: #999;
+  text-decoration: none;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.credit:hover {
+  color: #555;
+  text-decoration: underline;
+}
+
+.unsplashCredit {
+  font-size: 0.7rem;
+  color: #aaa;
+  text-align: center;
+  margin: 0.5rem 0 0;
+}
+
+.unsplashCredit a {
+  color: #888;
+  text-decoration: underline;
+}
+
+.unsplashCredit a:hover {
+  color: #333;
 }
 
 .noResults {
