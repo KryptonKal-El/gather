@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import styles from './StoreManager.module.css';
 
@@ -20,9 +21,9 @@ const CATEGORY_PRESET_COLORS = [
 /**
  * Inline category editor for a single store.
  * Supports add, remove (with confirm), rename, reorder, color picker,
- * and keyword editing for each category.
+ * keyword editing, and copying categories from defaults or another store.
  */
-const StoreCategoryEditor = ({ categories, onSave }) => {
+const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
   const [localCats, setLocalCats] = useState(categories);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(CATEGORY_PRESET_COLORS[0]);
@@ -31,6 +32,7 @@ const StoreCategoryEditor = ({ categories, onSave }) => {
   const [editColor, setEditColor] = useState('');
   const [editKeywords, setEditKeywords] = useState('');
   const [confirmingDeleteIndex, setConfirmingDeleteIndex] = useState(-1);
+  const [isCopyMenuOpen, setIsCopyMenuOpen] = useState(false);
 
   const isDirty = JSON.stringify(localCats) !== JSON.stringify(categories);
 
@@ -107,9 +109,56 @@ const StoreCategoryEditor = ({ categories, onSave }) => {
     onSave(localCats);
   };
 
+  const handleCopyDefaults = () => {
+    setLocalCats(DEFAULT_CATEGORIES.map((c) => ({ ...c })));
+    setIsCopyMenuOpen(false);
+  };
+
+  const handleCopyFromStore = (store) => {
+    const copied = (store.categories ?? []).map((c) => ({ ...c, keywords: [...c.keywords] }));
+    setLocalCats(copied);
+    setIsCopyMenuOpen(false);
+  };
+
   return (
     <div className={styles.catEditor}>
-      <h5 className={styles.catTitle}>Categories ({localCats.length})</h5>
+      <div className={styles.catHeader}>
+        <h5 className={styles.catTitle}>Categories ({localCats.length})</h5>
+        <div className={styles.copyWrapper}>
+          <button
+            type="button"
+            className={styles.copyBtn}
+            onClick={() => setIsCopyMenuOpen(!isCopyMenuOpen)}
+          >
+            Copy from...
+          </button>
+          {isCopyMenuOpen && (
+            <div className={styles.copyMenu}>
+              <button
+                type="button"
+                className={styles.copyMenuOption}
+                onClick={handleCopyDefaults}
+              >
+                Default categories ({DEFAULT_CATEGORIES.length})
+              </button>
+              {otherStores.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  className={styles.copyMenuOption}
+                  onClick={() => handleCopyFromStore(s)}
+                >
+                  <span
+                    className={styles.copyMenuDot}
+                    style={{ backgroundColor: s.color }}
+                  />
+                  {s.name} ({s.categories?.length ?? 0})
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {localCats.length === 0 && (
         <p className={styles.catEmpty}>No categories. Add one below.</p>
@@ -482,6 +531,7 @@ export const StoreManager = ({
                       {catExpandedId === store.id && (
                         <StoreCategoryEditor
                           categories={store.categories ?? []}
+                          otherStores={stores.filter((s) => s.id !== store.id)}
                           onSave={(cats) => handleSaveCategories(store.id, cats)}
                         />
                       )}

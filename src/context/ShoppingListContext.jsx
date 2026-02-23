@@ -298,7 +298,7 @@ export const ShoppingListProvider = ({ children }) => {
     await fsCreateStore(userId, {
       name,
       color,
-      categories: DEFAULT_CATEGORIES,
+      categories: [],
       order: stores.length,
     });
   }, [userId, stores.length]);

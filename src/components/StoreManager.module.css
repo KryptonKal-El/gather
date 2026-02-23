@@ -289,6 +289,78 @@
   margin: 0;
 }
 
+.catHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.copyWrapper {
+  position: relative;
+}
+
+.copyBtn {
+  font-size: 0.75rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--info-darker);
+  background: var(--info-tint);
+  border: 1px solid var(--info-tint-border);
+  border-radius: 5px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.copyBtn:hover {
+  background: var(--info-tint-border);
+}
+
+.copyMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--overlay-medium);
+  padding: 0.35rem 0;
+  min-width: 200px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.copyMenuOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.copyMenuOption:hover {
+  background: var(--bg-hover);
+}
+
+.copyMenuDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .catList {
   display: flex;
   flex-direction: column;
