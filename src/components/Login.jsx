@@ -1,14 +1,43 @@
 /**
- * Login screen with Apple sign-in, Google sign-in, and guest (anonymous) sign-in options.
+ * Login screen with Apple, Google, email/password, and guest sign-in options.
  */
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import styles from './Login.module.css';
 
+/**
+ * Maps Firebase auth error codes to user-friendly messages.
+ * @param {string} code - Firebase error code
+ * @returns {string}
+ */
+const friendlyError = (code) => {
+  switch (code) {
+    case 'auth/invalid-email':
+      return 'Invalid email address.';
+    case 'auth/user-disabled':
+      return 'This account has been disabled.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential':
+      return 'Incorrect email or password.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email already exists.';
+    case 'auth/weak-password':
+      return 'Password must be at least 6 characters.';
+    case 'auth/too-many-requests':
+      return 'Too many attempts. Please try again later.';
+    default:
+      return 'Something went wrong. Please try again.';
+  }
+};
+
 export const Login = () => {
-  const { signInWithApple, signInWithGoogle, signInAsGuest } = useAuth();
+  const { signInWithApple, signInWithGoogle, signInWithEmail, signUpWithEmail, signInAsGuest } = useAuth();
   const [error, setError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSignUpMode, setIsSignUpMode] = useState(false);
 
   const handleApple = async () => {
     setError(null);
@@ -29,6 +58,23 @@ export const Login = () => {
       await signInWithGoogle();
     } catch (err) {
       setError('Google sign-in failed. Please try again.');
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setIsSigningIn(true);
+    try {
+      if (isSignUpMode) {
+        await signUpWithEmail(email, password);
+      } else {
+        await signInWithEmail(email, password);
+      }
+    } catch (err) {
+      setError(friendlyError(err.code));
     } finally {
       setIsSigningIn(false);
     }
@@ -96,6 +142,46 @@ export const Login = () => {
             </svg>
             Sign in with Google
           </button>
+
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
+
+          <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
+            <input
+              type="email"
+              className={styles.emailInput}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+            <input
+              type="password"
+              className={styles.emailInput}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
+              required
+              minLength={6}
+            />
+            <button
+              type="submit"
+              className={styles.emailBtn}
+              disabled={isSigningIn}
+            >
+              {isSignUpMode ? 'Create Account' : 'Sign In'}
+            </button>
+            <button
+              type="button"
+              className={styles.toggleMode}
+              onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
+            >
+              {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
+            </button>
+          </form>
 
           <div className={styles.divider}>
             <span>or</span>

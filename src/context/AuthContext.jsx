@@ -1,6 +1,6 @@
 /**
  * Authentication context using Firebase Auth.
- * Supports Apple sign-in, Google sign-in, and anonymous sign-in.
+ * Supports Apple sign-in, Google sign-in, email/password, and anonymous sign-in.
  * Provides user state, loading state, and auth actions to the component tree.
  */
 import { createContext, useState, useEffect, useContext } from 'react';
@@ -8,6 +8,8 @@ import {
   onAuthStateChanged,
   signInWithPopup,
   signInAnonymously,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   GoogleAuthProvider,
   OAuthProvider,
@@ -61,6 +63,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signInWithEmail = async (email, password) => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error('Email sign-in failed:', err);
+      throw err;
+    }
+  };
+
+  const signUpWithEmail = async (email, password) => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      console.error('Email sign-up failed:', err);
+      throw err;
+    }
+  };
+
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
@@ -71,7 +91,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInAsGuest, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, signInAsGuest, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -80,7 +100,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInAsGuest: Function, signOut: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signInAsGuest: Function, signOut: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
