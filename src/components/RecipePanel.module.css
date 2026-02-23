@@ -1,10 +1,10 @@
 .openBtn {
   width: 100%;
   padding: 0.75rem;
-  background: #fff3e0;
-  border: 1px solid #ffe0b2;
+  background: var(--warning-tint);
+  border: 1px solid var(--warning-tint-hover);
   border-radius: 10px;
-  color: #e65100;
+  color: var(--warning-text);
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
@@ -13,13 +13,13 @@
 }
 
 .openBtn:hover {
-  background: #ffe0b2;
+  background: var(--warning-tint-hover);
 }
 
 .panel {
   margin-top: 1rem;
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 12px;
   padding: 1.25rem;
 }
@@ -34,27 +34,27 @@
 .title {
   font-size: 1rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .closeBtn {
   background: none;
   border: none;
-  color: #999;
+  color: var(--text-placeholder);
   cursor: pointer;
   font-size: 0.85rem;
 }
 
 .closeBtn:hover {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .tabs {
   display: flex;
   gap: 0;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid var(--border-light);
 }
 
 .tab {
@@ -64,7 +64,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  color: #999;
+  color: var(--text-placeholder);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -72,12 +72,12 @@
 }
 
 .tab:hover {
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .activeTab {
-  color: #e65100;
-  border-bottom-color: #e65100;
+  color: var(--warning-text);
+  border-bottom-color: var(--warning-text);
 }
 
 .templates {
@@ -91,8 +91,8 @@
   flex-direction: column;
   gap: 0.25rem;
   padding: 0.75rem;
-  background: #fafafa;
-  border: 1px solid #eee;
+  background: var(--bg-page);
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
@@ -100,24 +100,24 @@
 }
 
 .templateCard:hover {
-  border-color: #ff9800;
-  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.1);
+  border-color: var(--warning);
+  box-shadow: 0 2px 8px var(--warning-glow);
 }
 
 .templateName {
   font-weight: 600;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .templateDesc {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-placeholder);
 }
 
 .templateCount {
   font-size: 0.7rem;
-  color: #ff9800;
+  color: var(--warning);
   font-weight: 500;
   margin-top: 0.25rem;
 }
@@ -131,23 +131,25 @@
 .textarea {
   width: 100%;
   padding: 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .textarea:focus {
   outline: none;
-  border-color: #ff9800;
+  border-color: var(--warning);
 }
 
 .parseBtn {
   padding: 0.6rem 1.25rem;
-  background: #ff9800;
+  background: var(--warning);
   color: white;
   border: none;
   border-radius: 8px;
@@ -159,10 +161,10 @@
 }
 
 .parseBtn:hover:not(:disabled) {
-  background: #f57c00;
+  background: var(--warning-dark);
 }
 
 .parseBtn:disabled {
-  background: #ffe0b2;
+  background: var(--warning-tint-hover);
   cursor: not-allowed;
 }

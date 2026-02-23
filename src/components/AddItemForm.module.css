@@ -12,16 +12,18 @@
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
   box-sizing: border-box;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .input:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: var(--primary);
 }
 
 .dropdown {
@@ -31,10 +33,10 @@
   right: 0;
   margin: 4px 0 0;
   padding: 4px 0;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px var(--overlay-medium);
   list-style: none;
   max-height: 200px;
   overflow-y: auto;
@@ -44,20 +46,20 @@
 .dropdownItem {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background 0.1s;
 }
 
 .dropdownItem:hover,
 .highlighted {
-  background: #e8f5e9;
+  background: var(--primary-tint);
 }
 
 .button {
   padding: 0.75rem 1.5rem;
-  background: #4caf50;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-card);
   border: none;
   border-radius: 8px;
   font-size: 1rem;
@@ -67,22 +69,22 @@
 }
 
 .button:hover:not(:disabled) {
-  background: #388e3c;
+  background: var(--primary-deep);
 }
 
 .button:disabled {
-  background: #c8e6c9;
+  background: var(--disabled-bg);
   cursor: not-allowed;
 }
 
 .storeSelect {
   padding: 0.75rem 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
-  background: white;
-  color: #555;
+  background: var(--bg-card);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: border-color 0.2s;
   min-width: 120px;
@@ -90,5 +92,5 @@
 
 .storeSelect:focus {
   outline: none;
-  border-color: #1565c0;
+  border-color: var(--info-darker);
 }

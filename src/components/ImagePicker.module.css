@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-backdrop-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -10,9 +10,9 @@
 }
 
 .modal {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 480px;
   max-height: 85vh;
@@ -26,13 +26,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1rem 1.25rem 0.75rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -40,7 +40,7 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #999;
+  color: var(--text-placeholder);
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -48,7 +48,7 @@
 }
 
 .closeBtn:hover {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .currentImage {
@@ -57,7 +57,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .preview {
@@ -65,15 +65,15 @@
   height: 120px;
   object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
 }
 
 .removeBtn {
   font-size: 0.8rem;
   font-family: inherit;
-  color: #e53935;
+  color: var(--danger);
   background: none;
-  border: 1px solid #e53935;
+  border: 1px solid var(--danger);
   border-radius: 6px;
   padding: 0.3rem 0.75rem;
   cursor: pointer;
@@ -81,12 +81,12 @@
 }
 
 .removeBtn:hover {
-  background: #ffebee;
+  background: var(--danger-tint);
 }
 
 .tabs {
   display: flex;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .tab {
@@ -95,7 +95,7 @@
   font-size: 0.85rem;
   font-family: inherit;
   font-weight: 600;
-  color: #888;
+  color: var(--text-hint);
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -104,12 +104,12 @@
 }
 
 .tab:hover {
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .tabActive {
-  color: #4caf50;
-  border-bottom-color: #4caf50;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
 }
 
 .searchPane {
@@ -127,25 +127,26 @@
 .searchInput {
   flex: 1;
   padding: 0.6rem 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
-  color: #333;
+  color: var(--text-primary);
+  background: var(--bg-input);
   transition: border-color 0.2s;
 }
 
 .searchInput:focus {
   outline: none;
-  border-color: #4caf50;
+  border-color: var(--primary);
 }
 
 .searchBtn {
   padding: 0.6rem 1rem;
   border: none;
   border-radius: 8px;
-  background: #4caf50;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-card);
   font-size: 0.85rem;
   font-family: inherit;
   font-weight: 600;
@@ -155,7 +156,7 @@
 }
 
 .searchBtn:hover:not(:disabled) {
-  background: #43a047;
+  background: var(--primary-hover);
 }
 
 .searchBtn:disabled {
@@ -164,7 +165,7 @@
 }
 
 .error {
-  color: #e53935;
+  color: var(--danger);
   font-size: 0.8rem;
   margin: 0;
 }
@@ -183,18 +184,18 @@
 
 .gridItem {
   aspect-ratio: 1;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   padding: 0;
-  background: #f5f5f5;
+  background: var(--bg-hover);
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .gridItem:hover {
-  border-color: #4caf50;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+  border-color: var(--primary);
+  box-shadow: 0 2px 8px var(--primary-glow);
 }
 
 .gridImg {
@@ -206,7 +207,7 @@
 
 .credit {
   font-size: 0.6rem;
-  color: #999;
+  color: var(--text-placeholder);
   text-decoration: none;
   text-align: center;
   overflow: hidden;
@@ -215,28 +216,28 @@
 }
 
 .credit:hover {
-  color: #555;
+  color: var(--text-secondary);
   text-decoration: underline;
 }
 
 .unsplashCredit {
   font-size: 0.7rem;
-  color: #aaa;
+  color: var(--text-faint);
   text-align: center;
   margin: 0.5rem 0 0;
 }
 
 .unsplashCredit a {
-  color: #888;
+  color: var(--text-hint);
   text-decoration: underline;
 }
 
 .unsplashCredit a:hover {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .noResults {
-  color: #888;
+  color: var(--text-hint);
   font-size: 0.85rem;
   text-align: center;
   margin: 0;
@@ -257,23 +258,23 @@
 
 .uploadBtn {
   padding: 0.75rem 1.5rem;
-  border: 2px dashed #ccc;
+  border: 2px dashed var(--border-dashed);
   border-radius: 8px;
-  background: #fafafa;
+  background: var(--bg-page);
   font-size: 0.9rem;
   font-family: inherit;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
 
 .uploadBtn:hover {
-  border-color: #4caf50;
-  background: #f1f8e9;
+  border-color: var(--primary);
+  background: var(--primary-surface-alt);
 }
 
 .uploadHint {
-  color: #aaa;
+  color: var(--text-faint);
   font-size: 0.75rem;
   margin: 0;
 }

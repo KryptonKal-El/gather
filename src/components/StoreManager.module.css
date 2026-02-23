@@ -1,6 +1,6 @@
 .container {
   margin-top: 1.5rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   overflow: hidden;
 }
@@ -11,18 +11,18 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  background: #f9f9f9;
+  background: var(--bg-raised);
   border: none;
   cursor: pointer;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   font-family: inherit;
   transition: background 0.15s;
 }
 
 .toggle:hover {
-  background: #f0f0f0;
+  background: var(--bg-hover-strong);
 }
 
 .toggleIcon {
@@ -32,10 +32,10 @@
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 50%;
-  background: #e0e0e0;
+  background: var(--cancel-bg);
   font-size: 1rem;
   font-weight: 700;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .panel {
@@ -43,7 +43,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-default);
 }
 
 .section {
@@ -57,13 +57,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #777;
+  color: var(--text-muted);
   margin: 0;
 }
 
 .emptyHint {
   font-size: 0.85rem;
-  color: #aaa;
+  color: var(--text-faint);
   margin: 0;
 }
 
@@ -74,7 +74,7 @@
 }
 
 .storeItem {
-  border: 1px solid #eee;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -104,7 +104,7 @@
 
 .iconBtn {
   background: none;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
   width: 1.6rem;
   height: 1.6rem;
@@ -113,15 +113,15 @@
   justify-content: center;
   cursor: pointer;
   font-size: 0.85rem;
-  color: #777;
+  color: var(--text-muted);
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   padding: 0;
 }
 
 .iconBtn:hover:not(:disabled) {
-  background: #f0f0f0;
-  color: #333;
-  border-color: #bbb;
+  background: var(--bg-hover-strong);
+  color: var(--text-primary);
+  border-color: var(--text-ghost);
 }
 
 .iconBtn:disabled {
@@ -130,9 +130,9 @@
 }
 
 .deleteIcon:hover:not(:disabled) {
-  color: #e53935;
-  border-color: #e53935;
-  background: #ffebee;
+  color: var(--danger);
+  border-color: var(--danger);
+  background: var(--danger-tint);
 }
 
 .editForm {
@@ -140,7 +140,7 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.75rem;
-  background: #fafafa;
+  background: var(--bg-page);
 }
 
 .editActions {
@@ -151,16 +151,18 @@
 .input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .input:focus {
-  border-color: #1565c0;
+  border-color: var(--info-darker);
 }
 
 .colorPicker {
@@ -184,7 +186,7 @@
 }
 
 .colorSelected {
-  border-color: #333;
+  border-color: var(--text-primary);
   transform: scale(1.15);
 }
 
@@ -193,12 +195,12 @@
   flex-direction: column;
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-light);
 }
 
 .addBtn {
   padding: 0.5rem 1rem;
-  background: #1565c0;
+  background: var(--info-darker);
   color: white;
   border: none;
   border-radius: 6px;
@@ -210,7 +212,7 @@
 }
 
 .addBtn:hover:not(:disabled) {
-  background: #0d47a1;
+  background: var(--info-darker);
 }
 
 .addBtn:disabled {
@@ -221,7 +223,7 @@
 .saveBtn {
   flex: 1;
   padding: 0.4rem 0.75rem;
-  background: #1565c0;
+  background: var(--info-darker);
   color: white;
   border: none;
   border-radius: 6px;
@@ -233,15 +235,15 @@
 }
 
 .saveBtn:hover {
-  background: #0d47a1;
+  background: var(--info-darker);
 }
 
 .cancelBtn {
   flex: 1;
   padding: 0.4rem 0.75rem;
-  background: white;
-  color: #777;
-  border: 1px solid #ddd;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-medium);
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -251,25 +253,25 @@
 }
 
 .cancelBtn:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 /* --- Category editor (per-store) --- */
 
 .catCount {
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-placeholder);
   white-space: nowrap;
 }
 
 .catEditor {
   padding: 0.75rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: #fafafa;
+  background: var(--bg-page);
 }
 
 .catTitle {
@@ -277,13 +279,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #888;
+  color: var(--text-hint);
   margin: 0;
 }
 
 .catEmpty {
   font-size: 0.8rem;
-  color: #bbb;
+  color: var(--text-ghost);
   margin: 0;
 }
 
@@ -311,7 +313,7 @@
 
 .catKeywordCount {
   font-size: 0.7rem;
-  color: #aaa;
+  color: var(--text-faint);
   white-space: nowrap;
 }
 
@@ -328,23 +330,25 @@
   gap: 0.4rem;
   width: 100%;
   padding: 0.5rem;
-  background: #f5f5f5;
+  background: var(--bg-hover);
   border-radius: 6px;
 }
 
 .catRenameInput {
   width: 100%;
   padding: 0.3rem 0.5rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-dashed);
   border-radius: 4px;
   font-size: 0.85rem;
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .catRenameInput:focus {
-  border-color: #1565c0;
+  border-color: var(--info-darker);
 }
 
 .catEditColorPicker {
@@ -368,7 +372,7 @@
 }
 
 .catColorSelected {
-  border-color: #333;
+  border-color: var(--text-primary);
   transform: scale(1.15);
 }
 
@@ -380,7 +384,7 @@
 .catEditSaveBtn {
   flex: 1;
   padding: 0.3rem 0.6rem;
-  background: #1565c0;
+  background: var(--info-darker);
   color: white;
   border: none;
   border-radius: 5px;
@@ -392,15 +396,15 @@
 }
 
 .catEditSaveBtn:hover {
-  background: #0d47a1;
+  background: var(--info-darker);
 }
 
 .catEditCancelBtn {
   flex: 1;
   padding: 0.3rem 0.6rem;
-  background: white;
-  color: #777;
-  border: 1px solid #ddd;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-medium);
   border-radius: 5px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -410,8 +414,8 @@
 }
 
 .catEditCancelBtn:hover {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .catAddRow {
@@ -426,16 +430,18 @@
   flex: 1;
   min-width: 100px;
   padding: 0.35rem 0.5rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-medium);
   border-radius: 5px;
   font-size: 0.85rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .catAddInput:focus {
-  border-color: #1565c0;
+  border-color: var(--info-darker);
 }
 
 .catAddColorPicker {
@@ -445,9 +451,9 @@
 
 .catAddBtn {
   padding: 0.35rem 0.75rem;
-  background: #e3f2fd;
-  color: #1565c0;
-  border: 1px solid #bbdefb;
+  background: var(--info-tint);
+  color: var(--info-darker);
+  border: 1px solid var(--info-tint-border);
   border-radius: 5px;
   font-size: 0.8rem;
   font-weight: 600;
@@ -457,7 +463,7 @@
 }
 
 .catAddBtn:hover:not(:disabled) {
-  background: #bbdefb;
+  background: var(--info-tint-border);
 }
 
 .catAddBtn:disabled {
@@ -467,7 +473,7 @@
 
 .catSaveBtn {
   padding: 0.4rem 0.75rem;
-  background: #4caf50;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 5px;
@@ -480,5 +486,5 @@
 }
 
 .catSaveBtn:hover {
-  background: #388e3c;
+  background: var(--primary-deep);
 }

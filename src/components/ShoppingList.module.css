@@ -7,7 +7,7 @@
 .empty {
   text-align: center;
   padding: 3rem 1rem;
-  color: #999;
+  color: var(--text-placeholder);
 }
 
 .empty p:first-child {
@@ -21,7 +21,7 @@
 }
 
 .storeSection {
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   margin-bottom: 0.75rem;
 }
@@ -32,11 +32,11 @@
   gap: 0.5rem;
   font-size: 1rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   padding: 0.75rem 1rem;
   margin: 0;
-  background: #f9f9f9;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-default);
   border-radius: 10px 10px 0 0;
 }
 
@@ -64,9 +64,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #555;
+  color: var(--text-secondary);
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
   margin: 0;
 }
 
@@ -78,9 +78,9 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #666;
+  color: var(--text-tertiary);
   padding: 0.4rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-subtle);
   margin: 0;
 }
 
@@ -93,8 +93,8 @@
 
 .count {
   font-size: 0.75rem;
-  background: #eee;
-  color: #777;
+  background: var(--badge-bg);
+  color: var(--text-muted);
   padding: 0.1rem 0.4rem;
   border-radius: 10px;
   font-weight: 500;
@@ -104,7 +104,7 @@
   margin-left: auto;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #388e3c;
+  color: var(--primary-dark);
 }
 
 .checkedSection {
@@ -120,9 +120,9 @@
 
 .clearBtn {
   font-size: 0.8rem;
-  color: #e53935;
+  color: var(--danger);
   background: none;
-  border: 1px solid #e53935;
+  border: 1px solid var(--danger);
   border-radius: 6px;
   padding: 0.3rem 0.75rem;
   cursor: pointer;
@@ -131,6 +131,6 @@
 }
 
 .clearBtn:hover {
-  background: #e53935;
-  color: white;
+  background: var(--danger);
+  color: var(--bg-card);
 }

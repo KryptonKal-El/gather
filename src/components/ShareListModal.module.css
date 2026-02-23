@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,9 +11,9 @@
 }
 
 .modal {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 440px;
   max-height: 85vh;
@@ -26,13 +26,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 1.5rem 1rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .title {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -40,14 +40,14 @@
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: #999;
+  color: var(--text-placeholder);
   cursor: pointer;
   padding: 0 0.25rem;
   line-height: 1;
 }
 
 .closeBtn:hover {
-  color: #333;
+  color: var(--text-primary);
 }
 
 .form {
@@ -59,21 +59,23 @@
 .emailInput {
   flex: 1;
   padding: 0.6rem 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.9rem;
   outline: none;
   transition: border-color 0.15s;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .emailInput:focus {
-  border-color: #4caf50;
+  border-color: var(--primary);
 }
 
 .shareBtn {
   padding: 0.6rem 1.25rem;
-  background: #4caf50;
-  color: white;
+  background: var(--primary);
+  color: var(--bg-card);
   border: none;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -84,16 +86,16 @@
 }
 
 .shareBtn:hover:not(:disabled) {
-  background: #43a047;
+  background: var(--primary-hover);
 }
 
 .shareBtn:disabled {
-  background: #c8e6c9;
+  background: var(--disabled-bg);
   cursor: not-allowed;
 }
 
 .error {
-  color: #e53935;
+  color: var(--danger);
   font-size: 0.85rem;
   margin: 0;
   padding: 0 1.5rem 0.5rem;
@@ -106,7 +108,7 @@
 .subTitle {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #666;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin: 0 0 0.75rem;
@@ -117,14 +119,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .ownerBadge {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #4caf50;
-  background: #e8f5e9;
+  color: var(--primary);
+  background: var(--primary-tint);
   padding: 0.2rem 0.6rem;
   border-radius: 10px;
 }
@@ -134,7 +136,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .person:last-child {
@@ -143,7 +145,7 @@
 
 .personEmail {
   font-size: 0.9rem;
-  color: #333;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -152,8 +154,8 @@
 
 .removeBtn {
   background: none;
-  border: 1px solid #e0e0e0;
-  color: #999;
+  border: 1px solid var(--border-default);
+  color: var(--text-placeholder);
   font-size: 0.8rem;
   font-weight: 500;
   padding: 0.25rem 0.75rem;
@@ -165,12 +167,12 @@
 }
 
 .removeBtn:hover {
-  color: #e53935;
-  border-color: #e53935;
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
 .emptyMsg {
-  color: #999;
+  color: var(--text-placeholder);
   font-size: 0.85rem;
   padding: 0.5rem 0;
   margin: 0;

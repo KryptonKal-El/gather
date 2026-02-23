@@ -10,6 +10,7 @@ import { Suggestions } from './components/Suggestions.jsx';
 import { RecipePanel } from './components/RecipePanel.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
+import { ThemeToggle } from './components/ThemeToggle.jsx';
 import styles from './App.module.css';
 
 /**
@@ -90,6 +91,7 @@ export const App = () => {
           <span className={styles.userName}>
             {isGuest ? 'Guest' : user.displayName ?? user.email}
           </span>
+          <ThemeToggle />
           <button className={styles.signOutBtn} onClick={signOut} type="button">
             Sign out
           </button>

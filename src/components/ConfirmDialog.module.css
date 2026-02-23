@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--overlay-backdrop);
   z-index: 9999;
   display: flex;
   align-items: center;
@@ -13,19 +13,19 @@
 }
 
 .dialog {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 24px 28px;
   max-width: 360px;
   width: 90%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px var(--overlay-strong);
   animation: scaleIn 0.15s ease;
 }
 
 .message {
   font-size: 1rem;
   line-height: 1.5;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 20px;
 }
 
@@ -47,21 +47,21 @@
 }
 
 .cancelBtn {
-  background: #e0e0e0;
-  color: #333;
+  background: var(--cancel-bg);
+  color: var(--text-primary);
 }
 
 .cancelBtn:hover {
-  background: #d0d0d0;
+  background: var(--cancel-hover);
 }
 
 .confirmBtn {
-  background: #e53935;
-  color: #fff;
+  background: var(--danger);
+  color: var(--bg-card);
 }
 
 .confirmBtn:hover {
-  background: #c62828;
+  background: var(--danger-hover);
 }
 
 @keyframes fadeIn {

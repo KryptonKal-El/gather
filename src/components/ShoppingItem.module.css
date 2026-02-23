@@ -8,7 +8,7 @@
 }
 
 .item:hover {
-  background: #f5f5f5;
+  background: var(--bg-hover);
 }
 
 .checked {
@@ -17,15 +17,15 @@
 
 .checked .name {
   text-decoration: line-through;
-  color: #999;
+  color: var(--text-placeholder);
 }
 
 .thumbnail {
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 6px;
-  border: 2px dashed #d0d0d0;
-  background: #fafafa;
+  border: 2px dashed var(--thumbnail-border);
+  background: var(--bg-page);
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -37,8 +37,8 @@
 }
 
 .thumbnail:hover {
-  border-color: #4caf50;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.15);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow-subtle);
 }
 
 .thumbnailImg {
@@ -50,7 +50,7 @@
 
 .thumbnailPlaceholder {
   font-size: 1rem;
-  color: #bbb;
+  color: var(--text-ghost);
   font-weight: 600;
   line-height: 1;
 }
@@ -71,7 +71,7 @@
 .checkbox {
   width: 1.2rem;
   height: 1.2rem;
-  accent-color: #4caf50;
+  accent-color: var(--primary);
   cursor: pointer;
 }
 
@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   gap: 0;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -100,10 +100,10 @@
   width: 1.4rem;
   height: 1.4rem;
   border: none;
-  background: #f5f5f5;
+  background: var(--bg-hover);
   font-size: 0.75rem;
   font-family: inherit;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -113,7 +113,7 @@
 }
 
 .qtyBtn:hover {
-  background: #e0e0e0;
+  background: var(--cancel-bg);
 }
 
 .qtyValue {
@@ -121,18 +121,18 @@
   font-weight: 600;
   min-width: 1.4rem;
   text-align: center;
-  color: #333;
-  border-left: 1px solid #e0e0e0;
-  border-right: 1px solid #e0e0e0;
+  color: var(--text-primary);
+  border-left: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
   line-height: 1.4rem;
 }
 
 .priceDisplay {
   font-size: 0.75rem;
   font-family: inherit;
-  color: #666;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
+  color: var(--text-tertiary);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 0.15rem 0.4rem;
   cursor: pointer;
@@ -141,14 +141,14 @@
 }
 
 .priceDisplay:hover {
-  background: #e8f5e9;
-  border-color: #4caf50;
+  background: var(--primary-tint);
+  border-color: var(--primary);
 }
 
 .priceEdit {
   display: flex;
   align-items: center;
-  border: 1px solid #4caf50;
+  border: 1px solid var(--primary);
   border-radius: 6px;
   overflow: hidden;
   height: 1.5rem;
@@ -156,9 +156,9 @@
 
 .priceCurrency {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-hint);
   padding: 0 0.2rem 0 0.3rem;
-  background: #f5f5f5;
+  background: var(--bg-hover);
   height: 100%;
   display: flex;
   align-items: center;
@@ -170,7 +170,8 @@
   border: none;
   font-size: 0.75rem;
   font-family: inherit;
-  color: #333;
+  color: var(--text-primary);
+  background: var(--bg-input);
   padding: 0 0.3rem;
   -moz-appearance: textfield;
   box-sizing: border-box;
@@ -189,7 +190,7 @@
 .lineTotal {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #388e3c;
+  color: var(--primary-dark);
   white-space: nowrap;
 }
 
@@ -213,13 +214,13 @@
   white-space: nowrap;
   font-weight: 600;
   cursor: pointer;
-  background: #bbb;
+  background: var(--text-ghost);
   transition: opacity 0.15s, box-shadow 0.15s;
 }
 
 .storeBadge:hover {
   opacity: 0.85;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 2px var(--overlay-light);
 }
 
 .categoryWrapper {
@@ -243,7 +244,7 @@
 
 .category:hover {
   opacity: 0.85;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 0 0 2px var(--overlay-medium);
 }
 
 .picker {
@@ -251,10 +252,10 @@
   top: calc(100% + 4px);
   right: 0;
   z-index: 20;
-  background: #fff;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px var(--overlay-medium);
   padding: 0.35rem 0;
   min-width: 180px;
   max-height: 260px;
@@ -271,23 +272,23 @@
   background: none;
   font-family: inherit;
   font-size: 0.8rem;
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
   text-align: left;
   transition: background 0.1s;
 }
 
 .pickerOption:hover {
-  background: #f5f5f5;
+  background: var(--bg-hover);
 }
 
 .pickerActive {
-  background: #e8f5e9;
+  background: var(--primary-tint);
   font-weight: 600;
 }
 
 .pickerActive:hover {
-  background: #c8e6c9;
+  background: var(--primary-tint-hover);
 }
 
 .pickerDot {
@@ -301,7 +302,7 @@
 .deleteBtn {
   background: none;
   border: none;
-  color: #ccc;
+  color: var(--text-icon);
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
@@ -310,6 +311,6 @@
 }
 
 .deleteBtn:hover {
-  color: #e53935;
-  background: #ffebee;
+  color: var(--danger);
+  background: var(--danger-tint);
 }

@@ -3,33 +3,33 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f0 100%);
+  background: linear-gradient(135deg, var(--login-gradient-start) 0%, var(--login-gradient-end) 100%);
   padding: 1rem;
 }
 
 .card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 16px;
   padding: 2.5rem 2rem;
   max-width: 400px;
   width: 100%;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px var(--overlay-light);
   text-align: center;
 }
 
 .logo {
   font-size: 2rem;
   font-weight: 800;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 0.25rem;
 }
 
 .ai {
-  color: #4caf50;
+  color: var(--primary);
 }
 
 .tagline {
-  color: #999;
+  color: var(--text-placeholder);
   font-size: 0.9rem;
   margin: 0 0 2rem;
 }
@@ -47,19 +47,19 @@
   gap: 0.75rem;
   width: 100%;
   padding: 0.75rem 1rem;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s;
 }
 
 .googleBtn:hover:not(:disabled) {
-  background: #f8f8f8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--bg-raised);
+  box-shadow: 0 2px 8px var(--overlay-light);
 }
 
 .googleBtn:disabled {
@@ -76,7 +76,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #bbb;
+  color: var(--text-ghost);
   font-size: 0.8rem;
 }
 
@@ -85,24 +85,24 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: #e0e0e0;
+  background: var(--border-default);
 }
 
 .guestBtn {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: #f5f5f5;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #555;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.15s;
 }
 
 .guestBtn:hover:not(:disabled) {
-  background: #eee;
+  background: var(--badge-bg);
 }
 
 .guestBtn:disabled {
@@ -112,12 +112,12 @@
 
 .error {
   margin: 1rem 0 0;
-  color: #e53935;
+  color: var(--danger);
   font-size: 0.85rem;
 }
 
 .note {
   margin: 1.5rem 0 0;
-  color: #aaa;
+  color: var(--text-faint);
   font-size: 0.8rem;
 }

@@ -15,12 +15,12 @@
 .logo {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #333;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .ai {
-  color: #4caf50;
+  color: var(--primary);
   font-weight: 800;
 }
 
@@ -32,14 +32,14 @@
 
 .userName {
   font-size: 0.85rem;
-  color: #777;
+  color: var(--text-muted);
 }
 
 .signOutBtn {
   font-size: 0.8rem;
-  color: #e53935;
+  color: var(--danger);
   background: none;
-  border: 1px solid #e53935;
+  border: 1px solid var(--danger);
   border-radius: 6px;
   padding: 0.3rem 0.75rem;
   cursor: pointer;
@@ -47,8 +47,8 @@
 }
 
 .signOutBtn:hover {
-  background: #e53935;
-  color: white;
+  background: var(--danger);
+  color: var(--bg-card);
 }
 
 .loading {
@@ -56,12 +56,12 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  color: #999;
+  color: var(--text-placeholder);
   font-size: 1.1rem;
 }
 
 .tagline {
-  color: #999;
+  color: var(--text-placeholder);
   font-size: 0.9rem;
   margin: 0.25rem 0 0;
 }
@@ -87,18 +87,18 @@
 .listTitle {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #333;
+  color: var(--text-primary);
   margin: 0 0 1rem;
 }
 
 .noList {
   text-align: center;
   padding: 4rem 1rem;
-  color: #999;
+  color: var(--text-placeholder);
 }
 
 .noList h2 {
-  color: #555;
+  color: var(--text-secondary);
   margin-bottom: 0.5rem;
 }
 
