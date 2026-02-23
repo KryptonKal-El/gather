@@ -536,20 +536,3 @@
   cursor: default;
 }
 
-.catSaveBtn {
-  padding: 0.4rem 0.75rem;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-  margin-top: 0.25rem;
-}
-
-.catSaveBtn:hover {
-  background: var(--primary-deep);
-}

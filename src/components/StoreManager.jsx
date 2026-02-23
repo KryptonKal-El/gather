@@ -22,9 +22,9 @@ const CATEGORY_PRESET_COLORS = [
  * Inline category editor for a single store.
  * Supports add, remove (with confirm), rename, reorder, color picker,
  * keyword editing, and copying categories from defaults or another store.
+ * All changes persist to Firestore immediately via onSave.
  */
 const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
-  const [localCats, setLocalCats] = useState(categories);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(CATEGORY_PRESET_COLORS[0]);
   const [editingIndex, setEditingIndex] = useState(-1);
@@ -34,14 +34,12 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
   const [confirmingDeleteIndex, setConfirmingDeleteIndex] = useState(-1);
   const [isCopyMenuOpen, setIsCopyMenuOpen] = useState(false);
 
-  const isDirty = JSON.stringify(localCats) !== JSON.stringify(categories);
-
   const handleAdd = () => {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    if (localCats.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return;
+    if (categories.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) return;
     const key = `custom_${Date.now()}`;
-    setLocalCats([...localCats, { key, name: trimmed, color: newColor, keywords: [] }]);
+    onSave([...categories, { key, name: trimmed, color: newColor, keywords: [] }]);
     setNewName('');
     setNewColor(CATEGORY_PRESET_COLORS[0]);
   };
@@ -54,12 +52,12 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
   };
 
   const handleDelete = (index) => {
-    setLocalCats(localCats.filter((_, i) => i !== index));
+    onSave(categories.filter((_, i) => i !== index));
     setConfirmingDeleteIndex(-1);
   };
 
   const handleStartEdit = (index) => {
-    const cat = localCats[index];
+    const cat = categories[index];
     setEditingIndex(index);
     setEditName(cat.name);
     setEditColor(cat.color);
@@ -72,7 +70,7 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
       setEditingIndex(-1);
       return;
     }
-    const updated = [...localCats];
+    const updated = [...categories];
     updated[editingIndex] = {
       ...updated[editingIndex],
       name: trimmed,
@@ -82,7 +80,7 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
         .map((kw) => kw.trim())
         .filter(Boolean),
     };
-    setLocalCats(updated);
+    onSave(updated);
     setEditingIndex(-1);
   };
 
@@ -93,37 +91,33 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
 
   const handleMoveUp = (index) => {
     if (index === 0) return;
-    const reordered = [...localCats];
+    const reordered = [...categories];
     [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
-    setLocalCats(reordered);
+    onSave(reordered);
   };
 
   const handleMoveDown = (index) => {
-    if (index === localCats.length - 1) return;
-    const reordered = [...localCats];
+    if (index === categories.length - 1) return;
+    const reordered = [...categories];
     [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
-    setLocalCats(reordered);
-  };
-
-  const handleSaveAll = () => {
-    onSave(localCats);
+    onSave(reordered);
   };
 
   const handleCopyDefaults = () => {
-    setLocalCats(DEFAULT_CATEGORIES.map((c) => ({ ...c })));
+    onSave(DEFAULT_CATEGORIES.map((c) => ({ ...c })));
     setIsCopyMenuOpen(false);
   };
 
   const handleCopyFromStore = (store) => {
     const copied = (store.categories ?? []).map((c) => ({ ...c, keywords: [...c.keywords] }));
-    setLocalCats(copied);
+    onSave(copied);
     setIsCopyMenuOpen(false);
   };
 
   return (
     <div className={styles.catEditor}>
       <div className={styles.catHeader}>
-        <h5 className={styles.catTitle}>Categories ({localCats.length})</h5>
+        <h5 className={styles.catTitle}>Categories ({categories.length})</h5>
         <button
           type="button"
           className={styles.copyBtn}
@@ -159,12 +153,12 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
         </div>
       )}
 
-      {localCats.length === 0 && (
+      {categories.length === 0 && (
         <p className={styles.catEmpty}>No categories. Add one below.</p>
       )}
 
       <div className={styles.catList}>
-        {localCats.map((cat, index) => (
+        {categories.map((cat, index) => (
           <div key={`${cat.key}-${index}`} className={styles.catRow}>
             {editingIndex === index ? (
               <div className={styles.catEditForm}>
@@ -240,7 +234,7 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
                     type="button"
                     className={styles.iconBtn}
                     onClick={() => handleMoveDown(index)}
-                    disabled={index === localCats.length - 1}
+                    disabled={index === categories.length - 1}
                     aria-label="Move down"
                     title="Move down"
                   >
@@ -308,16 +302,6 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
           Add
         </button>
       </div>
-
-      {isDirty && (
-        <button
-          type="button"
-          className={styles.catSaveBtn}
-          onClick={handleSaveAll}
-        >
-          Save Categories
-        </button>
-      )}
     </div>
   );
 };
