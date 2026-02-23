@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import styles from './ConfirmDialog.module.css';
 
 /**
  * Reusable modal confirmation dialog.
- * Renders a backdrop overlay with a message and confirm/cancel buttons.
- * Closes on Escape key or backdrop click.
+ * Renders via a portal to document.body so it is never affected by
+ * ancestor opacity or overflow. Shows a backdrop overlay with a message
+ * and confirm/cancel buttons. Closes on Escape key or backdrop click.
  */
 export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) => {
   const dialogRef = useRef(null);
@@ -27,7 +29,7 @@ export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) =>
     if (e.target === e.currentTarget) onCancel();
   };
 
-  return (
+  return createPortal(
     <div className={styles.backdrop} onClick={handleBackdropClick} ref={dialogRef}>
       <div className={styles.dialog}>
         <p className={styles.message}>{message}</p>
@@ -40,7 +42,8 @@ export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) =>
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
