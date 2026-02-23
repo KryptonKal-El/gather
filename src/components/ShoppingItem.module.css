@@ -69,13 +69,6 @@
   cursor: pointer;
 }
 
-.checkbox {
-  width: 1.2rem;
-  height: 1.2rem;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
-
 .name {
   font-size: 1rem;
   transition: color 0.2s;
@@ -325,12 +318,12 @@
   .meta {
     order: 5;
     width: 100%;
-    padding-left: calc(1.2rem + 0.5rem);
+    padding-left: calc(2.25rem + 0.5rem);
   }
 
   .badges {
     order: 6;
-    padding-left: calc(1.2rem + 0.5rem);
+    padding-left: calc(2.25rem + 0.5rem);
   }
 
   .qtyBtn {

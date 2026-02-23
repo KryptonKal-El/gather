@@ -7,9 +7,9 @@ import { ImagePicker } from './ImagePicker.jsx';
 import styles from './ShoppingItem.module.css';
 
 /**
- * A single shopping list item row with optional image thumbnail, checkbox,
- * name, quantity, price, clickable category badge, clickable store badge,
- * and delete button.
+ * A single shopping list item row with optional image thumbnail, clickable
+ * name (toggles checked state), quantity stepper, price, clickable category
+ * badge, clickable store badge, and delete button.
  * Quantity, price, and image are editable inline. The category picker shows
  * the assigned store's categories (or global defaults).
  */
@@ -153,15 +153,15 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
           <span className={styles.thumbnailPlaceholder}>+</span>
         )}
       </button>
-      <label className={styles.label}>
-        <input
-          type="checkbox"
-          checked={item.isChecked}
-          onChange={onToggle}
-          className={styles.checkbox}
-        />
+      <span
+        className={styles.label}
+        onClick={onToggle}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+      >
         <span className={styles.name}>{item.name}</span>
-      </label>
+      </span>
       <div className={styles.meta}>
         <div className={styles.qtyStepper}>
           <button
