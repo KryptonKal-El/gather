@@ -1,7 +1,7 @@
 /**
  * Shopping list state management backed by Firestore.
  * Real-time listeners push data into state. Actions call Firestore directly.
- * All data is scoped to the authenticated user.
+ * Supports both owned lists and lists shared by other users.
  */
 import { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import { increment } from 'firebase/firestore';
@@ -12,6 +12,9 @@ import {
   subscribeItems,
   subscribeHistory,
   subscribeStores,
+  subscribeSharedListRefs,
+  subscribeList,
+  subscribeSharedItems,
   createList as fsCreateList,
   updateList as fsUpdateList,
   deleteList as fsDeleteList,
@@ -25,6 +28,8 @@ import {
   updateStore as fsUpdateStore,
   deleteStore as fsDeleteStore,
   saveStoreOrder,
+  shareList as fsShareList,
+  unshareList as fsUnshareList,
 } from '../services/firestore.js';
 
 /** Capitalizes the first letter of a string. */
@@ -34,13 +39,17 @@ export const ShoppingListContext = createContext(null);
 
 /**
  * Provides shopping list state and actions to the component tree.
- * Subscribes to Firestore real-time listeners scoped to the current user.
+ * Subscribes to Firestore real-time listeners scoped to the current user,
+ * plus shared list references from other users.
  */
 export const ShoppingListProvider = ({ children }) => {
   const { user } = useAuth();
   const userId = user?.uid ?? null;
+  const userEmail = user?.email ?? null;
 
   const [lists, setLists] = useState([]);
+  const [sharedListRefs, setSharedListRefs] = useState([]);
+  const [sharedListMetas, setSharedListMetas] = useState({});
   const [activeListId, setActiveListId] = useState(null);
   const [activeItems, setActiveItems] = useState([]);
   const [history, setHistory] = useState([]);
@@ -49,7 +58,7 @@ export const ShoppingListProvider = ({ children }) => {
   // Track whether we've auto-selected a list on initial load
   const hasAutoSelected = useRef(false);
 
-  // Subscribe to lists
+  // Subscribe to owned lists
   useEffect(() => {
     if (!userId) {
       setLists([]);
@@ -66,14 +75,73 @@ export const ShoppingListProvider = ({ children }) => {
     });
   }, [userId]);
 
-  // Subscribe to items of the active list
+  // Subscribe to shared list refs (lists others shared with me)
   useEffect(() => {
-    if (!userId || !activeListId) {
+    if (!userEmail) {
+      setSharedListRefs([]);
+      setSharedListMetas({});
+      return;
+    }
+    return subscribeSharedListRefs(userEmail, setSharedListRefs);
+  }, [userEmail]);
+
+  // Subscribe to metadata for each shared list
+  useEffect(() => {
+    const unsubs = {};
+
+    for (const ref of sharedListRefs) {
+      const key = `${ref.ownerUid}_${ref.listId}`;
+      unsubs[key] = subscribeList(ref.ownerUid, ref.listId, (listData) => {
+        if (listData) {
+          setSharedListMetas((prev) => ({
+            ...prev,
+            [key]: {
+              ...listData,
+              _ownerUid: ref.ownerUid,
+              _isShared: true,
+            },
+          }));
+        } else {
+          // List was deleted by owner
+          setSharedListMetas((prev) => {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+          });
+        }
+      });
+    }
+
+    return () => {
+      for (const unsub of Object.values(unsubs)) {
+        unsub();
+      }
+      setSharedListMetas({});
+    };
+  }, [sharedListRefs]);
+
+  // Build merged list of owned + shared lists
+  const allLists = [
+    ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false })),
+    ...Object.values(sharedListMetas),
+  ];
+
+  // Determine the owner UID for the active list (needed for cross-user item access)
+  const activeListEntry = allLists.find((l) => l.id === activeListId) ?? null;
+  const activeListOwnerUid = activeListEntry?._ownerUid ?? userId;
+  const isActiveListShared = activeListEntry?._isShared ?? false;
+
+  // Subscribe to items of the active list (using the owner's UID for path)
+  useEffect(() => {
+    if (!activeListId || !activeListOwnerUid) {
       setActiveItems([]);
       return;
     }
+    if (isActiveListShared) {
+      return subscribeSharedItems(activeListOwnerUid, activeListId, setActiveItems);
+    }
     return subscribeItems(userId, activeListId, setActiveItems);
-  }, [userId, activeListId]);
+  }, [userId, activeListId, activeListOwnerUid, isActiveListShared]);
 
   // Subscribe to history
   useEffect(() => {
@@ -107,31 +175,44 @@ export const ShoppingListProvider = ({ children }) => {
     return store?.categories ?? DEFAULT_CATEGORIES;
   }, [stores]);
 
+  /**
+   * Returns the ownerUid for a given list ID (could be the current user
+   * or another user if the list is shared).
+   */
+  const getListOwnerUid = useCallback((listId) => {
+    const entry = allLists.find((l) => l.id === listId);
+    return entry?._ownerUid ?? userId;
+  }, [allLists, userId]);
+
   // -----------------------------------------------------------------------
   // Actions
   // -----------------------------------------------------------------------
 
   const createListAction = useCallback(async (name) => {
     if (!userId) return;
-    const newId = await fsCreateList(userId, name);
+    const newId = await fsCreateList(userId, name, userEmail);
     setActiveListId(newId);
-  }, [userId]);
+  }, [userId, userEmail]);
 
   const deleteListAction = useCallback(async (id) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(id);
+    // Only owners can delete lists
+    if (ownerUid !== userId) return;
     await fsDeleteList(userId, id);
     if (activeListId === id) {
       setActiveListId((prev) => {
-        const remaining = lists.filter((l) => l.id !== id);
+        const remaining = allLists.filter((l) => l.id !== id);
         return remaining[0]?.id ?? null;
       });
     }
-  }, [userId, activeListId, lists]);
+  }, [userId, activeListId, allLists, getListOwnerUid]);
 
   const renameListAction = useCallback(async (id, newName) => {
     if (!userId) return;
-    await fsUpdateList(userId, id, { name: newName });
-  }, [userId]);
+    const ownerUid = getListOwnerUid(id);
+    await fsUpdateList(ownerUid, id, { name: newName });
+  }, [userId, getListOwnerUid]);
 
   const selectListAction = useCallback((id) => {
     setActiveListId(id);
@@ -139,6 +220,7 @@ export const ShoppingListProvider = ({ children }) => {
 
   const addItemAction = useCallback(async (listId, rawName, storeId = null) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
     const name = capitalize(rawName.trim());
     const categories = getCategoriesForStore(storeId);
     const item = {
@@ -150,12 +232,13 @@ export const ShoppingListProvider = ({ children }) => {
       price: null,
       imageUrl: null,
     };
-    await fsAddItem(userId, listId, item);
+    await fsAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, name);
-  }, [userId, getCategoriesForStore]);
+  }, [userId, getCategoriesForStore, getListOwnerUid]);
 
   const addItemsAction = useCallback(async (listId, items) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
     const prepared = items.map((item) => {
       const name = capitalize(item.name.trim());
       const storeId = item.store ?? null;
@@ -170,41 +253,45 @@ export const ShoppingListProvider = ({ children }) => {
         imageUrl: item.imageUrl ?? null,
       };
     });
-    await fsAddItems(userId, listId, prepared);
+    await fsAddItems(ownerUid, listId, prepared);
     for (const item of prepared) {
       await addHistoryEntry(userId, item.name);
     }
-  }, [userId, getCategoriesForStore]);
+  }, [userId, getCategoriesForStore, getListOwnerUid]);
 
   const toggleItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
     const item = activeItems.find((i) => i.id === itemId);
     if (!item) return;
     const nowChecked = !item.isChecked;
-    await fsUpdateItem(userId, listId, itemId, { isChecked: nowChecked });
-    await fsUpdateList(userId, listId, { itemCount: increment(nowChecked ? -1 : 1) });
-  }, [userId, activeItems]);
+    await fsUpdateItem(ownerUid, listId, itemId, { isChecked: nowChecked });
+    await fsUpdateList(ownerUid, listId, { itemCount: increment(nowChecked ? -1 : 1) });
+  }, [userId, activeItems, getListOwnerUid]);
 
   const removeItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
     const item = activeItems.find((i) => i.id === itemId);
-    await fsRemoveItem(userId, listId, itemId);
+    await fsRemoveItem(ownerUid, listId, itemId);
     if (item && !item.isChecked) {
-      await fsUpdateList(userId, listId, { itemCount: increment(-1) });
+      await fsUpdateList(ownerUid, listId, { itemCount: increment(-1) });
     }
-  }, [userId, activeItems]);
+  }, [userId, activeItems, getListOwnerUid]);
 
   const updateItemAction = useCallback(async (listId, itemId, updates) => {
     if (!userId) return;
-    await fsUpdateItem(userId, listId, itemId, updates);
-  }, [userId]);
+    const ownerUid = getListOwnerUid(listId);
+    await fsUpdateItem(ownerUid, listId, itemId, updates);
+  }, [userId, getListOwnerUid]);
 
   const clearCheckedAction = useCallback(async (listId) => {
     if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
     const checkedIds = activeItems.filter((i) => i.isChecked).map((i) => i.id);
     if (checkedIds.length === 0) return;
-    await clearCheckedItems(userId, listId, checkedIds);
-  }, [userId, activeItems]);
+    await clearCheckedItems(ownerUid, listId, checkedIds);
+  }, [userId, activeItems, getListOwnerUid]);
 
   const addStoreAction = useCallback(async (name, color) => {
     if (!userId) return;
@@ -233,11 +320,32 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId]);
 
   // -----------------------------------------------------------------------
+  // Sharing actions
+  // -----------------------------------------------------------------------
+
+  const shareListAction = useCallback(async (listId, email) => {
+    if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
+    // Only owners can share
+    if (ownerUid !== userId) return;
+    const listEntry = allLists.find((l) => l.id === listId);
+    const listName = listEntry?.name ?? 'Shared List';
+    await fsShareList(userId, listId, listName, email);
+  }, [userId, allLists, getListOwnerUid]);
+
+  const unshareListAction = useCallback(async (listId, email) => {
+    if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
+    if (ownerUid !== userId) return;
+    await fsUnshareList(userId, listId, email);
+  }, [userId, getListOwnerUid]);
+
+  // -----------------------------------------------------------------------
   // Build the context value
   // -----------------------------------------------------------------------
 
   const state = {
-    lists,
+    lists: allLists,
     activeListId,
     history,
     stores,
@@ -258,9 +366,11 @@ export const ShoppingListProvider = ({ children }) => {
     updateStore: updateStoreAction,
     deleteStore: deleteStoreAction,
     reorderStores: reorderStoresAction,
+    shareList: shareListAction,
+    unshareList: unshareListAction,
   };
 
-  const activeListMeta = lists.find((l) => l.id === activeListId) ?? null;
+  const activeListMeta = allLists.find((l) => l.id === activeListId) ?? null;
   const activeList = activeListMeta
     ? { ...activeListMeta, items: activeItems }
     : null;

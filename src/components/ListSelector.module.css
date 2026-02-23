@@ -117,17 +117,50 @@
   border: none;
   cursor: pointer;
   text-align: left;
+  min-width: 0;
 }
 
 .listName {
   font-size: 0.9rem;
   font-weight: 500;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .listCount {
   font-size: 0.75rem;
   color: #999;
+  white-space: nowrap;
+  margin-left: 0.5rem;
+}
+
+.sharedBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #1976d2;
+  background: #e3f2fd;
+  padding: 0.1rem 0.4rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.shareBtn {
+  background: none;
+  border: none;
+  color: transparent;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.3rem 0.35rem;
+  border-radius: 4px;
+  transition: color 0.1s;
+  line-height: 1;
 }
 
 .deleteBtn {
@@ -153,12 +186,17 @@
 }
 
 .listItem:hover .deleteBtn,
-.listItem:hover .editBtn {
+.listItem:hover .editBtn,
+.listItem:hover .shareBtn {
   color: #ccc;
 }
 
 .editBtn:hover {
   color: #666 !important;
+}
+
+.shareBtn:hover {
+  color: #1976d2 !important;
 }
 
 .deleteBtn:hover {
@@ -180,4 +218,20 @@
   color: #333;
   outline: none;
   box-sizing: border-box;
+}
+
+.sectionHeader {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
 }

@@ -1,0 +1,187 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: scaleIn 0.15s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: #333;
+}
+
+.form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem;
+}
+
+.emailInput {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.emailInput:focus {
+  border-color: #4caf50;
+}
+
+.shareBtn {
+  padding: 0.6rem 1.25rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.shareBtn:hover:not(:disabled) {
+  background: #43a047;
+}
+
+.shareBtn:disabled {
+  background: #c8e6c9;
+  cursor: not-allowed;
+}
+
+.error {
+  color: #e53935;
+  font-size: 0.85rem;
+  margin: 0;
+  padding: 0 1.5rem 0.5rem;
+}
+
+.collaborators {
+  padding: 0.75rem 1.5rem 1.25rem;
+}
+
+.subTitle {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.75rem;
+}
+
+.owner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ownerBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4caf50;
+  background: #e8f5e9;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.person:last-child {
+  border-bottom: none;
+}
+
+.personEmail {
+  font-size: 0.9rem;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.removeBtn {
+  background: none;
+  border: 1px solid #e0e0e0;
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: 0.75rem;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.removeBtn:hover {
+  color: #e53935;
+  border-color: #e53935;
+}
+
+.emptyMsg {
+  color: #999;
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

@@ -1,18 +1,21 @@
 /**
  * Firestore service layer for ShoppingListAI.
- * All data is scoped under users/{userId}/ for per-user isolation.
+ * Owned data lives under users/{userId}/.
+ * Shared list references use a top-level sharedListRefs collection.
  * Provides CRUD operations and real-time snapshot listeners.
  */
 import {
   collection,
   doc,
   addDoc,
-  setDoc,
   updateDoc,
   deleteDoc,
+  deleteField,
+  getDocs,
   onSnapshot,
   query,
   orderBy,
+  where,
   serverTimestamp,
   writeBatch,
   increment,
@@ -23,7 +26,6 @@ import { db } from './firebase.js';
 // Path helpers
 // ---------------------------------------------------------------------------
 
-const userDoc = (userId) => doc(db, 'users', userId);
 const listsCol = (userId) => collection(db, 'users', userId, 'lists');
 const listDoc = (userId, listId) => doc(db, 'users', userId, 'lists', listId);
 const itemsCol = (userId, listId) => collection(db, 'users', userId, 'lists', listId, 'items');
@@ -31,16 +33,20 @@ const itemDoc = (userId, listId, itemId) => doc(db, 'users', userId, 'lists', li
 const historyCol = (userId) => collection(db, 'users', userId, 'history');
 const storesCol = (userId) => collection(db, 'users', userId, 'stores');
 const storeDoc = (userId, storeId) => doc(db, 'users', userId, 'stores', storeId);
+const sharedRefsCol = () => collection(db, 'sharedListRefs');
 
 // ---------------------------------------------------------------------------
 // Lists
 // ---------------------------------------------------------------------------
 
 /** Creates a new shopping list document. Returns the generated ID. */
-export const createList = async (userId, name) => {
+export const createList = async (userId, name, ownerEmail = null) => {
   const ref = await addDoc(listsCol(userId), {
     name,
     itemCount: 0,
+    ownerUid: userId,
+    ownerEmail: ownerEmail ?? null,
+    sharedWith: {},
     createdAt: serverTimestamp(),
   });
   return ref.id;
@@ -166,6 +172,120 @@ export const subscribeHistory = (userId, callback) => {
       ...d.data(),
     }));
     callback(history);
+  });
+};
+
+// ---------------------------------------------------------------------------
+// Sharing
+// ---------------------------------------------------------------------------
+
+/**
+ * Shares a list with another user by email.
+ * Adds entry to the list's sharedWith map and creates a sharedListRef document.
+ * @param {string} ownerUid - UID of the list owner
+ * @param {string} listId - ID of the list to share
+ * @param {string} listName - Current name of the list (denormalized into the ref)
+ * @param {string} email - Email of the user to share with
+ */
+export const shareList = async (ownerUid, listId, listName, email) => {
+  const normalizedEmail = email.toLowerCase().trim();
+
+  // Add to the list's sharedWith map (keyed by sanitized email for Firestore field names)
+  const emailKey = normalizedEmail.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+  await updateDoc(listDoc(ownerUid, listId), {
+    [`sharedWith.${emailKey}`]: {
+      email: normalizedEmail,
+      addedAt: serverTimestamp(),
+    },
+  });
+
+  // Create a shared list reference so the recipient can discover it
+  await addDoc(sharedRefsCol(), {
+    email: normalizedEmail,
+    ownerUid,
+    listId,
+    listName,
+    addedAt: serverTimestamp(),
+  });
+};
+
+/**
+ * Removes sharing for a given email from a list.
+ * Deletes the sharedWith map entry and the matching sharedListRef document.
+ */
+export const unshareList = async (ownerUid, listId, email) => {
+  const normalizedEmail = email.toLowerCase().trim();
+  const emailKey = normalizedEmail.replace(/\./g, '_dot_').replace(/@/g, '_at_');
+
+  // Remove from the list's sharedWith map
+  await updateDoc(listDoc(ownerUid, listId), {
+    [`sharedWith.${emailKey}`]: deleteField(),
+  });
+
+  // Find and delete the matching sharedListRef document(s)
+  const q = query(
+    sharedRefsCol(),
+    where('ownerUid', '==', ownerUid),
+    where('listId', '==', listId),
+    where('email', '==', normalizedEmail),
+  );
+  const snapshot = await getDocs(q);
+  const batch = writeBatch(db);
+  snapshot.docs.forEach((d) => batch.delete(d.ref));
+  await batch.commit();
+};
+
+/**
+ * Subscribes to shared list references for a user (by email).
+ * Returns refs for lists that others have shared with this user.
+ * @returns {Function} Unsubscribe function
+ */
+export const subscribeSharedListRefs = (email, callback) => {
+  if (!email) {
+    callback([]);
+    return () => {};
+  }
+  const normalizedEmail = email.toLowerCase().trim();
+  const q = query(
+    sharedRefsCol(),
+    where('email', '==', normalizedEmail),
+  );
+  return onSnapshot(q, (snapshot) => {
+    const refs = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    callback(refs);
+  });
+};
+
+/**
+ * Subscribes to a single list document (used for shared lists from other users).
+ * @returns {Function} Unsubscribe function
+ */
+export const subscribeList = (ownerUid, listId, callback) => {
+  return onSnapshot(listDoc(ownerUid, listId), (snapshot) => {
+    if (snapshot.exists()) {
+      callback({ id: snapshot.id, ...snapshot.data() });
+    } else {
+      callback(null);
+    }
+  });
+};
+
+/**
+ * Subscribes to items in a list owned by any user (for shared list access).
+ * This is the cross-user variant of subscribeItems.
+ * @returns {Function} Unsubscribe function
+ */
+export const subscribeSharedItems = (ownerUid, listId, callback) => {
+  const q = query(itemsCol(ownerUid, listId), orderBy('addedAt', 'asc'));
+  return onSnapshot(q, (snapshot) => {
+    const items = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+    callback(items);
   });
 };
 
