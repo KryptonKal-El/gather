@@ -18,22 +18,52 @@ const CategoryGroup = ({
   onRemove,
   onUpdateCategory,
   onUpdateStore,
-}) => (
-  <>
-    {categoryOrder.map((cat) => {
-      const group = grouped[cat];
-      if (!group?.length) return null;
-      return (
-        <div key={cat} className={styles.group}>
+}) => {
+  const orderSet = new Set(categoryOrder);
+  const uncategorized = Object.keys(grouped)
+    .filter((key) => !orderSet.has(key))
+    .flatMap((key) => grouped[key]);
+
+  return (
+    <>
+      {categoryOrder.map((cat) => {
+        const group = grouped[cat];
+        if (!group?.length) return null;
+        return (
+          <div key={cat} className={styles.group}>
+            <h4 className={styles.categoryTitle}>
+              <span
+                className={styles.dot}
+                style={{ backgroundColor: allColors[cat] ?? '#9e9e9e' }}
+              />
+              {allLabels[cat] ?? cat}
+              <span className={styles.count}>{group.length}</span>
+            </h4>
+            {group.map((item) => (
+              <ShoppingItem
+                key={item.id}
+                item={item}
+                stores={stores}
+                onToggle={() => onToggle(item.id)}
+                onRemove={() => onRemove(item.id)}
+                onUpdateCategory={onUpdateCategory}
+                onUpdateStore={onUpdateStore}
+              />
+            ))}
+          </div>
+        );
+      })}
+      {uncategorized.length > 0 && (
+        <div className={styles.group}>
           <h4 className={styles.categoryTitle}>
             <span
               className={styles.dot}
-              style={{ backgroundColor: allColors[cat] ?? '#9e9e9e' }}
+              style={{ backgroundColor: '#9e9e9e' }}
             />
-            {allLabels[cat] ?? cat}
-            <span className={styles.count}>{group.length}</span>
+            Uncategorized
+            <span className={styles.count}>{uncategorized.length}</span>
           </h4>
-          {group.map((item) => (
+          {uncategorized.map((item) => (
             <ShoppingItem
               key={item.id}
               item={item}
@@ -45,10 +75,10 @@ const CategoryGroup = ({
             />
           ))}
         </div>
-      );
-    })}
-  </>
-);
+      )}
+    </>
+  );
+};
 
 /**
  * Groups items by category key. Returns an object keyed by category.
