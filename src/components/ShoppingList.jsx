@@ -18,6 +18,7 @@ const CategoryGroup = ({
   onRemove,
   onUpdateCategory,
   onUpdateStore,
+  onUpdateItem,
 }) => {
   const orderSet = new Set(categoryOrder);
   const uncategorized = Object.keys(grouped)
@@ -48,6 +49,7 @@ const CategoryGroup = ({
                 onRemove={() => onRemove(item.id)}
                 onUpdateCategory={onUpdateCategory}
                 onUpdateStore={onUpdateStore}
+                onUpdateItem={onUpdateItem}
               />
             ))}
           </div>
@@ -72,6 +74,7 @@ const CategoryGroup = ({
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
               onUpdateStore={onUpdateStore}
+              onUpdateItem={onUpdateItem}
             />
           ))}
         </div>
@@ -94,6 +97,24 @@ const groupByCategory = (items) => {
 };
 
 /**
+ * Computes the subtotal for a group of items (qty * price, skipping items without a price).
+ * @param {Array} items
+ * @returns {number|null} The subtotal, or null if no items have a price
+ */
+const computeSubtotal = (items) => {
+  let total = 0;
+  let hasAny = false;
+  for (const item of items) {
+    const price = item.price ?? null;
+    if (price !== null) {
+      total += (item.quantity ?? 1) * price;
+      hasAny = true;
+    }
+  }
+  return hasAny ? total : null;
+};
+
+/**
  * Displays the shopping list items grouped by store at the top level,
  * then by category within each store. Items without a store appear
  * in an "Unassigned" section. Checked items appear at the bottom.
@@ -108,6 +129,7 @@ export const ShoppingList = ({
   onRemove,
   onUpdateCategory,
   onUpdateStore,
+  onUpdateItem,
   onClearChecked,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -158,6 +180,7 @@ export const ShoppingList = ({
     onRemove,
     onUpdateCategory,
     onUpdateStore,
+    onUpdateItem,
   };
 
   return (
@@ -171,6 +194,7 @@ export const ShoppingList = ({
         const storeLabels = getAllCategoryLabels(storeCats);
         const storeColors = getAllCategoryColors(storeCats);
         const storeOrder = getAllCategoryKeys(storeCats);
+        const subtotal = computeSubtotal(storeItems);
         return (
           <div key={store.id} className={styles.storeSection}>
             <h3 className={styles.storeTitle}>
@@ -180,6 +204,9 @@ export const ShoppingList = ({
               />
               {store.name}
               <span className={styles.count}>{storeItems.length}</span>
+              {subtotal !== null && (
+                <span className={styles.subtotal}>{`$${subtotal.toFixed(2)}`}</span>
+              )}
             </h3>
             <div className={styles.storeBody}>
               <CategoryGroup
@@ -192,6 +219,7 @@ export const ShoppingList = ({
                 onRemove={onRemove}
                 onUpdateCategory={onUpdateCategory}
                 onUpdateStore={onUpdateStore}
+                onUpdateItem={onUpdateItem}
               />
             </div>
           </div>
@@ -245,6 +273,7 @@ export const ShoppingList = ({
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
               onUpdateStore={onUpdateStore}
+              onUpdateItem={onUpdateItem}
             />
           ))}
         </div>
@@ -260,6 +289,7 @@ ShoppingList.propTypes = {
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
   onUpdateStore: PropTypes.func.isRequired,
+  onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
 };
 

@@ -25,9 +25,9 @@ export const App = () => {
     activeList?.items ?? [],
   );
 
-  const handleAddItem = (name, storeId = null) => {
+  const handleAddItem = (name, storeId = null, quantity = 1, price = null) => {
     if (!activeList) return;
-    actions.addItem(activeList.id, name, storeId);
+    actions.addItem(activeList.id, name, storeId, quantity, price);
   };
 
   const handleAddItems = (items) => {
@@ -58,6 +58,11 @@ export const App = () => {
   const handleUpdateStore = (itemId, newStoreId) => {
     if (!activeList) return;
     actions.updateItem(activeList.id, itemId, { store: newStoreId });
+  };
+
+  const handleUpdateItem = (itemId, updates) => {
+    if (!activeList) return;
+    actions.updateItem(activeList.id, itemId, updates);
   };
 
   if (isLoading) {
@@ -110,6 +115,7 @@ export const App = () => {
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}
                 onUpdateStore={handleUpdateStore}
+                onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
               />
               <Suggestions suggestions={suggestions} onAdd={handleAddItem} />

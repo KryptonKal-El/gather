@@ -4,15 +4,19 @@ import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllC
 import styles from './ShoppingItem.module.css';
 
 /**
- * A single shopping list item row with checkbox, name, clickable category badge,
- * clickable store badge, and delete button.
- * The category picker shows the assigned store's categories (or global defaults).
+ * A single shopping list item row with checkbox, name, quantity, price,
+ * clickable category badge, clickable store badge, and delete button.
+ * Quantity and price are editable inline. The category picker shows
+ * the assigned store's categories (or global defaults).
  */
-export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore }) => {
+export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [priceValue, setPriceValue] = useState('');
   const categoryPickerRef = useRef(null);
   const storePickerRef = useRef(null);
+  const priceInputRef = useRef(null);
 
   const storeMap = {};
   for (const s of stores) {
@@ -64,6 +68,44 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     setIsStorePickerOpen(false);
   };
 
+  const qty = item.quantity ?? 1;
+  const price = item.price ?? null;
+  const lineTotal = price !== null ? qty * price : null;
+
+  const handleQtyChange = (delta) => {
+    const next = Math.max(1, qty + delta);
+    if (next !== qty) {
+      onUpdateItem(item.id, { quantity: next });
+    }
+  };
+
+  const handlePriceClick = () => {
+    setPriceValue(price !== null ? price.toFixed(2) : '');
+    setIsEditingPrice(true);
+  };
+
+  const commitPrice = () => {
+    setIsEditingPrice(false);
+    const parsed = parseFloat(priceValue);
+    const newPrice = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    if (newPrice !== price) {
+      onUpdateItem(item.id, { price: newPrice });
+    }
+  };
+
+  const handlePriceKeyDown = (e) => {
+    if (e.key === 'Enter') commitPrice();
+    if (e.key === 'Escape') setIsEditingPrice(false);
+  };
+
+  // Auto-focus the price input when entering edit mode
+  useEffect(() => {
+    if (isEditingPrice && priceInputRef.current) {
+      priceInputRef.current.focus();
+      priceInputRef.current.select();
+    }
+  }, [isEditingPrice]);
+
   return (
     <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
       <label className={styles.label}>
@@ -75,6 +117,55 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         />
         <span className={styles.name}>{item.name}</span>
       </label>
+      <div className={styles.meta}>
+        <div className={styles.qtyStepper}>
+          <button
+            type="button"
+            className={styles.qtyBtn}
+            onClick={() => handleQtyChange(-1)}
+            aria-label="Decrease quantity"
+          >
+            −
+          </button>
+          <span className={styles.qtyValue}>{qty}</span>
+          <button
+            type="button"
+            className={styles.qtyBtn}
+            onClick={() => handleQtyChange(1)}
+            aria-label="Increase quantity"
+          >
+            +
+          </button>
+        </div>
+        {isEditingPrice ? (
+          <div className={styles.priceEdit}>
+            <span className={styles.priceCurrency}>$</span>
+            <input
+              ref={priceInputRef}
+              className={styles.priceEditInput}
+              type="number"
+              min="0"
+              step="0.01"
+              value={priceValue}
+              onChange={(e) => setPriceValue(e.target.value)}
+              onBlur={commitPrice}
+              onKeyDown={handlePriceKeyDown}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={styles.priceDisplay}
+            onClick={handlePriceClick}
+            title="Set price"
+          >
+            {price !== null ? `$${price.toFixed(2)}` : '$–'}
+          </button>
+        )}
+        {lineTotal !== null && (
+          <span className={styles.lineTotal}>{`$${lineTotal.toFixed(2)}`}</span>
+        )}
+      </div>
       <div className={styles.badges}>
         {stores.length > 0 && (
           <div className={styles.storeWrapper} ref={storePickerRef}>
@@ -163,12 +254,15 @@ ShoppingItem.propTypes = {
     category: PropTypes.string.isRequired,
     isChecked: PropTypes.bool.isRequired,
     store: PropTypes.string,
+    quantity: PropTypes.number,
+    price: PropTypes.number,
   }).isRequired,
   stores: PropTypes.array,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
   onUpdateStore: PropTypes.func.isRequired,
+  onUpdateItem: PropTypes.func.isRequired,
 };
 
 ShoppingItem.defaultProps = {

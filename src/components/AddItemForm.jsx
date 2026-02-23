@@ -28,6 +28,8 @@ const getUniqueNames = (history) => {
 export const AddItemForm = ({ stores, history, onAdd }) => {
   const [value, setValue] = useState('');
   const [selectedStore, setSelectedStore] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [price, setPrice] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const wrapperRef = useRef(null);
@@ -71,8 +73,11 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
     e.preventDefault();
     const trimmed = value.trim();
     if (!trimmed) return;
-    onAdd(trimmed, selectedStore || null);
+    const parsedPrice = price === '' ? null : parseFloat(price);
+    onAdd(trimmed, selectedStore || null, quantity, Number.isFinite(parsedPrice) ? parsedPrice : null);
     setValue('');
+    setQuantity(1);
+    setPrice('');
     setIsDropdownOpen(false);
     setHighlightedIndex(-1);
   };
@@ -109,53 +114,111 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <div className={styles.inputWrapper} ref={wrapperRef}>
-        <input
-          className={styles.input}
-          type="text"
-          value={value}
-          onChange={handleInputChange}
-          onFocus={() => value.trim() && setIsDropdownOpen(true)}
-          onKeyDown={handleKeyDown}
-          placeholder="Add an item..."
-          aria-label="New item name"
-          autoComplete="off"
-        />
-        {showDropdown && (
-          <ul className={styles.dropdown} ref={listRef} role="listbox">
-            {suggestions.map((name, index) => (
-              <li
-                key={name}
-                role="option"
-                aria-selected={index === highlightedIndex}
-                className={`${styles.dropdownItem} ${index === highlightedIndex ? styles.highlighted : ''}`}
-                onMouseDown={() => handleSelect(name)}
-                onMouseEnter={() => setHighlightedIndex(index)}
-              >
-                {name}
-              </li>
-            ))}
-          </ul>
+      <div className={styles.topRow}>
+        <div className={styles.inputWrapper} ref={wrapperRef}>
+          <input
+            className={styles.input}
+            type="text"
+            value={value}
+            onChange={handleInputChange}
+            onFocus={() => value.trim() && setIsDropdownOpen(true)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add an item..."
+            aria-label="New item name"
+            autoComplete="off"
+          />
+          {showDropdown && (
+            <ul className={styles.dropdown} ref={listRef} role="listbox">
+              {suggestions.map((name, index) => (
+                <li
+                  key={name}
+                  role="option"
+                  aria-selected={index === highlightedIndex}
+                  className={`${styles.dropdownItem} ${index === highlightedIndex ? styles.highlighted : ''}`}
+                  onMouseDown={() => handleSelect(name)}
+                  onMouseEnter={() => setHighlightedIndex(index)}
+                >
+                  {name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <button className={styles.button} type="submit" disabled={!value.trim()}>
+          Add
+        </button>
+      </div>
+      <div className={styles.bottomRow}>
+        <div className={styles.qtyGroup}>
+          <label className={styles.fieldLabel} htmlFor="add-qty">Qty</label>
+          <div className={styles.stepper}>
+            <button
+              type="button"
+              className={styles.stepBtn}
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              aria-label="Decrease quantity"
+            >
+              −
+            </button>
+            <input
+              id="add-qty"
+              className={styles.qtyInput}
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(e) => {
+                const v = parseInt(e.target.value, 10);
+                setQuantity(Number.isFinite(v) && v >= 1 ? v : 1);
+              }}
+              aria-label="Quantity"
+            />
+            <button
+              type="button"
+              className={styles.stepBtn}
+              onClick={() => setQuantity((q) => q + 1)}
+              aria-label="Increase quantity"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div className={styles.priceGroup}>
+          <label className={styles.fieldLabel} htmlFor="add-price">Price</label>
+          <div className={styles.priceInputWrapper}>
+            <span className={styles.currencySymbol}>$</span>
+            <input
+              id="add-price"
+              className={styles.priceInput}
+              type="number"
+              min="0"
+              step="0.01"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="0.00"
+              aria-label="Price"
+            />
+          </div>
+        </div>
+        {stores.length > 0 && (
+          <div className={styles.storeGroup}>
+            <label className={styles.fieldLabel} htmlFor="add-store">Store</label>
+            <select
+              id="add-store"
+              className={styles.storeSelect}
+              value={selectedStore}
+              onChange={(e) => setSelectedStore(e.target.value)}
+              aria-label="Assign to store"
+            >
+              <option value="">No store</option>
+              {stores.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
+                </option>
+              ))}
+            </select>
+          </div>
         )}
       </div>
-      {stores.length > 0 && (
-        <select
-          className={styles.storeSelect}
-          value={selectedStore}
-          onChange={(e) => setSelectedStore(e.target.value)}
-          aria-label="Assign to store"
-        >
-          <option value="">No store</option>
-          {stores.map((store) => (
-            <option key={store.id} value={store.id}>
-              {store.name}
-            </option>
-          ))}
-        </select>
-      )}
-      <button className={styles.button} type="submit" disabled={!value.trim()}>
-        Add
-      </button>
     </form>
   );
 };
