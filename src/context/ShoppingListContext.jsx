@@ -188,9 +188,9 @@ export const ShoppingListProvider = ({ children }) => {
   // Actions
   // -----------------------------------------------------------------------
 
-  const createListAction = useCallback(async (name) => {
+  const createListAction = useCallback(async (name, emoji = null) => {
     if (!userId) return;
-    const newId = await fsCreateList(userId, name, userEmail);
+    const newId = await fsCreateList(userId, name, userEmail, emoji);
     setActiveListId(newId);
   }, [userId, userEmail]);
 
@@ -212,6 +212,15 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(id);
     await fsUpdateList(ownerUid, id, { name: newName });
+  }, [userId, getListOwnerUid]);
+
+  const updateListDetailsAction = useCallback(async (id, updates) => {
+    if (!userId) return;
+    const ownerUid = getListOwnerUid(id);
+    const allowed = {};
+    if (updates.name !== undefined) allowed.name = updates.name;
+    if (updates.emoji !== undefined) allowed.emoji = updates.emoji;
+    await fsUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 
   const selectListAction = useCallback((id) => {
@@ -354,6 +363,7 @@ export const ShoppingListProvider = ({ children }) => {
   const actions = {
     createList: createListAction,
     renameList: renameListAction,
+    updateListDetails: updateListDetailsAction,
     deleteList: deleteListAction,
     selectList: selectListAction,
     addItem: addItemAction,

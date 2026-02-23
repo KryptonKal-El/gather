@@ -107,7 +107,7 @@ export const App = () => {
             currentUserId={user.uid}
             onSelect={actions.selectList}
             onCreate={actions.createList}
-            onRename={actions.renameList}
+            onUpdateDetails={actions.updateListDetails}
             onDelete={actions.deleteList}
             onShareClick={isGuest ? undefined : (list) => setSharingListId(list.id)}
           />
@@ -116,7 +116,10 @@ export const App = () => {
         <section className={styles.content}>
           {activeList ? (
             <>
-              <h2 className={styles.listTitle}>{activeList.name}</h2>
+              <h2 className={styles.listTitle}>
+                {activeList.emoji && <span>{activeList.emoji} </span>}
+                {activeList.name}
+              </h2>
               <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
               <ShoppingList
                 items={activeList.items}

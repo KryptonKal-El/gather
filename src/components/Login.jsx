@@ -101,6 +101,46 @@ export const Login = () => {
         <p className={styles.tagline}>Smart grocery lists powered by AI</p>
 
         <div className={styles.buttons}>
+          <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
+            <input
+              type="email"
+              className={styles.emailInput}
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+            <input
+              type="password"
+              className={styles.emailInput}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
+              required
+              minLength={6}
+            />
+            <button
+              type="submit"
+              className={styles.emailBtn}
+              disabled={isSigningIn}
+            >
+              {isSignUpMode ? 'Create Account' : 'Sign In'}
+            </button>
+            <button
+              type="button"
+              className={styles.toggleMode}
+              onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
+            >
+              {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
+            </button>
+          </form>
+
+          <div className={styles.divider}>
+            <span>or</span>
+          </div>
+
           <button
             className={styles.appleBtn}
             onClick={handleApple}
@@ -142,46 +182,6 @@ export const Login = () => {
             </svg>
             Sign in with Google
           </button>
-
-          <div className={styles.divider}>
-            <span>or</span>
-          </div>
-
-          <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
-            <input
-              type="email"
-              className={styles.emailInput}
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-            />
-            <input
-              type="password"
-              className={styles.emailInput}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
-              required
-              minLength={6}
-            />
-            <button
-              type="submit"
-              className={styles.emailBtn}
-              disabled={isSigningIn}
-            >
-              {isSignUpMode ? 'Create Account' : 'Sign In'}
-            </button>
-            <button
-              type="button"
-              className={styles.toggleMode}
-              onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
-            >
-              {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
-            </button>
-          </form>
 
           <div className={styles.divider}>
             <span>or</span>

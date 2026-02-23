@@ -40,9 +40,10 @@ const sharedRefsCol = () => collection(db, 'sharedListRefs');
 // ---------------------------------------------------------------------------
 
 /** Creates a new shopping list document. Returns the generated ID. */
-export const createList = async (userId, name, ownerEmail = null) => {
+export const createList = async (userId, name, ownerEmail = null, emoji = null) => {
   const ref = await addDoc(listsCol(userId), {
     name,
+    emoji: emoji ?? null,
     itemCount: 0,
     ownerUid: userId,
     ownerEmail: ownerEmail ?? null,

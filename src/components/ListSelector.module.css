@@ -118,13 +118,19 @@
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
   padding: 0.6rem 0.75rem;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   min-width: 0;
+}
+
+.listEmoji {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .listName {
@@ -138,13 +144,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
 .listCount {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--text-placeholder);
   white-space: nowrap;
-  margin-left: 0.5rem;
+  background: var(--bg-hover);
+  padding: 0.15rem 0.45rem;
+  border-radius: 10px;
+  flex-shrink: 0;
 }
 
 .sharedBadge {
@@ -158,83 +168,143 @@
   flex-shrink: 0;
 }
 
-.shareBtn {
+/* Three-dot menu */
+.menuWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuBtn {
   background: none;
   border: none;
   color: var(--text-icon);
-  font-size: 0.8rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.4rem;
+  padding: 0.3rem 0.45rem;
   border-radius: 4px;
-  transition: color 0.1s;
+  transition: color 0.1s, background 0.1s;
   line-height: 1;
 }
 
-.deleteBtn {
-  background: none;
-  border: none;
-  color: var(--text-icon);
-  font-size: 0.9rem;
-  cursor: pointer;
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
-  transition: color 0.1s;
+.menuBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover-strong);
 }
 
-.editBtn {
-  background: none;
-  border: none;
-  color: var(--text-icon);
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0.4rem;
-  border-radius: 4px;
-  transition: color 0.1s;
-}
-
-/* On devices with hover capability, hide buttons until row hover */
 @media (hover: hover) {
-  .shareBtn,
-  .deleteBtn,
-  .editBtn {
+  .menuBtn {
     color: transparent;
   }
 
-  .listItem:hover .deleteBtn,
-  .listItem:hover .editBtn,
-  .listItem:hover .shareBtn {
+  .listItem:hover .menuBtn {
     color: var(--text-icon);
   }
 }
 
-.editBtn:hover {
-  color: var(--text-tertiary);
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 100;
+  min-width: 160px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--overlay-light);
+  padding: 0.25rem 0;
+  overflow: hidden;
 }
 
-.shareBtn:hover {
-  color: var(--info);
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
 }
 
-.deleteBtn:hover {
+.menuItem:hover {
+  background: var(--bg-hover);
+}
+
+.menuDanger {
   color: var(--danger);
 }
 
+.menuDanger:hover {
+  background: var(--danger-tint);
+}
+
+.menuIcon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Edit row (Name & Icon mode) */
 .editRow {
   flex: 1;
-  padding: 0.3rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
 }
 
 .editInput {
-  width: 100%;
+  flex: 1;
   padding: 0.4rem 0.6rem;
   border: 2px solid var(--primary);
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-input);
   outline: none;
   box-sizing: border-box;
+  min-width: 0;
+}
+
+.saveBtn {
+  padding: 0.35rem 0.65rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.saveBtn:hover {
+  background: var(--primary-hover);
+}
+
+.cancelBtn {
+  padding: 0.35rem 0.55rem;
+  background: none;
+  color: var(--text-placeholder);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.cancelBtn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
 }
 
 .sectionHeader {
