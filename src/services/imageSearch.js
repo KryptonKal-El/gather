@@ -1,31 +1,29 @@
 /**
- * Google Custom Search image service.
- * Uses the Google Custom Search JSON API to find images by keyword.
- * Requires VITE_GOOGLE_CSE_API_KEY and VITE_GOOGLE_CSE_ID environment variables.
+ * SerpAPI Google Images search service.
+ * Uses SerpAPI to retrieve Google Image results by keyword.
+ * Requires VITE_SERPAPI_KEY environment variable.
  */
 
-const API_KEY = import.meta.env.VITE_GOOGLE_CSE_API_KEY ?? '';
-const CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID ?? '';
-const BASE_URL = 'https://www.googleapis.com/customsearch/v1';
+const API_KEY = import.meta.env.VITE_SERPAPI_KEY ?? '';
+const BASE_URL = 'https://serpapi.com/search.json';
 
 /**
- * Searches Google Images for photos matching the query.
+ * Searches Google Images via SerpAPI for photos matching the query.
  * @param {string} query - The search term
- * @param {number} [count=8] - Number of results to return (max 10)
+ * @param {number} [count=8] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
  */
 export const searchImages = async (query, count = 8) => {
-  if (!API_KEY || !CSE_ID) {
-    console.warn('Image search unavailable: missing VITE_GOOGLE_CSE_API_KEY or VITE_GOOGLE_CSE_ID');
+  if (!API_KEY) {
+    console.warn('Image search unavailable: missing VITE_SERPAPI_KEY');
     return [];
   }
 
   const params = new URLSearchParams({
-    key: API_KEY,
-    cx: CSE_ID,
+    engine: 'google_images',
     q: query,
-    searchType: 'image',
-    num: String(Math.min(count, 10)),
+    api_key: API_KEY,
+    num: String(count),
     safe: 'active',
   });
 
@@ -37,11 +35,11 @@ export const searchImages = async (query, count = 8) => {
   }
 
   const data = await res.json();
-  const items = data.items ?? [];
+  const results = data.images_results ?? [];
 
-  return items.map((item) => ({
-    url: item.link,
-    thumbnail: item.image?.thumbnailLink ?? item.link,
-    title: item.title ?? '',
+  return results.slice(0, count).map((img) => ({
+    url: img.original,
+    thumbnail: img.thumbnail,
+    title: img.title ?? '',
   }));
 };
