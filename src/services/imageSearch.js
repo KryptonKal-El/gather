@@ -1,45 +1,35 @@
 /**
- * SerpAPI Google Images search service.
- * Uses SerpAPI to retrieve Google Image results by keyword.
- * Requires VITE_SERPAPI_KEY environment variable.
+ * Image search service.
+ * Calls the Cloud Function proxy which forwards requests to SerpAPI.
+ * In development, falls back to calling SerpAPI directly via the Vite dev proxy.
  */
 
-const API_KEY = import.meta.env.VITE_SERPAPI_KEY ?? '';
-const BASE_URL = 'https://serpapi.com/search.json';
-
 /**
- * Searches Google Images via SerpAPI for photos matching the query.
+ * Searches Google Images for photos matching the query.
+ * Uses the `/api/searchImages` endpoint which routes to a Firebase Cloud Function
+ * in production, avoiding CORS issues with third-party APIs.
  * @param {string} query - The search term
  * @param {number} [count=8] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
  */
 export const searchImages = async (query, count = 8) => {
-  if (!API_KEY) {
-    console.warn('Image search unavailable: missing VITE_SERPAPI_KEY');
-    return [];
-  }
-
   const params = new URLSearchParams({
-    engine: 'google_images',
     q: query,
-    api_key: API_KEY,
     num: String(count),
-    safe: 'active',
   });
 
-  const res = await fetch(`${BASE_URL}?${params}`);
+  try {
+    const res = await fetch(`/api/searchImages?${params}`);
 
-  if (!res.ok) {
-    console.error(`Image search failed: ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      console.error(`Image search failed: ${res.status} ${res.statusText}`);
+      return [];
+    }
+
+    const data = await res.json();
+    return data.results ?? [];
+  } catch (err) {
+    console.error('Image search error:', err);
     return [];
   }
-
-  const data = await res.json();
-  const results = data.images_results ?? [];
-
-  return results.slice(0, count).map((img) => ({
-    url: img.original,
-    thumbnail: img.thumbnail,
-    title: img.title ?? '',
-  }));
 };
