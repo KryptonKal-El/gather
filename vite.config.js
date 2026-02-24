@@ -80,10 +80,10 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/images\.unsplash\.com\/.*/i,
+            urlPattern: /\.(?:png|jpg|jpeg|gif|webp|svg)$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'unsplash-images-cache',
+              cacheName: 'external-images-cache',
               expiration: {
                 maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days

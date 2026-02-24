@@ -1,38 +1,35 @@
 /**
- * Unsplash image search service.
- * Uses the Unsplash API to find photos by keyword.
- * Requires VITE_UNSPLASH_ACCESS_KEY environment variable.
- *
- * Per Unsplash guidelines, returned image URLs must be hotlinked directly
- * (not downloaded and re-hosted), and photographer attribution should be shown.
+ * Google Custom Search image service.
+ * Uses the Google Custom Search JSON API to find images by keyword.
+ * Requires VITE_GOOGLE_CSE_API_KEY and VITE_GOOGLE_CSE_ID environment variables.
  */
 
-const ACCESS_KEY = import.meta.env.VITE_UNSPLASH_ACCESS_KEY ?? '';
-const BASE_URL = 'https://api.unsplash.com/search/photos';
+const API_KEY = import.meta.env.VITE_GOOGLE_CSE_API_KEY ?? '';
+const CSE_ID = import.meta.env.VITE_GOOGLE_CSE_ID ?? '';
+const BASE_URL = 'https://www.googleapis.com/customsearch/v1';
 
 /**
- * Searches Unsplash for photos matching the query.
+ * Searches Google Images for photos matching the query.
  * @param {string} query - The search term
- * @param {number} [count=8] - Number of results to return (max 30)
- * @returns {Promise<Array<{ url: string, thumbnail: string, title: string, photographer: string, profileUrl: string }>>}
+ * @param {number} [count=8] - Number of results to return (max 10)
+ * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
  */
 export const searchImages = async (query, count = 8) => {
-  if (!ACCESS_KEY) {
-    console.warn('Image search unavailable: missing VITE_UNSPLASH_ACCESS_KEY');
+  if (!API_KEY || !CSE_ID) {
+    console.warn('Image search unavailable: missing VITE_GOOGLE_CSE_API_KEY or VITE_GOOGLE_CSE_ID');
     return [];
   }
 
   const params = new URLSearchParams({
-    query,
-    per_page: String(Math.min(count, 30)),
-    content_filter: 'high',
+    key: API_KEY,
+    cx: CSE_ID,
+    q: query,
+    searchType: 'image',
+    num: String(Math.min(count, 10)),
+    safe: 'active',
   });
 
-  const res = await fetch(`${BASE_URL}?${params}`, {
-    headers: {
-      Authorization: `Client-ID ${ACCESS_KEY}`,
-    },
-  });
+  const res = await fetch(`${BASE_URL}?${params}`);
 
   if (!res.ok) {
     console.error(`Image search failed: ${res.status} ${res.statusText}`);
@@ -40,13 +37,11 @@ export const searchImages = async (query, count = 8) => {
   }
 
   const data = await res.json();
-  const results = data.results ?? [];
+  const items = data.items ?? [];
 
-  return results.map((photo) => ({
-    url: photo.urls?.small ?? photo.urls?.regular,
-    thumbnail: photo.urls?.thumb ?? photo.urls?.small,
-    title: photo.alt_description ?? photo.description ?? '',
-    photographer: photo.user?.name ?? '',
-    profileUrl: photo.user?.links?.html ?? '',
+  return items.map((item) => ({
+    url: item.link,
+    thumbnail: item.image?.thumbnailLink ?? item.link,
+    title: item.title ?? '',
   }));
 };

@@ -211,36 +211,6 @@
   display: block;
 }
 
-.credit {
-  font-size: 0.6rem;
-  color: var(--text-placeholder);
-  text-decoration: none;
-  text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.credit:hover {
-  color: var(--text-secondary);
-  text-decoration: underline;
-}
-
-.unsplashCredit {
-  font-size: 0.7rem;
-  color: var(--text-faint);
-  text-align: center;
-  margin: 0.5rem 0 0;
-}
-
-.unsplashCredit a {
-  color: var(--text-hint);
-  text-decoration: underline;
-}
-
-.unsplashCredit a:hover {
-  color: var(--text-primary);
-}
 
 .noResults {
   color: var(--text-hint);

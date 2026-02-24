@@ -136,35 +136,20 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
             {error && <p className={styles.error}>{error}</p>}
 
             {results.length > 0 && (
-              <>
-                <div className={styles.grid}>
-                  {results.map((img, index) => (
-                    <div key={`${img.url}-${index}`} className={styles.gridCell}>
-                      <button
-                        type="button"
-                        className={styles.gridItem}
-                        onClick={() => onSelectUrl(img.url)}
-                        title={img.title}
-                      >
-                        <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />
-                      </button>
-                      {img.photographer && (
-                        <a
-                          href={`${img.profileUrl}?utm_source=shoppinglistai&utm_medium=referral`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.credit}
-                        >
-                          {img.photographer}
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <p className={styles.unsplashCredit}>
-                  Photos by <a href="https://unsplash.com/?utm_source=shoppinglistai&utm_medium=referral" target="_blank" rel="noopener noreferrer">Unsplash</a>
-                </p>
-              </>
+              <div className={styles.grid}>
+                {results.map((img, index) => (
+                  <div key={`${img.url}-${index}`} className={styles.gridCell}>
+                    <button
+                      type="button"
+                      className={styles.gridItem}
+                      onClick={() => onSelectUrl(img.url)}
+                      title={img.title}
+                    >
+                      <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
 
             {hasSearched && results.length === 0 && !isSearching && !error && (
