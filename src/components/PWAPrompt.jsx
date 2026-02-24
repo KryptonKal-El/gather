@@ -15,6 +15,9 @@ export const PWAPrompt = () => {
 
   const handleUpdate = () => {
     updateServiceWorker(true);
+    // Force reload after a short delay — updateServiceWorker's promise
+    // may never resolve if the controllerchange event doesn't fire
+    setTimeout(() => window.location.reload(), 1000);
   };
 
   const handleDismiss = () => {
