@@ -112,30 +112,15 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     }
   };
 
-  const handleEditToggle = (openPicker) => {
-    if (isEditOpen && !openPicker) {
+  const handleEditToggle = () => {
+    if (isEditOpen) {
       commitName();
       commitPrice();
       setIsEditOpen(false);
-    } else if (!isEditOpen) {
+    } else {
       setNameValue(item.name);
       setPriceValue(price !== null ? price.toFixed(2) : '');
       setIsEditOpen(true);
-      if (openPicker === 'store') {
-        setIsStorePickerOpen(true);
-        setIsCategoryPickerOpen(false);
-      } else if (openPicker === 'category') {
-        setIsCategoryPickerOpen(true);
-        setIsStorePickerOpen(false);
-      }
-    } else if (isEditOpen && openPicker) {
-      if (openPicker === 'store') {
-        setIsStorePickerOpen(!isStorePickerOpen);
-        setIsCategoryPickerOpen(false);
-      } else if (openPicker === 'category') {
-        setIsCategoryPickerOpen(!isCategoryPickerOpen);
-        setIsStorePickerOpen(false);
-      }
     }
   };
 
@@ -180,14 +165,8 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
             <span className={styles.thumbnailPlaceholder}>+</span>
           )}
         </button>
-        <div className={styles.details}>
-          <span
-            className={styles.label}
-            onClick={onToggle}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
-          >
+        <div className={styles.details} onDoubleClick={onToggle}>
+          <span className={styles.label}>
             <span className={styles.name}>
               {item.name}
               {qty > 1 && <span className={styles.qty}> ({qty})</span>}
@@ -195,34 +174,27 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
           </span>
           <div className={styles.badges}>
             {assignedStore && (
-              <button
-                type="button"
-                className={styles.storeBadgeCompact}
-                style={{ backgroundColor: assignedStore.color }}
-                onClick={(e) => { e.stopPropagation(); handleEditToggle('store'); }}
-              >
+              <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
                 {assignedStore.name}
-              </button>
+              </span>
             )}
             {item.category && (
-              <button
-                type="button"
+              <span
                 className={styles.categoryCompact}
                 style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
-                onClick={(e) => { e.stopPropagation(); handleEditToggle('category'); }}
               >
                 {allLabels[item.category] ?? 'Other'}
-              </button>
+              </span>
             )}
           </div>
         </div>
-        <span className={styles.price}>
+        <span className={styles.price} onDoubleClick={onToggle}>
           {lineTotal !== null ? `$${lineTotal.toFixed(2)}` : '$–'}
         </span>
         <button
           type="button"
           className={styles.editBtn}
-          onClick={() => handleEditToggle()}
+          onClick={handleEditToggle}
           aria-label="Edit item"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
