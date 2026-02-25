@@ -7,7 +7,9 @@
       "title": "Three-dot menu popup clipped — cannot escape slide container overflow",
       "description": "On the My Lists screen (mobile), tapping the three-dot menu on a list item opens a dropdown that is clipped and not fully visible. The dropdown is cut off at the boundary of the slide container rather than rendering on top of surrounding content.",
       "severity": "high",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-02-25",
+      "resolvedCommit": "33a4ab9",
       "affectedComponents": [
         "src/App.module.css",
         "src/components/ListSelector.jsx",
@@ -43,7 +45,9 @@
       "title": "Simplify mobile header — remove all controls and logo text",
       "description": "On mobile (≤700px), the header should be a slim, empty bar that serves as a container for contextual actions only (e.g., '+' for new list, share button on detail view). Currently it still shows the app logo, username, ThemeToggle, and Sign Out button. Username/ThemeToggle/Sign Out now live in the Settings tab. The logo text is unnecessary on mobile and wastes vertical space. Desktop header should remain unchanged (logo + username + ThemeToggle + Sign Out).",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-02-25",
+      "resolvedCommit": "1c70544",
       "affectedComponents": [
         "src/App.jsx",
         "src/App.module.css"

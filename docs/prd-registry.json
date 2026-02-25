@@ -20,6 +20,17 @@
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
       "updatedAt": "2026-02-25"
+    },
+    {
+      "id": "prd-native-emoji-picker",
+      "name": "Native Emoji Picker",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-native-emoji-picker.md",
+      "jsonPath": "docs/prds/prd-native-emoji-picker.json",
+      "branchName": "feature/native-emoji-picker",
+      "createdAt": "2026-02-25",
+      "updatedAt": "2026-02-25",
+      "startedAt": "2026-02-25T20:00:00Z"
     }
   ]
 }

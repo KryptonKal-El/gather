@@ -1,91 +1,93 @@
 /**
  * Emoji picker for selecting a list icon.
- * Uses emoji-mart for the full native emoji set with search, categories, and skin tones.
+ * On desktop: custom emoji grid picker with search and categories.
+ * On mobile: native text input that invokes the OS emoji keyboard.
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import data from '@emoji-mart/data';
-import { Picker } from 'emoji-mart';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { DesktopEmojiPicker } from './DesktopEmojiPicker.jsx';
 import styles from './EmojiPicker.module.css';
+
+const extractEmoji = (str) => {
+  const emojiRegex = /(?:\p{Extended_Pictographic}(?:\uFE0F)?(?:\u200D\p{Extended_Pictographic}(?:\uFE0F)?)*)/u;
+  const match = str.match(emojiRegex);
+  return match ? match[0] : null;
+};
 
 /**
  * @param {{ value: string|null, onSelect: (emoji: string|null) => void }} props
  */
 export const EmojiPicker = ({ value, onSelect }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef(null);
-  const pickerRef = useRef(null);
+  const [triggerRect, setTriggerRect] = useState(null);
+  const triggerRef = useRef(null);
+  const mobileInputRef = useRef(null);
+  const isMobile = useIsMobile();
 
-  const handleSelect = useCallback((emoji) => {
-    onSelect(emoji.native);
-    setIsOpen(false);
+  const handleOpen = () => {
+    if (!isOpen && triggerRef.current) {
+      setTriggerRect(triggerRef.current.getBoundingClientRect());
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleMobileInput = useCallback((e) => {
+    const emoji = extractEmoji(e.target.value);
+    if (emoji) {
+      onSelect(emoji);
+      setIsOpen(false);
+    } else {
+      e.target.value = '';
+    }
   }, [onSelect]);
 
-  const handleClear = useCallback(() => {
-    onSelect(null);
+  const handleMobileBlur = useCallback(() => {
     setIsOpen(false);
-  }, [onSelect]);
+  }, []);
 
-  // Mount/unmount emoji-mart picker
   useEffect(() => {
-    if (!isOpen || !pickerRef.current) return;
-
-    // Clear previous picker content
-    pickerRef.current.innerHTML = '';
-
-    const picker = new Picker({
-      data,
-      onEmojiSelect: handleSelect,
-      theme: 'auto',
-      set: 'native',
-      previewPosition: 'none',
-      skinTonePosition: 'search',
-      autoFocus: true,
-      perLine: 8,
-      maxFrequentRows: 2,
-    });
-
-    pickerRef.current.appendChild(picker);
-
-    return () => {
-      if (pickerRef.current) {
-        pickerRef.current.innerHTML = '';
-      }
-    };
-  }, [isOpen, handleSelect]);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleClickOutside = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+    if (isOpen && isMobile && mobileInputRef.current) {
+      mobileInputRef.current.focus();
+    }
+  }, [isOpen, isMobile]);
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={styles.container}>
       <button
+        ref={triggerRef}
         type="button"
         className={styles.trigger}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleOpen}
         aria-label="Pick emoji icon"
       >
         {value || '😀'}
       </button>
 
-      {isOpen && (
-        <div className={styles.dropdown}>
-          <div ref={pickerRef} />
-          {value && (
-            <button type="button" className={styles.clearBtn} onClick={handleClear}>
-              Remove icon
-            </button>
-          )}
+      {isOpen && isMobile && (
+        <div className={styles.mobileDropdown}>
+          <input
+            ref={mobileInputRef}
+            type="text"
+            inputMode="text"
+            className={styles.mobileInput}
+            placeholder="Tap 😊 on keyboard"
+            onChange={handleMobileInput}
+            onBlur={handleMobileBlur}
+            aria-label="Select emoji from keyboard"
+          />
         </div>
+      )}
+
+      {isOpen && !isMobile && triggerRect && (
+        <DesktopEmojiPicker
+          triggerRect={triggerRect}
+          onSelect={(emoji) => {
+            onSelect(emoji);
+            setIsOpen(false);
+          }}
+          onClose={() => setIsOpen(false)}
+        />
       )}
     </div>
   );
