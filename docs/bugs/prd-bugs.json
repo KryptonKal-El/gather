@@ -1,0 +1,38 @@
+{
+  "$schema": "https://opencode.ai/prd-bugs.json",
+  "project": "ShoppingListAI",
+  "bugs": [
+    {
+      "id": "BUG-002",
+      "title": "Mobile header still shows username, ThemeToggle, and Sign Out",
+      "description": "On mobile (≤700px), the header still displays the username, ThemeToggle button, and Sign Out button. These controls now live in the Settings tab (MobileSettings component) and should be hidden from the mobile header. Desktop header should remain unchanged.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.jsx",
+        "src/App.module.css"
+      ],
+      "affectedPlatforms": ["mobile"],
+      "rootCause": "The header JSX in App.jsx (lines 265-276) renders `.headerRight` with username, ThemeToggle, and Sign Out unconditionally. There is no `isMobile` conditional to hide these on mobile. The mobile header should only show the logo (left) and optionally a contextual action (right).",
+      "reproductionSteps": [
+        "Open the app on mobile (≤700px viewport) or resize browser",
+        "Log in with any account",
+        "Observe the header — username, dark mode toggle, and Sign Out button are still visible",
+        "These same controls are also in the Settings tab, making them redundant on mobile"
+      ],
+      "suggestedFix": "In App.jsx, conditionally render the `.headerRight` div only when `!isMobile`. The `isMobile` hook is already imported and available. On mobile, the header should show only the logo. Example:\n\n```jsx\n<header className={styles.header}>\n  <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>\n  {!isMobile && (\n    <div className={styles.headerRight}>\n      <span className={styles.userName}>{isGuest ? 'Guest' : user.displayName ?? user.email}</span>\n      <ThemeToggle />\n      <button className={styles.signOutBtn} onClick={signOut} type=\"button\">Sign out</button>\n    </div>\n  )}\n</header>\n```\n\nAlternatively, hide via CSS with `display: none` on `.headerRight` at `max-width: 700px`, but the JSX approach is cleaner since it avoids rendering unused components.",
+      "acceptanceCriteria": [
+        "On mobile (≤700px), the header shows only the logo — no username, ThemeToggle, or Sign Out",
+        "On desktop (≥701px), the header continues to show logo, username, ThemeToggle, and Sign Out (no change)",
+        "The Settings tab on mobile still works with dark mode toggle and sign out",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-ios-mobile-nav",
+      "reportedAt": "2026-02-25",
+      "occurrences": 1,
+      "priority": "high",
+      "notes": "This was specified in the original PRD goals ('Simplify the mobile header: logo left, contextual action right — remove username, theme toggle, and sign out') and in US-007 acceptance criteria ('On desktop, the header retains the existing theme toggle, username, and sign out button'). The implementation missed this detail."
+    }
+  ]
+}
