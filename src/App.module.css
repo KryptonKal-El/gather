@@ -238,14 +238,14 @@
 
 @media (max-width: 700px) {
   .app {
+    padding-top: env(safe-area-inset-top, 0);
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
     padding-left: max(1rem, env(safe-area-inset-left, 0));
     padding-right: max(1rem, env(safe-area-inset-right, 0));
   }
 
   .header {
-    padding: env(safe-area-inset-top, 0) 0 0;
-    min-height: 0;
+    display: none;
   }
 
   .main {
@@ -267,11 +267,8 @@
 @media (max-width: 480px) {
   .app {
     padding: 0.5rem;
+    padding-top: env(safe-area-inset-top, 0);
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
-  }
-
-  .header {
-    padding: 1rem 0 0.75rem;
   }
 
   .logo {

@@ -76,5 +76,36 @@
       "priority": "high",
       "notes": "Combines two pieces of feedback: (1) username/ThemeToggle/Sign Out are redundant with Settings tab, (2) logo text wastes vertical space on mobile. The header bar itself should remain for future contextual actions but render empty/slim on mobile."
     }
+    ,
+    {
+      "id": "BUG-003",
+      "title": "Mobile header still takes up vertical space — hide it completely",
+      "description": "On mobile (≤700px), the header element still renders as an empty bar occupying vertical space even though its contents were removed in BUG-002. The header should be completely hidden on mobile via `display: none` so it doesn't waste any screen real estate. Desktop header remains unchanged.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.module.css"
+      ],
+      "affectedPlatforms": ["mobile"],
+      "rootCause": "BUG-002 removed the header contents on mobile using conditional JSX (`{!isMobile && (...)}`), but the `<header>` element itself still renders. The ≤700px media query at line 246 sets `min-height: 0` and `padding: env(safe-area-inset-top, 0)` — but the ≤480px media query at line 273 overrides with `padding: 1rem 0 0.75rem`, adding visible vertical space for the empty header. Even without the 480px override, the empty element still takes up some space.",
+      "reproductionSteps": [
+        "Open the app on mobile (≤700px viewport)",
+        "Log in with any account",
+        "Observe: there is an empty gap at the top of the screen where the header bar is rendered but contains nothing"
+      ],
+      "suggestedFix": "Add `display: none` to the `.header` rule inside the ≤700px media query in App.module.css. This completely removes it from layout on mobile.\n\n```css\n/* Inside @media (max-width: 700px) */\n.header {\n  display: none;\n}\n```\n\nAlso remove or guard the ≤480px `.header` padding override (line 273) since it's no longer needed when the header is hidden on mobile.\n\nNote: The safe-area-inset-top padding previously on `.header` should be moved to `.app` if not already there, to preserve status bar spacing on PWA/notched devices.",
+      "acceptanceCriteria": [
+        "On mobile (≤700px), the header element is not visible and takes up zero vertical space",
+        "Safe-area-inset-top spacing is preserved for PWA/notched devices (applied to .app or another container if needed)",
+        "On desktop (≥701px), the header is fully visible with logo, username, ThemeToggle, and Sign Out (no change)",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-ios-mobile-nav",
+      "reportedAt": "2026-02-25",
+      "occurrences": 1,
+      "priority": "high",
+      "notes": "Follow-up to BUG-002 which removed header contents but left the empty element visible."
+    }
   ]
 }
