@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opencode.ai/prd-registry.json",
+  "prds": [
+    {
+      "id": "prd-ios-mobile-nav",
+      "name": "iOS-Style Mobile Navigation",
+      "status": "completed",
+      "filePath": "docs/prds/prd-ios-mobile-nav.md",
+      "jsonPath": "docs/prds/prd-ios-mobile-nav.json",
+      "branchName": "feature/ios-mobile-nav",
+      "createdAt": "2026-02-25",
+      "updatedAt": "2026-02-25",
+      "startedAt": "2026-02-25T12:00:00Z",
+      "completedAt": "2026-02-25T18:00:00Z"
+    },
+    {
+      "id": "prd-bugs",
+      "name": "Bug Fixes",
+      "status": "ready",
+      "filePath": "docs/bugs/prd-bugs.json",
+      "createdAt": "2026-02-25",
+      "updatedAt": "2026-02-25"
+    }
+  ]
+}

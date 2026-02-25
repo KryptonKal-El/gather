@@ -309,6 +309,13 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
 /**
  * Panel for managing stores: create, rename, delete, pick color, reorder,
  * and manage categories per store.
+ * @param {Object} props
+ * @param {Array} props.stores - List of store objects.
+ * @param {Function} props.onAdd - Callback to add a new store.
+ * @param {Function} props.onUpdate - Callback to update a store.
+ * @param {Function} props.onDelete - Callback to delete a store.
+ * @param {Function} props.onReorder - Callback to reorder stores.
+ * @param {boolean} [props.alwaysOpen=false] - If true, skip toggle and show content immediately.
  */
 export const StoreManager = ({
   stores,
@@ -316,6 +323,7 @@ export const StoreManager = ({
   onUpdate,
   onDelete,
   onReorder,
+  alwaysOpen = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [newName, setNewName] = useState('');
@@ -374,18 +382,25 @@ export const StoreManager = ({
     setCatExpandedId((prev) => (prev === storeId ? null : storeId));
   };
 
-  return (
-    <div className={styles.container}>
-      <button
-        className={styles.toggle}
-        onClick={() => setIsOpen(!isOpen)}
-        type="button"
-      >
-        <span className={styles.toggleIcon}>{isOpen ? '\u2212' : '+'}</span>
-        Manage Stores
-      </button>
+  const showPanel = alwaysOpen || isOpen;
+  const containerClass = alwaysOpen
+    ? `${styles.container} ${styles.containerFullScreen}`
+    : styles.container;
 
-      {isOpen && (
+  return (
+    <div className={containerClass}>
+      {!alwaysOpen && (
+        <button
+          className={styles.toggle}
+          onClick={() => setIsOpen(!isOpen)}
+          type="button"
+        >
+          <span className={styles.toggleIcon}>{isOpen ? '\u2212' : '+'}</span>
+          Manage Stores
+        </button>
+      )}
+
+      {showPanel && (
         <div className={styles.panel}>
           <div className={styles.section}>
             <h4 className={styles.sectionTitle}>
@@ -576,4 +591,5 @@ StoreManager.propTypes = {
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onReorder: PropTypes.func.isRequired,
+  alwaysOpen: PropTypes.bool,
 };

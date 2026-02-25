@@ -109,7 +109,145 @@
   margin-bottom: 0.5rem;
 }
 
+.mobileFullScreen {
+  width: 100%;
+}
+
+.mobileTitle {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: none;
+  border: none;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  text-decoration: underline;
+}
+
+.placeholder {
+  color: var(--text-placeholder);
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* Slide transition container for iOS-style push/pop navigation */
+.slideContainer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.listScreen,
+.detailScreen {
+  width: 100%;
+}
+
+.listScreen.hidden,
+.detailScreen.hidden {
+  display: none;
+}
+
+/* During transitions, both screens are absolutely positioned */
+.listScreen.pushing,
+.listScreen.popping,
+.detailScreen.pushing,
+.detailScreen.popping {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+/* Push animation: list slides left to -30%, detail slides in from 100% to 0 */
+.listScreen.pushing {
+  animation: slideOutLeft 300ms ease-out forwards;
+}
+
+.detailScreen.pushing {
+  animation: slideInFromRight 300ms ease-out forwards;
+}
+
+/* Pop animation: detail slides out to 100%, list slides back from -30% to 0 */
+.listScreen.popping {
+  animation: slideInFromLeft 300ms ease-out forwards;
+}
+
+.detailScreen.popping {
+  animation: slideOutRight 300ms ease-out forwards;
+}
+
+@keyframes slideOutLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-30%);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-30%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Reduced motion: disable animations for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .listScreen.pushing,
+  .listScreen.popping,
+  .detailScreen.pushing,
+  .detailScreen.popping {
+    animation: none;
+  }
+}
+
 @media (max-width: 700px) {
+  .app {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
+    padding-left: max(1rem, env(safe-area-inset-left, 0));
+    padding-right: max(1rem, env(safe-area-inset-right, 0));
+  }
+
+  .header {
+    padding: env(safe-area-inset-top, 0) 0 0;
+    min-height: 0;
+  }
+
   .main {
     flex-direction: column;
   }
@@ -120,9 +258,16 @@
   }
 }
 
+@media (display-mode: standalone) {
+  .app {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
 @media (max-width: 480px) {
   .app {
     padding: 0.5rem;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
   }
 
   .header {

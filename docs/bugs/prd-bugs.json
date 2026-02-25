@@ -1,0 +1,40 @@
+{
+  "$schema": "https://opencode.ai/prd-bugs.json",
+  "project": "ShoppingListAI",
+  "bugs": [
+    {
+      "id": "BUG-002",
+      "title": "Simplify mobile header — remove all controls and logo text",
+      "description": "On mobile (≤700px), the header should be a slim, empty bar that serves as a container for contextual actions only (e.g., '+' for new list, share button on detail view). Currently it still shows the app logo, username, ThemeToggle, and Sign Out button. Username/ThemeToggle/Sign Out now live in the Settings tab. The logo text is unnecessary on mobile and wastes vertical space. Desktop header should remain unchanged (logo + username + ThemeToggle + Sign Out).",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.jsx",
+        "src/App.module.css"
+      ],
+      "affectedPlatforms": ["mobile"],
+      "rootCause": "The header JSX in App.jsx (lines 265-276) renders the logo, username, ThemeToggle, and Sign Out unconditionally with no mobile-specific conditional rendering. The `isMobile` hook is already imported but not used in the header.",
+      "reproductionSteps": [
+        "Open the app on mobile (≤700px viewport) or resize browser",
+        "Log in with any account",
+        "Observe the header — logo, username, dark mode toggle, and Sign Out button are all visible",
+        "These controls are redundant with the Settings tab, and the logo wastes vertical space"
+      ],
+      "suggestedFix": "In App.jsx, conditionally render header contents based on `isMobile`:\n\n```jsx\n<header className={styles.header}>\n  {!isMobile && (\n    <>\n      <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>\n      <div className={styles.headerRight}>\n        <span className={styles.userName}>{isGuest ? 'Guest' : user.displayName ?? user.email}</span>\n        <ThemeToggle />\n        <button className={styles.signOutBtn} onClick={signOut} type=\"button\">Sign out</button>\n      </div>\n    </>\n  )}\n</header>\n```\n\nOn mobile the header renders as a slim empty bar. Contextual actions ('+' new list, share) can be added to this header in a follow-up or within the individual tab/detail views as they are now.\n\nAlternatively, hide the entire header on mobile via CSS if no contextual actions are needed in it yet:\n```css\n@media (max-width: 700px) {\n  .header { display: none; }\n}\n```\nBut keeping the header element (empty) is preferred so contextual actions can be slotted in later.",
+      "acceptanceCriteria": [
+        "On mobile (≤700px), the header does not show the logo text, username, ThemeToggle, or Sign Out",
+        "On mobile, the header remains as a slim bar (not removed entirely) for future contextual actions",
+        "On desktop (≥701px), the header continues to show logo, username, ThemeToggle, and Sign Out (no change)",
+        "The Settings tab on mobile still works with dark mode toggle and sign out",
+        "No extra vertical space wasted on mobile — header should be minimal height when empty",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-ios-mobile-nav",
+      "reportedAt": "2026-02-25",
+      "occurrences": 1,
+      "priority": "high",
+      "notes": "Combines two pieces of feedback: (1) username/ThemeToggle/Sign Out are redundant with Settings tab, (2) logo text wastes vertical space on mobile. The header bar itself should remain for future contextual actions but render empty/slim on mobile."
+    }
+  ]
+}
