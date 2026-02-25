@@ -112,15 +112,31 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     }
   };
 
-  const handleEditToggle = () => {
-    if (isEditOpen) {
+  const handleEditToggle = (openPicker) => {
+    if (isEditOpen && !openPicker) {
       commitName();
       commitPrice();
-    } else {
+      setIsEditOpen(false);
+    } else if (!isEditOpen) {
       setNameValue(item.name);
       setPriceValue(price !== null ? price.toFixed(2) : '');
+      setIsEditOpen(true);
+      if (openPicker === 'store') {
+        setIsStorePickerOpen(true);
+        setIsCategoryPickerOpen(false);
+      } else if (openPicker === 'category') {
+        setIsCategoryPickerOpen(true);
+        setIsStorePickerOpen(false);
+      }
+    } else if (isEditOpen && openPicker) {
+      if (openPicker === 'store') {
+        setIsStorePickerOpen(!isStorePickerOpen);
+        setIsCategoryPickerOpen(false);
+      } else if (openPicker === 'category') {
+        setIsCategoryPickerOpen(!isCategoryPickerOpen);
+        setIsStorePickerOpen(false);
+      }
     }
-    setIsEditOpen(!isEditOpen);
   };
 
   const imageUrl = item.imageUrl ?? null;
@@ -179,17 +195,24 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
           </span>
           <div className={styles.badges}>
             {assignedStore && (
-              <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
+              <button
+                type="button"
+                className={styles.storeBadgeCompact}
+                style={{ backgroundColor: assignedStore.color }}
+                onClick={(e) => { e.stopPropagation(); handleEditToggle('store'); }}
+              >
                 {assignedStore.name}
-              </span>
+              </button>
             )}
             {item.category && (
-              <span
+              <button
+                type="button"
                 className={styles.categoryCompact}
                 style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
+                onClick={(e) => { e.stopPropagation(); handleEditToggle('category'); }}
               >
                 {allLabels[item.category] ?? 'Other'}
-              </span>
+              </button>
             )}
           </div>
         </div>

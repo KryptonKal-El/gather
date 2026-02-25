@@ -101,22 +101,38 @@
 
 .storeBadgeCompact {
   font-size: 0.7rem;
+  font-family: inherit;
   color: white;
   padding: 0.2rem 0.45rem;
   border-radius: 10px;
+  border: none;
   white-space: nowrap;
   font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.storeBadgeCompact:hover {
+  opacity: 0.85;
 }
 
 .categoryCompact {
   font-size: 0.7rem;
+  font-family: inherit;
   color: white;
   padding: 0.2rem 0.5rem;
   border-radius: 12px;
+  border: none;
   white-space: nowrap;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.categoryCompact:hover {
+  opacity: 0.85;
 }
 
 .price {
