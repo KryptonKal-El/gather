@@ -3,6 +3,42 @@
   "project": "ShoppingListAI",
   "bugs": [
     {
+      "id": "BUG-001",
+      "title": "Three-dot menu popup clipped — cannot escape slide container overflow",
+      "description": "On the My Lists screen (mobile), tapping the three-dot menu on a list item opens a dropdown that is clipped and not fully visible. The dropdown is cut off at the boundary of the slide container rather than rendering on top of surrounding content.",
+      "severity": "high",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.module.css",
+        "src/components/ListSelector.jsx",
+        "src/components/ListSelector.module.css"
+      ],
+      "affectedPlatforms": ["mobile"],
+      "rootCause": "The `.slideContainer` in App.module.css (lines 148-152) has `overflow: hidden`, which is needed for the iOS push/pop slide animations but also clips the absolutely-positioned `.menuDropdown`. A prior fix removed `overflow: hidden` from `.lists` in ListSelector.module.css, but the dropdown still can't escape `.slideContainer`. The DOM chain is: `.slideContainer` (overflow:hidden) → `.listScreen` → `.mobileFullScreen` → ListSelector `.lists` → `.listItem` → `.menuWrap` (position:relative) → `.menuDropdown` (position:absolute).",
+      "reproductionSteps": [
+        "Open the app on mobile (≤700px viewport)",
+        "Log in and go to the Lists tab",
+        "Ensure at least one list exists",
+        "Tap the three-dot menu button on any list item",
+        "Observe: the dropdown menu is cut off / not fully visible"
+      ],
+      "suggestedFix": "The `overflow: hidden` on `.slideContainer` is needed for slide animations but kills the dropdown. Best approaches:\n\n**Option A (recommended for iOS feel): Render the menu as a mobile-style bottom sheet / action sheet.** On mobile, instead of a small positioned dropdown, render the menu options as a full-width fixed-position bottom sheet overlay. This sidesteps the overflow issue entirely and is the most native iOS pattern.\n\n**Option B: React portal.** In ListSelector.jsx, render `.menuDropdown` via `ReactDOM.createPortal(dropdown, document.body)` so it escapes all overflow contexts. Position it using the menu button's `getBoundingClientRect()`.\n\n**Option C: Toggle overflow on `.slideContainer` when menu is open.** Temporarily set `overflow: visible` when a menu is open. Risky if a slide transition fires while menu is open.",
+      "acceptanceCriteria": [
+        "Three-dot menu options are fully visible when opened on any list item (first, middle, last)",
+        "Menu renders above all other content (proper z-index / stacking)",
+        "Slide animations (push/pop) still work correctly — no content leaking outside the container",
+        "No visual regression on the iOS grouped table view styling (rounded corners preserved)",
+        "Works on both mobile and desktop viewports",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-ios-mobile-nav",
+      "reportedAt": "2026-02-25",
+      "occurrences": 2,
+      "priority": "high",
+      "notes": "A prior fix removed overflow:hidden from .lists — that was correct but insufficient. The real blocker is .slideContainer in App.module.css which also has overflow:hidden (needed for slide animations). The fix must work around it, not remove it."
+    },
+    {
       "id": "BUG-002",
       "title": "Simplify mobile header — remove all controls and logo text",
       "description": "On mobile (≤700px), the header should be a slim, empty bar that serves as a container for contextual actions only (e.g., '+' for new list, share button on detail view). Currently it still shows the app logo, username, ThemeToggle, and Sign Out button. Username/ThemeToggle/Sign Out now live in the Settings tab. The logo text is unnecessary on mobile and wastes vertical space. Desktop header should remain unchanged (logo + username + ThemeToggle + Sign Out).",

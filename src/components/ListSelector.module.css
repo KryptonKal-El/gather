@@ -538,3 +538,98 @@
     font-size: 0.9rem;
   }
 }
+
+/* iOS Action Sheet / Bottom Sheet */
+.actionSheetBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.actionSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  padding: 0 0.5rem calc(env(safe-area-inset-bottom, 0.5rem) + 0.5rem);
+  animation: slideUp 0.25s ease;
+}
+
+.actionSheetGroup {
+  background: var(--bg-card);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.actionSheetTitle {
+  padding: 0.75rem 1rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.actionSheetItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 56px;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: center;
+}
+
+.actionSheetItem:first-child {
+  border-top: none;
+}
+
+.actionSheetItem:active {
+  background: var(--bg-hover);
+}
+
+.actionSheetDanger {
+  color: var(--danger);
+}
+
+.actionSheetCancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 0.5rem;
+  background: var(--bg-card);
+  border: none;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.actionSheetCancel:active {
+  background: var(--bg-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

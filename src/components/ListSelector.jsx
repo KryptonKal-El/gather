@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './ListSelector.module.css';
 
 /**
@@ -28,6 +29,7 @@ export const ListSelector = ({
   const [editName, setEditName] = useState('');
   const [editEmoji, setEditEmoji] = useState(null);
   const menuRef = useRef(null);
+  const isMobile = useIsMobile();
 
   // Close menu on outside click
   useEffect(() => {
@@ -133,7 +135,7 @@ export const ListSelector = ({
               <span className={styles.chevron}>›</span>
             </button>
 
-            <div className={styles.menuWrap} ref={isMenuOpen ? menuRef : null}>
+            <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
               <button
                 type="button"
                 className={styles.menuBtn}
@@ -143,7 +145,7 @@ export const ListSelector = ({
                 &#x22EE;
               </button>
 
-              {isMenuOpen && (
+              {isMenuOpen && !isMobile && (
                 <div className={styles.menuDropdown}>
                   <button
                     type="button"
@@ -176,6 +178,55 @@ export const ListSelector = ({
                 </div>
               )}
             </div>
+
+            {isMenuOpen && isMobile && (
+              <>
+                <div
+                  className={styles.actionSheetBackdrop}
+                  onClick={() => setMenuOpenId(null)}
+                />
+                <div className={styles.actionSheet}>
+                  <div className={styles.actionSheetGroup}>
+                    <div className={styles.actionSheetTitle}>
+                      {list.emoji && <span>{list.emoji} </span>}
+                      {list.name}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.actionSheetItem}
+                      onClick={() => handleStartEdit(list)}
+                    >
+                      Name &amp; Icon
+                    </button>
+                    {isOwned && onShareClick && (
+                      <button
+                        type="button"
+                        className={styles.actionSheetItem}
+                        onClick={() => { onShareClick(list); setMenuOpenId(null); }}
+                      >
+                        Share Settings
+                      </button>
+                    )}
+                    {isOwned && (
+                      <button
+                        type="button"
+                        className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
+                        onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
+                      >
+                        Delete List
+                      </button>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.actionSheetCancel}
+                    onClick={() => setMenuOpenId(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            )}
 
             {confirmingDeleteId === list.id && (
               <ConfirmDialog
