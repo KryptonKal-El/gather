@@ -93,7 +93,6 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  overflow: hidden;
 }
 
 .emptyMsg {
@@ -413,6 +412,16 @@
     background: var(--bg-card);
     border-radius: 12px;
     border: 1px solid var(--border-light);
+  }
+
+  .listItem:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .listItem:last-child {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
   }
 
   /* List rows with proper touch targets */
