@@ -263,17 +263,19 @@ export const App = () => {
   return (
     <div className={styles.app}>
       <header className={styles.header}>
-        <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>
         {!isMobile && (
-          <div className={styles.headerRight}>
-            <span className={styles.userName}>
-              {isGuest ? 'Guest' : user.displayName ?? user.email}
-            </span>
-            <ThemeToggle />
-            <button className={styles.signOutBtn} onClick={signOut} type="button">
-              Sign out
-            </button>
-          </div>
+          <>
+            <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>
+            <div className={styles.headerRight}>
+              <span className={styles.userName}>
+                {isGuest ? 'Guest' : user.displayName ?? user.email}
+              </span>
+              <ThemeToggle />
+              <button className={styles.signOutBtn} onClick={signOut} type="button">
+                Sign out
+              </button>
+            </div>
+          </>
         )}
       </header>
 
