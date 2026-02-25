@@ -7,18 +7,18 @@ import { ImagePicker } from './ImagePicker.jsx';
 import styles from './ShoppingItem.module.css';
 
 /**
- * A single shopping list item row with optional image thumbnail, clickable
- * name (toggles checked state), quantity stepper, price, clickable category
- * badge, clickable store badge, and delete button.
- * Quantity, price, and image are editable inline. The category picker shows
- * the assigned store's categories (or global defaults).
+ * A single shopping list item with a compact row and expandable edit panel.
+ * The compact row shows image, name (with qty), store/category badges, price,
+ * and a pencil icon to toggle the edit panel. The edit panel contains qty
+ * stepper, price input, store/category pickers, and delete button.
  */
 export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
   const { user } = useAuth();
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
-  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [priceValue, setPriceValue] = useState('');
+  const [nameValue, setNameValue] = useState('');
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const categoryPickerRef = useRef(null);
@@ -31,13 +31,11 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   }
   const assignedStore = item.store ? storeMap[item.store] : null;
 
-  // Use the assigned store's categories, or global defaults
   const categories = assignedStore?.categories ?? DEFAULT_CATEGORIES;
   const allLabels = getAllCategoryLabels(categories);
   const allColors = getAllCategoryColors(categories);
   const allKeys = getAllCategoryKeys(categories);
 
-  // Close category picker on outside click
   useEffect(() => {
     if (!isCategoryPickerOpen) return;
     const handleClick = (e) => {
@@ -49,7 +47,6 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     return () => document.removeEventListener('mousedown', handleClick);
   }, [isCategoryPickerOpen]);
 
-  // Close store picker on outside click
   useEffect(() => {
     if (!isStorePickerOpen) return;
     const handleClick = (e) => {
@@ -62,7 +59,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   }, [isStorePickerOpen]);
 
   const handleSelectCategory = (key) => {
-    if (key !== item.category) {
+    if (key !== (item.category ?? null)) {
       onUpdateCategory(item.id, key);
     }
     setIsCategoryPickerOpen(false);
@@ -86,13 +83,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     }
   };
 
-  const handlePriceClick = () => {
-    setPriceValue(price !== null ? price.toFixed(2) : '');
-    setIsEditingPrice(true);
-  };
-
   const commitPrice = () => {
-    setIsEditingPrice(false);
     const parsed = parseFloat(priceValue);
     const newPrice = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
     if (newPrice !== price) {
@@ -101,17 +92,36 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   };
 
   const handlePriceKeyDown = (e) => {
-    if (e.key === 'Enter') commitPrice();
-    if (e.key === 'Escape') setIsEditingPrice(false);
+    if (e.key === 'Enter') {
+      commitPrice();
+      e.target.blur();
+    }
   };
 
-  // Auto-focus the price input when entering edit mode
-  useEffect(() => {
-    if (isEditingPrice && priceInputRef.current) {
-      priceInputRef.current.focus();
-      priceInputRef.current.select();
+  const commitName = () => {
+    const trimmed = nameValue.trim();
+    if (trimmed && trimmed !== item.name) {
+      onUpdateItem(item.id, { name: trimmed });
     }
-  }, [isEditingPrice]);
+  };
+
+  const handleNameKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      commitName();
+      e.target.blur();
+    }
+  };
+
+  const handleEditToggle = () => {
+    if (isEditOpen) {
+      commitName();
+      commitPrice();
+    } else {
+      setNameValue(item.name);
+      setPriceValue(price !== null ? price.toFixed(2) : '');
+    }
+    setIsEditOpen(!isEditOpen);
+  };
 
   const imageUrl = item.imageUrl ?? null;
 
@@ -140,151 +150,214 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   };
 
   return (
-    <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
-      <button
-        type="button"
-        className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
-        onClick={() => setIsImagePickerOpen(true)}
-        title="Set item image"
-      >
-        {imageUrl ? (
-          <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
-        ) : (
-          <span className={styles.thumbnailPlaceholder}>+</span>
-        )}
-      </button>
-      <span
-        className={styles.label}
-        onClick={onToggle}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
-      >
-        <span className={styles.name}>{item.name}</span>
-      </span>
-      <div className={styles.meta}>
-        <div className={styles.qtyStepper}>
-          <button
-            type="button"
-            className={styles.qtyBtn}
-            onClick={() => handleQtyChange(-1)}
-            aria-label="Decrease quantity"
+    <div className={styles.itemWrapper}>
+      <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
+        <button
+          type="button"
+          className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
+          onClick={() => setIsImagePickerOpen(true)}
+          title="Set item image"
+        >
+          {imageUrl ? (
+            <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
+          ) : (
+            <span className={styles.thumbnailPlaceholder}>+</span>
+          )}
+        </button>
+        <div className={styles.details}>
+          <span
+            className={styles.label}
+            onClick={onToggle}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
           >
-            −
-          </button>
-          <span className={styles.qtyValue}>{qty}</span>
-          <button
-            type="button"
-            className={styles.qtyBtn}
-            onClick={() => handleQtyChange(1)}
-            aria-label="Increase quantity"
-          >
-            +
-          </button>
-        </div>
-        {isEditingPrice ? (
-          <div className={styles.priceEdit}>
-            <span className={styles.priceCurrency}>$</span>
-            <input
-              ref={priceInputRef}
-              className={styles.priceEditInput}
-              type="number"
-              min="0"
-              step="0.01"
-              value={priceValue}
-              onChange={(e) => setPriceValue(e.target.value)}
-              onBlur={commitPrice}
-              onKeyDown={handlePriceKeyDown}
-            />
-          </div>
-        ) : (
-          <button
-            type="button"
-            className={styles.priceDisplay}
-            onClick={handlePriceClick}
-            title="Set price"
-          >
-            {lineTotal !== null ? `$${lineTotal.toFixed(2)}` : '$–'}
-          </button>
-        )}
-      </div>
-      <div className={styles.badges}>
-        {stores.length > 0 && (
-          <div className={styles.storeWrapper} ref={storePickerRef}>
-            <button
-              type="button"
-              className={styles.storeBadge}
-              style={assignedStore ? { backgroundColor: assignedStore.color } : undefined}
-              onClick={() => setIsStorePickerOpen(!isStorePickerOpen)}
-              title="Change store"
-            >
-              {assignedStore ? assignedStore.name : 'No store'}
-            </button>
-            {isStorePickerOpen && (
-              <div className={styles.picker}>
-                <button
-                  type="button"
-                  className={`${styles.pickerOption} ${!item.store ? styles.pickerActive : ''}`}
-                  onClick={() => handleSelectStore(null)}
-                >
-                  <span className={styles.pickerDot} style={{ backgroundColor: '#bbb' }} />
-                  No store
-                </button>
-                {stores.map((store) => (
-                  <button
-                    key={store.id}
-                    type="button"
-                    className={`${styles.pickerOption} ${store.id === item.store ? styles.pickerActive : ''}`}
-                    onClick={() => handleSelectStore(store.id)}
-                  >
-                    <span
-                      className={styles.pickerDot}
-                      style={{ backgroundColor: store.color }}
-                    />
-                    {store.name}
-                  </button>
-                ))}
-              </div>
+            <span className={styles.name}>
+              {item.name}
+              {qty > 1 && <span className={styles.qty}> ({qty})</span>}
+            </span>
+          </span>
+          <div className={styles.badges}>
+            {assignedStore && (
+              <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
+                {assignedStore.name}
+              </span>
+            )}
+            {item.category && (
+              <span
+                className={styles.categoryCompact}
+                style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
+              >
+                {allLabels[item.category] ?? 'Other'}
+              </span>
             )}
           </div>
-        )}
-        <div className={styles.categoryWrapper} ref={categoryPickerRef}>
-          <button
-            type="button"
-            className={styles.category}
-            style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
-            onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
-            title="Change category"
-          >
-            {allLabels[item.category] ?? 'Other'}
-          </button>
-          {isCategoryPickerOpen && (
-            <div className={styles.picker}>
-              {allKeys.map((key) => (
+        </div>
+        <span className={styles.price}>
+          {lineTotal !== null ? `$${lineTotal.toFixed(2)}` : '$–'}
+        </span>
+        <button
+          type="button"
+          className={styles.editBtn}
+          onClick={handleEditToggle}
+          aria-label="Edit item"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.13 1.87a1.25 1.25 0 0 1 1.77 0l1.23 1.23a1.25 1.25 0 0 1 0 1.77L5.04 13.96l-3.46.77.77-3.46L11.13 1.87Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      {isEditOpen && (
+        <div className={styles.editPanel}>
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Name</span>
+            <input
+              className={styles.nameEditInput}
+              type="text"
+              value={nameValue}
+              onChange={(e) => setNameValue(e.target.value)}
+              onBlur={commitName}
+              onKeyDown={handleNameKeyDown}
+            />
+          </div>
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Quantity</span>
+            <div className={styles.qtyStepper}>
+              <button
+                type="button"
+                className={styles.qtyBtn}
+                onClick={() => handleQtyChange(-1)}
+                aria-label="Decrease quantity"
+              >
+                −
+              </button>
+              <span className={styles.qtyValue}>{qty}</span>
+              <button
+                type="button"
+                className={styles.qtyBtn}
+                onClick={() => handleQtyChange(1)}
+                aria-label="Increase quantity"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Price</span>
+            <div className={styles.priceEdit}>
+              <span className={styles.priceCurrency}>$</span>
+              <input
+                ref={priceInputRef}
+                className={styles.priceEditInput}
+                type="number"
+                min="0"
+                step="0.01"
+                value={priceValue}
+                onChange={(e) => setPriceValue(e.target.value)}
+                onBlur={commitPrice}
+                onKeyDown={handlePriceKeyDown}
+              />
+            </div>
+          </div>
+          {stores.length > 0 && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Store</span>
+              <div className={styles.storeWrapper} ref={storePickerRef}>
                 <button
-                  key={key}
                   type="button"
-                  className={`${styles.pickerOption} ${key === item.category ? styles.pickerActive : ''}`}
-                  onClick={() => handleSelectCategory(key)}
+                  className={styles.storeBadge}
+                  style={assignedStore ? { backgroundColor: assignedStore.color } : undefined}
+                  onClick={() => setIsStorePickerOpen(!isStorePickerOpen)}
+                  title="Change store"
                 >
-                  <span
-                    className={styles.pickerDot}
-                    style={{ backgroundColor: allColors[key] ?? '#9e9e9e' }}
-                  />
-                  {allLabels[key] ?? key}
+                  {assignedStore ? assignedStore.name : 'No store'}
                 </button>
-              ))}
+                {isStorePickerOpen && (
+                  <div className={styles.picker}>
+                    <button
+                      type="button"
+                      className={`${styles.pickerOption} ${!item.store ? styles.pickerActive : ''}`}
+                      onClick={() => handleSelectStore(null)}
+                    >
+                      <span className={styles.pickerDot} style={{ backgroundColor: '#bbb' }} />
+                      No store
+                    </button>
+                    {stores.map((store) => (
+                      <button
+                        key={store.id}
+                        type="button"
+                        className={`${styles.pickerOption} ${store.id === item.store ? styles.pickerActive : ''}`}
+                        onClick={() => handleSelectStore(store.id)}
+                      >
+                        <span
+                          className={styles.pickerDot}
+                          style={{ backgroundColor: store.color }}
+                        />
+                        {store.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Category</span>
+            <div className={styles.categoryWrapper} ref={categoryPickerRef}>
+              <button
+                type="button"
+                className={styles.category}
+                style={{ backgroundColor: item.category ? (allColors[item.category] ?? '#9e9e9e') : '#bbb' }}
+                onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
+                title="Change category"
+              >
+                {item.category ? (allLabels[item.category] ?? 'Other') : 'No category'}
+              </button>
+              {isCategoryPickerOpen && (
+                <div className={styles.picker}>
+                  <button
+                    type="button"
+                    className={`${styles.pickerOption} ${!item.category ? styles.pickerActive : ''}`}
+                    onClick={() => handleSelectCategory(null)}
+                  >
+                    <span className={styles.pickerDot} style={{ backgroundColor: '#bbb' }} />
+                    No category
+                  </button>
+                  {allKeys.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`${styles.pickerOption} ${key === item.category ? styles.pickerActive : ''}`}
+                      onClick={() => handleSelectCategory(key)}
+                    >
+                      <span
+                        className={styles.pickerDot}
+                        style={{ backgroundColor: allColors[key] ?? '#9e9e9e' }}
+                      />
+                      {allLabels[key] ?? key}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className={styles.editFooter}>
+            <button
+              type="button"
+              className={styles.deleteBtn}
+              onClick={onRemove}
+              aria-label={`Remove ${item.name}`}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1.75 3.5h10.5M5.25 3.5V2.33c0-.46.37-.83.83-.83h1.84c.46 0 .83.37.83.83V3.5m1.5 0v8.17c0 .46-.37.83-.83.83H4.58a.83.83 0 0 1-.83-.83V3.5h8.5Z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Delete
+            </button>
+          </div>
         </div>
-      </div>
-      <button
-        className={styles.deleteBtn}
-        onClick={onRemove}
-        aria-label={`Remove ${item.name}`}
-      >
-        x
-      </button>
+      )}
+
       {isImagePickerOpen && (
         <ImagePicker
           itemName={item.name}

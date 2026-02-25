@@ -1,11 +1,13 @@
+.itemWrapper {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 .item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border-radius: 8px;
   transition: background 0.15s, opacity 0.2s;
-  flex-wrap: wrap;
 }
 
 .item:hover {
@@ -22,9 +24,9 @@
 }
 
 .thumbnail {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 6px;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
   border: 2px dashed var(--thumbnail-border);
   background: var(--bg-page);
   cursor: pointer;
@@ -65,11 +67,18 @@
   pointer-events: none;
 }
 
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+}
+
 .label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
   cursor: pointer;
 }
 
@@ -78,11 +87,91 @@
   transition: color 0.2s;
 }
 
-.meta {
+.qty {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.badges {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+}
+
+.storeBadgeCompact {
+  font-size: 0.7rem;
+  color: white;
+  padding: 0.2rem 0.45rem;
+  border-radius: 10px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.categoryCompact {
+  font-size: 0.7rem;
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  white-space: nowrap;
   flex-shrink: 0;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.5rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.editBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.editPanel {
+  padding: 0.75rem 1rem;
+  background: var(--bg-hover);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.editRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.editLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 60px;
+}
+
+.editFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.25rem;
 }
 
 .qtyStepper {
@@ -90,16 +179,16 @@
   align-items: center;
   gap: 0;
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 .qtyBtn {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border: none;
-  background: var(--bg-hover);
-  font-size: 0.85rem;
+  background: var(--bg-page);
+  font-size: 1.1rem;
   font-family: inherit;
   color: var(--text-secondary);
   cursor: pointer;
@@ -115,62 +204,44 @@
 }
 
 .qtyValue {
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
-  min-width: 1.6rem;
+  min-width: 2.5rem;
   text-align: center;
   color: var(--text-primary);
   border-left: 1px solid var(--border-default);
   border-right: 1px solid var(--border-default);
-  line-height: 1.75rem;
-}
-
-.priceDisplay {
-  font-size: 0.75rem;
-  font-family: inherit;
-  font-weight: 600;
-  color: var(--primary-dark);
-  background: none;
-  border: none;
-  padding: 0.3rem 0.35rem;
-  cursor: pointer;
-  white-space: nowrap;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-
-.priceDisplay:hover {
-  background: var(--primary-tint);
+  line-height: 2.5rem;
 }
 
 .priceEdit {
   display: flex;
   align-items: center;
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  height: 1.85rem;
+  height: 2.5rem;
 }
 
 .priceCurrency {
-  font-size: 0.75rem;
+  font-size: 1rem;
   color: var(--text-hint);
-  padding: 0 0.2rem 0 0.3rem;
-  background: var(--bg-hover);
+  padding: 0 0.25rem 0 0.5rem;
+  background: var(--bg-page);
   height: 100%;
   display: flex;
   align-items: center;
 }
 
 .priceEditInput {
-  width: 3.5rem;
+  width: 5rem;
   height: 100%;
   border: none;
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
-  padding: 0 0.3rem;
+  padding: 0 0.5rem;
   -moz-appearance: textfield;
   box-sizing: border-box;
 }
@@ -185,11 +256,22 @@
   outline: none;
 }
 
+.nameEditInput {
+  flex: 1;
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  box-sizing: border-box;
+}
 
-.badges {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+.nameEditInput:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 .storeWrapper {
@@ -292,18 +374,21 @@
 }
 
 .deleteBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   background: none;
   border: none;
-  color: var(--text-icon);
-  font-size: 1.1rem;
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 500;
   cursor: pointer;
-  padding: 0.4rem 0.5rem;
-  border-radius: 4px;
-  transition: color 0.15s, background 0.15s;
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
 .deleteBtn:hover {
-  color: var(--danger);
   background: var(--danger-tint);
 }
 
@@ -311,28 +396,6 @@
   .item {
     padding: 0.6rem 0.75rem;
     gap: 0.5rem;
-  }
-
-  .meta {
-    order: 5;
-    width: 100%;
-    padding-left: calc(2.25rem + 0.5rem);
-  }
-
-  .badges {
-    order: 6;
-    padding-left: calc(2.25rem + 0.5rem);
-  }
-
-  .qtyBtn {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.9rem;
-  }
-
-  .qtyValue {
-    min-width: 1.8rem;
-    line-height: 2rem;
   }
 
   .picker {
