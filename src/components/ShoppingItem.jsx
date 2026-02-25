@@ -222,7 +222,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         <button
           type="button"
           className={styles.editBtn}
-          onClick={handleEditToggle}
+          onClick={() => handleEditToggle()}
           aria-label="Edit item"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
