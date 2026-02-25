@@ -339,4 +339,8 @@
     right: auto;
     left: 0;
   }
+
+  .priceEditInput {
+    font-size: 1rem;
+  }
 }

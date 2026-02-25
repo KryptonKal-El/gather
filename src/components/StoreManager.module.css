@@ -542,3 +542,17 @@
   cursor: default;
 }
 
+@media (max-width: 700px) {
+  .input {
+    font-size: 1rem;
+  }
+
+  .catRenameInput {
+    font-size: 1rem;
+  }
+
+  .catAddInput {
+    font-size: 1rem;
+  }
+}
+

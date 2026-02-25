@@ -98,7 +98,7 @@
 
 @media (max-width: 480px) {
   .form {
-    flex-direction: column;
+    flex-wrap: wrap;
   }
 
   .inputWrapper {
@@ -107,11 +107,12 @@
   }
 
   .storeSelect {
+    flex: 1;
     min-width: 0;
-    width: 100%;
+    font-size: 1rem;
   }
 
   .button {
-    width: 100%;
+    flex-shrink: 0;
   }
 }
