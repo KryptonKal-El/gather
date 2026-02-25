@@ -1,11 +1,11 @@
+import { useRegisterSW } from 'virtual:pwa-register/react';
+import styles from './PWAPrompt.module.css';
+
 /**
  * PWA update prompt and offline-ready notification.
  * Uses the virtual module from vite-plugin-pwa to detect
  * service worker updates and offline readiness.
  */
-import { useRegisterSW } from 'virtual:pwa-register/react';
-import styles from './PWAPrompt.module.css';
-
 export const PWAPrompt = () => {
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -14,10 +14,21 @@ export const PWAPrompt = () => {
   } = useRegisterSW();
 
   const handleUpdate = () => {
+    setNeedRefresh(false);
+
+    const reloadOnce = () => {
+      navigator.serviceWorker.removeEventListener('controllerchange', reloadOnce);
+      window.location.reload();
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', reloadOnce);
+
     updateServiceWorker(true);
-    // Force reload after a short delay — updateServiceWorker's promise
-    // may never resolve if the controllerchange event doesn't fire
-    setTimeout(() => window.location.reload(), 1000);
+
+    // Fallback if controllerchange never fires
+    setTimeout(() => {
+      navigator.serviceWorker.removeEventListener('controllerchange', reloadOnce);
+      window.location.reload();
+    }, 2000);
   };
 
   const handleDismiss = () => {
