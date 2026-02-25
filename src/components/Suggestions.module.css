@@ -73,3 +73,19 @@
   font-size: 1rem;
   margin-left: 0.25rem;
 }
+
+.toggleBtn {
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.toggleBtn:hover {
+  text-decoration: underline;
+}

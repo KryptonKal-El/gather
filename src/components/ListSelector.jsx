@@ -12,7 +12,7 @@ import styles from './ListSelector.module.css';
 export const ListSelector = ({
   lists,
   activeListId,
-  currentUserId,
+  currentUserId: _currentUserId,
   onSelect,
   onCreate,
   onUpdateDetails,
@@ -130,6 +130,7 @@ export const ListSelector = ({
                 </span>
                 <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
               </span>
+              <span className={styles.chevron}>›</span>
             </button>
 
             <div className={styles.menuWrap} ref={isMenuOpen ? menuRef : null}>

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opencode.ai/project.json",
+  "name": "ShoppingListAI",
+  "description": "AI-powered grocery shopping list PWA with real-time sync, shared lists, recipes, and image search",
+  "stack": {
+    "language": "javascript",
+    "framework": "react",
+    "bundler": "vite",
+    "styling": "css-modules",
+    "backend": "firebase",
+    "hosting": "firebase-hosting",
+    "functions": "firebase-functions",
+    "database": "firestore",
+    "auth": "firebase-auth",
+    "pwa": true
+  },
+  "commands": {
+    "dev": "npm run dev",
+    "build": "npm run build",
+    "lint": "npm run lint",
+    "preview": "npm run preview"
+  },
+  "devPort": 4000,
+  "paths": {
+    "src": "src",
+    "components": "src/components",
+    "services": "src/services",
+    "context": "src/context",
+    "hooks": "src/hooks",
+    "functions": "functions",
+    "public": "public"
+  },
+  "capabilities": {
+    "authentication": true,
+    "realtime": true,
+    "pwa": true,
+    "imageSearch": true,
+    "sharedLists": true,
+    "recipes": true,
+    "suggestions": true,
+    "darkMode": true,
+    "crud": true,
+    "api": false,
+    "multiTenant": false,
+    "ai": false
+  },
+  "integrations": [
+    {
+      "name": "firebase",
+      "purpose": "Auth, Firestore, Hosting, Cloud Functions"
+    },
+    {
+      "name": "serpapi",
+      "purpose": "Image search for shopping items"
+    }
+  ],
+  "git": {
+    "defaultBranch": "main",
+    "branchPattern": "gh/{ticket}/short-summary",
+    "teamSync": {
+      "enabled": false
+    }
+  },
+  "planning": {
+    "considerations": []
+  }
+}

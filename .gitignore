@@ -31,6 +31,9 @@ functions/.env
 # Firebase cache
 .firebase/
 
+# Temp files
+.tmp/
+
 # Symlinked toolkit dirs (don't commit these)
 agents
 skills
