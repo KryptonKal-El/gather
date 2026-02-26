@@ -47,6 +47,7 @@
 }
 
 .avatar {
+  position: relative;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -211,4 +212,67 @@
   font-size: 1rem;
   color: var(--danger);
   font-weight: 500;
+}
+
+.avatarTappable {
+  cursor: pointer;
+}
+
+.avatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+  color: #ffffff;
+}
+
+.avatarTappable:hover .avatarOverlay,
+.avatarTappable:focus-visible .avatarOverlay {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .avatarOverlay {
+    opacity: 0.5;
+  }
+}
+
+.uploadSpinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hiddenInput {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.uploadError {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--danger);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.uploadError:last-child {
+  border-bottom: none;
 }

@@ -90,8 +90,14 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+    if (!auth.currentUser) return;
+    await auth.currentUser.reload();
+    setUser({ ...auth.currentUser });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, signInAsGuest, signOut }}>
+    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, signInAsGuest, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -100,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signInAsGuest: Function, signOut: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signInAsGuest: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

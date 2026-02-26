@@ -126,6 +126,8 @@ export const App = () => {
   }
 
   const isGuest = user.isAnonymous;
+  const avatarLetter = isGuest ? 'G' : ((user.displayName ?? user.email ?? 'U').charAt(0).toUpperCase() || 'U');
+  const photoURL = user.photoURL;
 
   const handleListSelect = (listId) => {
     if (isMobile) {
@@ -294,6 +296,11 @@ export const App = () => {
           <>
             <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>
             <div className={styles.headerRight}>
+              {photoURL ? (
+                <img src={photoURL} alt="" className={styles.headerAvatar} />
+              ) : (
+                <span className={styles.headerAvatar}>{avatarLetter}</span>
+              )}
               <span className={styles.userName}>
                 {isGuest ? 'Guest' : user.displayName ?? user.email}
               </span>

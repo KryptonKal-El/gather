@@ -36,12 +36,26 @@
     {
       "id": "prd-pwa-install-banner",
       "name": "PWA Install Banner",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-pwa-install-banner.md",
       "jsonPath": "docs/prds/prd-pwa-install-banner.json",
       "branchName": "feature/pwa-install-banner",
       "createdAt": "2026-02-26",
-      "updatedAt": "2026-02-26"
+      "updatedAt": "2026-02-26",
+      "startedAt": "2026-02-26T12:00:00Z",
+      "completedAt": "2026-02-26T13:00:00Z"
+    },
+    {
+      "id": "prd-user-profile-image",
+      "name": "User Profile Image",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-user-profile-image.md",
+      "jsonPath": "docs/prds/prd-user-profile-image.json",
+      "branchName": "feature/user-profile-image",
+      "createdAt": "2026-02-26",
+      "updatedAt": "2026-02-26",
+      "startedAt": "2026-02-26T14:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }

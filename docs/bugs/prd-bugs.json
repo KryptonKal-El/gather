@@ -82,7 +82,8 @@
       "title": "Mobile header still takes up vertical space — hide it completely",
       "description": "On mobile (≤700px), the header element still renders as an empty bar occupying vertical space even though its contents were removed in BUG-002. The header should be completely hidden on mobile via `display: none` so it doesn't waste any screen real estate. Desktop header remains unchanged.",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-02-26",
       "affectedComponents": [
         "src/App.module.css"
       ],
