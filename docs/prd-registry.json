@@ -48,14 +48,14 @@
     {
       "id": "prd-user-profile-image",
       "name": "User Profile Image",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-user-profile-image.md",
       "jsonPath": "docs/prds/prd-user-profile-image.json",
       "branchName": "feature/user-profile-image",
       "createdAt": "2026-02-26",
       "updatedAt": "2026-02-26",
       "startedAt": "2026-02-26T14:00:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-02-26T16:00:00Z"
     }
   ]
 }
