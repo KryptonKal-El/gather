@@ -3,6 +3,7 @@ import { useShoppingList } from './hooks/useShoppingList.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
+import { usePWAInstall } from './hooks/usePWAInstall.js';
 import { getSuggestions } from './services/suggestions.js';
 import { Login } from './components/Login.jsx';
 import { ListSelector } from './components/ListSelector.jsx';
@@ -14,6 +15,7 @@ import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
 import { ThemeToggle } from './components/ThemeToggle.jsx';
 import { PWAPrompt } from './components/PWAPrompt.jsx';
+import { PWAInstallBanner } from './components/PWAInstallBanner.jsx';
 import { BottomTabBar } from './components/BottomTabBar.jsx';
 import { MobileListDetail } from './components/MobileListDetail.jsx';
 import { MobileSettings } from './components/MobileSettings.jsx';
@@ -39,6 +41,7 @@ export const App = () => {
     handleOpenList,
     handleBack,
   } = useMobileNav(state.lists);
+  const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -94,14 +97,32 @@ export const App = () => {
 
   if (isLoading) {
     return (
-      <div className={styles.loading}>
-        <p>Loading...</p>
-      </div>
+      <>
+        <PWAInstallBanner
+          showBanner={showBanner}
+          platform={platform}
+          onInstall={promptInstall}
+          onDismiss={dismissBanner}
+        />
+        <div className={styles.loading}>
+          <p>Loading...</p>
+        </div>
+      </>
     );
   }
 
   if (!user) {
-    return <Login />;
+    return (
+      <>
+        <PWAInstallBanner
+          showBanner={showBanner}
+          platform={platform}
+          onInstall={promptInstall}
+          onDismiss={dismissBanner}
+        />
+        <Login />
+      </>
+    );
   }
 
   const isGuest = user.isAnonymous;
@@ -262,6 +283,12 @@ export const App = () => {
 
   return (
     <div className={styles.app}>
+      <PWAInstallBanner
+        showBanner={showBanner}
+        platform={platform}
+        onInstall={promptInstall}
+        onDismiss={dismissBanner}
+      />
       <header className={styles.header}>
         {!isMobile && (
           <>
