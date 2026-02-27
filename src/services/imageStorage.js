@@ -1,40 +1,54 @@
 /**
- * Firebase Storage helpers for item images and profile images.
- * Handles uploading files and blobs, returning download URLs.
+ * Supabase Storage helpers for item images and profile images.
+ * Handles uploading files and blobs, returning public URLs.
  */
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { updateProfile } from 'firebase/auth';
-import { storage } from './firebase.js';
+import { supabase } from './supabase.js';
 
 /**
- * Uploads a File or Blob to Firebase Storage under the user's item images path.
- * @param {string} userId - The authenticated user's UID
- * @param {string} itemId - The Firestore item document ID
+ * Uploads a File or Blob to Supabase Storage under the user's item images path.
+ * @param {string} userId - The authenticated user's ID
+ * @param {string} itemId - The item ID
  * @param {File|Blob} file - The image file to upload
- * @returns {Promise<string>} The public download URL
+ * @returns {Promise<string>} The public URL
  */
 export const uploadItemImage = async (userId, itemId, file) => {
   const ext = file.type?.split('/')[1] ?? 'jpg';
-  const path = `users/${userId}/items/${itemId}.${ext}`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, file);
-  return getDownloadURL(storageRef);
+  const path = `${userId}/${itemId}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from('item-images')
+    .upload(path, file, { upsert: true });
+
+  if (error) {
+    throw new Error(`Failed to upload item image: itemId=${itemId}`, { cause: error });
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('item-images')
+    .getPublicUrl(path);
+
+  return urlData.publicUrl;
 };
 
 /**
- * Deletes an item's image from Firebase Storage.
+ * Deletes an item's image from Supabase Storage.
  * Silently ignores errors if the file doesn't exist.
- * @param {string} userId - The authenticated user's UID
- * @param {string} itemId - The Firestore item document ID
- * @param {string} imageUrl - The current image URL (used to derive the storage path)
+ * @param {string} userId - The authenticated user's ID
+ * @param {string} itemId - The item ID
+ * @param {string} imageUrl - The current image URL (unused, kept for API compat)
  */
 export const deleteItemImage = async (userId, itemId, imageUrl) => {
   if (!imageUrl) return;
   try {
-    const storageRef = ref(storage, imageUrl);
-    await deleteObject(storageRef);
+    const paths = [
+      `${userId}/${itemId}.jpg`,
+      `${userId}/${itemId}.jpeg`,
+      `${userId}/${itemId}.png`,
+      `${userId}/${itemId}.webp`,
+    ];
+    await supabase.storage.from('item-images').remove(paths);
   } catch {
-    // File may not exist in storage (e.g., external URL) — ignore
+    // File may not exist — ignore
   }
 };
 
@@ -94,17 +108,37 @@ export const resizeImage = (file, maxDimension = 256) => {
 };
 
 /**
- * Uploads a profile image to Firebase Storage and updates the user's photoURL.
- * @param {Object} user - The Firebase auth user object
+ * Uploads a profile image to Supabase Storage and updates the profiles table.
+ * @param {Object} user - The Supabase auth user object
  * @param {File|Blob} file - The image file to upload
- * @returns {Promise<string>} The public download URL
+ * @returns {Promise<string>} The public URL
  */
 export const uploadProfileImage = async (user, file) => {
   const resizedBlob = await resizeImage(file, 256);
-  const path = `users/${user.uid}/profile.jpg`;
-  const storageRef = ref(storage, path);
-  await uploadBytes(storageRef, resizedBlob);
-  const downloadUrl = await getDownloadURL(storageRef);
-  await updateProfile(user, { photoURL: downloadUrl });
-  return downloadUrl;
+  const path = `${user.id}/profile.jpg`;
+
+  const { error } = await supabase.storage
+    .from('profile-images')
+    .upload(path, resizedBlob, { upsert: true, contentType: 'image/jpeg' });
+
+  if (error) {
+    throw new Error('Failed to upload profile image', { cause: error });
+  }
+
+  const { data: urlData } = supabase.storage
+    .from('profile-images')
+    .getPublicUrl(path);
+
+  const publicUrl = urlData.publicUrl;
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ avatar_url: publicUrl })
+    .eq('id', user.id);
+
+  if (updateError) {
+    throw new Error('Failed to update profile avatar URL', { cause: updateError });
+  }
+
+  return publicUrl;
 };

@@ -132,10 +132,10 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   };
 
   const handleUploadImage = async (file) => {
-    if (!user?.uid) return;
+    if (!user?.id) return;
     setIsUploadingImage(true);
     try {
-      const url = await uploadItemImage(user.uid, item.id, file);
+      const url = await uploadItemImage(user.id, item.id, file);
       onUpdateItem(item.id, { imageUrl: url });
       setIsImagePickerOpen(false);
     } catch (err) {
