@@ -1,175 +1,449 @@
-# Critic Review: prd-ios-mobile-nav (Final Review)
+# Critic Review: Firebase to Supabase Migration (US-001 through US-003)
 
-**PRD**: iOS-Style Mobile Navigation Redesign  
-**Stories**: US-001 through US-009 (all 9 stories)  
-**Review Date**: 2026-02-25  
-**Reviewer**: Critic Agent (Consolidated Final Review)
+**PRD**: Firebase to Supabase Backend Migration  
+**Stories Reviewed**: US-001 (Database Schema), US-002 (Supabase Client), US-003 (Auth Migration)  
+**Review Date**: 2026-02-27  
+**Reviewer**: Critic Agent
 
 ---
 
 ## Summary
 
-This is a comprehensive iOS-style mobile navigation implementation featuring a bottom tab bar, slide transitions, mobile-specific views, and PWA safe area support. The implementation is **well-executed overall** with proper ARIA accessibility, CSS-only animations, and clean React patterns. All previously reported critical issues have been addressed.
+The migration covers database schema creation, Supabase client setup, and authentication context rewrite. The schema and auth implementations are **well-structured** but there are **critical runtime issues** due to incomplete migration — specifically, files still import from the now-deleted `firebase.js` and `firestore.js`. These must be fixed before the app can run.
 
 ---
 
 ## Critical Issues
 
-**None remaining.** All previously reported critical issues have been resolved:
+### CRITICAL-1: `src/services/imageStorage.js` still imports from Firebase (RUNTIME ERROR)
+**File**: `src/services/imageStorage.js` (lines 5-7)  
+**Impact**: App crashes on startup; module not found  
 
-| Issue | Status |
-|-------|--------|
-| ARIA `role="tablist"` and `role="tab"` on BottomTabBar | Fixed |
-| Touch targets increased to 44px for back/share buttons | Fixed |
-| Duplicate "Account" section header renamed to "Account Actions" | Fixed |
-| Escape key handler for recipe overlay | Fixed |
-| `aria-hidden="true"` on decorative SVGs | Fixed |
-| Duplicate "Anonymous user" text | Fixed |
-| Import ordering in Suggestions.jsx | Fixed |
-| BottomTabBar wrapped with isMobile conditional | Fixed |
+```javascript
+import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { updateProfile } from 'firebase/auth';
+import { storage } from './firebase.js';
+```
+
+**Problem**: These imports reference the deleted `firebase.js` and removed `firebase` package. The file was not migrated in US-001 through US-003 (it's scheduled for US-007), but `MobileSettings.jsx` imports from it NOW:
+
+```javascript
+import { uploadProfileImage } from '../services/imageStorage.js';
+```
+
+This causes an immediate runtime crash when loading MobileSettings.
+
+**Recommendation**: Either:
+1. **Stub the export** in `imageStorage.js` temporarily (throw "not yet migrated") so the import doesn't crash
+2. **Remove the import** from `MobileSettings.jsx` until US-007 completes
+3. **Disable the profile upload UI** in MobileSettings until storage is migrated
+
+---
+
+### CRITICAL-2: `src/context/ShoppingListContext.jsx` still imports from Firebase (RUNTIME ERROR)
+**File**: `src/context/ShoppingListContext.jsx` (lines 7, 11-33)  
+**Impact**: App crashes on startup; module not found  
+
+```javascript
+import { increment } from 'firebase/firestore';
+// ...
+import {
+  subscribeLists,
+  subscribeItems,
+  // ... many more
+} from '../services/firestore.js';
+```
+
+**Problem**: The `firestore.js` service file still exists and imports from Firebase. The entire shopping list functionality is broken until US-004 (Firestore migration) and US-005 (real-time subscriptions) are complete.
+
+**Recommendation**: The PRD correctly has these as separate stories, but the auth migration (US-003) is not truly usable until the data layer works. Consider:
+1. **Completing US-004 as part of the same commit batch** (these are tightly coupled)
+2. **Or** create a minimal stub that returns empty arrays so the app runs without data
+
+---
+
+### CRITICAL-3: `user.uid` vs `user.id` mismatch in ShoppingListContext
+**File**: `src/context/ShoppingListContext.jsx` (line 47)  
+**Impact**: All data queries fail silently (wrong user ID)  
+
+```javascript
+const userId = user?.uid ?? null;
+```
+
+**Problem**: Supabase auth returns `user.id`, not `user.uid`. Firebase used `uid`. This was NOT updated in ShoppingListContext, even though `App.jsx` and `MobileSettings.jsx` correctly use `user.id`.
+
+**Note**: This file still imports from Firebase (CRITICAL-2), so it won't run yet anyway. But when US-004 is done, this must be `user?.id`.
+
+**Recommendation**: Change to `user?.id ?? null` when migrating ShoppingListContext.
+
+---
+
+### CRITICAL-4: Supabase client doesn't validate env vars
+**File**: `src/services/supabase.js` (lines 7-10)  
+**Impact**: Cryptic "Cannot read properties of undefined" error if env vars missing  
+
+```javascript
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
+
+**Problem**: If either env var is missing/undefined, `createClient` throws an opaque error. Developers will see "Invalid URL" or similar without knowing which var is missing.
+
+**Recommendation**: Add validation:
+
+```javascript
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. ' +
+    'Ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in .env'
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
 
 ---
 
 ## Warnings
 
-### WARNING-1: Missing focus management on navigation transitions
-**File**: `src/hooks/useMobileNav.js` (lines 44-54, 56-67)  
+### WARNING-1: Auth loading state race condition
+**File**: `src/context/AuthContext.jsx` (lines 48-62)  
 **Severity**: Medium  
-**Issue**: When pushing to a new view or popping back, focus is not programmatically managed. Screen reader users may lose their place in the document.  
-**Recommendation**: After transition completes, move focus to the main content or back button of the newly visible view. Consider using a ref to the MobileListDetail container or the ListSelector heading.
 
-### WARNING-2: History state pollution on rapid navigation
-**File**: `src/hooks/useMobileNav.js` (line 49)  
-**Severity**: Low  
-**Issue**: Every `handleOpenList` call pushes to history without checking if the same list is already open. Rapid taps on the same list could push duplicate history entries.  
-**Recommendation**: Add a guard: `if (openListId === listId) return;` at the start of `handleOpenList`.
+```javascript
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        setUser(mergeUserWithProfile(session.user, profile));
+      } else {
+        setUser(null);
+      }
+      setIsLoading(false);
+    }
+  );
 
-### WARNING-3: Mobile toggle switch missing accessible name
-**File**: `src/components/MobileSettings.jsx` (lines 50-56)  
-**Severity**: Medium  
-**Issue**: The toggle checkbox input has no accessible label. The `<label>` wraps the input but relies on visual association only.  
-**Recommendation**: Add `aria-label="Toggle dark mode"` to the input, or associate it via `id` and `htmlFor`.
-
-```jsx
-<input
-  type="checkbox"
-  className={styles.toggleInput}
-  checked={isDark}
-  onChange={toggleTheme}
-  aria-label="Toggle dark mode"
-/>
+  return () => subscription.unsubscribe();
+}, []);
 ```
 
-### WARNING-4: Avatar image missing meaningful alt text
-**File**: `src/components/MobileSettings.jsx` (line 32)  
-**Severity**: Low  
-**Issue**: Profile image has `alt=""` which is correct for decorative images, but a profile photo provides meaningful user identification.  
-**Recommendation**: Use `alt="Profile photo"` or `alt={displayName}` to provide context.
+**Problem**: `onAuthStateChange` is called asynchronously. If the user navigates quickly or the initial session check is slow, `isLoading` stays `true` indefinitely until the callback fires. Supabase recommends calling `getSession()` immediately for the initial state.
 
-### WARNING-5: Recipe overlay backdrop click handler on non-interactive element
-**File**: `src/components/MobileListDetail.jsx` (line 127)  
+**Recommendation**: Add initial session check:
+
+```javascript
+useEffect(() => {
+  // Get initial session synchronously
+  supabase.auth.getSession().then(async ({ data: { session } }) => {
+    if (session?.user) {
+      const profile = await fetchProfile(session.user.id);
+      setUser(mergeUserWithProfile(session.user, profile));
+    }
+    setIsLoading(false);
+  });
+
+  // Subscribe to future changes
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    async (event, session) => {
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        setUser(mergeUserWithProfile(session.user, profile));
+      } else {
+        setUser(null);
+      }
+    }
+  );
+
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+---
+
+### WARNING-2: Profile fetch may fail for new users (trigger timing)
+**File**: `src/context/AuthContext.jsx` (line 52) and migration (lines 85-101)  
+**Severity**: Medium  
+
+**Problem**: The `handle_new_user` trigger creates a profile row AFTER the auth.users INSERT completes. But `onAuthStateChange` fires immediately when sign-up succeeds. The profile fetch in AuthContext may race with the trigger, returning null for brand new users.
+
+**Sequence**:
+1. `signUp()` -> user created in auth.users
+2. `onAuthStateChange` fires with new user
+3. `fetchProfile(userId)` -> may return null if trigger hasn't run yet
+4. Trigger runs -> profile created
+
+**Recommendation**: Either:
+1. Add a small retry/delay in `fetchProfile` for new users
+2. Create the profile client-side if `fetchProfile` returns null:
+
+```javascript
+let profile = await fetchProfile(session.user.id);
+if (!profile && event === 'SIGNED_UP') {
+  // Trigger may not have run yet; create profile manually
+  await supabase.from('profiles').upsert({
+    id: session.user.id,
+    display_name: session.user.user_metadata?.full_name,
+    email: session.user.email,
+  });
+  // Re-fetch
+  profile = await fetchProfile(session.user.id);
+}
+```
+
+---
+
+### WARNING-3: `increment_item_count` function lacks RLS
+**File**: `supabase/migrations/20260227213403_initial_schema.sql` (lines 105-112)  
+**Severity**: Medium  
+
+```sql
+CREATE OR REPLACE FUNCTION increment_item_count(p_list_id uuid, amount int)
+RETURNS void AS $$
+BEGIN
+  UPDATE lists
+  SET item_count = item_count + amount
+  WHERE id = p_list_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**Problem**: `SECURITY DEFINER` runs as the function owner (service role), bypassing RLS. Any authenticated user could call this function with any `list_id` to manipulate item counts on lists they don't own.
+
+**Recommendation**: Add ownership check inside the function:
+
+```sql
+CREATE OR REPLACE FUNCTION increment_item_count(p_list_id uuid, amount int)
+RETURNS void AS $$
+BEGIN
+  -- Verify caller owns or has access to this list
+  IF NOT EXISTS (
+    SELECT 1 FROM lists
+    WHERE id = p_list_id
+    AND (owner_id = auth.uid() OR EXISTS (
+      SELECT 1 FROM list_shares
+      WHERE list_id = p_list_id
+      AND shared_with_email = auth.jwt() ->> 'email'
+    ))
+  ) THEN
+    RAISE EXCEPTION 'Access denied to list %', p_list_id;
+  END IF;
+
+  UPDATE lists
+  SET item_count = item_count + amount
+  WHERE id = p_list_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+---
+
+### WARNING-4: Missing unique constraint on list_shares
+**File**: `supabase/migrations/20260227213403_initial_schema.sql` (lines 39-45)  
 **Severity**: Low  
-**Issue**: The backdrop `div` has an `onClick` handler but is not keyboard-accessible (no `role` or `tabIndex`).  
-**Recommendation**: The Escape key handler is already implemented, which is the recommended iOS pattern. For full compliance, either add `role="button" tabIndex="0" onKeyDown` for keyboard users, or document that backdrop-tap is intentionally mouse/touch-only. Current implementation is acceptable.
+
+```sql
+CREATE TABLE list_shares (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  list_id uuid REFERENCES lists(id) ON DELETE CASCADE NOT NULL,
+  shared_with_email text NOT NULL,
+  added_at timestamptz DEFAULT now()
+);
+```
+
+**Problem**: No unique constraint on `(list_id, shared_with_email)`. A user could accidentally share the same list with the same person multiple times, creating duplicate rows.
+
+**Recommendation**: Add a unique constraint:
+
+```sql
+CREATE TABLE list_shares (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  list_id uuid REFERENCES lists(id) ON DELETE CASCADE NOT NULL,
+  shared_with_email text NOT NULL,
+  added_at timestamptz DEFAULT now(),
+  UNIQUE (list_id, shared_with_email)
+);
+```
+
+---
+
+### WARNING-5: `handle_new_user` trigger lacks error handling
+**File**: `supabase/migrations/20260227213403_initial_schema.sql` (lines 85-96)  
+**Severity**: Low  
+
+```sql
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (id, display_name, email)
+  VALUES (
+    NEW.id,
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.email
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**Problem**: If the INSERT fails (e.g., due to a constraint violation), the entire user sign-up transaction would fail. The `ON CONFLICT DO NOTHING` clause would make this safer.
+
+**Recommendation**:
+
+```sql
+INSERT INTO public.profiles (id, display_name, email)
+VALUES (
+  NEW.id,
+  NEW.raw_user_meta_data->>'full_name',
+  NEW.email
+)
+ON CONFLICT (id) DO NOTHING;
+```
+
+---
+
+### WARNING-6: Login error mapping incomplete
+**File**: `src/components/Login.jsx` (lines 13-26)  
+**Severity**: Low  
+
+```javascript
+const friendlyError = (message) => {
+  switch (message) {
+    case 'Invalid login credentials':
+      return 'Incorrect email or password.';
+    case 'User already registered':
+      return 'An account with this email already exists.';
+    // ...
+  }
+};
+```
+
+**Problem**: Supabase error messages can vary by version. Some common ones not mapped:
+- `"Email not confirmed"` (if email confirmation enabled later)
+- `"Signup is not enabled"` (if auth disabled)
+- `"AuthApiError: ..."` wrapper messages
+
+**Recommendation**: Consider a more defensive pattern:
+
+```javascript
+const friendlyError = (message) => {
+  if (message?.includes('Invalid login credentials')) {
+    return 'Incorrect email or password.';
+  }
+  if (message?.includes('already registered')) {
+    return 'An account with this email already exists.';
+  }
+  // ... etc
+  return 'Something went wrong. Please try again.';
+};
+```
 
 ---
 
 ## Suggestions
 
-### SUGGESTION-1: Consider `aria-live` for transition announcements
-**File**: `src/App.jsx`  
-**Context**: Screen reader users may not be aware that a new view has loaded after slide transitions.  
-**Recommendation**: Add an `aria-live="polite"` region that announces "Viewing [list name]" or "Back to My Lists" after transitions complete.
+### SUGGESTION-1: Add index on `history.name` for autocomplete performance
+**File**: `supabase/migrations/20260227213403_initial_schema.sql`  
+**Context**: The history table is used for autocomplete. Searches by name prefix would benefit from an index.
 
-### SUGGESTION-2: Extract tab configuration to a constant
-**File**: `src/components/BottomTabBar.jsx` (lines 10-45)  
-**Context**: The tabs array is recreated on every render with inline SVGs.  
-**Recommendation**: Move the tabs array outside the component as a module-level constant. The SVGs are static and don't need to be recreated. This is a minor optimization but improves code clarity.
+```sql
+CREATE INDEX idx_history_name ON history(name text_pattern_ops);
+```
 
-### SUGGESTION-3: Consider `will-change` for smoother animations
-**File**: `src/App.module.css` (lines 175-227)  
-**Context**: Slide transitions could benefit from GPU acceleration hints.  
-**Recommendation**: Add `will-change: transform;` to animated elements during transitions. However, for 300ms animations, the benefit may be negligible and the memory overhead not worthwhile.
+---
 
-### SUGGESTION-4: Add data-testid attributes for E2E testing
-**Files**: `BottomTabBar.jsx`, `MobileListDetail.jsx`, `MobileSettings.jsx`  
-**Context**: The PRD marks e2eRequired as false, but when E2E tests are added later, stable selectors will be needed.  
-**Recommendation**: Proactively add `data-testid` to key interactive elements (tabs, back button, sign out button).
+### SUGGESTION-2: Consider `updated_at` columns for caching/sync
+**Files**: All tables  
+**Context**: The schema lacks `updated_at` timestamps. These are useful for:
+- Client-side cache invalidation
+- Conflict resolution in offline-first scenarios
+- Debugging data issues
 
-### SUGGESTION-5: StoreCategoryEditor PropTypes
-**File**: `src/components/StoreManager.jsx` (lines 27-307)  
-**Context**: The internal `StoreCategoryEditor` component has no PropTypes.  
-**Recommendation**: Add PropTypes for `categories`, `otherStores`, and `onSave` for better documentation and debugging.
+---
 
-### SUGGESTION-6: Transition duration synchronization
-**File**: `src/hooks/useMobileNav.js` (line 3)  
-**Context**: `TRANSITION_DURATION = 300` must match the CSS animation duration. No shared constant exists.  
-**Recommendation**: Add a comment noting the CSS coupling, or use a CSS custom property read via `getComputedStyle`.
+### SUGGESTION-3: Add `displayName` field to sign-up flow
+**File**: `src/context/AuthContext.jsx` (lines 108-114)  
+**Context**: The `signUpWithEmail` function doesn't collect or pass a display name.
+
+```javascript
+const signUpWithEmail = async (email, password, displayName = null) => {
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name: displayName }
+    }
+  });
+  // ...
+};
+```
 
 ---
 
 ## What's Done Well
 
-1. **ARIA Accessibility**: Proper `role="tablist"`, `role="tab"`, `aria-selected` on BottomTabBar. `aria-hidden="true"` on all decorative SVGs. `aria-label` on buttons.
+1. **Database Schema**: Well-structured relational design with appropriate foreign keys and ON DELETE CASCADE/SET NULL behavior.
 
-2. **44px Touch Targets**: Back button, share button, menu buttons, and list rows all meet Apple HIG minimum touch target sizes.
+2. **Indexes**: All the right indexes are created (owner_id, list_id, user_id, shared_with_email).
 
-3. **CSS-Only Animations**: Slide transitions use keyframes with proper timing (300ms ease-out). No JavaScript animation libraries required.
+3. **Profile Trigger**: Auto-creating profiles on sign-up via database trigger is the correct pattern for Supabase.
 
-4. **Reduced Motion Support**: `@media (prefers-reduced-motion: reduce)` correctly disables all slide animations.
+4. **Realtime Setup**: All tables are added to `supabase_realtime` publication, enabling real-time subscriptions.
 
-5. **Safe Area Handling**: Comprehensive use of `env(safe-area-inset-*)` in BottomTabBar, MobileListDetail nav bar, and App container. `viewport-fit=cover` correctly set in index.html.
+5. **Auth Context API**: The `useAuth` hook exposes the same methods as before (signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser), maintaining API compatibility.
 
-6. **PWA Configuration**: `black-translucent` status bar, `display-mode: standalone` CSS rule, and apple-mobile-web-app-* meta tags all present.
+6. **Profile Merging**: The `mergeUserWithProfile` pattern correctly attaches profile data to the user object for consistent access.
 
-7. **Dark Mode**: All new components use CSS custom properties consistently. No hardcoded colors. Both light and dark themes work correctly.
+7. **Error Propagation**: Auth functions properly throw errors for callers to handle rather than swallowing them.
 
-8. **Clean Hook Design**: `useMobileNav` properly manages transition state, integrates with browser history, and cleans up timeouts on unmount. `useIsMobile` uses matchMedia correctly with event listener cleanup.
+8. **PropTypes Updated**: `MobileSettings.jsx` correctly updated PropTypes to reflect new user shape with `user_metadata` and `profile` properties.
 
-9. **PropTypes Validation**: All new components have comprehensive PropTypes including shape definitions for complex objects.
+9. **User Property Paths**: `App.jsx` and `MobileSettings.jsx` correctly access user properties via the new paths (`user.user_metadata.full_name`, `user.profile.avatar_url`).
 
-10. **Desktop Unchanged**: The implementation correctly gates mobile behavior behind the `isMobile` check. Desktop layout continues to use the sidebar pattern without changes.
-
-11. **Escape Key Handler**: Recipe overlay properly closes on Escape key, improving keyboard accessibility.
-
-12. **Poping List Data Pattern**: The `poppingListData` approach preserves list data during exit animations to prevent content flicker.
-
-13. **Conditional BottomTabBar Rendering**: BottomTabBar is only rendered when `isMobile` is true, avoiding unnecessary DOM nodes on desktop.
+10. **Firebase Package Removed**: `package.json` correctly shows `firebase` replaced by `@supabase/supabase-js`.
 
 ---
 
 ## Requirements Traceability
 
-| Story | Status | Implementation Notes |
-|-------|--------|---------------------|
-| US-001 | Pass | BottomTabBar with ARIA tablist/tab roles, hidden on desktop (>700px), safe area padding |
-| US-002 | Pass | useMobileNav hook with activeTab, openListId, browser history integration via pushState/popstate |
-| US-003 | Pass | ListSelector mobile CSS: transparent container, rounded sections, 44px targets, chevrons |
-| US-004 | Pass | MobileListDetail: iOS nav bar, back button, collapsible suggestions, recipe bottom sheet, escape key |
-| US-005 | Pass | CSS keyframes (slideOutLeft, slideInFromRight, etc.), 300ms ease-out, prefers-reduced-motion |
-| US-006 | Pass | StoreManager `alwaysOpen` prop, `containerFullScreen` class, no toggle on mobile |
-| US-007 | Pass | MobileSettings: grouped table view, avatar, dark mode toggle, "Account Actions" for sign out |
-| US-008 | Pass | Desktop ListSelector gets chevrons, border-bottom separators; layout unchanged |
-| US-009 | Pass | viewport-fit=cover, env() safe-area-insets, display-mode: standalone rule, black-translucent status bar |
+| Story | Status | Notes |
+|-------|--------|-------|
+| US-001 | Partial Pass | Schema correct but `increment_item_count` needs RLS check; missing unique constraint on `list_shares` |
+| US-002 | Partial Pass | Client works but needs env var validation |
+| US-003 | Partial Pass | Auth works but `imageStorage.js` still imports Firebase (blocks MobileSettings); race condition on initial load |
 
 ---
 
 ## Final Assessment
 
-**Status**: Ready for Merge
+**Status**: **NOT READY** - Critical blockers must be fixed
 
-The implementation successfully delivers all 9 user stories with strong attention to iOS design patterns, accessibility, and PWA requirements. The warnings identified are minor improvements that do not block release.
+### Required Before Testing
 
-### Recommended Pre-Merge Fixes (Quick Wins)
+| Priority | Issue | Fix |
+|----------|-------|-----|
+| P0 | CRITICAL-1: imageStorage.js Firebase imports | Stub exports or remove import from MobileSettings |
+| P0 | CRITICAL-2: ShoppingListContext Firebase imports | Complete US-004 or stub with empty arrays |
+| P0 | CRITICAL-4: Missing env var validation | Add validation in supabase.js |
 
-1. **WARNING-3**: Add `aria-label="Toggle dark mode"` to the toggle input (1 line)
-2. **WARNING-2**: Add duplicate navigation guard in `handleOpenList` (1 line)
+### Required Before Merge
 
-### Recommended Post-Merge Follow-ups
+| Priority | Issue | Fix |
+|----------|-------|-----|
+| P1 | WARNING-1: Auth loading race | Add `getSession()` call |
+| P1 | WARNING-3: increment_item_count RLS bypass | Add ownership check |
+| P1 | WARNING-4: Missing unique constraint | Add to list_shares table |
 
-- WARNING-1: Focus management after transitions (requires design decision on focus target)
-- WARNING-4: Avatar alt text (trivial but requires deciding on text)
-- SUGGESTION-4: Add data-testid attributes before E2E tests are written
+### Post-Merge Follow-ups
+
+- WARNING-2: Profile fetch retry for new users
+- WARNING-5: ON CONFLICT DO NOTHING for trigger
+- WARNING-6: More robust error message matching
 
 ---
 
@@ -177,9 +451,9 @@ The implementation successfully delivers all 9 user stories with strong attentio
 
 | Category | Count |
 |----------|-------|
-| Critical Issues | 0 (all resolved) |
-| Warnings | 5 |
-| Suggestions | 6 |
-| Positive Notes | 13 |
+| Critical Issues | 4 |
+| Warnings | 6 |
+| Suggestions | 3 |
+| Positive Notes | 10 |
 
-The iOS mobile navigation implementation is well-architected with clean state management, proper accessibility, and excellent visual fidelity to iOS design patterns. The codebase follows React conventions consistently and the mobile/desktop split is handled elegantly. No blocking issues remain.
+The migration is **well-architected** but **incomplete** for the stories marked as done. The critical issues are straightforward to fix — primarily dealing with files that weren't migrated yet but are imported by migrated files. The database schema is solid with minor security hardening needed.

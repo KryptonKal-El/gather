@@ -56,6 +56,17 @@
       "updatedAt": "2026-02-26",
       "startedAt": "2026-02-26T14:00:00Z",
       "completedAt": "2026-02-26T16:00:00Z"
+    },
+    {
+      "id": "prd-supabase-migration",
+      "name": "Firebase to Supabase Backend Migration",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-supabase-migration.md",
+      "jsonPath": "docs/prds/prd-supabase-migration.json",
+      "branchName": "feature/supabase-migration",
+      "createdAt": "2026-02-27",
+      "updatedAt": "2026-02-27",
+      "startedAt": "2026-02-27T12:00:00Z"
     }
   ]
 }

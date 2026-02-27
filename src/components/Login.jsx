@@ -1,30 +1,24 @@
 /**
- * Login screen with Apple, Google, email/password, and guest sign-in options.
+ * Login screen with Apple, Google, and email/password sign-in options.
  */
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import styles from './Login.module.css';
 
 /**
- * Maps Firebase auth error codes to user-friendly messages.
- * @param {string} code - Firebase error code
+ * Maps Supabase auth error messages to user-friendly messages.
+ * @param {string} message - Supabase error message
  * @returns {string}
  */
-const friendlyError = (code) => {
-  switch (code) {
-    case 'auth/invalid-email':
-      return 'Invalid email address.';
-    case 'auth/user-disabled':
-      return 'This account has been disabled.';
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
+const friendlyError = (message) => {
+  switch (message) {
+    case 'Invalid login credentials':
       return 'Incorrect email or password.';
-    case 'auth/email-already-in-use':
+    case 'User already registered':
       return 'An account with this email already exists.';
-    case 'auth/weak-password':
+    case 'Password should be at least 6 characters':
       return 'Password must be at least 6 characters.';
-    case 'auth/too-many-requests':
+    case 'Email rate limit exceeded':
       return 'Too many attempts. Please try again later.';
     default:
       return 'Something went wrong. Please try again.';
@@ -32,7 +26,7 @@ const friendlyError = (code) => {
 };
 
 export const Login = () => {
-  const { signInWithApple, signInWithGoogle, signInWithEmail, signUpWithEmail, signInAsGuest } = useAuth();
+  const { signInWithApple, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const [error, setError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [email, setEmail] = useState('');
@@ -44,7 +38,7 @@ export const Login = () => {
     setIsSigningIn(true);
     try {
       await signInWithApple();
-    } catch (err) {
+    } catch {
       setError('Apple sign-in failed. Please try again.');
     } finally {
       setIsSigningIn(false);
@@ -56,7 +50,7 @@ export const Login = () => {
     setIsSigningIn(true);
     try {
       await signInWithGoogle();
-    } catch (err) {
+    } catch {
       setError('Google sign-in failed. Please try again.');
     } finally {
       setIsSigningIn(false);
@@ -74,19 +68,7 @@ export const Login = () => {
         await signInWithEmail(email, password);
       }
     } catch (err) {
-      setError(friendlyError(err.code));
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
-  const handleGuest = async () => {
-    setError(null);
-    setIsSigningIn(true);
-    try {
-      await signInAsGuest();
-    } catch (err) {
-      setError('Guest sign-in failed. Please try again.');
+      setError(friendlyError(err.message));
     } finally {
       setIsSigningIn(false);
     }
@@ -182,26 +164,9 @@ export const Login = () => {
             </svg>
             Sign in with Google
           </button>
-
-          <div className={styles.divider}>
-            <span>or</span>
-          </div>
-
-          <button
-            className={styles.guestBtn}
-            onClick={handleGuest}
-            disabled={isSigningIn}
-            type="button"
-          >
-            Continue as Guest
-          </button>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
-
-        <p className={styles.note}>
-          Guest data is temporary. Sign in to sync across devices.
-        </p>
       </div>
     </div>
   );

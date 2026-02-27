@@ -1,10 +1,9 @@
 /**
- * Shopping list state management backed by Firestore.
- * Real-time listeners push data into state. Actions call Firestore directly.
+ * Shopping list state management backed by Supabase.
+ * Real-time listeners push data into state. Actions call Supabase directly.
  * Supports both owned lists and lists shared by other users.
  */
 import { createContext, useState, useEffect, useCallback, useRef } from 'react';
-import { increment } from 'firebase/firestore';
 import { categorizeItem, DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { useAuth } from './AuthContext.jsx';
 import {
@@ -15,22 +14,23 @@ import {
   subscribeSharedListRefs,
   subscribeList,
   subscribeSharedItems,
-  createList as fsCreateList,
-  updateList as fsUpdateList,
-  deleteList as fsDeleteList,
-  addItem as fsAddItem,
-  addItems as fsAddItems,
-  updateItem as fsUpdateItem,
-  removeItem as fsRemoveItem,
+  createList as dbCreateList,
+  updateList as dbUpdateList,
+  deleteList as dbDeleteList,
+  addItem as dbAddItem,
+  addItems as dbAddItems,
+  updateItem as dbUpdateItem,
+  removeItem as dbRemoveItem,
   clearCheckedItems,
   addHistoryEntry,
-  createStore as fsCreateStore,
-  updateStore as fsUpdateStore,
-  deleteStore as fsDeleteStore,
+  createStore as dbCreateStore,
+  updateStore as dbUpdateStore,
+  deleteStore as dbDeleteStore,
   saveStoreOrder,
-  shareList as fsShareList,
-  unshareList as fsUnshareList,
-} from '../services/firestore.js';
+  shareList as dbShareList,
+  unshareList as dbUnshareList,
+  adjustItemCount,
+} from '../services/database.js';
 
 /** Capitalizes the first letter of a string. */
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -44,7 +44,7 @@ export const ShoppingListContext = createContext(null);
  */
 export const ShoppingListProvider = ({ children }) => {
   const { user } = useAuth();
-  const userId = user?.uid ?? null;
+  const userId = user?.id ?? null;
   const userEmail = user?.email ?? null;
 
   const [lists, setLists] = useState([]);
@@ -190,7 +190,7 @@ export const ShoppingListProvider = ({ children }) => {
 
   const createListAction = useCallback(async (name, emoji = null) => {
     if (!userId) return;
-    const newId = await fsCreateList(userId, name, userEmail, emoji);
+    const newId = await dbCreateList(userId, name, userEmail, emoji);
     setActiveListId(newId);
   }, [userId, userEmail]);
 
@@ -199,7 +199,7 @@ export const ShoppingListProvider = ({ children }) => {
     const ownerUid = getListOwnerUid(id);
     // Only owners can delete lists
     if (ownerUid !== userId) return;
-    await fsDeleteList(userId, id);
+    await dbDeleteList(userId, id);
     if (activeListId === id) {
       setActiveListId((prev) => {
         const remaining = allLists.filter((l) => l.id !== id);
@@ -211,7 +211,7 @@ export const ShoppingListProvider = ({ children }) => {
   const renameListAction = useCallback(async (id, newName) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(id);
-    await fsUpdateList(ownerUid, id, { name: newName });
+    await dbUpdateList(ownerUid, id, { name: newName });
   }, [userId, getListOwnerUid]);
 
   const updateListDetailsAction = useCallback(async (id, updates) => {
@@ -220,7 +220,7 @@ export const ShoppingListProvider = ({ children }) => {
     const allowed = {};
     if (updates.name !== undefined) allowed.name = updates.name;
     if (updates.emoji !== undefined) allowed.emoji = updates.emoji;
-    await fsUpdateList(ownerUid, id, allowed);
+    await dbUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 
   const selectListAction = useCallback((id) => {
@@ -241,7 +241,7 @@ export const ShoppingListProvider = ({ children }) => {
       price: null,
       imageUrl: null,
     };
-    await fsAddItem(ownerUid, listId, item);
+    await dbAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, name);
   }, [userId, getCategoriesForStore, getListOwnerUid]);
 
@@ -262,7 +262,7 @@ export const ShoppingListProvider = ({ children }) => {
         imageUrl: item.imageUrl ?? null,
       };
     });
-    await fsAddItems(ownerUid, listId, prepared);
+    await dbAddItems(ownerUid, listId, prepared);
     for (const item of prepared) {
       await addHistoryEntry(userId, item.name);
     }
@@ -274,24 +274,24 @@ export const ShoppingListProvider = ({ children }) => {
     const item = activeItems.find((i) => i.id === itemId);
     if (!item) return;
     const nowChecked = !item.isChecked;
-    await fsUpdateItem(ownerUid, listId, itemId, { isChecked: nowChecked });
-    await fsUpdateList(ownerUid, listId, { itemCount: increment(nowChecked ? -1 : 1) });
+    await dbUpdateItem(ownerUid, listId, itemId, { isChecked: nowChecked });
+    await adjustItemCount(listId, nowChecked ? -1 : 1);
   }, [userId, activeItems, getListOwnerUid]);
 
   const removeItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     const item = activeItems.find((i) => i.id === itemId);
-    await fsRemoveItem(ownerUid, listId, itemId);
+    await dbRemoveItem(ownerUid, listId, itemId);
     if (item && !item.isChecked) {
-      await fsUpdateList(ownerUid, listId, { itemCount: increment(-1) });
+      await adjustItemCount(listId, -1);
     }
   }, [userId, activeItems, getListOwnerUid]);
 
   const updateItemAction = useCallback(async (listId, itemId, updates) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
-    await fsUpdateItem(ownerUid, listId, itemId, updates);
+    await dbUpdateItem(ownerUid, listId, itemId, updates);
   }, [userId, getListOwnerUid]);
 
   const clearCheckedAction = useCallback(async (listId) => {
@@ -304,7 +304,7 @@ export const ShoppingListProvider = ({ children }) => {
 
   const addStoreAction = useCallback(async (name, color) => {
     if (!userId) return;
-    await fsCreateStore(userId, {
+    await dbCreateStore(userId, {
       name,
       color,
       categories: [],
@@ -314,12 +314,12 @@ export const ShoppingListProvider = ({ children }) => {
 
   const updateStoreAction = useCallback(async (id, updates) => {
     if (!userId) return;
-    await fsUpdateStore(userId, id, updates);
+    await dbUpdateStore(userId, id, updates);
   }, [userId]);
 
   const deleteStoreAction = useCallback(async (id) => {
     if (!userId) return;
-    await fsDeleteStore(userId, id);
+    await dbDeleteStore(userId, id);
   }, [userId]);
 
   const reorderStoresAction = useCallback(async (reorderedStores) => {
@@ -339,14 +339,14 @@ export const ShoppingListProvider = ({ children }) => {
     if (ownerUid !== userId) return;
     const listEntry = allLists.find((l) => l.id === listId);
     const listName = listEntry?.name ?? 'Shared List';
-    await fsShareList(userId, listId, listName, email);
+    await dbShareList(userId, listId, listName, email);
   }, [userId, allLists, getListOwnerUid]);
 
   const unshareListAction = useCallback(async (listId, email) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     if (ownerUid !== userId) return;
-    await fsUnshareList(userId, listId, email);
+    await dbUnshareList(userId, listId, email);
   }, [userId, getListOwnerUid]);
 
   // -----------------------------------------------------------------------

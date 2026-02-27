@@ -12,7 +12,7 @@ import styles from './MobileSettings.module.css';
 /**
  * Renders the mobile settings screen.
  * @param {Object} props
- * @param {Object} props.user - Firebase user object
+ * @param {Object} props.user - Supabase user object with profile
  * @param {Function} props.onSignOut - Sign out callback
  */
 export const MobileSettings = ({ user, onSignOut }) => {
@@ -23,15 +23,14 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
-  const isGuest = user?.isAnonymous ?? true;
 
-  const displayName = isGuest ? 'Guest' : (user?.displayName ?? 'User');
-  const email = isGuest ? null : (user?.email ?? '');
-  const avatarLetter = isGuest ? 'G' : (displayName.charAt(0).toUpperCase() || 'U');
-  const photoURL = user?.photoURL;
+  const displayName = user?.user_metadata?.full_name ?? user?.profile?.display_name ?? 'User';
+  const email = user?.email ?? '';
+  const avatarLetter = (displayName.charAt(0).toUpperCase() || 'U');
+  const photoURL = user?.profile?.avatar_url ?? user?.user_metadata?.avatar_url;
 
   const handleAvatarClick = () => {
-    if (isGuest || isUploading) return;
+    if (isUploading) return;
     fileInputRef.current?.click();
   };
 
@@ -59,12 +58,12 @@ export const MobileSettings = ({ user, onSignOut }) => {
       <div className={styles.section}>
         <div className={styles.accountRow}>
           <div
-            className={`${styles.avatar} ${!isGuest ? styles.avatarTappable : ''}`}
+            className={`${styles.avatar} ${styles.avatarTappable}`}
             onClick={handleAvatarClick}
-            role={!isGuest ? 'button' : undefined}
-            tabIndex={!isGuest ? 0 : undefined}
-            aria-label={!isGuest ? 'Change profile photo' : undefined}
-            onKeyDown={!isGuest ? (e) => { if (e.key === 'Enter' || e.key === ' ') handleAvatarClick(); } : undefined}
+            role="button"
+            tabIndex={0}
+            aria-label="Change profile photo"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleAvatarClick(); }}
           >
             {isUploading ? (
               <div className={styles.uploadSpinner} />
@@ -73,7 +72,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
             ) : (
               avatarLetter
             )}
-            {!isGuest && !isUploading && (
+            {!isUploading && (
               <div className={styles.avatarOverlay}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
@@ -82,21 +81,18 @@ export const MobileSettings = ({ user, onSignOut }) => {
               </div>
             )}
           </div>
-          {!isGuest && (
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className={styles.hiddenInput}
-              onChange={handleFileChange}
-              aria-hidden="true"
-              tabIndex={-1}
-            />
-          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className={styles.hiddenInput}
+            onChange={handleFileChange}
+            aria-hidden="true"
+            tabIndex={-1}
+          />
           <div className={styles.accountInfo}>
             <span className={styles.displayName}>{displayName}</span>
             {email && <span className={styles.email}>{email}</span>}
-            {isGuest && <span className={styles.email}>Anonymous user</span>}
           </div>
         </div>
         {uploadError && (
@@ -125,12 +121,6 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
       <h3 className={styles.sectionHeader}>Account Actions</h3>
       <div className={styles.section}>
-        {isGuest && (
-          <div className={styles.infoRow}>
-            <span className={styles.infoIcon}>ℹ️</span>
-            <span className={styles.infoText}>Sign in to sync across devices</span>
-          </div>
-        )}
         <button
           type="button"
           className={styles.destructiveRow}
@@ -145,11 +135,16 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
 MobileSettings.propTypes = {
   user: PropTypes.shape({
-    uid: PropTypes.string,
-    displayName: PropTypes.string,
+    id: PropTypes.string,
     email: PropTypes.string,
-    isAnonymous: PropTypes.bool,
-    photoURL: PropTypes.string,
+    user_metadata: PropTypes.shape({
+      full_name: PropTypes.string,
+      avatar_url: PropTypes.string,
+    }),
+    profile: PropTypes.shape({
+      display_name: PropTypes.string,
+      avatar_url: PropTypes.string,
+    }),
   }),
   onSignOut: PropTypes.func.isRequired,
 };

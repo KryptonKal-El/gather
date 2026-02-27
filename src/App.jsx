@@ -125,9 +125,9 @@ export const App = () => {
     );
   }
 
-  const isGuest = user.isAnonymous;
-  const avatarLetter = isGuest ? 'G' : ((user.displayName ?? user.email ?? 'U').charAt(0).toUpperCase() || 'U');
-  const photoURL = user.photoURL;
+  const displayName = user.user_metadata?.full_name ?? user.profile?.display_name ?? user.email ?? 'User';
+  const avatarLetter = (displayName.charAt(0).toUpperCase() || 'U');
+  const photoURL = user.profile?.avatar_url ?? user.user_metadata?.avatar_url;
 
   const handleListSelect = (listId) => {
     if (isMobile) {
@@ -167,12 +167,12 @@ export const App = () => {
                 <ListSelector
                   lists={state.lists}
                   activeListId={state.activeListId}
-                  currentUserId={user.uid}
+                  currentUserId={user.id}
                   onSelect={handleListSelect}
                   onCreate={actions.createList}
                   onUpdateDetails={actions.updateListDetails}
                   onDelete={actions.deleteList}
-                  onShareClick={isGuest ? undefined : (list) => setSharingListId(list.id)}
+                  onShareClick={(list) => setSharingListId(list.id)}
                 />
               </div>
             </section>
@@ -184,7 +184,6 @@ export const App = () => {
                 stores={state.stores}
                 history={state.history}
                 suggestions={suggestions}
-                isGuest={isGuest}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
                 onAddItems={handleAddItems}
@@ -236,12 +235,12 @@ export const App = () => {
         <ListSelector
           lists={state.lists}
           activeListId={state.activeListId}
-          currentUserId={user.uid}
+          currentUserId={user.id}
           onSelect={actions.selectList}
           onCreate={actions.createList}
           onUpdateDetails={actions.updateListDetails}
           onDelete={actions.deleteList}
-          onShareClick={isGuest ? undefined : (list) => setSharingListId(list.id)}
+          onShareClick={(list) => setSharingListId(list.id)}
         />
       </aside>
 
@@ -302,7 +301,7 @@ export const App = () => {
                 <span className={styles.headerAvatar}>{avatarLetter}</span>
               )}
               <span className={styles.userName}>
-                {isGuest ? 'Guest' : user.displayName ?? user.email}
+                {displayName}
               </span>
               <ThemeToggle />
               <button className={styles.signOutBtn} onClick={signOut} type="button">
