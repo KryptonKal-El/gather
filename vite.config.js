@@ -68,18 +68,6 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'firestore-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24, // 1 day
-              },
-              networkTimeoutSeconds: 10,
-            },
-          },
-          {
             urlPattern: /\.(?:png|jpg|jpeg|gif|webp|svg)$/i,
             handler: 'CacheFirst',
             options: {
@@ -94,10 +82,10 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/firebasestorage\.googleapis\.com\/.*/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'firebase-storage-cache',
+              cacheName: 'supabase-storage-cache',
               expiration: {
                 maxEntries: 200,
                 maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
