@@ -101,14 +101,13 @@ export const adjustItemCount = async (listId, amount) => {
 
 /**
  * Subscribes to all lists for a user.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
- * Real-time will be implemented in US-005.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID
  * @param {function} callback - Called with array of list objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeLists = (userId, callback) => {
-  (async () => {
+  const fetchLists = async () => {
     try {
       const { data, error } = await supabase
         .from('lists')
@@ -134,9 +133,31 @@ export const subscribeLists = (userId, callback) => {
     } catch (error) {
       console.error('Failed to fetch lists:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchLists();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`lists-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'lists',
+        filter: `owner_id=eq.${userId}`,
+      },
+      () => {
+        fetchLists();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -280,14 +301,14 @@ export const clearCheckedItems = async (userId, listId, checkedItemIds) => {
 
 /**
  * Subscribes to all items in a list.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID (kept for API compatibility)
  * @param {string} listId - List ID
  * @param {function} callback - Called with array of item objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeItems = (userId, listId, callback) => {
-  (async () => {
+  const fetchItems = async () => {
     try {
       const { data, error } = await supabase
         .from('items')
@@ -316,17 +337,39 @@ export const subscribeItems = (userId, listId, callback) => {
     } catch (error) {
       console.error('Failed to fetch items:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchItems();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`items-${listId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'items',
+        filter: `list_id=eq.${listId}`,
+      },
+      () => {
+        fetchItems();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
 
 /**
- * Subscribes to items in a shared list (same as subscribeItems in Supabase).
+ * Subscribes to items in a shared list (delegates to subscribeItems).
  * @param {string} ownerUid - Owner's user ID (kept for API compatibility)
  * @param {string} listId - List ID
  * @param {function} callback - Called with array of item objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeSharedItems = (ownerUid, listId, callback) => {
   return subscribeItems(ownerUid, listId, callback);
@@ -356,13 +399,13 @@ export const addHistoryEntry = async (userId, name) => {
 
 /**
  * Subscribes to the user's item history.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID
  * @param {function} callback - Called with array of history objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeHistory = (userId, callback) => {
-  (async () => {
+  const fetchHistory = async () => {
     try {
       const { data, error } = await supabase
         .from('history')
@@ -385,9 +428,31 @@ export const subscribeHistory = (userId, callback) => {
     } catch (error) {
       console.error('Failed to fetch history:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchHistory();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`history-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'history',
+        filter: `user_id=eq.${userId}`,
+      },
+      () => {
+        fetchHistory();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -441,10 +506,10 @@ export const unshareList = async (ownerUid, listId, email) => {
 /**
  * Subscribes to shared list references for a user (by email).
  * Returns refs for lists that others have shared with this user.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} email - User's email
  * @param {function} callback - Called with array of shared list ref objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeSharedListRefs = (email, callback) => {
   if (!email) {
@@ -452,10 +517,10 @@ export const subscribeSharedListRefs = (email, callback) => {
     return () => {};
   }
 
-  (async () => {
-    try {
-      const normalizedEmail = email.toLowerCase().trim();
+  const normalizedEmail = email.toLowerCase().trim();
 
+  const fetchSharedRefs = async () => {
+    try {
       const { data: shares, error: sharesError } = await supabase
         .from('list_shares')
         .select('id, list_id, added_at')
@@ -505,21 +570,43 @@ export const subscribeSharedListRefs = (email, callback) => {
     } catch (error) {
       console.error('Failed to fetch shared list refs:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchSharedRefs();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`shared-refs-${normalizedEmail}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'list_shares',
+        filter: `shared_with_email=eq.${normalizedEmail}`,
+      },
+      () => {
+        fetchSharedRefs();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
 
 /**
  * Subscribes to a single list document.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} ownerUid - Owner's user ID (kept for API compatibility)
  * @param {string} listId - List ID
  * @param {function} callback - Called with list object or null
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeList = (ownerUid, listId, callback) => {
-  (async () => {
+  const fetchList = async () => {
     try {
       const { data, error } = await supabase
         .from('lists')
@@ -548,9 +635,43 @@ export const subscribeList = (ownerUid, listId, callback) => {
     } catch (error) {
       console.error('Failed to fetch list:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchList();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`list-${listId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'lists',
+        filter: `id=eq.${listId}`,
+      },
+      () => {
+        fetchList();
+      }
+    )
+    .on(
+      'postgres_changes',
+      {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'lists',
+        filter: `id=eq.${listId}`,
+      },
+      () => {
+        callback(null);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
 
 // ---------------------------------------------------------------------------
@@ -652,13 +773,13 @@ export const saveStoreOrder = async (userId, stores) => {
 
 /**
  * Subscribes to stores.
- * Stub: performs initial fetch, calls callback once, returns no-op unsubscribe.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID
  * @param {function} callback - Called with array of store objects
- * @returns {function} Unsubscribe function (no-op for now)
+ * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeStores = (userId, callback) => {
-  (async () => {
+  const fetchStores = async () => {
     try {
       const { data, error } = await supabase
         .from('stores')
@@ -684,7 +805,29 @@ export const subscribeStores = (userId, callback) => {
     } catch (error) {
       console.error('Failed to fetch stores:', error);
     }
-  })();
+  };
 
-  return () => {};
+  // Initial fetch
+  fetchStores();
+
+  // Subscribe to real-time changes
+  const channel = supabase
+    .channel(`stores-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'stores',
+        filter: `user_id=eq.${userId}`,
+      },
+      () => {
+        fetchStores();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };
