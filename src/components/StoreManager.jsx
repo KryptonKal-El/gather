@@ -22,7 +22,7 @@ const CATEGORY_PRESET_COLORS = [
  * Inline category editor for a single store.
  * Supports add, remove (with confirm), rename, reorder, color picker,
  * keyword editing, and copying categories from defaults or another store.
- * All changes persist to Firestore immediately via onSave.
+ * All changes persist to the database immediately via onSave.
  */
 const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
   const [newName, setNewName] = useState('');

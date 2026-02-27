@@ -7,11 +7,11 @@
     "framework": "react",
     "bundler": "vite",
     "styling": "css-modules",
-    "backend": "firebase",
-    "hosting": "firebase-hosting",
-    "functions": "firebase-functions",
-    "database": "firestore",
-    "auth": "firebase-auth",
+    "backend": "supabase",
+    "hosting": "vercel",
+    "functions": "supabase-edge-functions",
+    "database": "postgres",
+    "auth": "supabase-auth",
     "pwa": true
   },
   "commands": {
@@ -27,7 +27,7 @@
     "services": "src/services",
     "context": "src/context",
     "hooks": "src/hooks",
-    "functions": "functions",
+    "functions": "supabase/functions",
     "public": "public"
   },
   "capabilities": {
@@ -46,12 +46,12 @@
   },
   "integrations": [
     {
-      "name": "firebase",
-      "purpose": "Auth, Firestore, Hosting, Cloud Functions"
+      "name": "supabase",
+      "purpose": "Auth, Postgres DB, Realtime, Storage, Edge Functions"
     },
     {
       "name": "serpapi",
-      "purpose": "Image search for shopping items"
+      "purpose": "Image search for shopping items (via Supabase Edge Function)"
     }
   ],
   "git": {
