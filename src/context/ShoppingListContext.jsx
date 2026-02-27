@@ -23,13 +23,13 @@ import {
   removeItem as dbRemoveItem,
   clearCheckedItems,
   addHistoryEntry,
+  addHistoryEntries,
   createStore as dbCreateStore,
   updateStore as dbUpdateStore,
   deleteStore as dbDeleteStore,
   saveStoreOrder,
   shareList as dbShareList,
   unshareList as dbUnshareList,
-  adjustItemCount,
 } from '../services/database.js';
 
 /** Capitalizes the first letter of a string. */
@@ -39,7 +39,7 @@ export const ShoppingListContext = createContext(null);
 
 /**
  * Provides shopping list state and actions to the component tree.
- * Subscribes to Firestore real-time listeners scoped to the current user,
+ * Subscribes to Supabase Realtime listeners scoped to the current user,
  * plus shared list references from other users.
  */
 export const ShoppingListProvider = ({ children }) => {
@@ -263,9 +263,8 @@ export const ShoppingListProvider = ({ children }) => {
       };
     });
     await dbAddItems(ownerUid, listId, prepared);
-    for (const item of prepared) {
-      await addHistoryEntry(userId, item.name);
-    }
+    const itemNames = prepared.map((item) => item.name);
+    await addHistoryEntries(userId, itemNames);
   }, [userId, getCategoriesForStore, getListOwnerUid]);
 
   const toggleItemAction = useCallback(async (listId, itemId) => {
@@ -275,18 +274,15 @@ export const ShoppingListProvider = ({ children }) => {
     if (!item) return;
     const nowChecked = !item.isChecked;
     await dbUpdateItem(ownerUid, listId, itemId, { isChecked: nowChecked });
-    await adjustItemCount(listId, nowChecked ? -1 : 1);
+    // Note: item_count is auto-updated by database trigger
   }, [userId, activeItems, getListOwnerUid]);
 
   const removeItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
-    const item = activeItems.find((i) => i.id === itemId);
     await dbRemoveItem(ownerUid, listId, itemId);
-    if (item && !item.isChecked) {
-      await adjustItemCount(listId, -1);
-    }
-  }, [userId, activeItems, getListOwnerUid]);
+    // Note: item_count is auto-updated by database trigger
+  }, [userId, getListOwnerUid]);
 
   const updateItemAction = useCallback(async (listId, itemId, updates) => {
     if (!userId) return;

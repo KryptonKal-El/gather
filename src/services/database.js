@@ -83,6 +83,8 @@ export const deleteList = async (userId, listId) => {
 
 /**
  * Adjusts the item_count on a list using the RPC function.
+ * NOTE: This is supplementary — database triggers auto-manage item_count on
+ * insert/delete/check. Use this only for manual corrections if needed.
  * @param {string} listId - List ID
  * @param {number} amount - Amount to add (negative to subtract)
  */
@@ -190,7 +192,7 @@ export const addItem = async (userId, listId, item) => {
 
     if (error) throw error;
 
-    await adjustItemCount(listId, 1);
+    // Note: item_count is auto-updated by database trigger
     return data.id;
   } catch (error) {
     throw new Error(`Failed to add item: listId=${listId}, name=${item.name}`, { cause: error });
@@ -219,8 +221,7 @@ export const addItems = async (userId, listId, items) => {
     const { error } = await supabase.from('items').insert(rows);
 
     if (error) throw error;
-
-    await adjustItemCount(listId, items.length);
+    // Note: item_count is auto-updated by database triggers (per row)
   } catch (error) {
     throw new Error(`Failed to add items: listId=${listId}, count=${items.length}`, { cause: error });
   }
@@ -394,6 +395,20 @@ export const addHistoryEntry = async (userId, name) => {
     if (error) throw error;
   } catch (error) {
     throw new Error(`Failed to add history entry: name=${name}`, { cause: error });
+  }
+};
+
+/**
+ * Adds multiple history entries in a single batch insert.
+ * @param {string} userId - The authenticated user's ID
+ * @param {string[]} names - Array of item names to add to history
+ */
+export const addHistoryEntries = async (userId, names) => {
+  if (!names.length) return;
+  const rows = names.map((name) => ({ user_id: userId, name }));
+  const { error } = await supabase.from('history').insert(rows);
+  if (error) {
+    throw new Error('Failed to add history entries', { cause: error });
   }
 };
 
@@ -752,21 +767,25 @@ export const deleteStore = async (userId, storeId) => {
 
 /**
  * Saves the full ordered array of stores (for reordering).
- * @param {string} userId - User ID (kept for API compatibility)
+ * Uses a single upsert for efficiency.
+ * @param {string} userId - User ID
  * @param {Array<object>} stores - Array of store objects with id
  */
 export const saveStoreOrder = async (userId, stores) => {
-  try {
-    // Update each store's sort_order
-    for (let i = 0; i < stores.length; i++) {
-      const { error } = await supabase
-        .from('stores')
-        .update({ sort_order: i })
-        .eq('id', stores[i].id);
+  const updates = stores.map((store, i) => ({
+    id: store.id,
+    user_id: userId,
+    name: store.name,
+    color: store.color,
+    categories: store.categories ?? [],
+    sort_order: i,
+  }));
 
-      if (error) throw error;
-    }
-  } catch (error) {
+  const { error } = await supabase
+    .from('stores')
+    .upsert(updates, { onConflict: 'id' });
+
+  if (error) {
     throw new Error('Failed to save store order', { cause: error });
   }
 };
