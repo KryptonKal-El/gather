@@ -1,25 +1,29 @@
 /**
  * Image search service.
- * Calls the Cloud Function proxy which forwards requests to SerpAPI.
- * In development, falls back to calling SerpAPI directly via the Vite dev proxy.
+ * Calls the Supabase Edge Function proxy which forwards requests to SerpAPI.
  */
 
 /**
  * Searches Google Images for photos matching the query.
- * Uses the `/api/searchImages` endpoint which routes to a Firebase Cloud Function
- * in production, avoiding CORS issues with third-party APIs.
+ * Uses the Supabase Edge Function endpoint to avoid CORS issues.
  * @param {string} query - The search term
  * @param {number} [count=8] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
  */
 export const searchImages = async (query, count = 8) => {
+  const baseUrl = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL;
+  if (!baseUrl) {
+    console.error('Image search failed: VITE_SUPABASE_EDGE_FUNCTION_URL not configured');
+    return [];
+  }
+
   const params = new URLSearchParams({
     q: query,
     num: String(count),
   });
 
   try {
-    const res = await fetch(`/api/searchImages?${params}`);
+    const res = await fetch(`${baseUrl}/search-images?${params}`);
 
     if (!res.ok) {
       console.error(`Image search failed: ${res.status} ${res.statusText}`);
