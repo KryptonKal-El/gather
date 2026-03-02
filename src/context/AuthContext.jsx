@@ -1,6 +1,6 @@
 /**
  * Authentication context using Supabase Auth.
- * Supports Apple sign-in, Google sign-in, and email/password.
+ * Supports Apple sign-in and email/password.
  * Provides user state, loading state, and auth actions to the component tree.
  */
 import { createContext, useState, useEffect, useContext } from 'react';
@@ -71,18 +71,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Signs in with Google OAuth.
-   * @returns {Promise<void>}
-   */
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-    if (error) {
-      console.error('Google sign-in failed:', error);
-      throw error;
-    }
-  };
-
-  /**
    * Signs in with Apple OAuth.
    * @returns {Promise<void>}
    */
@@ -151,7 +139,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, isLoading, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -160,7 +148,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, signInWithGoogle: Function, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signOut: Function, refreshUser: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

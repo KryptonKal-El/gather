@@ -37,3 +37,4 @@ functions/.env
 # Symlinked toolkit dirs (don't commit these)
 agents
 skills
+.vercel

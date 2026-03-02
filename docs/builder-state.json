@@ -1,20 +1,19 @@
 {
-  "sessionId": "builder-2026-02-27-supabase-migration",
-  "lastHeartbeat": "2026-02-27T23:30:00Z",
+  "sessionId": "builder-2026-03-02-apple-auth",
+  "lastHeartbeat": "2026-03-02T12:00:00Z",
   "activePrd": {
-    "prdId": "prd-supabase-migration",
+    "prdId": "prd-apple-auth",
     "testingRigor": "standard",
     "currentStory": null,
-    "storiesPending": [],
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010"],
+    "storiesPending": ["US-001", "US-002"],
+    "storiesCompleted": [],
     "storyAssessments": {},
-    "status": "completed",
+    "status": "in_progress",
     "credentials": {
-      "supabase": "provided",
-      "serpapi": "deferred",
-      "vercel": "deferred",
-      "google-oauth": "deferred",
-      "apple-oauth": "deferred"
+      "apple-developer": "deferred"
+    },
+    "skippedStories": {
+      "US-003": "Apple Developer credentials not available — deferred"
     }
   },
   "adhocQueue": [],
@@ -22,18 +21,11 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-02-27T23:30:00Z",
+    "lastSyncedAt": "2026-03-02T12:00:00Z",
     "items": [
-      {"content": "US-001: Initialize Supabase Project & DB Schema", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Configure Supabase Client & Env Vars", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Migrate Authentication", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Migrate Firestore → Supabase Postgres CRUD", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Migrate Real-time Subscriptions", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Implement Row Level Security (RLS)", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Migrate Firebase Storage → Supabase Storage", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-007"},
-      {"content": "US-008: Migrate Cloud Function → Edge Function", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-008"},
-      {"content": "US-009: Deploy Frontend to Vercel", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-009"},
-      {"content": "US-010: Final Cleanup & Verification", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-010"}
+      {"content": "US-001: Remove Google Sign-In", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Rearrange Login Screen Layout", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Enable Apple Sign-In in Supabase", "status": "cancelled", "priority": "medium", "flow": "prd", "refId": "US-003"}
     ]
   },
   "uncommittedWork": null,
