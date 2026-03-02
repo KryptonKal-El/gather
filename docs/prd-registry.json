@@ -75,15 +75,14 @@
     {
       "id": "prd-apple-auth",
       "name": "Apple Auth Setup & Google Auth Removal",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-apple-auth.md",
       "jsonPath": "docs/prds/prd-apple-auth.json",
       "branchName": "feature/apple-auth",
       "createdAt": "2026-03-02",
       "updatedAt": "2026-03-02",
       "startedAt": "2026-03-02T12:00:00Z",
-      "currentStory": null,
-      "notes": "US-001 and US-002 complete and committed. US-003 deferred — requires Apple Developer credentials configured in Supabase."
+      "completedAt": "2026-03-02T13:00:00Z"
     }
   ]
 }
