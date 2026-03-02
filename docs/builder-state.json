@@ -1,12 +1,12 @@
 {
   "sessionId": "builder-2026-03-02-apple-auth",
-  "lastHeartbeat": "2026-03-02T12:00:00Z",
+  "lastHeartbeat": "2026-03-02T12:30:00Z",
   "activePrd": {
     "prdId": "prd-apple-auth",
     "testingRigor": "standard",
     "currentStory": null,
-    "storiesPending": ["US-001", "US-002"],
-    "storiesCompleted": [],
+    "storiesPending": [],
+    "storiesCompleted": ["US-001", "US-002"],
     "storyAssessments": {},
     "status": "in_progress",
     "credentials": {
@@ -21,10 +21,10 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-02T12:00:00Z",
+    "lastSyncedAt": "2026-03-02T12:30:00Z",
     "items": [
-      {"content": "US-001: Remove Google Sign-In", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Rearrange Login Screen Layout", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-001: Remove Google Sign-In", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Rearrange Login Screen Layout", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
       {"content": "US-003: Enable Apple Sign-In in Supabase", "status": "cancelled", "priority": "medium", "flow": "prd", "refId": "US-003"}
     ]
   },
