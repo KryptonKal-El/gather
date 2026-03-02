@@ -9,7 +9,7 @@
       "requestTiming": "upfront",
       "requiredForStories": ["US-003"],
       "fallbackPlan": "US-001 and US-002 can proceed without credentials; US-003 blocked until Apple Developer credentials are configured",
-      "status": "pending"
+      "status": "provided"
     }
   ],
   "userStories": [
