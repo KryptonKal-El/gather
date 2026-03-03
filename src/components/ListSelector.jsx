@@ -87,9 +87,9 @@ export const ListSelector = ({
   const ownedLists = lists.filter((l) => !l._isShared);
   const sharedLists = lists.filter((l) => l._isShared);
 
-  const getRowTintStyle = (color, isActive) => {
-    if (isActive || !color) return undefined;
-    return { backgroundColor: color + '1A' };
+  const getRowTintStyle = (color) => {
+    if (!color) return undefined;
+    return { backgroundColor: color };
   };
 
   const renderListItem = (list) => {
@@ -100,8 +100,8 @@ export const ListSelector = ({
     return (
       <div
         key={list.id}
-        className={`${styles.listItem} ${isActive ? styles.active : ''}`}
-        style={getRowTintStyle(list.color, isActive)}
+        className={`${styles.listItem} ${isActive ? styles.active : ''} ${list.color ? styles.colored : ''}`}
+        style={getRowTintStyle(list.color)}
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>

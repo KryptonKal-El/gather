@@ -124,8 +124,8 @@
         "Lint passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "This replaces the previous low-opacity tint approach. The key change: remove getRowTintStyle's alpha suffix ('1A') and use full backgroundColor: list.color with white text. Active state should use brightness filter or white left border instead of --primary-tint. Also need to override .menuBtn color on hover:hover media query since it uses color: transparent by default.",
+      "passes": true,
+      "notes": "Revised US-004 implemented: full color backgrounds with white text, brightness filters for active/hover, white left border inset on active, white menu button overrides in hover:hover media query.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

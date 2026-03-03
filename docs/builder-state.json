@@ -20,7 +20,7 @@
       {"content": "US-001: Database Migration — Add color column to lists", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
       {"content": "US-002: Service Layer & Context — Wire color through data flow", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
       {"content": "US-003: Color Picker in Create & Edit Forms", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Display List Color as Row Background Tint", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-004"}
+      {"content": "US-004: Full color row backgrounds with white text (REVISED)", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"}
     ]
   },
   "uncommittedWork": null,
