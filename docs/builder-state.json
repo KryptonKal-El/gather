@@ -1,28 +1,24 @@
 {
-  "sessionId": "builder-2026-03-02-apple-auth",
-  "lastHeartbeat": "2026-03-02T13:00:00Z",
+  "sessionId": "builder-2026-03-02-bugs",
+  "lastHeartbeat": "2026-03-02T14:00:00Z",
   "activePrd": {
-    "prdId": "prd-apple-auth",
+    "prdId": "prd-bugs",
     "testingRigor": "standard",
     "currentStory": null,
     "storiesPending": [],
-    "storiesCompleted": ["US-001", "US-002", "US-003"],
+    "storiesCompleted": ["BUG-005", "BUG-006"],
     "storyAssessments": {},
-    "status": "completed",
-    "credentials": {
-      "apple-developer": "provided"
-    }
+    "status": "completed"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-02T13:00:00Z",
+    "lastSyncedAt": "2026-03-02T14:00:00Z",
     "items": [
-      {"content": "US-001: Remove Google Sign-In", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Rearrange Login Screen Layout", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Enable Apple Sign-In in Supabase", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-003"}
+      {"content": "BUG-005: New list doesn't appear after creation", "status": "completed", "priority": "high", "flow": "prd", "refId": "BUG-005"},
+      {"content": "BUG-006: App stuck on Loading... after refresh", "status": "completed", "priority": "high", "flow": "prd", "refId": "BUG-006"}
     ]
   },
   "uncommittedWork": null,

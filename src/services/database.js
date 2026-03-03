@@ -155,7 +155,11 @@ export const subscribeLists = (userId, callback) => {
         fetchLists();
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeLists] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -358,7 +362,11 @@ export const subscribeItems = (userId, listId, callback) => {
         fetchItems();
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeItems] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -463,7 +471,11 @@ export const subscribeHistory = (userId, callback) => {
         fetchHistory();
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeHistory] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -605,7 +617,11 @@ export const subscribeSharedListRefs = (email, callback) => {
         fetchSharedRefs();
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeSharedListRefs] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -682,7 +698,11 @@ export const subscribeList = (ownerUid, listId, callback) => {
         callback(null);
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeList] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);
@@ -844,7 +864,11 @@ export const subscribeStores = (userId, callback) => {
         fetchStores();
       }
     )
-    .subscribe();
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeStores] Realtime subscription error:', err);
+      }
+    });
 
   return () => {
     supabase.removeChannel(channel);

@@ -191,6 +191,7 @@ export const ShoppingListProvider = ({ children }) => {
   const createListAction = useCallback(async (name, emoji = null) => {
     if (!userId) return;
     const newId = await dbCreateList(userId, name, userEmail, emoji);
+    setLists(prev => [...prev, { id: newId, name, emoji, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
     setActiveListId(newId);
   }, [userId, userEmail]);
 

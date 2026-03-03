@@ -107,6 +107,107 @@
       "occurrences": 1,
       "priority": "high",
       "notes": "Follow-up to BUG-002 which removed header contents but left the empty element visible."
+    },
+    {
+      "id": "BUG-004",
+      "title": "Apple Sign-In redirects to localhost:3000 instead of production URL",
+      "description": "After completing Apple OAuth consent in the live/production environment, Supabase redirects the user back to http://localhost:3000 instead of the production Vercel URL. The access token is present in the URL hash, so auth technically succeeded — but the user lands on a dead page.",
+      "severity": "critical",
+      "status": "resolved",
+      "resolvedAt": "2026-03-02",
+      "affectedComponents": [],
+      "affectedPlatforms": ["all"],
+      "rootCause": "The Supabase project's **Site URL** in the dashboard (Authentication → URL Configuration) is still set to `http://localhost:3000` (or `http://127.0.0.1:3000`). This is the URL Supabase uses as the default OAuth redirect. The local `supabase/config.toml` also has `site_url = \"http://127.0.0.1:3000\"` and `additional_redirect_urls = [\"https://127.0.0.1:3000\"]` — but the remote dashboard setting is what matters for production.",
+      "reproductionSteps": [
+        "Go to the production Vercel deployment of ShoppingListAI",
+        "Click 'Sign in with Apple'",
+        "Complete Apple's consent screen",
+        "Observe: browser redirects to http://localhost:3000/#access_token=... instead of the production URL"
+      ],
+      "suggestedFix": "**This is a Supabase dashboard fix, not a code fix.**\n\n1. Go to your Supabase project dashboard → **Authentication** → **URL Configuration**\n2. Set **Site URL** to your production Vercel URL (e.g., `https://shoppinglistai.vercel.app`)\n3. Add both your production URL and localhost to **Redirect URLs**:\n   - `https://shoppinglistai.vercel.app` (production)\n   - `http://localhost:3000` (local dev — so local dev still works)\n   - `http://localhost:4000` (if using Vite dev port)\n4. Save\n\nOptionally, also update `supabase/config.toml` for local dev clarity, but the dashboard setting is what controls production behavior.",
+      "acceptanceCriteria": [
+        "After Apple Sign-In on production, user is redirected back to the production Vercel URL (not localhost)",
+        "The access token is picked up by Supabase client and user is logged in",
+        "Apple Sign-In still works in local development (localhost redirect preserved in Redirect URLs list)",
+        "Email/password sign-in is unaffected"
+      ],
+      "relatedPrd": "prd-apple-auth",
+      "reportedAt": "2026-03-02",
+      "occurrences": 1,
+      "priority": "critical",
+      "notes": "This is a config-only fix in the Supabase dashboard — no code changes needed. The root cause is that site_url was never updated from localhost to the production domain after the Supabase migration. Production URL: https://shoppinglistai.vercel.app"
+    },
+    {
+      "id": "BUG-005",
+      "title": "New list does not appear after creation — requires page refresh",
+      "description": "After clicking 'Create' to make a new list, the list does not appear in the UI. The user must refresh the page to see it. The list IS successfully inserted into Supabase (confirmed by refresh showing it), but the UI state doesn't update.",
+      "severity": "high",
+      "status": "resolved",
+      "resolvedAt": "2026-03-02",
+      "affectedComponents": [
+        "src/context/ShoppingListContext.jsx",
+        "src/services/database.js"
+      ],
+      "affectedPlatforms": ["all"],
+      "rootCause": "Two compounding issues:\n\n1. **No optimistic update:** `createListAction` in ShoppingListContext.jsx (lines 191-195) inserts via `dbCreateList` and calls `setActiveListId(newId)`, but never adds the new list to the `lists` state array. It relies entirely on the Supabase Realtime subscription to deliver the new list.\n\n2. **Silent Realtime subscription failures:** `subscribeLists` in database.js (line 158) calls `.subscribe()` with no status callback. If the channel fails to subscribe, enters CHANNEL_ERROR, or the Realtime event is silently dropped (due to RLS + expired JWT, network issues, etc.), there is zero error handling. The re-fetch inside the subscription handler also silently drops updates on failure (lines 120-137 — catch block logs but doesn't call the callback).\n\nThe result: `setActiveListId(newId)` points to an ID that doesn't exist in the `lists` array, so `activeListEntry` at line 130 returns `null`.",
+      "reproductionSteps": [
+        "Open the app (any viewport)",
+        "Log in with any account",
+        "Click '+' or navigate to create a new list",
+        "Enter a name and click 'Create'",
+        "Observe: the new list does not appear in the list sidebar/selector",
+        "Refresh the page — the new list now appears"
+      ],
+      "suggestedFix": "**Two-part fix:**\n\n**Part 1: Add optimistic update to `createListAction` (ShoppingListContext.jsx lines 191-195)**\nAfter `dbCreateList` returns the new ID, immediately add a temporary list object to the `lists` state so the UI updates instantly:\n```js\nconst createListAction = async (name, emoji = null) => {\n  if (!userId) return;\n  const newId = await dbCreateList(userId, name, userEmail, emoji);\n  // Optimistic update — add to state immediately\n  setLists(prev => [...prev, { id: newId, name, emoji, owner_id: userId, created_at: new Date().toISOString() }]);\n  setActiveListId(newId);\n};\n```\nThe next Realtime re-fetch will replace this with the full server data.\n\n**Part 2: Add `.subscribe()` status callbacks to all 6 subscriptions in database.js**\nAt minimum, log subscription errors so failures are visible:\n```js\n.subscribe((status, err) => {\n  if (status === 'CHANNEL_ERROR') console.error('Realtime subscription error:', err);\n});\n```\nApply to lines 158, 361, 466, 608, 685, 847.",
+      "acceptanceCriteria": [
+        "After clicking 'Create', the new list appears immediately in the list selector without a page refresh",
+        "The new list is selected (active) after creation",
+        "Realtime subscription failures are logged to the console (not silent)",
+        "If a Realtime event is missed, the optimistic update still shows the list",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-supabase-migration",
+      "reportedAt": "2026-03-02",
+      "occurrences": 1,
+      "priority": "critical",
+      "notes": "The same silent-subscription pattern affects all 6 Realtime subscriptions in database.js (lists, items, history, stores, shared list refs, individual list). Consider adding status callbacks to all of them as part of this fix."
+    },
+    {
+      "id": "BUG-006",
+      "title": "App gets stuck on 'Loading...' screen after refresh — requires multiple refreshes",
+      "description": "After refreshing the page, the app frequently gets stuck on the 'Loading...' screen indefinitely. It eventually loads after refreshing several times. This is most noticeable on mobile/PWA and slower connections.",
+      "severity": "critical",
+      "status": "resolved",
+      "resolvedAt": "2026-03-02",
+      "affectedComponents": [
+        "src/context/AuthContext.jsx",
+        "src/App.jsx"
+      ],
+      "affectedPlatforms": ["all"],
+      "rootCause": "The `isLoading` state starts as `true` (AuthContext.jsx line 46) and is only set to `false` inside two async code paths that both lack proper error handling:\n\n1. **No `.catch()` on `getSession().then()`** (line 50): If `getSession()` rejects (network error, corrupted localStorage token) or if the async callback inside `.then()` throws, `setIsLoading(false)` at line 55 never executes.\n\n2. **`fetchProfile()` can throw/hang** (lines 52, 61): Both `getSession` and `onAuthStateChange` paths call `await fetchProfile()` before reaching `setIsLoading(false)`. The `fetchProfile` function (lines 16-28) handles Supabase query errors (returns null) but does NOT handle network-level failures (e.g., `TypeError: Failed to fetch`). If the network request hangs or throws, the error propagates and prevents `setIsLoading(false)` from running.\n\n3. **No timeout fallback** (line 46): There is no mechanism to force `isLoading` to `false` after a maximum wait period. If both paths fail, the user is stuck forever.\n\n4. **Async callback in `onAuthStateChange`** (line 59): Supabase doesn't await async callbacks, so if the callback throws after an `await`, it becomes an unhandled promise rejection.",
+      "reproductionSteps": [
+        "Open the app in production (https://shoppinglistai.vercel.app)",
+        "Log in with any account",
+        "Refresh the page",
+        "Observe: the app shows 'Loading...' indefinitely (may need to try a few times, more likely on slower connections)",
+        "Refresh again — eventually it loads"
+      ],
+      "suggestedFix": "**Three fixes in AuthContext.jsx:**\n\n**Fix 1: Wrap `fetchProfile` in try/catch (lines 16-28)**\n```js\nconst fetchProfile = async (userId) => {\n  try {\n    const { data, error } = await supabase\n      .from('profiles')\n      .select('id, display_name, email, avatar_url, created_at')\n      .eq('id', userId)\n      .single();\n    if (error) {\n      console.error('Failed to fetch profile:', error);\n      return null;\n    }\n    return data;\n  } catch (err) {\n    console.error('Failed to fetch profile (network):', err);\n    return null;\n  }\n};\n```\n\n**Fix 2: Add `.catch()` to `getSession().then()` (line 50)**\n```js\nsupabase.auth.getSession().then(async ({ data: { session } }) => {\n  if (session?.user) {\n    const profile = await fetchProfile(session.user.id);\n    setUser(mergeUserWithProfile(session.user, profile));\n  }\n  setIsLoading(false);\n}).catch((err) => {\n  console.error('Failed to get session:', err);\n  setIsLoading(false);\n});\n```\n\n**Fix 3: Add a timeout fallback**\n```js\n// Force loading to end after 10 seconds no matter what\nconst timeout = setTimeout(() => setIsLoading(false), 10000);\nreturn () => { subscription.unsubscribe(); clearTimeout(timeout); };\n```",
+      "acceptanceCriteria": [
+        "After refreshing the page, the app loads within a reasonable time (under 5 seconds on a normal connection)",
+        "If fetchProfile fails (network error), the app still loads — showing the main content or login screen",
+        "If getSession fails, the app still loads — showing the login screen",
+        "The app never gets stuck on 'Loading...' indefinitely (timeout fallback)",
+        "No unhandled promise rejections in the console",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-supabase-migration",
+      "reportedAt": "2026-03-02",
+      "occurrences": 3,
+      "priority": "critical",
+      "notes": "This is a critical UX issue — users may think the app is broken and abandon it. The fixes are relatively small (error handling + timeout) but have a big impact on reliability."
     }
   ]
 }
