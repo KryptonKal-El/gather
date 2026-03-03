@@ -50,8 +50,16 @@
       "purpose": "Auth, Postgres DB, Realtime, Storage, Edge Functions"
     },
     {
+      "name": "walmart-affiliate",
+      "purpose": "Primary product image search via Supabase Edge Function"
+    },
+    {
+      "name": "openfoodfacts",
+      "purpose": "Secondary fallback image search for grocery items (free, no API key)"
+    },
+    {
       "name": "serpapi",
-      "purpose": "Image search for shopping items (via Supabase Edge Function)"
+      "purpose": "Tertiary fallback image search via Supabase Edge Function"
     }
   ],
   "git": {

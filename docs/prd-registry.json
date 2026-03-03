@@ -113,12 +113,14 @@
     {
       "id": "prd-walmart-image-search",
       "name": "Walmart Affiliate API Image Search",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-walmart-image-search.md",
       "jsonPath": "docs/prds/prd-walmart-image-search.json",
       "branchName": "feature/walmart-image-search",
       "createdAt": "2026-03-03",
-      "updatedAt": "2026-03-03"
+      "updatedAt": "2026-03-03",
+      "startedAt": "2026-03-03T22:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }

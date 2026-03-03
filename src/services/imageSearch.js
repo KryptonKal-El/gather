@@ -1,11 +1,11 @@
 /**
  * Image search service.
- * Calls the Supabase Edge Function proxy which forwards requests to SerpAPI.
+ * Calls the Supabase Edge Function proxy which searches Walmart, Open Food Facts, and SerpAPI.
  */
 
 /**
- * Searches Google Images for photos matching the query.
- * Uses the Supabase Edge Function endpoint to avoid CORS issues.
+ * Searches for product images matching the query.
+ * Uses the Supabase Edge Function endpoint with a Walmart → Open Food Facts → SerpAPI fallback chain.
  * @param {string} query - The search term
  * @param {number} [count=8] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
@@ -29,7 +29,7 @@ export const searchImages = async (query, count = 8) => {
   });
 
   try {
-    const res = await fetch(`${baseUrl}/search-images?${params}`, {
+    const res = await fetch(`${baseUrl}/search-products?${params}`, {
       headers: {
         'Authorization': `Bearer ${anonKey}`,
       },
