@@ -188,10 +188,10 @@ export const ShoppingListProvider = ({ children }) => {
   // Actions
   // -----------------------------------------------------------------------
 
-  const createListAction = useCallback(async (name, emoji = null) => {
+  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0') => {
     if (!userId) return;
-    const newId = await dbCreateList(userId, name, userEmail, emoji);
-    setLists(prev => [...prev, { id: newId, name, emoji, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
+    const newId = await dbCreateList(userId, name, userEmail, emoji, color);
+    setLists(prev => [...prev, { id: newId, name, emoji, color, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
     setActiveListId(newId);
   }, [userId, userEmail]);
 
@@ -221,6 +221,7 @@ export const ShoppingListProvider = ({ children }) => {
     const allowed = {};
     if (updates.name !== undefined) allowed.name = updates.name;
     if (updates.emoji !== undefined) allowed.emoji = updates.emoji;
+    if (updates.color !== undefined) allowed.color = updates.color;
     await dbUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 

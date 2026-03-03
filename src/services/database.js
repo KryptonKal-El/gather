@@ -15,9 +15,10 @@ import { supabase } from './supabase.js';
  * @param {string} name - List name
  * @param {string|null} _ownerEmail - Owner's email (unused in Supabase schema, kept for API compat)
  * @param {string|null} emoji - Optional emoji for the list
+ * @param {string} color - Hex color for the list (defaults to '#1565c0')
  * @returns {Promise<string>} The new list's ID
  */
-export const createList = async (userId, name, _ownerEmail = null, emoji = null) => {
+export const createList = async (userId, name, _ownerEmail = null, emoji = null, color = '#1565c0') => {
   try {
     const { data, error } = await supabase
       .from('lists')
@@ -25,6 +26,7 @@ export const createList = async (userId, name, _ownerEmail = null, emoji = null)
         owner_id: userId,
         name,
         emoji: emoji ?? null,
+        color,
         item_count: 0,
       })
       .select('id')
@@ -51,6 +53,7 @@ export const updateList = async (userId, listId, updates) => {
     if (updates.emoji !== undefined) mapped.emoji = updates.emoji;
     if (updates.itemCount !== undefined) mapped.item_count = updates.itemCount;
     if (updates.item_count !== undefined) mapped.item_count = updates.item_count;
+    if (updates.color !== undefined) mapped.color = updates.color;
 
     const { error } = await supabase
       .from('lists')
@@ -127,6 +130,7 @@ export const subscribeLists = (userId, callback) => {
           id: row.id,
           name: row.name,
           emoji: row.emoji,
+          color: row.color,
           itemCount: row.item_count,
           ownerId: row.owner_id,
           createdAt: row.created_at,
@@ -659,6 +663,7 @@ export const subscribeList = (ownerUid, listId, callback) => {
         id: data.id,
         name: data.name,
         emoji: data.emoji,
+        color: data.color,
         itemCount: data.item_count,
         ownerId: data.owner_id,
         createdAt: data.created_at,

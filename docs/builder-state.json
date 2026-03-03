@@ -1,24 +1,26 @@
 {
-  "sessionId": "builder-2026-03-02-bugs",
-  "lastHeartbeat": "2026-03-02T14:00:00Z",
+  "sessionId": "builder-2026-03-02-list-colors",
+  "lastHeartbeat": "2026-03-02T20:00:00Z",
   "activePrd": {
-    "prdId": "prd-bugs",
+    "prdId": "prd-list-colors",
     "testingRigor": "standard",
-    "currentStory": null,
-    "storiesPending": [],
-    "storiesCompleted": ["BUG-005", "BUG-006"],
+    "currentStory": "US-001",
+    "storiesPending": ["US-002", "US-003", "US-004"],
+    "storiesCompleted": [],
     "storyAssessments": {},
-    "status": "completed"
+    "status": "in_progress"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-02T14:00:00Z",
+    "lastSyncedAt": "2026-03-02T20:00:00Z",
     "items": [
-      {"content": "BUG-005: New list doesn't appear after creation", "status": "completed", "priority": "high", "flow": "prd", "refId": "BUG-005"},
-      {"content": "BUG-006: App stuck on Loading... after refresh", "status": "completed", "priority": "high", "flow": "prd", "refId": "BUG-006"}
+      {"content": "US-001: Database Migration — Add color column to lists", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Service Layer & Context — Wire color through data flow", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Color Picker in Create & Edit Forms", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Display List Color as Row Background Tint", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-004"}
     ]
   },
   "uncommittedWork": null,

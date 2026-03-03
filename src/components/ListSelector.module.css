@@ -286,6 +286,34 @@
   gap: 0.4rem;
 }
 
+/* Color picker swatches */
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.colorSwatch {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.1);
+}
+
+.colorSelected {
+  border-color: var(--text-primary);
+  transform: scale(1.15);
+}
+
 .editInput {
   flex: 1;
   padding: 0.4rem 0.6rem;
@@ -540,6 +568,19 @@
     min-height: 44px;
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+  }
+
+  /* Color swatches on mobile */
+  .colorSwatch {
+    width: 2rem;
+    height: 2rem;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .colorPicker {
+    gap: 0.5rem;
+    padding: 0.35rem 0;
   }
 }
 

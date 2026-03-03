@@ -5,6 +5,11 @@ import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './ListSelector.module.css';
 
+const LIST_PRESET_COLORS = [
+  '#1565c0', '#2e7d32', '#c62828', '#ef6c00', '#6a1b9a',
+  '#00838f', '#ad1457', '#f9a825', '#37474f', '#4e342e',
+];
+
 /**
  * Sidebar/dropdown for managing multiple shopping lists.
  * Shows all lists (owned + shared) with emoji icons, allows creating new ones,
@@ -22,12 +27,14 @@ export const ListSelector = ({
 }) => {
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState(null);
+  const [newColor, setNewColor] = useState('#1565c0');
   const [isCreating, setIsCreating] = useState(false);
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editEmoji, setEditEmoji] = useState(null);
+  const [editColor, setEditColor] = useState('#1565c0');
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
@@ -47,9 +54,10 @@ export const ListSelector = ({
     e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
-    onCreate(trimmed, newEmoji);
+    onCreate(trimmed, newEmoji, newColor);
     setNewName('');
     setNewEmoji(null);
+    setNewColor('#1565c0');
     setIsCreating(false);
   };
 
@@ -57,6 +65,7 @@ export const ListSelector = ({
     setEditingId(list.id);
     setEditName(list.name);
     setEditEmoji(list.emoji ?? null);
+    setEditColor(list.color ?? '#1565c0');
     setMenuOpenId(null);
   };
 
@@ -66,7 +75,7 @@ export const ListSelector = ({
       setEditingId(null);
       return;
     }
-    onUpdateDetails(id, { name: trimmed, emoji: editEmoji });
+    onUpdateDetails(id, { name: trimmed, emoji: editEmoji, color: editColor });
     setEditingId(null);
   };
 
@@ -78,6 +87,11 @@ export const ListSelector = ({
   const ownedLists = lists.filter((l) => !l._isShared);
   const sharedLists = lists.filter((l) => l._isShared);
 
+  const getRowTintStyle = (color, isActive) => {
+    if (isActive || !color) return undefined;
+    return { backgroundColor: color + '1A' };
+  };
+
   const renderListItem = (list) => {
     const isOwned = !list._isShared;
     const isActive = list.id === activeListId;
@@ -87,6 +101,7 @@ export const ListSelector = ({
       <div
         key={list.id}
         className={`${styles.listItem} ${isActive ? styles.active : ''}`}
+        style={getRowTintStyle(list.color, isActive)}
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>
@@ -100,6 +115,18 @@ export const ListSelector = ({
                 onKeyDown={(e) => handleEditKeyDown(e, list.id)}
                 autoFocus
               />
+            </div>
+            <div className={styles.colorPicker}>
+              {LIST_PRESET_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
+                  style={{ backgroundColor: c }}
+                  onClick={() => setEditColor(c)}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
             </div>
             <div className={styles.editActions}>
               <button
@@ -153,7 +180,7 @@ export const ListSelector = ({
                     onClick={() => handleStartEdit(list)}
                   >
                     <span className={styles.menuIcon}>✏️</span>
-                    Name &amp; Icon
+                    Name, Icon &amp; Color
                   </button>
                   {isOwned && onShareClick && (
                     <button
@@ -196,7 +223,7 @@ export const ListSelector = ({
                       className={styles.actionSheetItem}
                       onClick={() => handleStartEdit(list)}
                     >
-                      Name &amp; Icon
+                      Name, Icon &amp; Color
                     </button>
                     {isOwned && onShareClick && (
                       <button
@@ -268,6 +295,18 @@ export const ListSelector = ({
               placeholder="List name..."
               autoFocus
             />
+          </div>
+          <div className={styles.colorPicker}>
+            {LIST_PRESET_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                style={{ backgroundColor: c }}
+                onClick={() => setNewColor(c)}
+                aria-label={`Select color ${c}`}
+              />
+            ))}
           </div>
           <button className={styles.createBtn} type="submit" disabled={!newName.trim()}>
             Create
