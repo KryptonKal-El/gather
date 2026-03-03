@@ -13,6 +13,60 @@
   margin-bottom: 0.75rem;
 }
 
+.searchBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 0 1rem 0.75rem 1rem;
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.5rem 2rem 0.5rem 2.25rem;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.searchInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.65rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clearBtn:hover {
+  color: var(--text-primary);
+}
+
 .title {
   font-size: 1rem;
   font-weight: 700;
@@ -394,6 +448,30 @@
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
 @media (max-width: 700px) {
+  /* Mobile layout: flex column that fills parent height */
+  .mobileLayout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* Fixed header section (title + search bar) */
+  .mobileHeader {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0.75rem;
+  }
+
+  /* Scrollable content area */
+  .scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+
   /* Container becomes transparent - groups get backgrounds */
   .container {
     background: transparent;
@@ -405,8 +483,8 @@
 
   /* Header with larger touch targets */
   .header {
-    padding: 0 1rem;
-    margin-bottom: 0.5rem;
+    padding: 0.75rem 1rem 0.5rem;
+    margin-bottom: 0;
   }
 
   .title {
@@ -425,6 +503,15 @@
     justify-content: center;
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+  }
+
+  /* Search bar inside the fixed header */
+  .searchBar {
+    margin: 0 1rem;
+  }
+
+  .searchInput {
+    font-size: 16px;
   }
 
   /* Create form inside grouped section */

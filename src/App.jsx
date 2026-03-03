@@ -255,25 +255,33 @@ export const App = () => {
 
     if (activeTab === 'stores') {
       return (
-        <section className={styles.mobileFullScreen}>
-          <h2 className={styles.mobileTitle}>Stores</h2>
-          <StoreManager
-            stores={state.stores}
-            onAdd={actions.addStore}
-            onUpdate={actions.updateStore}
-            onDelete={actions.deleteStore}
-            onReorder={actions.reorderStores}
-            alwaysOpen
-          />
+        <section className={styles.mobileScreen}>
+          <div className={styles.mobileHeader}>
+            <h2 className={styles.mobileHeaderTitle}>Stores</h2>
+          </div>
+          <div className={styles.mobileScrollContent}>
+            <StoreManager
+              stores={state.stores}
+              onAdd={actions.addStore}
+              onUpdate={actions.updateStore}
+              onDelete={actions.deleteStore}
+              onReorder={actions.reorderStores}
+              alwaysOpen
+            />
+          </div>
         </section>
       );
     }
 
     if (activeTab === 'settings') {
       return (
-        <section className={styles.mobileFullScreen}>
-          <h2 className={styles.mobileTitle}>Settings</h2>
-          <MobileSettings user={user} onSignOut={signOut} />
+        <section className={styles.mobileScreen}>
+          <div className={styles.mobileHeader}>
+            <h2 className={styles.mobileHeaderTitle}>Settings</h2>
+          </div>
+          <div className={styles.mobileScrollContent}>
+            <MobileSettings user={user} onSignOut={signOut} />
+          </div>
         </section>
       );
     }
