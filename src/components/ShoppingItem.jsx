@@ -21,6 +21,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const [nameValue, setNameValue] = useState('');
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
   const categoryPickerRef = useRef(null);
   const storePickerRef = useRef(null);
   const priceInputRef = useRef(null);
@@ -134,12 +135,14 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const handleUploadImage = async (file) => {
     if (!user?.id) return;
     setIsUploadingImage(true);
+    setUploadError(null);
     try {
       const url = await uploadItemImage(user.id, item.id, file);
       onUpdateItem(item.id, { imageUrl: url });
       setIsImagePickerOpen(false);
     } catch (err) {
       console.error(`Failed to upload image for item ${item.id}:`, err);
+      setUploadError('Upload failed. Please try again.');
     } finally {
       setIsUploadingImage(false);
     }
@@ -156,7 +159,10 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         <button
           type="button"
           className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
-          onClick={() => setIsImagePickerOpen(true)}
+          onClick={() => {
+            setUploadError(null);
+            setIsImagePickerOpen(true);
+          }}
           title="Set item image"
         >
           {imageUrl ? (
@@ -361,6 +367,8 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
           onUpload={handleUploadImage}
           onRemove={handleRemoveImage}
           onClose={() => setIsImagePickerOpen(false)}
+          isUploading={isUploadingImage}
+          uploadError={uploadError}
         />
       )}
     </div>

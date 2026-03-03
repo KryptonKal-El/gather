@@ -18,8 +18,10 @@ import styles from './ImagePicker.module.css';
  * @param {Function} props.onUpload - Called with a File object to upload
  * @param {Function} props.onRemove - Called to clear the current image
  * @param {Function} props.onClose - Called to close the picker
+ * @param {boolean} props.isUploading - Whether an upload is in progress
+ * @param {string|null} props.uploadError - Error message from failed upload
  */
-export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose }) => {
+export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose, isUploading, uploadError }) => {
   const [searchQuery, setSearchQuery] = useState(itemName);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -166,14 +168,17 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
               accept="image/*"
               onChange={handleFileChange}
               className={styles.fileInput}
+              disabled={isUploading}
             />
             <button
               type="button"
               className={styles.uploadBtn}
               onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
             >
-              Choose an image file
+              {isUploading ? 'Uploading...' : 'Choose an image file'}
             </button>
+            {uploadError && <p className={styles.error}>{uploadError}</p>}
             <p className={styles.uploadHint}>Supports JPG, PNG, GIF, WebP</p>
           </div>
         )}
@@ -190,8 +195,12 @@ ImagePicker.propTypes = {
   onUpload: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  isUploading: PropTypes.bool,
+  uploadError: PropTypes.string,
 };
 
 ImagePicker.defaultProps = {
   currentImageUrl: null,
+  isUploading: false,
+  uploadError: null,
 };

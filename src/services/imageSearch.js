@@ -17,13 +17,23 @@ export const searchImages = async (query, count = 8) => {
     return [];
   }
 
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (!anonKey) {
+    console.error('Image search failed: VITE_SUPABASE_ANON_KEY not configured');
+    return [];
+  }
+
   const params = new URLSearchParams({
     q: query,
     num: String(count),
   });
 
   try {
-    const res = await fetch(`${baseUrl}/search-images?${params}`);
+    const res = await fetch(`${baseUrl}/search-images?${params}`, {
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+      },
+    });
 
     if (!res.ok) {
       console.error(`Image search failed: ${res.status} ${res.statusText}`);

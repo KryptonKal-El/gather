@@ -5,7 +5,7 @@
 
 const ALLOWED_ORIGINS = [
   'https://shoppinglistai.vercel.app',
-  'http://localhost:4000',
+  'http://localhost:5173',
 ];
 
 function getCorsHeaders(req: Request) {
