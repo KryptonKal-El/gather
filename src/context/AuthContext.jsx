@@ -53,39 +53,31 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const initSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          if (!isMounted) return;
-          setUser(mergeUserWithProfile(session.user, profile));
-        }
-      } catch (err) {
-        console.error('Failed to get session:', err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    initSession();
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!isMounted) return;
-        if (event === 'INITIAL_SESSION') return;
 
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
           if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
-        } else {
+        } else if (event === 'SIGNED_OUT') {
           setUser(null);
         }
+        // For INITIAL_SESSION with no session, also clear loading
+        // but DON'T set user to null yet — a TOKEN_REFRESHED event may follow
+        if (event === 'INITIAL_SESSION' && !session) {
+          // Wait a brief moment for a potential TOKEN_REFRESHED event
+          setTimeout(() => {
+            if (isMounted) setIsLoading(false);
+          }, 500);
+          return;
+        }
+        if (isMounted) setIsLoading(false);
       }
     );
 
+    // Safety timeout — if no auth event fires within 10 seconds, stop loading
     const timeout = setTimeout(() => {
       if (isMounted) setIsLoading(false);
     }, 10000);
