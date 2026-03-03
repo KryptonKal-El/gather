@@ -308,7 +308,7 @@
 
 @media (max-width: 700px) {
   .app {
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
     padding-left: max(1rem, env(safe-area-inset-left, 0));
     padding-right: max(1rem, env(safe-area-inset-right, 0));
@@ -330,14 +330,14 @@
 
 @media (display-mode: standalone) and (min-width: 701px) {
   .app {
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
   }
 }
 
 @media (max-width: 480px) {
   .app {
     padding: 0.5rem;
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
     padding-bottom: calc(70px + env(safe-area-inset-bottom, 0));
   }
 
