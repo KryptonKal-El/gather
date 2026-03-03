@@ -94,8 +94,8 @@
       "createdAt": "2026-03-02",
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
-      "completedAt": "2026-03-03T12:00:00Z",
-      "notes": "US-001–004 all complete. US-004 revised to use full color backgrounds with white text (replaced washed-out opacity tint)."
+      "completedAt": "2026-03-03T12:30:00Z",
+      "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
     }
   ]
 }

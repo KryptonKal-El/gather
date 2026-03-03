@@ -124,8 +124,8 @@
         "Lint passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "REVISED AGAIN: Replace full-color background approach with 4px left border accent. This is a simplification — remove ALL .colored CSS overrides (white text, brightness filters, rgba borders, hover:hover media query overrides). The getRowTintStyle function should return { borderLeft: '4px solid ' + color } instead of { backgroundColor: color }. Default .listItem needs border-left: 4px solid transparent to prevent layout shift. All text stays default theme colors.",
+      "passes": true,
+      "notes": "Implemented: 4px left border accent. Removed all .colored CSS overrides from previous full-color background approach.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

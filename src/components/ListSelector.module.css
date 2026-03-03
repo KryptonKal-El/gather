@@ -106,11 +106,8 @@
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--border-subtle);
+  border-left: 4px solid transparent;
   transition: background 0.1s;
-}
-
-.colored {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .listItem:last-child {
@@ -121,25 +118,12 @@
   background: var(--bg-hover);
 }
 
-.colored:hover {
-  filter: brightness(1.08);
-}
-
 .active {
   background: var(--primary-tint);
 }
 
 .active:hover {
   background: var(--primary-tint-hover);
-}
-
-.colored.active {
-  filter: brightness(1.15);
-  box-shadow: inset 3px 0 0 0 #fff;
-}
-
-.colored.active:hover {
-  filter: brightness(1.2);
 }
 
 .listBtn {
@@ -231,14 +215,6 @@
 
   .listItem:hover .menuBtn {
     color: var(--text-secondary);
-  }
-
-  .colored .menuBtn {
-    color: rgba(255, 255, 255, 0.85);
-  }
-
-  .colored:hover .menuBtn {
-    color: #fff;
   }
 }
 
@@ -414,33 +390,6 @@
   line-height: 1;
 }
 
-/* Full-color row overrides */
-.colored .listName {
-  color: #fff;
-}
-
-.colored .listCount {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.colored .chevron {
-  color: #fff;
-}
-
-.colored .menuBtn {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.colored .menuBtn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.colored .sharedBadge {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.2);
-}
-
 /* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
@@ -519,23 +468,6 @@
 
   .active:hover {
     background: var(--primary-tint-hover);
-  }
-
-  .colored:hover {
-    filter: brightness(1.08);
-  }
-
-  .colored.active {
-    filter: brightness(1.15);
-    box-shadow: inset 3px 0 0 0 #fff;
-  }
-
-  .colored.active:hover {
-    filter: brightness(1.2);
-  }
-
-  .colored .menuBtn {
-    color: rgba(255, 255, 255, 0.85);
   }
 
   /* List button fills the row */

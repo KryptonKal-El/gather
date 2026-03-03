@@ -89,7 +89,7 @@ export const ListSelector = ({
 
   const getRowTintStyle = (color) => {
     if (!color) return undefined;
-    return { backgroundColor: color };
+    return { borderLeft: '4px solid ' + color };
   };
 
   const renderListItem = (list) => {
@@ -100,7 +100,7 @@ export const ListSelector = ({
     return (
       <div
         key={list.id}
-        className={`${styles.listItem} ${isActive ? styles.active : ''} ${list.color ? styles.colored : ''}`}
+        className={`${styles.listItem} ${isActive ? styles.active : ''}`}
         style={getRowTintStyle(list.color)}
       >
         {editingId === list.id ? (
