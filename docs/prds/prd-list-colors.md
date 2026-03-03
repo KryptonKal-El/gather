@@ -6,7 +6,7 @@
 
 ## Summary
 
-Add a color property to shopping lists so users can visually distinguish them at a glance. Each list gets a required color (with a sensible default) displayed as a subtle background tint on the list row. The color picker follows the same swatch pattern used for stores and categories, with a curated set of 10 colors.
+Add a color property to shopping lists so users can visually distinguish them at a glance. Each list gets a required color (with a sensible default) displayed as a bold 4px left border accent on the list row. The color picker follows the same swatch pattern used for stores and categories, with a curated set of 10 colors.
 
 ## Motivation
 
@@ -19,7 +19,7 @@ Users with multiple lists (e.g., "Groceries", "Costco", "Party Supplies") need t
 - Curate a set of 10 preset colors for lists
 - Add a color swatch picker to the list **create** form (in `ListSelector`)
 - Add a color swatch picker to the list **edit** form (in `ListSelector`)
-- Display the selected color as a subtle background tint on each list row
+- Display the selected color as a 4px left border accent on each list row
 - Pass color through the full data flow: database → service layer → context → UI
 - Rename the three-dot menu option from "Name & Icon" to "Name, Icon & Color" (both desktop dropdown and mobile action sheet)
 
@@ -147,55 +147,62 @@ A curated, balanced set of 10 colors that provide good contrast and visual varie
 
 ---
 
-### US-004: Display List Color as Full Row Background
+### US-004: Display List Color as Left Border Accent
 
 **As a** user  
-**I want** to see my list's color as the row background  
-**So that** I can instantly identify lists by color  
+**I want** to see my list's color as a left border accent on each row  
+**So that** I can instantly identify lists by color without affecting text readability  
 
 #### Details
 
-**Current state (to be changed):**
-- `getRowTintStyle` in `ListSelector.jsx` (line 90-93) appends `'1A'` (10% alpha) to the hex color — this produces a washed-out tint that doesn't match the selected color. Remove this approach entirely.
+**Current state (to be reverted):**
+- Builder implemented full-color row backgrounds with white text overrides. This approach requires extensive text/icon color overrides (`.colored .listName`, `.colored .listCount`, `.colored .chevron`, `.colored .menuBtn`, `.colored .sharedBadge`) and `filter: brightness()` hacks for hover/active states. Remove all of this.
 
-**New approach — full color background with white text:**
+**New approach — 4px left border accent:**
 
-**`getRowTintStyle` replacement** (`ListSelector.jsx`):
-- Apply `backgroundColor: list.color` at full opacity (no alpha suffix)
-- Set `color: '#fff'` on the row so all text (list name, item count, chevron, menu button) is white and readable against the colored background
-- Apply to ALL list rows (owned + shared), including when active
-- Remove the `isActive` skip — colored rows should always show their color. The active state can be indicated by a subtle brightness change (e.g., a `filter: brightness(1.15)` or a thin white left border) instead of the `--primary-tint` background.
+The idea is simple: a bold 4px colored bar on the left edge of each list row. Text stays the default theme colors. No text color overrides needed. Clean, minimal, and instantly scannable.
 
-**Text color overrides** (`ListSelector.jsx` inline styles or CSS):
-- `.listName` — white (`#fff`)
-- `.listCount` — white at reduced opacity (`rgba(255,255,255,0.7)`) for visual hierarchy
-- `.chevron` — white (`#fff`)
-- `.menuBtn` — white (`#fff`), including hover state
-- `.sharedBadge` — white text on `rgba(255,255,255,0.2)` background (semi-transparent white pill)
+**`ListSelector.jsx` changes:**
+- Replace `getRowTintStyle` (lines 90-93): instead of `{ backgroundColor: color }`, return `{ borderLeft: '4px solid ' + color }`. If no color, return `undefined`.
+- Remove the `.colored` CSS class from the row's `className` (line 103). The `.colored` class and all its overrides are no longer needed.
+- The inline style on `.listItem` (line 104) stays, but now applies `borderLeft` instead of `backgroundColor`.
 
-**Active state:**
-- Instead of `--primary-tint` background, use `filter: brightness(1.15)` or `box-shadow: inset 3px 0 0 #fff` (white left bar) to indicate selection while keeping the list color visible.
+**`ListSelector.module.css` changes — remove all full-color overrides:**
+- Remove `.colored` rule (line 112-114) — no more `rgba(255,255,255,0.15)` border override
+- Remove `.colored:hover` rule (line 124-126) — no more `filter: brightness`
+- Remove `.colored.active` rule (line 136-139) — no more brightness + white inset shadow
+- Remove `.colored.active:hover` rule (line 141-143)
+- Remove the entire "Full-color row overrides" block (lines 417-442): `.colored .listName`, `.colored .listCount`, `.colored .chevron`, `.colored .menuBtn`, `.colored .menuBtn:hover`, `.colored .sharedBadge`
+- Remove `.colored .menuBtn` from the `@media (hover: hover)` block (lines 236-242)
+- Remove mobile `.colored:hover`, `.colored.active`, `.colored.active:hover`, `.colored .menuBtn` rules (lines 524-539)
+- Restore default `.listItem` border: keep `border-bottom: 1px solid var(--border-subtle)` (no rgba white override needed)
+- Restore default `.active` background: keep `var(--primary-tint)` (no brightness filter needed)
+- Restore default hover: keep `var(--bg-hover)` (no brightness filter needed)
+- Restore default `.menuBtn` color: keep `var(--text-secondary)` (no white override needed)
 
-**Hover state:**
-- Use `filter: brightness(0.9)` or `brightness(1.1)` to darken/lighten slightly on hover, keeping the color visible.
+**New CSS — left border accent on `.listItem`:**
+- Default `.listItem` should have `border-left: 4px solid transparent` to reserve space and prevent layout shift when some rows have a color and others don't.
+- The inline `style={{ borderLeft: '4px solid #1565c0' }}` overrides this for colored rows.
+- On mobile, the left border should work with the iOS grouped table border-radius. The first-child `border-top-left-radius: 12px` will curve the top of the left border — this is fine and looks intentional.
 
-**Border between rows:**
-- The current `border-bottom: 1px solid var(--border-subtle)` may look off against colored backgrounds. Change to `border-bottom: 1px solid rgba(255,255,255,0.15)` on colored rows for a clean separator.
-
-**Mobile rounded corners (iOS grouped table):**
-- On mobile, the `.lists` container has `border-radius: 12px` and individual rows have border-radius on first/last child. The colored backgrounds must respect these border-radius values so colors don't bleed outside the rounded container. This should already work since `background` respects `border-radius`, but verify.
+**What stays the same:**
+- All text colors remain theme defaults (`var(--text-primary)`, `var(--text-placeholder)`, etc.)
+- Active state remains `var(--primary-tint)` background
+- Hover state remains `var(--bg-hover)` background  
+- Shared badge keeps `var(--info)` text on `var(--info-tint)` background
+- Chevron keeps `var(--text-ghost)` color
+- Menu button keeps default behavior (transparent on hover:hover, visible on touch)
 
 #### Acceptance Criteria
 
-- [ ] Each list row has its full list color as the background (no opacity/alpha)
-- [ ] All text on colored rows is white and fully readable
-- [ ] Item count text is slightly dimmed white (rgba) for hierarchy
-- [ ] Active list row is visually distinguishable (brightness shift or left bar indicator) while keeping its color
-- [ ] Hover state provides visual feedback without losing the color
-- [ ] Row separators are visible against colored backgrounds (white semi-transparent border)
-- [ ] Mobile rounded corners are preserved — no color bleeding
-- [ ] Shared badge is readable on colored backgrounds
-- [ ] The three-dot menu button is white and visible on all row colors (including yellow #f9a825 and lighter colors)
+- [ ] Each list row with a color has a 4px solid left border in its assigned color
+- [ ] Rows without a color (if any) have no visible left border (transparent)
+- [ ] All text remains the default theme colors — no white overrides, no color overrides at all
+- [ ] Active list row uses the standard `--primary-tint` background (not brightness filter)
+- [ ] Hover state uses the standard `--bg-hover` background (not brightness filter)
+- [ ] The `.colored` CSS class and ALL its derivative rules are removed from `ListSelector.module.css`
+- [ ] Layout does not shift between colored and non-colored rows (`border-left: 4px solid transparent` as default)
+- [ ] Mobile rounded corners (iOS grouped table) still look correct with the left border
 - [ ] Works in both light and dark mode
 - [ ] Lint passes
 
@@ -215,8 +222,8 @@ Implementation is complete when:
 2. **Data flow:** `color` flows through `createList` → `subscribeLists` → context state → UI, and through `updateList` for edits.
 3. **Create form:** Shows 10 color swatches with blue pre-selected. Selected color is saved to the database on list creation.
 4. **Edit form:** Shows 10 color swatches with the list's current color pre-selected. Changing color and saving persists to the database.
-5. **Row color:** Every list row in ListSelector has its full assigned color as background with white text. No opacity/alpha wash — the background matches the swatch color exactly.
-6. **Active/hover states:** Active row is visually distinguishable (brightness or border indicator) while keeping its color. Hover provides feedback without losing color.
+5. **Row color:** Every list row in ListSelector has a 4px solid left border in its assigned color. Text remains default theme colors — no white overrides. Clean and readable.
+6. **Active/hover states:** Active and hover use the standard `--primary-tint` and `--bg-hover` backgrounds. No brightness filters or special color overrides.
 7. **Menu label:** "Name & Icon" is updated to "Name, Icon & Color" in both desktop dropdown and mobile action sheet.
 8. **Dark mode:** Color swatches and colored row backgrounds look correct in dark mode.
 9. **Lint passes** with no new warnings.

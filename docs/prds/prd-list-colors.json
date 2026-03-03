@@ -1,7 +1,7 @@
 {
   "project": "ShoppingListAI",
   "branchName": "feature/list-colors",
-  "description": "Add a color property to shopping lists with a 10-color swatch picker and full-color row backgrounds",
+  "description": "Add a color property to shopping lists with a 10-color swatch picker and left border accent on rows",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -107,25 +107,25 @@
     },
     {
       "id": "US-004",
-      "title": "Display List Color as Full Row Background",
-      "description": "As a user, I want to see my list's color as the row background so that I can instantly identify lists by color",
+      "title": "Display List Color as Left Border Accent",
+      "description": "As a user, I want to see my list's color as a left border accent on each row so that I can instantly identify lists by color without affecting text readability",
       "acceptanceCriteria": [
-        "Each list row has its full list color as the background — no opacity or alpha suffix (remove the current '1A' approach in getRowTintStyle)",
-        "All text on colored rows is white (#fff) and fully readable",
-        "Item count text (.listCount) is slightly dimmed white (rgba(255,255,255,0.7)) for visual hierarchy",
-        "Chevron is white on colored rows",
-        "Three-dot menu button is white and visible on all row colors including lighter ones (yellow #f9a825)",
-        "Shared badge is readable on colored backgrounds (white text on rgba(255,255,255,0.2) pill)",
-        "Active list row is visually distinguishable while keeping its color (use filter: brightness(1.15) or inset white left border, NOT --primary-tint background)",
-        "Hover state provides visual feedback without losing the color (use filter: brightness shift)",
-        "Row separators are visible against colored backgrounds (use rgba(255,255,255,0.15) border instead of var(--border-subtle))",
-        "Mobile rounded corners are preserved — colored backgrounds respect border-radius on first/last child",
+        "Each list row with a color has a 4px solid left border in its assigned color (via inline style borderLeft)",
+        "Rows without a color (if any) have no visible left border (transparent)",
+        "All text remains the default theme colors — no white overrides, no color overrides at all",
+        "Active list row uses the standard --primary-tint background (not brightness filter)",
+        "Hover state uses the standard --bg-hover background (not brightness filter)",
+        "The .colored CSS class and ALL its derivative rules are removed from ListSelector.module.css",
+        "The .colored class is no longer applied to list row elements in ListSelector.jsx",
+        "Default .listItem has border-left: 4px solid transparent to prevent layout shift",
+        "Layout does not shift between colored and non-colored rows",
+        "Mobile rounded corners (iOS grouped table) still look correct with the left border",
         "Works in both light and dark mode",
         "Lint passes"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Revised US-004 implemented: full color backgrounds with white text, brightness filters for active/hover, white left border inset on active, white menu button overrides in hover:hover media query.",
+      "passes": false,
+      "notes": "REVISED AGAIN: Replace full-color background approach with 4px left border accent. This is a simplification — remove ALL .colored CSS overrides (white text, brightness filters, rgba borders, hover:hover media query overrides). The getRowTintStyle function should return { borderLeft: '4px solid ' + color } instead of { backgroundColor: color }. Default .listItem needs border-left: 4px solid transparent to prevent layout shift. All text stays default theme colors.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -139,8 +139,8 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Visual styling rework with multiple CSS overrides for text, borders, active/hover states across light and dark mode"
+      "testIntensity": "low",
+      "testIntensityReason": "Simpler than before — mostly removing CSS rules and changing one inline style property. No text color overrides needed."
     }
   ]
 }
