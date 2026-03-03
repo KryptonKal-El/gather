@@ -214,7 +214,9 @@
       "title": "Cannot upload profile image on desktop — no click handler on header avatar",
       "description": "On desktop (≥701px), the header avatar is display-only. There is no way to change your profile photo from the desktop viewport because the MobileSettings component (which has the upload flow) is only rendered on mobile via the BottomTabBar settings tab. Desktop users have no settings page and no clickable avatar.",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-03-03",
+      "resolvedCommit": "97e5296",
       "affectedComponents": [
         "src/App.jsx",
         "src/App.module.css"
