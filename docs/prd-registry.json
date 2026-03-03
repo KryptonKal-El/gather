@@ -109,6 +109,16 @@
       "startedAt": "2026-03-03T18:00:00Z",
       "completedAt": "2026-03-03T18:15:00Z",
       "notes": "BUG-007 fix. Desktop header avatar now clickable to upload profile image. Mirrors MobileSettings pattern."
+    },
+    {
+      "id": "prd-walmart-image-search",
+      "name": "Walmart Affiliate API Image Search",
+      "status": "ready",
+      "filePath": "docs/prds/prd-walmart-image-search.md",
+      "jsonPath": "docs/prds/prd-walmart-image-search.json",
+      "branchName": "feature/walmart-image-search",
+      "createdAt": "2026-03-03",
+      "updatedAt": "2026-03-03"
     }
   ]
 }
