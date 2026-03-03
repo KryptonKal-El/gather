@@ -100,12 +100,13 @@
     {
       "id": "prd-desktop-avatar-upload",
       "name": "Desktop Avatar Upload",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-desktop-avatar-upload.md",
       "jsonPath": "docs/prds/prd-desktop-avatar-upload.json",
       "branchName": "feature/desktop-avatar-upload",
       "createdAt": "2026-03-03",
       "updatedAt": "2026-03-03",
+      "startedAt": "2026-03-03T18:00:00Z",
       "notes": "BUG-007 fix. Make desktop header avatar clickable to upload profile image. Single story — mirrors existing MobileSettings upload pattern."
     }
   ]

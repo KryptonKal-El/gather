@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
 import { usePWAInstall } from './hooks/usePWAInstall.js';
 import { getSuggestions } from './services/suggestions.js';
+import { uploadProfileImage } from './services/imageStorage.js';
 import { Login } from './components/Login.jsx';
 import { ListSelector } from './components/ListSelector.jsx';
 import { AddItemForm } from './components/AddItemForm.jsx';
@@ -28,9 +29,12 @@ import styles from './App.module.css';
  * recipe panel, store manager, and share modal.
  */
 export const App = () => {
-  const { user, isLoading, signOut } = useAuth();
+  const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const [sharingListId, setSharingListId] = useState(null);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const [avatarUploadError, setAvatarUploadError] = useState(null);
+  const avatarFileInputRef = useRef(null);
   const isMobile = useIsMobile();
   const {
     activeTab,
@@ -94,6 +98,35 @@ export const App = () => {
     if (!activeList) return;
     actions.updateItem(activeList.id, itemId, updates);
   };
+
+  const handleAvatarClick = () => {
+    if (isAvatarUploading) return;
+    avatarFileInputRef.current?.click();
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsAvatarUploading(true);
+    setAvatarUploadError(null);
+    try {
+      await uploadProfileImage(user, file);
+      await refreshUser();
+    } catch (err) {
+      console.error('Profile image upload failed:', err);
+      setAvatarUploadError('Upload failed. Please try again.');
+    } finally {
+      setIsAvatarUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  useEffect(() => {
+    if (!avatarUploadError) return;
+    const timer = setTimeout(() => setAvatarUploadError(null), 3000);
+    return () => clearTimeout(timer);
+  }, [avatarUploadError]);
 
   if (isLoading) {
     return (
@@ -295,10 +328,41 @@ export const App = () => {
           <>
             <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>
             <div className={styles.headerRight}>
-              {photoURL ? (
-                <img src={photoURL} alt="" className={styles.headerAvatar} />
-              ) : (
-                <span className={styles.headerAvatar}>{avatarLetter}</span>
+              <div
+                className={styles.headerAvatarWrap}
+                onClick={handleAvatarClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAvatarClick(); } }}
+                aria-label="Change profile photo"
+              >
+                {isAvatarUploading ? (
+                  <div className={styles.headerUploadSpinner} />
+                ) : photoURL ? (
+                  <img src={photoURL} alt="" className={styles.headerAvatar} />
+                ) : (
+                  <span className={styles.headerAvatar}>{avatarLetter}</span>
+                )}
+                {!isAvatarUploading && (
+                  <div className={styles.headerAvatarOverlay}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                      <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <input
+                ref={avatarFileInputRef}
+                type="file"
+                accept="image/*"
+                className={styles.headerFileInput}
+                onChange={handleAvatarFileChange}
+                aria-hidden="true"
+                tabIndex={-1}
+              />
+              {avatarUploadError && (
+                <span className={styles.headerUploadError}>{avatarUploadError}</span>
               )}
               <span className={styles.userName}>
                 {displayName}

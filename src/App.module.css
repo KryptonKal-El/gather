@@ -48,6 +48,60 @@
   user-select: none;
 }
 
+.headerAvatarWrap {
+  position: relative;
+  cursor: pointer;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.headerAvatarWrap:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.headerAvatarOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.headerAvatarWrap:hover .headerAvatarOverlay {
+  opacity: 1;
+}
+
+.headerUploadSpinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.headerUploadError {
+  font-size: 0.75rem;
+  color: var(--danger);
+  white-space: nowrap;
+}
+
+.headerFileInput {
+  display: none;
+}
+
 .userName {
   font-size: 0.85rem;
   color: var(--text-muted);

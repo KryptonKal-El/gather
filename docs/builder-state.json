@@ -1,26 +1,23 @@
 {
-  "sessionId": "builder-2026-03-02-list-colors",
-  "lastHeartbeat": "2026-03-02T20:30:00Z",
+  "sessionId": "builder-2026-03-03-desktop-avatar",
+  "lastHeartbeat": "2026-03-03T18:00:00Z",
   "activePrd": {
-    "prdId": "prd-list-colors",
+    "prdId": "prd-desktop-avatar-upload",
     "testingRigor": "standard",
-    "currentStory": null,
+    "currentStory": "US-001",
     "storiesPending": [],
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004"],
+    "storiesCompleted": [],
     "storyAssessments": {},
-    "status": "completed"
+    "status": "in_progress"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-02T20:30:00Z",
+    "lastSyncedAt": "2026-03-03T18:00:00Z",
     "items": [
-      {"content": "US-001: Database Migration — Add color column to lists", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Service Layer & Context — Wire color through data flow", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Color Picker in Create & Edit Forms", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Left border accent (REVISED AGAIN)", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"}
+      {"content": "US-001: Clickable Desktop Header Avatar with Upload", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"}
     ]
   },
   "uncommittedWork": null,
