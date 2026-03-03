@@ -34,7 +34,7 @@ The PWA will continue to serve Android and web users. The native iOS app will pr
 - [ ] `@capacitor/core` added as dependency
 - [ ] `@capacitor/cli` added as dev dependency
 - [ ] `@capacitor/ios` added as dependency
-- [ ] `capacitor.config.ts` created with `appId: "com.shoppinglistai.app"`, `appName: "ShoppingListAI"`, `webDir: "dist"`
+- [ ] `capacitor.config.ts` created with `appId: "com.shoppinglistai"`, `appName: "ShoppingListAI"`, `webDir: "dist"`
 - [ ] `npx cap add ios` run — `ios/` directory created with Xcode project
 - [ ] `npm run build && npx cap sync ios` succeeds — web assets copied to native project
 - [ ] `npx cap open ios` opens in Xcode without errors
@@ -106,7 +106,7 @@ The PWA will continue to serve Android and web users. The native iOS app will pr
 - [ ] On native: call the native Apple Sign-In plugin to get `identityToken`, then call `supabase.auth.signInWithIdToken({ provider: 'apple', token: identityToken })`
 - [ ] On web: keep existing `supabase.auth.signInWithOAuth({ provider: 'apple' })` flow unchanged
 - [ ] Handle first-time sign-in: capture `givenName`/`familyName` from Apple response and update Supabase user metadata (Apple only provides name on first authorization)
-- [ ] Verify the Supabase Apple provider config includes the app's Bundle ID (`com.shoppinglistai.app`) as a valid Client ID
+- [ ] Verify the Supabase Apple provider config includes the app's Bundle ID (`com.shoppinglistai`) as a valid Client ID
 - [ ] Sign-in works on physical iOS device — native Apple Sign-In sheet appears, user authenticates, session is established
 - [ ] Sign-out works on native — session is cleared, user returns to login screen
 - [ ] Existing web Apple Sign-In still works (no regression)
@@ -127,7 +127,7 @@ The PWA will continue to serve Android and web users. The native iOS app will pr
 **Acceptance Criteria:**
 
 - [ ] Install `@capacitor/app` plugin for URL handling
-- [ ] Create `public/.well-known/apple-app-site-association` file with `applinks` for `TEAMID.com.shoppinglistai.app`
+- [ ] Create `public/.well-known/apple-app-site-association` file with `applinks` for `53L3M4444A.com.shoppinglistai`
 - [ ] Update `vercel.json` to serve AASA file with `Content-Type: application/json` header
 - [ ] Enable "Associated Domains" capability in Xcode with `applinks:shoppinglistai.vercel.app`
 - [ ] Add URL scheme `shoppinglistai://` in iOS `Info.plist` for OAuth callbacks
@@ -234,7 +234,7 @@ The PWA will continue to serve Android and web users. The native iOS app will pr
 
 **Acceptance Criteria:**
 
-- [ ] Bundle ID set to `com.shoppinglistai.app` in Xcode project
+- [ ] Bundle ID set to `com.shoppinglistai` in Xcode project
 - [ ] Display name set to "ShoppingListAI"
 - [ ] Version set to `1.0.0`, build number to `1`
 - [ ] Deployment target set to iOS 16.0 minimum (covers 95%+ of devices)
@@ -330,4 +330,4 @@ Implementation is complete when:
 - Should we add Siri shortcuts for common actions like "Add milk to my list"? (Deferred)
 - Should we add a widget showing the current shopping list? (Deferred)
 - Should we support iPad multitasking (Split View, Slide Over)? The current responsive design may already handle this, but it should be tested.
-- Should the privacy policy be a standalone static page or a route within the React app?
+- ~~Should the privacy policy be a standalone static page or a route within the React app?~~ → Decision: standalone `public/privacy.html` — simpler, loads without JS, always accessible.
