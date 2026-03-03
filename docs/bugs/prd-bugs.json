@@ -208,6 +208,42 @@
       "occurrences": 3,
       "priority": "critical",
       "notes": "This is a critical UX issue — users may think the app is broken and abandon it. The fixes are relatively small (error handling + timeout) but have a big impact on reliability."
+    },
+    {
+      "id": "BUG-007",
+      "title": "Cannot upload profile image on desktop — no click handler on header avatar",
+      "description": "On desktop (≥701px), the header avatar is display-only. There is no way to change your profile photo from the desktop viewport because the MobileSettings component (which has the upload flow) is only rendered on mobile via the BottomTabBar settings tab. Desktop users have no settings page and no clickable avatar.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.jsx",
+        "src/App.module.css"
+      ],
+      "affectedPlatforms": ["desktop"],
+      "rootCause": "The desktop header (App.jsx lines 293-312) renders the avatar as a plain <img> or <span> with no onClick handler, no hidden file input, and no upload logic. The profile image upload functionality only exists in MobileSettings.jsx which is exclusively rendered when isMobile is true (via the BottomTabBar settings tab). There is no desktop equivalent of the settings screen.",
+      "reproductionSteps": [
+        "Open the app on desktop (≥701px viewport)",
+        "Log in with any account",
+        "Look at the header — there is an avatar circle next to your name",
+        "Try to click it — nothing happens",
+        "There is no settings page, gear icon, or other way to upload a profile photo on desktop"
+      ],
+      "suggestedFix": "Make the desktop header avatar clickable with the same hidden file input pattern used in MobileSettings.jsx:\n\n1. Import `uploadProfileImage` from imageStorage.js and `useAuth` (for `refreshUser`) in App.jsx\n2. Add `useState` for `isUploading` and `uploadError`, plus a `useRef` for the hidden file input\n3. Add a `handleAvatarClick` that calls `fileInputRef.current?.click()`\n4. Add a `handleFileChange` async handler that calls `uploadProfileImage` then `refreshUser`\n5. Wrap the avatar `<img>`/`<span>` in a clickable container with `onClick={handleAvatarClick}`, `role='button'`, `tabIndex={0}`, `cursor: pointer`\n6. Add a hidden `<input type='file' accept='image/*'>` next to the avatar\n7. Show a small spinner on the avatar while uploading\n8. Add a camera overlay icon on hover (matching the MobileSettings pattern but sized for 32px)\n9. Show upload errors briefly (tooltip or inline text near the avatar)",
+      "acceptanceCriteria": [
+        "Clicking the desktop header avatar opens the native file picker",
+        "After selecting an image, it uploads and the avatar updates immediately",
+        "A loading indicator shows on the avatar during upload",
+        "A hover state indicates the avatar is clickable (cursor pointer + camera overlay)",
+        "Upload errors are shown to the user",
+        "The avatar remains display-only for guest users (no click, no overlay)",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-user-profile-image",
+      "reportedAt": "2026-03-03",
+      "occurrences": 1,
+      "priority": "medium",
+      "notes": "The original PRD (US-003) explicitly stated 'The avatar does not act as a tap target on desktop'. This was a design decision, but in practice it means desktop users cannot upload a profile photo at all since there is no desktop settings page. The fix is to reverse that decision and make the avatar clickable on desktop too."
     }
   ]
 }

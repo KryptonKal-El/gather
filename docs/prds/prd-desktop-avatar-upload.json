@@ -1,0 +1,44 @@
+{
+  "project": "ShoppingListAI",
+  "branchName": "feature/desktop-avatar-upload",
+  "description": "Make the desktop header avatar clickable to upload a profile image, mirroring the mobile MobileSettings upload flow",
+  "credentialRequirements": [],
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Clickable Desktop Header Avatar with Upload",
+      "description": "As a desktop user, I want to click my avatar in the header to upload a profile photo so that I can set my profile image without needing a mobile device",
+      "acceptanceCriteria": [
+        "Clicking the desktop header avatar opens the native file picker",
+        "After selecting an image, it uploads via uploadProfileImage and the avatar updates immediately (via refreshUser)",
+        "A loading spinner shows on the avatar during upload (replaces avatar content)",
+        "A camera overlay icon appears on hover to indicate the avatar is clickable",
+        "Upload errors are shown near the avatar and auto-dismiss after 3 seconds",
+        "Keyboard accessible — Enter/Space triggers file picker",
+        "The hidden file input accepts only image files (accept='image/*')",
+        "The file input value is reset after each upload (allows re-uploading the same file)",
+        "No layout shift in the header when uploading or showing error",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Mirror the MobileSettings upload pattern: hidden file input, handleAvatarClick, handleFileChange with uploadProfileImage + refreshUser. Add camera overlay on hover and spinner during upload. Add isAvatarUploading/avatarUploadError state and avatarFileInputRef to App.jsx. New CSS classes: .headerAvatarWrap, .headerAvatarOverlay, .headerUploadSpinner, .headerUploadError, .headerFileInput.",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": [],
+      "testIntensity": "low",
+      "testIntensityReason": "Reusing existing uploadProfileImage service. The change is adding click handlers and CSS to the desktop header avatar — no new data flow."
+    }
+  ]
+}

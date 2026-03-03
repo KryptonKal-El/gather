@@ -96,6 +96,17 @@
       "startedAt": "2026-03-02T20:00:00Z",
       "completedAt": "2026-03-03T12:30:00Z",
       "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
+    },
+    {
+      "id": "prd-desktop-avatar-upload",
+      "name": "Desktop Avatar Upload",
+      "status": "ready",
+      "filePath": "docs/prds/prd-desktop-avatar-upload.md",
+      "jsonPath": "docs/prds/prd-desktop-avatar-upload.json",
+      "branchName": "feature/desktop-avatar-upload",
+      "createdAt": "2026-03-03",
+      "updatedAt": "2026-03-03",
+      "notes": "BUG-007 fix. Make desktop header avatar clickable to upload profile image. Single story — mirrors existing MobileSettings upload pattern."
     }
   ]
 }
