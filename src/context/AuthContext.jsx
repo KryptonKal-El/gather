@@ -51,32 +51,47 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
-        setUser(mergeUserWithProfile(session.user, profile));
+    let isMounted = true;
+
+    const initSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (!isMounted) return;
+          setUser(mergeUserWithProfile(session.user, profile));
+        }
+      } catch (err) {
+        console.error('Failed to get session:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
-      setIsLoading(false);
-    }).catch((err) => {
-      console.error('Failed to get session:', err);
-      setIsLoading(false);
-    });
+    };
+
+    initSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!isMounted) return;
+        if (event === 'INITIAL_SESSION') return;
+
         if (session?.user) {
           const profile = await fetchProfile(session.user.id);
+          if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
         } else {
           setUser(null);
         }
-        setIsLoading(false);
       }
     );
 
-    const timeout = setTimeout(() => setIsLoading(false), 10000);
+    const timeout = setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 10000);
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
