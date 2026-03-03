@@ -54,7 +54,7 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         if (!isMounted) return;
 
         if (session?.user) {
@@ -62,25 +62,28 @@ export const AuthProvider = ({ children }) => {
           if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
           setIsLoading(false);
-        } else if (event === 'SIGNED_OUT') {
+        } else if (_event === 'SIGNED_OUT') {
           setUser(null);
           setIsLoading(false);
         }
       }
     );
 
-    // Explicit session check as fallback — handles page refresh
-    // when onAuthStateChange fires INITIAL_SESSION with null before
-    // the stored session is fully restored
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!isMounted) return;
-      if (session?.user) {
-        const profile = await fetchProfile(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
         if (!isMounted) return;
-        setUser(mergeUserWithProfile(session.user, profile));
+        if (session?.user) {
+          const profile = await fetchProfile(session.user.id);
+          if (!isMounted) return;
+          setUser(mergeUserWithProfile(session.user, profile));
+        }
+      } catch (err) {
+        console.error('Failed to check session:', err);
       }
-      setIsLoading(false);
+      if (isMounted) {
+        setIsLoading(false);
+      }
     };
     checkSession();
 
