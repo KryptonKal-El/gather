@@ -87,14 +87,14 @@
     {
       "id": "prd-list-colors",
       "name": "List Colors",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-list-colors.md",
       "jsonPath": "docs/prds/prd-list-colors.json",
       "branchName": "feature/list-colors",
       "createdAt": "2026-03-02",
       "updatedAt": "2026-03-02",
       "startedAt": "2026-03-02T20:00:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-03-02T20:30:00Z"
     }
   ]
 }
