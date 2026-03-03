@@ -22,7 +22,7 @@
         "Lint passes"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Mirror the MobileSettings upload pattern: hidden file input, handleAvatarClick, handleFileChange with uploadProfileImage + refreshUser. Add camera overlay on hover and spinner during upload. Add isAvatarUploading/avatarUploadError state and avatarFileInputRef to App.jsx. New CSS classes: .headerAvatarWrap, .headerAvatarOverlay, .headerUploadSpinner, .headerUploadError, .headerFileInput.",
       "supportArticleRequired": false,
       "documentationType": null,
