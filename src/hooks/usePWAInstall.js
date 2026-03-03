@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { useIsMobile } from './useIsMobile.js';
 
 const DISMISS_KEY = 'pwa-install-dismissed';
@@ -14,6 +15,12 @@ const isDismissalActive = () => {
   const timestamp = parseInt(dismissedAt, 10);
   return timestamp + DISMISS_DURATION > Date.now();
 };
+
+/**
+ * Detects if running inside Capacitor native shell (iOS/Android app).
+ * @returns {boolean} True if native app.
+ */
+const isNativeApp = () => Capacitor.isNativePlatform();
 
 /**
  * Detects if running in standalone (installed PWA) mode.
@@ -102,6 +109,7 @@ export const usePWAInstall = () => {
   }, []);
 
   const showBanner =
+    !isNativeApp() &&
     isMobile &&
     !isStandalone() &&
     !isDismissed &&

@@ -126,12 +126,14 @@
     {
       "id": "prd-ios-app-store",
       "name": "iOS App Store Deployment",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-ios-app-store.md",
       "jsonPath": "docs/prds/prd-ios-app-store.json",
       "branchName": "feature/ios-app-store",
       "createdAt": "2026-03-03",
       "updatedAt": "2026-03-03",
+      "startedAt": "2026-03-03T23:45:00Z",
+      "currentStory": "US-001",
       "notes": "11 stories. Bundle ID: com.shoppinglistai, Team ID: 53L3M4444A. Push notifications deferred. All credentials provided."
     }
   ]

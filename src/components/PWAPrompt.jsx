@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import styles from './PWAPrompt.module.css';
 
@@ -7,11 +8,15 @@ import styles from './PWAPrompt.module.css';
  * service worker updates and offline readiness.
  */
 export const PWAPrompt = () => {
+  const isNative = Capacitor.isNativePlatform();
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     offlineReady: [offlineReady, setOfflineReady],
     updateServiceWorker,
-  } = useRegisterSW();
+  } = useRegisterSW({
+    immediate: !isNative,
+  });
 
   const handleUpdate = () => {
     setNeedRefresh(false);
@@ -36,7 +41,7 @@ export const PWAPrompt = () => {
     setOfflineReady(false);
   };
 
-  if (!needRefresh && !offlineReady) return null;
+  if (isNative || (!needRefresh && !offlineReady)) return null;
 
   return (
     <div className={styles.toast} role="alert">

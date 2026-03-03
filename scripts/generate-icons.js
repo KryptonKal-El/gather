@@ -1,31 +1,43 @@
 /**
- * Generate PNG icons for PWA from a simple design.
+ * Generate PNG icons for PWA and iOS App Store.
  * Uses only Node.js built-in modules — creates minimal valid PNGs.
  * 
  * Run: node scripts/generate-icons.js
  */
-import { createWriteStream } from 'fs';
+import { createWriteStream, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { deflateSync } from 'zlib';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, '..', 'public');
+const ASSETS = join(__dirname, '..', 'assets');
 
-/** Create a minimal valid PNG with a solid rounded-rect + simple shapes. */
-const createPng = (size) => {
+// Ensure assets directory exists
+if (!existsSync(ASSETS)) {
+  mkdirSync(ASSETS, { recursive: true });
+  console.log(`Created ${ASSETS}`);
+}
+
+/**
+ * Create a minimal valid PNG with a solid background + simple shapes.
+ * @param {number} size - Icon size in pixels
+ * @param {boolean} [opaque=false] - If true, fill entire square (no rounded corners/transparency)
+ */
+const createPng = (size, opaque = false) => {
   const pixels = Buffer.alloc(size * size * 4);
 
   const bgR = 76, bgG = 175, bgB = 80; // #4caf50
-  const cornerRadius = Math.round(size * 0.1875); // ~96/512
+  const cornerRadius = opaque ? 0 : Math.round(size * 0.1875); // ~96/512
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const idx = (y * size + x) * 4;
 
-      // Rounded rectangle check
+      // For opaque mode, always inside. For rounded, check corners.
       let inside = true;
-      if (x < cornerRadius && y < cornerRadius) {
+      if (!opaque) {
+        if (x < cornerRadius && y < cornerRadius) {
         const dx = cornerRadius - x;
         const dy = cornerRadius - y;
         if (dx * dx + dy * dy > cornerRadius * cornerRadius) inside = false;
@@ -41,6 +53,7 @@ const createPng = (size) => {
         const dx = x - (size - cornerRadius - 1);
         const dy = y - (size - cornerRadius - 1);
         if (dx * dx + dy * dy > cornerRadius * cornerRadius) inside = false;
+        }
       }
 
       if (inside) {
@@ -188,15 +201,46 @@ const crc32 = (() => {
   };
 })();
 
-// Generate icons
-const sizes = [64, 192, 512];
-for (const size of sizes) {
-  const png = createPng(size);
+// Generate PWA icons (with rounded corners)
+const pwaSizes = [64, 192, 512];
+for (const size of pwaSizes) {
+  const png = createPng(size, false);
   const path = join(PUBLIC, `icon-${size}x${size}.png`);
   const ws = createWriteStream(path);
   ws.write(png);
   ws.end();
   console.log(`Generated ${path} (${png.length} bytes)`);
 }
+
+// Generate 1024x1024 opaque icon for capacitor-assets (iOS App Store)
+const appStoreIcon = createPng(1024, true);
+const iconOnlyPath = join(ASSETS, 'icon-only.png');
+const iconFgPath = join(ASSETS, 'icon-foreground.png');
+
+const ws1 = createWriteStream(iconOnlyPath);
+ws1.write(appStoreIcon);
+ws1.end();
+console.log(`Generated ${iconOnlyPath} (${appStoreIcon.length} bytes) - OPAQUE for App Store`);
+
+const ws2 = createWriteStream(iconFgPath);
+ws2.write(appStoreIcon);
+ws2.end();
+console.log(`Generated ${iconFgPath} (${appStoreIcon.length} bytes) - OPAQUE for App Store`);
+
+// Generate splash screens (2732x2732 for iPad Pro)
+const splashSize = 2732;
+const splash = createPng(splashSize, true);
+const splashPath = join(ASSETS, 'splash.png');
+const splashDarkPath = join(ASSETS, 'splash-dark.png');
+
+const ws3 = createWriteStream(splashPath);
+ws3.write(splash);
+ws3.end();
+console.log(`Generated ${splashPath} (${splash.length} bytes) - SPLASH SCREEN`);
+
+const ws4 = createWriteStream(splashDarkPath);
+ws4.write(splash);
+ws4.end();
+console.log(`Generated ${splashDarkPath} (${splash.length} bytes) - SPLASH SCREEN (dark)`);
 
 console.log('Done!');

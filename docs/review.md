@@ -1,324 +1,195 @@
-# Critic Review — US-004 through US-008 (Checkpoint)
+# Critic Review — US-008 (App Store Metadata and Privacy Policy)
 
-**PRD:** prd-supabase-migration  
-**Stories Reviewed:** US-004, US-005, US-006, US-007, US-008  
-**Review Date:** 2026-02-27  
+**PRD:** prd-ios-app-store  
+**Story Reviewed:** US-008  
+**Review Date:** 2026-03-03  
 **Reviewer:** Critic Agent
 
 ---
 
 ## Summary
 
-This review covers the Supabase migration work from US-004 through US-008, including:
-- CRUD service layer (`database.js`)
-- Real-time subscriptions
-- RLS policies
-- Storage migration (`imageStorage.js`)
-- Edge Function (`search-images/index.ts`)
-- Image search client (`imageSearch.js`)
-- Context updates (`ShoppingListContext.jsx`)
+This review covers the App Store submission materials for ShoppingListAI:
+- App Store metadata (`metadata.md`)
+- Privacy policy (`privacy-policy.md`, `privacy.html`)
+- App Privacy labels (`app-privacy-labels.md`)
+- Apple Privacy Manifest (`PrivacyInfo.xcprivacy`)
 
-The implementation is **well-structured** with consistent patterns. There are **4 critical issues** requiring fixes before proceeding to US-009.
+The implementation is **well-structured** with comprehensive coverage. There are **2 critical issues**, **3 important issues**, and **2 minor issues** to address before App Store submission.
 
 ---
 
 ## Critical Issues
 
-### CRITICAL-1: RLS policy gap — `increment_item_count` allows negative counts
+### CRITICAL-1: Missing Walmart API disclosure in privacy policy and third-party services
 
-**File:** `supabase/migrations/20260227220000_rls_policies.sql`  
-**Lines:** 183-206
+**Files:** `docs/app-store/privacy-policy.md`, `public/privacy.html`  
+**Lines:** 54-57 (privacy-policy.md), 166-169 (privacy.html)
 
-**Description:** The `increment_item_count` function has an access check but lacks validation to prevent `item_count` from going negative. An attacker with shared list access could call with a large negative value to corrupt data.
+**Description:** The privacy policy lists Open Food Facts and SerpAPI as third-party services but omits **Walmart Affiliate API**, which is explicitly listed in `project.json` as the *primary* product image search provider. Per Apple's guidelines and FTC requirements, all third-party services that receive user data must be disclosed.
 
-**Impact:** Data corruption, UI showing negative item counts.
+**Impact:** App Store rejection risk; FTC compliance issue; user trust.
 
-**Fix:** Add floor validation:
-```sql
-UPDATE lists
-SET item_count = GREATEST(0, item_count + amount)
-WHERE id = p_list_id;
+**Fix:** Add Walmart to the Third-Party Services section:
+```markdown
+- **Walmart Affiliate API** — Primary product image search (search queries only, no personal data)
+- **Open Food Facts** — Secondary product data lookup (open-source, no personal data sent)
+- **SerpAPI** — Tertiary fallback product image search (search queries only, no personal data)
 ```
 
 ---
 
-### CRITICAL-2: `item_count` tracking is inconsistent across operations
+### CRITICAL-2: PrivacyInfo.xcprivacy missing FileTimestamp API declaration (Capacitor usage)
 
-**Files:** `src/services/database.js`, `src/context/ShoppingListContext.jsx`
+**File:** `ios/App/App/PrivacyInfo.xcprivacy`  
+**Lines:** 56-65
 
-**Description:** The `item_count` tracking has race conditions and inconsistencies:
-1. `addItem` (database.js:193) increments count in service layer
-2. `removeItem` (context:286-288) decrements in context layer, only if item found AND unchecked
-3. `clearCheckedItems` does not decrement (assumes items were already "checked" = decremented)
-4. If `activeItems` doesn't contain the item (race with real-time), count is not adjusted
+**Description:** The privacy manifest declares `NSPrivacyAccessedAPICategoryUserDefaults` with reason `CA92.1`, which is correct. However, Capacitor apps typically also access the **File Timestamp API** (`NSPrivacyAccessedAPICategoryFileTimestamp`) for file operations. Starting May 1, 2024, Apple rejects apps that use required-reason APIs without proper declaration.
 
-**Impact:** `item_count` drifts from reality over time, especially with concurrent users.
-
-**Recommendation:** Use a database trigger to maintain `item_count` atomically:
-```sql
-CREATE OR REPLACE FUNCTION update_item_count_on_insert()
-RETURNS trigger AS $$
-BEGIN
-  UPDATE lists SET item_count = item_count + 1 WHERE id = NEW.list_id;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION update_item_count_on_delete()
-RETURNS trigger AS $$
-BEGIN
-  IF NOT OLD.is_checked THEN
-    UPDATE lists SET item_count = item_count - 1 WHERE id = OLD.list_id;
-  END IF;
-  RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER items_insert_count AFTER INSERT ON items
-  FOR EACH ROW EXECUTE FUNCTION update_item_count_on_insert();
-
-CREATE TRIGGER items_delete_count AFTER DELETE ON items
-  FOR EACH ROW EXECUTE FUNCTION update_item_count_on_delete();
+**Recommendation:** Audit Capacitor plugins for API usage. Run this check:
+```bash
+grep -r "fileModificationDate\|attributesOfItem\|NSFileModificationDate" ios/
 ```
 
----
-
-### CRITICAL-3: Edge Function CORS allows all origins
-
-**File:** `supabase/functions/search-images/index.ts`  
-**Lines:** 6-9
-
-**Description:** CORS header `'Access-Control-Allow-Origin': '*'` allows any domain to call the function and consume your SerpAPI quota.
-
-**Impact:** API abuse; quota exhaustion; cost exposure.
-
-**Fix:** Restrict to your domains:
-```typescript
-const ALLOWED_ORIGINS = [
-  'https://your-app.vercel.app',
-  'http://localhost:4000',  // dev
-];
-
-const corsHeaders = (origin: string | null) => ({
-  'Access-Control-Allow-Origin': origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-});
+If any file timestamp access is found (common in filesystem plugins), add:
+```xml
+<dict>
+    <key>NSPrivacyAccessedAPIType</key>
+    <string>NSPrivacyAccessedAPICategoryFileTimestamp</string>
+    <key>NSPrivacyAccessedAPITypeReasons</key>
+    <array>
+        <string>C617.1</string>
+    </array>
+</dict>
 ```
 
----
-
-### CRITICAL-4: vite.config.js still caches Firebase domains (dead code)
-
-**File:** `vite.config.js`  
-**Lines:** 70-109
-
-**Description:** PWA workbox configuration still references `firestore.googleapis.com` and `firebasestorage.googleapis.com` caching rules. This is explicitly listed as an acceptance criterion for US-009 but should be fixed now to avoid confusion.
-
-**Impact:** Bloated service worker; confusing dead code; must fix for US-009 anyway.
-
-**Fix:** Remove lines 70-109 (Firebase caching rules) and add Supabase domain caching if needed.
+**Impact:** App Store rejection if APIs are used without declaration.
 
 ---
 
 ## Important Issues
 
-### IMPORTANT-1: Missing timeouts on Supabase operations
+### IMPORTANT-1: Privacy policy missing email/contact for GDPR compliance
 
-**File:** `src/services/database.js` (all async functions)
+**Files:** `docs/app-store/privacy-policy.md`, `public/privacy.html`  
+**Lines:** 80-84 (privacy-policy.md)
 
-**Description:** No timeouts configured. If Supabase hangs, UI waits indefinitely.
+**Description:** GDPR requires a specific contact method for data subject requests. The policy provides a website URL and in-app path, but Apple and GDPR guidelines recommend including an email address for privacy inquiries.
 
-**Recommendation:** Add a global fetch timeout via custom fetch in Supabase client init:
-```javascript
-const supabase = createClient(url, key, {
-  global: {
-    fetch: (input, init) => {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
-      return fetch(input, { ...init, signal: controller.signal })
-        .finally(() => clearTimeout(timeout));
-    }
-  }
-});
+**Impact:** Weak compliance posture; user friction for data requests.
+
+**Fix:** Add dedicated email:
+```markdown
+## Contact Us
+
+For privacy-related questions or data deletion requests:
+- Email: privacy@shoppinglistai.app
+- Website: https://shoppinglistai.vercel.app
+- In-app: Settings > Support
 ```
 
 ---
 
-### IMPORTANT-2: `saveStoreOrder` makes N sequential requests
+### IMPORTANT-2: App Privacy Labels missing "Account Management" purpose for Email/Name
 
-**File:** `src/services/database.js`  
-**Lines:** 758-772
+**File:** `ios/App/App/PrivacyInfo.xcprivacy`  
+**Lines:** 6-30
 
-**Description:** Reordering stores makes N sequential UPDATE calls. Slow with many stores; non-atomic on partial failure.
+**Description:** The privacy manifest only declares `NSPrivacyCollectedDataTypePurposeAppFunctionality` for Email and Name. However, `app-privacy-labels.md` correctly lists both "App Functionality" AND "Account Management" as purposes. These must match.
 
-**Fix:** Use upsert for batch update:
-```javascript
-const updates = stores.map((store, i) => ({
-  id: store.id,
-  user_id: userId,
-  name: store.name,
-  color: store.color,
-  categories: store.categories,
-  sort_order: i,
-}));
-const { error } = await supabase
-  .from('stores')
-  .upsert(updates, { onConflict: 'id' });
+Per Apple's guidelines, Email collected via Sign in with Apple should include both purposes.
+
+**Fix:** Update PrivacyInfo.xcprivacy:
+```xml
+<key>NSPrivacyCollectedDataTypePurposes</key>
+<array>
+    <string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string>
+    <string>NSPrivacyCollectedDataTypePurposeAccountCreation</string>
+</array>
 ```
 
----
-
-### IMPORTANT-3: `subscribeSharedListRefs` makes 2 sequential queries
-
-**File:** `src/services/database.js`  
-**Lines:** 522-573
-
-**Description:** Fetches shares, then fetches lists in separate query. Creates 2 round trips on every update.
-
-**Recommendation:** Create a Postgres view or denormalize `list_name` into `list_shares`.
+Apply this to both EmailAddress and Name data type entries.
 
 ---
 
-### IMPORTANT-4: Real-time subscriptions re-fetch everything on any change
+### IMPORTANT-3: Keywords exceed 100 character limit
 
-**File:** `src/services/database.js` (all 7 subscriptions)
+**File:** `docs/app-store/metadata.md`  
+**Line:** 13
 
-**Description:** On any `postgres_changes` event, the callback re-fetches the entire dataset instead of using the event payload for incremental updates.
-
-**Impact:** Unnecessary bandwidth; scales poorly with large lists.
-
-**Track for later:** This is a significant refactor. Document as tech debt.
-
----
-
-### IMPORTANT-5: `addItemsAction` adds history entries sequentially
-
-**File:** `src/context/ShoppingListContext.jsx`  
-**Lines:** 266-269
-
-**Description:** Adding 20 items makes 20 sequential history INSERT calls.
-
-**Fix:** Create `addHistoryEntries` batch function:
-```javascript
-export const addHistoryEntries = async (userId, names) => {
-  const rows = names.map(name => ({ user_id: userId, name }));
-  await supabase.from('history').insert(rows);
-};
+**Description:** The keywords string is:
 ```
-
----
-
-### IMPORTANT-6: `imageSearch.js` fails silently
-
-**File:** `src/services/imageSearch.js`  
-**Lines:** 14-38
-
-**Description:** When edge function URL is missing or fetch fails, returns empty array with only console error. User sees no indication.
-
-**Fix:** Return structured error or throw:
-```javascript
-export const searchImages = async (query, count = 8) => {
-  const baseUrl = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL;
-  if (!baseUrl) {
-    throw new Error('Image search not configured');
-  }
-  // ...
+shopping list,grocery,AI,shared lists,recipes,meal planning,food,kitchen,smart list,family
 ```
+This is **96 characters** — within limit, but barely. However, "smart list" is not a common search term and uses 10 chars. Consider optimizing for higher-value keywords.
+
+**Recommendation:** Replace low-value keywords:
+```
+shopping list,grocery,AI,shared lists,recipes,meal planning,food,sync,organize,checklist
+```
+(93 chars, adds "sync", "organize", "checklist" — common App Store searches)
 
 ---
 
 ## Minor Issues
 
-### MINOR-1: Stale docstring references Firestore
+### MINOR-1: Marketing URL and Support URL are identical
 
-**File:** `src/context/ShoppingListContext.jsx`  
-**Lines:** 42-44
+**File:** `docs/app-store/metadata.md`  
+**Lines:** 51-55
 
-**Description:** Comment says "Subscribes to Firestore real-time listeners" but now uses Supabase.
+**Description:** Both URLs point to `https://shoppinglistai.vercel.app`. Apple allows this, but having a dedicated `/support` or `/help` page is better UX and demonstrates app maturity.
 
-**Fix:** Update to "Subscribes to Supabase Realtime listeners".
-
----
-
-### MINOR-2: `deleteItemImage` tries 4 extensions
-
-**File:** `src/services/imageStorage.js`  
-**Lines:** 43-49
-
-**Description:** Tries to delete `.jpg`, `.jpeg`, `.png`, `.webp` because extension is unknown. 3 of 4 calls always fail.
-
-**Recommendation:** Store extension in database or accept as minor inefficiency.
+**Fix (optional):** Create `/support.html` with FAQ/contact form, or append `#support` anchor.
 
 ---
 
-### MINOR-3: Empty catch in `deleteItemImage`
+### MINOR-2: Copyright year is 2026 — verify this is intentional
 
-**File:** `src/services/imageStorage.js`  
-**Lines:** 50-52
+**File:** `docs/app-store/metadata.md`  
+**Line:** 58
 
-**Description:** Silently catches all errors, could hide real issues.
+**Description:** Copyright shows `© 2026 ShoppingListAI`. If the app is being submitted in 2026, this is correct. If submitted earlier, update to current year.
 
-**Fix:** Log unexpected errors:
-```javascript
-} catch (err) {
-  if (err?.message && !err.message.includes('not found')) {
-    console.warn('Unexpected error deleting item image:', err);
-  }
-}
-```
-
----
-
-### MINOR-4: Missing PropTypes on `ShoppingListProvider`
-
-**File:** `src/context/ShoppingListContext.jsx`
-
-**Description:** Per AGENTS.md, React components should have PropTypes. `children` prop not validated.
-
-**Fix:**
-```javascript
-import PropTypes from 'prop-types';
-// ...
-ShoppingListProvider.propTypes = {
-  children: PropTypes.node.isRequired,
-};
-```
+**Impact:** None if correct; looks odd if wrong.
 
 ---
 
 ## What's Done Well
 
-1. **Comprehensive RLS policies** — All 6 tables have RLS with appropriate owner/shared access patterns. The `increment_item_count` RPC includes access verification.
+1. **Comprehensive privacy policy** — Covers all App Store required sections: data collection, usage, sharing, storage, deletion, children's privacy, and third-party services (minus Walmart).
 
-2. **Consistent snake_case/camelCase mapping** — All CRUD functions transform correctly in both directions.
+2. **Privacy manifest structure correct** — `NSPrivacyTracking: false`, empty `NSPrivacyTrackingDomains`, and `NSPrivacyCollectedDataTypeTracking: false` on all data types align with "no tracking" claim.
 
-3. **JSDoc on all exports** — Proper documentation as required by conventions.
+3. **UserDefaults API reason correct** — `CA92.1` ("Access info from same app") is the appropriate reason for Capacitor's use of UserDefaults for app state.
 
-4. **Error context** — All error messages include relevant IDs (`listId`, `itemId`, etc.) with `{ cause: error }`.
+4. **Photos marked as not linked to identity** — Correctly reflects that product photos are processed but not stored or associated with user accounts.
 
-5. **Subscription cleanup** — All subscribe functions return proper cleanup functions.
+5. **Privacy labels match policy** — The data types in `app-privacy-labels.md` (Email, Name, Photos, Other User Content) match what's declared in the privacy policy and xcprivacy manifest.
 
-6. **Storage policies correctly scoped** — Path-based access using `(storage.foldername(name))[1] = auth.uid()::text`.
+6. **HTML privacy page well-styled** — Responsive design, accessible, matches app branding (green theme), proper semantic HTML.
 
-7. **Edge Function structure** — Clean error handling, proper HTTP status codes, type annotations.
+7. **Apple Sign-In private relay mentioned** — Privacy policy correctly notes users can use Apple's private relay email.
 
-8. **Email normalization** — Consistent `toLowerCase().trim()` on email in sharing functions.
+8. **"What's New" version text is appropriate** — Clear, concise initial release message.
 
-9. **Unique constraint on shares** — `UNIQUE (list_id, shared_with_email)` prevents duplicates.
+9. **Category selection appropriate** — "Food & Drink" is correct for a grocery/shopping list app.
 
-10. **API compatibility preserved** — Function signatures match old Firestore API for drop-in replacement.
+10. **App description covers key features** — AI image search, real-time sharing, cross-device sync, privacy-first messaging all present.
 
 ---
 
 ## Requirements Traceability
 
-| Story | Status | Notes |
-|-------|--------|-------|
-| US-004 | Partial | CRUD correct but `item_count` tracking has issues |
-| US-005 | Pass | All 7 subscriptions with unique channels and cleanup |
-| US-006 | Partial | RLS comprehensive but `increment_item_count` needs floor check |
-| US-007 | Pass | Storage upload/delete working; policies correct |
-| US-008 | Partial | Edge function works but CORS too permissive |
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| App Store metadata complete | **Pass** | Name, subtitle, description, keywords, category all present |
+| Privacy policy covers collection | **Partial** | Missing Walmart API disclosure |
+| Privacy policy covers deletion rights | **Pass** | Clear deletion instructions provided |
+| App Privacy labels accurate | **Pass** | Matches actual app data collection |
+| PrivacyInfo.xcprivacy valid | **Partial** | May need FileTimestamp API; purposes incomplete |
+| HTML privacy page accessible | **Pass** | /privacy.html works standalone |
+| No tracking declaration | **Pass** | NSPrivacyTracking: false correctly set |
 
 ---
 
@@ -326,37 +197,33 @@ ShoppingListProvider.propTypes = {
 
 | Severity | Count |
 |----------|-------|
-| Critical | 4 |
-| Important | 6 |
-| Minor | 4 |
+| Critical | 2 |
+| Important | 3 |
+| Minor | 2 |
 | Positive | 10 |
 
 ---
 
 ## Action Items
 
-### Must Fix Before US-009
+### Must Fix Before App Store Submission
 
 | Issue | Effort | Owner |
 |-------|--------|-------|
-| CRITICAL-1: Negative item_count | Low | Database migration |
-| CRITICAL-2: item_count consistency | Medium | Database triggers |
-| CRITICAL-3: Edge Function CORS | Low | Edge function |
-| CRITICAL-4: Firebase caching rules | Low | vite.config.js |
+| CRITICAL-1: Add Walmart to privacy policy | Low | Both MD and HTML files |
+| CRITICAL-2: Audit Capacitor for FileTimestamp API | Medium | Run grep, update xcprivacy |
+| IMPORTANT-2: Add AccountCreation purpose | Low | xcprivacy file |
 
-### Should Fix Soon
+### Should Fix
 
 | Issue | Effort |
 |-------|--------|
-| IMPORTANT-1: Supabase timeouts | Low |
-| IMPORTANT-2: saveStoreOrder batch | Low |
-| IMPORTANT-5: History batch insert | Low |
-| IMPORTANT-6: imageSearch error UX | Low |
-| MINOR-1: Stale docstring | Trivial |
+| IMPORTANT-1: Add privacy email | Low |
+| IMPORTANT-3: Optimize keywords | Low |
+| MINOR-1: Separate support URL | Low |
 
-### Track as Tech Debt
+---
 
-| Issue | Impact |
-|-------|--------|
-| IMPORTANT-3: N+2 queries for shared lists | Performance |
-| IMPORTANT-4: Re-fetch on every change | Bandwidth/scale |
+## Verdict
+
+**CONDITIONAL PASS** — Fix CRITICAL-1 and CRITICAL-2 before submission. The privacy policy is well-written but incomplete, and the privacy manifest may be missing required API declarations that would cause rejection.
