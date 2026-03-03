@@ -87,14 +87,14 @@
     {
       "id": "prd-list-colors",
       "name": "List Colors",
-      "status": "completed",
+      "status": "ready",
       "filePath": "docs/prds/prd-list-colors.md",
       "jsonPath": "docs/prds/prd-list-colors.json",
       "branchName": "feature/list-colors",
       "createdAt": "2026-03-02",
-      "updatedAt": "2026-03-02",
+      "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
-      "completedAt": "2026-03-02T20:30:00Z"
+      "notes": "US-001–003 done. US-004 revised: full color background with white text (replaces washed-out opacity tint). Builder needs to rework ListSelector.jsx and ListSelector.module.css."
     }
   ]
 }
