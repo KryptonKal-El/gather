@@ -1,39 +1,25 @@
 {
   "sessionId": "builder-2026-03-03-ios-app-store",
-  "lastHeartbeat": "2026-03-03T23:45:00Z",
-  "activePrd": {
-    "prdId": "prd-ios-app-store",
-    "testingRigor": "strict",
-    "currentStory": "US-001",
-    "storiesPending": ["US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011"],
-    "storiesCompleted": [],
-    "storyAssessments": {},
-    "status": "in_progress",
-    "credentials": {
-      "Apple Developer Program": "provided",
-      "Apple Sign-In Capability": "provided",
-      "App Store Connect": "provided",
-      "Apple Developer Team ID": "provided"
-    }
-  },
+  "lastHeartbeat": "2026-03-03T23:59:00Z",
+  "activePrd": null,
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-03T23:45:00Z",
+    "lastSyncedAt": "2026-03-03T23:59:00Z",
     "items": [
-      {"content": "US-001: Install Capacitor & Scaffold iOS Project", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Generate App Icons", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Splash Screens & Launch Screen", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Native Apple Sign-In", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Universal Links & Deep Linking", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Status Bar & Safe Areas", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Suppress PWA Banner in Native", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-007"},
-      {"content": "US-008: App Store Metadata & Privacy Policy", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-008"},
-      {"content": "US-009: App Store Screenshots", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-009"},
-      {"content": "US-010: Xcode Build Config & Signing", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-010"},
-      {"content": "US-011: Update project.json", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-011"}
+      {"content": "US-001: Install Capacitor & Scaffold iOS Project", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Generate App Icons", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Splash Screens & Launch Screen", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Native Apple Sign-In", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: Universal Links & Deep Linking", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Status Bar & Safe Areas", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: Suppress PWA Banner in Native", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-007"},
+      {"content": "US-008: App Store Metadata & Privacy Policy", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-008"},
+      {"content": "US-009: App Store Screenshots", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-009"},
+      {"content": "US-010: Xcode Build Config & Signing", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-010"},
+      {"content": "US-011: Update project.json", "status": "completed", "priority": "low", "flow": "prd", "refId": "US-011"}
     ]
   },
   "uncommittedWork": null,
