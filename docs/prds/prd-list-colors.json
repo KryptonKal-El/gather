@@ -1,7 +1,7 @@
 {
   "project": "ShoppingListAI",
   "branchName": "feature/list-colors",
-  "description": "Add a color property to shopping lists with a 10-color swatch picker and subtle row background tint",
+  "description": "Add a color property to shopping lists with a 10-color swatch picker and full-color row backgrounds",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -17,8 +17,8 @@
         "Lint passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Implemented by Builder",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -49,8 +49,8 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Implemented by Builder",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -87,8 +87,8 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "Swatch styling should match StoreManager's visual pattern: circular buttons, ~1.5rem diameter, selected state with border-color: var(--text-primary) and transform: scale(1.15)",
+      "passes": true,
+      "notes": "Implemented by Builder",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -107,23 +107,25 @@
     },
     {
       "id": "US-004",
-      "title": "Display List Color as Row Background Tint",
-      "description": "As a user, I want to see my list's color as a subtle background wash on its row so that I can quickly identify lists visually",
+      "title": "Display List Color as Full Row Background",
+      "description": "As a user, I want to see my list's color as the row background so that I can instantly identify lists by color",
       "acceptanceCriteria": [
-        "Each list row in renderListItem has an inline backgroundColor style derived from list.color at low opacity",
-        "The tint is visible but does not reduce text readability",
-        "Active list row still shows the primary-tint highlight (active state takes precedence over color tint)",
-        "Hover state still works naturally on desktop",
-        "Tint renders correctly in light mode (~10-12% opacity)",
-        "Tint renders correctly in dark mode (~12-18% opacity, adjust as needed for visibility)",
-        "Lists with the default color (blue) show a blue-ish tint",
-        "Shared lists also show their color tint",
+        "Each list row has its full list color as the background — no opacity or alpha suffix (remove the current '1A' approach in getRowTintStyle)",
+        "All text on colored rows is white (#fff) and fully readable",
+        "Item count text (.listCount) is slightly dimmed white (rgba(255,255,255,0.7)) for visual hierarchy",
+        "Chevron is white on colored rows",
+        "Three-dot menu button is white and visible on all row colors including lighter ones (yellow #f9a825)",
+        "Shared badge is readable on colored backgrounds (white text on rgba(255,255,255,0.2) pill)",
+        "Active list row is visually distinguishable while keeping its color (use filter: brightness(1.15) or inset white left border, NOT --primary-tint background)",
+        "Hover state provides visual feedback without losing the color (use filter: brightness shift)",
+        "Row separators are visible against colored backgrounds (use rgba(255,255,255,0.15) border instead of var(--border-subtle))",
+        "Mobile rounded corners are preserved — colored backgrounds respect border-radius on first/last child",
         "Works in both light and dark mode",
         "Lint passes"
       ],
       "priority": 4,
       "passes": false,
-      "notes": "Use hex with alpha (e.g., list.color + '1A') or convert to rgba. The tint should NOT conflict with .active or :hover states. Consider not applying the tint when the row is active.",
+      "notes": "This replaces the previous low-opacity tint approach. The key change: remove getRowTintStyle's alpha suffix ('1A') and use full backgroundColor: list.color with white text. Active state should use brightness filter or white left border instead of --primary-tint. Also need to override .menuBtn color on hover:hover media query since it uses color: transparent by default.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -138,7 +140,7 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Visual styling with light/dark mode considerations and state interaction"
+      "testIntensityReason": "Visual styling rework with multiple CSS overrides for text, borders, active/hover states across light and dark mode"
     }
   ]
 }

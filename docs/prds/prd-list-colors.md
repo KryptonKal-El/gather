@@ -147,35 +147,56 @@ A curated, balanced set of 10 colors that provide good contrast and visual varie
 
 ---
 
-### US-004: Display List Color as Row Background Tint
+### US-004: Display List Color as Full Row Background
 
 **As a** user  
-**I want** to see my list's color as a subtle background wash on its row  
-**So that** I can quickly identify lists visually  
+**I want** to see my list's color as the row background  
+**So that** I can instantly identify lists by color  
 
 #### Details
 
-**List row rendering** (`ListSelector.jsx`, `renderListItem` function):
-- Apply an inline style to the `.listItem` div using the list's `color` value
-- Use the color at low opacity (~10-15%) as a background tint: `backgroundColor: list.color + '1A'` (hex with alpha) or use `rgba` conversion
-- The tint should be visible but subtle — it should NOT overpower the text or the active/hover states
-- Active state (`.active`) and hover state should blend with or override the tint naturally
+**Current state (to be changed):**
+- `getRowTintStyle` in `ListSelector.jsx` (line 90-93) appends `'1A'` (10% alpha) to the hex color — this produces a washed-out tint that doesn't match the selected color. Remove this approach entirely.
 
-**Considerations:**
-- The background tint applies to ALL list rows (owned + shared)
-- Light mode: the tint should be barely visible (10-12% opacity)
-- Dark mode: the tint may need slightly higher opacity (12-18%) to be visible against the dark background — test and adjust
-- The tint should NOT conflict with the `.active` highlight (primary-tint). When a list is active, the active style takes precedence.
+**New approach — full color background with white text:**
+
+**`getRowTintStyle` replacement** (`ListSelector.jsx`):
+- Apply `backgroundColor: list.color` at full opacity (no alpha suffix)
+- Set `color: '#fff'` on the row so all text (list name, item count, chevron, menu button) is white and readable against the colored background
+- Apply to ALL list rows (owned + shared), including when active
+- Remove the `isActive` skip — colored rows should always show their color. The active state can be indicated by a subtle brightness change (e.g., a `filter: brightness(1.15)` or a thin white left border) instead of the `--primary-tint` background.
+
+**Text color overrides** (`ListSelector.jsx` inline styles or CSS):
+- `.listName` — white (`#fff`)
+- `.listCount` — white at reduced opacity (`rgba(255,255,255,0.7)`) for visual hierarchy
+- `.chevron` — white (`#fff`)
+- `.menuBtn` — white (`#fff`), including hover state
+- `.sharedBadge` — white text on `rgba(255,255,255,0.2)` background (semi-transparent white pill)
+
+**Active state:**
+- Instead of `--primary-tint` background, use `filter: brightness(1.15)` or `box-shadow: inset 3px 0 0 #fff` (white left bar) to indicate selection while keeping the list color visible.
+
+**Hover state:**
+- Use `filter: brightness(0.9)` or `brightness(1.1)` to darken/lighten slightly on hover, keeping the color visible.
+
+**Border between rows:**
+- The current `border-bottom: 1px solid var(--border-subtle)` may look off against colored backgrounds. Change to `border-bottom: 1px solid rgba(255,255,255,0.15)` on colored rows for a clean separator.
+
+**Mobile rounded corners (iOS grouped table):**
+- On mobile, the `.lists` container has `border-radius: 12px` and individual rows have border-radius on first/last child. The colored backgrounds must respect these border-radius values so colors don't bleed outside the rounded container. This should already work since `background` respects `border-radius`, but verify.
 
 #### Acceptance Criteria
 
-- [ ] Each list row shows a subtle background tint matching its assigned color
-- [ ] The tint is visible but does not reduce text readability
-- [ ] Active list row still shows the primary-tint highlight (active state wins)
-- [ ] Hover state still works naturally on desktop
-- [ ] Tint renders correctly in both light and dark mode
-- [ ] Lists with the default color (blue) show a blue-ish tint
-- [ ] Shared lists also show their color tint
+- [ ] Each list row has its full list color as the background (no opacity/alpha)
+- [ ] All text on colored rows is white and fully readable
+- [ ] Item count text is slightly dimmed white (rgba) for hierarchy
+- [ ] Active list row is visually distinguishable (brightness shift or left bar indicator) while keeping its color
+- [ ] Hover state provides visual feedback without losing the color
+- [ ] Row separators are visible against colored backgrounds (white semi-transparent border)
+- [ ] Mobile rounded corners are preserved — no color bleeding
+- [ ] Shared badge is readable on colored backgrounds
+- [ ] The three-dot menu button is white and visible on all row colors (including yellow #f9a825 and lighter colors)
+- [ ] Works in both light and dark mode
 - [ ] Lint passes
 
 ---
@@ -194,8 +215,9 @@ Implementation is complete when:
 2. **Data flow:** `color` flows through `createList` → `subscribeLists` → context state → UI, and through `updateList` for edits.
 3. **Create form:** Shows 10 color swatches with blue pre-selected. Selected color is saved to the database on list creation.
 4. **Edit form:** Shows 10 color swatches with the list's current color pre-selected. Changing color and saving persists to the database.
-5. **Row tint:** Every list row in ListSelector displays a subtle background tint derived from its color. The tint does not break active/hover states or text readability.
-6. **Menu label:** "Name & Icon" is updated to "Name, Icon & Color" in both desktop dropdown and mobile action sheet.
-7. **Dark mode:** All color swatches and background tints are visually correct in dark mode.
-8. **Lint passes** with no new warnings.
-9. **Build succeeds** (`npm run build` exits 0).
+5. **Row color:** Every list row in ListSelector has its full assigned color as background with white text. No opacity/alpha wash — the background matches the swatch color exactly.
+6. **Active/hover states:** Active row is visually distinguishable (brightness or border indicator) while keeping its color. Hover provides feedback without losing color.
+7. **Menu label:** "Name & Icon" is updated to "Name, Icon & Color" in both desktop dropdown and mobile action sheet.
+8. **Dark mode:** Color swatches and colored row backgrounds look correct in dark mode.
+9. **Lint passes** with no new warnings.
+10. **Build succeeds** (`npm run build` exits 0).
