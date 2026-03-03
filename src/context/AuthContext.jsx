@@ -61,31 +61,32 @@ export const AuthProvider = ({ children }) => {
           const profile = await fetchProfile(session.user.id);
           if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
+          setIsLoading(false);
         } else if (event === 'SIGNED_OUT') {
           setUser(null);
+          setIsLoading(false);
         }
-        // For INITIAL_SESSION with no session, also clear loading
-        // but DON'T set user to null yet — a TOKEN_REFRESHED event may follow
-        if (event === 'INITIAL_SESSION' && !session) {
-          // Wait a brief moment for a potential TOKEN_REFRESHED event
-          setTimeout(() => {
-            if (isMounted) setIsLoading(false);
-          }, 500);
-          return;
-        }
-        if (isMounted) setIsLoading(false);
       }
     );
 
-    // Safety timeout — if no auth event fires within 10 seconds, stop loading
-    const timeout = setTimeout(() => {
-      if (isMounted) setIsLoading(false);
-    }, 10000);
+    // Explicit session check as fallback — handles page refresh
+    // when onAuthStateChange fires INITIAL_SESSION with null before
+    // the stored session is fully restored
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!isMounted) return;
+      if (session?.user) {
+        const profile = await fetchProfile(session.user.id);
+        if (!isMounted) return;
+        setUser(mergeUserWithProfile(session.user, profile));
+      }
+      setIsLoading(false);
+    };
+    checkSession();
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, []);
 
