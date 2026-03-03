@@ -113,14 +113,15 @@
     {
       "id": "prd-walmart-image-search",
       "name": "Walmart Affiliate API Image Search",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-walmart-image-search.md",
       "jsonPath": "docs/prds/prd-walmart-image-search.json",
       "branchName": "feature/walmart-image-search",
       "createdAt": "2026-03-03",
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-03T22:00:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-03-03T23:30:00Z",
+      "notes": "All 6 stories complete. Walmart → Open Food Facts → SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     }
   ]
 }

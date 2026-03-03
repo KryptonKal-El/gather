@@ -1,28 +1,20 @@
 {
   "sessionId": "builder-2026-03-03-walmart-image-search",
-  "lastHeartbeat": "2026-03-03T22:00:00Z",
-  "activePrd": {
-    "prdId": "prd-walmart-image-search",
-    "testingRigor": "standard",
-    "currentStory": "US-001",
-    "storiesPending": ["US-002", "US-003", "US-004", "US-005", "US-006"],
-    "storiesCompleted": [],
-    "storyAssessments": {},
-    "status": "in_progress"
-  },
+  "lastHeartbeat": "2026-03-03T23:30:00Z",
+  "activePrd": null,
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-03T22:00:00Z",
+    "lastSyncedAt": "2026-03-03T23:30:00Z",
     "items": [
-      {"content": "US-001: Walmart Affiliate API Edge Function", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Open Food Facts Fallback", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: SerpAPI Tertiary Fallback", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Update Client-Side imageSearch.js", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: CORS & Environment Config + Deploy", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Update project.json Integrations", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-006"}
+      {"content": "US-001: Walmart Affiliate API Edge Function", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Open Food Facts Fallback", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: SerpAPI Tertiary Fallback", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Update Client-Side imageSearch.js", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: CORS & Environment Config + Deploy", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Update project.json Integrations", "status": "completed", "priority": "low", "flow": "prd", "refId": "US-006"}
     ]
   },
   "uncommittedWork": null,
