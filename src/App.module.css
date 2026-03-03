@@ -195,6 +195,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -365,6 +366,15 @@
   .sidebar {
     width: 100%;
     position: static;
+  }
+
+  .slideContainer {
+    height: 100%;
+  }
+
+  .listScreen,
+  .detailScreen {
+    height: 100%;
   }
 }
 
