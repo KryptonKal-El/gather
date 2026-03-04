@@ -15,7 +15,6 @@ import { ListSelector } from './components/ListSelector.jsx';
 import { AddItemForm } from './components/AddItemForm.jsx';
 import { ShoppingList } from './components/ShoppingList.jsx';
 import { Suggestions } from './components/Suggestions.jsx';
-import { RecipePanel } from './components/RecipePanel.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
 import { ThemeToggle } from './components/ThemeToggle.jsx';
@@ -95,11 +94,6 @@ export const App = () => {
   const handleAddItem = (name, storeId = null) => {
     if (!activeList) return;
     actions.addItem(activeList.id, name, storeId);
-  };
-
-  const handleAddItems = (items) => {
-    if (!activeList) return;
-    actions.addItems(activeList.id, items);
   };
 
   const handleToggleItem = (itemId) => {
@@ -252,7 +246,6 @@ export const App = () => {
                 suggestions={suggestions}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
-                onAddItems={handleAddItems}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}
@@ -479,7 +472,6 @@ export const App = () => {
               onClearChecked={handleClearChecked}
             />
             <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
-            <RecipePanel onAddItems={handleAddItems} />
             <StoreManager
               stores={state.stores}
               onAdd={actions.addStore}
