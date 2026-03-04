@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { RECIPE_TEMPLATES } from '../services/recipes.js';
 import styles from './RecipeSelector.module.css';
 
 /**
@@ -17,10 +18,13 @@ export const RecipeSelector = ({
   onEdit,
   onDelete,
   onShareClick,
+  onSaveTemplate,
+  onAddTemplateToList,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
+  const [expandedTemplateId, setExpandedTemplateId] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
@@ -282,6 +286,75 @@ export const RecipeSelector = ({
     );
   };
 
+  const handleTemplateClick = (templateId) => {
+    setExpandedTemplateId(expandedTemplateId === templateId ? null : templateId);
+  };
+
+  const renderTemplatesSection = () => (
+    <>
+      <div className={styles.sectionHeader}>
+        <h3 className={styles.sectionTitle}>Browse Templates</h3>
+      </div>
+      <div className={styles.templatesSection}>
+        <div className={styles.templateCards}>
+          {RECIPE_TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              className={`${styles.templateCard} ${expandedTemplateId === template.id ? styles.templateCardActive : ''}`}
+              onClick={() => handleTemplateClick(template.id)}
+            >
+              <span className={styles.templateName}>{template.name}</span>
+              <span className={styles.templateDesc}>{template.description}</span>
+              <span className={styles.templateCount}>{template.ingredients.length} ingredients</span>
+            </button>
+          ))}
+        </div>
+        {expandedTemplateId && (() => {
+          const template = RECIPE_TEMPLATES.find((t) => t.id === expandedTemplateId);
+          if (!template) return null;
+          return (
+            <div className={styles.templateDetail}>
+              <div className={styles.templateDetailHeader}>
+                <span className={styles.templateName}>{template.name}</span>
+                <span className={styles.templateDesc}>{template.description}</span>
+              </div>
+              <div className={styles.templateIngredients}>
+                {template.ingredients.map((ingredient) => (
+                  <span key={ingredient} className={styles.templateIngredient}>
+                    {ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.templateActions}>
+                <button
+                  type="button"
+                  className={styles.templateSaveBtn}
+                  onClick={() => {
+                    onSaveTemplate?.(template);
+                    setExpandedTemplateId(null);
+                  }}
+                >
+                  Save as Recipe
+                </button>
+                <button
+                  type="button"
+                  className={styles.templateAddBtn}
+                  onClick={() => {
+                    onAddTemplateToList?.(template);
+                    setExpandedTemplateId(null);
+                  }}
+                >
+                  Add to List
+                </button>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+    </>
+  );
+
   const renderMobileLayout = () => (
     <div className={styles.mobileLayout}>
       <div className={styles.mobileHeader}>
@@ -345,6 +418,8 @@ export const RecipeSelector = ({
             </div>
           </>
         )}
+
+        {renderTemplatesSection()}
       </div>
     </div>
   );
@@ -409,6 +484,8 @@ export const RecipeSelector = ({
           </div>
         </>
       )}
+
+      {renderTemplatesSection()}
     </div>
   );
 
@@ -423,4 +500,6 @@ RecipeSelector.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onShareClick: PropTypes.func,
+  onSaveTemplate: PropTypes.func,
+  onAddTemplateToList: PropTypes.func,
 };

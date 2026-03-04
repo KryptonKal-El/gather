@@ -341,6 +341,28 @@ export const App = () => {
         setShowRecipeForm(recipeId);
       };
 
+      const handleSaveTemplate = async (template) => {
+        const ingredients = template.ingredients.map((name, i) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          quantity: '',
+          sortOrder: i,
+        }));
+        await recipeActions.createRecipe({
+          name: template.name,
+          description: template.description,
+          ingredients,
+          steps: [],
+        });
+      };
+
+      const handleAddTemplateToList = (template) => {
+        const ingredients = template.ingredients.map((name) => ({
+          name: name.charAt(0).toUpperCase() + name.slice(1),
+          quantity: '',
+        }));
+        setAddToListIngredients(ingredients);
+      };
+
       const detailRecipe = recipeState.activeRecipe ?? poppingRecipeData;
 
       return (
@@ -356,6 +378,8 @@ export const App = () => {
                   onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
                   onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
+                  onSaveTemplate={handleSaveTemplate}
+                  onAddTemplateToList={handleAddTemplateToList}
                 />
               </div>
             </section>
