@@ -59,8 +59,10 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T21:45:00Z",
+      "passes": true,
+      "notes": "Migration at supabase/migrations/20260304220000_migrate_recipes_to_collections.sql. Creates default collections, assigns recipes, migrates recipe_shares to collection_shares, makes collection_id NOT NULL, changes FK to ON DELETE RESTRICT, archives recipe_shares table, updates all SELECT policies to collection-only sharing.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
