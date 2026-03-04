@@ -482,8 +482,10 @@
         "Lint passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T00:55:00Z",
+      "passes": true,
+      "notes": "Already implemented — ensureDefaultCollection(userId) is called on mount in RecipeContext (line 76), fires on every userId change (sign-in). Function is idempotent (checks for existing default first). subscribeCollections callback auto-selects default collection. No code changes needed.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
