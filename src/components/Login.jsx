@@ -66,22 +66,7 @@ export const Login = () => {
     <div className={styles.backdrop}>
       <div className={styles.card}>
         <div className={styles.logoStack}>
-          <svg className={styles.logoIcon} viewBox="0 0 512 512" aria-hidden="true">
-            <defs>
-              <linearGradient id="loginIconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#B5E8C8"/>
-                <stop offset="100%" stopColor="#A8D8EA"/>
-              </linearGradient>
-            </defs>
-            <rect width="512" height="512" rx="96" fill="url(#loginIconGrad)"/>
-            <circle cx="160" cy="210" r="18" fill="#fff" opacity="0.95"/>
-            <rect x="198" y="198" width="158" height="24" rx="12" fill="#fff" opacity="0.95"/>
-            <circle cx="160" cy="260" r="18" fill="#fff" opacity="0.95"/>
-            <rect x="198" y="248" width="120" height="24" rx="12" fill="#fff" opacity="0.95"/>
-            <circle cx="160" cy="310" r="18" fill="#fff" opacity="0.95"/>
-            <rect x="198" y="298" width="144" height="24" rx="12" fill="#fff" opacity="0.95"/>
-            <path d="M400,180 C400,180 378,164 378,150 C378,142 384,136 389,136 C394,136 397,140 400,144 C403,140 406,136 411,136 C416,136 422,142 422,150 C422,164 400,180 400,180 Z" fill="#F9A8C9" opacity="0.92"/>
-          </svg>
+          <img src="/logo/icon-only.svg" alt="" className={styles.logoIcon} aria-hidden="true" />
           <h1 className={styles.logo}>Gather</h1>
           <p className={styles.tagline}>Gather your lists, meals, and more.</p>
         </div>

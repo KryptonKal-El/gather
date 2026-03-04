@@ -1,18 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="512" height="512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#B5E8C8"/>
       <stop offset="100%" stop-color="#A8D8EA"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- List lines -->
-  <circle cx="160" cy="210" r="18" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="198" y="198" width="158" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
-  <circle cx="160" cy="260" r="18" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="198" y="248" width="120" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
-  <circle cx="160" cy="310" r="18" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="198" y="298" width="144" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
-  <!-- Pink heart accent -->
-  <path d="M400,180 C400,180 378,164 378,150 C378,142 384,136 389,136 C394,136 397,140 400,144 C403,140 406,136 411,136 C416,136 422,142 422,150 C422,164 400,180 400,180 Z" fill="#F9A8C9" opacity="0.92"/>
+
+  <rect width="120" height="120" rx="28" fill="url(#iconGrad)"/>
+
+  <circle cx="28" cy="40" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="41" y="35" width="52" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="28" cy="60" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="41" y="55" width="40" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="28" cy="80" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="41" y="75" width="48" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <path d="M100,26 C100,26 86,16 86,8 C86,3 90,0 93,0 C96,0 98,2 100,4 C102,2 104,0 107,0 C110,0 114,3 114,8 C114,16 100,26 100,26 Z" fill="#F9A8C9" opacity="0.92"/>
 </svg>
