@@ -450,6 +450,7 @@ export const subscribeRecipeDetail = (recipeId, callback) => {
 
 /**
  * Shares a recipe with another user by email.
+ * @deprecated Use shareCollection instead. Will be removed in US-012.
  * @param {string} recipeId - Recipe ID to share
  * @param {string} email - Email of the user to share with
  */
@@ -470,6 +471,7 @@ export const shareRecipe = async (recipeId, email) => {
 
 /**
  * Removes sharing for a given email from a recipe.
+ * @deprecated Use unshareCollection instead. Will be removed in US-012.
  * @param {string} recipeId - Recipe ID
  * @param {string} email - Email to unshare with
  */
@@ -492,6 +494,7 @@ export const unshareRecipe = async (recipeId, email) => {
 /**
  * Subscribes to shared recipe references for a user (by email).
  * Returns refs for recipes that others have shared with this user.
+ * @deprecated Use subscribeSharedCollections instead. Will be removed in US-012.
  * @param {string} email - User's email
  * @param {function} callback - Called with array of shared recipe ref objects
  * @returns {function} Unsubscribe function that removes the channel
@@ -585,6 +588,7 @@ export const subscribeSharedRecipeRefs = (email, callback) => {
 
 /**
  * Fetches all shares for a recipe.
+ * @deprecated Use getCollectionShares instead. Will be removed in US-012.
  * @param {string} recipeId - Recipe ID
  * @returns {Promise<Array<object>>} Array of { id, email, addedAt }
  */
@@ -852,5 +856,262 @@ export const moveRecipeToCollection = async (recipeId, collectionId) => {
     if (error) throw error;
   } catch (error) {
     throw new Error(`Failed to move recipe: recipeId=${recipeId}, collectionId=${collectionId}`, { cause: error });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Collections - Sharing
+// ---------------------------------------------------------------------------
+
+/**
+ * Shares a collection with another user by email.
+ * @param {string} collectionId - Collection ID to share
+ * @param {string} email - Email of the user to share with
+ * @param {string} userId - User ID of the person sharing (owner)
+ */
+export const shareCollection = async (collectionId, email, userId) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if owner is trying to share with themselves
+    const { data: collection, error: collectionError } = await supabase
+      .from('collections')
+      .select('owner_id')
+      .eq('id', collectionId)
+      .single();
+
+    if (collectionError) throw collectionError;
+
+    const { data: ownerProfile, error: profileError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', collection.owner_id)
+      .single();
+
+    if (profileError) throw profileError;
+
+    if (ownerProfile.email?.toLowerCase().trim() === normalizedEmail) {
+      throw new Error('Cannot share a collection with yourself');
+    }
+
+    const { error } = await supabase.from('collection_shares').insert({
+      collection_id: collectionId,
+      shared_with_email: normalizedEmail,
+      shared_by: userId,
+      permission: 'write',
+    });
+
+    if (error) throw error;
+  } catch (error) {
+    if (error.message === 'Cannot share a collection with yourself') {
+      throw error;
+    }
+    throw new Error(`Failed to share collection: collectionId=${collectionId}, email=${email}`, { cause: error });
+  }
+};
+
+/**
+ * Removes sharing for a given email from a collection.
+ * @param {string} collectionId - Collection ID
+ * @param {string} email - Email to unshare with
+ */
+export const unshareCollection = async (collectionId, email) => {
+  try {
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const { error } = await supabase
+      .from('collection_shares')
+      .delete()
+      .eq('collection_id', collectionId)
+      .eq('shared_with_email', normalizedEmail);
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to unshare collection: collectionId=${collectionId}, email=${email}`, { cause: error });
+  }
+};
+
+/**
+ * Fetches all shares for a collection.
+ * @param {string} collectionId - Collection ID
+ * @returns {Promise<Array<object>>} Array of { id, email, addedAt }
+ */
+export const getCollectionShares = async (collectionId) => {
+  try {
+    const { data, error } = await supabase
+      .from('collection_shares')
+      .select('id, shared_with_email, added_at')
+      .eq('collection_id', collectionId);
+
+    if (error) throw error;
+
+    return data.map((row) => ({
+      id: row.id,
+      email: row.shared_with_email,
+      addedAt: row.added_at,
+    }));
+  } catch (error) {
+    throw new Error(`Failed to get collection shares: collectionId=${collectionId}`, { cause: error });
+  }
+};
+
+/**
+ * Subscribes to shared collections for a user (by email).
+ * Returns collections that others have shared with this user.
+ * @param {string} email - User's email
+ * @param {function} callback - Called with array of shared collection objects
+ * @returns {function} Unsubscribe function that removes the channel
+ */
+export const subscribeSharedCollections = (email, callback) => {
+  if (!email) {
+    callback([]);
+    return () => {};
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+
+  const fetchSharedCollections = async () => {
+    try {
+      const { data: shares, error: sharesError } = await supabase
+        .from('collection_shares')
+        .select(`
+          id,
+          collection_id,
+          added_at,
+          permission,
+          collections (
+            id, name, emoji, description, owner_id, created_at, updated_at
+          )
+        `)
+        .eq('shared_with_email', normalizedEmail);
+
+      if (sharesError) {
+        console.error('Failed to fetch shared collections:', sharesError);
+        return;
+      }
+
+      if (!shares || shares.length === 0) {
+        callback([]);
+        return;
+      }
+
+      // Get recipe counts per collection
+      const collectionIds = shares.map((s) => s.collection_id);
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipes')
+        .select('collection_id')
+        .in('collection_id', collectionIds);
+
+      if (recipesError) {
+        console.error('Failed to fetch recipe counts:', recipesError);
+        return;
+      }
+
+      // Count recipes per collection
+      const recipeCounts = {};
+      for (const recipe of recipes || []) {
+        recipeCounts[recipe.collection_id] = (recipeCounts[recipe.collection_id] || 0) + 1;
+      }
+
+      const mapped = shares
+        .filter((s) => s.collections)
+        .map((s) => ({
+          id: s.id,
+          collectionId: s.collection_id,
+          permission: s.permission,
+          addedAt: s.added_at,
+          collection: {
+            id: s.collections.id,
+            name: s.collections.name,
+            emoji: s.collections.emoji,
+            description: s.collections.description,
+            ownerId: s.collections.owner_id,
+            createdAt: s.collections.created_at,
+            updatedAt: s.collections.updated_at,
+          },
+          recipeCount: recipeCounts[s.collection_id] || 0,
+        }));
+
+      callback(mapped);
+    } catch (error) {
+      console.error('Failed to fetch shared collections:', error);
+    }
+  };
+
+  fetchSharedCollections();
+
+  const channel = supabase
+    .channel(`shared-collections-${normalizedEmail}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'collection_shares',
+        filter: `shared_with_email=eq.${normalizedEmail}`,
+      },
+      () => {
+        fetchSharedCollections();
+      }
+    )
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeSharedCollections] Realtime subscription error:', err);
+      }
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+/**
+ * Adds a recipe to a shared collection. The recipe will be owned by the user
+ * but placed in the shared collection.
+ * @param {string} userId - User ID of the person adding the recipe
+ * @param {string} collectionId - Shared collection ID
+ * @param {object} recipe - Recipe data { name, description, ingredients, steps }
+ * @returns {Promise<string>} The new recipe's ID
+ */
+export const addRecipeToSharedCollection = async (userId, collectionId, recipe) => {
+  try {
+    return await createRecipe(userId, { ...recipe, collectionId });
+  } catch (error) {
+    throw new Error(`Failed to add recipe to shared collection: collectionId=${collectionId}`, { cause: error });
+  }
+};
+
+/**
+ * Removes a recipe from a shared collection. Users can only remove recipes they added.
+ * @param {string} userId - User ID attempting the removal
+ * @param {string} recipeId - Recipe ID to remove
+ * @param {string} collectionId - Collection ID (kept for API clarity)
+ */
+export const removeRecipeFromSharedCollection = async (userId, recipeId, _collectionId) => {
+  try {
+    // Check if user owns the recipe
+    const { data: recipe, error: fetchError } = await supabase
+      .from('recipes')
+      .select('owner_id')
+      .eq('id', recipeId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    if (recipe.owner_id !== userId) {
+      throw new Error('Can only remove recipes you added to a shared collection');
+    }
+
+    const { error: deleteError } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', recipeId);
+
+    if (deleteError) throw deleteError;
+  } catch (error) {
+    if (error.message === 'Can only remove recipes you added to a shared collection') {
+      throw error;
+    }
+    throw new Error(`Failed to remove recipe from shared collection: recipeId=${recipeId}`, { cause: error });
   }
 };
