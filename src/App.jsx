@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { useShoppingList } from './hooks/useShoppingList.js';
+import { useRecipes } from './hooks/useRecipes.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
@@ -23,6 +24,7 @@ import { PWAInstallBanner } from './components/PWAInstallBanner.jsx';
 import { BottomTabBar } from './components/BottomTabBar.jsx';
 import { MobileListDetail } from './components/MobileListDetail.jsx';
 import { MobileSettings } from './components/MobileSettings.jsx';
+import { RecipeSelector } from './components/RecipeSelector.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
@@ -35,6 +37,7 @@ import styles from './App.module.css';
 export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
+  const { state: recipeState, actions: recipeActions } = useRecipes();
   const [sharingListId, setSharingListId] = useState(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [avatarUploadError, setAvatarUploadError] = useState(null);
@@ -43,12 +46,15 @@ export const App = () => {
   const {
     activeTab,
     openListId,
+    openRecipeId,
     transition,
     poppingListData,
     handleTabChange,
     handleOpenList,
+    handleOpenRecipe,
     handleBack,
-  } = useMobileNav(state.lists);
+    handleRecipeBack,
+  } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
 
   // Hide native splash screen after auth check completes
@@ -254,7 +260,68 @@ export const App = () => {
     }
 
     if (activeTab === 'recipes') {
-      return <div>Recipes coming soon</div>;
+      const showDetail = openRecipeId && recipeState.activeRecipe;
+      const showListScreen = !openRecipeId || transition;
+      const showDetailScreen = showDetail || transition === 'popping';
+
+      const getRecipeListScreenClass = () => {
+        if (transition === 'pushing') return `${styles.listScreen} ${styles.pushing}`;
+        if (transition === 'popping') return `${styles.listScreen} ${styles.popping}`;
+        if (showDetail) return `${styles.listScreen} ${styles.hidden}`;
+        return styles.listScreen;
+      };
+
+      const getRecipeDetailScreenClass = () => {
+        if (transition === 'pushing') return `${styles.detailScreen} ${styles.pushing}`;
+        if (transition === 'popping') return `${styles.detailScreen} ${styles.popping}`;
+        if (!showDetail) return `${styles.detailScreen} ${styles.hidden}`;
+        return styles.detailScreen;
+      };
+
+      const handleRecipeSelect = (recipeId) => {
+        recipeActions.selectRecipe(recipeId);
+        handleOpenRecipe(recipeId);
+      };
+
+      const handleRecipeBackNav = () => {
+        handleRecipeBack();
+      };
+
+      return (
+        <div className={styles.slideContainer}>
+          {showListScreen && (
+            <section className={getRecipeListScreenClass()}>
+              <div className={styles.mobileFullScreen}>
+                <RecipeSelector
+                  recipes={recipeState.recipes}
+                  sharedRecipes={recipeState.sharedRecipes}
+                  onSelect={handleRecipeSelect}
+                  onCreate={() => {}}
+                  onEdit={() => {}}
+                  onDelete={recipeActions.deleteRecipe}
+                  onShareClick={() => {}}
+                />
+              </div>
+            </section>
+          )}
+          {showDetailScreen && (
+            <section className={getRecipeDetailScreenClass()}>
+              <div className={styles.mobileFullScreen}>
+                <div style={{ padding: '1rem' }}>
+                  <button
+                    type="button"
+                    className={styles.backBtn}
+                    onClick={handleRecipeBackNav}
+                  >
+                    ‹ Back
+                  </button>
+                  <p>Recipe detail coming in US-010</p>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
+      );
     }
 
     if (activeTab === 'stores') {
