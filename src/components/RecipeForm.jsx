@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styles from './RecipeForm.module.css';
+import { parseRecipeText } from '../services/recipes.js';
 
 /**
  * Full-screen form view for creating or editing a recipe.
@@ -44,6 +45,9 @@ export const RecipeForm = ({
   const [nameError, setNameError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  const [showImportOverlay, setShowImportOverlay] = useState(false);
+  const [importText, setImportText] = useState('');
 
   const fileInputRef = useRef(null);
 
@@ -106,6 +110,25 @@ export const RecipeForm = ({
 
   const handleRemoveStep = (id) => {
     setSteps((prev) => prev.filter((step) => step.id !== id));
+  };
+
+  const handleImportIngredients = () => {
+    const parsed = parseRecipeText(importText);
+    if (parsed.length === 0) return;
+
+    const imported = parsed.map((item) => ({
+      id: crypto.randomUUID(),
+      quantity: '',
+      name: item.name,
+    }));
+
+    setIngredients((prev) => {
+      const nonEmpty = prev.filter((ing) => ing.name.trim());
+      return [...nonEmpty, ...imported];
+    });
+
+    setShowImportOverlay(false);
+    setImportText('');
   };
 
   const handleSave = async () => {
@@ -364,13 +387,22 @@ export const RecipeForm = ({
               ))
             )}
           </div>
-          <button
-            type="button"
-            className={styles.addBtn}
-            onClick={handleAddIngredient}
-          >
-            + Add ingredient
-          </button>
+          <div className={styles.ingredientActions}>
+            <button
+              type="button"
+              className={styles.addBtn}
+              onClick={handleAddIngredient}
+            >
+              + Add ingredient
+            </button>
+            <button
+              type="button"
+              className={styles.importBtn}
+              onClick={() => setShowImportOverlay(true)}
+            >
+              📋 Import from Text
+            </button>
+          </div>
         </div>
 
         {/* Steps Section */}
@@ -425,6 +457,52 @@ export const RecipeForm = ({
         </div>
 
         {saveError && <p className={styles.errorText}>{saveError}</p>}
+
+        {showImportOverlay && (
+          <div className={styles.importOverlay}>
+            <div className={styles.importPanel}>
+              <div className={styles.importHeader}>
+                <h3 className={styles.importTitle}>Import Ingredients</h3>
+                <button
+                  type="button"
+                  className={styles.importCloseBtn}
+                  onClick={() => { setShowImportOverlay(false); setImportText(''); }}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <p className={styles.importHint}>
+                Paste your ingredient list below (one per line):
+              </p>
+              <textarea
+                className={styles.importTextarea}
+                value={importText}
+                onChange={(e) => setImportText(e.target.value)}
+                placeholder={"2 cups flour\n1 lb ground beef\n3 cloves garlic\n1 can tomato sauce"}
+                rows={8}
+                autoFocus
+              />
+              <div className={styles.importActions}>
+                <button
+                  type="button"
+                  className={styles.importCancelBtn}
+                  onClick={() => { setShowImportOverlay(false); setImportText(''); }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={styles.importConfirmBtn}
+                  onClick={handleImportIngredients}
+                  disabled={!importText.trim()}
+                >
+                  Import
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
