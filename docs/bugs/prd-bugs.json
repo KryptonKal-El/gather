@@ -246,6 +246,72 @@
       "occurrences": 1,
       "priority": "medium",
       "notes": "The original PRD (US-003) explicitly stated 'The avatar does not act as a tap target on desktop'. This was a design decision, but in practice it means desktop users cannot upload a profile photo at all since there is no desktop settings page. The fix is to reverse that decision and make the avatar clickable on desktop too."
+    },
+    {
+      "id": "BUG-008",
+      "title": "Recipe-images storage bucket missing 5MB file size limit and MIME type restrictions",
+      "description": "The recipe-images Supabase Storage bucket was created in the migration but is missing server-side enforcement of the 5MB max file size and the allowed MIME type restrictions (image/jpeg, image/png, image/webp). Without these, users can upload arbitrarily large files or non-image files to the bucket.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "supabase/migrations/20260304120000_create_recipes.sql"
+      ],
+      "affectedPlatforms": ["all"],
+      "rootCause": "The migration creates the recipe-images bucket via INSERT INTO storage.buckets but does not set file_size_limit or allowed_mime_types on the bucket. The existing item-images and profile-images buckets may have the same gap — check them too. Supabase supports these as bucket-level properties.",
+      "reproductionSteps": [
+        "Attempt to upload a file larger than 5MB as a recipe image — it succeeds (should be rejected)",
+        "Attempt to upload a non-image file (e.g., .pdf, .txt) — it succeeds (should be rejected)"
+      ],
+      "suggestedFix": "Create a new migration that updates the recipe-images bucket to add constraints:\n\n```sql\nUPDATE storage.buckets\nSET file_size_limit = 5242880,\n    allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp']\nWHERE id = 'recipe-images';\n```\n\nAlternatively, if the original migration INSERT can be amended:\n```sql\nINSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)\nVALUES ('recipe-images', 'recipe-images', true, 5242880, ARRAY['image/jpeg', 'image/png', 'image/webp']);\n```\n\nAlso check item-images and profile-images buckets for the same gap and fix if needed.",
+      "acceptanceCriteria": [
+        "recipe-images bucket has file_size_limit set to 5242880 (5MB)",
+        "recipe-images bucket has allowed_mime_types set to ['image/jpeg', 'image/png', 'image/webp']",
+        "Uploading a file >5MB is rejected server-side with an appropriate error",
+        "Uploading a non-image file is rejected server-side with an appropriate error",
+        "Existing recipe image uploads still work for valid images under 5MB",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-recipes",
+      "reportedAt": "2026-03-04",
+      "occurrences": 1,
+      "priority": "medium",
+      "notes": "PRD US-003 explicitly required 5MB max and MIME type restrictions. This is server-side enforcement — client-side validation may exist but is insufficient on its own."
+    },
+    {
+      "id": "BUG-009",
+      "title": "RecipeForm missing drag-to-reorder for ingredients and steps",
+      "description": "The RecipeForm component allows adding and removing ingredients and steps, but users cannot drag to reorder them. The PRD (US-009) explicitly required drag-to-reorder for both ingredients and steps. The sort_order is determined by array position but the user has no way to change it.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/components/RecipeForm.jsx",
+        "src/components/RecipeForm.module.css"
+      ],
+      "affectedPlatforms": ["all"],
+      "rootCause": "RecipeForm.jsx renders ingredients and steps as simple lists with add/remove buttons but no drag handles, no drag library integration, and no reorder logic. No sortable/draggable library (e.g., @dnd-kit/core, @dnd-kit/sortable, react-beautiful-dnd) is installed or imported.",
+      "reproductionSteps": [
+        "Open the app and navigate to Recipes tab",
+        "Create a new recipe or edit an existing one",
+        "Add multiple ingredients or steps",
+        "Try to drag any ingredient or step to reorder — nothing happens",
+        "There are no drag handles or visual indicators that reordering is possible"
+      ],
+      "suggestedFix": "Add drag-to-reorder using @dnd-kit/core + @dnd-kit/sortable (lightweight, modern, well-maintained):\n\n1. Install: `npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`\n2. Wrap ingredient list and step list each in a `<DndContext>` + `<SortableContext>`\n3. Make each ingredient/step row a `<SortableItem>` using `useSortable()`\n4. Add a drag handle icon (≡ or ⠿) to the left of each row\n5. On drag end, reorder the array and update sort_order accordingly\n6. Apply `DragOverlay` for smooth visual feedback during drag\n7. Works on both touch (mobile) and mouse (desktop)\n8. Style drag handles and active/dragging state in RecipeForm.module.css\n\nAlternative: If a library feels too heavy, implement simple move-up/move-down arrow buttons per row. Less elegant but zero dependencies. The PRD says 'drag-to-reorder' though, so the library approach is preferred.",
+      "acceptanceCriteria": [
+        "Ingredients in RecipeForm can be reordered by dragging (touch on mobile, mouse on desktop)",
+        "Steps in RecipeForm can be reordered by dragging (touch on mobile, mouse on desktop)",
+        "Each ingredient and step row has a visible drag handle",
+        "Drag provides visual feedback (item lifts/moves, placeholder shows drop position)",
+        "Reordered items persist correctly when the recipe is saved (sort_order reflects new order)",
+        "Step numbering updates automatically after reorder",
+        "Works in both light and dark mode",
+        "Lint passes"
+      ],
+      "relatedPrd": "prd-recipes",
+      "reportedAt": "2026-03-04",
+      "occurrences": 1,
+      "priority": "medium",
+      "notes": "PRD US-009 explicitly required 'drag-to-reorder' for both ingredients and steps. Consider @dnd-kit/sortable as it is lightweight (~12KB gzipped) and has good React 18 support. The existing add/remove functionality should remain alongside the new drag reorder."
     }
   ]
 }

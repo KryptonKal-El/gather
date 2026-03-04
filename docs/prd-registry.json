@@ -21,7 +21,7 @@
       "createdAt": "2026-02-25",
       "updatedAt": "2026-03-02",
       "completedAt": "2026-03-02T14:00:00Z",
-      "notes": "All 6 bugs resolved (BUG-001 through BUG-006). BUG-005: added optimistic update + Realtime error callbacks. BUG-006: added error handling + 10s timeout fallback in AuthContext."
+      "notes": "BUG-001 through BUG-007 resolved. BUG-008 and BUG-009 open (recipe storage constraints + drag-to-reorder)."
     },
     {
       "id": "prd-native-emoji-picker",
