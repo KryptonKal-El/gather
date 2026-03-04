@@ -280,6 +280,7 @@ export const subscribeRecipes = (userId, callback) => {
           ingredientCount: row.ingredient_count,
           stepCount: row.step_count,
           ownerId: row.owner_id,
+          collectionId: row.collection_id,
           createdAt: row.created_at,
           updatedAt: row.updated_at,
         }))

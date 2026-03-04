@@ -1,11 +1,11 @@
 {
   "sessionId": "builder-2026-03-04-recipe-collections",
-  "lastHeartbeat": "2026-03-04T22:00:00Z",
+  "lastHeartbeat": "2026-03-04T22:30:00Z",
   "activePrd": {
     "id": "prd-recipe-collections",
     "name": "Recipe Collections",
-    "currentStory": "US-005",
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004"],
+    "currentStory": "US-006",
+    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005"],
     "storiesBlocked": [],
     "storiesSkipped": [],
     "totalStories": 15,
@@ -23,7 +23,7 @@
       {"content": "US-002: Data Migration — Recipes to Default Collections", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
       {"content": "US-003: Service Layer — Collection CRUD", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
       {"content": "US-004: Service Layer — Collection Sharing", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: RecipeContext — Collection State", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-005: RecipeContext — Collection State", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
       {"content": "US-006: RecipeSelector — Collection List View", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-006"},
       {"content": "US-007: RecipeSelector — Recipe List Within Collection", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-007"},
       {"content": "US-008: ShareCollectionModal", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-008"},

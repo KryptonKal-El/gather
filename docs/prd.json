@@ -174,8 +174,10 @@
         "Lint passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T22:30:00Z",
+      "passes": true,
+      "notes": "Major RecipeContext refactor: added collections/sharedCollections/activeCollectionId state, collection subscriptions with auto-default selection, shared collection recipe fetching with Realtime, 8 new collection actions, recipes filtered by active collection via useMemo, createRecipe passes activeCollectionId. Old per-recipe sharing state and actions removed. Also added collectionId to subscribeRecipes mapping in recipeDatabase.js.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
