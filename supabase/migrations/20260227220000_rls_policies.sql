@@ -1,4 +1,4 @@
--- ShoppingListAI Row Level Security Policies
+-- Gather Row Level Security Policies
 -- Migration: rls_policies
 -- Created: 2026-02-27
 

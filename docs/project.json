@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/project.json",
-  "name": "ShoppingListAI",
+  "name": "Gather",
   "description": "AI-powered grocery shopping list PWA with real-time sync, shared lists, recipes, and image search",
   "stack": {
     "language": "javascript",

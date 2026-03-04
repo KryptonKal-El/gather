@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/ios-mobile-nav",
   "description": "Redesign mobile experience with iOS-style tab bar navigation, full-screen list views with slide transitions, and dedicated Stores and Settings tabs",
   "credentialRequirements": [],

@@ -1,5 +1,5 @@
 /**
- * Supabase database service layer for ShoppingListAI.
+ * Supabase database service layer for Gather.
  * Provides CRUD operations and subscription stubs for lists, items, stores, history, and sharing.
  * Real-time subscriptions will be implemented in US-005.
  */

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>ShoppingListAI</string>
+        <string>Gather</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -27,10 +27,10 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>shoppinglistai</string>
+				<string>gather</string>
 			</array>
 			<key>CFBundleURLName</key>
-			<string>com.shoppinglistai</string>
+			<string>com.gather.app</string>
 		</dict>
 	</array>
 	<key>LSRequiresIPhoneOS</key>

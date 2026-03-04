@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/desktop-avatar-upload",
   "description": "Make the desktop header avatar clickable to upload a profile image, mirroring the mobile MobileSettings upload flow",
   "credentialRequirements": [],

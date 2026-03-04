@@ -9,7 +9,7 @@
 
 ## Summary
 
-This review covers the App Store submission materials for ShoppingListAI:
+This review covers the App Store submission materials for Gather:
 - App Store metadata (`metadata.md`)
 - Privacy policy (`privacy-policy.md`, `privacy.html`)
 - App Privacy labels (`app-privacy-labels.md`)

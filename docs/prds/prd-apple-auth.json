@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/apple-auth",
   "description": "Replace Google OAuth with Apple Sign-In as the sole social login provider, rearrange login screen layout with Apple button on top",
   "credentialRequirements": [

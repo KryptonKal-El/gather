@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/rebrand-gather",
   "description": "Full rebrand from ShoppingListAI to Gather — name, tagline, metadata, iOS config, legal, docs. Phased: Phase 1 unblocked, Phase 2 blocked on logo/colors, Phase 3 blocked on domain.",
   "credentialRequirements": [

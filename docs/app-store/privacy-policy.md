@@ -1,10 +1,10 @@
-# ShoppingListAI — Privacy Policy
+# Gather — Privacy Policy
 
 *Last updated: March 3, 2026*
 
 ## Introduction
 
-ShoppingListAI ("we", "our", "the app") is committed to protecting your privacy. This privacy policy explains what information we collect, how we use it, and your rights regarding your data.
+Gather ("we", "our", "the app") is committed to protecting your privacy. This privacy policy explains what information we collect, how we use it, and your rights regarding your data.
 
 ## Information We Collect
 
@@ -65,7 +65,7 @@ You have the right to:
 
 ## Children's Privacy
 
-ShoppingListAI does not knowingly collect data from children under 13. The app is rated 4+ but is designed for general audiences.
+Gather does not knowingly collect data from children under 13. The app is rated 4+ but is designed for general audiences.
 
 ## Data Retention
 
@@ -80,7 +80,7 @@ We may update this privacy policy from time to time. We will notify you of any m
 ## Contact Us
 
 For privacy-related questions or data deletion requests:
-- Website: https://shoppinglistai.vercel.app
+- Website: https://gather.vercel.app
 - In-app: Settings > Support
 
 ---

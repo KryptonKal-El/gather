@@ -1,24 +1,38 @@
 {
   "project": "ShoppingListAI",
-  "branchName": "feature/recipes",
-  "description": "Full recipe management system as a first-class tab — CRUD, images, structured ingredients/steps, Add to List flow, sharing by email, Browse Templates, paste import, desktop layout.",
-  "credentialRequirements": [],
+  "branchName": "feature/rebrand-gather",
+  "description": "Full rebrand from ShoppingListAI to Gather — name, tagline, metadata, iOS config, legal, docs. Phased: Phase 1 unblocked, Phase 2 blocked on logo/colors, Phase 3 blocked on domain.",
+  "credentialRequirements": [
+    {
+      "service": "Apple Developer Portal",
+      "credentialType": "serviceAccount",
+      "requestTiming": "after-initial-build",
+      "requiredForStories": ["US-007", "US-008", "US-009", "US-019", "US-020"],
+      "fallbackPlan": "Local build and cap sync work; App Store submission blocked until portal is updated",
+      "status": "provided"
+    },
+    {
+      "service": "Custom Domain Registrar",
+      "credentialType": "token",
+      "requestTiming": "after-initial-build",
+      "requiredForStories": ["US-018", "US-019", "US-020", "US-021"],
+      "fallbackPlan": "All Phase 1 and Phase 2 stories proceed without domain; domain stories deferred",
+      "status": "pending"
+    }
+  ],
   "userStories": [
     {
       "id": "US-001",
-      "title": "Create recipes, recipe_ingredients, and recipe_steps database tables",
-      "description": "As a developer, I need database tables to persist recipes, their ingredients, and their steps so the feature has a backend.",
+      "title": "Update App Header Branding",
+      "description": "Replace 'ShoppingListAI' with 'Gather' in the desktop header logo area and welcome/greeting text in src/App.jsx. Add tagline to desktop header.",
       "acceptanceCriteria": [
-        "Create Supabase migration YYYYMMDDHHMMSS_create_recipes_tables.sql",
-        "recipes table: id (uuid PK), owner_id (uuid FK → profiles, ON DELETE CASCADE), name (text NOT NULL), description (text), image_url (text), ingredient_count (int DEFAULT 0), step_count (int DEFAULT 0), created_at (timestamptz DEFAULT now()), updated_at (timestamptz DEFAULT now())",
-        "recipe_ingredients table: id (uuid PK), recipe_id (uuid FK → recipes, ON DELETE CASCADE), name (text NOT NULL), quantity (text — free-form like '2 cups'), sort_order (int DEFAULT 0)",
-        "recipe_steps table: id (uuid PK), recipe_id (uuid FK → recipes, ON DELETE CASCADE), instruction (text NOT NULL), sort_order (int DEFAULT 0)",
-        "Indexes: idx_recipes_owner_id, idx_recipe_ingredients_recipe_id, idx_recipe_steps_recipe_id",
-        "Enable RLS on all three tables",
-        "RLS policies: owner can CRUD their own recipes/ingredients/steps; shared users can SELECT",
-        "Enable Realtime: ALTER PUBLICATION supabase_realtime ADD TABLE recipes, recipe_ingredients, recipe_steps;",
-        "Migration runs successfully against Supabase",
-        "Lint passes"
+        "Desktop header displays 'Gather' instead of 'ShoppingListAI'",
+        "Tagline 'Gather your lists, meals, and more.' visible in desktop header",
+        "Welcome message references 'Gather'",
+        "No visual layout regression — same spacing, font weight, alignment",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
       ],
       "priority": 1,
       "passes": false,
@@ -37,19 +51,19 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Database migration with standard patterns"
+      "testIntensityReason": null
     },
     {
       "id": "US-002",
-      "title": "Create recipe_shares table and sharing RLS",
-      "description": "As a developer, I need a sharing table so recipes can be shared with other users by email, following the same pattern as list_shares.",
+      "title": "Update Login Screen Branding",
+      "description": "Replace 'ShoppingListAI' with 'Gather' on the login screen in src/components/Login.jsx. Add tagline below the app name.",
       "acceptanceCriteria": [
-        "Add to the same migration (or a new one): recipe_shares table: id (uuid PK), recipe_id (uuid FK → recipes, ON DELETE CASCADE), shared_with_email (text NOT NULL), added_at (timestamptz DEFAULT now())",
-        "Index: idx_recipe_shares_shared_with_email, idx_recipe_shares_recipe_id",
-        "RLS policies: recipe owner can INSERT/DELETE shares; shared user (matched by email) can SELECT",
-        "Shared users can SELECT the recipe, its ingredients, and its steps via RLS (read-only)",
-        "Enable Realtime: ALTER PUBLICATION supabase_realtime ADD TABLE recipe_shares;",
-        "Lint passes"
+        "Login screen shows 'Gather' as the app name",
+        "Tagline 'Gather your lists, meals, and more.' appears below the app name in a lighter/smaller font treatment",
+        "Login screen looks clean and balanced with the new text",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
       ],
       "priority": 2,
       "passes": false,
@@ -68,19 +82,19 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Database migration following existing list_shares pattern"
+      "testIntensityReason": null
     },
     {
       "id": "US-003",
-      "title": "Create recipe-images Supabase Storage bucket",
-      "description": "As a developer, I need a storage bucket for recipe images so users can upload photos.",
+      "title": "Update PWA Install Banner",
+      "description": "Replace 'ShoppingListAI' with 'Gather' in the PWA install banner text in src/components/PWAInstallBanner.jsx. Include tagline in the banner description.",
       "acceptanceCriteria": [
-        "Add to migration: create recipe-images storage bucket (public read, authenticated upload)",
-        "Storage policies: authenticated users can upload to recipe-images/{user_id}/*",
-        "Users can only delete their own images",
-        "Max file size: 5MB",
-        "Allowed MIME types: image/jpeg, image/png, image/webp",
-        "Lint passes"
+        "PWA install banner shows 'Gather' as the app name",
+        "Tagline 'Gather your lists, meals, and more.' appears in the banner",
+        "Banner layout and dismiss behavior unchanged",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
       ],
       "priority": 3,
       "passes": false,
@@ -99,27 +113,16 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Storage bucket following existing item-images pattern"
+      "testIntensityReason": null
     },
     {
       "id": "US-004",
-      "title": "Recipe database service layer",
-      "description": "As a developer, I need Supabase CRUD functions for recipes so the UI can create, read, update, and delete recipes.",
+      "title": "Update Page Title & HTML Metadata",
+      "description": "Update <title>, meta description, and apple-mobile-web-app-title in index.html to use 'Gather'.",
       "acceptanceCriteria": [
-        "Create src/services/recipeDatabase.js with the following exports:",
-        "createRecipe(userId, recipe) — inserts recipe row + ingredient rows + step rows in a single transaction, returns recipe ID",
-        "updateRecipe(userId, recipeId, updates) — updates recipe fields (name, description, image_url)",
-        "deleteRecipe(userId, recipeId) — deletes recipe (cascades to ingredients, steps, shares)",
-        "updateRecipeIngredients(recipeId, ingredients) — replaces all ingredients for a recipe (delete + insert)",
-        "updateRecipeSteps(recipeId, steps) — replaces all steps for a recipe (delete + insert)",
-        "uploadRecipeImage(userId, recipeId, file) — uploads to recipe-images/{userId}/{recipeId}, returns public URL, updates recipe.image_url",
-        "subscribeRecipes(userId, callback) — initial fetch + Realtime subscription for user's own recipes",
-        "subscribeRecipeDetail(recipeId, callback) — fetches recipe + ingredients + steps, subscribes to changes",
-        "shareRecipe(recipeId, email) — inserts into recipe_shares",
-        "unshareRecipe(recipeId, email) — deletes from recipe_shares",
-        "subscribeSharedRecipeRefs(email, callback) — like subscribeSharedListRefs but for recipes",
-        "All functions follow the same error handling pattern as src/services/database.js (try/catch, descriptive Error with cause)",
-        "All functions have JSDoc comments",
+        "Browser tab shows 'Gather' as page title",
+        "Meta description references Gather",
+        "iOS home screen bookmark shows 'Gather'",
         "Lint passes"
       ],
       "priority": 4,
@@ -138,21 +141,17 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Service layer with multiple CRUD operations and Realtime subscriptions"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-005",
-      "title": "useRecipes hook for state management",
-      "description": "As a developer, I need a React hook to manage recipe state (own recipes, shared recipes, active recipe) so components can consume recipe data.",
+      "title": "Update PWA Manifest",
+      "description": "Update VitePWA plugin manifest config in vite.config.js: name, short_name, and description to reference 'Gather'.",
       "acceptanceCriteria": [
-        "Create src/hooks/useRecipes.js",
-        "Hook subscribes to user's own recipes via subscribeRecipes",
-        "Hook subscribes to shared recipe refs via subscribeSharedRecipeRefs",
-        "Exposes: recipes (own), sharedRecipes (shared refs), activeRecipeId, activeRecipe (detail data including ingredients + steps)",
-        "Exposes actions: createRecipe, updateRecipe, deleteRecipe, updateIngredients, updateSteps, uploadImage, shareRecipe, unshareRecipe, selectRecipe",
-        "selectRecipe(id) triggers subscribeRecipeDetail and populates activeRecipe",
-        "Cleans up subscriptions on unmount",
+        "PWA manifest name and short_name are 'Gather'",
+        "PWA manifest description references Gather",
+        "npm run build succeeds with updated manifest",
         "Lint passes"
       ],
       "priority": 5,
@@ -171,22 +170,17 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "State management hook with subscriptions and cleanup"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-006",
-      "title": "Add Recipes tab to bottom navigation",
-      "description": "As a user, I want a Recipes tab in the bottom toolbar so I can access my recipes from anywhere in the app.",
+      "title": "Update package.json Name",
+      "description": "Change the name field in package.json from 'shoppinglistai' to 'gather'.",
       "acceptanceCriteria": [
-        "Add a 4th tab to BottomTabBar.jsx with id 'recipes', label 'Recipes', and a book/utensils SVG icon",
-        "Tab is positioned between Lists and Stores (order: Lists, Recipes, Stores, Settings)",
-        "Update PropTypes.oneOf to include 'recipes'",
-        "Update useMobileNav.js: add 'recipes' to valid tab values, add openRecipeId state for recipe detail push/pop (same pattern as openListId)",
-        "Update App.jsx: add activeTab === 'recipes' branch in renderMobileContent() (render placeholder for now — wired in US-008)",
-        "Tab icons remain evenly spaced with 4 tabs (verify visually)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "package.json name is 'gather'",
+        "npm install succeeds without errors",
+        "package-lock.json regenerates cleanly"
       ],
       "priority": 6,
       "passes": false,
@@ -204,28 +198,21 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Navigation change affecting all screens"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-007",
-      "title": "Recipe list screen (mobile)",
-      "description": "As a user, I want to see all my recipes on the Recipes tab, with search and a button to create new ones, matching the layout of the Lists screen.",
+      "title": "Update Capacitor Config",
+      "description": "Update appId to 'com.gather.app' and appName to 'Gather' in capacitor.config.ts.",
       "acceptanceCriteria": [
-        "Create src/components/RecipeSelector.jsx and RecipeSelector.module.css",
-        "Fixed header with 'My Recipes' title and '+ New' button (same layout pattern as ListSelector)",
-        "Search bar below the header — filters recipes by name",
-        "Scrollable list of recipe cards: recipe image thumbnail (or placeholder icon if no image), recipe name, ingredient count (e.g., '8 ingredients'), step count (e.g., '5 steps')",
-        "Tapping a recipe card navigates to recipe detail (calls handleOpenRecipe from nav hook)",
-        "'Shared with me' section below own recipes (same pattern as shared lists in ListSelector)",
-        "Empty state when no recipes exist: 'No recipes yet. Tap + to create one.'",
-        "Three-dot menu per recipe: Edit, Share, Delete (with confirmation)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "capacitor.config.ts appId is 'com.gather.app'",
+        "capacitor.config.ts appName is 'Gather'",
+        "npx cap sync succeeds"
       ],
       "priority": 7,
       "passes": false,
-      "notes": "",
+      "notes": "Changing bundle ID creates a new app identity in the App Store. User confirmed com.gather.app.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -238,22 +225,19 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
+      "requiredCredentials": ["Apple Developer Portal"],
       "testIntensity": "medium",
-      "testIntensityReason": "UI component following established ListSelector pattern"
+      "testIntensityReason": "Affects native build pipeline"
     },
     {
       "id": "US-008",
-      "title": "Wire recipe list screen into App.jsx",
-      "description": "As a developer, I need the recipe list screen wired into the main app so switching to the Recipes tab shows the recipe list with push/pop transitions to detail view.",
+      "title": "Update iOS Info.plist",
+      "description": "Update CFBundleDisplayName, URL scheme name, and URL scheme identifier in ios/App/App/Info.plist to use 'Gather' and the new bundle ID 'com.gather.app'.",
       "acceptanceCriteria": [
-        "Initialize useRecipes hook in App.jsx",
-        "renderMobileContent() → activeTab === 'recipes' renders RecipeSelector with slide container (same push/pop pattern as lists)",
-        "Tapping a recipe pushes to MobileRecipeDetail (US-010) with iOS-style slide animation",
-        "Back button pops back to recipe list with slide animation",
-        "renderDesktopContent() → add recipe selector in sidebar or as a separate section (follow existing desktop layout pattern)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "iOS display name is 'Gather'",
+        "URL scheme uses 'com.gather.app' identifier",
+        "URL scheme name is 'Gather'",
+        "Info.plist is valid XML"
       ],
       "priority": 8,
       "passes": false,
@@ -270,27 +254,17 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
+      "requiredCredentials": ["Apple Developer Portal"],
       "testIntensity": "medium",
-      "testIntensityReason": "App-level wiring with push/pop navigation transitions"
+      "testIntensityReason": "Affects native build pipeline"
     },
     {
       "id": "US-009",
-      "title": "Create/edit recipe screen",
-      "description": "As a user, I want to create a new recipe or edit an existing one, entering a name, image, ingredients, and steps.",
+      "title": "Update Xcode Project Bundle Identifiers",
+      "description": "Update PRODUCT_BUNDLE_IDENTIFIER entries in ios/App/App.xcodeproj/project.pbxproj from 'com.shoppinglistai' to 'com.gather.app'.",
       "acceptanceCriteria": [
-        "Create src/components/RecipeForm.jsx and RecipeForm.module.css",
-        "Full-screen modal or pushed view with nav bar (Back / 'New Recipe' or 'Edit Recipe' / Save)",
-        "Recipe Name — text input, required",
-        "Recipe Image — tap to choose: upload photo (camera/gallery via file input) OR paste image URL; shows preview; optional",
-        "Ingredients — structured list of individual inputs; each ingredient has name (required) and quantity (optional, free-form text like '2 cups'); 'Add ingredient' button at bottom; swipe-to-delete or delete icon per ingredient; drag-to-reorder",
-        "Steps — structured list of individual inputs; each step is a separate text field; numbered automatically; 'Add step' button at bottom; swipe-to-delete or delete icon per step; drag-to-reorder",
-        "Save button calls createRecipe or updateRecipe + updateIngredients + updateSteps",
-        "Image upload calls uploadRecipeImage and stores returned URL",
-        "Validation: name is required, at least 1 ingredient",
-        "Loading state while saving",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "All PRODUCT_BUNDLE_IDENTIFIER references use 'com.gather.app'",
+        "Xcode project file is valid and parseable"
       ],
       "priority": 9,
       "passes": false,
@@ -307,27 +281,19 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
-      "testIntensity": "high",
-      "testIntensityReason": "Complex form with drag-reorder, image upload, validation, and multi-table writes"
+      "requiredCredentials": ["Apple Developer Portal"],
+      "testIntensity": "medium",
+      "testIntensityReason": "Affects native build pipeline"
     },
     {
       "id": "US-010",
-      "title": "Recipe detail screen (mobile)",
-      "description": "As a user, I want to view a recipe's full details — image, ingredients, steps — with options to edit, share, add ingredients to a shopping list, or delete.",
+      "title": "Update Privacy Policy",
+      "description": "Replace all instances of 'ShoppingListAI' with 'Gather' in public/privacy.html and docs/app-store/privacy-policy.md.",
       "acceptanceCriteria": [
-        "Create src/components/MobileRecipeDetail.jsx and MobileRecipeDetail.module.css",
-        "Nav bar with back button, recipe name as title, and action buttons (share, edit)",
-        "Hero image at top (full-width, or placeholder if no image)",
-        "Ingredients section with checkboxes next to each ingredient (for selecting which to add to list)",
-        "Steps section with numbered steps",
-        "'Add to List' button — enabled when at least 1 ingredient is checked; tapping opens a list picker (see US-011)",
-        "Edit button opens RecipeForm in edit mode",
-        "Share button opens share modal (see US-012)",
-        "Three-dot menu with Delete option (confirmation dialog)",
-        "For shared recipes (not owned): read-only view, no edit/delete, but 'Add to List' still works",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "Privacy policy HTML references 'Gather' throughout (no 'ShoppingListAI' remaining)",
+        "Privacy policy markdown references 'Gather' throughout",
+        "No broken HTML structure",
+        "Page renders correctly at /privacy.html"
       ],
       "priority": 10,
       "passes": false,
@@ -345,22 +311,18 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Detail view with multiple action flows but standard UI patterns"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-011",
-      "title": "Add to List flow",
-      "description": "As a user, I want to select ingredients from a recipe and add them to a shopping list of my choice so I can quickly build a grocery list from a recipe.",
+      "title": "Update App Store Metadata",
+      "description": "Update all App Store copy in docs/app-store/metadata.md and docs/app-store/app-privacy-labels.md to use 'Gather'. Add tagline to App Store description.",
       "acceptanceCriteria": [
-        "Create src/components/AddToListModal.jsx and AddToListModal.module.css",
-        "Modal/bottom sheet shows: list of selected ingredients (read-only summary), dropdown or scrollable list of user's shopping lists to pick from, 'Add Items' button",
-        "Tapping 'Add Items' calls addItems on the chosen list — uses the existing parseRecipeText / ingredient-to-item logic to strip quantities and categorize",
-        "Success confirmation: 'Added N items to [list name]' toast/banner",
-        "If no lists exist, show 'Create a list first' message with a link/button to Lists tab",
-        "Modal closes after successful add",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "App Store title is 'Gather'",
+        "App Store subtitle includes tagline 'Gather your lists, meals, and more.'",
+        "Description copy uses 'Gather' throughout",
+        "Privacy labels document references 'Gather'"
       ],
       "priority": 11,
       "passes": false,
@@ -378,21 +340,15 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "high",
-      "testIntensityReason": "Cross-feature flow bridging recipes and shopping lists with data transformation"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-012",
-      "title": "Share recipe modal",
-      "description": "As a user, I want to share my recipe with another user by email so they can view it.",
+      "title": "Update Supabase Config",
+      "description": "Update project_id in supabase/config.toml from ShoppingListAI-based name to gather-based name.",
       "acceptanceCriteria": [
-        "Create src/components/ShareRecipeModal.jsx and ShareRecipeModal.module.css (follow ShareListModal pattern)",
-        "Email input + 'Share' button",
-        "Shows list of currently shared emails with remove button",
-        "Calls shareRecipe / unshareRecipe from useRecipes",
-        "Error handling: invalid email, already shared",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "supabase/config.toml project_id references 'gather'"
       ],
       "priority": 12,
       "passes": false,
@@ -410,20 +366,18 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Modal following established ShareListModal pattern"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-013",
-      "title": "Browse Templates section",
-      "description": "As a user, I want to browse pre-built recipe templates so I can get inspiration and quickly add template ingredients to a list or save a template as my own recipe.",
+      "title": "Update Internal Docs & Agent Config",
+      "description": "Update docs/project.json name to 'Gather'. Update 'project' field in all 13 PRD JSON files in docs/prds/. Update docs/bugs/prd-bugs.json references. Update docs/review.md references.",
       "acceptanceCriteria": [
-        "Add a 'Browse Templates' section/button on the RecipeSelector screen (below the recipe list, or as a tab/toggle)",
-        "Shows the 6 existing RECIPE_TEMPLATES from src/services/recipes.js as cards",
-        "Tapping a template shows its details (name, description, ingredient list)",
-        "Two actions per template: 'Save as Recipe' (creates a new recipe pre-filled with template data) and 'Add to List' (opens the Add to List modal with template ingredients selected)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "docs/project.json name is 'Gather'",
+        "All PRD JSON files have 'project': 'Gather'",
+        "docs/bugs/prd-bugs.json references updated to 'Gather'",
+        "docs/review.md references updated to 'Gather'"
       ],
       "priority": 13,
       "passes": false,
@@ -441,21 +395,16 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Template display with two action paths"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-014",
-      "title": "Import recipe via paste",
-      "description": "As a user, I want to paste a recipe's ingredient list when creating a new recipe so I don't have to type each ingredient manually.",
+      "title": "Update SQL Migration Comments",
+      "description": "Update comment headers in supabase/migrations/*.sql (4 files) that reference 'ShoppingListAI' to 'Gather'.",
       "acceptanceCriteria": [
-        "Add an 'Import from Text' option in RecipeForm (button or option when tapping + New)",
-        "Opens a textarea where user pastes ingredient text (one per line)",
-        "Uses existing parseRecipeText from src/services/recipes.js to parse lines into structured ingredients",
-        "Parsed ingredients are pre-populated into the ingredients list in the form — user can edit before saving",
-        "Existing RecipePanel import from the list detail view is removed (replaced by this flow)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "Migration file comments reference 'Gather'",
+        "SQL files remain valid and executable"
       ],
       "priority": 14,
       "passes": false,
@@ -473,19 +422,15 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Text parsing and form pre-population using existing parseRecipeText"
+      "testIntensity": "low",
+      "testIntensityReason": null
     },
     {
       "id": "US-015",
-      "title": "Remove RecipePanel from list detail views",
-      "description": "As a developer, I need to remove the old RecipePanel from the list detail view since the recipe-to-list functionality now lives in the Recipes tab.",
+      "title": "Update Service JSDoc",
+      "description": "Update JSDoc comment in src/services/database.js (line ~2) referencing 'ShoppingListAI' to 'Gather'.",
       "acceptanceCriteria": [
-        "Remove RecipePanel import and usage from MobileListDetail.jsx (the 'Recipe to List' button and bottom sheet overlay)",
-        "Remove RecipePanel import and usage from desktop renderDesktopContent() in App.jsx",
-        "Remove onAddItems prop threading that was only used for RecipePanel (keep it if still used for other purposes)",
-        "Verify no broken imports or unused CSS",
-        "Do NOT delete RecipePanel.jsx or recipes.js yet — the parsing logic is reused by US-014, and templates by US-013",
+        "JSDoc comment references 'Gather'",
         "Lint passes"
       ],
       "priority": 15,
@@ -505,23 +450,26 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Code removal with import cleanup"
+      "testIntensityReason": null
     },
     {
       "id": "US-016",
-      "title": "Recipe desktop layout",
-      "description": "As a user on desktop, I want to view and manage recipes in the desktop layout alongside my lists.",
+      "title": "Replace Logo Assets",
+      "description": "Replace current logo/icon across all touchpoints with new Gather logo. Generate sizes: favicon (16x16, 32x32), apple-touch-icon (180x180), PWA icons (192x192, 512x512). Update logo rendering in src/App.jsx and src/components/Login.jsx.",
       "acceptanceCriteria": [
-        "Desktop layout shows recipe selector as a sidebar section or separate view (follow existing desktop pattern — sidebar + content area)",
-        "Selecting a recipe shows the detail view in the content area with all the same functionality as mobile (ingredients, steps, add to list, edit, share, delete)",
-        "RecipeForm works on desktop (modal or inline, matching existing desktop patterns)",
-        "ShareRecipeModal works on desktop",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "All icon sizes generated from the new logo",
+        "Favicon displays correctly in browser tabs",
+        "Apple touch icon renders on iOS home screen",
+        "PWA install uses new icon",
+        "App header and login screen show new logo",
+        "No broken image references",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
       ],
       "priority": 16,
       "passes": false,
-      "notes": "",
+      "notes": "⏳ BLOCKED — waiting for user to provide new logo image file",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -536,19 +484,24 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Desktop layout integration with multiple recipe components"
+      "testIntensityReason": "Visual assets across multiple touchpoints"
     },
     {
       "id": "US-017",
-      "title": "Update project.json",
-      "description": "As a developer, I need docs/project.json updated to reflect the new recipes capability.",
+      "title": "Update Brand Colors",
+      "description": "Apply new brand color palette to CSS custom properties / design tokens. Update primary, secondary, and accent colors. Adjust dark mode palette.",
       "acceptanceCriteria": [
-        "Add 'recipes': true to capabilities in docs/project.json",
-        "Lint passes"
+        "All brand colors updated to new palette",
+        "Dark mode colors adjusted to complement new palette",
+        "No contrast/accessibility regressions (WCAG AA minimum)",
+        "Login screen, header, buttons, and accent elements all use new colors",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
       ],
       "priority": 17,
       "passes": false,
-      "notes": "",
+      "notes": "⏳ BLOCKED — waiting for user to provide new brand color palette",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -562,8 +515,148 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
+      "testIntensity": "medium",
+      "testIntensityReason": "Visual styling across entire app, dark mode implications"
+    },
+    {
+      "id": "US-018",
+      "title": "Update CORS Origins in Edge Functions",
+      "description": "Replace 'shoppinglistai.vercel.app' CORS origin with new custom domain in supabase/functions/search-products/index.ts and supabase/functions/search-images/index.ts.",
+      "acceptanceCriteria": [
+        "Both edge functions accept requests from the new domain",
+        "Old domain removed from CORS allowlist (or kept temporarily for migration period)",
+        "Edge functions deploy successfully with supabase functions deploy"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": "⏳ BLOCKED — waiting for user to purchase custom domain and configure DNS",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": ["Custom Domain Registrar"],
+      "testIntensity": "high",
+      "testIntensityReason": "Functional — breaks API calls if CORS origin is wrong"
+    },
+    {
+      "id": "US-019",
+      "title": "Update Apple Sign-In Config",
+      "description": "Update Apple Sign-In clientId and redirectURI in src/context/AuthContext.jsx to use new bundle ID 'com.gather.app' and new domain.",
+      "acceptanceCriteria": [
+        "Apple Sign-In clientId matches 'com.gather.app'",
+        "redirectURI points to new domain",
+        "Apple Sign-In flow works end-to-end (requires Apple Developer portal updates too)"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": "⏳ BLOCKED — waiting for custom domain. Also requires Apple Developer portal Service ID update.",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": ["Apple Developer Portal", "Custom Domain Registrar"],
+      "testIntensity": "high",
+      "testIntensityReason": "Functional — breaks authentication if wrong"
+    },
+    {
+      "id": "US-020",
+      "title": "Update Universal Links & Entitlements",
+      "description": "Update apple-app-site-association in public/.well-known/ with new bundle ID. Update App.entitlements associated domains to new domain.",
+      "acceptanceCriteria": [
+        "AASA file contains new bundle ID 'com.gather.app' and correct paths",
+        "Entitlements reference new domain for associated domains",
+        "Universal Links verification passes on the new domain"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": "⏳ BLOCKED — waiting for custom domain",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": ["Apple Developer Portal", "Custom Domain Registrar"],
+      "testIntensity": "high",
+      "testIntensityReason": "Functional — breaks deep linking if wrong"
+    },
+    {
+      "id": "US-021",
+      "title": "Update Privacy Policy URLs",
+      "description": "Update any URLs in public/privacy.html that reference 'shoppinglistai.vercel.app' to the new custom domain.",
+      "acceptanceCriteria": [
+        "All URLs in privacy policy point to new domain",
+        "No broken links"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": "⏳ BLOCKED — waiting for custom domain",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": ["Custom Domain Registrar"],
       "testIntensity": "low",
-      "testIntensityReason": "Single config file update"
+      "testIntensityReason": null
+    },
+    {
+      "id": "US-022",
+      "title": "Rename ShoppingList React Components (Optional)",
+      "description": "OPTIONAL — rename internal React component/context/hook names from 'ShoppingList' to a Gather-aligned name. Recommendation: SKIP this story. 'ShoppingList' is descriptive, not branding.",
+      "acceptanceCriteria": [
+        "All component, context, hook, and import references updated consistently",
+        "No broken imports",
+        "App functions identically after rename",
+        "Lint passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": "OPTIONAL — recommended to skip. ShoppingList is a descriptive term, not brand. Large refactor with risk and no user-facing benefit.",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": [],
+      "testIntensity": "medium",
+      "testIntensityReason": "Large refactor across many files if done"
     }
   ]
 }

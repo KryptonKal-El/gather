@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/user-profile-image",
   "description": "Add the ability for authenticated users to set a profile photo by tapping their avatar in Mobile Settings. Uploads to Firebase Storage, updates Firebase Auth photoURL, and displays the photo in both mobile settings and the desktop header.",
   "credentialRequirements": [],

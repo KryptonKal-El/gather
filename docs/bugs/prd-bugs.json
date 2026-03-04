@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/prd-bugs.json",
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "bugs": [
     {
       "id": "BUG-001",

@@ -9,9 +9,9 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['icon.svg', 'icon-64x64.png'],
       manifest: {
-        name: 'ShoppingListAI',
-        short_name: 'ShopAI',
-        description: 'AI-powered grocery shopping list with real-time sync',
+        name: 'Gather',
+        short_name: 'Gather',
+        description: 'Gather — your lists, meals, and more.',
         theme_color: '#4caf50',
         background_color: '#fafafa',
         display: 'standalone',

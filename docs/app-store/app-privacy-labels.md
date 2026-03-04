@@ -1,4 +1,4 @@
-# ShoppingListAI — App Privacy Labels
+# Gather — App Privacy Labels
 
 *For App Store Connect submission*
 

@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/ios-app-store",
   "description": "Deploy ShoppingListAI to the Apple App Store as a universal iPhone + iPad native app using Capacitor, with native Apple Sign-In, App Store assets, and complete submission package.",
   "credentialRequirements": [

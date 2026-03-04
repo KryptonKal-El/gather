@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/list-colors",
   "description": "Add a color property to shopping lists with a 10-color swatch picker and left border accent on rows",
   "credentialRequirements": [],

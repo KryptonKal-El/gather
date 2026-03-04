@@ -38,7 +38,9 @@ export const PWAInstallBanner = ({ showBanner, platform, onInstall, onDismiss })
 
       {platform === 'android' && (
         <>
-          <span className={styles.message}>Add ShoppingListAI to your home screen</span>
+          <span className={styles.message}>
+            Add Gather to your home screen — Gather your lists, meals, and more.
+          </span>
           <button type="button" className={styles.installBtn} onClick={onInstall}>
             Install
           </button>
@@ -47,7 +49,7 @@ export const PWAInstallBanner = ({ showBanner, platform, onInstall, onDismiss })
 
       {platform === 'ios' && (
         <span className={styles.message}>
-          Install this app: tap{' '}
+          Install Gather: tap{' '}
           <svg
             className={styles.shareIcon}
             width="16"

@@ -1,10 +1,10 @@
-# ShoppingListAI — App Store Metadata
+# Gather — App Store Metadata
 
 ## App Name
-ShoppingListAI
+Gather
 
 ## Subtitle (30 chars max)
-AI-Powered Grocery Lists
+Gather your lists, meals, and more.
 
 ## Category
 Food & Drink
@@ -14,7 +14,7 @@ shopping list,grocery,AI,shared lists,recipes,meal planning,food,kitchen,smart l
 
 ## Description (4000 chars max)
 
-ShoppingListAI is your intelligent grocery shopping companion that makes meal planning and shopping effortless.
+Gather is your intelligent grocery shopping companion that makes meal planning and shopping effortless.
 
 **Smart Shopping Lists**
 Create and organize shopping lists with ease. Add items quickly, check them off as you shop, and keep everything organized by category. Your lists sync across all your devices instantly.
@@ -43,19 +43,19 @@ Sign in securely with Apple. Your data is yours — we don't sell it, track you,
 • Organize items with custom categories and colors
 • Secure Apple Sign-In
 
-Download ShoppingListAI today and make grocery shopping smarter.
+Download Gather today and make grocery shopping smarter.
 
 ## Content Rating
 4+ (No objectionable content)
 
 ## Support URL
-https://shoppinglistai.vercel.app
+https://gather.vercel.app
 
 ## Marketing URL
-https://shoppinglistai.vercel.app
+https://gather.vercel.app
 
 ## Copyright
-© 2026 ShoppingListAI
+© 2026 Gather
 
 ## What's New in This Version
-Initial release! ShoppingListAI brings AI-powered grocery shopping to your iPhone and iPad with smart lists, image search, real-time sharing, and seamless sync.
+Initial release! Gather brings AI-powered grocery shopping to your iPhone and iPad with smart lists, image search, real-time sharing, and seamless sync.

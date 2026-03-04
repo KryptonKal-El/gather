@@ -65,10 +65,8 @@ export const Login = () => {
   return (
     <div className={styles.backdrop}>
       <div className={styles.card}>
-        <h1 className={styles.logo}>
-          ShoppingList<span className={styles.ai}>AI</span>
-        </h1>
-        <p className={styles.tagline}>Smart grocery lists powered by AI</p>
+        <h1 className={styles.logo}>Gather</h1>
+        <p className={styles.tagline}>Gather your lists, meals, and more.</p>
 
         <div className={styles.buttons}>
           <button

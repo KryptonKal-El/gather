@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/native-emoji-picker",
   "description": "Replace emoji-mart with native OS emoji keyboard on mobile and a lightweight custom picker on desktop, removing two npm dependencies and fixing overflow clipping issues",
   "credentialRequirements": [],

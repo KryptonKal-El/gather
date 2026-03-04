@@ -512,7 +512,7 @@ export const App = () => {
             </>
           ) : (
             <div className={styles.noList}>
-              <h2>Welcome to ShoppingListAI</h2>
+              <h2>Welcome to Gather</h2>
               <p>Create a new list to get started.</p>
             </div>
           )}
@@ -611,7 +611,10 @@ export const App = () => {
       <header className={styles.header}>
         {!isMobile && (
           <>
-            <h1 className={styles.logo}>ShoppingList<span className={styles.ai}>AI</span></h1>
+            <div className={styles.logoGroup}>
+              <h1 className={styles.logo}>Gather</h1>
+              <span className={styles.tagline}>Gather your lists, meals, and more.</span>
+            </div>
             <div className={styles.headerRight}>
               <div
                 className={styles.headerAvatarWrap}

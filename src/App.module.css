@@ -21,6 +21,12 @@
   margin: 0;
 }
 
+.logoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .ai {
   color: var(--primary);
   font-weight: 800;

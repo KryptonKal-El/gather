@@ -1,4 +1,4 @@
--- ShoppingListAI Initial Database Schema
+-- Gather Initial Database Schema
 -- Migration: initial_schema
 -- Created: 2026-02-27
 

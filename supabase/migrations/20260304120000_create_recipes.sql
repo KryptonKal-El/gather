@@ -1,4 +1,4 @@
--- ShoppingListAI Recipe Tables, Sharing, Storage, and RLS
+-- Gather Recipe Tables, Sharing, Storage, and RLS
 -- Migration: create_recipes
 -- Created: 2026-03-04
 

@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.shoppinglistai',
-  appName: 'ShoppingListAI',
+  appId: 'com.gather.app',
+  appName: 'Gather',
   webDir: 'dist',
   plugins: {
     SplashScreen: {

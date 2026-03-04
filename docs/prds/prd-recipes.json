@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/recipes",
   "description": "Full recipe management system as a first-class tab — CRUD, images, structured ingredients/steps, Add to List flow, sharing by email, Browse Templates, paste import, desktop layout.",
   "credentialRequirements": [],

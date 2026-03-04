@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/pwa-install-banner",
   "description": "Show a smart PWA install banner on mobile browsers — native install prompt on Android, manual share instructions on iOS Safari — with 7-day dismissal persistence and standalone detection",
   "credentialRequirements": [],

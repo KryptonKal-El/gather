@@ -1,4 +1,4 @@
--- ShoppingListAI Storage Buckets and Policies
+-- Gather Storage Buckets and Policies
 -- Migration: storage_buckets
 -- Created: 2026-02-27
 

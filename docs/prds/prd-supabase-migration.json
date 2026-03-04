@@ -1,5 +1,5 @@
 {
-  "project": "ShoppingListAI",
+  "project": "Gather",
   "branchName": "feature/supabase-migration",
   "description": "Migrate entire backend from Firebase to Supabase: auth, database, storage, edge functions, and hosting",
   "credentialRequirements": [
