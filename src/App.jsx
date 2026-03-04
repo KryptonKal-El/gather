@@ -417,6 +417,10 @@ export const App = () => {
                 <MobileRecipeDetail
                   recipe={detailRecipe}
                   isOwner={detailRecipe.ownerId === user.id}
+                  collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
+                  collections={recipeState.collections}
+                  activeCollectionId={recipeState.activeCollectionId}
+                  onMoveRecipe={recipeActions.moveRecipe}
                   onBack={handleRecipeBackNav}
                   onEdit={(recipeId) => {
                     recipeActions.selectRecipe(recipeId);
@@ -594,6 +598,10 @@ export const App = () => {
             <MobileRecipeDetail
               recipe={recipeState.activeRecipe}
               isOwner={recipeState.activeRecipe.ownerId === user.id}
+              collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
+              collections={recipeState.collections}
+              activeCollectionId={recipeState.activeCollectionId}
+              onMoveRecipe={recipeActions.moveRecipe}
               onBack={() => recipeActions.selectRecipe(null)}
               onEdit={(recipeId) => {
                 recipeActions.selectRecipe(recipeId);

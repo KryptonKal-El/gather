@@ -416,8 +416,10 @@
         "Lint passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T00:40:00Z",
+      "passes": true,
+      "notes": "Removed onShareClick prop and Share button from MobileRecipeDetail. Added collection name breadcrumb ('in {collectionName}') below nav title. Added 'Move to Collection' in 3-dot menu with picker overlay (mobile bottom sheet + desktop centered modal). New props: collectionName, collections, activeCollectionId, onMoveRecipe. Both App.jsx instances wired. Component 375→426 lines, CSS 402→470+ lines.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -7,20 +7,24 @@ import styles from './MobileRecipeDetail.module.css';
 /**
  * Full-screen mobile recipe detail view.
  * Shows hero image, ingredients with checkboxes, numbered steps,
- * and action buttons for share, edit, delete.
+ * and action buttons for edit, delete, move to collection.
  */
 export const MobileRecipeDetail = ({
   recipe,
   isOwner,
+  collectionName,
+  collections,
+  activeCollectionId,
+  onMoveRecipe,
   onBack,
   onEdit,
   onDelete,
-  onShareClick,
   onAddToList,
 }) => {
   const [checkedIngredients, setCheckedIngredients] = useState(new Set());
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [showMovePicker, setShowMovePicker] = useState(false);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
@@ -128,6 +132,18 @@ export const MobileRecipeDetail = ({
                   Add to List
                 </button>
               )}
+              {isOwner && collections && collections.length > 1 && (
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => {
+                    setShowMovePicker(true);
+                    setMenuOpen(false);
+                  }}
+                >
+                  Move to Collection
+                </button>
+              )}
               {isOwner && (
                 <button
                   type="button"
@@ -181,6 +197,19 @@ export const MobileRecipeDetail = ({
             Add to List
           </button>
         )}
+        {isOwner && collections && collections.length > 1 && (
+          <button
+            type="button"
+            className={styles.menuItem}
+            onClick={() => {
+              setShowMovePicker(true);
+              setMenuOpen(false);
+            }}
+          >
+            <span className={styles.menuIcon}>📁</span>
+            Move to Collection
+          </button>
+        )}
         {isOwner && (
           <button
             type="button"
@@ -222,34 +251,14 @@ export const MobileRecipeDetail = ({
           </svg>
         </button>
 
-        <h1 className={styles.navTitle}>{recipe.name}</h1>
+        <div className={styles.navTitleGroup}>
+          <h1 className={styles.navTitle}>{recipe.name}</h1>
+          {collectionName && (
+            <span className={styles.navSubtitle}>in {collectionName}</span>
+          )}
+        </div>
 
         <div className={styles.navActions}>
-          {isOwner && (
-            <button
-              type="button"
-              className={styles.shareButton}
-              onClick={() => onShareClick(recipe)}
-              aria-label="Share recipe"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
-              </svg>
-            </button>
-          )}
-
           <div className={styles.menuWrap} ref={!isMobile && menuOpen ? menuRef : null}>
             <button
               type="button"
@@ -325,6 +334,45 @@ export const MobileRecipeDetail = ({
         </div>
       </div>
 
+      {showMovePicker && (
+        <>
+          <div
+            className={styles.movePickerBackdrop}
+            onClick={() => setShowMovePicker(false)}
+          />
+          <div className={styles.movePickerModal}>
+            <div className={styles.movePickerHeader}>
+              <h3 className={styles.movePickerTitle}>Move to Collection</h3>
+              <button
+                type="button"
+                className={styles.movePickerClose}
+                onClick={() => setShowMovePicker(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.movePickerList}>
+              {collections
+                .filter((c) => c.id !== activeCollectionId)
+                .map((collection) => (
+                  <button
+                    key={collection.id}
+                    type="button"
+                    className={styles.movePickerItem}
+                    onClick={() => {
+                      onMoveRecipe?.(recipe.id, collection.id);
+                      setShowMovePicker(false);
+                    }}
+                  >
+                    <span className={styles.movePickerEmoji}>{collection.emoji ?? '📁'}</span>
+                    <span className={styles.movePickerName}>{collection.name}</span>
+                  </button>
+                ))}
+            </div>
+          </div>
+        </>
+      )}
+
       {confirmingDelete && (
         <ConfirmDialog
           message={`Delete "${recipe.name}"?`}
@@ -367,9 +415,12 @@ MobileRecipeDetail.propTypes = {
     ),
   }).isRequired,
   isOwner: PropTypes.bool.isRequired,
+  collectionName: PropTypes.string,
+  collections: PropTypes.array,
+  activeCollectionId: PropTypes.string,
+  onMoveRecipe: PropTypes.func,
   onBack: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onShareClick: PropTypes.func.isRequired,
   onAddToList: PropTypes.func.isRequired,
 };

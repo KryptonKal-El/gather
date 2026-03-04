@@ -34,13 +34,29 @@
   opacity: 0.8;
 }
 
-.navTitle {
+.navTitleGroup {
   flex: 1;
+  min-width: 0;
+  text-align: center;
+  overflow: hidden;
+}
+
+.navTitle {
   text-align: center;
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navSubtitle {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -391,6 +407,98 @@
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+/* Move to Collection Picker */
+.movePickerBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 100;
+}
+
+.movePickerModal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 60vh;
+  background: var(--bg-card);
+  border-radius: 1rem 1rem 0 0;
+  z-index: 101;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.movePickerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.movePickerTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.movePickerClose {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.movePickerList {
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.movePickerItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.movePickerItem:hover {
+  background: var(--bg-hover);
+}
+
+.movePickerEmoji {
+  font-size: 1.25rem;
+}
+
+.movePickerName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .movePickerModal {
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    max-height: 50vh;
+    width: 360px;
+    border-radius: 1rem;
+  }
 }
 
 @media (max-width: 700px) {
