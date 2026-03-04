@@ -52,14 +52,17 @@ export const App = () => {
     activeTab,
     openListId,
     openRecipeId,
+    openCollectionId,
     transition,
     poppingListData,
     poppingRecipeData,
     handleTabChange,
     handleOpenList,
     handleOpenRecipe,
+    handleOpenCollection,
     handleBack,
     handleRecipeBack,
+    handleCollectionBack,
   } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
   const [showRecipeForm, setShowRecipeForm] = useState(null);
@@ -88,6 +91,13 @@ export const App = () => {
       actions.selectList(openListId);
     }
   }, [isMobile, openListId, actions]);
+
+  // US-010: Sync openCollectionId with recipe context when browser back clears collection
+  useEffect(() => {
+    if (!openCollectionId && recipeState.activeCollectionId && isMobile) {
+      recipeActions.selectCollection(null);
+    }
+  }, [openCollectionId, recipeState.activeCollectionId, recipeActions, isMobile]);
 
   const suggestions = getSuggestions(
     state.history,
@@ -359,6 +369,16 @@ export const App = () => {
         setShowRecipeForm(recipeId);
       };
 
+      const handleMobileSelectCollection = (collectionId) => {
+        recipeActions.selectCollection(collectionId);
+        handleOpenCollection(collectionId);
+      };
+
+      const handleMobileCollectionBack = () => {
+        recipeActions.selectCollection(null);
+        handleCollectionBack();
+      };
+
       const detailRecipe = recipeState.activeRecipe ?? poppingRecipeData;
 
       return (
@@ -377,7 +397,7 @@ export const App = () => {
                   onCreate={() => setShowRecipeForm('create')}
                   onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
-                  onSelectCollection={recipeActions.selectCollection}
+                  onSelectCollection={handleMobileSelectCollection}
                   onCreateCollection={recipeActions.createCollection}
                   onUpdateCollection={recipeActions.updateCollection}
                   onDeleteCollection={recipeActions.deleteCollection}
@@ -386,6 +406,7 @@ export const App = () => {
                   onMoveRecipe={recipeActions.moveRecipe}
                   onSaveTemplate={handleSaveTemplate}
                   onAddTemplateToList={handleAddTemplateToList}
+                  onCollectionBack={handleMobileCollectionBack}
                 />
               </div>
             </section>

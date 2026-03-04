@@ -381,8 +381,10 @@
         "Lint passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T00:25:00Z",
+      "passes": true,
+      "notes": "Added openCollectionId state to useMobileNav with handleOpenCollection/handleCollectionBack and 3-level popstate handler. App.jsx wires handleMobileSelectCollection (context + history) and handleMobileCollectionBack (context clear + animation). RecipeSelector syncs viewMode via useEffect when activeCollectionId is cleared externally. Browser back button works through all 3 levels. useMobileNav 142→179 lines, RecipeSelector 1421→1435 lines, App.jsx 735→756 lines.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

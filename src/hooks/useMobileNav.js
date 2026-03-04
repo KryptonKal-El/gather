@@ -4,7 +4,7 @@ const TRANSITION_DURATION = 300;
 
 /**
  * Hook that manages mobile navigation state for iOS-style tab/detail navigation.
- * Tracks the active tab and which list/recipe (if any) is open in detail view.
+ * Tracks the active tab and which list/recipe/collection (if any) is open in detail view.
  * Manages push/pop transition states for slide animations.
  * Integrates with browser history for back button support.
  * 
@@ -14,20 +14,24 @@ const TRANSITION_DURATION = 300;
  *   activeTab: 'lists' | 'recipes' | 'stores' | 'settings',
  *   openListId: string | null,
  *   openRecipeId: string | null,
+ *   openCollectionId: string | null,
  *   transition: 'pushing' | 'popping' | null,
  *   poppingListData: object | null,
  *   poppingRecipeData: object | null,
  *   handleTabChange: (tab: string) => void,
  *   handleOpenList: (listId: string) => void,
  *   handleOpenRecipe: (recipeId: string) => void,
+ *   handleOpenCollection: (collectionId: string) => void,
  *   handleBack: () => void,
  *   handleRecipeBack: () => void,
+ *   handleCollectionBack: () => void,
  * }}
  */
 export const useMobileNav = (lists = [], recipes = []) => {
   const [activeTab, setActiveTab] = useState('lists');
   const [openListId, setOpenListId] = useState(null);
   const [openRecipeId, setOpenRecipeId] = useState(null);
+  const [openCollectionId, setOpenCollectionId] = useState(null);
   const [transition, setTransition] = useState(null);
   const [poppingListData, setPoppingListData] = useState(null);
   const [poppingRecipeData, setPoppingRecipeData] = useState(null);
@@ -48,6 +52,7 @@ export const useMobileNav = (lists = [], recipes = []) => {
     setActiveTab(tab);
     setOpenListId(null);
     setOpenRecipeId(null);
+    setOpenCollectionId(null);
   }, [clearTransitionTimeout]);
 
   const handleOpenList = useCallback((listId) => {
@@ -110,17 +115,46 @@ export const useMobileNav = (lists = [], recipes = []) => {
     startRecipePopTransition(openRecipeId, recipes);
   }, [startRecipePopTransition, openRecipeId, recipes]);
 
+  const handleOpenCollection = useCallback((collectionId) => {
+    if (openCollectionId === collectionId) return;
+    clearTransitionTimeout();
+    setOpenCollectionId(collectionId);
+    setTransition('pushing');
+    window.history.pushState({ view: 'collection-recipes', collectionId }, '');
+
+    transitionTimeoutRef.current = setTimeout(() => {
+      setTransition(null);
+    }, TRANSITION_DURATION);
+  }, [clearTransitionTimeout, openCollectionId]);
+
+  const handleCollectionBack = useCallback(() => {
+    clearTransitionTimeout();
+    setTransition('popping');
+
+    transitionTimeoutRef.current = setTimeout(() => {
+      setOpenCollectionId(null);
+      setTransition(null);
+    }, TRANSITION_DURATION);
+  }, [clearTransitionTimeout]);
+
   useEffect(() => {
     const onPopState = () => {
       if (openRecipeId && !transition) {
         startRecipePopTransition(openRecipeId, recipes);
+      } else if (openCollectionId && !openRecipeId && !transition) {
+        clearTransitionTimeout();
+        setTransition('popping');
+        transitionTimeoutRef.current = setTimeout(() => {
+          setOpenCollectionId(null);
+          setTransition(null);
+        }, TRANSITION_DURATION);
       } else if (openListId && !transition) {
         startPopTransition(openListId, lists);
       }
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, [openListId, openRecipeId, transition, startPopTransition, startRecipePopTransition, lists, recipes]);
+  }, [openListId, openRecipeId, openCollectionId, transition, startPopTransition, startRecipePopTransition, lists, recipes, clearTransitionTimeout]);
 
   useEffect(() => {
     return () => clearTransitionTimeout();
@@ -130,13 +164,16 @@ export const useMobileNav = (lists = [], recipes = []) => {
     activeTab,
     openListId,
     openRecipeId,
+    openCollectionId,
     transition,
     poppingListData,
     poppingRecipeData,
     handleTabChange,
     handleOpenList,
     handleOpenRecipe,
+    handleOpenCollection,
     handleBack,
     handleRecipeBack,
+    handleCollectionBack,
   };
 };

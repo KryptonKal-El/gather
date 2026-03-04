@@ -36,6 +36,8 @@ export const RecipeSelector = ({
   // US-007: Recipe list within collection
   onMoveRecipe,
   currentUserId,
+  // US-010: Collection drill-down with browser history
+  onCollectionBack,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -56,6 +58,15 @@ export const RecipeSelector = ({
 
   // Determine if we're in collection mode (new) or legacy mode (backwards compat)
   const isCollectionMode = Array.isArray(collections);
+
+  // US-010: Sync viewMode when activeCollectionId is cleared externally (browser back)
+  // This is a legitimate controlled/uncontrolled hybrid pattern for syncing external navigation state
+  useEffect(() => {
+    if (!activeCollectionId && viewMode === 'recipes') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setViewMode('collections');
+    }
+  }, [activeCollectionId, viewMode]);
 
   // Recipe counts per collection
   const recipeCounts = useMemo(() => {
@@ -147,7 +158,8 @@ export const RecipeSelector = ({
     setViewMode('collections');
     setSearchQuery('');
     setMenuOpenId(null);
-  }, []);
+    onCollectionBack?.();
+  }, [onCollectionBack]);
 
   const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim()) return;
@@ -1418,4 +1430,6 @@ RecipeSelector.propTypes = {
   // US-007: Recipe list within collection
   onMoveRecipe: PropTypes.func,
   currentUserId: PropTypes.string,
+  // US-010: Collection drill-down with browser history
+  onCollectionBack: PropTypes.func,
 };
