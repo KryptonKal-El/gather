@@ -25,6 +25,7 @@ import { BottomTabBar } from './components/BottomTabBar.jsx';
 import { MobileListDetail } from './components/MobileListDetail.jsx';
 import { MobileSettings } from './components/MobileSettings.jsx';
 import { RecipeSelector } from './components/RecipeSelector.jsx';
+import { RecipeForm } from './components/RecipeForm.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
@@ -56,6 +57,7 @@ export const App = () => {
     handleRecipeBack,
   } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
+  const [showRecipeForm, setShowRecipeForm] = useState(null);
 
   // Hide native splash screen after auth check completes
   useEffect(() => {
@@ -260,6 +262,47 @@ export const App = () => {
     }
 
     if (activeTab === 'recipes') {
+      const handleRecipeSave = async (recipeData) => {
+        if (showRecipeForm === 'create') {
+          const newId = await recipeActions.createRecipe({
+            name: recipeData.name,
+            description: recipeData.description,
+            ingredients: recipeData.ingredients,
+            steps: recipeData.steps,
+          });
+          if (recipeData.imageFile && newId) {
+            await recipeActions.uploadImage(newId, recipeData.imageFile);
+          }
+        } else {
+          const recipeId = showRecipeForm;
+          await recipeActions.updateRecipe(recipeId, {
+            name: recipeData.name,
+            description: recipeData.description,
+            imageUrl: recipeData.imageUrl,
+          });
+          await recipeActions.updateIngredients(recipeId, recipeData.ingredients);
+          await recipeActions.updateSteps(recipeId, recipeData.steps);
+          if (recipeData.imageFile) {
+            await recipeActions.uploadImage(recipeId, recipeData.imageFile);
+          }
+        }
+        setShowRecipeForm(null);
+      };
+
+      if (showRecipeForm) {
+        const editRecipe =
+          showRecipeForm !== 'create' ? recipeState.activeRecipe : null;
+        return (
+          <div className={styles.mobileFullScreen}>
+            <RecipeForm
+              recipe={editRecipe}
+              onSave={handleRecipeSave}
+              onBack={() => setShowRecipeForm(null)}
+            />
+          </div>
+        );
+      }
+
       const showDetail = openRecipeId && recipeState.activeRecipe;
       const showListScreen = !openRecipeId || transition;
       const showDetailScreen = showDetail || transition === 'popping';
@@ -287,6 +330,11 @@ export const App = () => {
         handleRecipeBack();
       };
 
+      const handleRecipeEdit = (recipeId) => {
+        recipeActions.selectRecipe(recipeId);
+        setShowRecipeForm(recipeId);
+      };
+
       return (
         <div className={styles.slideContainer}>
           {showListScreen && (
@@ -296,8 +344,8 @@ export const App = () => {
                   recipes={recipeState.recipes}
                   sharedRecipes={recipeState.sharedRecipes}
                   onSelect={handleRecipeSelect}
-                  onCreate={() => {}}
-                  onEdit={() => {}}
+                  onCreate={() => setShowRecipeForm('create')}
+                  onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
                   onShareClick={() => {}}
                 />

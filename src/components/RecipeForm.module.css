@@ -1,0 +1,430 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-page);
+}
+
+.navBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  min-height: 44px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+.navTitle {
+  flex: 1;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saveButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 0.75rem;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.saveButton:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.saveButton:disabled {
+  color: var(--text-placeholder);
+  cursor: not-allowed;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Image Section */
+.imageSection {
+  margin-bottom: 1.25rem;
+}
+
+.imagePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 150px;
+  background: var(--bg-card);
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.imagePlaceholder:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.imagePlaceholderText {
+  font-size: 0.85rem;
+}
+
+.imagePreviewWrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.imagePreview {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.imageRemoveBtn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.imageRemoveBtn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.imageOptions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.imageOptionBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  min-height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.imageOptionBtn:hover {
+  background: var(--bg-hover);
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.urlInputRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.urlInput {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+.urlInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.urlInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.urlConfirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 1rem;
+  background: var(--primary);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.urlConfirmBtn:hover {
+  opacity: 0.9;
+}
+
+.urlCancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.urlCancelBtn:hover {
+  background: var(--bg-hover);
+}
+
+/* Form Fields */
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.nameInput {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.nameInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.nameInputError {
+  border-color: var(--danger);
+}
+
+.errorText {
+  color: var(--danger);
+  font-size: 0.8rem;
+  margin-top: 0.35rem;
+}
+
+/* Section Headers */
+.sectionHeader {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.75rem;
+}
+
+/* Ingredient/Step List */
+.listGroup {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  min-height: 44px;
+}
+
+.listRow:last-child {
+  border-bottom: none;
+}
+
+.ingredientQty {
+  width: 70px;
+  flex-shrink: 0;
+  padding: 0.5rem;
+  font-size: 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.ingredientQty::placeholder {
+  color: var(--text-placeholder);
+}
+
+.ingredientQty:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.ingredientName {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  font-size: 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.ingredientName::placeholder {
+  color: var(--text-placeholder);
+}
+
+.ingredientName:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.stepNumber {
+  width: 24px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.stepInstruction {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.5rem;
+  font-size: 16px;
+  font-family: inherit;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+  resize: none;
+  line-height: 1.4;
+}
+
+.stepInstruction::placeholder {
+  color: var(--text-placeholder);
+}
+
+.stepInstruction:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+}
+
+.deleteBtn:hover {
+  opacity: 0.8;
+}
+
+/* Add Buttons */
+.addBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.65rem 1rem;
+  min-height: 44px;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  text-decoration: underline;
+}
+
+/* Empty State for lists */
+.emptyListRow {
+  padding: 1rem;
+  text-align: center;
+  color: var(--text-placeholder);
+  font-size: 0.85rem;
+}
