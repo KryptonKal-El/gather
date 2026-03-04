@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" width="900" height="650">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap');
+    </style>
+
+    <!-- Pastel gradient for icon background -->
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+    </linearGradient>
+
+    <linearGradient id="iconGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Drop shadow -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#5BA08A" flood-opacity="0.15"/>
+    </filter>
+    <filter id="softShadow2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#5BA08A" flood-opacity="0.12"/>
+    </filter>
+
+    <!-- Background card -->
+    <rect id="bg" width="900" height="650" fill="#FAFAF7"/>
+  </defs>
+
+  <!-- Page background -->
+  <rect width="900" height="650" fill="#FAFAF7" rx="16"/>
+
+  <!-- Section labels -->
+  <text x="450" y="34" font-family="Georgia, serif" font-size="11" fill="#AAAAAA" text-anchor="middle" letter-spacing="3">LOGO VARIANTS</text>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- VERSION 1: ICON ONLY (App Icon style)       -->
+  <!-- ─────────────────────────────────────────── -->
+  <text x="150" y="62" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">APP ICON</text>
+
+  <!-- Rounded square bg -->
+  <rect x="90" y="74" width="120" height="120" rx="28" fill="url(#iconGrad)" filter="url(#softShadow)"/>
+
+  <!-- Line 1 dot + bar -->
+  <circle cx="118" cy="114" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="131" y="109" width="52" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Line 2 dot + bar -->
+  <circle cx="118" cy="134" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="131" y="129" width="40" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Line 3 dot + bar -->
+  <circle cx="118" cy="154" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="131" y="149" width="48" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Pink heart accent top right -->
+  <path d="M190,100 C190,100 176,90 176,82 C176,77 180,74 183,74 C186,74 188,76 190,78 C192,76 194,74 197,74 C200,74 204,77 204,82 C204,90 190,100 190,100 Z" fill="#F9A8C9" opacity="0.92"/>
+
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- VERSION 2: ICON + APP NAME                 -->
+  <!-- ─────────────────────────────────────────── -->
+  <text x="450" y="62" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">ICON + NAME</text>
+
+  <!-- Icon small -->
+  <rect x="310" y="74" width="80" height="80" rx="20" fill="url(#iconGrad2)" filter="url(#softShadow2)"/>
+
+  <!-- List lines small -->
+  <circle cx="330" cy="104" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="340" y="100" width="34" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="330" cy="119" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="340" y="115" width="26" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="330" cy="134" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="340" y="130" width="30" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Pink heart accent -->
+  <path d="M379,91 C379,91 368,83 368,76 C368,72 371,69 374,69 C376,69 378,71 379,73 C380,71 382,69 384,69 C387,69 390,72 390,76 C390,83 379,91 379,91 Z" fill="#F9A8C9" opacity="0.92"/>
+
+  <!-- App name text -->
+  <text x="408" y="118" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="46" font-weight="800" fill="#3D7A63" letter-spacing="-1">Gather</text>
+
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- VERSION 3: ICON + NAME + TAGLINE           -->
+  <!-- ─────────────────────────────────────────── -->
+  <text x="450" y="230" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">FULL LOGO WITH TAGLINE</text>
+
+  <!-- Wider centered layout -->
+  <!-- Icon medium -->
+  <rect x="198" y="250" width="96" height="96" rx="24" fill="url(#iconGrad)" filter="url(#softShadow)"/>
+
+  <!-- List lines medium -->
+  <circle cx="221" cy="284" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="233" y="279" width="42" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="221" cy="300" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="233" y="295" width="32" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="221" cy="316" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="233" y="311" width="38" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Pink heart accent -->
+  <path d="M279,268 C279,268 266,259 266,251 C266,246 269,243 272,243 C275,243 277,245 279,247 C281,245 283,243 286,243 C289,243 292,246 292,251 C292,259 279,268 279,268 Z" fill="#F9A8C9" opacity="0.92"/>
+
+  <!-- Name -->
+  <text x="312" y="305" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="54" font-weight="800" fill="#3D7A63" letter-spacing="-1">Gather</text>
+
+  <!-- Tagline -->
+  <text x="313" y="330" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="15" font-weight="600" fill="#85BFA8" letter-spacing="0.5">Gather your lists, meals, and more.</text>
+
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- VERSION 3b: STACKED (centered)             -->
+  <!-- ─────────────────────────────────────────── -->
+  <text x="450" y="410" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">STACKED / CENTERED</text>
+
+  <!-- Icon centered -->
+  <rect x="390" y="424" width="120" height="120" rx="28" fill="url(#iconGrad)" filter="url(#softShadow)"/>
+
+  <!-- List lines -->
+  <circle cx="418" cy="464" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="431" y="459" width="52" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="418" cy="484" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="431" y="479" width="40" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="418" cy="504" r="6" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="431" y="499" width="48" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+
+  <!-- Pink heart accent -->
+  <path d="M491,442 C491,442 475,431 475,421 C475,415 479,411 483,411 C486,411 489,414 491,416 C493,414 496,411 499,411 C503,411 507,415 507,421 C507,431 491,442 491,442 Z" fill="#F9A8C9" opacity="0.92"/>
+
+  <!-- Stacked name -->
+  <text x="450" y="582" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="52" font-weight="800" fill="#3D7A63" text-anchor="middle" letter-spacing="-1">Gather</text>
+
+  <!-- Stacked tagline -->
+  <text x="450" y="607" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
+
+  <!-- Divider lines between sections -->
+  <line x1="240" y1="50" x2="240" y2="210" stroke="#E8E8E2" stroke-width="1"/>
+  <line x1="40" y1="220" x2="860" y2="220" stroke="#E8E8E2" stroke-width="1"/>
+  <line x1="40" y1="400" x2="860" y2="400" stroke="#E8E8E2" stroke-width="1"/>
+
+</svg>

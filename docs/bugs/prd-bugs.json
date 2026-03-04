@@ -316,6 +316,48 @@
       "occurrences": 1,
       "priority": "medium",
       "notes": "PRD US-009 explicitly required 'drag-to-reorder' for both ingredients and steps. Consider @dnd-kit/sortable as it is lightweight (~12KB gzipped) and has good React 18 support. The existing add/remove functionality should remain alongside the new drag reorder."
+    },
+    {
+      "id": "BUG-010",
+      "title": "Logo SVGs were regenerated instead of using the original designer files — replace with exact originals",
+      "description": "During the rebrand (US-016), Builder recreated the logo icon SVG from scratch instead of using the original designer-provided SVG files. The regenerated version has subtle differences (corner radius proportions, element positioning) from the original. The original logo file has been split into 4 separate SVG variants in public/logo/ — Builder should replace all inline SVGs and the icon.svg with references to these exact original files.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "src/App.jsx",
+        "src/components/Login.jsx",
+        "public/icon.svg",
+        "public/icon-64x64.png",
+        "public/icon-192x192.png",
+        "public/icon-512x512.png",
+        "public/apple-touch-icon.png"
+      ],
+      "affectedPlatforms": ["all"],
+      "rootCause": "Builder regenerated the icon SVG by hand-coding coordinates into a 512x512 viewBox instead of using the original designer file. This introduced subtle differences: corner radius is ~19% (rx=96 on 512px) instead of the original ~23% (rx=28 on 120px), and element positions are approximated rather than exact.",
+      "reproductionSteps": [
+        "Compare public/icon.svg with the original logo in public/logo/icon-only.svg",
+        "Notice the corners are slightly less rounded and element positions differ slightly",
+        "Compare the inline SVGs in App.jsx (line 616) and Login.jsx (line 69) with the originals"
+      ],
+      "suggestedFix": "**The original logo variants are now available in `public/logo/`. Use them directly — do not regenerate.**\n\n### Available files:\n- `public/logo/icon-only.svg` — App icon (square, no text)\n- `public/logo/icon-name.svg` — Icon + 'Gather' text (horizontal)\n- `public/logo/icon-name-tagline.svg` — Icon + 'Gather' + tagline (horizontal)\n- `public/logo/stacked.svg` — Icon centered above 'Gather' + tagline (vertical)\n- `public/logo/gather-logo-all-variants.svg` — Source of truth reference file\n\n### Where each variant goes:\n\n**1. Desktop header (`src/App.jsx` ~line 616):**\n- Replace the inline SVG with an `<img>` tag referencing `/logo/icon-name.svg`\n- Remove the tagline from the logoGroup — the icon-name variant has the name built in\n- OR keep tagline as separate text and use `/logo/icon-only.svg` for just the icon\n\n**2. Login screen (`src/components/Login.jsx` ~line 69):**\n- Replace the inline SVG with an `<img>` tag referencing `/logo/stacked.svg`\n- The stacked variant includes both the name and tagline, so you can remove the separate `<h1>` and `<p>` tags\n- OR use `/logo/icon-only.svg` as just the icon and keep the text as separate HTML elements for styling flexibility\n\n**3. PWA icon (`public/icon.svg`):**\n- Copy the content of `public/logo/icon-only.svg` to `public/icon.svg` (replace current)\n- Important: strip the `filter` attribute (drop shadow) from the icon.svg version — shadows in PWA icons render poorly on some platforms\n\n**4. PNG icons (favicon, apple-touch-icon, PWA icons):**\n- Regenerate all PNGs from the corrected `public/icon.svg` using the same method Builder used before\n- Sizes needed: 64x64 (favicon), 180x180 (apple-touch-icon), 192x192 (PWA), 512x512 (PWA)\n\n### Key rule: Reference the SVG files directly. Do NOT copy SVG markup inline or hand-modify coordinates.",
+      "acceptanceCriteria": [
+        "Desktop header uses the original icon-only.svg or icon-name.svg from public/logo/ (not a regenerated version)",
+        "Login screen uses the original stacked.svg or icon-only.svg from public/logo/ (not a regenerated version)",
+        "public/icon.svg contains the exact icon-only variant geometry (rx=28 on 120px, or proportionally equivalent)",
+        "All PNG icons (64x64, 180x180, 192x192, 512x512) are regenerated from the corrected icon.svg",
+        "Favicon displays correctly in browser tabs",
+        "Apple touch icon renders correctly on iOS home screen",
+        "PWA install uses correct icon",
+        "No inline SVG duplication — logo SVGs are referenced as files, not duplicated in JSX",
+        "Lint passes",
+        "Verify in browser",
+        "Works in both light and dark mode"
+      ],
+      "relatedPrd": "prd-rebrand",
+      "reportedAt": "2026-03-04",
+      "occurrences": 1,
+      "priority": "medium",
+      "notes": "The original designer-provided SVG has been split into 4 variants in public/logo/. The source of truth is public/logo/gather-logo-all-variants.svg. Builder should use <img> tags referencing the SVG files rather than inlining SVG markup. Note: the Nunito font used in the text variants requires a Google Fonts import — this is already present in the SVG files via @import in <style>."
     }
   ]
 }
