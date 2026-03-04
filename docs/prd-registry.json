@@ -152,8 +152,10 @@
     {
       "id": "prd-rebrand",
       "name": "Rebrand ShoppingListAI to Gather",
-      "status": "draft",
-      "filePath": "docs/drafts/prd-rebrand.md",
+      "status": "ready",
+      "filePath": "docs/prds/prd-rebrand.md",
+      "jsonPath": "docs/prds/prd-rebrand.json",
+      "branchName": "feature/rebrand-gather",
       "createdAt": "2026-03-04",
       "updatedAt": "2026-03-04",
       "notes": "22 stories across 4 phases. Phase 1 (US-001–015) unblocked. Phase 2 blocked on logo+colors. Phase 3 blocked on custom domain. Phase 4 (component rename) optional/deferred."

@@ -1,6 +1,6 @@
 # PRD: Rebrand ShoppingListAI → Gather
 
-**Status:** Draft
+**Status:** Ready
 **Created:** 2026-03-04
 **Author:** Planner
 
