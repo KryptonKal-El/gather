@@ -152,15 +152,15 @@
     {
       "id": "prd-rebrand",
       "name": "Rebrand ShoppingListAI to Gather",
-      "status": "in_progress",
+      "status": "blocked",
       "startedAt": "2026-03-04T19:00:00Z",
-      "currentStory": "US-001",
+      "currentStory": null,
       "filePath": "docs/prds/prd-rebrand.md",
       "jsonPath": "docs/prds/prd-rebrand.json",
       "branchName": "feature/rebrand-gather",
       "createdAt": "2026-03-04",
       "updatedAt": "2026-03-04",
-      "notes": "22 stories across 4 phases. Phase 1 (US-001–015) unblocked. Phase 2 blocked on logo+colors. Phase 3 blocked on custom domain. Phase 4 (component rename) optional/deferred."
+      "notes": "17/22 stories complete (US-001–017). US-018–021 BLOCKED on custom domain purchase. US-022 SKIPPED (optional component rename). Zero 'ShoppingListAI' references remain in codebase. Will move to completed when domain stories are unblocked and done."
     }
   ]
 }
