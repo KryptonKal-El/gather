@@ -306,6 +306,26 @@
   border-bottom: none;
 }
 
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 44px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-placeholder);
+  cursor: grab;
+  padding: 0;
+  touch-action: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+  color: var(--text-secondary);
+}
+
 .ingredientQty {
   width: 70px;
   flex-shrink: 0;
