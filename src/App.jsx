@@ -253,6 +253,10 @@ export const App = () => {
       );
     }
 
+    if (activeTab === 'recipes') {
+      return <div>Recipes coming soon</div>;
+    }
+
     if (activeTab === 'stores') {
       return (
         <section className={styles.mobileScreen}>

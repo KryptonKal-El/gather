@@ -1,0 +1,573 @@
+.container {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.searchBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.searchInput {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.5rem 2rem 0.5rem 2.25rem;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  color: var(--text-primary);
+  box-sizing: border-box;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.searchInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.65rem;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clearBtn:hover {
+  color: var(--text-primary);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.newBtn {
+  font-size: 0.8rem;
+  color: var(--primary);
+  background: none;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+
+.newBtn:hover {
+  background: var(--primary);
+  color: var(--bg-card);
+}
+
+.lists {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.emptyMsg {
+  color: var(--text-placeholder);
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.75rem;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.1s;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.listItem:hover {
+  background: var(--bg-hover);
+}
+
+.listBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  min-width: 0;
+}
+
+.recipeThumbnail {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.recipePlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}
+
+.listText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.listName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listCount {
+  font-size: 0.72rem;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+}
+
+.sharedBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--info);
+  background: var(--info-tint);
+  padding: 0.1rem 0.4rem;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Three-dot menu */
+.menuWrap {
+  position: relative;
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+}
+
+.menuBtn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.3rem 0.45rem;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+  line-height: 1;
+}
+
+.menuBtn:hover {
+  color: var(--text-primary);
+  background: var(--border-default);
+  border-radius: 6px;
+}
+
+@media (hover: hover) {
+  .menuBtn {
+    color: transparent;
+  }
+
+  .listItem:hover .menuBtn {
+    color: var(--text-secondary);
+  }
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 100;
+  min-width: 160px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--overlay-light);
+  padding: 0.25rem 0;
+  overflow: hidden;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+  text-align: left;
+}
+
+.menuItem:hover {
+  background: var(--bg-hover);
+}
+
+.menuDanger {
+  color: var(--danger);
+}
+
+.menuDanger:hover {
+  background: var(--danger-tint);
+}
+
+.menuIcon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.sectionHeader {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-default);
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-placeholder);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+}
+
+/* Chevron indicator */
+.chevron {
+  display: block;
+  color: var(--text-ghost);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* ============================================
+   MOBILE iOS GROUPED TABLE VIEW STYLES
+   ============================================ */
+@media (max-width: 700px) {
+  /* Mobile layout: flex column that fills parent height */
+  .mobileLayout {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* Fixed header section (title + search bar) */
+  .mobileHeader {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: 0.75rem;
+  }
+
+  /* Scrollable content area */
+  .scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Container becomes transparent - groups get backgrounds */
+  .container {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin-bottom: 0;
+  }
+
+  /* Header with larger touch targets */
+  .header {
+    padding: 0.75rem 1rem 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .newBtn {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Search bar inside the fixed header */
+  .searchBar {
+    margin: 0 1rem;
+  }
+
+  .searchInput {
+    font-size: 16px;
+  }
+
+  /* List groups as iOS-style rounded sections */
+  .lists {
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+  }
+
+  .listItem:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .listItem:last-child {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+
+  /* List rows with proper touch targets */
+  .listItem {
+    min-height: 44px;
+  }
+
+  .listItem:hover {
+    background: var(--bg-hover);
+  }
+
+  /* List button fills the row */
+  .listBtn {
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+  }
+
+  .recipeThumbnail {
+    width: 48px;
+    height: 48px;
+  }
+
+  .recipePlaceholder {
+    width: 48px;
+    height: 48px;
+  }
+
+  .listText {
+    gap: 0.15rem;
+  }
+
+  .listName {
+    font-size: 1rem;
+  }
+
+  .listCount {
+    font-size: 0.75rem;
+  }
+
+  /* Chevron spacing on mobile */
+  .chevron {
+    margin-left: auto;
+    padding-right: 0.25rem;
+  }
+
+  /* Menu button always visible on touch devices */
+  .menuBtn {
+    color: var(--text-secondary);
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .menuWrap {
+    margin-right: 0.25rem;
+  }
+
+  /* Section header for shared recipes */
+  .sectionHeader {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-top: 0;
+    border-top: none;
+    padding-left: 1rem;
+  }
+
+  .sectionTitle {
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  /* Empty state styling */
+  .emptyMsg {
+    padding: 2rem 1rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  /* Menu dropdown on mobile */
+  .menuDropdown {
+    min-width: 180px;
+  }
+
+  .menuItem {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* iOS Action Sheet / Bottom Sheet */
+.actionSheetBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.actionSheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  padding: 0 0.5rem calc(env(safe-area-inset-bottom, 0.5rem) + 0.5rem);
+  animation: slideUp 0.25s ease;
+}
+
+.actionSheetGroup {
+  background: var(--bg-card);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.actionSheetTitle {
+  padding: 0.75rem 1rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.actionSheetItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 56px;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--primary);
+  cursor: pointer;
+  text-align: center;
+}
+
+.actionSheetItem:first-child {
+  border-top: none;
+}
+
+.actionSheetItem:active {
+  background: var(--bg-hover);
+}
+
+.actionSheetDanger {
+  color: var(--danger);
+}
+
+.actionSheetCancel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  margin-top: 0.5rem;
+  background: var(--bg-card);
+  border: none;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.actionSheetCancel:active {
+  background: var(--bg-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
