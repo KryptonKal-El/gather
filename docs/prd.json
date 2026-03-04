@@ -261,8 +261,10 @@
         "Lint passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T23:30:00Z",
+      "passes": true,
+      "notes": "Added viewMode state (collections/recipes) to RecipeSelector. Collection click transitions to recipe list view with back navigation. Recipe list reuses existing recipe item rendering with context-aware 3-dot menus: owned (Edit/Move/Delete), shared-own (Edit/Remove), shared-other (View). Move to Collection picker modal with owned collections list. New props: onMoveRecipe, currentUserId. Component now 1421 lines, CSS 1053 lines.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

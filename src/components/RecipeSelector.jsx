@@ -33,6 +33,9 @@ export const RecipeSelector = ({
   onShareClick,
   onSaveTemplate,
   onAddTemplateToList,
+  // US-007: Recipe list within collection
+  onMoveRecipe,
+  currentUserId,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -43,6 +46,9 @@ export const RecipeSelector = ({
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
   const [confirmingLeaveId, setConfirmingLeaveId] = useState(null);
+  // US-007: View mode state for collection mode
+  const [viewMode, setViewMode] = useState('collections'); // 'collections' | 'recipes'
+  const [movePickerRecipeId, setMovePickerRecipeId] = useState(null);
   const menuRef = useRef(null);
   const renameInputRef = useRef(null);
   const newCollectionInputRef = useRef(null);
@@ -113,10 +119,35 @@ export const RecipeSelector = ({
     ? sharedRecipes.filter((r) => (r.recipeName ?? '').toLowerCase().includes(query))
     : sharedRecipes;
 
+  // US-007: Active collection object for recipe list header
+  const activeCollection = useMemo(() => {
+    if (!activeCollectionId) return null;
+    const owned = collections?.find((c) => c.id === activeCollectionId);
+    if (owned) return owned;
+    const shared = sharedCollections?.find((sc) => sc.collectionId === activeCollectionId);
+    return shared ? { id: shared.collectionId, name: shared.collection?.name, emoji: shared.collection?.emoji, isShared: true } : null;
+  }, [activeCollectionId, collections, sharedCollections]);
+
+  // US-007: Check if viewing a shared collection (not owned)
+  const isSharedView = useMemo(() => {
+    if (!activeCollectionId || !collections) return false;
+    return !collections.some((c) => c.id === activeCollectionId);
+  }, [activeCollectionId, collections]);
+
   // Collection handlers
   const handleCollectionClick = useCallback((collectionId) => {
     onSelectCollection?.(collectionId);
+    setViewMode('recipes');
+    setSearchQuery('');
+    setMenuOpenId(null);
   }, [onSelectCollection]);
+
+  // US-007: Back to collections handler
+  const handleBackToCollections = useCallback(() => {
+    setViewMode('collections');
+    setSearchQuery('');
+    setMenuOpenId(null);
+  }, []);
 
   const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim()) return;
@@ -188,6 +219,35 @@ export const RecipeSelector = ({
     await onLeaveCollection?.(confirmingLeaveId);
     setConfirmingLeaveId(null);
   }, [confirmingLeaveId, onLeaveCollection]);
+
+  // US-007: Move recipe handlers
+  const handleOpenMovePicker = useCallback((recipeId) => {
+    setMovePickerRecipeId(recipeId);
+    setMenuOpenId(null);
+  }, []);
+
+  const handleMoveRecipe = useCallback((targetCollectionId) => {
+    if (movePickerRecipeId && onMoveRecipe) {
+      onMoveRecipe(movePickerRecipeId, targetCollectionId);
+    }
+    setMovePickerRecipeId(null);
+  }, [movePickerRecipeId, onMoveRecipe]);
+
+  const handleCloseMovePicker = useCallback(() => {
+    setMovePickerRecipeId(null);
+  }, []);
+
+  // US-007: Handle Escape key to close move picker
+  useEffect(() => {
+    if (!movePickerRecipeId) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMovePickerRecipeId(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [movePickerRecipeId]);
 
   const renderRecipeThumbnail = (imageUrl) => {
     if (imageUrl) {
@@ -422,6 +482,172 @@ export const RecipeSelector = ({
               </button>
             </div>
           </>
+        )}
+      </div>
+    );
+  };
+
+  /**
+   * Recipe item renderer for collection recipe list view (US-007).
+   * Shows different 3-dot menu options based on ownership:
+   * - Owned collection: Edit, Move to Collection, Delete
+   * - Shared collection + user's recipe: Edit, Remove
+   * - Shared collection + other's recipe: View only
+   */
+  const renderCollectionRecipeItem = (recipe) => {
+    const isMenuOpen = menuOpenId === `col-recipe-${recipe.id}`;
+    const isUsersRecipe = currentUserId && recipe.ownerId === currentUserId;
+
+    // Determine menu options based on context
+    const canEdit = !isSharedView || isUsersRecipe;
+    const canMove = !isSharedView && onMoveRecipe;
+    const canDelete = !isSharedView || isUsersRecipe;
+    const isViewOnly = isSharedView && !isUsersRecipe;
+
+    return (
+      <div key={recipe.id} className={styles.listItem}>
+        <button
+          className={styles.listBtn}
+          onClick={() => onSelect(recipe.id)}
+        >
+          {renderRecipeThumbnail(recipe.imageUrl)}
+          <span className={styles.listText}>
+            <span className={styles.listName}>{recipe.name}</span>
+            <span className={styles.listCount}>
+              {recipe.ingredientCount ?? 0} ingredients · {recipe.stepCount ?? 0} steps
+            </span>
+          </span>
+          <span className={styles.chevron}>›</span>
+        </button>
+
+        <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
+          <button
+            type="button"
+            className={styles.menuBtn}
+            onClick={() => setMenuOpenId(isMenuOpen ? null : `col-recipe-${recipe.id}`)}
+            aria-label={`Options for ${recipe.name}`}
+          >
+            &#x22EE;
+          </button>
+
+          {isMenuOpen && !isMobile && (
+            <div className={styles.menuDropdown}>
+              {isViewOnly ? (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { onSelect(recipe.id); setMenuOpenId(null); }}
+                >
+                  <span className={styles.menuIcon}>👁️</span>
+                  View
+                </button>
+              ) : (
+                <>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className={styles.menuItem}
+                      onClick={() => { onEdit(recipe.id); setMenuOpenId(null); }}
+                    >
+                      <span className={styles.menuIcon}>✏️</span>
+                      Edit
+                    </button>
+                  )}
+                  {canMove && (
+                    <button
+                      type="button"
+                      className={styles.menuItem}
+                      onClick={() => handleOpenMovePicker(recipe.id)}
+                    >
+                      <span className={styles.menuIcon}>📂</span>
+                      Move to Collection
+                    </button>
+                  )}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      className={`${styles.menuItem} ${styles.menuDanger}`}
+                      onClick={() => { setConfirmingDeleteId(recipe.id); setMenuOpenId(null); }}
+                    >
+                      <span className={styles.menuIcon}>🗑️</span>
+                      {isSharedView ? 'Remove' : 'Delete'}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isMenuOpen && isMobile && (
+          <>
+            <div
+              className={styles.actionSheetBackdrop}
+              onClick={() => setMenuOpenId(null)}
+            />
+            <div className={styles.actionSheet}>
+              <div className={styles.actionSheetGroup}>
+                <div className={styles.actionSheetTitle}>{recipe.name}</div>
+                {isViewOnly ? (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => { onSelect(recipe.id); setMenuOpenId(null); }}
+                  >
+                    View
+                  </button>
+                ) : (
+                  <>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        className={styles.actionSheetItem}
+                        onClick={() => { onEdit(recipe.id); setMenuOpenId(null); }}
+                      >
+                        Edit
+                      </button>
+                    )}
+                    {canMove && (
+                      <button
+                        type="button"
+                        className={styles.actionSheetItem}
+                        onClick={() => handleOpenMovePicker(recipe.id)}
+                      >
+                        Move to Collection
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
+                        onClick={() => { setConfirmingDeleteId(recipe.id); setMenuOpenId(null); }}
+                      >
+                        {isSharedView ? 'Remove' : 'Delete'}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
+              <button
+                type="button"
+                className={styles.actionSheetCancel}
+                onClick={() => setMenuOpenId(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+
+        {confirmingDeleteId === recipe.id && (
+          <ConfirmDialog
+            message={isSharedView ? `Remove "${recipe.name}" from this collection?` : `Delete "${recipe.name}" and all its contents?`}
+            onConfirm={() => {
+              onDelete(recipe.id);
+              setConfirmingDeleteId(null);
+            }}
+            onCancel={() => setConfirmingDeleteId(null)}
+          />
         )}
       </div>
     );
@@ -786,6 +1012,161 @@ export const RecipeSelector = ({
     </div>
   );
 
+  // US-007: Move to Collection picker modal
+  const renderMovePicker = () => {
+    if (!movePickerRecipeId) return null;
+
+    // Show all owned collections except the current one
+    const targetCollections = collections?.filter((c) => c.id !== activeCollectionId) ?? [];
+
+    return (
+      <>
+        <div className={styles.movePickerBackdrop} onClick={handleCloseMovePicker} />
+        <div className={styles.movePickerPanel}>
+          <div className={styles.movePickerHeader}>
+            <span className={styles.movePickerTitle}>Move to Collection</span>
+            <button
+              type="button"
+              className={styles.movePickerClose}
+              onClick={handleCloseMovePicker}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </div>
+          <div className={styles.movePickerList}>
+            {targetCollections.length === 0 ? (
+              <p className={styles.emptyMsg}>No other collections available.</p>
+            ) : (
+              targetCollections.map((col) => (
+                <button
+                  key={col.id}
+                  type="button"
+                  className={styles.movePickerItem}
+                  onClick={() => handleMoveRecipe(col.id)}
+                >
+                  <span className={styles.collectionEmoji}>{col.emoji ?? '📁'}</span>
+                  <span className={styles.movePickerItemName}>{col.name}</span>
+                </button>
+              ))
+            )}
+          </div>
+          <button
+            type="button"
+            className={styles.movePickerCancel}
+            onClick={handleCloseMovePicker}
+          >
+            Cancel
+          </button>
+        </div>
+      </>
+    );
+  };
+
+  // US-007: Recipe list empty state
+  const renderRecipeListEmptyState = () => (
+    <p className={styles.emptyMsg}>
+      No recipes yet. Tap + to add one.
+    </p>
+  );
+
+  // -------------------------------------------------------------------------
+  // US-007: Recipe List Layouts (within collection)
+  // -------------------------------------------------------------------------
+
+  const renderRecipeListMobileLayout = () => (
+    <div className={styles.mobileLayout}>
+      <div className={styles.mobileHeader}>
+        <div className={styles.recipeListHeader}>
+          <button
+            type="button"
+            className={styles.backBtn}
+            onClick={handleBackToCollections}
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            <span>Collections</span>
+          </button>
+          <button className={styles.newBtn} onClick={onCreate}>
+            + New
+          </button>
+        </div>
+        <div className={styles.collectionTitleRow}>
+          <span className={styles.collectionTitleEmoji}>{activeCollection?.emoji ?? '📁'}</span>
+          <h2 className={styles.collectionTitleText}>{activeCollection?.name ?? 'Collection'}</h2>
+          {activeCollection?.isShared && <span className={styles.sharedBadge}>Shared</span>}
+        </div>
+        {renderSearchBar('Search recipes...')}
+      </div>
+
+      <div className={styles.scrollArea}>
+        <div className={styles.lists}>
+          {filteredRecipes.length === 0 && renderRecipeListEmptyState()}
+          {filteredRecipes.map(renderCollectionRecipeItem)}
+        </div>
+
+        {renderTemplatesSection()}
+      </div>
+
+      {renderMovePicker()}
+    </div>
+  );
+
+  const renderRecipeListDesktopLayout = () => (
+    <div className={styles.container}>
+      <div className={styles.recipeListHeader}>
+        <button
+          type="button"
+          className={styles.backBtn}
+          onClick={handleBackToCollections}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span>Back</span>
+        </button>
+        <div className={styles.collectionTitleRow}>
+          <span className={styles.collectionTitleEmoji}>{activeCollection?.emoji ?? '📁'}</span>
+          <h2 className={styles.collectionTitleText}>{activeCollection?.name ?? 'Collection'}</h2>
+          {activeCollection?.isShared && <span className={styles.sharedBadge}>Shared</span>}
+        </div>
+        <button className={styles.newBtn} onClick={onCreate}>
+          + New Recipe
+        </button>
+      </div>
+
+      {renderSearchBar('Search recipes...')}
+
+      <div className={styles.lists}>
+        {filteredRecipes.length === 0 && renderRecipeListEmptyState()}
+        {filteredRecipes.map(renderCollectionRecipeItem)}
+      </div>
+
+      {renderTemplatesSection()}
+
+      {renderMovePicker()}
+    </div>
+  );
+
   // -------------------------------------------------------------------------
   // Collection Mode Layouts
   // -------------------------------------------------------------------------
@@ -1003,6 +1384,11 @@ export const RecipeSelector = ({
     return isMobile ? renderLegacyMobileLayout() : renderLegacyDesktopLayout();
   }
 
+  // US-007: Recipe list view within a collection
+  if (viewMode === 'recipes') {
+    return isMobile ? renderRecipeListMobileLayout() : renderRecipeListDesktopLayout();
+  }
+
   // Collection mode: show collection list
   return isMobile ? renderCollectionMobileLayout() : renderCollectionDesktopLayout();
 };
@@ -1029,4 +1415,7 @@ RecipeSelector.propTypes = {
   onShareClick: PropTypes.func,
   onSaveTemplate: PropTypes.func,
   onAddTemplateToList: PropTypes.func,
+  // US-007: Recipe list within collection
+  onMoveRecipe: PropTypes.func,
+  currentUserId: PropTypes.string,
 };
