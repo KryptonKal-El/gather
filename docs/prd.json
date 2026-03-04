@@ -343,8 +343,10 @@
         "Lint passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T00:10:00Z",
+      "passes": true,
+      "notes": "Wired collection props to both mobile and desktop RecipeSelector instances. Replaced sharingRecipeId state with sharingCollectionId. Replaced ShareRecipeModal rendering with ShareCollectionModal (wired to recipeActions.shareCollection/unshareCollection/getCollectionShares). Removed per-recipe onShareClick from both MobileRecipeDetail instances. ShareRecipeModal import kept for US-012 cleanup. App.jsx grew from 716 to 735 lines. Lint clean.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

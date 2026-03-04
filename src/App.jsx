@@ -28,6 +28,7 @@ import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
 import { ShareRecipeModal } from './components/ShareRecipeModal.jsx';
+import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
@@ -42,7 +43,7 @@ export const App = () => {
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
   const [sharingListId, setSharingListId] = useState(null);
-  const [sharingRecipeId, setSharingRecipeId] = useState(null);
+  const [sharingCollectionId, setSharingCollectionId] = useState(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [avatarUploadError, setAvatarUploadError] = useState(null);
   const avatarFileInputRef = useRef(null);
@@ -367,12 +368,22 @@ export const App = () => {
               <div className={styles.mobileFullScreen}>
                 <RecipeSelector
                   recipes={recipeState.recipes}
-                  sharedRecipes={recipeState.sharedRecipes}
+                  collections={recipeState.collections}
+                  sharedCollections={recipeState.sharedCollections}
+                  activeCollectionId={recipeState.activeCollectionId}
+                  allRecipes={recipeState.allRecipes}
+                  currentUserId={user.id}
                   onSelect={handleRecipeSelect}
                   onCreate={() => setShowRecipeForm('create')}
                   onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
-                  onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
+                  onSelectCollection={recipeActions.selectCollection}
+                  onCreateCollection={recipeActions.createCollection}
+                  onUpdateCollection={recipeActions.updateCollection}
+                  onDeleteCollection={recipeActions.deleteCollection}
+                  onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
+                  onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
+                  onMoveRecipe={recipeActions.moveRecipe}
                   onSaveTemplate={handleSaveTemplate}
                   onAddTemplateToList={handleAddTemplateToList}
                 />
@@ -394,7 +405,6 @@ export const App = () => {
                     recipeActions.deleteRecipe(recipeId);
                     handleRecipeBackNav();
                   }}
-                  onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
                   onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
                 />
               </div>
@@ -525,7 +535,11 @@ export const App = () => {
         <aside className={styles.sidebar}>
           <RecipeSelector
             recipes={recipeState.recipes}
-            sharedRecipes={recipeState.sharedRecipes}
+            collections={recipeState.collections}
+            sharedCollections={recipeState.sharedCollections}
+            activeCollectionId={recipeState.activeCollectionId}
+            allRecipes={recipeState.allRecipes}
+            currentUserId={user.id}
             onSelect={(recipeId) => {
               recipeActions.selectRecipe(recipeId);
               setDesktopRecipeFormId(null);
@@ -536,7 +550,13 @@ export const App = () => {
               setDesktopRecipeFormId(recipeId);
             }}
             onDelete={recipeActions.deleteRecipe}
-            onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
+            onSelectCollection={recipeActions.selectCollection}
+            onCreateCollection={recipeActions.createCollection}
+            onUpdateCollection={recipeActions.updateCollection}
+            onDeleteCollection={recipeActions.deleteCollection}
+            onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
+            onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
+            onMoveRecipe={recipeActions.moveRecipe}
             onSaveTemplate={handleSaveTemplate}
             onAddTemplateToList={handleAddTemplateToList}
           />
@@ -561,7 +581,6 @@ export const App = () => {
               onDelete={(recipeId) => {
                 recipeActions.deleteRecipe(recipeId);
               }}
-              onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
               onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
             />
           ) : (
@@ -693,17 +712,17 @@ export const App = () => {
         />
       )}
 
-      {sharingRecipeId && (() => {
-        const recipeToShare = recipeState.recipes.find((r) => r.id === sharingRecipeId);
-        if (!recipeToShare) return null;
+      {sharingCollectionId && (() => {
+        const collectionToShare = recipeState.collections.find((c) => c.id === sharingCollectionId);
+        if (!collectionToShare) return null;
         return (
-          <ShareRecipeModal
-            recipe={recipeToShare}
+          <ShareCollectionModal
+            collection={collectionToShare}
             ownerEmail={user.email}
-            onShare={recipeActions.shareRecipe}
-            onUnshare={recipeActions.unshareRecipe}
-            getShares={recipeActions.getShares}
-            onClose={() => setSharingRecipeId(null)}
+            onShare={recipeActions.shareCollection}
+            onUnshare={recipeActions.unshareCollection}
+            getShares={recipeActions.getCollectionShares}
+            onClose={() => setSharingCollectionId(null)}
           />
         );
       })()}
