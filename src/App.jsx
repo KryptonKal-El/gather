@@ -63,6 +63,8 @@ export const App = () => {
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
   const [showRecipeForm, setShowRecipeForm] = useState(null);
   const [addToListIngredients, setAddToListIngredients] = useState(null);
+  const [desktopView, setDesktopView] = useState('lists');
+  const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
 
   // Hide native splash screen after auth check completes
   useEffect(() => {
@@ -195,6 +197,28 @@ export const App = () => {
     } else {
       actions.selectList(listId);
     }
+  };
+
+  const handleSaveTemplate = async (template) => {
+    const ingredients = template.ingredients.map((name, i) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      quantity: '',
+      sortOrder: i,
+    }));
+    await recipeActions.createRecipe({
+      name: template.name,
+      description: template.description,
+      ingredients,
+      steps: [],
+    });
+  };
+
+  const handleAddTemplateToList = (template) => {
+    const ingredients = template.ingredients.map((name) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      quantity: '',
+    }));
+    setAddToListIngredients(ingredients);
   };
 
   const renderMobileContent = () => {
@@ -334,28 +358,6 @@ export const App = () => {
         setShowRecipeForm(recipeId);
       };
 
-      const handleSaveTemplate = async (template) => {
-        const ingredients = template.ingredients.map((name, i) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          quantity: '',
-          sortOrder: i,
-        }));
-        await recipeActions.createRecipe({
-          name: template.name,
-          description: template.description,
-          ingredients,
-          steps: [],
-        });
-      };
-
-      const handleAddTemplateToList = (template) => {
-        const ingredients = template.ingredients.map((name) => ({
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          quantity: '',
-        }));
-        setAddToListIngredients(ingredients);
-      };
-
       const detailRecipe = recipeState.activeRecipe ?? poppingRecipeData;
 
       return (
@@ -438,57 +440,164 @@ export const App = () => {
     return null;
   };
 
-  const renderDesktopContent = () => (
-    <>
-      <aside className={styles.sidebar}>
-        <ListSelector
-          lists={state.lists}
-          activeListId={state.activeListId}
-          currentUserId={user.id}
-          onSelect={actions.selectList}
-          onCreate={actions.createList}
-          onUpdateDetails={actions.updateListDetails}
-          onDelete={actions.deleteList}
-          onShareClick={(list) => setSharingListId(list.id)}
-        />
-      </aside>
+  const handleDesktopRecipeSave = async (recipeData) => {
+    if (desktopRecipeFormId === 'create') {
+      const newId = await recipeActions.createRecipe({
+        name: recipeData.name,
+        description: recipeData.description,
+        ingredients: recipeData.ingredients,
+        steps: recipeData.steps,
+      });
+      if (recipeData.imageFile && newId) {
+        await recipeActions.uploadImage(newId, recipeData.imageFile);
+      }
+    } else {
+      const recipeId = desktopRecipeFormId;
+      await recipeActions.updateRecipe(recipeId, {
+        name: recipeData.name,
+        description: recipeData.description,
+        imageUrl: recipeData.imageUrl,
+      });
+      await recipeActions.updateIngredients(recipeId, recipeData.ingredients);
+      await recipeActions.updateSteps(recipeId, recipeData.steps);
+      if (recipeData.imageFile) {
+        await recipeActions.uploadImage(recipeId, recipeData.imageFile);
+      }
+    }
+    setDesktopRecipeFormId(null);
+  };
 
-      <section className={styles.content}>
-        {activeList ? (
-          <>
-            <h2 className={styles.listTitle}>
-              {activeList.emoji && <span>{activeList.emoji} </span>}
-              {activeList.name}
-            </h2>
-            <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
-            <ShoppingList
-              items={activeList.items}
-              stores={state.stores}
-              onToggle={handleToggleItem}
-              onRemove={handleRemoveItem}
-              onUpdateCategory={handleUpdateCategory}
-              onUpdateStore={handleUpdateStore}
-              onUpdateItem={handleUpdateItem}
-              onClearChecked={handleClearChecked}
+  const renderDesktopContent = () => {
+    const renderListsView = () => (
+      <>
+        <aside className={styles.sidebar}>
+          <ListSelector
+            lists={state.lists}
+            activeListId={state.activeListId}
+            currentUserId={user.id}
+            onSelect={actions.selectList}
+            onCreate={actions.createList}
+            onUpdateDetails={actions.updateListDetails}
+            onDelete={actions.deleteList}
+            onShareClick={(list) => setSharingListId(list.id)}
+          />
+        </aside>
+
+        <section className={styles.content}>
+          {activeList ? (
+            <>
+              <h2 className={styles.listTitle}>
+                {activeList.emoji && <span>{activeList.emoji} </span>}
+                {activeList.name}
+              </h2>
+              <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
+              <ShoppingList
+                items={activeList.items}
+                stores={state.stores}
+                onToggle={handleToggleItem}
+                onRemove={handleRemoveItem}
+                onUpdateCategory={handleUpdateCategory}
+                onUpdateStore={handleUpdateStore}
+                onUpdateItem={handleUpdateItem}
+                onClearChecked={handleClearChecked}
+              />
+              <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
+              <StoreManager
+                stores={state.stores}
+                onAdd={actions.addStore}
+                onUpdate={actions.updateStore}
+                onDelete={actions.deleteStore}
+                onReorder={actions.reorderStores}
+              />
+            </>
+          ) : (
+            <div className={styles.noList}>
+              <h2>Welcome to ShoppingListAI</h2>
+              <p>Create a new list to get started.</p>
+            </div>
+          )}
+        </section>
+      </>
+    );
+
+    const renderRecipesView = () => (
+      <>
+        <aside className={styles.sidebar}>
+          <RecipeSelector
+            recipes={recipeState.recipes}
+            sharedRecipes={recipeState.sharedRecipes}
+            onSelect={(recipeId) => {
+              recipeActions.selectRecipe(recipeId);
+              setDesktopRecipeFormId(null);
+            }}
+            onCreate={() => setDesktopRecipeFormId('create')}
+            onEdit={(recipeId) => {
+              recipeActions.selectRecipe(recipeId);
+              setDesktopRecipeFormId(recipeId);
+            }}
+            onDelete={recipeActions.deleteRecipe}
+            onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
+            onSaveTemplate={handleSaveTemplate}
+            onAddTemplateToList={handleAddTemplateToList}
+          />
+        </aside>
+
+        <section className={styles.content}>
+          {desktopRecipeFormId ? (
+            <RecipeForm
+              recipe={desktopRecipeFormId !== 'create' ? recipeState.activeRecipe : null}
+              onSave={handleDesktopRecipeSave}
+              onBack={() => setDesktopRecipeFormId(null)}
             />
-            <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
-            <StoreManager
-              stores={state.stores}
-              onAdd={actions.addStore}
-              onUpdate={actions.updateStore}
-              onDelete={actions.deleteStore}
-              onReorder={actions.reorderStores}
+          ) : recipeState.activeRecipe ? (
+            <MobileRecipeDetail
+              recipe={recipeState.activeRecipe}
+              isOwner={recipeState.activeRecipe.ownerId === user.id}
+              onBack={() => recipeActions.selectRecipe(null)}
+              onEdit={(recipeId) => {
+                recipeActions.selectRecipe(recipeId);
+                setDesktopRecipeFormId(recipeId);
+              }}
+              onDelete={(recipeId) => {
+                recipeActions.deleteRecipe(recipeId);
+              }}
+              onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
+              onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
             />
-          </>
-        ) : (
-          <div className={styles.noList}>
-            <h2>Welcome to ShoppingListAI</h2>
-            <p>Create a new list to get started.</p>
-          </div>
-        )}
-      </section>
-    </>
-  );
+          ) : (
+            <div className={styles.noList}>
+              <h2>Recipes</h2>
+              <p>Select a recipe or create a new one.</p>
+            </div>
+          )}
+        </section>
+      </>
+    );
+
+    return (
+      <div className={styles.desktopWrapper}>
+        <div className={styles.desktopTabs}>
+          <button
+            type="button"
+            className={`${styles.desktopTab} ${desktopView === 'lists' ? styles.desktopTabActive : ''}`}
+            onClick={() => setDesktopView('lists')}
+          >
+            Lists
+          </button>
+          <button
+            type="button"
+            className={`${styles.desktopTab} ${desktopView === 'recipes' ? styles.desktopTabActive : ''}`}
+            onClick={() => setDesktopView('recipes')}
+          >
+            Recipes
+          </button>
+        </div>
+        <div className={styles.desktopBody}>
+          {desktopView === 'lists' ? renderListsView() : renderRecipesView()}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.app}>

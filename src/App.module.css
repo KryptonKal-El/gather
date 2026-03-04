@@ -179,6 +179,48 @@
   margin-bottom: 0.5rem;
 }
 
+.desktopWrapper {
+  width: 100%;
+}
+
+.desktopTabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 240px;
+  margin-bottom: 0.75rem;
+}
+
+.desktopBody {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+}
+
+.desktopTab {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  background: var(--bg-card);
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.desktopTab:not(:last-child) {
+  border-right: 1px solid var(--border-default);
+}
+
+.desktopTabActive {
+  background: var(--primary);
+  color: white;
+}
+
 .mobileFullScreen {
   width: 100%;
   height: 100%;
