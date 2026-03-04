@@ -252,7 +252,9 @@
       "title": "Recipe-images storage bucket missing 5MB file size limit and MIME type restrictions",
       "description": "The recipe-images Supabase Storage bucket was created in the migration but is missing server-side enforcement of the 5MB max file size and the allowed MIME type restrictions (image/jpeg, image/png, image/webp). Without these, users can upload arbitrarily large files or non-image files to the bucket.",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-03-04",
+      "resolvedCommit": "2e1fc3c",
       "affectedComponents": [
         "supabase/migrations/20260304120000_create_recipes.sql"
       ],
@@ -282,7 +284,9 @@
       "title": "RecipeForm missing drag-to-reorder for ingredients and steps",
       "description": "The RecipeForm component allows adding and removing ingredients and steps, but users cannot drag to reorder them. The PRD (US-009) explicitly required drag-to-reorder for both ingredients and steps. The sort_order is determined by array position but the user has no way to change it.",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-03-04",
+      "resolvedCommit": "a1b70d6",
       "affectedComponents": [
         "src/components/RecipeForm.jsx",
         "src/components/RecipeForm.module.css"
