@@ -27,6 +27,7 @@ import { MobileSettings } from './components/MobileSettings.jsx';
 import { RecipeSelector } from './components/RecipeSelector.jsx';
 import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
+import { AddToListModal } from './components/AddToListModal.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
@@ -60,6 +61,7 @@ export const App = () => {
   } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
   const [showRecipeForm, setShowRecipeForm] = useState(null);
+  const [addToListIngredients, setAddToListIngredients] = useState(null);
 
   // Hide native splash screen after auth check completes
   useEffect(() => {
@@ -372,7 +374,7 @@ export const App = () => {
                     handleRecipeBackNav();
                   }}
                   onShareClick={() => {}}
-                  onAddToList={() => {}}
+                  onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
                 />
               </div>
             </section>
@@ -548,6 +550,15 @@ export const App = () => {
           />
         );
       })()}
+
+      {addToListIngredients && (
+        <AddToListModal
+          ingredients={addToListIngredients}
+          lists={state.lists}
+          onAddItems={(listId, items) => actions.addItems(listId, items)}
+          onClose={() => setAddToListIngredients(null)}
+        />
+      )}
 
       {isMobile && <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />}
 
