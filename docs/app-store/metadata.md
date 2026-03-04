@@ -49,10 +49,10 @@ Download Gather today and make grocery shopping smarter.
 4+ (No objectionable content)
 
 ## Support URL
-https://gather.vercel.app
+https://gatherapp.vercel.app
 
 ## Marketing URL
-https://gather.vercel.app
+https://gatherapp.vercel.app
 
 ## Copyright
 © 2026 Gather

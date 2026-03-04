@@ -80,7 +80,7 @@ We may update this privacy policy from time to time. We will notify you of any m
 ## Contact Us
 
 For privacy-related questions or data deletion requests:
-- Website: https://gather.vercel.app
+- Website: https://gatherapp.vercel.app
 - In-app: Settings > Support
 
 ---
