@@ -27,6 +27,18 @@
   gap: 0;
 }
 
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
 .ai {
   color: var(--primary);
   font-weight: 800;

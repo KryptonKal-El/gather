@@ -1,12 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="#4caf50"/>
-  <g transform="translate(256, 220)">
-    <!-- Cart body -->
-    <path d="M-120,-60 L-90,-60 L-50,40 L100,40 L120,-30 L-40,-30" fill="none" stroke="white" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-    <!-- Cart wheels -->
-    <circle cx="-30" cy="70" r="16" fill="white"/>
-    <circle cx="80" cy="70" r="16" fill="white"/>
-  </g>
-  <!-- AI text -->
-  <text x="256" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="100" font-weight="800" fill="white" opacity="0.9">AI</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B5E8C8"/>
+      <stop offset="100%" stop-color="#A8D8EA"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- List lines -->
+  <circle cx="160" cy="210" r="18" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="198" y="198" width="158" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="160" cy="260" r="18" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="198" y="248" width="120" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="160" cy="310" r="18" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="198" y="298" width="144" height="24" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <!-- Pink heart accent -->
+  <path d="M400,180 C400,180 378,164 378,150 C378,142 384,136 389,136 C394,136 397,140 400,144 C403,140 406,136 411,136 C416,136 422,142 422,150 C422,164 400,180 400,180 Z" fill="#F9A8C9" opacity="0.92"/>
 </svg>

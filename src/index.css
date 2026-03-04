@@ -16,7 +16,7 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* Surfaces */
-  --bg-page: #fafafa;
+  --bg-page: #FAFAF7;
   --bg-card: #ffffff;
   --bg-raised: #f9f9f9;
   --bg-hover: #f5f5f5;
@@ -42,17 +42,22 @@
   --border-dashed: #cccccc;
 
   /* Primary green */
-  --primary: #4caf50;
-  --primary-hover: #43a047;
-  --primary-dark: #388e3c;
-  --primary-deep: #2e7d32;
-  --primary-light: #66bb6a;
-  --primary-tint: #e8f5e9;
-  --primary-tint-hover: #c8e6c9;
-  --primary-surface: #f8fdf8;
-  --primary-surface-alt: #f1f8e9;
-  --primary-glow: rgba(76, 175, 80, 0.3);
-  --primary-glow-subtle: rgba(76, 175, 80, 0.15);
+  --primary: #3D7A63;
+  --primary-hover: #346B56;
+  --primary-dark: #2C5C4A;
+  --primary-deep: #24503F;
+  --primary-light: #5BA08A;
+  --primary-tint: #E8F5EE;
+  --primary-tint-hover: #C8E6D5;
+  --primary-surface: #F5FAF7;
+  --primary-surface-alt: #EDF5F0;
+  --primary-glow: rgba(61, 122, 99, 0.3);
+  --primary-glow-subtle: rgba(61, 122, 99, 0.15);
+
+  /* Accent pink */
+  --accent: #F9A8C9;
+  --accent-hover: #F48CB5;
+  --accent-tint: #FFF0F5;
 
   /* Danger red */
   --danger: #e53935;
@@ -85,9 +90,9 @@
   --badge-bg: #eeeeee;
   --cancel-bg: #e0e0e0;
   --cancel-hover: #d0d0d0;
-  --disabled-bg: #c8e6c9;
-  --login-gradient-start: #f5f7fa;
-  --login-gradient-end: #e4e9f0;
+  --disabled-bg: #C8E6D5;
+  --login-gradient-start: #F5FAF7;
+  --login-gradient-end: #E8F2EE;
   --thumbnail-border: #d0d0d0;
 
   /* Transition */
@@ -128,17 +133,22 @@
   --border-dashed: #484848;
 
   /* Primary green (stays vibrant, tints darken) */
-  --primary: #66bb6a;
-  --primary-hover: #4caf50;
-  --primary-dark: #43a047;
-  --primary-deep: #388e3c;
-  --primary-light: #81c784;
-  --primary-tint: #1b3a1c;
-  --primary-tint-hover: #254726;
-  --primary-surface: #162216;
-  --primary-surface-alt: #1a2e1a;
-  --primary-glow: rgba(102, 187, 106, 0.25);
-  --primary-glow-subtle: rgba(102, 187, 106, 0.12);
+  --primary: #5BA08A;
+  --primary-hover: #4E9079;
+  --primary-dark: #3D7A63;
+  --primary-deep: #346B56;
+  --primary-light: #85BFA8;
+  --primary-tint: #1B2E26;
+  --primary-tint-hover: #253D32;
+  --primary-surface: #162219;
+  --primary-surface-alt: #1A2E21;
+  --primary-glow: rgba(91, 160, 138, 0.25);
+  --primary-glow-subtle: rgba(91, 160, 138, 0.12);
+
+  /* Accent pink */
+  --accent: #F9A8C9;
+  --accent-hover: #F48CB5;
+  --accent-tint: #3D1C2A;
 
   /* Danger red */
   --danger: #ef5350;
@@ -171,9 +181,9 @@
   --badge-bg: #333333;
   --cancel-bg: #383838;
   --cancel-hover: #444444;
-  --disabled-bg: #254726;
-  --login-gradient-start: #1a1a2e;
-  --login-gradient-end: #16213e;
+  --disabled-bg: #253D32;
+  --login-gradient-start: #141E1A;
+  --login-gradient-end: #121C1F;
   --thumbnail-border: #484848;
 }
 

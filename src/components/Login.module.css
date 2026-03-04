@@ -21,7 +21,21 @@
   font-size: 2rem;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 0.25rem;
+  margin: 0;
+}
+
+.logoStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.logoIcon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 0.5rem;
 }
 
 .ai {
@@ -31,7 +45,7 @@
 .tagline {
   color: var(--text-placeholder);
   font-size: 0.9rem;
-  margin: 0 0 2rem;
+  margin: 0;
 }
 
 .buttons {
