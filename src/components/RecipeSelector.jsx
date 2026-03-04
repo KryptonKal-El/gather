@@ -25,12 +25,10 @@ export const RecipeSelector = ({
   onLeaveCollection,
   // Recipe props (existing — keep for US-007)
   recipes,
-  sharedRecipes = [],
   onSelect,
   onCreate,
   onEdit,
   onDelete,
-  onShareClick,
   onSaveTemplate,
   onAddTemplateToList,
   // US-007: Recipe list within collection
@@ -125,10 +123,6 @@ export const RecipeSelector = ({
   const filteredRecipes = query
     ? recipes.filter((r) => (r.name ?? '').toLowerCase().includes(query))
     : recipes;
-
-  const filteredSharedRecipes = query
-    ? sharedRecipes.filter((r) => (r.recipeName ?? '').toLowerCase().includes(query))
-    : sharedRecipes;
 
   // US-007: Active collection object for recipe list header
   const activeCollection = useMemo(() => {
@@ -330,16 +324,6 @@ export const RecipeSelector = ({
                 <span className={styles.menuIcon}>✏️</span>
                 Edit
               </button>
-              {onShareClick && (
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { onShareClick(recipe); setMenuOpenId(null); }}
-                >
-                  <span className={styles.menuIcon}>🔗</span>
-                  Share
-                </button>
-              )}
               <button
                 type="button"
                 className={`${styles.menuItem} ${styles.menuDanger}`}
@@ -368,15 +352,6 @@ export const RecipeSelector = ({
                 >
                   Edit
                 </button>
-                {onShareClick && (
-                  <button
-                    type="button"
-                    className={styles.actionSheetItem}
-                    onClick={() => { onShareClick(recipe); setMenuOpenId(null); }}
-                  >
-                    Share
-                  </button>
-                )}
                 <button
                   type="button"
                   className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
@@ -1419,12 +1394,10 @@ RecipeSelector.propTypes = {
   onLeaveCollection: PropTypes.func,
   // Recipe data (existing — keep for US-007)
   recipes: PropTypes.array.isRequired,
-  sharedRecipes: PropTypes.array,
   onSelect: PropTypes.func.isRequired,
   onCreate: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onShareClick: PropTypes.func,
   onSaveTemplate: PropTypes.func,
   onAddTemplateToList: PropTypes.func,
   // US-007: Recipe list within collection

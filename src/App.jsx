@@ -27,7 +27,6 @@ import { RecipeSelector } from './components/RecipeSelector.jsx';
 import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
-import { ShareRecipeModal } from './components/ShareRecipeModal.jsx';
 import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';

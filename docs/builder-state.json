@@ -4,8 +4,8 @@
   "activePrd": {
     "id": "prd-recipe-collections",
     "name": "Recipe Collections",
-    "currentStory": "US-012",
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011"],
+    "currentStory": "US-013",
+    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011", "US-012"],
     "storiesBlocked": [],
     "storiesSkipped": [],
     "totalStories": 15,
@@ -30,8 +30,8 @@
       {"content": "US-009: App.jsx — Desktop Layout Wiring", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-009"},
       {"content": "US-010: Mobile Navigation — Collection Drill-Down", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-010"},
       {"content": "US-011: MobileRecipeDetail — Collection Context", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-011"},
-      {"content": "US-012: Remove Per-Recipe Sharing Code", "status": "in_progress", "priority": "medium", "flow": "prd", "refId": "US-012"},
-      {"content": "US-013: Default Collection Auto-Creation on Sign-Up", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-013"},
+      {"content": "US-012: Remove Per-Recipe Sharing Code", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-012"},
+      {"content": "US-013: Default Collection Auto-Creation on Sign-Up", "status": "in_progress", "priority": "medium", "flow": "prd", "refId": "US-013"},
       {"content": "US-014: Collection Emoji Picker", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-014"},
       {"content": "US-015: Delete Collection Confirmation Dialog", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-015"}
     ]
