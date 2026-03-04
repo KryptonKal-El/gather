@@ -11,10 +11,14 @@ import { supabase } from './supabase.js';
 /**
  * Creates a new recipe with ingredients and steps. Returns the generated ID.
  * @param {string} userId - Owner's user ID
- * @param {object} recipe - Recipe data { name, description, ingredients, steps }
+ * @param {object} recipe - Recipe data { name, description, ingredients, steps, collectionId }
  * @returns {Promise<string>} The new recipe's ID
  */
 export const createRecipe = async (userId, recipe) => {
+  if (!recipe.collectionId) {
+    throw new Error('collectionId is required to create a recipe');
+  }
+
   try {
     const { data, error } = await supabase
       .from('recipes')
@@ -24,6 +28,7 @@ export const createRecipe = async (userId, recipe) => {
         description: recipe.description ?? null,
         ingredient_count: recipe.ingredients?.length ?? 0,
         step_count: recipe.steps?.length ?? 0,
+        collection_id: recipe.collectionId,
       })
       .select('id')
       .single();
@@ -599,5 +604,253 @@ export const getRecipeShares = async (recipeId) => {
     }));
   } catch (error) {
     throw new Error(`Failed to get recipe shares: recipeId=${recipeId}`, { cause: error });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// Collections - CRUD
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a new collection. Returns the generated ID.
+ * @param {string} userId - Owner's user ID
+ * @param {object} params - Collection data { name, emoji, description }
+ * @returns {Promise<string>} The new collection's ID
+ */
+export const createCollection = async (userId, { name, emoji, description }) => {
+  try {
+    const { data, error } = await supabase
+      .from('collections')
+      .insert({
+        owner_id: userId,
+        name,
+        emoji: emoji ?? null,
+        description: description ?? null,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+
+    return data.id;
+  } catch (error) {
+    throw new Error(`Failed to create collection: name=${name}`, { cause: error });
+  }
+};
+
+/**
+ * Updates fields on a collection.
+ * @param {string} collectionId - Collection ID to update
+ * @param {object} updates - Fields to update { name, emoji, description }
+ */
+export const updateCollection = async (collectionId, { name, emoji, description }) => {
+  try {
+    const mapped = {
+      updated_at: new Date().toISOString(),
+    };
+    if (name !== undefined) mapped.name = name;
+    if (emoji !== undefined) mapped.emoji = emoji;
+    if (description !== undefined) mapped.description = description;
+
+    const { error } = await supabase
+      .from('collections')
+      .update(mapped)
+      .eq('id', collectionId);
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to update collection: collectionId=${collectionId}`, { cause: error });
+  }
+};
+
+/**
+ * Deletes a collection. Prevents deleting the user's last collection.
+ * @param {string} userId - Owner's user ID
+ * @param {string} collectionId - Collection ID to delete
+ */
+export const deleteCollection = async (userId, collectionId) => {
+  try {
+    const { count, error: countError } = await supabase
+      .from('collections')
+      .select('*', { count: 'exact', head: true })
+      .eq('owner_id', userId);
+
+    if (countError) throw countError;
+
+    if (count <= 1) {
+      throw new Error('Cannot delete your last collection');
+    }
+
+    const { error } = await supabase
+      .from('collections')
+      .delete()
+      .eq('id', collectionId);
+
+    if (error) throw error;
+  } catch (error) {
+    if (error.message === 'Cannot delete your last collection') {
+      throw error;
+    }
+    throw new Error(`Failed to delete collection: collectionId=${collectionId}`, { cause: error });
+  }
+};
+
+/**
+ * Fetches all collections for a user.
+ * @param {string} userId - User ID
+ * @returns {Promise<Array<object>>} Array of collection objects
+ */
+export const getCollections = async (userId) => {
+  try {
+    const { data, error } = await supabase
+      .from('collections')
+      .select('*')
+      .eq('owner_id', userId)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    return data.map((row) => ({
+      id: row.id,
+      name: row.name,
+      emoji: row.emoji,
+      description: row.description,
+      isDefault: row.is_default,
+      sortOrder: row.sort_order,
+      ownerId: row.owner_id,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+  } catch (error) {
+    throw new Error(`Failed to get collections: userId=${userId}`, { cause: error });
+  }
+};
+
+/**
+ * Subscribes to all collections for a user.
+ * Performs initial fetch and subscribes to real-time changes.
+ * @param {string} userId - User ID
+ * @param {function} callback - Called with array of collection objects
+ * @returns {function} Unsubscribe function that removes the channel
+ */
+export const subscribeCollections = (userId, callback) => {
+  const fetchCollections = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('collections')
+        .select('*')
+        .eq('owner_id', userId)
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Failed to fetch collections:', error);
+        return;
+      }
+
+      callback(
+        data.map((row) => ({
+          id: row.id,
+          name: row.name,
+          emoji: row.emoji,
+          description: row.description,
+          isDefault: row.is_default,
+          sortOrder: row.sort_order,
+          ownerId: row.owner_id,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at,
+        }))
+      );
+    } catch (error) {
+      console.error('Failed to fetch collections:', error);
+    }
+  };
+
+  fetchCollections();
+
+  const channel = supabase
+    .channel(`collections-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'collections',
+        filter: `owner_id=eq.${userId}`,
+      },
+      () => {
+        fetchCollections();
+      }
+    )
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeCollections] Realtime subscription error:', err);
+      }
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+/**
+ * Ensures the user has a default collection, creating one if needed.
+ * @param {string} userId - User ID
+ * @returns {Promise<string>} The default collection's ID
+ */
+export const ensureDefaultCollection = async (userId) => {
+  try {
+    const { data, error: selectError } = await supabase
+      .from('collections')
+      .select('id')
+      .eq('owner_id', userId)
+      .eq('is_default', true)
+      .maybeSingle();
+
+    if (selectError) throw selectError;
+
+    if (data) {
+      return data.id;
+    }
+
+    const { data: newCollection, error: insertError } = await supabase
+      .from('collections')
+      .insert({
+        owner_id: userId,
+        name: 'My Recipes',
+        emoji: '📖',
+        is_default: true,
+        sort_order: 0,
+      })
+      .select('id')
+      .single();
+
+    if (insertError) throw insertError;
+
+    return newCollection.id;
+  } catch (error) {
+    throw new Error(`Failed to ensure default collection: userId=${userId}`, { cause: error });
+  }
+};
+
+/**
+ * Moves a recipe to a different collection.
+ * @param {string} recipeId - Recipe ID to move
+ * @param {string} collectionId - Target collection ID
+ */
+export const moveRecipeToCollection = async (recipeId, collectionId) => {
+  try {
+    const { error } = await supabase
+      .from('recipes')
+      .update({
+        collection_id: collectionId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', recipeId);
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to move recipe: recipeId=${recipeId}, collectionId=${collectionId}`, { cause: error });
   }
 };
