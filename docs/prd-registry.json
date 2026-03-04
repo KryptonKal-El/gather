@@ -165,15 +165,15 @@
     {
       "id": "prd-recipe-collections",
       "name": "Recipe Collections",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-recipe-collections.md",
       "jsonPath": "docs/prds/prd-recipe-collections.json",
       "branchName": "feature/recipe-collections",
       "createdAt": "2026-03-04",
-      "updatedAt": "2026-03-04",
+      "updatedAt": "2026-03-05",
       "startedAt": "2026-03-04T22:00:00Z",
-      "currentStory": "US-001",
-      "notes": "Large (L) — 15 stories across 5 phases. Collections grouping layer above recipes with collaborative sharing. Promoted from docs/tasks/promotions/recipe-collections.md."
+      "completedAt": "2026-03-05T01:00:00Z",
+      "notes": "All 15 stories complete. Collections grouping layer above recipes with collection-level sharing. DB schema + migration, service layer CRUD + sharing, RecipeContext state, UI for collection/recipe browsing, mobile drill-down, share modal, emoji picker, delete dialog. Per-recipe sharing removed."
     }
   ]
 }

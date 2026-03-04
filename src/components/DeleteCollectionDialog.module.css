@@ -1,0 +1,120 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--overlay-backdrop);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.dialog {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 32px var(--overlay-strong);
+  animation: scaleIn 0.15s ease;
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.safeBtn,
+.dangerBtn {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.safeBtn {
+  background: var(--primary);
+  color: white;
+}
+
+.safeBtn:hover {
+  opacity: 0.9;
+}
+
+.dangerBtn {
+  background: var(--danger);
+  color: white;
+}
+
+.dangerBtn:hover {
+  opacity: 0.9;
+}
+
+.message {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem;
+}
+
+.footer {
+  display: flex;
+  gap: 0.625rem;
+  justify-content: flex-end;
+}
+
+.cancelBtn,
+.deleteBtn {
+  padding: 0.55rem 1.15rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.cancelBtn {
+  background: var(--cancel-bg);
+  color: var(--text-primary);
+}
+
+.cancelBtn:hover {
+  background: var(--cancel-hover);
+}
+
+.deleteBtn {
+  background: var(--danger);
+  color: var(--bg-card);
+}
+
+.deleteBtn:hover {
+  background: var(--danger-hover);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}

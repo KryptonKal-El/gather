@@ -555,8 +555,10 @@
         "Lint passes"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T01:00:00Z",
+      "passes": true,
+      "notes": "DeleteCollectionDialog component with smart two-option dialog (move recipes vs delete all). Integrated into RecipeSelector replacing simple ConfirmDialog. Fixed filteredSharedRecipes lint error in legacy renderers.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

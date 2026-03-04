@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { DeleteCollectionDialog } from './DeleteCollectionDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { RECIPE_TEMPLATES } from '../services/recipes.js';
@@ -127,6 +128,9 @@ export const RecipeSelector = ({
     ? recipes.filter((r) => (r.name ?? '').toLowerCase().includes(query))
     : recipes;
 
+  // Per-recipe sharing removed (US-012) — empty array keeps legacy renderers safe
+  const filteredSharedRecipes = [];
+
   // US-007: Active collection object for recipe list header
   const activeCollection = useMemo(() => {
     if (!activeCollectionId) return null;
@@ -209,9 +213,15 @@ export const RecipeSelector = ({
     setMenuOpenId(null);
   }, []);
 
-  const handleConfirmDeleteCollection = useCallback(async () => {
+  const handleConfirmMoveAndDelete = useCallback(async () => {
     if (!confirmingDeleteId) return;
     await onDeleteCollection?.(confirmingDeleteId, { deleteRecipes: false });
+    setConfirmingDeleteId(null);
+  }, [confirmingDeleteId, onDeleteCollection]);
+
+  const handleConfirmDeleteAll = useCallback(async () => {
+    if (!confirmingDeleteId) return;
+    await onDeleteCollection?.(confirmingDeleteId, { deleteRecipes: true });
     setConfirmingDeleteId(null);
   }, [confirmingDeleteId, onDeleteCollection]);
 
@@ -1216,9 +1226,12 @@ export const RecipeSelector = ({
 
       {/* Delete collection confirmation */}
       {confirmingDeleteId && collections?.some((c) => c.id === confirmingDeleteId) && (
-        <ConfirmDialog
-          message={`Delete "${collections.find((c) => c.id === confirmingDeleteId)?.name}"? Recipes will be moved to your default collection.`}
-          onConfirm={handleConfirmDeleteCollection}
+        <DeleteCollectionDialog
+          collectionName={collections.find((c) => c.id === confirmingDeleteId)?.name ?? ''}
+          recipeCount={recipeCounts[confirmingDeleteId] ?? 0}
+          defaultCollectionName={collections.find((c) => c.isDefault)?.name ?? 'My Recipes'}
+          onMoveAndDelete={handleConfirmMoveAndDelete}
+          onDeleteAll={handleConfirmDeleteAll}
           onCancel={() => setConfirmingDeleteId(null)}
         />
       )}
@@ -1279,9 +1292,12 @@ export const RecipeSelector = ({
 
       {/* Delete collection confirmation */}
       {confirmingDeleteId && collections?.some((c) => c.id === confirmingDeleteId) && (
-        <ConfirmDialog
-          message={`Delete "${collections.find((c) => c.id === confirmingDeleteId)?.name}"? Recipes will be moved to your default collection.`}
-          onConfirm={handleConfirmDeleteCollection}
+        <DeleteCollectionDialog
+          collectionName={collections.find((c) => c.id === confirmingDeleteId)?.name ?? ''}
+          recipeCount={recipeCounts[confirmingDeleteId] ?? 0}
+          defaultCollectionName={collections.find((c) => c.isDefault)?.name ?? 'My Recipes'}
+          onMoveAndDelete={handleConfirmMoveAndDelete}
+          onDeleteAll={handleConfirmDeleteAll}
           onCancel={() => setConfirmingDeleteId(null)}
         />
       )}
