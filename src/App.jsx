@@ -28,6 +28,7 @@ import { RecipeSelector } from './components/RecipeSelector.jsx';
 import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
+import { ShareRecipeModal } from './components/ShareRecipeModal.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
@@ -42,6 +43,7 @@ export const App = () => {
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
   const [sharingListId, setSharingListId] = useState(null);
+  const [sharingRecipeId, setSharingRecipeId] = useState(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
   const [avatarUploadError, setAvatarUploadError] = useState(null);
   const avatarFileInputRef = useRef(null);
@@ -353,7 +355,7 @@ export const App = () => {
                   onCreate={() => setShowRecipeForm('create')}
                   onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
-                  onShareClick={() => {}}
+                  onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
                 />
               </div>
             </section>
@@ -373,7 +375,7 @@ export const App = () => {
                     recipeActions.deleteRecipe(recipeId);
                     handleRecipeBackNav();
                   }}
-                  onShareClick={() => {}}
+                  onShareClick={(recipe) => setSharingRecipeId(recipe.id)}
                   onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
                 />
               </div>
@@ -559,6 +561,21 @@ export const App = () => {
           onClose={() => setAddToListIngredients(null)}
         />
       )}
+
+      {sharingRecipeId && (() => {
+        const recipeToShare = recipeState.recipes.find((r) => r.id === sharingRecipeId);
+        if (!recipeToShare) return null;
+        return (
+          <ShareRecipeModal
+            recipe={recipeToShare}
+            ownerEmail={user.email}
+            onShare={recipeActions.shareRecipe}
+            onUnshare={recipeActions.unshareRecipe}
+            getShares={recipeActions.getShares}
+            onClose={() => setSharingRecipeId(null)}
+          />
+        );
+      })()}
 
       {isMobile && <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />}
 
