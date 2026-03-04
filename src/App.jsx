@@ -25,6 +25,7 @@ import { BottomTabBar } from './components/BottomTabBar.jsx';
 import { MobileListDetail } from './components/MobileListDetail.jsx';
 import { MobileSettings } from './components/MobileSettings.jsx';
 import { RecipeSelector } from './components/RecipeSelector.jsx';
+import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
@@ -50,6 +51,7 @@ export const App = () => {
     openRecipeId,
     transition,
     poppingListData,
+    poppingRecipeData,
     handleTabChange,
     handleOpenList,
     handleOpenRecipe,
@@ -335,6 +337,8 @@ export const App = () => {
         setShowRecipeForm(recipeId);
       };
 
+      const detailRecipe = recipeState.activeRecipe ?? poppingRecipeData;
+
       return (
         <div className={styles.slideContainer}>
           {showListScreen && (
@@ -352,19 +356,24 @@ export const App = () => {
               </div>
             </section>
           )}
-          {showDetailScreen && (
+          {showDetailScreen && detailRecipe && (
             <section className={getRecipeDetailScreenClass()}>
               <div className={styles.mobileFullScreen}>
-                <div style={{ padding: '1rem' }}>
-                  <button
-                    type="button"
-                    className={styles.backBtn}
-                    onClick={handleRecipeBackNav}
-                  >
-                    ‹ Back
-                  </button>
-                  <p>Recipe detail coming in US-010</p>
-                </div>
+                <MobileRecipeDetail
+                  recipe={detailRecipe}
+                  isOwner={detailRecipe.ownerId === user.id}
+                  onBack={handleRecipeBackNav}
+                  onEdit={(recipeId) => {
+                    recipeActions.selectRecipe(recipeId);
+                    setShowRecipeForm(recipeId);
+                  }}
+                  onDelete={(recipeId) => {
+                    recipeActions.deleteRecipe(recipeId);
+                    handleRecipeBackNav();
+                  }}
+                  onShareClick={() => {}}
+                  onAddToList={() => {}}
+                />
               </div>
             </section>
           )}
