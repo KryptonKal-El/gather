@@ -19,9 +19,9 @@
       "status": "completed",
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
-      "updatedAt": "2026-03-02",
-      "completedAt": "2026-03-02T14:00:00Z",
-      "notes": "BUG-001 through BUG-007 resolved. BUG-008 and BUG-009 open (recipe storage constraints + drag-to-reorder)."
+      "updatedAt": "2026-03-04",
+      "completedAt": "2026-03-04T18:00:00Z",
+      "notes": "All 9 bugs resolved (BUG-001–009). BUG-008: storage bucket constraints via migration. BUG-009: drag-to-reorder via @dnd-kit/sortable."
     },
     {
       "id": "prd-native-emoji-picker",
