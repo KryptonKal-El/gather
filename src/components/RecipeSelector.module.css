@@ -300,6 +300,96 @@
 }
 
 /* ============================================
+   COLLECTION LIST STYLES
+   ============================================ */
+
+/* Collection emoji */
+.collectionEmoji {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Recipe count badge */
+.collectionCount {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  margin-right: 0.25rem;
+}
+
+/* Inline new collection form */
+.inlineForm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.inlineInput {
+  flex: 1;
+  min-height: 36px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  color: var(--text-primary);
+}
+
+.inlineInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.inlineBtn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.inlineSaveBtn {
+  background: var(--primary);
+  color: white;
+}
+
+.inlineCancelBtn {
+  background: var(--cancel-bg, var(--bg-input));
+  color: var(--text-primary);
+}
+
+/* Inline rename input */
+.inlineRenameInput {
+  flex: 1;
+  min-height: 28px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background: var(--bg-input);
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  color: var(--text-primary);
+}
+
+.inlineRenameInput:focus {
+  outline: none;
+}
+
+/* Active collection highlight */
+.listItemActive {
+  background: var(--primary-tint);
+}
+
+/* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
 @media (max-width: 700px) {
@@ -474,6 +564,32 @@
     min-height: 44px;
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
+  }
+
+  /* Collection-specific mobile overrides */
+  .collectionEmoji {
+    width: 48px;
+    height: 48px;
+    font-size: 1.75rem;
+  }
+
+  .inlineForm {
+    padding: 0.75rem 1rem;
+  }
+
+  .inlineInput {
+    font-size: 16px; /* Prevent iOS zoom */
+    min-height: 44px;
+  }
+
+  .inlineBtn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .inlineRenameInput {
+    font-size: 16px; /* Prevent iOS zoom */
+    min-height: 36px;
   }
 }
 

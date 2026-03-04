@@ -301,6 +301,7 @@ export const RecipeProvider = ({ children }) => {
     sharedCollections,
     activeCollectionId,
     recipes,
+    allRecipes,
     activeRecipeId,
     activeRecipe,
   };
