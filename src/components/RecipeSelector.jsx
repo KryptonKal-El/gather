@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { RECIPE_TEMPLATES } from '../services/recipes.js';
 import styles from './RecipeSelector.module.css';
@@ -43,8 +44,10 @@ export const RecipeSelector = ({
   const [expandedTemplateId, setExpandedTemplateId] = useState(null);
   const [showNewCollectionForm, setShowNewCollectionForm] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
+  const [newCollectionEmoji, setNewCollectionEmoji] = useState('📁');
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+  const [renameEmoji, setRenameEmoji] = useState(null);
   const [confirmingLeaveId, setConfirmingLeaveId] = useState(null);
   // US-007: View mode state for collection mode
   const [viewMode, setViewMode] = useState('collections'); // 'collections' | 'recipes'
@@ -157,23 +160,25 @@ export const RecipeSelector = ({
 
   const handleCreateCollection = useCallback(async () => {
     if (!newCollectionName.trim()) return;
-    await onCreateCollection?.({ name: newCollectionName.trim(), emoji: '📁' });
+    await onCreateCollection?.({ name: newCollectionName.trim(), emoji: newCollectionEmoji || '📁' });
     setNewCollectionName('');
+    setNewCollectionEmoji('📁');
     setShowNewCollectionForm(false);
-  }, [newCollectionName, onCreateCollection]);
+  }, [newCollectionName, newCollectionEmoji, onCreateCollection]);
 
   const handleStartRename = useCallback((collection) => {
     setRenamingId(collection.id);
     setRenameValue(collection.name);
+    setRenameEmoji(collection.emoji ?? '📁');
     setMenuOpenId(null);
   }, []);
 
   const handleConfirmRename = useCallback(async () => {
     if (!renameValue.trim() || !renamingId) return;
-    await onUpdateCollection?.(renamingId, { name: renameValue.trim() });
+    await onUpdateCollection?.(renamingId, { name: renameValue.trim(), emoji: renameEmoji || '📁' });
     setRenamingId(null);
     setRenameValue('');
-  }, [renamingId, renameValue, onUpdateCollection]);
+  }, [renamingId, renameValue, renameEmoji, onUpdateCollection]);
 
   const handleCancelRename = useCallback(() => {
     setRenamingId(null);
@@ -717,7 +722,7 @@ export const RecipeSelector = ({
     if (!showNewCollectionForm) return null;
     return (
       <div className={styles.inlineForm}>
-        <span className={styles.collectionEmoji}>📁</span>
+        <EmojiPicker value={newCollectionEmoji} onSelect={setNewCollectionEmoji} />
         <input
           ref={newCollectionInputRef}
           type="text"
@@ -737,7 +742,7 @@ export const RecipeSelector = ({
         <button
           type="button"
           className={`${styles.inlineBtn} ${styles.inlineCancelBtn}`}
-          onClick={() => { setShowNewCollectionForm(false); setNewCollectionName(''); }}
+          onClick={() => { setShowNewCollectionForm(false); setNewCollectionName(''); setNewCollectionEmoji('📁'); }}
         >
           Cancel
         </button>
@@ -761,7 +766,11 @@ export const RecipeSelector = ({
           onClick={() => !isRenaming && handleCollectionClick(collection.id)}
           disabled={isRenaming}
         >
-          <span className={styles.collectionEmoji}>{collection.emoji ?? '📁'}</span>
+          {isRenaming ? (
+            <EmojiPicker value={renameEmoji} onSelect={setRenameEmoji} />
+          ) : (
+            <span className={styles.collectionEmoji}>{collection.emoji ?? '📁'}</span>
+          )}
           <span className={styles.listText}>
             {isRenaming ? (
               <input

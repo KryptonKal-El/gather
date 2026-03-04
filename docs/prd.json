@@ -518,8 +518,10 @@
         "Lint passes"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T01:05:00Z",
+      "passes": true,
+      "notes": "Integrated existing EmojiPicker component into RecipeSelector collection create and rename flows. Added newCollectionEmoji/renameEmoji state. Create form shows EmojiPicker (default 📁) instead of static emoji. Rename mode shows EmojiPicker pre-filled with collection's current emoji. Both handlers pass emoji to create/update callbacks. Same UX as ListSelector: native keyboard on mobile, grid picker on desktop.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
