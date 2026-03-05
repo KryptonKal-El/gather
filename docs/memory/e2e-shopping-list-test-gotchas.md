@@ -33,3 +33,27 @@ The ConfirmDialog component renders via `createPortal` to `document.body`, not i
 `getByRole('button', { name: LIST_NAME })` can match multiple buttons (the list button AND the options menu button).
 
 **Fix:** Use more specific locators that filter by expected structure.
+
+## Touch events need delays for React state updates
+
+When simulating swipe gestures via `TouchEvent` dispatch, React's async state updates require small delays (20-50ms) between touchstart/touchmove/touchend events.
+
+**Fix:** Use `page.waitForTimeout()` between touch event dispatches.
+
+## Autocomplete dropdown intercepts clicks
+
+When adding items, the autocomplete dropdown can intercept clicks on the "Add" button.
+
+**Fix:** Use `input.press('Enter')` instead of clicking the Add button.
+
+## Edit panel delete button doesn't work on mobile
+
+The Delete button inside the ShoppingItem edit panel doesn't respond to clicks on mobile. Native click events fire but React's onClick handler doesn't execute.
+
+**Fix:** Close the edit panel and use swipe-to-delete as a workaround. See `docs/memory/edit-panel-delete-button-mobile-bug.md` for details.
+
+## Mobile navigation resets on reload
+
+After `page.reload()`, the mobile app returns to "My Lists" view, not the detail view.
+
+**Fix:** Re-navigate into the list after reload when testing list-level state persistence.
