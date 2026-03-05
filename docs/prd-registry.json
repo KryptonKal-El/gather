@@ -188,6 +188,17 @@
       "startedAt": "2026-03-05T01:30:00Z",
       "completedAt": "2026-03-04T23:45:00Z",
       "notes": "All 14 stories complete. Undo stack hook + context, shake detection with iOS DeviceMotion permission, swipe-left gesture on shopping items with delete zone visual + exit animation + restore animation. Undo wired to delete item, clear checked, move recipe, unshare list. Edge gesture zone exclusion."
+    },
+    {
+      "id": "prd-ios-asset-rebrand",
+      "name": "iOS Asset Rebrand",
+      "status": "ready",
+      "filePath": "docs/prds/prd-ios-asset-rebrand.md",
+      "jsonPath": "docs/prds/prd-ios-asset-rebrand.json",
+      "branchName": "feature/ios-asset-rebrand",
+      "createdAt": "2026-03-05",
+      "updatedAt": "2026-03-05",
+      "notes": "3 stories: update icon generation script for Gather SVG, regenerate splash screens with Gather gradient, rebuild Xcode asset catalog. No credentials needed."
     }
   ]
 }
