@@ -380,9 +380,10 @@
         "Lint passes"
       ],
       "priority": 19,
-      "passes": false,
-      "status": "pending",
-      "notes": "Unblocked. Code change is redirectURI only. User must also update Apple Developer Portal Service ID return URLs and Supabase Dashboard Site URL to https://gatherapp.vercel.app.",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-05T12:05:00Z",
+      "notes": "clientId updated to com.gather.app, redirectURI updated to https://gatherapp.vercel.app. User must also update Apple Developer Portal Service ID return URLs and Supabase Dashboard Site URL.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
