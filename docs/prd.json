@@ -398,8 +398,10 @@
         "Lint passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T23:20:00Z",
+      "passes": true,
+      "notes": "Created handleUnshareList wrapper in App.jsx that pushes undo action with type 'unshare-list' before calling actions.unshareList. Restore callback calls actions.shareList to re-share. Replaced onUnshare prop on ShareListModal.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -192,6 +192,17 @@ export const App = () => {
     await recipeActions.moveRecipe(recipeId, targetCollectionId);
   };
 
+  const handleUnshareList = async (listId, email) => {
+    pushUndo({
+      type: 'unshare-list',
+      data: { listId, email },
+      restore: async () => {
+        await actions.shareList(listId, email);
+      },
+    });
+    await actions.unshareList(listId, email);
+  };
+
   const handleUpdateCategory = (itemId, newCategory) => {
     if (!activeList) return;
     actions.updateItem(activeList.id, itemId, { category: newCategory });
@@ -798,7 +809,7 @@ export const App = () => {
           <ShareListModal
             list={listToShare}
             onShare={actions.shareList}
-            onUnshare={actions.unshareList}
+            onUnshare={handleUnshareList}
             onClose={() => setSharingListId(null)}
           />
         );
