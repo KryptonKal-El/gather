@@ -93,8 +93,10 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T01:45:00Z",
+      "passes": true,
+      "notes": "useShakeDetection hook with DeviceMotionEvent API, iOS permission handling via requestMotionPermission helper, prefers-reduced-motion no-op, debounce",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
