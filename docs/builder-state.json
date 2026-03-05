@@ -4,8 +4,8 @@
   "activePrd": {
     "id": "prd-swipe-delete-shake-undo",
     "name": "Swipe-to-Delete + Shake-to-Undo",
-    "currentStory": "US-002",
-    "storiesCompleted": ["US-001"],
+    "currentStory": "US-003",
+    "storiesCompleted": ["US-001", "US-002"],
     "storiesBlocked": [],
     "storiesSkipped": [],
     "totalStories": 14,
@@ -20,8 +20,8 @@
     "lastSyncedAt": "2026-03-05T01:30:00Z",
     "items": [
       {"content": "US-001: Create useUndoStack hook", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Create UndoProvider context", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Create useShakeDetection hook", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-002: Create UndoProvider context", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Create useShakeDetection hook", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-003"},
       {"content": "US-004: Wire shake detection to UndoProvider", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
       {"content": "US-005: Add swipe gesture to ShoppingItem", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
       {"content": "US-006: Swipe delete zone visual design", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-006"},
