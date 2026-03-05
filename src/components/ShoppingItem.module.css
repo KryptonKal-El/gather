@@ -450,8 +450,51 @@
   transform: scale(1.2);
 }
 
+/* Exit animation: slide off-screen then collapse height */
+@keyframes slideOffLeft {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes collapseHeight {
+  from {
+    max-height: 200px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-bottom-width: 0;
+  }
+}
+
+.itemExiting .item {
+  animation: slideOffLeft 0.2s ease-out forwards;
+}
+
+.itemExiting {
+  animation: collapseHeight 0.15s ease 0.2s forwards;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .item {
     transition: opacity 0.1s !important;
+  }
+
+  .itemExiting .item {
+    animation: none;
+  }
+
+  .itemExiting {
+    animation: collapseHeight 0.1s ease forwards;
   }
 }

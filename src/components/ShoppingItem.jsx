@@ -29,6 +29,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   // Swipe gesture state
   const [swipeX, setSwipeX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
   const touchStartRef = useRef(null);
   const swipeDirectionRef = useRef(null);
 
@@ -213,23 +214,30 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
 
     const SWIPE_THRESHOLD = 80;
     if (Math.abs(swipeX) >= SWIPE_THRESHOLD) {
-      // Threshold met: trigger delete
-      if (prefersReducedMotion) {
-        // Instant delete for reduced motion
-        onRemove();
-      } else {
-        onRemove();
-      }
+      // Threshold met: trigger exit animation
+      setIsExiting(true);
+      setSwipeX(0);
+      setIsSwiping(false);
+    } else {
+      // Reset swipe state (snap-back if threshold not met)
+      setSwipeX(0);
+      setIsSwiping(false);
     }
-    // Reset swipe state (snap-back if threshold not met)
-    setSwipeX(0);
-    setIsSwiping(false);
     touchStartRef.current = null;
     swipeDirectionRef.current = null;
   };
 
+  const handleAnimationEnd = (e) => {
+    // Only fire on the collapseHeight animation ending on the wrapper
+    if (isExiting && e.target === e.currentTarget) {
+      onRemove();
+    }
+  };
+
   // Build inline style for swipe transform
   const getSwipeStyle = () => {
+    // CSS animation handles exit
+    if (isExiting) return undefined;
     if (prefersReducedMotion) {
       // No translate animation for reduced motion
       return undefined;
@@ -244,9 +252,12 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   };
 
   return (
-    <div className={styles.itemWrapper}>
+    <div
+      className={`${styles.itemWrapper} ${isExiting ? styles.itemExiting : ''}`}
+      onAnimationEnd={handleAnimationEnd}
+    >
       {/* Delete zone revealed behind item during swipe */}
-      {isMobile && (isSwiping || swipeX !== 0) && (
+      {isMobile && !isExiting && (isSwiping || swipeX !== 0) && (
         <div className={`${styles.deleteZone} ${Math.abs(swipeX) >= 80 ? styles.deleteZoneActive : ''}`}>
           <svg
             className={styles.deleteZoneIcon}
@@ -262,7 +273,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         </div>
       )}
       <div
-        className={`${styles.item} ${item.isChecked ? styles.checked : ''} ${isSwiping ? styles.itemSwiping : ''}`}
+        className={`${styles.item} ${item.isChecked ? styles.checked : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

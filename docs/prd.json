@@ -268,8 +268,10 @@
         "Verify in browser"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T22:25:00Z",
+      "passes": true,
+      "notes": "2-phase CSS animation: slideOffLeft (0.2s) then collapseHeight (0.15s with 0.2s delay). isExiting state defers onRemove until animation completes via onAnimationEnd. Reduced motion skips slide, 0.1s collapse only.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
