@@ -178,12 +178,14 @@
     {
       "id": "prd-swipe-delete-shake-undo",
       "name": "Swipe-to-Delete + Shake-to-Undo",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swipe-delete-shake-undo.md",
       "jsonPath": "docs/prds/prd-swipe-delete-shake-undo.json",
       "branchName": "feature/swipe-delete-shake-undo",
       "createdAt": "2026-03-04",
-      "updatedAt": "2026-03-04"
+      "updatedAt": "2026-03-05",
+      "startedAt": "2026-03-05T01:30:00Z",
+      "currentStory": "US-001"
     }
   ]
 }
