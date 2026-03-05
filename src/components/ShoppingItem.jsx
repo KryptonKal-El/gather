@@ -189,6 +189,9 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const handleTouchStart = (e) => {
     if (!isMobile || isEditOpen) return;
     const touch = e.touches[0];
+    // Ignore touches near screen edges (iOS back gesture, Android edge gestures)
+    const EDGE_THRESHOLD = 20;
+    if (touch.clientX <= EDGE_THRESHOLD || touch.clientX >= window.innerWidth - EDGE_THRESHOLD) return;
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     swipeDirectionRef.current = null;
   };

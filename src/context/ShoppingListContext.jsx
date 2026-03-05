@@ -323,6 +323,27 @@ export const ShoppingListProvider = ({ children }) => {
     return newId;
   }, [userId, getListOwnerUid]);
 
+  /**
+   * Restores multiple previously deleted items with their original data.
+   * Used by undo functionality to re-insert items after batch operations like clear-checked.
+   *
+   * @param {string} listId - The list to restore items into
+   * @param {Array<Object>} itemsData - Array of full item data objects
+   */
+  const restoreItemsAction = useCallback(async (listId, itemsData) => {
+    if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
+    await dbAddItems(ownerUid, listId, itemsData.map((itemData) => ({
+      name: itemData.name,
+      category: itemData.category ?? null,
+      isChecked: itemData.isChecked ?? false,
+      store: itemData.store ?? null,
+      quantity: itemData.quantity ?? 1,
+      price: itemData.price ?? null,
+      imageUrl: itemData.imageUrl ?? null,
+    })));
+  }, [userId, getListOwnerUid]);
+
   const addStoreAction = useCallback(async (name, color) => {
     if (!userId) return;
     await dbCreateStore(userId, {
@@ -394,6 +415,7 @@ export const ShoppingListProvider = ({ children }) => {
     updateItem: updateItemAction,
     clearChecked: clearCheckedAction,
     restoreItem: restoreItemAction,
+    restoreItems: restoreItemsAction,
     addStore: addStoreAction,
     updateStore: updateStoreAction,
     deleteStore: deleteStoreAction,

@@ -178,14 +178,15 @@
     {
       "id": "prd-swipe-delete-shake-undo",
       "name": "Swipe-to-Delete + Shake-to-Undo",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swipe-delete-shake-undo.md",
       "jsonPath": "docs/prds/prd-swipe-delete-shake-undo.json",
       "branchName": "feature/swipe-delete-shake-undo",
       "createdAt": "2026-03-04",
       "updatedAt": "2026-03-05",
       "startedAt": "2026-03-05T01:30:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-03-04T23:45:00Z",
+      "notes": "All 14 stories complete. Undo stack hook + context, shake detection with iOS DeviceMotion permission, swipe-left gesture on shopping items with delete zone visual + exit animation + restore animation. Undo wired to delete item, clear checked, move recipe, unshare list. Edge gesture zone exclusion."
     }
   ]
 }

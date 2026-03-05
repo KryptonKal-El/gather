@@ -465,8 +465,10 @@
         "Verify in browser"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-04T23:45:00Z",
+      "passes": true,
+      "notes": "Added 20px edge zone exclusion in handleTouchStart to prevent interference with iOS back-swipe and Android edge gestures. Direction lock, preventDefault gating, and edit panel disable were already implemented in US-005.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
