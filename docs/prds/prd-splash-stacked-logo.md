@@ -36,7 +36,7 @@ The stacked SVG uses the Nunito font via Google Fonts `@import`. Since `sharp` r
 - [ ] Splash screen generation reads `public/logo/stacked.svg` instead of extracting the icon-only inner content
 - [ ] The stacked logo (icon + "Gather" + tagline) is centered on the splash canvas at an appropriate size (~600-800px tall to accommodate the full stacked layout)
 - [ ] Text renders correctly — since `stacked.svg` uses `@import url(...)` for Nunito which won't work in sharp's SVG rasterizer, either: (a) download and embed the Nunito font as a base64 `@font-face` in the SVG before rasterizing, (b) use `@resvg/resvg-js` which has better font handling, or (c) replace the `@import` with a local font reference. Pick the simplest approach that produces correct output.
-- [ ] `assets/splash.png` (2732x2732) — light version: gradient background (`#B5E8C8` → `#A8D8EA`) with stacked logo centered, text in `#3D7A63`
+- [ ] `assets/splash.png` (2732x2732) — light version: white or near-white background (`#FFFFFF` or `#F8FAF9`) with stacked logo centered, text in `#3D7A63`. Do NOT use the brand gradient (`#B5E8C8` → `#A8D8EA`) as the background — it blends into the icon's own gradient and the logo doesn't stand out.
 - [ ] `assets/splash-dark.png` (2732x2732) — dark version: dark background with stacked logo centered, text should be light/white for contrast (not `#3D7A63` which won't be readable on dark)
 - [ ] Icon-only generation (PWA icons, Capacitor app icons) is NOT changed — only splash screens are affected
 - [ ] Run `npx capacitor-assets generate --ios` to rebuild Xcode splash assets
@@ -47,9 +47,11 @@ The stacked SVG uses the Nunito font via Google Fonts `@import`. Since `sharp` r
 ## Functional Requirements
 
 - FR-1: Splash screens must show the full stacked Gather logo (icon + name + tagline), not just the icon
-- FR-2: Text must render as actual text, not be missing or replaced by fallback font boxes
-- FR-3: Dark splash must have legible text (light text on dark background)
-- FR-4: App icons are not affected by this change
+- FR-2: Light splash must use a white or near-white background so the icon's gradient stands out clearly — not the brand gradient
+- FR-3: Text must render as actual text, not be missing or replaced by fallback font boxes
+- FR-4: Dark splash must have legible text (light text on dark background)
+- FR-5: App icons are not affected by this change
+- FR-6: `capacitor.config.ts` `SplashScreen.backgroundColor` should be updated to match the new light splash background (white/near-white)
 
 ## Non-Goals
 

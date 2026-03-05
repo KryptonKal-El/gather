@@ -12,7 +12,7 @@
         "Splash screen generation reads public/logo/stacked.svg instead of extracting the icon-only inner content",
         "The stacked logo (icon + Gather + tagline) is centered on the splash canvas at an appropriate size (~600-800px tall to accommodate the full stacked layout)",
         "Text renders correctly — since stacked.svg uses @import url(...) for Nunito which won't work in sharp's SVG rasterizer, either: (a) download and embed the Nunito font as a base64 @font-face in the SVG before rasterizing, (b) use @resvg/resvg-js which has better font handling, or (c) replace the @import with a local font reference. Pick the simplest approach that produces correct output.",
-        "assets/splash.png (2732x2732) — light version: gradient background (#B5E8C8 to #A8D8EA) with stacked logo centered, text in #3D7A63",
+        "assets/splash.png (2732x2732) — light version: white or near-white background (#FFFFFF or #F8FAF9) with stacked logo centered, text in #3D7A63. Do NOT use the brand gradient (#B5E8C8 to #A8D8EA) as the background — it blends into the icon's own gradient and the logo doesn't stand out.",
         "assets/splash-dark.png (2732x2732) — dark version: dark background with stacked logo centered, text should be light/white for contrast (not #3D7A63 which won't be readable on dark)",
         "Icon-only generation (PWA icons, Capacitor app icons) is NOT changed — only splash screens are affected",
         "Run npx capacitor-assets generate --ios to rebuild Xcode splash assets",
