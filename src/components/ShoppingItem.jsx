@@ -245,6 +245,22 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
 
   return (
     <div className={styles.itemWrapper}>
+      {/* Delete zone revealed behind item during swipe */}
+      {isMobile && (isSwiping || swipeX !== 0) && (
+        <div className={`${styles.deleteZone} ${Math.abs(swipeX) >= 80 ? styles.deleteZoneActive : ''}`}>
+          <svg
+            className={styles.deleteZoneIcon}
+            style={{ opacity: Math.min(1, Math.abs(swipeX) / 60) }}
+            width="20"
+            height="20"
+            viewBox="0 0 14 14"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M1.75 3.5h10.5M5.25 3.5V2.33c0-.46.37-.83.83-.83h1.84c.46 0 .83.37.83.83V3.5m1.5 0v8.17c0 .46-.37.83-.83.83H4.58a.83.83 0 0 1-.83-.83V3.5h8.5Z" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      )}
       <div
         className={`${styles.item} ${item.isChecked ? styles.checked : ''} ${isSwiping ? styles.itemSwiping : ''}`}
         onTouchStart={handleTouchStart}

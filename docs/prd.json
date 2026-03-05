@@ -201,8 +201,10 @@
         "Verify in browser"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T02:25:00Z",
+      "passes": true,
+      "notes": "Red delete zone (#E74C3C) behind item during swipe, white trash icon with opacity fade-in over 60px, darker red (#C0392B) + icon scale-up past 80px threshold, CSS modules",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

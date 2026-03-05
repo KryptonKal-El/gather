@@ -1,5 +1,7 @@
 .itemWrapper {
   border-bottom: 1px solid var(--border-subtle);
+  position: relative;
+  overflow: hidden;
 }
 
 .item {
@@ -11,6 +13,8 @@
   position: relative;
   will-change: transform;
   touch-action: pan-y;
+  background: var(--bg-card);
+  z-index: 1;
 }
 
 .item:hover {
@@ -415,6 +419,35 @@
 .itemSwiping {
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* Delete zone revealed during swipe */
+.deleteZone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: #E74C3C;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1.5rem;
+  z-index: 0;
+  border-radius: 0;
+}
+
+.deleteZoneActive {
+  background: #C0392B;
+}
+
+.deleteZoneIcon {
+  transition: transform 0.15s ease-out;
+  flex-shrink: 0;
+}
+
+.deleteZoneActive .deleteZoneIcon {
+  transform: scale(1.2);
 }
 
 @media (prefers-reduced-motion: reduce) {
