@@ -1,14 +1,14 @@
 {
-  "sessionId": "builder-2026-03-05-ios-asset-rebrand",
-  "lastHeartbeat": "2026-03-05T18:15:00Z",
+  "sessionId": "builder-2026-03-05-splash-stacked-logo",
+  "lastHeartbeat": "2026-03-05T18:35:00Z",
   "activePrd": {
-    "id": "prd-ios-asset-rebrand",
-    "name": "iOS Asset Rebrand",
+    "id": "prd-splash-stacked-logo",
+    "name": "Splash Screen Stacked Logo",
     "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003"],
+    "storiesCompleted": ["US-001"],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 3,
+    "totalStories": 1,
     "testingRigor": "standard",
     "status": "completed"
   },
@@ -17,11 +17,9 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-05T18:15:00Z",
+    "lastSyncedAt": "2026-03-05T18:35:00Z",
     "items": [
-      {"content": "US-001: Update icon generation script for Gather logo", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Update splash screen assets for Gather branding", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Regenerate Xcode asset catalog and verify", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"}
+      {"content": "US-001: Update splash generation to use stacked logo", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"}
     ]
   },
   "uncommittedWork": null,

@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchAutoHide: false,
-      backgroundColor: '#AEDFD9',
+      backgroundColor: '#FFFFFF',
     },
     StatusBar: {
       overlaysWebView: true,

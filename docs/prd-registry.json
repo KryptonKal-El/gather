@@ -206,13 +206,16 @@
     {
       "id": "prd-splash-stacked-logo",
       "name": "Splash Screen Stacked Logo",
-      "status": "ready",
+      "status": "completed",
+      "startedAt": "2026-03-05T18:30:00Z",
+      "completedAt": "2026-03-05T18:35:00Z",
+      "currentStory": null,
       "filePath": "docs/prds/prd-splash-stacked-logo.md",
       "jsonPath": "docs/prds/prd-splash-stacked-logo.json",
       "branchName": "feature/splash-stacked-logo",
       "createdAt": "2026-03-05",
       "updatedAt": "2026-03-05",
-      "notes": "1 story: update splash generation to use stacked.svg (icon + name + tagline) instead of icon-only.svg. Font rendering is the main challenge (Nunito via @import won't work in sharp)."
+      "notes": "1 story complete. Splash screens now show stacked Gather logo (icon + name + tagline) with embedded Nunito fonts. Light splash: white bg. Dark splash: #1a1a2e with white text. Xcode assets rebuilt."
     }
   ]
 }
