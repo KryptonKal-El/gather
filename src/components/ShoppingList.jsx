@@ -19,6 +19,8 @@ const CategoryGroup = ({
   onUpdateCategory,
   onUpdateStore,
   onUpdateItem,
+  restoredItemIds,
+  onRestoreAnimationDone,
 }) => {
   const orderSet = new Set(categoryOrder);
   const uncategorized = Object.keys(grouped)
@@ -45,6 +47,8 @@ const CategoryGroup = ({
                 key={item.id}
                 item={item}
                 stores={stores}
+                isRestored={restoredItemIds?.has(item.id)}
+                onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
                 onToggle={() => onToggle(item.id)}
                 onRemove={() => onRemove(item.id)}
                 onUpdateCategory={onUpdateCategory}
@@ -70,6 +74,8 @@ const CategoryGroup = ({
               key={item.id}
               item={item}
               stores={stores}
+              isRestored={restoredItemIds?.has(item.id)}
+              onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
               onToggle={() => onToggle(item.id)}
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
@@ -131,6 +137,8 @@ export const ShoppingList = ({
   onUpdateStore,
   onUpdateItem,
   onClearChecked,
+  restoredItemIds,
+  onRestoreAnimationDone,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
 
@@ -181,6 +189,8 @@ export const ShoppingList = ({
     onUpdateCategory,
     onUpdateStore,
     onUpdateItem,
+    restoredItemIds,
+    onRestoreAnimationDone,
   };
 
   return (
@@ -220,6 +230,8 @@ export const ShoppingList = ({
                 onUpdateCategory={onUpdateCategory}
                 onUpdateStore={onUpdateStore}
                 onUpdateItem={onUpdateItem}
+                restoredItemIds={restoredItemIds}
+                onRestoreAnimationDone={onRestoreAnimationDone}
               />
             </div>
           </div>
@@ -269,6 +281,8 @@ export const ShoppingList = ({
               key={item.id}
               item={item}
               stores={stores}
+              isRestored={restoredItemIds?.has(item.id)}
+              onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
               onToggle={() => onToggle(item.id)}
               onRemove={() => onRemove(item.id)}
               onUpdateCategory={onUpdateCategory}
@@ -291,8 +305,12 @@ ShoppingList.propTypes = {
   onUpdateStore: PropTypes.func.isRequired,
   onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
+  restoredItemIds: PropTypes.instanceOf(Set),
+  onRestoreAnimationDone: PropTypes.func,
 };
 
 ShoppingList.defaultProps = {
   stores: [],
+  restoredItemIds: null,
+  onRestoreAnimationDone: null,
 };

@@ -23,6 +23,8 @@ export const MobileListDetail = ({
   onUpdateItem,
   onClearChecked,
   onShareClick,
+  restoredItemIds,
+  onRestoreAnimationDone,
 }) => {
   return (
     <div className={styles.container}>
@@ -89,6 +91,8 @@ export const MobileListDetail = ({
           onUpdateStore={onUpdateStore}
           onUpdateItem={onUpdateItem}
           onClearChecked={onClearChecked}
+          restoredItemIds={restoredItemIds}
+          onRestoreAnimationDone={onRestoreAnimationDone}
         />
         <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />
       </div>
@@ -106,7 +110,7 @@ MobileListDetail.propTypes = {
   stores: PropTypes.array.isRequired,
   history: PropTypes.array.isRequired,
   suggestions: PropTypes.array.isRequired,
-  isGuest: PropTypes.bool.isRequired,
+  isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
@@ -116,4 +120,12 @@ MobileListDetail.propTypes = {
   onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
   onShareClick: PropTypes.func.isRequired,
+  restoredItemIds: PropTypes.instanceOf(Set),
+  onRestoreAnimationDone: PropTypes.func,
+};
+
+MobileListDetail.defaultProps = {
+  isGuest: false,
+  restoredItemIds: null,
+  onRestoreAnimationDone: null,
 };

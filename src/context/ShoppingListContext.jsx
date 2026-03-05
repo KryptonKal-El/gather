@@ -306,11 +306,12 @@ export const ShoppingListProvider = ({ children }) => {
    *
    * @param {string} listId - The list to restore the item into
    * @param {Object} itemData - Full item data (name, category, isChecked, store, quantity, price, imageUrl)
+   * @returns {Promise<string|null>} The new item ID, or null if restore failed
    */
   const restoreItemAction = useCallback(async (listId, itemData) => {
-    if (!userId) return;
+    if (!userId) return null;
     const ownerUid = getListOwnerUid(listId);
-    await dbAddItem(ownerUid, listId, {
+    const newId = await dbAddItem(ownerUid, listId, {
       name: itemData.name,
       category: itemData.category ?? null,
       isChecked: itemData.isChecked ?? false,
@@ -319,6 +320,7 @@ export const ShoppingListProvider = ({ children }) => {
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
     });
+    return newId;
   }, [userId, getListOwnerUid]);
 
   const addStoreAction = useCallback(async (name, color) => {

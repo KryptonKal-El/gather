@@ -12,7 +12,7 @@ import styles from './ShoppingItem.module.css';
  * and a pencil icon to toggle the edit panel. The edit panel contains qty
  * stepper, price input, store/category pickers, and delete button.
  */
-export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
   const { user } = useAuth();
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
@@ -33,6 +33,9 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const touchStartRef = useRef(null);
   const swipeDirectionRef = useRef(null);
 
+  // Restore animation state
+  const [showRestoreAnimation, setShowRestoreAnimation] = useState(isRestored ?? false);
+
   // Mobile detection (coarse pointer = touch device)
   const [isMobile] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -44,6 +47,16 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
+
+  // Clear restore animation after it plays
+  useEffect(() => {
+    if (!showRestoreAnimation) return;
+    const timer = setTimeout(() => {
+      setShowRestoreAnimation(false);
+      onRestoreAnimationDone?.();
+    }, 1200); // 0.2s expand + 1s green fade
+    return () => clearTimeout(timer);
+  }, [showRestoreAnimation, onRestoreAnimationDone]);
 
   const storeMap = {};
   for (const s of stores) {
@@ -253,7 +266,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
 
   return (
     <div
-      className={`${styles.itemWrapper} ${isExiting ? styles.itemExiting : ''}`}
+      className={`${styles.itemWrapper} ${isExiting ? styles.itemExiting : ''} ${showRestoreAnimation ? styles.itemRestored : ''}`}
       onAnimationEnd={handleAnimationEnd}
     >
       {/* Delete zone revealed behind item during swipe */}
@@ -515,8 +528,12 @@ ShoppingItem.propTypes = {
   onUpdateCategory: PropTypes.func.isRequired,
   onUpdateStore: PropTypes.func.isRequired,
   onUpdateItem: PropTypes.func.isRequired,
+  isRestored: PropTypes.bool,
+  onRestoreAnimationDone: PropTypes.func,
 };
 
 ShoppingItem.defaultProps = {
   stores: [],
+  isRestored: false,
+  onRestoreAnimationDone: null,
 };

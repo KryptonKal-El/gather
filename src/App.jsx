@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
@@ -70,6 +70,7 @@ export const App = () => {
   const [addToListIngredients, setAddToListIngredients] = useState(null);
   const [desktopView, setDesktopView] = useState('lists');
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
+  const [restoredItemIds, setRestoredItemIds] = useState(new Set());
 
   // Hide native splash screen after auth check completes
   useEffect(() => {
@@ -133,12 +134,23 @@ export const App = () => {
         type: 'delete-item',
         data: { listId, item: snapshot },
         restore: async () => {
-          await actions.restoreItem(listId, snapshot);
+          const newId = await actions.restoreItem(listId, snapshot);
+          if (newId) {
+            setRestoredItemIds((prev) => new Set(prev).add(newId));
+          }
         },
       });
     }
     actions.removeItem(activeList.id, itemId);
   };
+
+  const handleRestoreAnimationDone = useCallback((itemId) => {
+    setRestoredItemIds((prev) => {
+      const next = new Set(prev);
+      next.delete(itemId);
+      return next;
+    });
+  }, []);
 
   const handleClearChecked = () => {
     if (!activeList) return;
@@ -309,6 +321,8 @@ export const App = () => {
                 onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
                 onShareClick={(list) => setSharingListId(list.id)}
+                restoredItemIds={restoredItemIds}
+                onRestoreAnimationDone={handleRestoreAnimationDone}
               />
             </section>
           )}
@@ -556,6 +570,8 @@ export const App = () => {
                 onUpdateStore={handleUpdateStore}
                 onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
+                restoredItemIds={restoredItemIds}
+                onRestoreAnimationDone={handleRestoreAnimationDone}
               />
               <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
               <StoreManager
