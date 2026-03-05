@@ -152,15 +152,15 @@
     {
       "id": "prd-rebrand",
       "name": "Rebrand ShoppingListAI to Gather",
-      "status": "blocked",
+      "status": "ready",
       "startedAt": "2026-03-04T19:00:00Z",
-      "currentStory": null,
+      "currentStory": "US-018",
       "filePath": "docs/prds/prd-rebrand.md",
       "jsonPath": "docs/prds/prd-rebrand.json",
       "branchName": "feature/rebrand-gather",
       "createdAt": "2026-03-04",
-      "updatedAt": "2026-03-04",
-      "notes": "17/22 stories complete (US-001–017). US-018–021 BLOCKED on custom domain purchase. US-022 SKIPPED (optional component rename). Zero 'ShoppingListAI' references remain in codebase. Will move to completed when domain stories are unblocked and done."
+      "updatedAt": "2026-03-05",
+      "notes": "17/22 stories complete (US-001–017). US-021 already complete. US-022 skipped. Phase 3 UNBLOCKED: US-018 (CORS), US-019 (Apple Sign-In redirectURI), US-020 (Universal Links) now target gatherapp.vercel.app instead of custom domain. Ready for Builder."
     },
     {
       "id": "prd-recipe-collections",

@@ -10,15 +10,13 @@ Full rebrand of ShoppingListAI to **Gather**. Every user-facing and machine-read
 
 **Tagline:** "Gather your lists, meals, and more."
 
-### What's Blocked
+### Previously Blocked — Now Resolved
 
-Three aspects of this rebrand require assets/decisions the user will provide separately:
+Three aspects of this rebrand were previously blocked:
 
-1. **Logo** — New logo image file (will replace current logo in Login, App header, PWA icons, favicon, apple-touch-icon)
-2. **Brand colors** — New color palette (will update CSS custom properties / design tokens)
-3. **Custom domain** — New domain (e.g., `getgather.app`) replacing `shoppinglistai.vercel.app` (affects CORS origins, Apple Sign-In config, Universal Links, privacy policy URLs, entitlements)
-
-Stories that depend on these are marked with `⏳ BLOCKED` and can be implemented once assets arrive.
+1. ~~**Logo**~~ — ✅ Resolved. Original designer SVGs in `public/logo/`. Implemented in US-016.
+2. ~~**Brand colors**~~ — ✅ Resolved. Gather palette applied. Implemented in US-017.
+3. ~~**Custom domain**~~ — ✅ Resolved. Using `gatherapp.vercel.app` as the production domain (no custom domain purchase needed). US-018–020 are now unblocked. US-021 already references the correct domain.
 
 ---
 
@@ -250,56 +248,59 @@ Apply the new brand color palette provided by the user. Update primary, secondar
 
 ---
 
-### Phase 3: Blocked on Custom Domain ⏳
+### Phase 3: Domain Migration (Previously Blocked — Now Unblocked)
 
-#### US-018: Update CORS Origins in Edge Functions ⏳ BLOCKED on domain
+Target domain: `gatherapp.vercel.app`
+
+#### US-018: Update CORS Origins in Edge Functions
 **Priority:** High
 **Files:** `supabase/functions/search-products/index.ts`, `supabase/functions/search-images/index.ts`
 
-Replace `shoppinglistai.vercel.app` CORS origin with the new custom domain in all edge functions.
+Replace `shoppinglistai.vercel.app` CORS origin with `gatherapp.vercel.app` in all edge functions.
 
 **Acceptance Criteria:**
-- Both edge functions accept requests from the new domain
-- Old domain removed from CORS allowlist (or kept temporarily for migration)
+- Both edge functions accept requests from `https://gatherapp.vercel.app`
+- Old `shoppinglistai.vercel.app` origin removed from CORS allowlist
 - Edge functions deploy successfully with `supabase functions deploy`
+- Lint passes
 
 ---
 
-#### US-019: Update Apple Sign-In Config ⏳ BLOCKED on domain
+#### US-019: Update Apple Sign-In Config
 **Priority:** High
 **Files:** `src/context/AuthContext.jsx`
 
-Update the Apple Sign-In `clientId` and `redirectURI` (lines ~107-108) to use the new bundle ID and domain.
+Update the Apple Sign-In `redirectURI` (line ~108) from `https://shoppinglistai.vercel.app` to `https://gatherapp.vercel.app`.
+
+**Note:** The user must also update the Apple Developer Portal → Services IDs → Sign In with Apple → Website URLs to add `gatherapp.vercel.app` as an allowed return URL, and update Supabase Dashboard → Authentication → URL Configuration → Site URL.
 
 **Acceptance Criteria:**
-- Apple Sign-In clientId matches new bundle ID
-- redirectURI points to new domain
-- Apple Sign-In flow works end-to-end (requires Apple Developer portal updates too)
+- `redirectURI` points to `https://gatherapp.vercel.app`
+- Apple Sign-In flow works end-to-end (requires Apple Developer portal + Supabase dashboard updates by the user)
+- Lint passes
 
 ---
 
-#### US-020: Update Universal Links & Entitlements ⏳ BLOCKED on domain
+#### US-020: Update Universal Links & Entitlements
 **Priority:** High
 **Files:** `public/.well-known/apple-app-site-association`, `ios/App/App/App.entitlements`
 
-Update the apple-app-site-association file with the new bundle ID (lines ~6, 12). Update App.entitlements associated domains (line ~11) to the new domain.
+Update App.entitlements associated domains (line ~11) from `applinks:shoppinglistai.vercel.app` to `applinks:gatherapp.vercel.app`.
 
 **Acceptance Criteria:**
-- AASA file contains new bundle ID and correct paths
-- Entitlements reference new domain for associated domains
-- Universal Links verification passes on the new domain
+- Entitlements reference `gatherapp.vercel.app` for associated domains
+- AASA file contains correct bundle ID (`com.gather.app`) and paths
+- Universal Links verification passes on `gatherapp.vercel.app`
 
 ---
 
-#### US-021: Update Privacy Policy URLs ⏳ BLOCKED on domain
+#### US-021: Update Privacy Policy URLs ✅ ALREADY COMPLETE
 **Priority:** Medium
 **Files:** `public/privacy.html`
 
-Update any URLs in the privacy policy that reference `shoppinglistai.vercel.app` to the new custom domain.
+Privacy policy already references `gatherapp.vercel.app`. No code change needed.
 
-**Acceptance Criteria:**
-- All URLs in privacy policy point to new domain
-- No broken links
+**Status:** Complete — no action required.
 
 ---
 
@@ -327,7 +328,9 @@ Consider renaming internal React component/context/hook names from `ShoppingList
 | Apple Developer Portal | Developer account access | US-007, US-008, US-009, US-019, US-020 | After initial build | Local build works; App Store submission blocked |
 | Vercel | Project settings access | US-018 (domain), US-021 | After initial build | Dev/preview deploys work on existing domain |
 | Supabase Dashboard | Project admin | US-018 (edge function deploy) | After initial build | Local edge function testing works |
-| Custom Domain Registrar | Domain DNS access | US-018, US-019, US-020, US-021 | After initial build | All non-domain stories can proceed |
+| Custom Domain Registrar | Domain DNS access | ~~US-018, US-019, US-020, US-021~~ | ~~After initial build~~ | ~~All non-domain stories can proceed~~ |
+
+> **Note:** Custom domain purchase is no longer required. Using `gatherapp.vercel.app` as the production domain.
 
 No new API keys or secrets are required. The rebrand uses existing service accounts — only configuration values change.
 
@@ -382,15 +385,16 @@ Implementation is complete when:
 12. **`npx cap sync` succeeds** with updated Capacitor config
 13. **(When logo provided)** All icon sizes generated and rendering correctly
 14. **(When colors provided)** New color palette applied with WCAG AA contrast compliance
-15. **(When domain provided)** CORS origins, Apple Sign-In, Universal Links, and privacy URLs all point to new domain
+15. **(When domain provided)** CORS origins, Apple Sign-In, Universal Links, and privacy URLs all point to `gatherapp.vercel.app`
 
 ---
 
 ## Implementation Notes for Builder
 
-- **Phase 1 (US-001 through US-015) can start immediately** — no external blockers
-- **Phase 2 (US-016, US-017)** requires logo file and color palette from the user
-- **Phase 3 (US-018 through US-021)** requires the custom domain to be purchased and DNS configured
+- **Phase 1 (US-001 through US-015)** — ✅ Complete
+- **Phase 2 (US-016, US-017)** — ✅ Complete
+- **Phase 3 (US-018 through US-021)** — Unblocked. Target domain: `gatherapp.vercel.app`. US-021 already done. Builder should implement US-018, US-019, US-020.
+  - **Manual steps required (user):** Update Apple Developer Portal Service ID return URLs and Supabase Dashboard Site URL to `https://gatherapp.vercel.app`
 - **US-022 is optional** and recommended to skip — "ShoppingList" as a React component name is descriptive, not branding
 - When changing the Capacitor bundle ID (US-007), this creates a **new app identity** — the old `com.shoppinglistai` app and the new `com.gather.app` will be treated as different apps by iOS. Dorian should confirm the new bundle ID before implementation.
 - Perform a global search for `ShoppingListAI`, `shoppinglistai`, `shopping-list-ai`, and `Shopping List AI` (case-insensitive) after all changes to verify nothing was missed.

@@ -1,7 +1,7 @@
 {
   "project": "Gather",
   "branchName": "feature/rebrand-gather",
-  "description": "Full rebrand from ShoppingListAI to Gather — name, tagline, metadata, iOS config, legal, docs. Phase 1 (US-001–015) and Phase 2 (US-016–017) complete. Phase 3 (US-018–021) blocked on custom domain. Phase 4 (US-022) skipped.",
+  "description": "Full rebrand from ShoppingListAI to Gather — name, tagline, metadata, iOS config, legal, docs. Phase 1 (US-001–015) and Phase 2 (US-016–017) complete. Phase 3 (US-018–021) unblocked — using gatherapp.vercel.app as production domain. Phase 4 (US-022) skipped.",
   "credentialRequirements": [
     {
       "service": "Apple Developer Portal",
@@ -17,7 +17,7 @@
       "requestTiming": "after-initial-build",
       "requiredForStories": ["US-018", "US-019", "US-020", "US-021"],
       "fallbackPlan": "All Phase 1 and Phase 2 stories proceed without domain; domain stories deferred",
-      "status": "pending"
+      "status": "resolved-not-needed"
     }
   ],
   "userStories": [
@@ -342,16 +342,17 @@
     {
       "id": "US-018",
       "title": "Update CORS Origins in Edge Functions",
-      "description": "Replace 'shoppinglistai.vercel.app' CORS origin with new custom domain in supabase/functions/search-products/index.ts and supabase/functions/search-images/index.ts.",
+      "description": "Replace 'shoppinglistai.vercel.app' CORS origin with 'gatherapp.vercel.app' in supabase/functions/search-products/index.ts and supabase/functions/search-images/index.ts.",
       "acceptanceCriteria": [
-        "Both edge functions accept requests from the new domain",
-        "Old domain removed from CORS allowlist (or kept temporarily for migration period)",
-        "Edge functions deploy successfully with supabase functions deploy"
+        "Both edge functions accept requests from https://gatherapp.vercel.app",
+        "Old shoppinglistai.vercel.app origin removed from CORS allowlist",
+        "Edge functions deploy successfully with supabase functions deploy",
+        "Lint passes"
       ],
       "priority": 18,
       "passes": false,
-      "status": "blocked",
-      "notes": "BLOCKED — requires custom domain purchase and DNS configuration. Edge functions still reference shoppinglistai.vercel.app.",
+      "status": "pending",
+      "notes": "Unblocked — using gatherapp.vercel.app as production domain. No custom domain purchase needed.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -364,23 +365,23 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": ["Custom Domain Registrar"],
+      "requiredCredentials": [],
       "testIntensity": "high",
       "testIntensityReason": "Functional — breaks API calls if CORS origin is wrong"
     },
     {
       "id": "US-019",
       "title": "Update Apple Sign-In Config",
-      "description": "Update Apple Sign-In clientId and redirectURI in src/context/AuthContext.jsx to use new bundle ID 'com.gather.app' and new domain.",
+      "description": "Update Apple Sign-In redirectURI in src/context/AuthContext.jsx from 'https://shoppinglistai.vercel.app' to 'https://gatherapp.vercel.app'.",
       "acceptanceCriteria": [
-        "Apple Sign-In clientId matches 'com.gather.app'",
-        "redirectURI points to new domain",
-        "Apple Sign-In flow works end-to-end (requires Apple Developer portal updates too)"
+        "redirectURI points to https://gatherapp.vercel.app",
+        "Apple Sign-In flow works end-to-end (requires Apple Developer portal + Supabase dashboard updates by the user)",
+        "Lint passes"
       ],
       "priority": 19,
       "passes": false,
-      "status": "blocked",
-      "notes": "BLOCKED — requires custom domain + Apple Developer portal Service ID update.",
+      "status": "pending",
+      "notes": "Unblocked. Code change is redirectURI only. User must also update Apple Developer Portal Service ID return URLs and Supabase Dashboard Site URL to https://gatherapp.vercel.app.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -393,23 +394,23 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": ["Apple Developer Portal", "Custom Domain Registrar"],
+      "requiredCredentials": ["Apple Developer Portal"],
       "testIntensity": "high",
       "testIntensityReason": "Functional — breaks authentication if wrong"
     },
     {
       "id": "US-020",
       "title": "Update Universal Links & Entitlements",
-      "description": "Update apple-app-site-association in public/.well-known/ with new bundle ID. Update App.entitlements associated domains to new domain.",
+      "description": "Update App.entitlements associated domains from 'applinks:shoppinglistai.vercel.app' to 'applinks:gatherapp.vercel.app'. Verify AASA file contains correct bundle ID.",
       "acceptanceCriteria": [
-        "AASA file contains new bundle ID 'com.gather.app' and correct paths",
-        "Entitlements reference new domain for associated domains",
-        "Universal Links verification passes on the new domain"
+        "Entitlements reference gatherapp.vercel.app for associated domains",
+        "AASA file contains bundle ID com.gather.app and correct paths",
+        "Universal Links verification passes on gatherapp.vercel.app"
       ],
       "priority": 20,
       "passes": false,
-      "status": "blocked",
-      "notes": "BLOCKED — requires custom domain for associated domains and AASA.",
+      "status": "pending",
+      "notes": "Unblocked — using gatherapp.vercel.app as production domain.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -422,22 +423,22 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": ["Apple Developer Portal", "Custom Domain Registrar"],
+      "requiredCredentials": ["Apple Developer Portal"],
       "testIntensity": "high",
       "testIntensityReason": "Functional — breaks deep linking if wrong"
     },
     {
       "id": "US-021",
       "title": "Update Privacy Policy URLs",
-      "description": "Update any URLs in public/privacy.html that reference 'shoppinglistai.vercel.app' to the new custom domain.",
+      "description": "Update any URLs in public/privacy.html that reference 'shoppinglistai.vercel.app' to gatherapp.vercel.app.",
       "acceptanceCriteria": [
-        "All URLs in privacy policy point to new domain",
+        "All URLs in privacy policy point to gatherapp.vercel.app",
         "No broken links"
       ],
       "priority": 21,
-      "passes": false,
-      "status": "blocked",
-      "notes": "BLOCKED — requires custom domain to update privacy policy URLs.",
+      "passes": true,
+      "status": "completed",
+      "notes": "Already complete — privacy.html and privacy-policy.md already reference gatherapp.vercel.app.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -450,7 +451,7 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": ["Custom Domain Registrar"],
+      "requiredCredentials": [],
       "testIntensity": "low",
       "testIntensityReason": null
     },
