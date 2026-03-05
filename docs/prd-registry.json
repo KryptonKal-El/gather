@@ -152,7 +152,7 @@
     {
       "id": "prd-rebrand",
       "name": "Rebrand ShoppingListAI to Gather",
-      "status": "ready",
+      "status": "in_progress",
       "startedAt": "2026-03-04T19:00:00Z",
       "currentStory": "US-018",
       "filePath": "docs/prds/prd-rebrand.md",

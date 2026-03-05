@@ -12,7 +12,7 @@ interface ProductResult {
 }
 
 const ALLOWED_ORIGINS = [
-  'https://shoppinglistai.vercel.app',
+  'https://gatherapp.vercel.app',
   'http://localhost:5173',
   'http://localhost:4000',
 ];
