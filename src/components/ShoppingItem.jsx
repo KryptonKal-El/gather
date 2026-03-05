@@ -26,6 +26,24 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const storePickerRef = useRef(null);
   const priceInputRef = useRef(null);
 
+  // Swipe gesture state
+  const [swipeX, setSwipeX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStartRef = useRef(null);
+  const swipeDirectionRef = useRef(null);
+
+  // Mobile detection (coarse pointer = touch device)
+  const [isMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(pointer: coarse)').matches;
+  });
+
+  // Reduced motion preference
+  const [prefersReducedMotion] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  });
+
   const storeMap = {};
   for (const s of stores) {
     storeMap[s.id] = s;
@@ -153,9 +171,87 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     setIsImagePickerOpen(false);
   };
 
+  // Swipe gesture handlers (mobile only)
+  const handleTouchStart = (e) => {
+    if (!isMobile || isEditOpen) return;
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    swipeDirectionRef.current = null;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    // Direction lock: determine swipe direction on first significant movement
+    if (swipeDirectionRef.current === null) {
+      if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        swipeDirectionRef.current = 'vertical';
+        return;
+      }
+      swipeDirectionRef.current = 'horizontal';
+    }
+
+    if (swipeDirectionRef.current === 'vertical') return;
+
+    // Horizontal swipe: only allow left swipe (negative deltaX)
+    const clampedDeltaX = Math.min(0, deltaX);
+    setSwipeX(clampedDeltaX);
+    setIsSwiping(true);
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping || !touchStartRef.current) {
+      touchStartRef.current = null;
+      swipeDirectionRef.current = null;
+      return;
+    }
+
+    const SWIPE_THRESHOLD = 80;
+    if (Math.abs(swipeX) >= SWIPE_THRESHOLD) {
+      // Threshold met: trigger delete
+      if (prefersReducedMotion) {
+        // Instant delete for reduced motion
+        onRemove();
+      } else {
+        onRemove();
+      }
+    }
+    // Reset swipe state (snap-back if threshold not met)
+    setSwipeX(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+    swipeDirectionRef.current = null;
+  };
+
+  // Build inline style for swipe transform
+  const getSwipeStyle = () => {
+    if (prefersReducedMotion) {
+      // No translate animation for reduced motion
+      return undefined;
+    }
+    if (isSwiping || swipeX !== 0) {
+      return {
+        transform: `translateX(${swipeX}px)`,
+        transition: isSwiping ? 'none' : 'transform 0.2s ease-out',
+      };
+    }
+    return undefined;
+  };
+
   return (
     <div className={styles.itemWrapper}>
-      <div className={`${styles.item} ${item.isChecked ? styles.checked : ''}`}>
+      <div
+        className={`${styles.item} ${item.isChecked ? styles.checked : ''} ${isSwiping ? styles.itemSwiping : ''}`}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={getSwipeStyle()}
+      >
         <button
           type="button"
           className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}

@@ -166,8 +166,10 @@
         "Verify in browser"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-05T02:15:00Z",
+      "passes": true,
+      "notes": "Swipe gesture detection with raw touch events, direction lock (10px threshold), left-only swipe, 80px delete threshold, snap-back animation, mobile-only gating, prefers-reduced-motion support",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
