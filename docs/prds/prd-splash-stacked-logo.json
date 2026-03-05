@@ -1,0 +1,43 @@
+{
+  "project": "Gather",
+  "branchName": "feature/splash-stacked-logo",
+  "description": "Update iOS splash screen to show stacked Gather logo (icon + name + tagline) instead of icon-only",
+  "credentialRequirements": [],
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Update Splash Generation to Use Stacked Logo",
+      "description": "As a developer, I need the splash screen generation in scripts/generate-icons.js updated to use public/logo/stacked.svg instead of icon-only.svg, so the splash shows the icon, app name, and tagline.",
+      "acceptanceCriteria": [
+        "Splash screen generation reads public/logo/stacked.svg instead of extracting the icon-only inner content",
+        "The stacked logo (icon + Gather + tagline) is centered on the splash canvas at an appropriate size (~600-800px tall to accommodate the full stacked layout)",
+        "Text renders correctly — since stacked.svg uses @import url(...) for Nunito which won't work in sharp's SVG rasterizer, either: (a) download and embed the Nunito font as a base64 @font-face in the SVG before rasterizing, (b) use @resvg/resvg-js which has better font handling, or (c) replace the @import with a local font reference. Pick the simplest approach that produces correct output.",
+        "assets/splash.png (2732x2732) — light version: gradient background (#B5E8C8 to #A8D8EA) with stacked logo centered, text in #3D7A63",
+        "assets/splash-dark.png (2732x2732) — dark version: dark background with stacked logo centered, text should be light/white for contrast (not #3D7A63 which won't be readable on dark)",
+        "Icon-only generation (PWA icons, Capacitor app icons) is NOT changed — only splash screens are affected",
+        "Run npx capacitor-assets generate --ios to rebuild Xcode splash assets",
+        "Run npm run build && npx cap sync ios successfully",
+        "node scripts/generate-icons.js runs successfully",
+        "Lint passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "",
+      "supportArticleRequired": false,
+      "documentationType": null,
+      "relatedArticleSlugs": [],
+      "e2eRequired": false,
+      "e2eScope": null,
+      "marketingRequired": false,
+      "marketingType": null,
+      "relatedMarketingPages": [],
+      "toolsRequired": false,
+      "toolsType": null,
+      "relatedToolNames": [],
+      "considerations": [],
+      "requiredCredentials": [],
+      "testIntensity": "low",
+      "testIntensityReason": "Build script change — visual output verification only, no runtime impact"
+    }
+  ]
+}
