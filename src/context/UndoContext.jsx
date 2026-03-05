@@ -4,8 +4,9 @@
  */
 import { createContext, useContext, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Capacitor } from '@capacitor/core';
 import { useUndoStack } from '../hooks/useUndoStack.js';
-import { useShakeDetection } from '../hooks/useShakeDetection.js';
+import { useShakeDetection, requestMotionPermission } from '../hooks/useShakeDetection.js';
 
 export const UndoContext = createContext(null);
 
@@ -24,16 +25,37 @@ export const UndoProvider = ({ children }) => {
     return window.matchMedia('(pointer: coarse)').matches;
   });
 
+  const [motionPermission, setMotionPermission] = useState(() => {
+    if (typeof window === 'undefined') return 'unknown';
+    if (typeof DeviceMotionEvent?.requestPermission !== 'function') return 'granted';
+    if (Capacitor.isNativePlatform()) {
+      localStorage.setItem('shake-motion-permission', 'granted');
+      return 'granted';
+    }
+    return localStorage.getItem('shake-motion-permission') ?? 'unknown';
+  });
+
+  const requestPermissionIfNeeded = useCallback(async () => {
+    if (motionPermission !== 'unknown') return;
+    const result = await requestMotionPermission();
+    setMotionPermission(result);
+  }, [motionPermission]);
+
+  const wrappedPushUndo = useCallback((action) => {
+    stack.push(action);
+    requestPermissionIfNeeded();
+  }, [stack, requestPermissionIfNeeded]);
+
   const handleShake = useCallback(() => {
     if (!stack.canUndo) return;
     stack.undo();
     navigator.vibrate?.(50);
   }, [stack]);
 
-  useShakeDetection({ onShake: handleShake, enabled: isMobile && stack.canUndo });
+  useShakeDetection({ onShake: handleShake, enabled: isMobile && stack.canUndo, permissionState: motionPermission });
 
   const value = {
-    pushUndo: stack.push,
+    pushUndo: wrappedPushUndo,
     undo: stack.undo,
     canUndo: stack.canUndo,
   };

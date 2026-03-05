@@ -10,6 +10,7 @@ const SHAKE_DEBOUNCE_MS = 500;
  * @typedef {Object} UseShakeDetectionOptions
  * @property {() => void} onShake - Callback fired when shake gesture is detected
  * @property {boolean} [enabled=true] - Whether shake detection is enabled
+ * @property {string} [permissionState] - iOS motion permission state, triggers re-evaluation when changed
  */
 
 /**
@@ -23,7 +24,7 @@ const SHAKE_DEBOUNCE_MS = 500;
  *
  * @param {UseShakeDetectionOptions} options - Configuration options
  */
-export const useShakeDetection = ({ onShake, enabled = true }) => {
+export const useShakeDetection = ({ onShake, enabled = true, permissionState }) => {
   const lastShakeRef = useRef(0);
   const onShakeRef = useRef(onShake);
 
@@ -60,7 +61,7 @@ export const useShakeDetection = ({ onShake, enabled = true }) => {
 
     window.addEventListener('devicemotion', handleMotion);
     return () => window.removeEventListener('devicemotion', handleMotion);
-  }, [enabled]);
+  }, [enabled, permissionState]);
 };
 
 /**
