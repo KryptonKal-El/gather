@@ -192,13 +192,16 @@
     {
       "id": "prd-ios-asset-rebrand",
       "name": "iOS Asset Rebrand",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-ios-asset-rebrand.md",
       "jsonPath": "docs/prds/prd-ios-asset-rebrand.json",
       "branchName": "feature/ios-asset-rebrand",
       "createdAt": "2026-03-05",
       "updatedAt": "2026-03-05",
-      "notes": "3 stories: update icon generation script for Gather SVG, regenerate splash screens with Gather gradient, rebuild Xcode asset catalog. No credentials needed."
+      "startedAt": "2026-03-05T18:00:00Z",
+      "completedAt": "2026-03-05T18:15:00Z",
+      "currentStory": null,
+      "notes": "All 3 stories complete. Rewrote generate-icons.js to use sharp for SVG rasterization. PWA icons, Capacitor icons, splash screens all regenerated with Gather branding. Xcode asset catalog rebuilt."
     }
   ]
 }

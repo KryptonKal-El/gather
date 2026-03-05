@@ -1,14 +1,14 @@
 {
-  "sessionId": "builder-2026-03-05-rebrand",
-  "lastHeartbeat": "2026-03-05T12:15:00Z",
+  "sessionId": "builder-2026-03-05-ios-asset-rebrand",
+  "lastHeartbeat": "2026-03-05T18:15:00Z",
   "activePrd": {
-    "id": "prd-rebrand",
-    "name": "Rebrand ShoppingListAI to Gather",
+    "id": "prd-ios-asset-rebrand",
+    "name": "iOS Asset Rebrand",
     "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-011", "US-012", "US-013", "US-014", "US-015", "US-016", "US-017", "US-018", "US-019", "US-020", "US-021"],
+    "storiesCompleted": ["US-001", "US-002", "US-003"],
     "storiesBlocked": [],
-    "storiesSkipped": ["US-022"],
-    "totalStories": 22,
+    "storiesSkipped": [],
+    "totalStories": 3,
     "testingRigor": "standard",
     "status": "completed"
   },
@@ -17,11 +17,11 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-05T12:15:00Z",
+    "lastSyncedAt": "2026-03-05T18:15:00Z",
     "items": [
-      {"content": "US-018: Update CORS origins in edge functions", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-018"},
-      {"content": "US-019: Update Apple Sign-In config", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-019"},
-      {"content": "US-020: Update Universal Links & Entitlements", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-020"}
+      {"content": "US-001: Update icon generation script for Gather logo", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Update splash screen assets for Gather branding", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Regenerate Xcode asset catalog and verify", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"}
     ]
   },
   "uncommittedWork": null,

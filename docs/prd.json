@@ -87,8 +87,10 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-05T18:15:00Z",
+      "notes": "Ran generate-icons.js, capacitor-assets generate --ios, npm run build && cap sync ios. All 7 iOS assets regenerated (1 icon + 6 splash). Removed 3 orphaned old splash PNGs. Build and sync successful.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
