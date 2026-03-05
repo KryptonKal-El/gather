@@ -410,9 +410,10 @@
         "Universal Links verification passes on gatherapp.vercel.app"
       ],
       "priority": 20,
-      "passes": false,
-      "status": "pending",
-      "notes": "Unblocked — using gatherapp.vercel.app as production domain.",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-05T12:10:00Z",
+      "notes": "Entitlements updated to applinks:gatherapp.vercel.app. AASA file updated to bundle ID 53L3M4444A.com.gather.app.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

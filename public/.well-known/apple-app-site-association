@@ -3,12 +3,12 @@
     "apps": [],
     "details": [
       {
-        "appIDs": ["53L3M4444A.com.shoppinglistai"],
+        "appIDs": ["53L3M4444A.com.gather.app"],
         "paths": ["*"]
       }
     ]
   },
   "webcredentials": {
-    "apps": ["53L3M4444A.com.shoppinglistai"]
+    "apps": ["53L3M4444A.com.gather.app"]
   }
 }
