@@ -300,6 +300,27 @@ export const ShoppingListProvider = ({ children }) => {
     await clearCheckedItems(ownerUid, listId, checkedIds);
   }, [userId, activeItems, getListOwnerUid]);
 
+  /**
+   * Restores a previously deleted item with its original data.
+   * Used by undo functionality to re-insert items after swipe-delete.
+   *
+   * @param {string} listId - The list to restore the item into
+   * @param {Object} itemData - Full item data (name, category, isChecked, store, quantity, price, imageUrl)
+   */
+  const restoreItemAction = useCallback(async (listId, itemData) => {
+    if (!userId) return;
+    const ownerUid = getListOwnerUid(listId);
+    await dbAddItem(ownerUid, listId, {
+      name: itemData.name,
+      category: itemData.category ?? null,
+      isChecked: itemData.isChecked ?? false,
+      store: itemData.store ?? null,
+      quantity: itemData.quantity ?? 1,
+      price: itemData.price ?? null,
+      imageUrl: itemData.imageUrl ?? null,
+    });
+  }, [userId, getListOwnerUid]);
+
   const addStoreAction = useCallback(async (name, color) => {
     if (!userId) return;
     await dbCreateStore(userId, {
@@ -370,6 +391,7 @@ export const ShoppingListProvider = ({ children }) => {
     removeItem: removeItemAction,
     updateItem: updateItemAction,
     clearChecked: clearCheckedAction,
+    restoreItem: restoreItemAction,
     addStore: addStoreAction,
     updateStore: updateStoreAction,
     deleteStore: deleteStoreAction,

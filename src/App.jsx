@@ -5,6 +5,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
 import { useAuth } from './context/AuthContext.jsx';
+import { useUndo } from './context/UndoContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
 import { usePWAInstall } from './hooks/usePWAInstall.js';
@@ -41,6 +42,7 @@ export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
+  const { pushUndo } = useUndo();
   const [sharingListId, setSharingListId] = useState(null);
   const [sharingCollectionId, setSharingCollectionId] = useState(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -115,6 +117,26 @@ export const App = () => {
 
   const handleRemoveItem = (itemId) => {
     if (!activeList) return;
+    const item = activeList.items.find((i) => i.id === itemId);
+    if (item) {
+      const snapshot = {
+        name: item.name,
+        category: item.category,
+        isChecked: item.isChecked,
+        store: item.store,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.imageUrl,
+      };
+      const listId = activeList.id;
+      pushUndo({
+        type: 'delete-item',
+        data: { listId, item: snapshot },
+        restore: async () => {
+          await actions.restoreItem(listId, snapshot);
+        },
+      });
+    }
     actions.removeItem(activeList.id, itemId);
   };
 
