@@ -1,14 +1,14 @@
 {
-  "sessionId": "builder-2026-03-05-swipe-delete-shake-undo",
-  "lastHeartbeat": "2026-03-05T01:30:00Z",
+  "sessionId": "builder-2026-03-05-rebrand",
+  "lastHeartbeat": "2026-03-05T12:15:00Z",
   "activePrd": {
-    "id": "prd-swipe-delete-shake-undo",
-    "name": "Swipe-to-Delete + Shake-to-Undo",
+    "id": "prd-rebrand",
+    "name": "Rebrand ShoppingListAI to Gather",
     "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011", "US-012", "US-013", "US-014"],
+    "storiesCompleted": ["US-001", "US-002", "US-003", "US-011", "US-012", "US-013", "US-014", "US-015", "US-016", "US-017", "US-018", "US-019", "US-020", "US-021"],
     "storiesBlocked": [],
-    "storiesSkipped": [],
-    "totalStories": 14,
+    "storiesSkipped": ["US-022"],
+    "totalStories": 22,
     "testingRigor": "standard",
     "status": "completed"
   },
@@ -17,22 +17,11 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-05T01:30:00Z",
+    "lastSyncedAt": "2026-03-05T12:15:00Z",
     "items": [
-      {"content": "US-001: Create useUndoStack hook", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Create UndoProvider context", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Create useShakeDetection hook", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Wire shake detection to UndoProvider", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Add swipe gesture to ShoppingItem", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Swipe delete zone visual design", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Wire swipe delete to undo stack", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"},
-      {"content": "US-008: Exit animation for deleted items", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-008"},
-      {"content": "US-009: Undo restoration animation", "status": "completed", "priority": "low", "flow": "prd", "refId": "US-009"},
-      {"content": "US-010: Undo for Clear Checked Items", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-010"},
-      {"content": "US-011: Undo for Remove Recipe from Collection", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-011"},
-      {"content": "US-012: Undo for Unshare List", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-012"},
-      {"content": "US-013: iOS DeviceMotion permission handling", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-013"},
-      {"content": "US-014: Prevent swipe conflicts with gestures", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-014"}
+      {"content": "US-018: Update CORS origins in edge functions", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-018"},
+      {"content": "US-019: Update Apple Sign-In config", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-019"},
+      {"content": "US-020: Update Universal Links & Entitlements", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-020"}
     ]
   },
   "uncommittedWork": null,
