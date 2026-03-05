@@ -154,7 +154,42 @@ export const App = () => {
 
   const handleClearChecked = () => {
     if (!activeList) return;
+    const checkedItems = activeList.items.filter((i) => i.isChecked);
+    if (checkedItems.length > 0) {
+      const snapshots = checkedItems.map((item) => ({
+        name: item.name,
+        category: item.category,
+        isChecked: item.isChecked,
+        store: item.store,
+        quantity: item.quantity,
+        price: item.price,
+        imageUrl: item.imageUrl,
+      }));
+      const listId = activeList.id;
+      pushUndo({
+        type: 'clear-checked',
+        data: { listId, items: snapshots },
+        restore: async () => {
+          await actions.restoreItems(listId, snapshots);
+        },
+      });
+    }
     actions.clearChecked(activeList.id);
+  };
+
+  const handleMoveRecipe = async (recipeId, targetCollectionId) => {
+    const recipe = recipeState.allRecipes.find((r) => r.id === recipeId);
+    if (recipe) {
+      const fromCollectionId = recipe.collectionId ?? null;
+      pushUndo({
+        type: 'move-recipe',
+        data: { recipeId, fromCollectionId, toCollectionId: targetCollectionId },
+        restore: async () => {
+          await recipeActions.moveRecipe(recipeId, fromCollectionId);
+        },
+      });
+    }
+    await recipeActions.moveRecipe(recipeId, targetCollectionId);
   };
 
   const handleUpdateCategory = (itemId, newCategory) => {
@@ -438,7 +473,7 @@ export const App = () => {
                   onDeleteCollection={recipeActions.deleteCollection}
                   onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
                   onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
-                  onMoveRecipe={recipeActions.moveRecipe}
+                  onMoveRecipe={handleMoveRecipe}
                   onSaveTemplate={handleSaveTemplate}
                   onAddTemplateToList={handleAddTemplateToList}
                   onCollectionBack={handleMobileCollectionBack}
@@ -455,7 +490,7 @@ export const App = () => {
                   collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
                   collections={recipeState.collections}
                   activeCollectionId={recipeState.activeCollectionId}
-                  onMoveRecipe={recipeActions.moveRecipe}
+                  onMoveRecipe={handleMoveRecipe}
                   onBack={handleRecipeBackNav}
                   onEdit={(recipeId) => {
                     recipeActions.selectRecipe(recipeId);
@@ -618,7 +653,7 @@ export const App = () => {
             onDeleteCollection={recipeActions.deleteCollection}
             onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
             onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
-            onMoveRecipe={recipeActions.moveRecipe}
+            onMoveRecipe={handleMoveRecipe}
             onSaveTemplate={handleSaveTemplate}
             onAddTemplateToList={handleAddTemplateToList}
           />
@@ -638,7 +673,7 @@ export const App = () => {
               collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
               collections={recipeState.collections}
               activeCollectionId={recipeState.activeCollectionId}
-              onMoveRecipe={recipeActions.moveRecipe}
+              onMoveRecipe={handleMoveRecipe}
               onBack={() => recipeActions.selectRecipe(null)}
               onEdit={(recipeId) => {
                 recipeActions.selectRecipe(recipeId);
