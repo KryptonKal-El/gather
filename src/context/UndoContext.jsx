@@ -2,9 +2,10 @@
  * Undo context for managing reversible actions app-wide.
  * Provides an undo stack that components can push actions to and trigger undo.
  */
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useUndoStack } from '../hooks/useUndoStack.js';
+import { useShakeDetection } from '../hooks/useShakeDetection.js';
 
 export const UndoContext = createContext(null);
 
@@ -18,6 +19,18 @@ export const UndoContext = createContext(null);
  */
 export const UndoProvider = ({ children }) => {
   const stack = useUndoStack();
+  const [isMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(pointer: coarse)').matches;
+  });
+
+  const handleShake = useCallback(() => {
+    if (!stack.canUndo) return;
+    stack.undo();
+    navigator.vibrate?.(50);
+  }, [stack]);
+
+  useShakeDetection({ onShake: handleShake, enabled: isMobile && stack.canUndo });
 
   const value = {
     pushUndo: stack.push,
