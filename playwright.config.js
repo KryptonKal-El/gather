@@ -10,22 +10,19 @@ export default defineConfig({
     baseURL: 'http://localhost:4000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    storageState: '.auth/user.json',
   },
 
   projects: [
     {
       name: 'setup',
       testMatch: /auth\.setup\.js/,
-      use: {
-        storageState: undefined,
-      },
     },
     {
       name: 'desktop-chrome',
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 },
+        storageState: '.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -33,6 +30,7 @@ export default defineConfig({
       name: 'mobile-chrome',
       use: {
         ...devices['Pixel 5'],
+        storageState: '.auth/user.json',
       },
       dependencies: ['setup'],
     },

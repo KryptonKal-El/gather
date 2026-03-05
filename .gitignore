@@ -43,3 +43,4 @@ skills
 test-results/
 playwright-report/
 .auth/
+e2e/.env.test
