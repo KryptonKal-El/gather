@@ -184,8 +184,10 @@
         "Lint passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "This pattern will be reused in US-010 (Store Manager rewrite)",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T20:35:00Z",
+      "notes": "Replaced '+ New' with circular 28px button (32px on mobile). × icon in cancel state with muted background.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

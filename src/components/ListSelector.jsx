@@ -287,10 +287,11 @@ export const ListSelector = ({
         <div className={styles.header}>
           <h2 className={styles.title}>My Lists</h2>
           <button
-            className={styles.newBtn}
+            className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
             onClick={() => setIsCreating(!isCreating)}
+            aria-label={isCreating ? 'Cancel' : 'New list'}
           >
-            {isCreating ? 'Cancel' : '+ New'}
+            {isCreating ? '×' : '+'}
           </button>
         </div>
 
