@@ -51,8 +51,10 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T20:15:00Z",
+      "notes": "Removed dashed border from .storeBadge, now matches .category badge style.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
