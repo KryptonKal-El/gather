@@ -244,6 +244,16 @@
       "completedAt": "2026-03-06T18:06:00Z",
       "currentStory": null,
       "notes": "All 5 stories complete. Bundle ID updated from com.gather.app to com.gatherlists across capacitor.config.ts, pbxproj, Info.plist, AuthContext.jsx, and AASA file. Build and cap sync verified."
+    },
+    {
+      "id": "prd-custom-domain",
+      "name": "Custom Domain Migration (gatherlists.com)",
+      "status": "ready",
+      "filePath": "docs/prds/prd-custom-domain.md",
+      "jsonPath": "docs/prds/prd-custom-domain.json",
+      "branchName": "feature/custom-domain",
+      "createdAt": "2026-03-06",
+      "updatedAt": "2026-03-06"
     }
   ]
 }
