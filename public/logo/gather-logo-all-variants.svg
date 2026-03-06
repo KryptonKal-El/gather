@@ -143,7 +143,7 @@
   </text>
 
   <!-- Stacked tagline -->
-  <text x="463" y="621" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
+  <text x="450" y="621" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
 
   <!-- Divider lines between sections -->
   <line x1="240" y1="50" x2="240" y2="210" stroke="#E8E8E2" stroke-width="1"/>
