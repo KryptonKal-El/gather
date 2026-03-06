@@ -1,14 +1,14 @@
 {
-  "sessionId": "builder-2026-03-06-rebrand-gather-lists",
-  "lastHeartbeat": "2026-03-06T12:00:00Z",
+  "sessionId": "builder-2026-03-06-custom-domain",
+  "lastHeartbeat": "2026-03-06T19:03:00Z",
   "activePrd": {
-    "id": "prd-rebrand-gather-lists",
-    "name": "Rebrand Gather to Gather Lists",
+    "id": "prd-custom-domain",
+    "name": "Custom Domain Migration (gatherlists.com)",
     "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011", "US-012", "US-013", "US-014", "US-015"],
+    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007"],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 15,
+    "totalStories": 7,
     "testingRigor": "standard",
     "status": "completed"
   },
@@ -17,23 +17,15 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-06T12:00:00Z",
+    "lastSyncedAt": "2026-03-06T19:03:00Z",
     "items": [
-      {"content": "US-001: Save all-variants SVG reference file", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Extract and replace logo SVG files", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Update HTML title and meta tags", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Update Capacitor app name", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Update iOS display name", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Update desktop header branding", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Update login screen branding", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"},
-      {"content": "US-008: Update welcome message", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-008"},
-      {"content": "US-009: Update PWA install banner", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-009"},
-      {"content": "US-010: Update privacy policy", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-010"},
-      {"content": "US-011: Update App Store metadata", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-011"},
-      {"content": "US-012: Update generate-icons.js comment", "status": "completed", "priority": "low", "flow": "prd", "refId": "US-012"},
-      {"content": "US-013: Verify splash dark mode with two-tone text", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-013"},
-      {"content": "US-014: Regenerate PWA and iOS assets", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-014"},
-      {"content": "US-015: Update style guide (optional)", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-015"}
+      {"content": "US-001: Update Apple Sign-In redirectURI", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Update edge function CORS origins", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Update iOS associated domains", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Verify AASA file for new domain", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: Update privacy policy URLs", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Update App Store metadata URLs", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: Sync iOS project with Capacitor", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"}
     ]
   },
   "uncommittedWork": null,

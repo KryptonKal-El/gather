@@ -248,12 +248,16 @@
     {
       "id": "prd-custom-domain",
       "name": "Custom Domain Migration (gatherlists.com)",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-custom-domain.md",
       "jsonPath": "docs/prds/prd-custom-domain.json",
       "branchName": "feature/custom-domain",
       "createdAt": "2026-03-06",
-      "updatedAt": "2026-03-06"
+      "updatedAt": "2026-03-06",
+      "startedAt": "2026-03-06T19:00:00Z",
+      "completedAt": "2026-03-06T19:03:00Z",
+      "currentStory": null,
+      "notes": "All 7 stories complete. Domain migrated from gatherapp.vercel.app to gatherlists.com across auth redirect, CORS origins (both edge functions), iOS entitlements, AASA verification, privacy policy, App Store metadata. Old domain kept as fallback in CORS and entitlements. Build and cap sync verified."
     }
   ]
 }
