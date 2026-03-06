@@ -61,9 +61,11 @@
 }
 
 .preview {
-  width: 120px;
-  height: 120px;
-  object-fit: cover;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
   border-radius: 8px;
   border: 2px solid var(--border-default);
 }
@@ -75,7 +77,9 @@
   background: none;
   border: 1px solid var(--danger);
   border-radius: 6px;
-  padding: 0.3rem 0.75rem;
+  padding: 0.5rem 1rem;
+  min-height: 44px;
+  min-width: 44px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -253,4 +257,10 @@
   color: var(--text-faint);
   font-size: 0.75rem;
   margin: 0;
+}
+
+@media (max-width: 480px) {
+  .preview {
+    max-width: 100%;
+  }
 }
