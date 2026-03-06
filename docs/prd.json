@@ -289,8 +289,10 @@
         "npm run build succeeds"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T22:35:00Z",
+      "notes": "Added collapsedStores state with Set. Chevron CSS triangle with 0.2s rotation transition. Unassigned section also collapsible. Checked section not collapsible.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
