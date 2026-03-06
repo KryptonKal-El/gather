@@ -234,12 +234,16 @@
     {
       "id": "prd-bundle-id-update",
       "name": "Update Bundle ID to com.gatherlists",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-bundle-id-update.md",
       "jsonPath": "docs/prds/prd-bundle-id-update.json",
       "branchName": "feature/bundle-id-update",
       "createdAt": "2026-03-06",
-      "updatedAt": "2026-03-06"
+      "updatedAt": "2026-03-06",
+      "startedAt": "2026-03-06T18:00:00Z",
+      "completedAt": "2026-03-06T18:06:00Z",
+      "currentStory": null,
+      "notes": "All 5 stories complete. Bundle ID updated from com.gather.app to com.gatherlists across capacitor.config.ts, pbxproj, Info.plist, AuthContext.jsx, and AASA file. Build and cap sync verified."
     }
   ]
 }

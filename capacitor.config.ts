@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.gather.app',
+  appId: 'com.gatherlists',
   appName: 'Gather Lists',
   webDir: 'dist',
   plugins: {

@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }) => {
     if (Capacitor.isNativePlatform()) {
       const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
       const result = await SignInWithApple.authorize({
-        clientId: 'com.gather.app',
+        clientId: 'com.gatherlists',
         redirectURI: 'https://gatherapp.vercel.app',
         scopes: 'email name',
       });

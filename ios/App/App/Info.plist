@@ -30,7 +30,7 @@
 				<string>gather</string>
 			</array>
 			<key>CFBundleURLName</key>
-			<string>com.gather.app</string>
+			<string>com.gatherlists</string>
 		</dict>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
