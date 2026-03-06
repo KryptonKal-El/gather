@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gather — Brand Style Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-light:  #B5E8C8;
+      --blue-light:   #A8D8EA;
+      --teal-deep:    #3D7A63;
+      --sage:         #85BFA8;
+      --pink:         #F9A8C9;
+      --white:        #FFFFFF;
+      --cream:        #FAFAF7;
+      --text-dark:    #2C3E35;
+      --text-mid:     #6B8C7D;
+      --border:       #E4EDE8;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--text-dark);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--green-light) 0%, var(--blue-light) 100%);
+      padding: 60px 48px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 80% 20%, rgba(249,168,201,0.3) 0%, transparent 60%);
+    }
+    .header-inner { position: relative; max-width: 960px; margin: 0 auto; }
+    .header-badge {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--teal-deep); background: rgba(255,255,255,0.6);
+      padding: 6px 14px; border-radius: 20px; margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 58px; font-weight: 800; color: var(--teal-deep);
+      letter-spacing: -2px; line-height: 1;
+    }
+    header p {
+      font-size: 17px; color: var(--teal-deep); opacity: 0.75;
+      margin-top: 10px; font-weight: 600;
+    }
+    .header-logo-row {
+      display: flex; align-items: center; gap: 14px; margin-top: 28px;
+    }
+    .logo-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      background: linear-gradient(135deg, var(--green-light), var(--blue-light));
+      box-shadow: 0 6px 20px rgba(61,122,99,0.2);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; flex-shrink: 0;
+    }
+    .logo-icon svg { width: 36px; height: 36px; }
+    .heart-badge {
+      position: absolute; top: -6px; right: -6px;
+      font-size: 16px; line-height: 1;
+    }
+    .logo-wordmark { font-size: 36px; font-weight: 800; color: var(--teal-deep); letter-spacing: -1px; }
+    .logo-tagline { font-size: 13px; color: var(--sage); font-weight: 600; margin-top: 2px; }
+
+    /* ── LAYOUT ── */
+    main { max-width: 960px; margin: 0 auto; padding: 56px 48px; }
+
+    section { margin-bottom: 64px; }
+
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 6px;
+    }
+    .section-title {
+      font-size: 26px; font-weight: 800; color: var(--teal-deep);
+      margin-bottom: 28px; letter-spacing: -0.5px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* ── COLORS ── */
+    .color-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;
+    }
+    .color-card {
+      border-radius: 16px; overflow: hidden;
+      box-shadow: 0 2px 12px rgba(61,122,99,0.08);
+      border: 1px solid var(--border);
+      background: white;
+    }
+    .color-swatch { height: 80px; width: 100%; }
+    .color-info { padding: 14px 16px; }
+    .color-name { font-size: 13px; font-weight: 800; color: var(--text-dark); }
+    .color-role { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
+    .color-hex {
+      font-size: 12px; font-weight: 700; color: var(--text-mid);
+      margin-top: 8px; font-family: 'Courier New', monospace;
+      background: var(--cream); padding: 4px 8px; border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ── TYPOGRAPHY ── */
+    .type-samples { display: flex; flex-direction: column; gap: 24px; }
+    .type-card {
+      background: white; border-radius: 16px; padding: 28px 32px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(61,122,99,0.06);
+    }
+    .type-meta {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 12px;
+    }
+    .type-sample-app-name {
+      font-family: 'Nunito', sans-serif; font-size: 48px; font-weight: 800;
+      color: var(--teal-deep); letter-spacing: -1.5px; line-height: 1;
+    }
+    .type-sample-heading {
+      font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 800;
+      color: var(--text-dark); line-height: 1.2;
+    }
+    .type-sample-subheading {
+      font-family: 'Nunito', sans-serif; font-size: 18px; font-weight: 700;
+      color: var(--teal-deep);
+    }
+    .type-sample-body {
+      font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 400;
+      color: var(--text-dark); line-height: 1.7;
+    }
+    .type-sample-tagline {
+      font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600;
+      color: var(--sage); letter-spacing: 0.3px;
+    }
+    .type-sample-caption {
+      font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600;
+      color: var(--text-mid); letter-spacing: 0.5px;
+    }
+    .type-spec {
+      margin-top: 10px; font-size: 11px; color: #AAAAAA;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* ── LOGO VARIANTS ── */
+    .logo-variants { display: flex; flex-direction: column; gap: 20px; }
+    .logo-card {
+      background: white; border-radius: 16px; padding: 36px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(61,122,99,0.06);
+    }
+    .logo-card.dark { background: var(--teal-deep); }
+    .logo-card-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 20px;
+    }
+    .logo-card.dark .logo-card-label { color: rgba(255,255,255,0.45); }
+
+    /* Icon only */
+    .lv-icon {
+      width: 80px; height: 80px; border-radius: 20px;
+      background: linear-gradient(135deg, var(--green-light), var(--blue-light));
+      box-shadow: 0 8px 24px rgba(61,122,99,0.18);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .lv-icon .heart { position: absolute; top: -8px; right: -8px; font-size: 20px; }
+
+    /* Horizontal */
+    .lv-horizontal { display: flex; align-items: center; gap: 18px; }
+    .lv-horizontal .lv-icon { width: 60px; height: 60px; border-radius: 15px; flex-shrink: 0; }
+    .lv-name { font-family: 'Nunito', sans-serif; font-size: 42px; font-weight: 800; color: var(--teal-deep); letter-spacing: -1px; line-height: 1; }
+    .lv-name.on-dark { color: white; }
+
+    /* Full */
+    .lv-full { display: flex; align-items: center; gap: 18px; }
+    .lv-full .lv-icon { width: 66px; height: 66px; border-radius: 17px; flex-shrink: 0; }
+    .lv-text-block { display: flex; flex-direction: column; }
+    .lv-text-block .lv-name { font-size: 44px; }
+    .lv-text-block .lv-tag {
+      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--sage); margin-top: 2px; letter-spacing: 0.3px;
+    }
+    .lv-text-block .lv-tag.on-dark { color: rgba(181,232,200,0.8); }
+
+    /* Stacked */
+    .lv-stacked { display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+    .lv-stacked .lv-icon { width: 90px; height: 90px; border-radius: 22px; }
+    .lv-stacked .lv-name { font-size: 46px; }
+    .lv-stacked .lv-tag {
+      font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--sage); letter-spacing: 0.3px;
+    }
+
+    /* Inline list icon */
+    .list-icon-svg { width: 38px; height: 38px; }
+
+    /* ── USAGE NOTES ── */
+    .usage-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .usage-card {
+      background: white; border-radius: 16px; padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 12px rgba(61,122,99,0.06);
+    }
+    .usage-card h4 {
+      font-size: 14px; font-weight: 800; color: var(--teal-deep); margin-bottom: 12px;
+    }
+    .usage-card ul { list-style: none; padding: 0; }
+    .usage-card ul li {
+      font-size: 13px; color: var(--text-mid); padding: 5px 0;
+      border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px;
+    }
+    .usage-card ul li:last-child { border-bottom: none; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-light); margin-top: 5px; flex-shrink: 0; }
+    .dot.pink { background: var(--pink); }
+    .dot.sage { background: var(--sage); }
+
+    /* ── SPACING & RADIUS ── */
+    .spec-row {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;
+    }
+    .spec-chip {
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 18px; font-size: 13px;
+    }
+    .spec-chip .label { font-weight: 800; color: var(--teal-deep); }
+    .spec-chip .val { color: var(--text-mid); margin-top: 2px; font-family: 'Courier New', monospace; font-size: 11px; }
+
+    /* ── GRADIENT ── */
+    .gradient-bar {
+      height: 60px; border-radius: 14px;
+      background: linear-gradient(135deg, var(--green-light) 0%, var(--blue-light) 100%);
+      box-shadow: 0 4px 14px rgba(168,216,234,0.4);
+      margin-bottom: 10px;
+    }
+    .gradient-meta { font-size: 12px; color: var(--text-mid); font-family: 'Courier New', monospace; }
+
+    footer {
+      text-align: center; padding: 40px;
+      font-size: 12px; color: var(--text-mid); letter-spacing: 1px;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 600px) {
+      main { padding: 32px 24px; }
+      header { padding: 40px 24px 32px; }
+      header h1 { font-size: 38px; }
+      .usage-grid { grid-template-columns: 1fr; }
+      .color-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">Brand Style Guide · v1.0</div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="198 240 560 105" style="width:480px;max-width:100%;display:block;">
+      <defs>
+        <linearGradient id="hdr-iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+        </linearGradient>
+        <filter id="hdr-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#5BA08A" flood-opacity="0.15"/>
+        </filter>
+      </defs>
+      <!-- Icon -->
+      <rect x="198" y="250" width="96" height="96" rx="24" fill="url(#hdr-iconGrad)" filter="url(#hdr-shadow)"/>
+      <circle cx="221" cy="284" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+      <rect x="233" y="279" width="42" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+      <circle cx="221" cy="300" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+      <rect x="233" y="295" width="32" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+      <circle cx="221" cy="316" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+      <rect x="233" y="311" width="38" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+      <!-- Heart -->
+      <path d="M279,268 C279,268 266,259 266,251 C266,246 269,243 272,243 C275,243 277,245 279,247 C281,245 283,243 286,243 C289,243 292,246 292,251 C292,259 279,268 279,268 Z" fill="#F9A8C9" opacity="0.92"/>
+      <!-- Name -->
+      <text x="312" y="305" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1">
+        <tspan font-size="54">Gather </tspan><tspan font-size="30" font-weight="600" fill="#85BFA8">Lists</tspan>
+      </text>
+      <!-- Tagline -->
+      <text x="313" y="330" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="15" font-weight="600" fill="#85BFA8" letter-spacing="0.5">Gather your lists, meals, and more.</text>
+    </svg>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── COLORS ── -->
+  <section>
+    <div class="section-label">01 — Foundation</div>
+    <div class="section-title">Color Palette</div>
+    <div class="color-grid">
+      <div class="color-card">
+        <div class="color-swatch" style="background:#B5E8C8;"></div>
+        <div class="color-info">
+          <div class="color-name">Mint</div>
+          <div class="color-role">Icon gradient start · Accents</div>
+          <div class="color-hex">#B5E8C8</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#A8D8EA;"></div>
+        <div class="color-info">
+          <div class="color-name">Sky</div>
+          <div class="color-role">Icon gradient end · Highlights</div>
+          <div class="color-hex">#A8D8EA</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#3D7A63;"></div>
+        <div class="color-info">
+          <div class="color-name">Forest</div>
+          <div class="color-role">Primary text · Logo wordmark</div>
+          <div class="color-hex">#3D7A63</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#85BFA8;"></div>
+        <div class="color-info">
+          <div class="color-name">Sage</div>
+          <div class="color-role">Tagline · Secondary text</div>
+          <div class="color-hex">#85BFA8</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#F9A8C9;"></div>
+        <div class="color-info">
+          <div class="color-name">Blush</div>
+          <div class="color-role">Heart accent · Love / favorites</div>
+          <div class="color-hex">#F9A8C9</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#FAFAF7;"></div>
+        <div class="color-info">
+          <div class="color-name">Cream</div>
+          <div class="color-role">App background · Card base</div>
+          <div class="color-hex">#FAFAF7</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#FFFFFF; border-top: 1px solid #E4EDE8;"></div>
+        <div class="color-info">
+          <div class="color-name">White</div>
+          <div class="color-role">Icon elements · Cards</div>
+          <div class="color-hex">#FFFFFF</div>
+        </div>
+      </div>
+      <div class="color-card">
+        <div class="color-swatch" style="background:#2C3E35;"></div>
+        <div class="color-info">
+          <div class="color-name">Deep Moss</div>
+          <div class="color-role">Body text · Dark backgrounds</div>
+          <div class="color-hex">#2C3E35</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;">
+      <div style="font-size:13px;font-weight:700;color:var(--teal-deep);margin-bottom:8px;">Primary Gradient</div>
+      <div class="gradient-bar"></div>
+      <div class="gradient-meta">linear-gradient(135deg, #B5E8C8 0%, #A8D8EA 100%)</div>
+    </div>
+  </section>
+
+  <!-- ── TYPOGRAPHY ── -->
+  <section>
+    <div class="section-label">02 — Typography</div>
+    <div class="section-title">Type System</div>
+    <div class="type-samples">
+      <div class="type-card">
+        <div class="type-meta">App Name / Display</div>
+        <div class="type-sample-app-name">Gather <span style="font-size:0.55em;font-weight:600;color:var(--sage);vertical-align:baseline;">Lists</span></div>
+        <div class="type-spec">Nunito · 800 weight · -1.5px tracking</div>
+      </div>
+      <div class="type-card">
+        <div class="type-meta">Tagline</div>
+        <div class="type-sample-tagline">Gather your lists, meals, and more.</div>
+        <div class="type-spec">Nunito · 600 weight · #85BFA8 · 0.3px tracking</div>
+      </div>
+      <div class="type-card">
+        <div class="type-meta">Page Heading</div>
+        <div class="type-sample-heading">Your weekly meal plan</div>
+        <div class="type-spec">Nunito · 800 weight · 28px · #2C3E35</div>
+      </div>
+      <div class="type-card">
+        <div class="type-meta">Section Subheading</div>
+        <div class="type-sample-subheading">Shopping List · Tuesday</div>
+        <div class="type-spec">Nunito · 700 weight · 18px · #3D7A63</div>
+      </div>
+      <div class="type-card">
+        <div class="type-meta">Body Text</div>
+        <div class="type-sample-body">Add ingredients from your recipe directly to your shopping list with one tap. Gather keeps everything in sync so nothing gets missed at the store.</div>
+        <div class="type-spec">Nunito · 400 weight · 15px · 1.7 line-height · #2C3E35</div>
+      </div>
+      <div class="type-card">
+        <div class="type-meta">Caption / Label</div>
+        <div class="type-sample-caption">4 INGREDIENTS · 30 MIN · SERVES 4</div>
+        <div class="type-spec">Nunito · 600 weight · 12px · 0.5px tracking · #6B8C7D</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── LOGO VARIANTS ── -->
+  <section>
+    <div class="section-label">03 — Identity</div>
+    <div class="section-title">Logo Variants</div>
+    <div class="logo-variants">
+
+      <div class="logo-card" style="padding: 0; overflow: hidden;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 650" style="width:100%;height:auto;display:block;">
+          <defs>
+            <style>@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap');</style>
+            <linearGradient id="sg-iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="sg-iconGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+            </linearGradient>
+            <filter id="sg-softShadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#5BA08A" flood-opacity="0.15"/>
+            </filter>
+            <filter id="sg-softShadow2" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#5BA08A" flood-opacity="0.12"/>
+            </filter>
+          </defs>
+
+          <rect width="900" height="650" fill="#FAFAF7" rx="16"/>
+          <text x="450" y="34" font-family="Georgia, serif" font-size="11" fill="#AAAAAA" text-anchor="middle" letter-spacing="3">LOGO VARIANTS</text>
+
+          <!-- APP ICON -->
+          <text x="150" y="62" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">APP ICON</text>
+          <rect x="90" y="74" width="120" height="120" rx="28" fill="url(#sg-iconGrad)" filter="url(#sg-softShadow)"/>
+          <circle cx="118" cy="114" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="131" y="109" width="52" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="118" cy="134" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="131" y="129" width="40" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="118" cy="154" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="131" y="149" width="48" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <path d="M190,100 C190,100 176,90 176,82 C176,77 180,74 183,74 C186,74 188,76 190,78 C192,76 194,74 197,74 C200,74 204,77 204,82 C204,90 190,100 190,100 Z" fill="#F9A8C9" opacity="0.92"/>
+
+          <!-- ICON + NAME -->
+          <text x="450" y="62" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">ICON + NAME</text>
+          <rect x="310" y="74" width="80" height="80" rx="20" fill="url(#sg-iconGrad2)" filter="url(#sg-softShadow2)"/>
+          <circle cx="330" cy="104" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="340" y="100" width="34" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="330" cy="119" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="340" y="115" width="26" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="330" cy="134" r="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="340" y="130" width="30" height="8" rx="4" fill="#FFFFFF" opacity="0.95"/>
+          <path d="M379,91 C379,91 368,83 368,76 C368,72 371,69 374,69 C376,69 378,71 379,73 C380,71 382,69 384,69 C387,69 390,72 390,76 C390,83 379,91 379,91 Z" fill="#F9A8C9" opacity="0.92"/>
+          <text x="408" y="126" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1">
+            <tspan font-size="46">Gather </tspan><tspan font-size="26" font-weight="600" fill="#85BFA8">Lists</tspan>
+          </text>
+
+          <!-- FULL LOGO WITH TAGLINE -->
+          <text x="450" y="230" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">FULL LOGO WITH TAGLINE</text>
+          <rect x="198" y="250" width="96" height="96" rx="24" fill="url(#sg-iconGrad)" filter="url(#sg-softShadow)"/>
+          <circle cx="221" cy="284" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="233" y="279" width="42" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="221" cy="300" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="233" y="295" width="32" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="221" cy="316" r="5.5" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="233" y="311" width="38" height="9" rx="4.5" fill="#FFFFFF" opacity="0.95"/>
+          <path d="M279,268 C279,268 266,259 266,251 C266,246 269,243 272,243 C275,243 277,245 279,247 C281,245 283,243 286,243 C289,243 292,246 292,251 C292,259 279,268 279,268 Z" fill="#F9A8C9" opacity="0.92"/>
+          <text x="312" y="305" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1">
+            <tspan font-size="54">Gather </tspan><tspan font-size="30" font-weight="600" fill="#85BFA8">Lists</tspan>
+          </text>
+          <text x="313" y="330" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="15" font-weight="600" fill="#85BFA8" letter-spacing="0.5">Gather your lists, meals, and more.</text>
+
+          <!-- STACKED / CENTERED -->
+          <text x="450" y="410" font-family="Georgia, serif" font-size="10" fill="#BBBBBB" text-anchor="middle" letter-spacing="2">STACKED / CENTERED</text>
+          <rect x="390" y="424" width="120" height="120" rx="28" fill="url(#sg-iconGrad)" filter="url(#sg-softShadow)"/>
+          <circle cx="418" cy="464" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="431" y="459" width="52" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="418" cy="484" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="431" y="479" width="40" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <circle cx="418" cy="504" r="6" fill="#FFFFFF" opacity="0.95"/>
+          <rect x="431" y="499" width="48" height="10" rx="5" fill="#FFFFFF" opacity="0.95"/>
+          <path d="M491,442 C491,442 475,431 475,421 C475,415 479,411 483,411 C486,411 489,414 491,416 C493,414 496,411 499,411 C503,411 507,415 507,421 C507,431 491,442 491,442 Z" fill="#F9A8C9" opacity="0.92"/>
+          <text x="450" y="596" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1" text-anchor="middle">
+            <tspan font-size="52">Gather </tspan><tspan font-size="28" font-weight="600" fill="#85BFA8">Lists</tspan>
+          </text>
+          <text x="463" y="621" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
+
+          <!-- Dividers -->
+          <line x1="240" y1="50" x2="240" y2="210" stroke="#E8E8E2" stroke-width="1"/>
+          <line x1="40" y1="220" x2="860" y2="220" stroke="#E8E8E2" stroke-width="1"/>
+          <line x1="40" y1="400" x2="860" y2="400" stroke="#E8E8E2" stroke-width="1"/>
+        </svg>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── USAGE ── -->
+  <section>
+    <div class="section-label">04 — Guidelines</div>
+    <div class="section-title">Usage Notes</div>
+    <div class="usage-grid">
+      <div class="usage-card">
+        <h4>✅ Do</h4>
+        <ul>
+          <li><span class="dot"></span>Use Forest (#3D7A63) for the wordmark on light backgrounds</li>
+          <li><span class="dot"></span>Use White wordmark on the Forest dark background</li>
+          <li><span class="dot"></span>Always include the 🩷 heart on the app icon</li>
+          <li><span class="dot"></span>Maintain the gradient direction (135°) on the icon</li>
+          <li><span class="dot"></span>Keep Nunito 800 for all logo text</li>
+          <li><span class="dot"></span>Use Cream (#FAFAF7) as the default app background</li>
+        </ul>
+      </div>
+      <div class="usage-card">
+        <h4>❌ Don't</h4>
+        <ul>
+          <li><span class="dot pink"></span>Don't stretch or distort the logo proportions</li>
+          <li><span class="dot pink"></span>Don't place the logo on busy or clashing backgrounds</li>
+          <li><span class="dot pink"></span>Don't use colors outside the defined palette</li>
+          <li><span class="dot pink"></span>Don't change the font family away from Nunito</li>
+          <li><span class="dot pink"></span>Don't use the icon without its rounded-square container</li>
+          <li><span class="dot pink"></span>Don't alter the heart accent color</li>
+        </ul>
+      </div>
+      <div class="usage-card">
+        <h4>🎯 Logo Placement</h4>
+        <ul>
+          <li><span class="dot sage"></span>App Store / Play Store → Icon only</li>
+          <li><span class="dot sage"></span>App navigation bar → Icon + Name (horizontal)</li>
+          <li><span class="dot sage"></span>Website header → Full logo with tagline</li>
+          <li><span class="dot sage"></span>Splash / onboarding → Stacked centered version</li>
+          <li><span class="dot sage"></span>Social media profile → Icon only (square crop)</li>
+          <li><span class="dot sage"></span>Email footer → Icon + Name (horizontal)</li>
+        </ul>
+      </div>
+      <div class="usage-card">
+        <h4>📐 Spacing & Radius</h4>
+        <ul>
+          <li><span class="dot"></span>App icon corner radius: 28% of icon width</li>
+          <li><span class="dot"></span>Card corner radius: 16px standard, 24px large</li>
+          <li><span class="dot"></span>Clear space around logo: 1× icon height minimum</li>
+          <li><span class="dot"></span>Button border radius: 12px</li>
+          <li><span class="dot"></span>Base spacing unit: 8px grid</li>
+          <li><span class="dot"></span>Shadow: 0 4px 16px rgba(61,122,99, 0.12)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Gather Lists · Brand Style Guide v1.0 · Confidential
+</footer>
+
+</body>
+</html>

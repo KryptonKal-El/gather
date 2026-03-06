@@ -66,9 +66,8 @@ export const Login = () => {
     <div className={styles.backdrop}>
       <div className={styles.card}>
         <div className={styles.logoStack}>
-          <img src="/logo/icon-only.svg" alt="" className={styles.logoIcon} aria-hidden="true" />
-          <h1 className={styles.logo}>Gather</h1>
-          <p className={styles.tagline}>Gather your lists, meals, and more.</p>
+          <img src="/logo/stacked.svg" alt="Gather Lists" className={styles.logoImg} />
+          <h1 className={styles.srOnly}>Gather Lists</h1>
         </div>
 
         <div className={styles.buttons}>

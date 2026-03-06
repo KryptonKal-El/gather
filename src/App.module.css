@@ -14,34 +14,16 @@
   padding: 1.5rem 0 1rem;
 }
 
-.logo {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--text-primary);
+.logoGroup {
+  display: flex;
+  align-items: center;
   margin: 0;
 }
 
-.logoGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.logoRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.logoIcon {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
-.ai {
-  color: var(--primary);
-  font-weight: 800;
+.headerLogo {
+  height: 44px;
+  width: auto;
+  display: block;
 }
 
 .headerRight {
@@ -153,12 +135,6 @@
   min-height: 100vh;
   color: var(--text-placeholder);
   font-size: 1.1rem;
-}
-
-.tagline {
-  color: var(--text-placeholder);
-  font-size: 0.9rem;
-  margin: 0.25rem 0 0;
 }
 
 .main {
@@ -453,10 +429,6 @@
     overflow: hidden;
     padding: 0;
     padding-top: env(safe-area-inset-top, 0px);
-  }
-
-  .logo {
-    font-size: 1.4rem;
   }
 
   .userName {

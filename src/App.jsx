@@ -630,7 +630,7 @@ export const App = () => {
             </>
           ) : (
             <div className={styles.noList}>
-              <h2>Welcome to Gather</h2>
+              <h2>Welcome to Gather Lists</h2>
               <p>Create a new list to get started.</p>
             </div>
           )}
@@ -742,13 +742,9 @@ export const App = () => {
       <header className={styles.header}>
         {!isMobile && (
           <>
-            <div className={styles.logoGroup}>
-              <div className={styles.logoRow}>
-                <img src="/logo/icon-only.svg" alt="" className={styles.logoIcon} aria-hidden="true" />
-                <h1 className={styles.logo}>Gather</h1>
-              </div>
-              <span className={styles.tagline}>Gather your lists, meals, and more.</span>
-            </div>
+            <h1 className={styles.logoGroup}>
+              <img src="/logo/icon-name-tagline.svg" alt="Gather Lists" className={styles.headerLogo} />
+            </h1>
             <div className={styles.headerRight}>
               <div
                 className={styles.headerAvatarWrap}

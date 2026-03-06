@@ -1,6 +1,6 @@
 /**
  * Generate PNG icons and splash screens for PWA and Capacitor (iOS/Android).
- * Uses sharp to rasterize the Gather logo SVG.
+ * Uses sharp to rasterize the Gather Lists logo SVG.
  *
  * Run: node scripts/generate-icons.js
  */

@@ -1,7 +1,7 @@
-# Gather — App Store Metadata
+# Gather Lists — App Store Metadata
 
 ## App Name
-Gather
+Gather Lists
 
 ## Subtitle (30 chars max)
 Gather your lists, meals, and more.
@@ -14,7 +14,7 @@ shopping list,grocery,AI,shared lists,recipes,meal planning,food,kitchen,smart l
 
 ## Description (4000 chars max)
 
-Gather is your intelligent grocery shopping companion that makes meal planning and shopping effortless.
+Gather Lists is your intelligent grocery shopping companion that makes meal planning and shopping effortless.
 
 **Smart Shopping Lists**
 Create and organize shopping lists with ease. Add items quickly, check them off as you shop, and keep everything organized by category. Your lists sync across all your devices instantly.
@@ -43,7 +43,7 @@ Sign in securely with Apple. Your data is yours — we don't sell it, track you,
 • Organize items with custom categories and colors
 • Secure Apple Sign-In
 
-Download Gather today and make grocery shopping smarter.
+Download Gather Lists today and make grocery shopping smarter.
 
 ## Content Rating
 4+ (No objectionable content)
@@ -55,7 +55,7 @@ https://gatherapp.vercel.app
 https://gatherapp.vercel.app
 
 ## Copyright
-© 2026 Gather
+© 2026 Gather Lists
 
 ## What's New in This Version
-Initial release! Gather brings AI-powered grocery shopping to your iPhone and iPad with smart lists, image search, real-time sharing, and seamless sync.
+Initial release! Gather Lists brings AI-powered grocery shopping to your iPhone and iPad with smart lists, image search, real-time sharing, and seamless sync.
