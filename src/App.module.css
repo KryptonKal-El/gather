@@ -313,7 +313,7 @@
   width: 100%;
 }
 
-/* Push animation: list slides left to -30%, detail slides in from 100% to 0 */
+/* Push animation: list slides left to -100%, detail slides in from 100% to 0 */
 .listScreen.pushing {
   animation: slideOutLeft 300ms ease-out forwards;
 }
@@ -322,7 +322,7 @@
   animation: slideInFromRight 300ms ease-out forwards;
 }
 
-/* Pop animation: detail slides out to 100%, list slides back from -30% to 0 */
+/* Pop animation: detail slides out to 100%, list slides back from -100% to 0 */
 .listScreen.popping {
   animation: slideInFromLeft 300ms ease-out forwards;
 }
@@ -336,7 +336,7 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-30%);
+    transform: translateX(-100%);
   }
 }
 
@@ -351,7 +351,7 @@
 
 @keyframes slideInFromLeft {
   from {
-    transform: translateX(-30%);
+    transform: translateX(-100%);
   }
   to {
     transform: translateX(0);
