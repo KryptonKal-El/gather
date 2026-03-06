@@ -336,11 +336,16 @@ export const StoreManager = ({
   const [catExpandedId, setCatExpandedId] = useState(null);
   const isMobile = useIsMobile();
   const menuRef = useRef(null);
+  const actionSheetRef = useRef(null);
 
   useEffect(() => {
     if (!menuOpenId) return;
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        (!actionSheetRef.current || !actionSheetRef.current.contains(e.target))
+      ) {
         setMenuOpenId(null);
       }
     };
@@ -491,7 +496,7 @@ export const StoreManager = ({
                   className={styles.menuItem}
                   onClick={() => handleStartEdit(store)}
                 >
-                  Edit Name
+                  Edit Name &amp; Color
                 </button>
                 <button
                   type="button"
@@ -531,7 +536,7 @@ export const StoreManager = ({
         {menuOpenId === store.id && isMobile && (
           <>
             <div className={styles.actionSheetBackdrop} onClick={() => setMenuOpenId(null)} />
-            <div className={styles.actionSheet}>
+            <div className={styles.actionSheet} ref={actionSheetRef}>
               <div className={styles.actionSheetGroup}>
                 <div className={styles.actionSheetTitle}>{store.name}</div>
                 <button
