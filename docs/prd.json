@@ -113,8 +113,10 @@
         "Lint passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T20:25:00Z",
+      "notes": "Price element now conditionally rendered only when lineTotal is not null.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

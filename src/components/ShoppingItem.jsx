@@ -333,9 +333,11 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
             )}
           </div>
         </div>
-        <span className={styles.price} onDoubleClick={onToggle}>
-          {lineTotal !== null ? `$${lineTotal.toFixed(2)}` : '$–'}
-        </span>
+        {lineTotal !== null && (
+          <span className={styles.price} onDoubleClick={onToggle}>
+            {`$${lineTotal.toFixed(2)}`}
+          </span>
+        )}
         <button
           type="button"
           className={styles.editBtn}
