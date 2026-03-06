@@ -220,14 +220,16 @@
     {
       "id": "prd-rebrand-gather-lists",
       "name": "Rebrand Gather to Gather Lists",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-rebrand-gather-lists.md",
       "jsonPath": "docs/prds/prd-rebrand-gather-lists.json",
       "branchName": "feature/rebrand-gather-lists",
       "createdAt": "2026-03-06",
       "updatedAt": "2026-03-06",
       "startedAt": "2026-03-06T12:00:00Z",
-      "currentStory": "US-015"
+      "completedAt": "2026-03-06T13:25:00Z",
+      "currentStory": null,
+      "notes": "All 15 stories complete. Rebrand from Gather to Gather Lists across logos (two-tone tspan treatment), UI (header, login, welcome, PWA banner), metadata (HTML, Capacitor, iOS, App Store, privacy policy), script JSDoc, dark mode splash verification, asset regeneration (PWA icons, Capacitor icons, splash screens, Xcode catalog), and style guide."
     }
   ]
 }

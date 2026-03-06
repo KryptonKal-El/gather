@@ -450,8 +450,10 @@
         "Note: This file is untracked. May not need to be committed."
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-06T13:25:00Z",
+      "passes": true,
+      "notes": "Updated title and body text references from Gather to Gather Lists in style guide HTML",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
