@@ -164,16 +164,16 @@ const generatePwaIcons = async (svgContent, sizes) => {
 
 /**
  * Generate opaque 1024x1024 icons for Capacitor/App Store.
- * Creates a solid background and composites the SVG on top.
+ * Renders the icon SVG on a white background.
  * @param {string} svgContent - SVG content
  */
 const generateCapacitorIcons = async (svgContent) => {
   const size = 1024;
 
-  // Render SVG at 1024x1024 and flatten onto solid background
+  // Render SVG at 1024x1024 and flatten onto white background
   const iconBuffer = await sharp(Buffer.from(svgContent))
     .resize(size, size)
-    .flatten({ background: GRADIENT_MIDPOINT })
+    .flatten({ background: '#FFFFFF' })
     .png()
     .toBuffer();
 
