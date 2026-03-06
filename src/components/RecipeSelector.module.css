@@ -91,6 +91,31 @@
   color: var(--bg-card);
 }
 
+/* Circular + button (mobile) */
+.circleBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.circleBtn:hover {
+  background: var(--primary-deep);
+  transform: scale(1.1);
+}
+
 .lists {
   display: flex;
   flex-direction: column;
@@ -448,6 +473,14 @@
     justify-content: center;
     padding: 0.5rem 1rem;
     font-size: 0.85rem;
+  }
+
+  .circleBtn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 1.3rem;
   }
 
   /* Search bar inside the fixed header */

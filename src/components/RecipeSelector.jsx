@@ -1103,8 +1103,8 @@ export const RecipeSelector = ({
             </svg>
             <span>Collections</span>
           </button>
-          <button className={styles.newBtn} onClick={onCreate}>
-            + New
+          <button className={styles.circleBtn} onClick={onCreate} aria-label="New recipe">
+            +
           </button>
         </div>
         <div className={styles.collectionTitleRow}>
@@ -1183,10 +1183,11 @@ export const RecipeSelector = ({
         <div className={styles.header}>
           <h2 className={styles.title}>Collections</h2>
           <button
-            className={styles.newBtn}
+            className={styles.circleBtn}
             onClick={() => setShowNewCollectionForm(true)}
+            aria-label="New collection"
           >
-            + New
+            +
           </button>
         </div>
         {renderSearchBar('Search collections...')}
@@ -1322,8 +1323,8 @@ export const RecipeSelector = ({
       <div className={styles.mobileHeader}>
         <div className={styles.header}>
           <h2 className={styles.title}>My Recipes</h2>
-          <button className={styles.newBtn} onClick={onCreate}>
-            + New
+          <button className={styles.circleBtn} onClick={onCreate} aria-label="New recipe">
+            +
           </button>
         </div>
 
