@@ -430,6 +430,7 @@
     flex-shrink: 0;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-light);
+    padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: 0.75rem;
   }
 

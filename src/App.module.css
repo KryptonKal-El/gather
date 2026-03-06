@@ -385,7 +385,6 @@
     height: 100dvh;
     overflow: hidden;
     padding: 0;
-    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .header {
@@ -428,7 +427,6 @@
     height: 100dvh;
     overflow: hidden;
     padding: 0;
-    padding-top: env(safe-area-inset-top, 0px);
   }
 
   .userName {
