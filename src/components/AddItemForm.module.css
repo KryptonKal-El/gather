@@ -96,22 +96,33 @@
   border-color: var(--info-darker);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 700px) {
   .form {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
   }
 
   .inputWrapper {
-    flex: none;
-    width: 100%;
-  }
-
-  .storeSelect {
     flex: 1;
     min-width: 0;
   }
 
+  .input {
+    padding: 0.4rem 0.75rem;
+    min-height: 36px;
+  }
+
+  .storeSelect {
+    min-width: 0;
+    max-width: 90px;
+    padding: 0.4rem 0.25rem;
+    font-size: 0.85rem;
+  }
+
   .button {
+    padding: 0.4rem 0.75rem;
     flex-shrink: 0;
+    font-size: 0.9rem;
   }
 }
