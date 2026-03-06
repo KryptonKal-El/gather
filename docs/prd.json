@@ -251,8 +251,10 @@
         "Lint passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T22:20:00Z",
+      "notes": "Preview resized from 120x120 to width:100%/max-width:400px with contain fit. Remove button has 44x44 min touch target. Full-width on narrow viewports.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
