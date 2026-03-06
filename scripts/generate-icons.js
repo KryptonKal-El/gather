@@ -13,7 +13,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
 const PUBLIC = join(PROJECT_ROOT, 'public');
 const ASSETS = join(PROJECT_ROOT, 'assets');
-const LOGO_SVG_PATH = join(PUBLIC, 'logo', 'icon-only.svg');
+const LOGO_SVG_PATH = join(PUBLIC, 'logo', 'icon-only-full-bleed.svg');
 const STACKED_SVG_PATH = join(PUBLIC, 'logo', 'stacked.svg');
 
 // Brand colors

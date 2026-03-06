@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="300" height="300" fill="url(#iconGrad)"/>
+
+  <circle cx="97" cy="120" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="129" y="107" width="82" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="97" cy="170" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="129" y="157" width="63" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="97" cy="220" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="129" y="207" width="75" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+
+  <path d="M240,64 C240,64 226,54 226,46 C226,41 230,38 233,38 C236,38 238,40 240,42 C242,40 244,38 247,38 C250,38 254,41 254,46 C254,54 240,64 240,64 Z" fill="#F9A8C9" opacity="0.92"/>
+</svg>
