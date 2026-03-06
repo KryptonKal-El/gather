@@ -38,6 +38,28 @@
   background: var(--bg-raised);
   border-bottom: 1px solid var(--border-default);
   border-radius: 10px 10px 0 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.storeTitleCollapsed {
+  border-bottom: none;
+  border-radius: 10px;
+}
+
+.chevron {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid var(--text-tertiary);
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.chevronExpanded {
+  transform: rotate(90deg);
 }
 
 .storeDot {

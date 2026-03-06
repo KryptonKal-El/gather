@@ -141,6 +141,19 @@ export const ShoppingList = ({
   onRestoreAnimationDone,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
+  const [collapsedStores, setCollapsedStores] = useState(new Set());
+
+  const handleToggleStore = (storeId) => {
+    setCollapsedStores((prev) => {
+      const next = new Set(prev);
+      if (next.has(storeId)) {
+        next.delete(storeId);
+      } else {
+        next.add(storeId);
+      }
+      return next;
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -205,9 +218,14 @@ export const ShoppingList = ({
         const storeColors = getAllCategoryColors(storeCats);
         const storeOrder = getAllCategoryKeys(storeCats);
         const subtotal = computeSubtotal(storeItems);
+        const isCollapsed = collapsedStores.has(store.id);
         return (
           <div key={store.id} className={styles.storeSection}>
-            <h3 className={styles.storeTitle}>
+            <h3
+              className={`${styles.storeTitle} ${isCollapsed ? styles.storeTitleCollapsed : ''}`}
+              onClick={() => handleToggleStore(store.id)}
+            >
+              <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronExpanded}`} />
               <span
                 className={styles.storeDot}
                 style={{ backgroundColor: store.color }}
@@ -218,22 +236,24 @@ export const ShoppingList = ({
                 <span className={styles.subtotal}>{`$${subtotal.toFixed(2)}`}</span>
               )}
             </h3>
-            <div className={styles.storeBody}>
-              <CategoryGroup
-                categoryOrder={storeOrder}
-                grouped={grouped}
-                allLabels={storeLabels}
-                allColors={storeColors}
-                stores={stores}
-                onToggle={onToggle}
-                onRemove={onRemove}
-                onUpdateCategory={onUpdateCategory}
-                onUpdateStore={onUpdateStore}
-                onUpdateItem={onUpdateItem}
-                restoredItemIds={restoredItemIds}
-                onRestoreAnimationDone={onRestoreAnimationDone}
-              />
-            </div>
+            {!isCollapsed && (
+              <div className={styles.storeBody}>
+                <CategoryGroup
+                  categoryOrder={storeOrder}
+                  grouped={grouped}
+                  allLabels={storeLabels}
+                  allColors={storeColors}
+                  stores={stores}
+                  onToggle={onToggle}
+                  onRemove={onRemove}
+                  onUpdateCategory={onUpdateCategory}
+                  onUpdateStore={onUpdateStore}
+                  onUpdateItem={onUpdateItem}
+                  restoredItemIds={restoredItemIds}
+                  onRestoreAnimationDone={onRestoreAnimationDone}
+                />
+              </div>
+            )}
           </div>
         );
       })}
@@ -242,15 +262,21 @@ export const ShoppingList = ({
       {unassigned.length > 0 && (
         <div className={hasStores ? styles.storeSection : undefined}>
           {hasStores && (
-            <h3 className={styles.storeTitle}>
+            <h3
+              className={`${styles.storeTitle} ${collapsedStores.has('__unassigned__') ? styles.storeTitleCollapsed : ''}`}
+              onClick={() => handleToggleStore('__unassigned__')}
+            >
+              <span className={`${styles.chevron} ${collapsedStores.has('__unassigned__') ? '' : styles.chevronExpanded}`} />
               <span className={styles.storeDot} style={{ backgroundColor: '#bbb' }} />
               Unassigned
               <span className={styles.count}>{unassigned.length}</span>
             </h3>
           )}
-          <div className={hasStores ? styles.storeBody : undefined}>
-            <CategoryGroup grouped={groupByCategory(unassigned)} {...defaultGroupProps} />
-          </div>
+          {(!hasStores || !collapsedStores.has('__unassigned__')) && (
+            <div className={hasStores ? styles.storeBody : undefined}>
+              <CategoryGroup grouped={groupByCategory(unassigned)} {...defaultGroupProps} />
+            </div>
+          )}
         </div>
       )}
 
