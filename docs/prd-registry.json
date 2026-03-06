@@ -258,6 +258,17 @@
       "completedAt": "2026-03-06T19:03:00Z",
       "currentStory": null,
       "notes": "All 7 stories complete. Domain migrated from gatherapp.vercel.app to gatherlists.com across auth redirect, CORS origins (both edge functions), iOS entitlements, AASA verification, privacy policy, App Store metadata. Old domain kept as fallback in CORS and entitlements. Build and cap sync verified."
+    },
+    {
+      "id": "prd-ios-ui-cleanup",
+      "name": "iOS UI Cleanup",
+      "status": "ready",
+      "filePath": "docs/prds/prd-ios-ui-cleanup.md",
+      "jsonPath": "docs/prds/prd-ios-ui-cleanup.json",
+      "branchName": "feature/ios-ui-cleanup",
+      "createdAt": "2026-03-06",
+      "updatedAt": "2026-03-06",
+      "notes": "10 stories covering 15 improvements: CSS spacing tightening (6a-6f batched), store badge border fix, chevron removal, price placeholder hiding, compact AddItemForm, iOS-style + button, push navigation transition, image lightbox improvements, collapsible store groups, and Store Manager rewrite."
     }
   ]
 }
