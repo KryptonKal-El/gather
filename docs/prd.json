@@ -421,8 +421,10 @@
         "Visually verify splash-dark.png shows 'Gather Lists' with white 'Gather' + light gray 'Lists'"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-06T13:20:00Z",
+      "passes": true,
+      "notes": "Fixed STACKED_VIEWBOX height (210→225) to match stacked.svg. All assets regenerated: PWA icons (64/192/512), Capacitor icons (icon-only.png, icon-foreground.png), splash screens (splash.png, splash-dark.png). Build + cap sync + capacitor-assets generate all successful.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

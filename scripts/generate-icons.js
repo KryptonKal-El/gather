@@ -22,7 +22,7 @@ const DARK_BACKGROUND = '#1a1a2e';
 const LIGHT_SPLASH_BG = '#FFFFFF';
 
 // Stacked logo viewBox dimensions
-const STACKED_VIEWBOX = { x: 310, y: 410, width: 280, height: 210 };
+const STACKED_VIEWBOX = { x: 310, y: 410, width: 280, height: 225 };
 
 // Ensure assets directory exists
 if (!existsSync(ASSETS)) {
