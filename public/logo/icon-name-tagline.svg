@@ -25,7 +25,9 @@
 
   <path d="M279,268 C279,268 266,259 266,251 C266,246 269,243 272,243 C275,243 277,245 279,247 C281,245 283,243 286,243 C289,243 292,246 292,251 C292,259 279,268 279,268 Z" fill="#F9A8C9" opacity="0.92"/>
 
-  <text x="312" y="305" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="54" font-weight="800" fill="#3D7A63" letter-spacing="-1">Gather</text>
+  <text x="312" y="305" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1">
+    <tspan font-size="54">Gather </tspan><tspan font-size="30" font-weight="600" fill="#85BFA8">Lists</tspan>
+  </text>
 
   <text x="313" y="330" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="15" font-weight="600" fill="#85BFA8" letter-spacing="0.5">Gather your lists, meals, and more.</text>
 </svg>

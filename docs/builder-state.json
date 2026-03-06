@@ -1,25 +1,39 @@
 {
-  "sessionId": "builder-2026-03-05-splash-stacked-logo",
-  "lastHeartbeat": "2026-03-05T18:35:00Z",
+  "sessionId": "builder-2026-03-06-rebrand-gather-lists",
+  "lastHeartbeat": "2026-03-06T12:00:00Z",
   "activePrd": {
-    "id": "prd-splash-stacked-logo",
-    "name": "Splash Screen Stacked Logo",
-    "currentStory": null,
+    "id": "prd-rebrand-gather-lists",
+    "name": "Rebrand Gather to Gather Lists",
+    "currentStory": "US-002",
     "storiesCompleted": ["US-001"],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 1,
+    "totalStories": 15,
     "testingRigor": "standard",
-    "status": "completed"
+    "status": "in_progress"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-05T18:35:00Z",
+    "lastSyncedAt": "2026-03-06T12:00:00Z",
     "items": [
-      {"content": "US-001: Update splash generation to use stacked logo", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"}
+      {"content": "US-001: Save all-variants SVG reference file", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Extract and replace logo SVG files", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Update HTML title and meta tags", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Update Capacitor app name", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: Update iOS display name", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Update desktop header branding", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: Update login screen branding", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-007"},
+      {"content": "US-008: Update welcome message", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-008"},
+      {"content": "US-009: Update PWA install banner", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-009"},
+      {"content": "US-010: Update privacy policy", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-010"},
+      {"content": "US-011: Update App Store metadata", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-011"},
+      {"content": "US-012: Update generate-icons.js comment", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-012"},
+      {"content": "US-013: Verify splash dark mode with two-tone text", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-013"},
+      {"content": "US-014: Regenerate PWA and iOS assets", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-014"},
+      {"content": "US-015: Update style guide (optional)", "status": "pending", "priority": "low", "flow": "prd", "refId": "US-015"}
     ]
   },
   "uncommittedWork": null,

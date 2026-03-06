@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="310 410 280 210" width="280" height="210">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="310 410 280 225" width="280" height="225">
   <defs>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&amp;display=swap');
@@ -25,7 +25,9 @@
 
   <path d="M491,442 C491,442 475,431 475,421 C475,415 479,411 483,411 C486,411 489,414 491,416 C493,414 496,411 499,411 C503,411 507,415 507,421 C507,431 491,442 491,442 Z" fill="#F9A8C9" opacity="0.92"/>
 
-  <text x="450" y="582" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="52" font-weight="800" fill="#3D7A63" text-anchor="middle" letter-spacing="-1">Gather</text>
+  <text x="450" y="596" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1" text-anchor="middle">
+    <tspan font-size="52">Gather </tspan><tspan font-size="28" font-weight="600" fill="#85BFA8">Lists</tspan>
+  </text>
 
-  <text x="450" y="607" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
+  <text x="463" y="621" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="13.5" font-weight="600" fill="#85BFA8" text-anchor="middle" letter-spacing="0.4">Gather your lists, meals, and more.</text>
 </svg>

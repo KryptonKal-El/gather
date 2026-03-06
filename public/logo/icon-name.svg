@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="296 55 310 110" width="310" height="110">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@800&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&amp;display=swap');
     </style>
     <linearGradient id="iconGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
@@ -25,5 +25,7 @@
 
   <path d="M379,91 C379,91 368,83 368,76 C368,72 371,69 374,69 C376,69 378,71 379,73 C380,71 382,69 384,69 C387,69 390,72 390,76 C390,83 379,91 379,91 Z" fill="#F9A8C9" opacity="0.92"/>
 
-  <text x="408" y="118" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-size="46" font-weight="800" fill="#3D7A63" letter-spacing="-1">Gather</text>
+  <text x="408" y="126" font-family="'Nunito', 'Trebuchet MS', sans-serif" font-weight="800" fill="#3D7A63" letter-spacing="-1">
+    <tspan font-size="46">Gather </tspan><tspan font-size="26" font-weight="600" fill="#85BFA8">Lists</tspan>
+  </text>
 </svg>

@@ -220,12 +220,14 @@
     {
       "id": "prd-rebrand-gather-lists",
       "name": "Rebrand Gather to Gather Lists",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-rebrand-gather-lists.md",
       "jsonPath": "docs/prds/prd-rebrand-gather-lists.json",
       "branchName": "feature/rebrand-gather-lists",
       "createdAt": "2026-03-06",
-      "updatedAt": "2026-03-06"
+      "updatedAt": "2026-03-06",
+      "startedAt": "2026-03-06T12:00:00Z",
+      "currentStory": "US-002"
     }
   ]
 }
