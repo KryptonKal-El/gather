@@ -24,7 +24,7 @@
   width: 100%;
   min-height: 36px;
   padding: 0.5rem 2rem 0.5rem 2.25rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background: var(--bg-input);
   border: 1px solid var(--border-light);
   border-radius: 10px;
@@ -109,7 +109,7 @@
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--border-default);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   box-sizing: border-box;
   background: var(--bg-input);
   color: var(--text-primary);
@@ -374,7 +374,7 @@
   padding: 0.4rem 0.6rem;
   border: 2px solid var(--primary);
   border-radius: 6px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -510,9 +510,7 @@
     margin: 0 1rem;
   }
 
-  .searchInput {
-    font-size: 16px;
-  }
+
 
   /* Create form inside grouped section */
   .createForm {
@@ -628,12 +626,7 @@
   }
 
   .editInput {
-    font-size: 1rem;
     padding: 0.5rem 0.75rem;
-  }
-
-  .createInput {
-    font-size: 1rem;
   }
 
   .editActions {

@@ -82,7 +82,7 @@
   padding: 0.75rem 0.75rem;
   border: 2px solid var(--border-default);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
   background: var(--bg-card);
   color: var(--text-secondary);
@@ -109,7 +109,6 @@
   .storeSelect {
     flex: 1;
     min-width: 0;
-    font-size: 1rem;
   }
 
   .button {

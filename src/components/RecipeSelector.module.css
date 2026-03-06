@@ -24,7 +24,7 @@
   width: 100%;
   min-height: 36px;
   padding: 0.5rem 2rem 0.5rem 2.25rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background: var(--bg-input);
   border: 1px solid var(--border-light);
   border-radius: 10px;
@@ -336,7 +336,7 @@
   flex: 1;
   min-height: 36px;
   padding: 0.4rem 0.75rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   background: var(--bg-input);
   border: 1px solid var(--border-light);
   border-radius: 8px;
@@ -372,7 +372,7 @@
   flex: 1;
   min-height: 28px;
   padding: 0.25rem 0.5rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
   background: var(--bg-input);
   border: 1px solid var(--primary);
@@ -455,9 +455,7 @@
     margin: 0 1rem;
   }
 
-  .searchInput {
-    font-size: 16px;
-  }
+
 
   /* List groups as iOS-style rounded sections */
   .lists {
@@ -578,7 +576,6 @@
   }
 
   .inlineInput {
-    font-size: 16px; /* Prevent iOS zoom */
     min-height: 44px;
   }
 
@@ -588,7 +585,6 @@
   }
 
   .inlineRenameInput {
-    font-size: 16px; /* Prevent iOS zoom */
     min-height: 36px;
   }
 }

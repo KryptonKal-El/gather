@@ -135,7 +135,7 @@
   padding: 0.75rem;
   border: 2px solid var(--border-default);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
   resize: vertical;
   transition: border-color 0.2s;

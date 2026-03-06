@@ -159,7 +159,7 @@
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-medium);
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
@@ -410,7 +410,7 @@
   padding: 0.3rem 0.5rem;
   border: 1px solid var(--border-dashed);
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-family: inherit;
   outline: none;
   box-sizing: border-box;
@@ -503,7 +503,7 @@
   padding: 0.35rem 0.5rem;
   border: 1px solid var(--border-medium);
   border-radius: 5px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-family: inherit;
   outline: none;
   transition: border-color 0.15s;
@@ -542,17 +542,5 @@
   cursor: default;
 }
 
-@media (max-width: 700px) {
-  .input {
-    font-size: 1rem;
-  }
 
-  .catRenameInput {
-    font-size: 1rem;
-  }
-
-  .catAddInput {
-    font-size: 1rem;
-  }
-}
 

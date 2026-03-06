@@ -539,7 +539,7 @@
   width: 100%;
   min-height: 160px;
   padding: 0.75rem;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-family: inherit;
   background: var(--bg-input);
   border: 2px solid var(--border-default);
@@ -614,10 +614,6 @@
 @media (max-width: 700px) {
   .importBtn {
     min-height: 44px;
-  }
-
-  .importTextarea {
-    font-size: 16px; /* Prevent iOS zoom */
   }
 
   .importCancelBtn,

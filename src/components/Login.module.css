@@ -93,7 +93,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
