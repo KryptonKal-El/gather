@@ -164,16 +164,37 @@ const generatePwaIcons = async (svgContent, sizes) => {
 
 /**
  * Generate opaque 1024x1024 icons for Capacitor/App Store.
- * Renders the icon SVG on a white background.
- * @param {string} svgContent - SVG content
+ * Creates a full-bleed version where the gradient fills the entire square
+ * and the icon content is centered. iOS applies its own rounded corner mask.
  */
-const generateCapacitorIcons = async (svgContent) => {
+const generateCapacitorIcons = async () => {
   const size = 1024;
 
-  // Render SVG at 1024x1024 and flatten onto white background
-  const iconBuffer = await sharp(Buffer.from(svgContent))
+  // Full-bleed app icon SVG: gradient fills entire square, no rounded corners, no shadow
+  const appIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+  <defs>
+    <linearGradient id="iconGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B5E8C8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A8D8EA;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="${size}" height="${size}" fill="url(#iconGrad)"/>
+
+  <circle cx="330" cy="410" r="52" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="440" y="365" width="280" height="85" rx="42" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="330" cy="580" r="52" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="440" y="535" width="215" height="85" rx="42" fill="#FFFFFF" opacity="0.95"/>
+
+  <circle cx="330" cy="750" r="52" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="440" y="705" width="255" height="85" rx="42" fill="#FFFFFF" opacity="0.95"/>
+
+  <path d="M820,220 C820,220 700,140 700,70 C700,30 730,0 760,0 C790,0 810,20 820,40 C830,20 850,0 880,0 C910,0 940,30 940,70 C940,140 820,220 820,220 Z" fill="#F9A8C9" opacity="0.92"/>
+</svg>`;
+
+  const iconBuffer = await sharp(Buffer.from(appIconSvg))
     .resize(size, size)
-    .flatten({ background: '#FFFFFF' })
     .png()
     .toBuffer();
 
@@ -181,10 +202,10 @@ const generateCapacitorIcons = async (svgContent) => {
   const iconFgPath = join(ASSETS, 'icon-foreground.png');
 
   await sharp(iconBuffer).toFile(iconOnlyPath);
-  console.log(`Generated ${iconOnlyPath} (1024x1024, opaque)`);
+  console.log(`Generated ${iconOnlyPath} (1024x1024, full-bleed)`);
 
   await sharp(iconBuffer).toFile(iconFgPath);
-  console.log(`Generated ${iconFgPath} (1024x1024, opaque)`);
+  console.log(`Generated ${iconFgPath} (1024x1024, full-bleed)`);
 };
 
 /**
@@ -227,7 +248,7 @@ const main = async () => {
   await generatePwaIcons(svgContent, [64, 192, 512]);
 
   console.log('\nGenerating Capacitor icons...');
-  await generateCapacitorIcons(svgContent);
+  await generateCapacitorIcons();
 
   console.log('\nGenerating splash screens...');
   await generateSplashScreens();
