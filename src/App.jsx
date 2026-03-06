@@ -523,19 +523,13 @@ export const App = () => {
     if (activeTab === 'stores') {
       return (
         <section className={styles.mobileScreen}>
-          <div className={styles.mobileHeader}>
-            <h2 className={styles.mobileHeaderTitle}>Stores</h2>
-          </div>
-          <div className={styles.mobileScrollContent}>
-            <StoreManager
-              stores={state.stores}
-              onAdd={actions.addStore}
-              onUpdate={actions.updateStore}
-              onDelete={actions.deleteStore}
-              onReorder={actions.reorderStores}
-              alwaysOpen
-            />
-          </div>
+          <StoreManager
+            stores={state.stores}
+            onAdd={actions.addStore}
+            onUpdate={actions.updateStore}
+            onDelete={actions.deleteStore}
+            onReorder={actions.reorderStores}
+          />
         </section>
       );
     }

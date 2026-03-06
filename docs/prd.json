@@ -332,8 +332,10 @@
         "npx cap sync ios succeeds"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "Largest story — major component rewrite. Should be implemented last after US-006 establishes the circular + button pattern.",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T21:00:00Z",
+      "notes": "Major StoreManager rewrite: ListSelector-matching layout with search, inline creation, three-dot menu (desktop dropdown / mobile action sheet), removed alwaysOpen prop, App.jsx mobile stores tab simplified.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

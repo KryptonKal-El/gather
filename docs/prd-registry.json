@@ -262,14 +262,15 @@
     {
       "id": "prd-ios-ui-cleanup",
       "name": "iOS UI Cleanup",
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2026-03-06T20:00:00Z",
+      "completedAt": "2026-03-06T21:00:00Z",
       "filePath": "docs/prds/prd-ios-ui-cleanup.md",
       "jsonPath": "docs/prds/prd-ios-ui-cleanup.json",
       "branchName": "feature/ios-ui-cleanup",
       "createdAt": "2026-03-06",
       "updatedAt": "2026-03-06",
-      "notes": "10 stories covering 15 improvements: CSS spacing tightening (6a-6f batched), store badge border fix, chevron removal, price placeholder hiding, compact AddItemForm, iOS-style + button, push navigation transition, image lightbox improvements, collapsible store groups, and Store Manager rewrite."
+      "notes": "All 10 stories complete. CSS spacing tightening, store badge border fix, chevron removal, price placeholder hiding, compact AddItemForm, iOS-style + button, push navigation transition, image lightbox improvements, collapsible store groups, and full Store Manager rewrite matching ListSelector polish."
     }
   ]
 }

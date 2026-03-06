@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './StoreManager.module.css';
 
 const PRESET_COLORS = [
@@ -308,14 +309,13 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
 
 /**
  * Panel for managing stores: create, rename, delete, pick color, reorder,
- * and manage categories per store.
+ * and manage categories per store. Renders mobile or desktop layout based on viewport.
  * @param {Object} props
  * @param {Array} props.stores - List of store objects.
  * @param {Function} props.onAdd - Callback to add a new store.
  * @param {Function} props.onUpdate - Callback to update a store.
  * @param {Function} props.onDelete - Callback to delete a store.
  * @param {Function} props.onReorder - Callback to reorder stores.
- * @param {boolean} [props.alwaysOpen=false] - If true, skip toggle and show content immediately.
  */
 export const StoreManager = ({
   stores,
@@ -323,16 +323,34 @@ export const StoreManager = ({
   onUpdate,
   onDelete,
   onReorder,
-  alwaysOpen = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [menuOpenId, setMenuOpenId] = useState(null);
   const [catExpandedId, setCatExpandedId] = useState(null);
+  const isMobile = useIsMobile();
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpenId) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpenId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpenId]);
+
+  const filteredStores = searchQuery.trim()
+    ? stores.filter((s) => s.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+    : stores;
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -341,12 +359,15 @@ export const StoreManager = ({
     onAdd(trimmed, newColor);
     setNewName('');
     setNewColor(PRESET_COLORS[0]);
+    setIsCreating(false);
+    setSearchQuery('');
   };
 
   const handleStartEdit = (store) => {
     setEditingId(store.id);
     setEditName(store.name);
     setEditColor(store.color);
+    setMenuOpenId(null);
   };
 
   const handleSaveEdit = (id) => {
@@ -382,193 +403,320 @@ export const StoreManager = ({
     setCatExpandedId((prev) => (prev === storeId ? null : storeId));
   };
 
-  const showPanel = alwaysOpen || isOpen;
-  const containerClass = alwaysOpen
-    ? `${styles.container} ${styles.containerFullScreen}`
-    : styles.container;
+  const renderCreateForm = () => (
+    <form className={styles.createForm} onSubmit={handleCreate}>
+      <input
+        type="text"
+        value={newName}
+        onChange={(e) => setNewName(e.target.value)}
+        className={styles.createInput}
+        placeholder="Store name (e.g. Walmart, Costco)"
+        autoFocus
+      />
+      <div className={styles.colorPicker}>
+        {PRESET_COLORS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+            style={{ backgroundColor: c }}
+            onClick={() => setNewColor(c)}
+            aria-label={`Color ${c}`}
+          />
+        ))}
+      </div>
+      <button type="submit" className={styles.createBtn} disabled={!newName.trim()}>
+        Create
+      </button>
+    </form>
+  );
 
-  return (
-    <div className={containerClass}>
-      {!alwaysOpen && (
-        <button
-          className={styles.toggle}
-          onClick={() => setIsOpen(!isOpen)}
-          type="button"
-        >
-          <span className={styles.toggleIcon}>{isOpen ? '\u2212' : '+'}</span>
-          Manage Stores
-        </button>
-      )}
-
-      {showPanel && (
-        <div className={styles.panel}>
-          <div className={styles.section}>
-            <h4 className={styles.sectionTitle}>
-              Your Stores ({stores.length})
-            </h4>
-
-            {stores.length === 0 && (
-              <p className={styles.emptyHint}>
-                No stores yet. Add a store to organize items by where you shop.
-              </p>
-            )}
-
-            <div className={styles.storeList}>
-              {stores.map((store, index) => (
-                <div key={store.id} className={styles.storeItem}>
-                  {editingId === store.id ? (
-                    <div className={styles.editForm}>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className={styles.input}
-                        placeholder="Store name"
-                      />
-                      <div className={styles.colorPicker}>
-                        {PRESET_COLORS.map((c) => (
-                          <button
-                            key={c}
-                            type="button"
-                            className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
-                            style={{ backgroundColor: c }}
-                            onClick={() => setEditColor(c)}
-                            aria-label={`Color ${c}`}
-                          />
-                        ))}
-                      </div>
-                      <div className={styles.editActions}>
-                        <button
-                          type="button"
-                          className={styles.saveBtn}
-                          onClick={() => handleSaveEdit(store.id)}
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.cancelBtn}
-                          onClick={handleCancelEdit}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className={styles.storeItemRow}>
-                        <span
-                          className={styles.storeBadge}
-                          style={{ backgroundColor: store.color }}
-                        >
-                          {store.name}
-                        </span>
-                        <span className={styles.catCount}>
-                          {store.categories?.length ?? 0} categories
-                        </span>
-                        <div className={styles.itemActions}>
-                          <button
-                            type="button"
-                            className={styles.iconBtn}
-                            onClick={() => toggleCatExpanded(store.id)}
-                            aria-label="Manage categories"
-                            title="Manage categories"
-                          >
-                            {catExpandedId === store.id ? '\u25BE' : '\u25B8'}
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.iconBtn}
-                            onClick={() => handleMoveUp(index)}
-                            disabled={index === 0}
-                            aria-label="Move up"
-                            title="Move up"
-                          >
-                            &uarr;
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.iconBtn}
-                            onClick={() => handleMoveDown(index)}
-                            disabled={index === stores.length - 1}
-                            aria-label="Move down"
-                            title="Move down"
-                          >
-                            &darr;
-                          </button>
-                          <button
-                            type="button"
-                            className={styles.iconBtn}
-                            onClick={() => handleStartEdit(store)}
-                            aria-label="Edit"
-                            title="Edit"
-                          >
-                            &#9998;
-                          </button>
-                          <button
-                            type="button"
-                            className={`${styles.iconBtn} ${styles.deleteIcon}`}
-                            onClick={() => setConfirmingDeleteId(store.id)}
-                            aria-label={`Delete ${store.name}`}
-                            title="Delete"
-                          >
-                            &times;
-                          </button>
-                          {confirmingDeleteId === store.id && (
-                            <ConfirmDialog
-                              message={`Delete store "${store.name}"?`}
-                              onConfirm={() => {
-                                onDelete(store.id);
-                                setConfirmingDeleteId(null);
-                              }}
-                              onCancel={() => setConfirmingDeleteId(null)}
-                            />
-                          )}
-                        </div>
-                      </div>
-                      {catExpandedId === store.id && (
-                        <StoreCategoryEditor
-                          categories={store.categories ?? []}
-                          otherStores={stores.filter((s) => s.id !== store.id)}
-                          onSave={(cats) => handleSaveCategories(store.id, cats)}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <form className={styles.addForm} onSubmit={handleCreate}>
-            <h4 className={styles.sectionTitle}>Add New Store</h4>
+  const renderStoreItem = (store, index) => {
+    if (editingId === store.id) {
+      return (
+        <div key={store.id} className={styles.storeItem}>
+          <div className={styles.editForm}>
             <input
               type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
               className={styles.input}
-              placeholder="Store name (e.g. Walmart, Costco)"
+              placeholder="Store name"
+              autoFocus
             />
             <div className={styles.colorPicker}>
               {PRESET_COLORS.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                  className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
                   style={{ backgroundColor: c }}
-                  onClick={() => setNewColor(c)}
+                  onClick={() => setEditColor(c)}
                   aria-label={`Color ${c}`}
                 />
               ))}
             </div>
-            <button type="submit" className={styles.addBtn} disabled={!newName.trim()}>
-              Add Store
-            </button>
-          </form>
+            <div className={styles.editActions}>
+              <button type="button" className={styles.saveBtn} onClick={() => handleSaveEdit(store.id)}>
+                Save
+              </button>
+              <button type="button" className={styles.cancelBtn} onClick={handleCancelEdit}>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-      )}
+      );
+    }
+
+    return (
+      <div key={store.id} className={styles.storeItem}>
+        <div className={styles.storeItemRow}>
+          <span className={styles.storeDot} style={{ backgroundColor: store.color }} />
+          <span className={styles.storeName}>{store.name}</span>
+          <span className={styles.catCount}>{store.categories?.length ?? 0} categories</span>
+          <div className={styles.menuWrap} ref={menuOpenId === store.id ? menuRef : null}>
+            <button
+              type="button"
+              className={styles.menuBtn}
+              onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
+              aria-label="Store options"
+            >
+              ⋯
+            </button>
+            {menuOpenId === store.id && !isMobile && (
+              <div className={styles.menuDropdown}>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => handleStartEdit(store)}
+                >
+                  Edit Name
+                </button>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { toggleCatExpanded(store.id); setMenuOpenId(null); }}
+                >
+                  Manage Categories
+                </button>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { handleMoveUp(index); setMenuOpenId(null); }}
+                  disabled={index === 0}
+                >
+                  Move Up
+                </button>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { handleMoveDown(index); setMenuOpenId(null); }}
+                  disabled={index === stores.length - 1}
+                >
+                  Move Down
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.menuItem} ${styles.menuDanger}`}
+                  onClick={() => { setConfirmingDeleteId(store.id); setMenuOpenId(null); }}
+                >
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {menuOpenId === store.id && isMobile && (
+          <>
+            <div className={styles.actionSheetBackdrop} onClick={() => setMenuOpenId(null)} />
+            <div className={styles.actionSheet}>
+              <div className={styles.actionSheetGroup}>
+                <div className={styles.actionSheetTitle}>{store.name}</div>
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => handleStartEdit(store)}
+                >
+                  Edit Name &amp; Color
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => { toggleCatExpanded(store.id); setMenuOpenId(null); }}
+                >
+                  Manage Categories
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => { handleMoveUp(index); setMenuOpenId(null); }}
+                  disabled={index === 0}
+                >
+                  Move Up
+                </button>
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => { handleMoveDown(index); setMenuOpenId(null); }}
+                  disabled={index === stores.length - 1}
+                >
+                  Move Down
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
+                  onClick={() => { setConfirmingDeleteId(store.id); setMenuOpenId(null); }}
+                >
+                  Delete Store
+                </button>
+              </div>
+              <button
+                type="button"
+                className={styles.actionSheetCancel}
+                onClick={() => setMenuOpenId(null)}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+
+        {catExpandedId === store.id && (
+          <StoreCategoryEditor
+            categories={store.categories ?? []}
+            otherStores={stores.filter((s) => s.id !== store.id)}
+            onSave={(cats) => handleSaveCategories(store.id, cats)}
+          />
+        )}
+
+        {confirmingDeleteId === store.id && (
+          <ConfirmDialog
+            message={`Delete store "${store.name}"?`}
+            onConfirm={() => { onDelete(store.id); setConfirmingDeleteId(null); }}
+            onCancel={() => setConfirmingDeleteId(null)}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const renderMobileLayout = () => (
+    <div className={styles.mobileLayout}>
+      <div className={styles.mobileHeader}>
+        <div className={styles.headerRow}>
+          <h2 className={styles.title}>Stores</h2>
+          <button
+            className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
+            onClick={() => setIsCreating(!isCreating)}
+            aria-label={isCreating ? 'Cancel' : 'New store'}
+          >
+            {isCreating ? '×' : '+'}
+          </button>
+        </div>
+        <div className={styles.searchBar}>
+          <svg
+            className={styles.searchIcon}
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            className={styles.searchInput}
+            placeholder="Search stores..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              className={styles.searchClearBtn}
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      </div>
+      <div className={styles.scrollArea}>
+        {isCreating && renderCreateForm()}
+        <div className={styles.storeList}>
+          {filteredStores.length === 0 && (
+            <p className={styles.emptyHint}>
+              {searchQuery ? 'No stores match your search.' : 'No stores yet. Add a store to organize items by where you shop.'}
+            </p>
+          )}
+          {filteredStores.map((store, index) => renderStoreItem(store, index))}
+        </div>
+      </div>
     </div>
   );
+
+  const renderDesktopLayout = () => (
+    <div className={styles.container}>
+      <div className={styles.headerRow}>
+        <h4 className={styles.sectionTitle}>Your Stores ({stores.length})</h4>
+        <button className={styles.newBtn} onClick={() => setIsCreating(!isCreating)}>
+          {isCreating ? 'Cancel' : '+ New'}
+        </button>
+      </div>
+      <div className={styles.searchBar}>
+        <svg
+          className={styles.searchIcon}
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input
+          type="text"
+          className={styles.searchInput}
+          placeholder="Search stores..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button
+            type="button"
+            className={styles.searchClearBtn}
+            onClick={() => setSearchQuery('')}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
+      </div>
+      {isCreating && renderCreateForm()}
+      <div className={styles.storeList}>
+        {filteredStores.length === 0 && (
+          <p className={styles.emptyHint}>
+            {searchQuery ? 'No stores match your search.' : 'No stores yet. Add a store to organize items by where you shop.'}
+          </p>
+        )}
+        {filteredStores.map((store, index) => renderStoreItem(store, index))}
+      </div>
+    </div>
+  );
+
+  return isMobile ? renderMobileLayout() : renderDesktopLayout();
 };
 
 StoreManager.propTypes = {
@@ -591,5 +739,4 @@ StoreManager.propTypes = {
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onReorder: PropTypes.func.isRequired,
-  alwaysOpen: PropTypes.bool,
 };
