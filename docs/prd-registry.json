@@ -216,6 +216,16 @@
       "createdAt": "2026-03-05",
       "updatedAt": "2026-03-05",
       "notes": "1 story complete. Splash screens now show stacked Gather logo (icon + name + tagline) with embedded Nunito fonts. Light splash: white bg. Dark splash: #1a1a2e with white text. Xcode assets rebuilt."
+    },
+    {
+      "id": "prd-rebrand-gather-lists",
+      "name": "Rebrand Gather to Gather Lists",
+      "status": "ready",
+      "filePath": "docs/prds/prd-rebrand-gather-lists.md",
+      "jsonPath": "docs/prds/prd-rebrand-gather-lists.json",
+      "branchName": "feature/rebrand-gather-lists",
+      "createdAt": "2026-03-06",
+      "updatedAt": "2026-03-06"
     }
   ]
 }
