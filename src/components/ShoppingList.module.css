@@ -137,3 +137,9 @@
   background: var(--danger);
   color: var(--bg-card);
 }
+
+@media (max-width: 700px) {
+  .empty {
+    padding: 1.5rem 1rem;
+  }
+}

@@ -1,31 +1,34 @@
 {
-  "sessionId": "builder-2026-03-06-custom-domain",
-  "lastHeartbeat": "2026-03-06T19:03:00Z",
+  "sessionId": "builder-2026-03-06-ios-ui-cleanup",
+  "lastHeartbeat": "2026-03-06T20:00:00Z",
   "activePrd": {
-    "id": "prd-custom-domain",
-    "name": "Custom Domain Migration (gatherlists.com)",
-    "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007"],
+    "id": "prd-ios-ui-cleanup",
+    "name": "iOS UI Cleanup",
+    "currentStory": "US-002",
+    "storiesCompleted": ["US-001"],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 7,
+    "totalStories": 10,
     "testingRigor": "standard",
-    "status": "completed"
+    "status": "in_progress"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-06T19:03:00Z",
+    "lastSyncedAt": "2026-03-06T20:00:00Z",
     "items": [
-      {"content": "US-001: Update Apple Sign-In redirectURI", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Update edge function CORS origins", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Update iOS associated domains", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Verify AASA file for new domain", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Update privacy policy URLs", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Update App Store metadata URLs", "status": "completed", "priority": "medium", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Sync iOS project with Capacitor", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"}
+      {"content": "US-001: CSS Quick Wins — Tighten Spacing & Sizing", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Remove Store Badge Dashed Border in Edit Panel", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Remove Chevron from List Items", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Hide Price Placeholder When No Price Set", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: AddItemForm — Single-Line Compact Layout", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Replace '+ New' Button with iOS-Style Plus Button", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: Improve Navigation Push Transition", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-007"},
+      {"content": "US-008: Image Lightbox — Larger Preview & Relocated Remove Button", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-008"},
+      {"content": "US-009: Collapsible Store Groups in Shopping List", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-009"},
+      {"content": "US-010: Store Manager — Full ListSelector-Like Treatment", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-010"}
     ]
   },
   "uncommittedWork": null,

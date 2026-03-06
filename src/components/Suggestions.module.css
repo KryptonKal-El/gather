@@ -89,3 +89,10 @@
 .toggleBtn:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 700px) {
+  .container {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+  }
+}

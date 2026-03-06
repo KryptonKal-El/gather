@@ -262,7 +262,8 @@
     {
       "id": "prd-ios-ui-cleanup",
       "name": "iOS UI Cleanup",
-      "status": "ready",
+      "status": "in_progress",
+      "startedAt": "2026-03-06T20:00:00Z",
       "filePath": "docs/prds/prd-ios-ui-cleanup.md",
       "jsonPath": "docs/prds/prd-ios-ui-cleanup.json",
       "branchName": "feature/ios-ui-cleanup",

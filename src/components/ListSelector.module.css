@@ -469,7 +469,7 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 1rem;
-    padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Container becomes transparent - groups get backgrounds */
