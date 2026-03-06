@@ -8,14 +8,14 @@
 
   <rect width="300" height="300" fill="url(#iconGrad)"/>
 
-  <circle cx="97" cy="120" r="15" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="129" y="107" width="82" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="70" cy="100" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="102.5" y="87.5" width="130" height="25" rx="12.5" fill="#FFFFFF" opacity="0.95"/>
 
-  <circle cx="97" cy="170" r="15" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="129" y="157" width="63" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="70" cy="150" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="102.5" y="137.5" width="100" height="25" rx="12.5" fill="#FFFFFF" opacity="0.95"/>
 
-  <circle cx="97" cy="220" r="15" fill="#FFFFFF" opacity="0.95"/>
-  <rect x="129" y="207" width="75" height="25" rx="12" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="70" cy="200" r="15" fill="#FFFFFF" opacity="0.95"/>
+  <rect x="102.5" y="187.5" width="120" height="25" rx="12.5" fill="#FFFFFF" opacity="0.95"/>
 
-  <path d="M240,64 C240,64 226,54 226,46 C226,41 230,38 233,38 C236,38 238,40 240,42 C242,40 244,38 247,38 C250,38 254,41 254,46 C254,54 240,64 240,64 Z" fill="#F9A8C9" opacity="0.92"/>
+  <path d="M250,65 C250,65 215,40 215,20 C215,7.5 225,0 232.5,0 C240,0 245,5 250,10 C255,5 260,0 267.5,0 C275,0 285,7.5 285,20 C285,40 250,65 250,65 Z" fill="#F9A8C9" opacity="0.92"/>
 </svg>
