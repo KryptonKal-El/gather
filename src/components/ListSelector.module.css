@@ -434,16 +434,6 @@
   margin: 0;
 }
 
-/* Chevron indicator */
-.chevron {
-  display: block;
-  color: var(--text-ghost);
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  font-weight: 300;
-  line-height: 1;
-}
-
 /* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
@@ -575,12 +565,6 @@
 
   .listCount {
     font-size: 0.75rem;
-  }
-
-  /* Chevron spacing on mobile */
-  .chevron {
-    margin-left: auto;
-    padding-right: 0.25rem;
   }
 
   /* Menu button always visible on touch devices */

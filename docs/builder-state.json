@@ -4,8 +4,8 @@
   "activePrd": {
     "id": "prd-ios-ui-cleanup",
     "name": "iOS UI Cleanup",
-    "currentStory": "US-003",
-    "storiesCompleted": ["US-001", "US-002"],
+    "currentStory": "US-004",
+    "storiesCompleted": ["US-001", "US-002", "US-003"],
     "storiesBlocked": [],
     "storiesSkipped": [],
     "totalStories": 10,
