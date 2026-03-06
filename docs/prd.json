@@ -218,8 +218,10 @@
         "Lint passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-06T22:10:00Z",
+      "notes": "Changed slideOutLeft and slideInFromLeft keyframes from -30% to -100% for full iOS push/pop navigation feel.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
