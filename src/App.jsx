@@ -614,13 +614,6 @@ export const App = () => {
                 onRestoreAnimationDone={handleRestoreAnimationDone}
               />
               <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
-              <StoreManager
-                stores={state.stores}
-                onAdd={actions.addStore}
-                onUpdate={actions.updateStore}
-                onDelete={actions.deleteStore}
-                onReorder={actions.reorderStores}
-              />
             </>
           ) : (
             <div className={styles.noList}>
@@ -699,6 +692,18 @@ export const App = () => {
       </>
     );
 
+    const renderStoresView = () => (
+      <div className={styles.storesViewWrap}>
+        <StoreManager
+          stores={state.stores}
+          onAdd={actions.addStore}
+          onUpdate={actions.updateStore}
+          onDelete={actions.deleteStore}
+          onReorder={actions.reorderStores}
+        />
+      </div>
+    );
+
     return (
       <div className={styles.desktopWrapper}>
         <div className={styles.desktopTabs}>
@@ -716,9 +721,18 @@ export const App = () => {
           >
             Recipes
           </button>
+          <button
+            type="button"
+            className={`${styles.desktopTab} ${desktopView === 'stores' ? styles.desktopTabActive : ''}`}
+            onClick={() => setDesktopView('stores')}
+          >
+            Stores
+          </button>
         </div>
         <div className={styles.desktopBody}>
-          {desktopView === 'lists' ? renderListsView() : renderRecipesView()}
+          {desktopView === 'lists' && renderListsView()}
+          {desktopView === 'recipes' && renderRecipesView()}
+          {desktopView === 'stores' && renderStoresView()}
         </div>
       </div>
     );

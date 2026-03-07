@@ -183,7 +183,7 @@
   border: 1px solid var(--border-default);
   border-radius: 8px;
   overflow: hidden;
-  width: 240px;
+  width: 360px;
   margin-bottom: 0.75rem;
 }
 
@@ -213,6 +213,10 @@
 .desktopTabActive {
   background: var(--primary);
   color: white;
+}
+
+.storesViewWrap {
+  max-width: 480px;
 }
 
 .mobileFullScreen {
