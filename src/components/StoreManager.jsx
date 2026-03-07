@@ -1,5 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
@@ -307,6 +325,20 @@ const StoreCategoryEditor = ({ categories, otherStores, onSave }) => {
   );
 };
 
+const SortableStoreItem = ({ id, children, isMobile }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      {typeof children === 'function' ? children({ attributes, listeners, isDragging, isMobile }) : children}
+    </div>
+  );
+};
+
 /**
  * Panel for managing stores: create, rename, delete, pick color, reorder,
  * and manage categories per store. Renders mobile or desktop layout based on viewport.
@@ -386,19 +418,19 @@ export const StoreManager = ({
     setEditingId(null);
   };
 
-  const handleMoveUp = (index) => {
-    if (index === 0) return;
-    const reordered = [...stores];
-    [reordered[index - 1], reordered[index]] = [reordered[index], reordered[index - 1]];
-    onReorder(reordered);
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = stores.findIndex((s) => s.id === active.id);
+    const newIndex = stores.findIndex((s) => s.id === over.id);
+    onReorder(arrayMove(stores, oldIndex, newIndex));
   };
 
-  const handleMoveDown = (index) => {
-    if (index === stores.length - 1) return;
-    const reordered = [...stores];
-    [reordered[index], reordered[index + 1]] = [reordered[index + 1], reordered[index]];
-    onReorder(reordered);
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
   const handleSaveCategories = (storeId, categories) => {
     onUpdate(storeId, { categories });
@@ -436,10 +468,10 @@ export const StoreManager = ({
     </form>
   );
 
-  const renderStoreItem = (store, index) => {
+  const renderStoreItem = (store, index, dragProps) => {
     if (editingId === store.id) {
       return (
-        <div key={store.id} className={styles.storeItem}>
+        <div className={styles.storeItem}>
           <div className={styles.editForm}>
             <input
               type="text"
@@ -475,12 +507,39 @@ export const StoreManager = ({
     }
 
     return (
-      <div key={store.id} className={styles.storeItem}>
-        <div className={styles.storeItemRow}>
+      <div className={styles.storeItem}>
+        <div
+          className={styles.storeItemRow}
+          onClick={() => toggleCatExpanded(store.id)}
+          {...(dragProps && isMobile ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
+        >
+          {!isMobile && dragProps && (
+            <button type="button" className={styles.dragHandle} {...dragProps.attributes} {...dragProps.listeners} onClick={(e) => e.stopPropagation()} aria-label="Drag to reorder">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+              </svg>
+            </button>
+          )}
           <span className={styles.storeDot} style={{ backgroundColor: store.color }} />
           <span className={styles.storeName}>{store.name}</span>
           <span className={styles.catCount}>{store.categories?.length ?? 0} categories</span>
-          <div className={styles.menuWrap} ref={menuOpenId === store.id ? menuRef : null}>
+          <svg
+            className={`${styles.expandChevron} ${catExpandedId === store.id ? styles.expandChevronOpen : ''}`}
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          <div className={styles.menuWrap} ref={menuOpenId === store.id ? menuRef : null} onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               className={styles.menuBtn}
@@ -497,29 +556,6 @@ export const StoreManager = ({
                   onClick={() => handleStartEdit(store)}
                 >
                   Edit Name &amp; Color
-                </button>
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { toggleCatExpanded(store.id); setMenuOpenId(null); }}
-                >
-                  Manage Categories
-                </button>
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { handleMoveUp(index); setMenuOpenId(null); }}
-                  disabled={index === 0}
-                >
-                  Move Up
-                </button>
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { handleMoveDown(index); setMenuOpenId(null); }}
-                  disabled={index === stores.length - 1}
-                >
-                  Move Down
                 </button>
                 <button
                   type="button"
@@ -545,29 +581,6 @@ export const StoreManager = ({
                   onClick={() => handleStartEdit(store)}
                 >
                   Edit Name &amp; Color
-                </button>
-                <button
-                  type="button"
-                  className={styles.actionSheetItem}
-                  onClick={() => { toggleCatExpanded(store.id); setMenuOpenId(null); }}
-                >
-                  Manage Categories
-                </button>
-                <button
-                  type="button"
-                  className={styles.actionSheetItem}
-                  onClick={() => { handleMoveUp(index); setMenuOpenId(null); }}
-                  disabled={index === 0}
-                >
-                  Move Up
-                </button>
-                <button
-                  type="button"
-                  className={styles.actionSheetItem}
-                  onClick={() => { handleMoveDown(index); setMenuOpenId(null); }}
-                  disabled={index === stores.length - 1}
-                >
-                  Move Down
                 </button>
                 <button
                   type="button"
@@ -662,7 +675,19 @@ export const StoreManager = ({
               {searchQuery ? 'No stores match your search.' : 'No stores yet. Add a store to organize items by where you shop.'}
             </p>
           )}
-          {filteredStores.map((store, index) => renderStoreItem(store, index))}
+          {!searchQuery.trim() ? (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
+              <SortableContext items={stores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                {stores.map((store, index) => (
+                  <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
+                    {(dragProps) => renderStoreItem(store, index, dragProps)}
+                  </SortableStoreItem>
+                ))}
+              </SortableContext>
+            </DndContext>
+          ) : (
+            filteredStores.map((store, index) => renderStoreItem(store, index, null))
+          )}
         </div>
       </div>
     </div>
@@ -716,7 +741,19 @@ export const StoreManager = ({
             {searchQuery ? 'No stores match your search.' : 'No stores yet. Add a store to organize items by where you shop.'}
           </p>
         )}
-        {filteredStores.map((store, index) => renderStoreItem(store, index))}
+        {!searchQuery.trim() ? (
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
+            <SortableContext items={stores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+              {stores.map((store, index) => (
+                <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
+                  {(dragProps) => renderStoreItem(store, index, dragProps)}
+                </SortableStoreItem>
+              ))}
+            </SortableContext>
+          </DndContext>
+        ) : (
+          filteredStores.map((store, index) => renderStoreItem(store, index, null))
+        )}
       </div>
     </div>
   );
