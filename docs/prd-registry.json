@@ -349,6 +349,26 @@
       "branchName": "feature/swift-recipes-advanced",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09"
+    },
+    {
+      "id": "prd-swift-settings-images",
+      "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-settings-images.md",
+      "jsonPath": "docs/prds/prd-swift-settings-images.json",
+      "branchName": "feature/swift-settings-images",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
+    },
+    {
+      "id": "prd-swift-final-polish",
+      "name": "Native Swift iOS App — Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-final-polish.md",
+      "jsonPath": "docs/prds/prd-swift-final-polish.json",
+      "branchName": "feature/swift-final-polish",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
