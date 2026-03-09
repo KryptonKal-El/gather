@@ -165,7 +165,11 @@ struct ListBrowserView: View {
             set: { vm.searchQuery = $0 }
         ), prompt: "Search lists")
         .navigationDestination(for: GatherList.self) { list in
-            ListDetailPlaceholderView(list: list)
+            ListDetailView(
+                list: list,
+                viewModel: vm,
+                isOwned: vm.ownedLists.contains { $0.id == list.id }
+            )
         }
     }
     

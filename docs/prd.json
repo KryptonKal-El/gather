@@ -270,8 +270,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "ListDetailView with colored navigation bar, share status indicator (collaborator count for owned, 'Shared' badge for shared), empty state, items count placeholder, and add item toolbar placeholder. Replaced ListDetailPlaceholderView in navigation destination.",
+      "status": "completed",
+      "completedAt": "2026-03-09T18:00:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

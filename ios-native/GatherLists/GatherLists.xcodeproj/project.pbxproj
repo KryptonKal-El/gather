@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */; };
@@ -33,6 +34,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E238 /* ListBrowserView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E23A /* ListRowView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */,
@@ -293,6 +296,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */,
