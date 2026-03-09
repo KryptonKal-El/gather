@@ -296,7 +296,17 @@
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T16:45:00Z",
-      "currentStory": "US-004"
+      "currentStory": "US-005"
+    },
+    {
+      "id": "prd-swift-shopping-list",
+      "name": "Native Swift iOS App — Phase 3: Shopping List Items",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-shopping-list.md",
+      "jsonPath": "docs/prds/prd-swift-shopping-list.json",
+      "branchName": "feature/swift-shopping-list",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
