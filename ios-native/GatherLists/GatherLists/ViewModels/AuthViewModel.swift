@@ -10,7 +10,22 @@ final class AuthViewModel {
     var isLoading = true
     var isAuthenticated = false
     var currentUser: User?
+    var profile: Profile?
     var error: String?
+    
+    var displayName: String {
+        profile?.displayName
+            ?? currentUser?.userMetadata["full_name"]?.stringValue
+            ?? "User"
+    }
+    
+    var avatarUrl: String? {
+        profile?.avatarUrl ?? currentUser?.userMetadata["avatar_url"]?.stringValue
+    }
+    
+    var email: String? {
+        currentUser?.email
+    }
     
     nonisolated(unsafe) private var authStateTask: Task<Void, Never>?
     
@@ -28,6 +43,7 @@ final class AuthViewModel {
             isAuthenticated = true
             currentUser = session.user
             print("[AuthViewModel] Existing session found for user: \(session.user.id)")
+            Task { await fetchProfile() }
         } catch {
             isAuthenticated = false
             currentUser = nil
@@ -44,13 +60,16 @@ final class AuthViewModel {
                 case .signedIn, .tokenRefreshed, .userUpdated:
                     isAuthenticated = true
                     currentUser = session?.user
+                    Task { await fetchProfile() }
                 case .signedOut:
                     isAuthenticated = false
                     currentUser = nil
+                    profile = nil
                 case .initialSession:
                     if let session {
                         isAuthenticated = true
                         currentUser = session.user
+                        Task { await fetchProfile() }
                     } else {
                         isAuthenticated = false
                         currentUser = nil
@@ -68,6 +87,7 @@ final class AuthViewModel {
             try await SupabaseManager.shared.client.auth.signOut()
             isAuthenticated = false
             currentUser = nil
+            profile = nil
             print("[AuthViewModel] User signed out successfully")
         } catch {
             self.error = error.localizedDescription
@@ -129,6 +149,19 @@ final class AuthViewModel {
         } catch {
             self.error = error.localizedDescription
             print("[AuthViewModel] Email sign-up failed: \(error.localizedDescription)")
+        }
+    }
+    
+    func refreshProfile() async {
+        await fetchProfile()
+    }
+    
+    private func fetchProfile() async {
+        guard let userId = currentUser?.id else { return }
+        do {
+            profile = try await ProfileService.fetchProfile(userId: userId)
+        } catch {
+            print("[AuthViewModel] Failed to fetch profile: \(error.localizedDescription)")
         }
     }
     
