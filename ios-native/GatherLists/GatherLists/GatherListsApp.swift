@@ -3,6 +3,8 @@ import SwiftUI
 @main
 struct GatherListsApp: App {
     @State private var authViewModel = AuthViewModel()
+    @State private var networkMonitor = NetworkMonitor()
+    private var appearanceManager = AppearanceManager.shared
     
     var body: some Scene {
         WindowGroup {
@@ -17,6 +19,9 @@ struct GatherListsApp: App {
                         .environment(authViewModel)
                 }
             }
+            .environment(networkMonitor)
+            .environment(appearanceManager)
+            .preferredColorScheme(appearanceManager.setting.colorScheme)
         }
     }
 }

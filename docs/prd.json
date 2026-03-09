@@ -451,8 +451,10 @@
         "Build succeeds"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:50:00Z",
+      "passes": true,
+      "notes": "Root wiring: NetworkMonitor @State + .environment(), AppearanceManager.shared + .environment(), .preferredColorScheme() on root Group. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

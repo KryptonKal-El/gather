@@ -359,14 +359,16 @@
     {
       "id": "prd-swift-settings-images",
       "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-settings-images.md",
       "jsonPath": "docs/prds/prd-swift-settings-images.json",
       "branchName": "feature/swift-settings-images",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T23:00:00Z",
-      "currentStory": "US-014"
+      "completedAt": "2026-03-09T23:50:00Z",
+      "currentStory": null,
+      "notes": "All 14 stories complete. ProfileService, ProfileImageService, AuthViewModel profile integration, SettingsView (avatar+name editing+appearance picker), AppearanceManager (system/light/dark), ItemImageService, ProductSearchService, ItemImagePickerSheet (search+upload), ListDetailView thumbnails, item context menu image actions, NetworkMonitor connectivity indicator, root appearance+network wiring. Build succeeds."
     },
     {
       "id": "prd-swift-final-polish",
