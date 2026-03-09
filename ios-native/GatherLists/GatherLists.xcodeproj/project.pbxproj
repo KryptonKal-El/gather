@@ -59,6 +59,7 @@
 		A1B2C3D4E5F6A7B8C9D0E27E /* RecipeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E280 /* ShareCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27F /* ShareCollectionSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E282 /* EditCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E281 /* EditCollectionSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E284 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -116,6 +117,7 @@
 		A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E27F /* ShareCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollectionSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E281 /* EditCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCollectionSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -207,6 +209,7 @@
 				A1B2C3D4E5F6A7B8C9D0E254 /* HistoryService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E256 /* StoreService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E271 /* RecipeService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -427,6 +430,7 @@
 				A1B2C3D4E5F6A7B8C9D0E27E /* RecipeDetailView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E280 /* ShareCollectionSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E282 /* EditCollectionSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E284 /* StorageService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

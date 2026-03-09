@@ -288,7 +288,7 @@
     },
     {
       "id": "prd-swift-lists-core",
-      "name": "Native Swift iOS App — Phase 2: Lists Core",
+      "name": "Native Swift iOS App \u2014 Phase 2: Lists Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-lists-core.md",
       "jsonPath": "docs/prds/prd-swift-lists-core.json",
@@ -302,7 +302,7 @@
     },
     {
       "id": "prd-swift-shopping-list",
-      "name": "Native Swift iOS App — Phase 3: Shopping List Items",
+      "name": "Native Swift iOS App \u2014 Phase 3: Shopping List Items",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-shopping-list.md",
       "jsonPath": "docs/prds/prd-swift-shopping-list.json",
@@ -316,7 +316,7 @@
     },
     {
       "id": "prd-swift-stores",
-      "name": "Native Swift iOS App — Phase 4: Store Management",
+      "name": "Native Swift iOS App \u2014 Phase 4: Store Management",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
@@ -330,7 +330,7 @@
     },
     {
       "id": "prd-swift-recipes-core",
-      "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
+      "name": "Native Swift iOS App \u2014 Phase 5: Recipes & Collections Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
@@ -344,17 +344,19 @@
     },
     {
       "id": "prd-swift-recipes-advanced",
-      "name": "Native Swift iOS App — Phase 6: Recipes Advanced",
-      "status": "ready",
+      "name": "Native Swift iOS App \u2014 Phase 6: Recipes Advanced",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swift-recipes-advanced.md",
       "jsonPath": "docs/prds/prd-swift-recipes-advanced.json",
       "branchName": "feature/swift-recipes-advanced",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09"
+      "updatedAt": "2026-03-10",
+      "startedAt": "2026-03-10T02:15:00Z",
+      "currentStory": "US-002"
     },
     {
       "id": "prd-swift-settings-images",
-      "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
+      "name": "Native Swift iOS App \u2014 Phase 7: Settings, Profile & Item Images",
       "status": "ready",
       "filePath": "docs/prds/prd-swift-settings-images.md",
       "jsonPath": "docs/prds/prd-swift-settings-images.json",
@@ -364,7 +366,7 @@
     },
     {
       "id": "prd-swift-final-polish",
-      "name": "Native Swift iOS App — Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
+      "name": "Native Swift iOS App \u2014 Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
       "status": "ready",
       "filePath": "docs/prds/prd-swift-final-polish.md",
       "jsonPath": "docs/prds/prd-swift-final-polish.json",
