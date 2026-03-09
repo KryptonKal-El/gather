@@ -349,6 +349,64 @@ final class RecipeViewModel {
         }
     }
     
+    // MARK: - Image Actions
+    
+    func uploadRecipeImage(recipeId: UUID, imageData: Data, fileExtension: String) async throws {
+        error = nil
+        do {
+            let imageUrl = try await StorageService.uploadRecipeImage(
+                userId: userId,
+                recipeId: recipeId,
+                imageData: imageData,
+                fileExtension: fileExtension
+            )
+            if let index = recipes.firstIndex(where: { $0.id == recipeId }) {
+                recipes[index].imageUrl = imageUrl
+            }
+            if activeRecipeDetail?.recipe.id == recipeId {
+                activeRecipeDetail?.recipe.imageUrl = imageUrl
+            }
+        } catch {
+            self.error = error.localizedDescription
+            print("[RecipeViewModel] Failed to upload recipe image: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func updateRecipeImageUrl(recipeId: UUID, imageUrl: String) async throws {
+        error = nil
+        do {
+            try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: imageUrl)
+            if let index = recipes.firstIndex(where: { $0.id == recipeId }) {
+                recipes[index].imageUrl = imageUrl
+            }
+            if activeRecipeDetail?.recipe.id == recipeId {
+                activeRecipeDetail?.recipe.imageUrl = imageUrl
+            }
+        } catch {
+            self.error = error.localizedDescription
+            print("[RecipeViewModel] Failed to update recipe image URL: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
+    func removeRecipeImage(recipeId: UUID) async throws {
+        error = nil
+        do {
+            try await RecipeService.removeRecipeImage(recipeId: recipeId)
+            if let index = recipes.firstIndex(where: { $0.id == recipeId }) {
+                recipes[index].imageUrl = nil
+            }
+            if activeRecipeDetail?.recipe.id == recipeId {
+                activeRecipeDetail?.recipe.imageUrl = nil
+            }
+        } catch {
+            self.error = error.localizedDescription
+            print("[RecipeViewModel] Failed to remove recipe image: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     // MARK: - Selection Actions
     
     func selectCollection(id: UUID) {
