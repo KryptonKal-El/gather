@@ -376,8 +376,8 @@
         "Verify on device/simulator"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "UndoManager integration via @Environment. Undo registered for single delete (swipe + context menu) and batch clear checked. UndoHelper NSObject as target since SwiftUI views are value types.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -392,7 +392,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "UndoManager wiring with restore logic and batch undo"
+      "testIntensityReason": "UndoManager wiring with restore logic and batch undo",
+      "status": "completed",
+      "completedAt": "2026-03-09T15:24:12Z"
     },
     {
       "id": "US-012",
@@ -410,8 +412,8 @@
         "Verify on device/simulator with two clients"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Verification story \u2014 no code changes needed. 3 realtime channels (items/stores/history) with refetch-on-change pattern already implemented in US-006. Pull-to-refresh via .refreshable. Cleanup in deinit.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -426,7 +428,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "Cross-device verification and reconnection behavior"
+      "testIntensityReason": "Cross-device verification and reconnection behavior",
+      "status": "completed",
+      "completedAt": "2026-03-09T15:24:12Z"
     }
   ]
 }

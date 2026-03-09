@@ -303,14 +303,16 @@
     {
       "id": "prd-swift-shopping-list",
       "name": "Native Swift iOS App — Phase 3: Shopping List Items",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-shopping-list.md",
       "jsonPath": "docs/prds/prd-swift-shopping-list.json",
       "branchName": "feature/swift-shopping-list",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T19:20:00Z",
-      "currentStory": "US-011"
+      "currentStory": null,
+      "completedAt": "2026-03-09T22:00:00Z",
+      "notes": "All 12 stories complete. Item model, category auto-categorization, ItemService CRUD+restore, HistoryService, StoreService, ListDetailViewModel with 3 realtime channels, add item bar with autocomplete+store picker, item list with store+category grouping, context menu editing, swipe-to-delete, shake-to-undo via UndoManager, realtime sync verified."
     },
     {
       "id": "prd-swift-stores",
