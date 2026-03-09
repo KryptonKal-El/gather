@@ -17,8 +17,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:50:00Z",
+      "passes": true,
+      "notes": "GatherList and ListShare Codable models with CodingKeys for snake_case mapping. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
