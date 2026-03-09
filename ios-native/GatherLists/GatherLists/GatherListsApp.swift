@@ -22,6 +22,11 @@ struct GatherListsApp: App {
             .environment(networkMonitor)
             .environment(appearanceManager)
             .preferredColorScheme(appearanceManager.setting.colorScheme)
+            .onOpenURL { url in
+                Task {
+                    await authViewModel.handleDeepLink(url: url)
+                }
+            }
         }
     }
 }

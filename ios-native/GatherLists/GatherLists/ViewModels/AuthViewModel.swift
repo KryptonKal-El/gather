@@ -152,6 +152,26 @@ final class AuthViewModel {
         }
     }
     
+    /// Handle deep link URL for auth callbacks (OAuth, email confirmation).
+    func handleDeepLink(url: URL) async {
+        print("[AuthViewModel] Deep link received: \(url)")
+        
+        let urlString = url.absoluteString
+        let isAuthCallback = urlString.contains("auth/callback") || urlString.contains("#access_token")
+        
+        guard isAuthCallback else {
+            print("[AuthViewModel] URL is not an auth callback, ignoring: \(url)")
+            return
+        }
+        
+        do {
+            try await SupabaseManager.shared.client.auth.session(from: url)
+            print("[AuthViewModel] Session restored from deep link")
+        } catch {
+            print("[AuthViewModel] Failed to restore session from deep link: \(error.localizedDescription)")
+        }
+    }
+    
     func refreshProfile() async {
         await fetchProfile()
     }
