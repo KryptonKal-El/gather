@@ -11,6 +11,10 @@
 		A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E239 /* ListBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E238 /* ListBrowserView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E23B /* ListRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E23A /* ListRowView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E23D /* ListDetailPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E23F /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */; };
 		A1B2C3D4E5F6A7B8C9D0E1F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */; };
@@ -29,6 +33,10 @@
 		A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherList.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListShare.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E238 /* ListBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListBrowserView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E23A /* ListRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListRowView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailPlaceholderView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -158,6 +166,9 @@
 		A1B2C3D4E5F6A7B8C9D0E216 /* Lists */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F6A7B8C9D0E238 /* ListBrowserView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E23A /* ListRowView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */,
 			);
 			path = Lists;
 			sourceTree = "<group>";
@@ -187,6 +198,7 @@
 		A1B2C3D4E5F6A7B8C9D0E21A /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -273,6 +285,10 @@
 				A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E239 /* ListBrowserView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E23B /* ListRowView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E23D /* ListDetailPlaceholderView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E23F /* ColorExtension.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */,
 				B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */,
 				C2D3E4F5A6B7C8D9E0F1A2B3 /* AuthViewModel.swift in Sources */,

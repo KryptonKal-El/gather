@@ -1,7 +1,7 @@
 import Foundation
 
 /// A shopping list owned by a user, mapped to the `lists` Supabase table.
-struct GatherList: Codable, Identifiable {
+struct GatherList: Codable, Identifiable, Hashable {
     let id: UUID
     let ownerId: UUID
     var name: String

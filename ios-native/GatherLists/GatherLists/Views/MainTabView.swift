@@ -7,7 +7,8 @@ struct MainTabView: View {
     
     var body: some View {
         TabView {
-            ListsPlaceholderView()
+            ListBrowserView()
+                .environment(authViewModel)
                 .tabItem {
                     Label("Lists", systemImage: "list.bullet")
                 }
@@ -29,22 +30,6 @@ struct MainTabView: View {
                 }
         }
         .tint(brandGreen)
-    }
-}
-
-struct ListsPlaceholderView: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                Image(systemName: "list.bullet")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.secondary)
-                Text("Lists — Coming Soon")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-            .navigationTitle("Lists")
-        }
     }
 }
 
