@@ -1,7 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Capacitor } from '@capacitor/core';
-import { SplashScreen } from '@capacitor/splash-screen';
-import { StatusBar, Style } from '@capacitor/status-bar';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
 import { useAuth } from './context/AuthContext.jsx';
@@ -29,7 +26,6 @@ import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
 import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
-import { AppUrlListener } from './components/AppUrlListener.jsx';
 import styles from './App.module.css';
 
 /**
@@ -71,21 +67,6 @@ export const App = () => {
   const [desktopView, setDesktopView] = useState('lists');
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
   const [restoredItemIds, setRestoredItemIds] = useState(new Set());
-
-  // Hide native splash screen after auth check completes
-  useEffect(() => {
-    if (!isLoading && Capacitor.isNativePlatform()) {
-      SplashScreen.hide();
-    }
-  }, [isLoading]);
-
-  // Configure native status bar for edge-to-edge display
-  useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      StatusBar.setOverlaysWebView({ overlay: true });
-      StatusBar.setStyle({ style: Style.Default });
-    }
-  }, []);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -740,7 +721,6 @@ export const App = () => {
 
   return (
     <div className={styles.app}>
-      <AppUrlListener />
       <PWAInstallBanner
         showBanner={showBanner}
         platform={platform}

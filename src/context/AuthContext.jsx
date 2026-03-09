@@ -4,7 +4,6 @@
  * Provides user state, loading state, and auth actions to the component tree.
  */
 import { createContext, useState, useEffect, useContext } from 'react';
-import { Capacitor } from '@capacitor/core';
 import { supabase } from '../services/supabase.js';
 
 export const AuthContext = createContext(null);
@@ -95,47 +94,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /**
-   * Signs in with Apple OAuth.
-   * On native iOS: uses native Apple Sign-In sheet and exchanges token with Supabase.
-   * On web: uses OAuth redirect flow.
+   * Signs in with Apple via OAuth redirect flow.
    * @returns {Promise<void>}
    */
   const signInWithApple = async () => {
-    if (Capacitor.isNativePlatform()) {
-      const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
-      const result = await SignInWithApple.authorize({
-        clientId: 'com.gatherlists',
-        redirectURI: 'https://gatherlists.com',
-        scopes: 'email name',
-      });
-
-      const { error } = await supabase.auth.signInWithIdToken({
-        provider: 'apple',
-        token: result.response.identityToken,
-      });
-
-      if (error) {
-        console.error('Native Apple sign-in token exchange failed:', error);
-        throw error;
-      }
-
-      // Apple only provides name on first authorization — capture it immediately
-      if (result.response.givenName || result.response.familyName) {
-        const fullName = [result.response.givenName, result.response.familyName]
-          .filter(Boolean)
-          .join(' ');
-        if (fullName) {
-          await supabase.auth.updateUser({
-            data: { full_name: fullName },
-          });
-        }
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
-      if (error) {
-        console.error('Apple sign-in failed:', error);
-        throw error;
-      }
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
+    if (error) {
+      console.error('Apple sign-in failed:', error);
+      throw error;
     }
   };
 

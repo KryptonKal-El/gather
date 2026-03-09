@@ -329,8 +329,10 @@
         "Keep: The React PWA continues to work at gatherlists.com for web/desktop users"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "This is a React codebase story, not Swift",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-09T00:45:00Z",
+      "notes": "Removed ios/ directory, capacitor.config.ts, AppUrlListener.jsx, patch-apple-sign-in.js. Removed 8 Capacitor dependencies and 4 scripts from package.json. Stripped all Capacitor.isNativePlatform() guards from App.jsx, AuthContext.jsx, UndoContext.jsx, PWAPrompt.jsx, usePWAInstall.js. npm install removed 410 packages. npm run build succeeds. Xcode build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

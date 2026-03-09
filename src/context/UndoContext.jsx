@@ -4,7 +4,6 @@
  */
 import { createContext, useContext, useCallback, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Capacitor } from '@capacitor/core';
 import { useUndoStack } from '../hooks/useUndoStack.js';
 import { useShakeDetection, requestMotionPermission } from '../hooks/useShakeDetection.js';
 
@@ -28,10 +27,6 @@ export const UndoProvider = ({ children }) => {
   const [motionPermission, setMotionPermission] = useState(() => {
     if (typeof window === 'undefined') return 'unknown';
     if (typeof DeviceMotionEvent?.requestPermission !== 'function') return 'granted';
-    if (Capacitor.isNativePlatform()) {
-      localStorage.setItem('shake-motion-permission', 'granted');
-      return 'granted';
-    }
     return localStorage.getItem('shake-motion-permission') ?? 'unknown';
   });
 
