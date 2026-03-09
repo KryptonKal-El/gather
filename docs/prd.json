@@ -171,9 +171,10 @@
         "Verify on device/simulator"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "EditStoreSheet with pre-filled name and color from store. Detects preset vs custom color on init. Same 18-color LazyVGrid + ColorPicker as CreateStoreSheet. Save calls viewModel.updateStore. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:10:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
