@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherList.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListShare.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 			isa = PBXGroup;
 			children = (
 				C2D3E4F5A6B7C8D9E0F1A2B4 /* AuthViewModel.swift */,
+				A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -266,6 +269,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */,

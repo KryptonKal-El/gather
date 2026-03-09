@@ -21,7 +21,7 @@
       "createdAt": "2026-02-25",
       "updatedAt": "2026-03-04",
       "completedAt": "2026-03-04T18:00:00Z",
-      "notes": "All 9 bugs resolved (BUG-001–009). BUG-008: storage bucket constraints via migration. BUG-009: drag-to-reorder via @dnd-kit/sortable."
+      "notes": "All 9 bugs resolved (BUG-001\u2013009). BUG-008: storage bucket constraints via migration. BUG-009: drag-to-reorder via @dnd-kit/sortable."
     },
     {
       "id": "prd-native-emoji-picker",
@@ -70,7 +70,7 @@
       "updatedAt": "2026-02-27",
       "startedAt": "2026-02-27T12:00:00Z",
       "completedAt": "2026-02-27T23:45:00Z",
-      "notes": "Google and Apple OAuth deferred — email/password auth active. Configure providers in Supabase dashboard when ready."
+      "notes": "Google and Apple OAuth deferred \u2014 email/password auth active. Configure providers in Supabase dashboard when ready."
     },
     {
       "id": "prd-apple-auth",
@@ -95,7 +95,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
       "completedAt": "2026-03-03T12:30:00Z",
-      "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
+      "notes": "US-001\u2013004 all complete. US-004 went through 3 iterations: opacity tint \u2192 full-color backgrounds \u2192 4px left border accent (final)."
     },
     {
       "id": "prd-desktop-avatar-upload",
@@ -121,7 +121,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-03T22:00:00Z",
       "completedAt": "2026-03-03T23:30:00Z",
-      "notes": "All 6 stories complete. Walmart → Open Food Facts → SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
+      "notes": "All 6 stories complete. Walmart \u2192 Open Food Facts \u2192 SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     },
     {
       "id": "prd-ios-app-store",
@@ -274,7 +274,7 @@
     },
     {
       "id": "prd-swift-ios-setup",
-      "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
+      "name": "Native Swift iOS App \u2014 Phase 1: Project Setup & Auth",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
@@ -288,7 +288,7 @@
     },
     {
       "id": "prd-swift-lists-core",
-      "name": "Native Swift iOS App — Phase 2: Lists Core",
+      "name": "Native Swift iOS App \u2014 Phase 2: Lists Core",
       "status": "in_progress",
       "filePath": "docs/prds/prd-swift-lists-core.md",
       "jsonPath": "docs/prds/prd-swift-lists-core.json",
@@ -296,7 +296,7 @@
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T16:45:00Z",
-      "currentStory": "US-002"
+      "currentStory": "US-003"
     }
   ]
 }

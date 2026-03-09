@@ -1,17 +1,17 @@
 {
   "project": "Gather",
   "branchName": "feature/swift-lists-core",
-  "description": "Build the full shopping list management experience in the native Swift app — list CRUD, sharing, realtime sync, custom emoji grid picker, and navigation to list detail view.",
+  "description": "Build the full shopping list management experience in the native Swift app \u2014 list CRUD, sharing, realtime sync, custom emoji grid picker, and navigation to list detail view.",
   "credentialRequirements": [],
   "userStories": [
     {
       "id": "US-001",
       "title": "Codable Data Models for Lists & Shares",
-      "description": "Create Swift data models that map to the Supabase lists and list_shares tables, with CodingKeys for snake_case ↔ camelCase conversion.",
+      "description": "Create Swift data models that map to the Supabase lists and list_shares tables, with CodingKeys for snake_case \u2194 camelCase conversion.",
       "acceptanceCriteria": [
         "A GatherList model with properties: id (UUID), ownerId (UUID), name (String), emoji (String?), itemCount (Int), color (String), createdAt (Date). Conforms to Codable and Identifiable.",
         "A ListShare model with properties: id (UUID), listId (UUID), sharedWithEmail (String), addedAt (Date). Conforms to Codable and Identifiable.",
-        "Column name mapping uses CodingKeys to convert between snake_case DB columns and camelCase Swift properties (e.g., owner_id ↔ ownerId, item_count ↔ itemCount, shared_with_email ↔ sharedWithEmail).",
+        "Column name mapping uses CodingKeys to convert between snake_case DB columns and camelCase Swift properties (e.g., owner_id \u2194 ownerId, item_count \u2194 itemCount, shared_with_email \u2194 sharedWithEmail).",
         "Default values match database defaults: itemCount = 0, color = '#1565c0', emoji = nil.",
         "Models compile and are usable with the Supabase Swift SDK's .select() and .insert() queries.",
         "xcodebuild build succeeds"
@@ -35,11 +35,11 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Data structure definitions — compile-time verification only"
+      "testIntensityReason": "Data structure definitions \u2014 compile-time verification only"
     },
     {
       "id": "US-002",
-      "title": "ListService — CRUD Operations",
+      "title": "ListService \u2014 CRUD Operations",
       "description": "Create a service layer that wraps Supabase queries for list and share operations including fetch, create, update, delete, share, and unshare.",
       "acceptanceCriteria": [
         "A ListService class (or actor) provides async methods: fetchOwnedLists(userId:), createList(userId:name:emoji:color:), updateList(listId:updates:), deleteList(listId:), shareList(listId:email:), unshareList(listId:email:), fetchSharesForList(listId:), fetchSharedWithMe(email:)",
@@ -49,7 +49,7 @@
         "fetchSharedWithMe fetches list_shares rows for the user's email, then fetches the parent lists to return merged data including list name and owner ID",
         "All methods use the Supabase Swift SDK's PostgREST API",
         "Errors are thrown with descriptive context (e.g., 'Failed to create list: name=Groceries')",
-        "The service does NOT manually manage item_count — that's handled by database triggers",
+        "The service does NOT manually manage item_count \u2014 that's handled by database triggers",
         "xcodebuild build succeeds"
       ],
       "priority": 2,
@@ -73,7 +73,7 @@
     },
     {
       "id": "US-003",
-      "title": "ListViewModel — State Management with @Observable",
+      "title": "ListViewModel \u2014 State Management with @Observable",
       "description": "Create the main observable view model that manages all list state (owned + shared), active list selection, search filtering, and realtime subscriptions.",
       "acceptanceCriteria": [
         "A ListViewModel using @Observable manages: ownedLists, sharedLists, activeListId, isLoading, error, searchQuery",
@@ -88,8 +88,8 @@
         "xcodebuild build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "@Observable ListViewModel with owned+shared list state, allLists/filteredLists computed properties, parallel data loading, dual realtime subscriptions (lists+list_shares), re-fetch-all pattern, CRUD actions, ownership-guarded delete, channel cleanup on deinit.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -104,11 +104,13 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "State management with realtime subscriptions and channel lifecycle"
+      "testIntensityReason": "State management with realtime subscriptions and channel lifecycle",
+      "status": "completed",
+      "completedAt": "2026-03-09T13:06:48Z"
     },
     {
       "id": "US-004",
-      "title": "List Browser View — Owned & Shared Sections",
+      "title": "List Browser View \u2014 Owned & Shared Sections",
       "description": "Build the main list browser UI with owned and shared sections, color accents, search bar, loading state, and empty state.",
       "acceptanceCriteria": [
         "The Lists tab shows a scrollable list separated into 'My Lists' (owned) and 'Shared with me' sections",
@@ -144,7 +146,7 @@
     },
     {
       "id": "US-005",
-      "title": "Create List Flow — Name, Emoji & Color Picker",
+      "title": "Create List Flow \u2014 Name, Emoji & Color Picker",
       "description": "Implement the create-list bottom sheet with name input, custom emoji grid picker with categories and search, and 10-color preset picker.",
       "acceptanceCriteria": [
         "A '+' button in the list browser's toolbar triggers the create flow",
@@ -152,9 +154,9 @@
         "The sheet contains: text field for list name, emoji picker button, and a row of 10 color preset circles",
         "The 10 preset colors match the React app: #1565c0, #2e7d32, #c62828, #ef6c00, #6a1b9a, #00838f, #ad1457, #f9a825, #37474f, #4e342e",
         "The selected color circle has a visible checkmark or border indicator; default is #1565c0",
-        "The emoji picker is a custom grid picker — scrollable grid organized by category (Food & Drink, Animals, Objects, Smileys, etc.) with search bar at top, presented as nested sheet or navigation push",
+        "The emoji picker is a custom grid picker \u2014 scrollable grid organized by category (Food & Drink, Animals, Objects, Smileys, etc.) with search bar at top, presented as nested sheet or navigation push",
         "Tapping 'Create' calls ListViewModel.createList and auto-selects the new list; sheet dismisses automatically",
-        "The name field is required — Create button is disabled when name is empty",
+        "The name field is required \u2014 Create button is disabled when name is empty",
         "The sheet has Cancel and Create buttons in a top navigation bar area",
         "xcodebuild build succeeds"
       ],
@@ -179,7 +181,7 @@
     },
     {
       "id": "US-006",
-      "title": "List Context Menu — Edit & Delete",
+      "title": "List Context Menu \u2014 Edit & Delete",
       "description": "Add contextual actions for each list row: edit name/emoji/color via bottom sheet and delete with confirmation dialog.",
       "acceptanceCriteria": [
         "Each list row has a context menu with options based on ownership: owned lists get 'Name & Icon', 'Share Settings', 'Delete List'; shared lists get no edit/delete options",
@@ -212,7 +214,7 @@
     },
     {
       "id": "US-007",
-      "title": "Share List Modal — Add & Remove Collaborators",
+      "title": "Share List Modal \u2014 Add & Remove Collaborators",
       "description": "Implement list sharing by email with collaborator display, add/remove functionality, and basic validation.",
       "acceptanceCriteria": [
         "Share Settings from the context menu opens a share view/sheet showing list name, email input, Add button, and current collaborators",
@@ -221,7 +223,7 @@
         "Removing a collaborator calls ListService.unshareList",
         "The collaborator list updates in realtime via the list_shares subscription from US-003",
         "Basic validation: prevent empty email, show error if already shared (UNIQUE constraint), prevent sharing with owner's own email",
-        "Only list owners can access Share Settings — option does not appear for shared lists",
+        "Only list owners can access Share Settings \u2014 option does not appear for shared lists",
         "xcodebuild build succeeds"
       ],
       "priority": 7,
@@ -245,7 +247,7 @@
     },
     {
       "id": "US-008",
-      "title": "List Detail View — Navigation & Empty State",
+      "title": "List Detail View \u2014 Navigation & Empty State",
       "description": "Create the list detail view with navigation from browser, share status indicator, empty state for items, and toolbar placeholder for Phase 3.",
       "acceptanceCriteria": [
         "Tapping a list in the browser pushes a detail view using NavigationStack / NavigationLink",
@@ -280,7 +282,7 @@
     },
     {
       "id": "US-009",
-      "title": "Realtime Sync — Live Updates Across Devices",
+      "title": "Realtime Sync \u2014 Live Updates Across Devices",
       "description": "Verify and polish realtime behavior so changes made on the React web app or another device appear instantly in the Swift app.",
       "acceptanceCriteria": [
         "When a list is created/renamed/deleted on the React web app, the Swift app's list browser updates within a few seconds without manual refresh",
