@@ -92,8 +92,10 @@
         "Build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T01:00:00Z",
+      "passes": true,
+      "notes": "9 recipe CRUD methods added to RecipeService: fetch, create, update, delete, ingredients/steps rewrite, detail fetch, move. 5 private DTOs. DB triggers handle counts. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
