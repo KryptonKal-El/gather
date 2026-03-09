@@ -504,8 +504,8 @@
         "Build succeeds"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Verified: 3 realtime channels (collections filtered by owner_id, collection_shares filtered by shared_with_email, recipes filtered by owner_id). All use AnyAction for INSERT/UPDATE/DELETE coverage. Duplicate channel guard present. Deinit cancels all tasks and unsubscribes all channels. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -520,7 +520,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "Cross-device realtime sync verification across React and Swift clients"
+      "testIntensityReason": "Cross-device realtime sync verification across React and Swift clients",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:10:00Z"
     }
   ]
 }

@@ -331,14 +331,16 @@
     {
       "id": "prd-swift-recipes-core",
       "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
       "branchName": "feature/swift-recipes-core",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-10",
       "startedAt": "2026-03-10T00:15:00Z",
-      "currentStory": "US-014"
+      "completedAt": "2026-03-10T02:10:00Z",
+      "currentStory": null,
+      "notes": "All 14 stories complete. Recipe/collection data models, RecipeService full CRUD+sharing, RecipeViewModel with @Observable + 3 realtime channels, CollectionBrowserView with search/create/edit/delete/share, CollectionRecipeListView with recipe rows + context menu, RecipeFormSheet dual-mode create/edit with ingredients+steps, RecipeDetailView with hero image + checkable ingredients + numbered steps, ShareCollectionSheet, EditCollectionSheet, wired Recipes tab in MainTabView. Build succeeds."
     },
     {
       "id": "prd-swift-recipes-advanced",
