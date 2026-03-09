@@ -71,7 +71,8 @@ struct ItemService {
         quantity: Int? = nil,
         price: Decimal? = nil,
         clearPrice: Bool = false,
-        imageUrl: String? = nil
+        imageUrl: String? = nil,
+        clearImageUrl: Bool = false
     ) async throws {
         let update = ItemUpdate(
             name: name,
@@ -82,7 +83,8 @@ struct ItemService {
             quantity: quantity,
             price: price,
             clearPrice: clearPrice,
-            imageUrl: imageUrl
+            imageUrl: imageUrl,
+            clearImageUrl: clearImageUrl
         )
         try await client
             .from("items")
@@ -227,6 +229,7 @@ private struct ItemUpdate: Encodable {
     var price: Decimal?
     var clearPrice: Bool = false
     var imageUrl: String?
+    var clearImageUrl: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -254,7 +257,11 @@ private struct ItemUpdate: Encodable {
         } else if let price = price {
             try container.encode(price, forKey: .price)
         }
-        if let imageUrl = imageUrl { try container.encode(imageUrl, forKey: .imageUrl) }
+        if clearImageUrl {
+            try container.encodeNil(forKey: .imageUrl)
+        } else if let imageUrl = imageUrl {
+            try container.encode(imageUrl, forKey: .imageUrl)
+        }
     }
 }
 
