@@ -218,6 +218,11 @@ struct CollectionBrowserView: View {
                 CollectionRecipeListView(collection: collection, viewModel: vm)
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if vm.isShowingCachedData {
+                CachedDataBanner(cachedAt: vm.cachedAt)
+            }
+        }
     }
     
     @ViewBuilder

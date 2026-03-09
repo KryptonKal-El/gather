@@ -291,8 +291,10 @@
         "Build succeeds"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:45:00Z",
+      "passes": true,
+      "notes": "Cache-first loading in RecipeViewModel (collections-owned/shared + recipes keys). CachedDataBanner added to CollectionBrowserView. Same isShowingCachedData/cachedAt pattern as ListViewModel.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

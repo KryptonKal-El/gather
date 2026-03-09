@@ -16,6 +16,8 @@ final class RecipeViewModel {
     var isLoading = false
     var error: String?
     var searchQuery = ""
+    var isShowingCachedData = false
+    var cachedAt: Date?
     
     let userId: UUID
     let userEmail: String
@@ -66,6 +68,24 @@ final class RecipeViewModel {
         isLoading = true
         error = nil
         
+        let cachedCollections: CachedEntry<[RecipeCollection]>? = await OfflineCache.shared.load(forKey: "collections-owned-\(userId.uuidString)")
+        let cachedShared: CachedEntry<[RecipeCollection]>? = await OfflineCache.shared.load(forKey: "collections-shared-\(userId.uuidString)")
+        let cachedRecipes: CachedEntry<[Recipe]>? = await OfflineCache.shared.load(forKey: "recipes-\(userId.uuidString)")
+        
+        if let cachedCollections {
+            collections = cachedCollections.data
+        }
+        if let cachedShared {
+            sharedCollections = cachedShared.data
+        }
+        if let cachedRecipes {
+            recipes = cachedRecipes.data
+        }
+        cachedAt = cachedCollections?.cachedAt ?? cachedShared?.cachedAt ?? cachedRecipes?.cachedAt
+        if activeCollectionId == nil, let firstCollection = collections.first {
+            activeCollectionId = firstCollection.id
+        }
+        
         do {
             let defaultCollection = try await RecipeService.ensureDefaultCollection(userId: userId)
             
@@ -77,12 +97,19 @@ final class RecipeViewModel {
             collections = ownedResult
             sharedCollections = sharedResult
             recipes = recipesResult
+            isShowingCachedData = false
+            cachedAt = nil
             
             if activeCollectionId == nil {
                 activeCollectionId = defaultCollection.id
             }
+            
+            await OfflineCache.shared.save(ownedResult, forKey: "collections-owned-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedResult, forKey: "collections-shared-\(userId.uuidString)")
+            await OfflineCache.shared.save(recipesResult, forKey: "recipes-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
+            isShowingCachedData = !collections.isEmpty || !sharedCollections.isEmpty || !recipes.isEmpty
             print("[RecipeViewModel] Failed to load data: \(error.localizedDescription)")
         }
         
@@ -166,6 +193,12 @@ final class RecipeViewModel {
             if let activeId = activeCollectionId, !allCollections.contains(where: { $0.id == activeId }) {
                 activeCollectionId = collections.first?.id
             }
+            
+            await OfflineCache.shared.save(ownedResult, forKey: "collections-owned-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedResult, forKey: "collections-shared-\(userId.uuidString)")
+            await OfflineCache.shared.save(recipesResult, forKey: "recipes-\(userId.uuidString)")
+            isShowingCachedData = false
+            cachedAt = nil
         } catch {
             self.error = error.localizedDescription
             print("[RecipeViewModel] Failed to refetch data: \(error.localizedDescription)")
