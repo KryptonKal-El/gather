@@ -170,7 +170,7 @@
     },
     {
       "id": "US-006",
-      "title": "RecipeFormSheet \u2014 Import from Clipboard Button",
+      "title": "RecipeFormSheet — Import from Clipboard Button",
       "description": "Add an 'Import from Clipboard' button to the ingredients section of RecipeFormSheet. Tapping it reads the system clipboard, parses it, and appends the extracted ingredients to the form.",
       "acceptanceCriteria": [
         "Add an 'Import from Clipboard' button in the ingredients section header (next to '+ Add' button), with a clipboard SF Symbol icon",
@@ -185,8 +185,8 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added clipboard import button to ingredients section header. Shows feedback for empty clipboard, no results, or success with count. Auto-clears feedback after 3 seconds. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

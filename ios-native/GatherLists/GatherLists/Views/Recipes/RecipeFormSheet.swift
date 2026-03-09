@@ -26,6 +26,7 @@ struct RecipeFormSheet: View {
     @State private var showingUrlInput = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imageSource: ImageSource = .none
+    @State private var clipboardFeedback: String?
     
     private enum ImageSource {
         case none, file, url
@@ -341,10 +342,22 @@ struct RecipeFormSheet: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
+            
+            if let feedback = clipboardFeedback {
+                Text(feedback)
+                    .font(.caption)
+                    .foregroundStyle(feedback.starts(with: "Added") ? .green : .secondary)
+            }
         } header: {
             HStack {
                 Text("Ingredients")
                 Spacer()
+                Button {
+                    importFromClipboard()
+                } label: {
+                    Image(systemName: "doc.on.clipboard")
+                        .foregroundStyle(.blue)
+                }
                 Button {
                     ingredients.append(IngredientRow(id: UUID(), name: "", quantity: ""))
                 } label: {
@@ -396,6 +409,51 @@ struct RecipeFormSheet: View {
     
     private func moveIngredient(from source: IndexSet, to destination: Int) {
         ingredients.move(fromOffsets: source, toOffset: destination)
+    }
+    
+    private func importFromClipboard() {
+        clipboardFeedback = nil
+        
+        guard let clipboardText = UIPasteboard.general.string,
+              !clipboardText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            clipboardFeedback = "Nothing on clipboard"
+            clearFeedbackAfterDelay()
+            return
+        }
+        
+        let parsed = RecipeTextParser.parseRecipeText(clipboardText)
+        
+        if parsed.isEmpty {
+            clipboardFeedback = "No ingredients found in clipboard text"
+            clearFeedbackAfterDelay()
+            return
+        }
+        
+        let existingNonEmpty = ingredients.filter {
+            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        
+        let newIngredients = parsed.map {
+            IngredientRow(id: UUID(), name: $0.name, quantity: "")
+        }
+        
+        if existingNonEmpty.isEmpty {
+            ingredients = newIngredients
+        } else {
+            ingredients = existingNonEmpty + newIngredients
+        }
+        
+        clipboardFeedback = "Added \(parsed.count) ingredients from clipboard"
+        clearFeedbackAfterDelay()
+    }
+    
+    private func clearFeedbackAfterDelay() {
+        Task {
+            try? await Task.sleep(for: .seconds(3))
+            await MainActor.run {
+                clipboardFeedback = nil
+            }
+        }
     }
     
     private func deleteStep(at offsets: IndexSet) {
