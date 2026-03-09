@@ -401,8 +401,8 @@
         "Build succeeds"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "ShareCollectionSheet created following ShareListSheet pattern. Email validation, add/remove collaborators, duplicate handling, loading/empty states. Wired into CollectionBrowserView context menu.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -417,7 +417,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Sharing flow with email validation and error handling for duplicates"
+      "testIntensityReason": "Sharing flow with email validation and error handling for duplicates",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:00:00Z"
     },
     {
       "id": "US-012",
@@ -434,8 +436,8 @@
         "Full navigation flow works: tap Recipes tab \u2192 see collections \u2192 tap collection \u2192 see recipes \u2192 tap recipe \u2192 see detail \u2192 back works at each level"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "MainTabView updated to wire CollectionBrowserView with RecipeViewModel via .environment(). RecipesPlaceholderView struct removed. Tab icon and label unchanged.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -450,11 +452,13 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "Integration story wiring all views together \u2014 full navigation flow must work end-to-end"
+      "testIntensityReason": "Integration story wiring all views together — full navigation flow must work end-to-end",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:00:00Z"
     },
     {
       "id": "US-013",
-      "title": "Rename Collection \u2014 Inline Edit",
+      "title": "Rename Collection — Inline Edit",
       "description": "Allow renaming a collection and changing its emoji from the context menu.",
       "acceptanceCriteria": [
         "\"Rename\" in the collection context menu presents an edit sheet (.sheet) with pre-filled name and emoji",
@@ -464,8 +468,8 @@
         "Build succeeds"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "EditCollectionSheet created with name + emoji picker + description fields. Wired into CollectionBrowserView context menu replacing simple alert. Removed unused renameText/showRenameAlert state.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -480,11 +484,13 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Small edit sheet reusing existing components"
+      "testIntensityReason": "Small edit sheet reusing existing components",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:00:00Z"
     },
     {
       "id": "US-014",
-      "title": "Realtime Sync \u2014 Cross-Device Verification",
+      "title": "Realtime Sync — Cross-Device Verification",
       "description": "Verify that all recipe and collection changes sync in real-time across devices/sessions, matching the ListViewModel realtime behavior.",
       "acceptanceCriteria": [
         "Collections channel: Subscribes to collections table filtered by owner_id. Any INSERT/UPDATE/DELETE triggers full data re-fetch.",

@@ -9,8 +9,6 @@ struct CollectionBrowserView: View {
     @State private var showDeleteDialog = false
     @State private var collectionToShare: RecipeCollection?
     @State private var collectionToRename: RecipeCollection?
-    @State private var renameText = ""
-    @State private var showRenameAlert = false
     
     private var ownedFiltered: [RecipeCollection] {
         guard let vm = viewModel else { return [] }
@@ -76,17 +74,8 @@ struct CollectionBrowserView: View {
                 }
             }
             .sheet(item: $collectionToShare) { collection in
-                // TODO: ShareCollectionSheet — US-011
-                NavigationStack {
-                    Text("Share \(collection.name)")
-                        .navigationTitle("Share Collection")
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Done") {
-                                    collectionToShare = nil
-                                }
-                            }
-                        }
+                if let email = authViewModel.currentUser?.email {
+                    ShareCollectionSheet(collection: collection, viewModel: viewModel!, ownerEmail: email)
                 }
             }
             .confirmationDialog(
@@ -106,16 +95,10 @@ struct CollectionBrowserView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             }
-            .alert("Rename Collection", isPresented: $showRenameAlert) {
-                TextField("Name", text: $renameText)
-                Button("Save") {
-                    if let collection = collectionToRename {
-                        Task {
-                            await viewModel?.updateCollection(id: collection.id, name: renameText, emoji: nil, description: nil)
-                        }
-                    }
+            .sheet(item: $collectionToRename) { collection in
+                if let vm = viewModel {
+                    EditCollectionSheet(collection: collection, viewModel: vm)
                 }
-                Button("Cancel", role: .cancel) {}
             }
         }
         .onAppear {
@@ -135,8 +118,6 @@ struct CollectionBrowserView: View {
                         .contextMenu {
                             Button {
                                 collectionToRename = collection
-                                renameText = collection.name
-                                showRenameAlert = true
                             } label: {
                                 Label("Rename", systemImage: "pencil")
                             }

@@ -13,7 +13,8 @@ struct MainTabView: View {
                     Label("Lists", systemImage: "list.bullet")
                 }
             
-            RecipesPlaceholderView()
+            CollectionBrowserView()
+                .environment(authViewModel)
                 .tabItem {
                     Label("Recipes", systemImage: "book")
                 }
@@ -31,22 +32,6 @@ struct MainTabView: View {
                 }
         }
         .tint(brandGreen)
-    }
-}
-
-struct RecipesPlaceholderView: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                Image(systemName: "book")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.secondary)
-                Text("Recipes — Coming Soon")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-            .navigationTitle("Recipes")
-        }
     }
 }
 
