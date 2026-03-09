@@ -20,22 +20,3 @@ struct GatherListsApp: App {
         }
     }
 }
-
-struct MainTabView: View {
-    @Environment(AuthViewModel.self) private var authViewModel
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("Authenticated! Welcome.")
-                .font(.title)
-            
-            Button("Sign Out") {
-                Task {
-                    await authViewModel.signOut()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
-    }
-}
