@@ -6,11 +6,14 @@ struct RecipeDetailView: View {
     
     let recipe: Recipe
     let viewModel: RecipeViewModel
+    let userId: UUID
+    let userEmail: String
     
     @State private var checkedIngredients: Set<UUID> = []
     @State private var showEditSheet = false
     @State private var showDeleteConfirm = false
     @State private var showMoveSheet = false
+    @State private var showAddToListSheet = false
     @State private var editIngredients: [RecipeIngredient] = []
     @State private var editSteps: [RecipeStep] = []
     
@@ -68,6 +71,17 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showMoveSheet) {
             moveToCollectionSheet
+        }
+        .sheet(isPresented: $showAddToListSheet) {
+            AddToListSheet(
+                ingredients: checkedIngredientsData,
+                userId: userId,
+                userEmail: userEmail,
+                onDismiss: {
+                    checkedIngredients.removeAll()
+                    showAddToListSheet = false
+                }
+            )
         }
         .confirmationDialog("Delete Recipe?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
@@ -156,7 +170,28 @@ struct RecipeDetailView: View {
                     }
                 }
             }
+            
+            addToListButton
         }
+    }
+    
+    @ViewBuilder
+    private var addToListButton: some View {
+        let checkedCount = checkedIngredients.count
+        
+        Button {
+            showAddToListSheet = true
+        } label: {
+            Text(checkedCount > 0 ? "Add \(checkedCount) to List" : "Select ingredients to add")
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(checkedCount > 0 ? Color.accentColor : Color(.systemGray4))
+                .foregroundStyle(.white)
+                .fontWeight(.semibold)
+                .cornerRadius(12)
+        }
+        .disabled(checkedCount == 0)
+        .padding(.top, 8)
     }
     
     @ViewBuilder
@@ -225,6 +260,13 @@ struct RecipeDetailView: View {
                 }
             }
         }
+    }
+    
+    private var checkedIngredientsData: [(name: String, quantity: String?)] {
+        guard let ingredients = viewModel.activeRecipeDetail?.ingredients else { return [] }
+        return ingredients
+            .filter { checkedIngredients.contains($0.id) }
+            .map { (name: $0.name, quantity: $0.quantity) }
     }
     
     private func toggleIngredient(_ id: UUID) {

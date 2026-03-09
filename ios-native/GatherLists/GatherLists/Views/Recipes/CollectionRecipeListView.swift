@@ -72,7 +72,12 @@ struct CollectionRecipeListView: View {
             viewModel.selectCollection(id: collection.id)
         }
         .navigationDestination(for: Recipe.self) { recipe in
-            RecipeDetailView(recipe: recipe, viewModel: viewModel)
+            RecipeDetailView(
+                recipe: recipe,
+                viewModel: viewModel,
+                userId: viewModel.userId,
+                userEmail: viewModel.userEmail
+            )
         }
     }
     

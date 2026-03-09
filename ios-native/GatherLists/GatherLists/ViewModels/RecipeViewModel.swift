@@ -18,7 +18,7 @@ final class RecipeViewModel {
     var searchQuery = ""
     
     let userId: UUID
-    private let userEmail: String
+    let userEmail: String
     
     // MARK: - Realtime Channels
     nonisolated(unsafe) private var collectionsChannel: RealtimeChannelV2?
