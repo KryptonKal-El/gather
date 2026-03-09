@@ -192,6 +192,16 @@ final class ListViewModel {
         activeListId = id
     }
     
+    // MARK: - Share Actions
+    
+    func shareList(id: UUID, email: String) async throws {
+        try await ListService.shareList(listId: id, email: email)
+    }
+    
+    func unshareList(id: UUID, email: String) async throws {
+        try await ListService.unshareList(listId: id, email: email)
+    }
+    
     deinit {
         ownedListsTask?.cancel()
         sharedListsTask?.cancel()

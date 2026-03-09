@@ -7,6 +7,7 @@ struct ListBrowserView: View {
     @State private var showCreateSheet = false
     @State private var listToEdit: GatherList?
     @State private var listToDelete: GatherList?
+    @State private var listToShare: GatherList?
     @State private var showDeleteConfirm = false
     
     private var ownedFiltered: [GatherList] {
@@ -69,6 +70,15 @@ struct ListBrowserView: View {
                     EditListSheet(list: list, viewModel: vm)
                 }
             }
+            .sheet(item: $listToShare) { list in
+                if let vm = viewModel {
+                    ShareListSheet(
+                        list: list,
+                        viewModel: vm,
+                        ownerEmail: authViewModel.currentUser?.email ?? ""
+                    )
+                }
+            }
             .alert("Delete List?", isPresented: $showDeleteConfirm, presenting: listToDelete) { list in
                 Button("Delete", role: .destructive) {
                     Task {
@@ -103,7 +113,7 @@ struct ListBrowserView: View {
                             }
                             
                             Button {
-                                // Placeholder for US-007 share settings
+                                listToShare = list
                             } label: {
                                 Label("Share Settings", systemImage: "person.badge.plus")
                             }

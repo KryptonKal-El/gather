@@ -233,8 +233,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "ShareListSheet with email input, validation (empty, format, self-share, duplicate), collaborator list with trash button and swipe-to-delete. ListViewModel shareList/unshareList methods. Share Settings wired in context menu.",
+      "status": "completed",
+      "completedAt": "2026-03-09T17:45:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
