@@ -49,5 +49,7 @@
         <key>UIApplicationSupportsMultipleScenes</key>
         <false/>
     </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>Take photos of your recipes to add to your cookbook.</string>
 </dict>
 </plist>

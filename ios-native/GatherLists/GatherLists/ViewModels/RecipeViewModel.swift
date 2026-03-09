@@ -17,7 +17,7 @@ final class RecipeViewModel {
     var error: String?
     var searchQuery = ""
     
-    private let userId: UUID
+    let userId: UUID
     private let userEmail: String
     
     // MARK: - Realtime Channels
