@@ -189,8 +189,10 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "ListDetailViewModel @Observable with 3 realtime channels (items/stores/history), computed groupedByStore and groupByCategory, action methods (addItem with history, toggleItem, deleteItem, updateItem, clearChecked, restoreItem), uniqueHistoryNames for autocomplete. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:25:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

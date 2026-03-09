@@ -18,6 +18,7 @@
 		A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E259 /* ListDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E258 /* ListDetailViewModel.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */; };
@@ -52,6 +53,7 @@
 		A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E258 /* ListDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewModel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherList.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListShare.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
@@ -168,6 +170,7 @@
 			children = (
 				C2D3E4F5A6B7C8D9E0F1A2B4 /* AuthViewModel.swift */,
 				A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */,
+				A1B2C3D4E5F6A7B8C9D0E258 /* ListDetailViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -327,6 +330,7 @@
 				A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E259 /* ListDetailViewModel.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E235 /* ListService.swift in Sources */,
