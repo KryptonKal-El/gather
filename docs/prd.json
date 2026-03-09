@@ -353,8 +353,10 @@
         "Build succeeds"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:15:00Z",
+      "passes": true,
+      "notes": "36×36 thumbnails with AsyncImage/placeholder, tap opens ItemImagePickerSheet. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
