@@ -169,6 +169,32 @@ struct ItemService {
         }
         return restored
     }
+    
+    /// Batch inserts ingredients as shopping list items with auto-categorization.
+    /// Used by the "Add to List" flow from recipes.
+    static func addIngredientItems(
+        listId: UUID,
+        ingredients: [(name: String, quantity: String?)]
+    ) async throws {
+        guard !ingredients.isEmpty else { return }
+        
+        let newItems = ingredients.map { ingredient in
+            let capitalizedName = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
+            let category = CategoryDefinitions.categorizeItem(capitalizedName)
+            return IngredientItem(
+                listId: listId,
+                name: capitalizedName,
+                category: category,
+                quantity: 1,
+                isChecked: false
+            )
+        }
+        
+        try await client
+            .from("items")
+            .insert(newItems)
+            .execute()
+    }
 }
 
 // MARK: - DTOs
@@ -259,5 +285,21 @@ private struct RestoreItem: Encodable {
         case isChecked = "is_checked"
         case price
         case imageUrl = "image_url"
+    }
+}
+
+private struct IngredientItem: Encodable {
+    let listId: UUID
+    let name: String
+    let category: String
+    let quantity: Int
+    let isChecked: Bool
+    
+    enum CodingKeys: String, CodingKey {
+        case listId = "list_id"
+        case name
+        case category
+        case quantity
+        case isChecked = "is_checked"
     }
 }

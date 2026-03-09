@@ -205,17 +205,17 @@
     },
     {
       "id": "US-007",
-      "title": "Add-to-List Service Function \u2014 Batch Insert Items",
+      "title": "Add-to-List Service Function — Batch Insert Items",
       "description": "Create a function to batch-insert ingredients as shopping list items, with auto-categorization.",
       "acceptanceCriteria": [
-        "Add to ItemService.swift (or create a new helper): static func addIngredientItems(listId: UUID, ingredients: [(name: String, quantity: String?)]) async throws \u2014 for each ingredient, creates an item row with: list_id = listId, name = ingredient.name, category = CategoryDefinitions.categorizeItem(ingredient.name), is_checked = false, quantity = 1 (numeric default, NOT the recipe's measurement string)",
+        "Add to ItemService.swift (or create a new helper): static func addIngredientItems(listId: UUID, ingredients: [(name: String, quantity: String?)]) async throws — for each ingredient, creates an item row with: list_id = listId, name = ingredient.name, category = CategoryDefinitions.categorizeItem(ingredient.name), is_checked = false, quantity = 1 (numeric default, NOT the recipe's measurement string)",
         "Batch insert via single Supabase .insert() call (array of rows)",
         "Handles empty ingredient list gracefully (no-op)",
         "Build succeeds"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added addIngredientItems to ItemService with IngredientItem DTO. Batch insert with auto-categorization. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
