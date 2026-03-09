@@ -28,6 +28,9 @@ struct ListDetailView: View {
     @State private var showCustomQuantityAlert = false
     @State private var customQuantityText = ""
     
+    // Image picker state
+    @State private var imagePickerItem: Item?
+    
     private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
@@ -142,6 +145,22 @@ struct ListDetailView: View {
                     await detailViewModel?.updateItem(item.id, quantity: qty)
                 }
             }
+        }
+        .sheet(item: $imagePickerItem) { item in
+            ItemImagePickerSheet(
+                item: item,
+                userId: authViewModel.currentUser?.id ?? UUID(),
+                onImageUrlSet: { url in
+                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                        detailViewModel?.items[index].imageUrl = url
+                    }
+                },
+                onImageRemoved: {
+                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                        detailViewModel?.items[index].imageUrl = nil
+                    }
+                }
+            )
         }
         .task {
             await initializeDetailViewModel()
@@ -336,6 +355,8 @@ struct ListDetailView: View {
                 .font(.title3)
                 .foregroundStyle(isChecked ? .secondary : listColor)
             
+            itemThumbnail(item: item)
+            
             Text(item.name)
                 .strikethrough(isChecked)
                 .foregroundStyle(isChecked ? .secondary : .primary)
@@ -373,6 +394,53 @@ struct ListDetailView: View {
         }
         .contextMenu {
             itemContextMenu(item: item)
+        }
+    }
+    
+    // MARK: - Item Thumbnail
+    
+    @ViewBuilder
+    private func itemThumbnail(item: Item) -> some View {
+        if let imageUrl = item.imageUrl, !imageUrl.isEmpty, let url = URL(string: imageUrl) {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                case .failure:
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(.systemGray5))
+                        .overlay {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                case .empty:
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(.systemGray5))
+                @unknown default:
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(.systemGray5))
+                }
+            }
+            .frame(width: 36, height: 36)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .onTapGesture {
+                imagePickerItem = item
+            }
+        } else {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color(.systemGray5))
+                .frame(width: 36, height: 36)
+                .overlay {
+                    Image(systemName: "plus")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .onTapGesture {
+                    imagePickerItem = item
+                }
         }
     }
     
