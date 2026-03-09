@@ -70,6 +70,7 @@
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -138,6 +139,7 @@
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductSearchService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemImagePickerSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -339,6 +341,7 @@
 				A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */,
 				A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -479,6 +482,7 @@
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
