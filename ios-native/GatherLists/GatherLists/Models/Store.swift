@@ -12,10 +12,10 @@ struct CategoryDef: Codable, Hashable {
 struct Store: Codable, Identifiable, Hashable {
     let id: UUID
     let userId: UUID
-    let name: String
+    var name: String
     var color: String?
     var categories: [CategoryDef]
-    let sortOrder: Int
+    var sortOrder: Int
     let createdAt: Date
     
     init(

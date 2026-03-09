@@ -75,7 +75,11 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "State management with realtime subscriptions"
+      "testIntensityReason": "State management with realtime subscriptions",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-09T22:20:00Z",
+      "notes": "StoreViewModel with @Observable, realtime subscription, addStore, updateStore, deleteStore, moveStore, updateCategories. Store model updated: name and sortOrder now var for local mutation."
     },
     {
       "id": "US-003",
