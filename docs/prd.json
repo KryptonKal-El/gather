@@ -363,8 +363,10 @@
         "No console errors related to missing Capacitor plugins"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "This is a React codebase story, not Swift",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-09T00:50:00Z",
+      "notes": "All acceptance criteria verified: build succeeds with zero errors, no @capacitor imports in src or bundle, no Capacitor.isNativePlatform() guards remain, Apple Sign-In uses web OAuth redirect only, service worker registration active (immediate: true), PWA install banner logic intact (beforeinstallprompt + isIOSSafari), no Capacitor plugin references (SplashScreen, StatusBar, AppUrlListener all removed).",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

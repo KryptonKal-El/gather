@@ -373,14 +373,16 @@
     {
       "id": "prd-swift-final-polish",
       "name": "Native Swift iOS App \u2014 Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-final-polish.md",
       "jsonPath": "docs/prds/prd-swift-final-polish.json",
       "branchName": "feature/swift-final-polish",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T23:55:00Z",
-      "currentStory": "US-011"
+      "completedAt": "2026-03-09T00:50:00Z",
+      "currentStory": null,
+      "notes": "All 11 stories complete. SuggestionEngine (18 pairings + frequency + recency), SuggestionsView chip grid, ListDetailView wiring, OfflineCache actor with CachedEntry, ViewModel cache integration (lists/stores/history/collections/recipes), CachedDataBanner stale indicator, onOpenURL deep link handler, AuthViewModel setSession, RecipeViewModel offline cache, Capacitor WebView shell removed (ios/ directory, 8 deps, all platform checks), post-removal PWA verification passed."
     }
   ]
 }
