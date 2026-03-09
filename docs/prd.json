@@ -389,8 +389,10 @@
         "Build succeeds"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:00:00Z",
+      "passes": true,
+      "notes": "Templates section with expand/collapse, Save as Recipe and Add to List buttons. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
