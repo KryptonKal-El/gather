@@ -108,8 +108,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T13:30:00Z",
+      "passes": true,
+      "notes": "AuthViewModel using @Observable manages auth state. Checks existing session on launch, listens to authStateChanges stream, handles signOut. Root app conditionally renders loading/login/main views. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
