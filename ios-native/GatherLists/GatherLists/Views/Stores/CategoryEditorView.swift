@@ -63,8 +63,12 @@ struct CategoryEditorView: View {
         List {
             ForEach(Array(categories.enumerated()), id: \.element.key) { index, cat in
                 NavigationLink {
-                    Text("Category Detail — Coming Soon")
-                        .navigationTitle(cat.name)
+                    CategoryDetailView(
+                        categoryIndex: index,
+                        categories: $categories,
+                        storeId: store.id,
+                        viewModel: viewModel
+                    )
                 } label: {
                     categoryRow(cat)
                 }
