@@ -340,8 +340,10 @@
         "Verify on device/simulator"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Converted ScrollView+LazyVStack to List for native .swipeActions support. Added .swipeActions(edge: .trailing, allowsFullSwipe: true) on both unchecked and checked item rows. Stripped default List chrome with .listRowInsets/.listRowSeparator/.listRowBackground. UndoManager wiring deferred to US-011.",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:25:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

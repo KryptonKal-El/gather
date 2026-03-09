@@ -177,16 +177,15 @@ struct ListDetailView: View {
     // MARK: - Item List Content
     
     private var itemListContent: some View {
-        ScrollView {
-            LazyVStack(spacing: 0, pinnedViews: []) {
-                uncheckedItemsSection
-                
-                if let vm = detailViewModel, !vm.checkedItems.isEmpty {
-                    checkedItemsSection
-                }
+        List {
+            uncheckedItemsSection
+            
+            if let vm = detailViewModel, !vm.checkedItems.isEmpty {
+                checkedItemsSection
             }
-            .padding(.bottom, 80)
         }
+        .listStyle(.plain)
+        .contentMargins(.bottom, 80, for: .scrollContent)
         .refreshable {
             await detailViewModel?.refresh()
         }
@@ -216,6 +215,9 @@ struct ListDetailView: View {
                             }
                         }
                     }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
                     
                     if !isCollapsed {
                         categoryGroupsView(items: items, store: store)
@@ -274,9 +276,24 @@ struct ListDetailView: View {
             let categoryItems = group.items
             
             categoryHeader(category: category, itemCount: categoryItems.count)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
             
             ForEach(categoryItems) { item in
                 itemRow(item: item, isChecked: false)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            Task {
+                                await detailViewModel?.deleteItem(item)
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
         }
     }
@@ -556,9 +573,24 @@ struct ListDetailView: View {
             .padding(.vertical, 12)
             .padding(.top, 8)
             .background(Color(.secondarySystemGroupedBackground))
+            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
             
             ForEach(checkedItems) { item in
                 itemRow(item: item, isChecked: true)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            Task {
+                                await detailViewModel?.deleteItem(item)
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
             }
         }
     }
