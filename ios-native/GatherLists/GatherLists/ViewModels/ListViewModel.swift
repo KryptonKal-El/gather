@@ -75,6 +75,9 @@ final class ListViewModel {
     // MARK: - Realtime Subscriptions
     
     private func setupRealtimeSubscriptions() async {
+        // Guard against duplicate channel setup
+        guard ownedListsChannel == nil else { return }
+        
         let client = SupabaseManager.shared.client
         
         // Channel for owned lists
@@ -135,6 +138,11 @@ final class ListViewModel {
     }
     
     // MARK: - Actions
+    
+    /// Manual refresh — re-fetches all list data.
+    func refresh() async {
+        await refetchAllData()
+    }
     
     func createList(name: String, emoji: String?, color: String) async {
         error = nil

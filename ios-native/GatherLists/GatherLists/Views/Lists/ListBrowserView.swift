@@ -160,6 +160,9 @@ struct ListBrowserView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .refreshable {
+            await vm.refresh()
+        }
         .searchable(text: Binding(
             get: { vm.searchQuery },
             set: { vm.searchQuery = $0 }
