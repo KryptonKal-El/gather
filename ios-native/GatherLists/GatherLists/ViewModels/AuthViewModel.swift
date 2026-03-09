@@ -104,6 +104,34 @@ final class AuthViewModel {
         }
     }
     
+    func signInWithEmail(email: String, password: String) async {
+        error = nil
+        do {
+            try await SupabaseManager.shared.client.auth.signIn(
+                email: email,
+                password: password
+            )
+            print("[AuthViewModel] Email sign-in successful")
+        } catch {
+            self.error = error.localizedDescription
+            print("[AuthViewModel] Email sign-in failed: \(error.localizedDescription)")
+        }
+    }
+    
+    func signUpWithEmail(email: String, password: String) async {
+        error = nil
+        do {
+            try await SupabaseManager.shared.client.auth.signUp(
+                email: email,
+                password: password
+            )
+            print("[AuthViewModel] Email sign-up successful")
+        } catch {
+            self.error = error.localizedDescription
+            print("[AuthViewModel] Email sign-up failed: \(error.localizedDescription)")
+        }
+    }
+    
     deinit {
         authStateTask?.cancel()
     }

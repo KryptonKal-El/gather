@@ -182,8 +182,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T14:30:00Z",
+      "passes": true,
+      "notes": "Email/password sign-in and sign-up added to LoginView alongside Apple Sign-In. Form validation (email format, 6+ char password), keyboard dismissal, Sign In/Sign Up toggle, branded styling. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
