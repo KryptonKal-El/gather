@@ -51,6 +51,7 @@
 		A1B2C3D4E5F6A7B8C9D0E26E /* RecipeCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E270 /* CollectionShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E272 /* RecipeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E271 /* RecipeService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E273 /* RecipeViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -100,6 +101,7 @@
 		A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCollection.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionShare.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E271 /* RecipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E273 /* RecipeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -202,6 +204,7 @@
 				A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */,
 				A1B2C3D4E5F6A7B8C9D0E258 /* ListDetailViewModel.swift */,
 				A1B2C3D4E5F6A7B8C9D0E25A /* StoreViewModel.swift */,
+				A1B2C3D4E5F6A7B8C9D0E273 /* RecipeViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -395,6 +398,7 @@
 				A1B2C3D4E5F6A7B8C9D0E26E /* RecipeCollection.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E270 /* CollectionShare.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E272 /* RecipeService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
