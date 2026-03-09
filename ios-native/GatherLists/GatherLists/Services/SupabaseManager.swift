@@ -7,6 +7,8 @@ final class SupabaseManager {
     static let shared = SupabaseManager()
     
     let client: SupabaseClient
+    let supabaseURL: URL
+    let anonKey: String
     
     private init() {
         guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
@@ -17,6 +19,8 @@ final class SupabaseManager {
             fatalError("Missing or invalid Secrets.plist — copy Secrets.plist.example to Secrets.plist and fill in your Supabase credentials")
         }
         
+        supabaseURL = url
+        self.anonKey = anonKey
         client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
     }
 }
