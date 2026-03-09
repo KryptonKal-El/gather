@@ -275,14 +275,16 @@
     {
       "id": "prd-swift-ios-setup",
       "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
       "branchName": "feature/swift-ios-setup",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T12:00:00Z",
-      "currentStory": "US-006"
+      "completedAt": "2026-03-09T16:30:00Z",
+      "currentStory": null,
+      "notes": "All 7 stories complete. Native SwiftUI iOS app created at ios-native/ with Xcode project, Supabase Swift SDK, auth state management, Apple Sign-In, email/password auth, 4-tab shell, app icon, launch screen, entitlements, privacy manifest. Build succeeds on iPhone 16e simulator."
     },
     {
       "id": "prd-swift-lists-core",

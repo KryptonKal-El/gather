@@ -253,8 +253,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:30:00Z",
+      "passes": true,
+      "notes": "App icon copied from Capacitor app. Launch screen configured with white/dark (#1a1a2e) background via LaunchBackground color set and icon via LaunchLogo image set. Associated domains entitlement added (applinks:gatherlists.com). URL scheme gather:// added to Info.plist. PrivacyInfo.xcprivacy created matching Capacitor app. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
