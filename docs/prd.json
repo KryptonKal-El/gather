@@ -136,9 +136,10 @@
         "Verify on device/simulator"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "CreateStoreSheet with Form layout: name TextField, 18 preset color swatches in LazyVGrid with checkmark, iOS ColorPicker for custom color. Create disabled when name empty. interactiveDismissDisabled during creation. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:00:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
