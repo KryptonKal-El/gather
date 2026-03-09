@@ -309,6 +309,16 @@
       "branchName": "feature/swift-shopping-list",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09"
+    },
+    {
+      "id": "prd-swift-stores",
+      "name": "Native Swift iOS App — Phase 4: Store Management",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-stores.md",
+      "jsonPath": "docs/prds/prd-swift-stores.json",
+      "branchName": "feature/swift-stores",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
