@@ -591,6 +591,31 @@ struct ListDetailView: View {
             Label("Category: \(categoryName)", systemImage: "tag")
         }
         
+        // Image actions
+        Button {
+            imagePickerItem = item
+        } label: {
+            if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
+                Label("Change Image", systemImage: "photo")
+            } else {
+                Label("Set Image", systemImage: "photo")
+            }
+        }
+        
+        if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
+            Button(role: .destructive) {
+                Task {
+                    guard let userId = authViewModel.currentUser?.id else { return }
+                    try? await StorageService.deleteItemImage(userId: userId, itemId: item.id)
+                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                        detailViewModel?.items[index].imageUrl = nil
+                    }
+                }
+            } label: {
+                Label("Remove Image", systemImage: "xmark.circle")
+            }
+        }
+        
         Divider()
         
         // Delete
