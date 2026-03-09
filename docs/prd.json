@@ -248,8 +248,10 @@
         "Build succeeds"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "Depends on Phase 6 ImageCompressor",
+      "status": "completed",
+      "completedAt": "2026-03-10T01:15:00Z",
+      "passes": true,
+      "notes": "StorageService.uploadItemImage + deleteItemImage, ItemService.updateItem clearImageUrl flag. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
