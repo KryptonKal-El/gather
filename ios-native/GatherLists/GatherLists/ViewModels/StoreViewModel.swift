@@ -10,6 +10,7 @@ final class StoreViewModel {
     var stores: [Store] = []
     var isLoading = false
     var error: String?
+    var isShowingCachedData = false
     
     private let userId: UUID
     
@@ -31,10 +32,19 @@ final class StoreViewModel {
         isLoading = true
         error = nil
         
+        // Load cached data first for instant display
+        if let cached: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
+            stores = cached.data
+        }
+        
+        // Fetch fresh data from Supabase
         do {
             stores = try await StoreService.fetchStores(userId: userId)
+            isShowingCachedData = false
+            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
+            isShowingCachedData = !stores.isEmpty
             print("[StoreViewModel] Failed to load stores: \(error.localizedDescription)")
         }
         
@@ -68,6 +78,8 @@ final class StoreViewModel {
     private func refetchStores() async {
         do {
             stores = try await StoreService.fetchStores(userId: userId)
+            isShowingCachedData = false
+            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[StoreViewModel] Failed to refetch stores: \(error.localizedDescription)")

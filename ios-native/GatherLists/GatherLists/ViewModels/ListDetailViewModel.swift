@@ -13,6 +13,7 @@ final class ListDetailViewModel {
     var historyEntries: [HistoryEntry] = []
     var isLoading = false
     var error: String?
+    var isShowingCachedData = false
     
     // Identifiers
     private let listId: UUID
@@ -141,6 +142,18 @@ final class ListDetailViewModel {
         isLoading = true
         error = nil
         
+        // Load cached data first for instant display
+        if let cachedItems: CachedEntry<[Item]> = await OfflineCache.shared.load(forKey: "items-\(listId.uuidString)") {
+            items = cachedItems.data
+        }
+        if let cachedStores: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
+            stores = cachedStores.data
+        }
+        if let cachedHistory: CachedEntry<[HistoryEntry]> = await OfflineCache.shared.load(forKey: "history-\(userId.uuidString)") {
+            historyEntries = cachedHistory.data
+        }
+        
+        // Fetch fresh data from Supabase
         do {
             async let fetchedItems = ItemService.fetchItems(listId: listId)
             async let fetchedStores = StoreService.fetchStores(userId: userId)
@@ -150,8 +163,15 @@ final class ListDetailViewModel {
             items = itemsResult
             stores = storesResult
             historyEntries = historyResult
+            isShowingCachedData = false
+            
+            // Cache the fresh data
+            await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
+            await OfflineCache.shared.save(storesResult, forKey: "stores-\(userId.uuidString)")
+            await OfflineCache.shared.save(historyResult, forKey: "history-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
+            isShowingCachedData = !items.isEmpty
             print("[ListDetailViewModel] Failed to load data: \(error.localizedDescription)")
         }
         
@@ -225,6 +245,8 @@ final class ListDetailViewModel {
     private func refetchItems() async {
         do {
             items = try await ItemService.fetchItems(listId: listId)
+            isShowingCachedData = false
+            await OfflineCache.shared.save(items, forKey: "items-\(listId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch items: \(error.localizedDescription)")
@@ -234,6 +256,7 @@ final class ListDetailViewModel {
     private func refetchStores() async {
         do {
             stores = try await StoreService.fetchStores(userId: userId)
+            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch stores: \(error.localizedDescription)")
@@ -243,6 +266,7 @@ final class ListDetailViewModel {
     private func refetchHistory() async {
         do {
             historyEntries = try await HistoryService.fetchHistory(userId: userId)
+            await OfflineCache.shared.save(historyEntries, forKey: "history-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch history: \(error.localizedDescription)")

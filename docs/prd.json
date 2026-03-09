@@ -158,8 +158,10 @@
         "Build succeeds"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T01:00:00Z",
+      "passes": true,
+      "notes": "Integrated OfflineCache into ListViewModel, ListDetailViewModel, and StoreViewModel. Cache-first pattern: load cached data instantly, then fetch live. On success → update cache. On failure → keep cached + set isShowingCachedData flag.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

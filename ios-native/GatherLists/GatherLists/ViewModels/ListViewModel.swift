@@ -13,6 +13,7 @@ final class ListViewModel {
     var isLoading = false
     var error: String?
     var searchQuery = ""
+    var isShowingCachedData = false
     
     private let userId: UUID
     private let userEmail: String
@@ -53,6 +54,18 @@ final class ListViewModel {
         isLoading = true
         error = nil
         
+        // Load cached data first for instant display
+        if let cachedOwned: CachedEntry<[GatherList]> = await OfflineCache.shared.load(forKey: "lists-owned-\(userId.uuidString)") {
+            ownedLists = cachedOwned.data
+        }
+        if let cachedShared: CachedEntry<[GatherList]> = await OfflineCache.shared.load(forKey: "lists-shared-\(userId.uuidString)") {
+            sharedLists = cachedShared.data
+        }
+        if activeListId == nil, let firstList = allLists.first {
+            activeListId = firstList.id
+        }
+        
+        // Fetch fresh data from Supabase
         do {
             async let owned = ListService.fetchOwnedLists(userId: userId)
             async let shared = ListService.fetchSharedWithMe(email: userEmail)
@@ -60,12 +73,18 @@ final class ListViewModel {
             let (ownedResult, sharedResult) = try await (owned, shared)
             ownedLists = ownedResult
             sharedLists = sharedResult
+            isShowingCachedData = false
             
             if activeListId == nil, let firstList = allLists.first {
                 activeListId = firstList.id
             }
+            
+            // Cache the fresh data
+            await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedResult, forKey: "lists-shared-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
+            isShowingCachedData = !ownedLists.isEmpty || !sharedLists.isEmpty
             print("[ListViewModel] Failed to load data: \(error.localizedDescription)")
         }
         
@@ -126,11 +145,16 @@ final class ListViewModel {
             let (ownedResult, sharedResult) = try await (owned, shared)
             ownedLists = ownedResult
             sharedLists = sharedResult
+            isShowingCachedData = false
             
             // Verify active list still exists
             if let activeId = activeListId, !allLists.contains(where: { $0.id == activeId }) {
                 activeListId = allLists.first?.id
             }
+            
+            // Update cache
+            await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedResult, forKey: "lists-shared-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to refetch data: \(error.localizedDescription)")
