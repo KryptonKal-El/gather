@@ -163,8 +163,8 @@
         "xcodebuild build succeeds"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "CreateListSheet bottom sheet with name field, emoji picker button, 10 preset color circles with checkmark selection. Custom EmojiPickerView with 7 categories, LazyVGrid search, and clear option. Toolbar + button in ListBrowserView.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -179,7 +179,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "User input form with custom emoji grid picker and color selection"
+      "testIntensityReason": "User input form with custom emoji grid picker and color selection",
+      "status": "completed",
+      "completedAt": "2026-03-09T13:14:48Z"
     },
     {
       "id": "US-006",

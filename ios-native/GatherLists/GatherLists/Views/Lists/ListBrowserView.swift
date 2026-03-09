@@ -4,6 +4,7 @@ import SwiftUI
 struct ListBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel: ListViewModel?
+    @State private var showCreateSheet = false
     
     private var ownedFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -46,6 +47,20 @@ struct ListBrowserView: View {
                 }
             }
             .navigationTitle("Lists")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showCreateSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .sheet(isPresented: $showCreateSheet) {
+                if let vm = viewModel {
+                    CreateListSheet(viewModel: vm)
+                }
+            }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -121,9 +136,7 @@ struct ListBrowserView: View {
                 .foregroundStyle(.secondary)
             
             Button {
-                Task {
-                    await viewModel?.createList(name: "My List", emoji: nil, color: "#1565c0")
-                }
+                showCreateSheet = true
             } label: {
                 Label("Create List", systemImage: "plus")
                     .fontWeight(.medium)
