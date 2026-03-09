@@ -126,8 +126,10 @@
         "Build succeeds"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T01:15:00Z",
+      "passes": true,
+      "notes": "4 sharing methods added: shareCollection, unshareCollection, fetchCollectionShares, fetchSharedCollections. Email normalization, write permission default. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

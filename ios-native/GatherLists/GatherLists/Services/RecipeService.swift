@@ -314,6 +314,65 @@ struct RecipeService {
             .eq("id", value: recipeId)
             .execute()
     }
+    
+    // MARK: - Collection Sharing
+    
+    /// Shares a collection with a user by email.
+    static func shareCollection(collectionId: UUID, email: String, sharedBy: UUID) async throws {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let newShare = NewCollectionShare(
+            collectionId: collectionId,
+            sharedWithEmail: normalizedEmail,
+            sharedBy: sharedBy,
+            permission: "write"
+        )
+        try await client
+            .from("collection_shares")
+            .insert(newShare)
+            .execute()
+    }
+    
+    /// Removes a collection share for a user by email.
+    static func unshareCollection(collectionId: UUID, email: String) async throws {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        try await client
+            .from("collection_shares")
+            .delete()
+            .eq("collection_id", value: collectionId)
+            .eq("shared_with_email", value: normalizedEmail)
+            .execute()
+    }
+    
+    /// Fetches all shares for a collection.
+    static func fetchCollectionShares(collectionId: UUID) async throws -> [CollectionShare] {
+        let shares: [CollectionShare] = try await client
+            .from("collection_shares")
+            .select()
+            .eq("collection_id", value: collectionId)
+            .execute()
+            .value
+        return shares
+    }
+    
+    /// Fetches all collections shared with a user by email.
+    static func fetchSharedCollections(email: String) async throws -> [RecipeCollection] {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let shares: [CollectionShare] = try await client
+            .from("collection_shares")
+            .select()
+            .eq("shared_with_email", value: normalizedEmail)
+            .execute()
+            .value
+        guard !shares.isEmpty else { return [] }
+        let collectionIds = shares.map { $0.collectionId }
+        let collections: [RecipeCollection] = try await client
+            .from("collections")
+            .select()
+            .in("id", values: collectionIds)
+            .execute()
+            .value
+        return collections
+    }
 }
 
 // MARK: - Errors
@@ -427,5 +486,19 @@ private struct RecipeMoveUpdate: Encodable {
     
     enum CodingKeys: String, CodingKey {
         case collectionId = "collection_id"
+    }
+}
+
+private struct NewCollectionShare: Encodable {
+    let collectionId: UUID
+    let sharedWithEmail: String
+    let sharedBy: UUID
+    let permission: String
+    
+    enum CodingKeys: String, CodingKey {
+        case collectionId = "collection_id"
+        case sharedWithEmail = "shared_with_email"
+        case sharedBy = "shared_by"
+        case permission
     }
 }
