@@ -69,6 +69,7 @@
 		A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -136,6 +137,7 @@
 		A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductSearchService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemImagePickerSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -326,6 +328,7 @@
 				A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */,
 				A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */,
+				A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -475,6 +478,7 @@
 				A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
