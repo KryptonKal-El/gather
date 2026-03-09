@@ -54,8 +54,10 @@
         "Build succeeds"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:45:00Z",
+      "passes": true,
+      "notes": "RecipeService.swift created with fetchCollections, createCollection, updateCollection, deleteCollection, ensureDefaultCollection. Private DTOs with CodingKeys. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
