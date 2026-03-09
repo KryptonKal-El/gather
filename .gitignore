@@ -50,6 +50,7 @@ ios-native/**/xcuserdata/
 ios-native/**/DerivedData/
 ios-native/**/build/
 ios-native/**/*.xcworkspace/xcuserdata/
+ios-native/**/Secrets.plist
 *.hmap
 *.ipa
 *.dSYM.zip

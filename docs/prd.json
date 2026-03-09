@@ -73,8 +73,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T13:00:00Z",
+      "passes": true,
+      "notes": "Supabase Swift SDK v2.41.1 added via SPM. SupabaseManager singleton loads credentials from git-ignored Secrets.plist. Smoke test prints client status on launch. Build succeeds on iPhone 16e simulator.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

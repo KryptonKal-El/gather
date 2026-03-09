@@ -5,6 +5,11 @@ struct GatherListsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .task {
+                    // Smoke test: verify Supabase client is initialized
+                    _ = SupabaseManager.shared.client
+                    print("[GatherLists] Supabase client initialized successfully")
+                }
         }
     }
 }
