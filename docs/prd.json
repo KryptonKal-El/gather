@@ -207,8 +207,10 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T01:50:00Z",
+      "passes": true,
+      "notes": "CollectionBrowserView with owned/shared sections, search, swipe-delete with move/delete dialog, context menus, rename alert, pull-to-refresh. Placeholder sheets for US-007/008/011. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
