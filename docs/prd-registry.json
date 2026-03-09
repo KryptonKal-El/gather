@@ -271,6 +271,16 @@
       "createdAt": "2026-03-06",
       "updatedAt": "2026-03-06",
       "notes": "All 10 stories complete. CSS spacing tightening, store badge border fix, chevron removal, price placeholder hiding, compact AddItemForm, iOS-style + button, push navigation transition, image lightbox improvements, collapsible store groups, and full Store Manager rewrite matching ListSelector polish."
+    },
+    {
+      "id": "prd-swift-ios-setup",
+      "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-ios-setup.md",
+      "jsonPath": "docs/prds/prd-swift-ios-setup.json",
+      "branchName": "feature/swift-ios-setup",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
