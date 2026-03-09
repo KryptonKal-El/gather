@@ -198,8 +198,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Context menu on owned list rows with Name & Icon, Share Settings (placeholder), Delete List. EditListSheet bottom sheet reusing emoji picker and color presets. Delete confirmation alert. Swipe-to-delete action. Emoji clearing fix in ListViewModel.",
+      "status": "completed",
+      "completedAt": "2026-03-09T17:30:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

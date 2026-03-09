@@ -156,7 +156,8 @@ final class ListViewModel {
             // Update local state
             if let index = ownedLists.firstIndex(where: { $0.id == id }) {
                 if let name { ownedLists[index].name = name }
-                if let emoji { ownedLists[index].emoji = emoji }
+                // Always update emoji (allows clearing by passing empty string)
+                ownedLists[index].emoji = emoji
                 if let color { ownedLists[index].color = color }
             }
         } catch {

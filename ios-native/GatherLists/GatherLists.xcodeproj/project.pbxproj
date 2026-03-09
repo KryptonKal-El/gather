@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E233 /* ListShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */; };
@@ -31,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListViewModel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherList.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E232 /* ListShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListShare.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				A1B2C3D4E5F6A7B8C9D0E23A /* ListRowView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */,
 			);
 			path = Lists;
 			sourceTree = "<group>";
@@ -296,6 +299,7 @@
 				A1B2C3D4E5F6A7B8C9D0E23D /* ListDetailPlaceholderView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E23F /* ColorExtension.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E241 /* CreateListSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E243 /* EmojiPickerView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */,
 				B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */,

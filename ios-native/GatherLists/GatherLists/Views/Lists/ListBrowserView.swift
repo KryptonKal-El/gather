@@ -5,6 +5,9 @@ struct ListBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel: ListViewModel?
     @State private var showCreateSheet = false
+    @State private var listToEdit: GatherList?
+    @State private var listToDelete: GatherList?
+    @State private var showDeleteConfirm = false
     
     private var ownedFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -61,6 +64,21 @@ struct ListBrowserView: View {
                     CreateListSheet(viewModel: vm)
                 }
             }
+            .sheet(item: $listToEdit) { list in
+                if let vm = viewModel {
+                    EditListSheet(list: list, viewModel: vm)
+                }
+            }
+            .alert("Delete List?", isPresented: $showDeleteConfirm, presenting: listToDelete) { list in
+                Button("Delete", role: .destructive) {
+                    Task {
+                        await viewModel?.deleteList(id: list.id)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: { list in
+                Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
+            }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -77,6 +95,36 @@ struct ListBrowserView: View {
                             ListRowView(list: list, isShared: false)
                         }
                         .listRowInsets(EdgeInsets())
+                        .contextMenu {
+                            Button {
+                                listToEdit = list
+                            } label: {
+                                Label("Name & Icon", systemImage: "pencil")
+                            }
+                            
+                            Button {
+                                // Placeholder for US-007 share settings
+                            } label: {
+                                Label("Share Settings", systemImage: "person.badge.plus")
+                            }
+                            
+                            Divider()
+                            
+                            Button(role: .destructive) {
+                                listToDelete = list
+                                showDeleteConfirm = true
+                            } label: {
+                                Label("Delete List", systemImage: "trash")
+                            }
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                listToDelete = list
+                                showDeleteConfirm = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
                     }
                 }
             }
