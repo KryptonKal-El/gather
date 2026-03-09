@@ -70,7 +70,7 @@
     },
     {
       "id": "US-003",
-      "title": "RecipeFormSheet — Image Section (Camera + Photo Library + URL Paste)",
+      "title": "RecipeFormSheet \u2014 Image Section (Camera + Photo Library + URL Paste)",
       "description": "Add an image section to the recipe create/edit form with three options: take a photo with camera, pick from photo library, or paste a URL. Upload happens on recipe save.",
       "acceptanceCriteria": [
         "Add an image section at the top of RecipeFormSheet (above name field)",
@@ -78,18 +78,18 @@
         "'Take Photo' opens the camera via UIImagePickerController (wrapped in UIViewControllerRepresentable) with .sourceType = .camera. Captures a photo, stores as Data in local state, shows preview.",
         "'Choose from Library' opens PhotosPicker from PhotosUI framework. On selection, loads the image Data, stores in local state, shows preview.",
         "'Paste Image URL' shows an inline TextField for entering a URL. On confirm, stores the URL string, shows AsyncImage preview.",
-        "When image is set (file or URL): Show the image preview (local Data → UIImage → Image, or AsyncImage for URL) with an '✕' button to remove and a 'Change' button to replace",
-        "Image data is stored in local @State — not uploaded yet. Upload happens in save handler.",
+        "When image is set (file or URL): Show the image preview (local Data \u2192 UIImage \u2192 Image, or AsyncImage for URL) with an '\u2715' button to remove and a 'Change' button to replace",
+        "Image data is stored in local @State \u2014 not uploaded yet. Upload happens in save handler.",
         "On save (create mode): Recipe is created first (to get recipeId), then image is uploaded via StorageService.uploadRecipeImage, then image_url is updated on the recipe",
         "On save (edit mode): If image changed, upload new image via StorageService.uploadRecipeImage (upsert overwrites), then update image_url. If image removed, call RecipeService.removeRecipeImage.",
-        "If image is a URL (not a file): No upload — just set image_url directly on the recipe",
-        "Compress large images before upload — resize to max 1200px on longest edge, JPEG compression quality 0.8",
+        "If image is a URL (not a file): No upload \u2014 just set image_url directly on the recipe",
+        "Compress large images before upload \u2014 resize to max 1200px on longest edge, JPEG compression quality 0.8",
         "import PhotosUI for PhotosPicker, import UIKit for camera",
         "Build succeeds"
       ],
       "priority": 3,
       "passes": true,
-      "notes": "Created CameraPicker.swift, updated Info.plist with camera permission, modified RecipeFormSheet with image section (3 input methods, preview, upload on save), made RecipeViewModel.userId public. Build succeeds.",
+      "notes": "Image section with camera, photo library, URL paste. CameraPicker component added. Save flow handles upload + URL. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -104,22 +104,24 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "Complex UI with camera, photo picker, URL input, compression, deferred upload on save"
+      "testIntensityReason": "Complex UI with camera, photo picker, URL input, compression, deferred upload on save",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:35:00Z"
     },
     {
       "id": "US-004",
-      "title": "RecipeViewModel — Image Upload Actions",
+      "title": "RecipeViewModel \u2014 Image Upload Actions",
       "description": "Add image upload/remove actions to RecipeViewModel so views can trigger uploads through the view model.",
       "acceptanceCriteria": [
-        "uploadRecipeImage(recipeId: UUID, imageData: Data, fileExtension: String) async throws — calls StorageService.uploadRecipeImage, then updates local recipe state with the new imageUrl",
-        "updateRecipeImageUrl(recipeId: UUID, imageUrl: String) async throws — for URL-pasted images, calls RecipeService.updateRecipeImage directly",
-        "removeRecipeImage(recipeId: UUID) async throws — calls RecipeService.removeRecipeImage, clears local recipe state imageUrl",
+        "uploadRecipeImage(recipeId: UUID, imageData: Data, fileExtension: String) async throws \u2014 calls StorageService.uploadRecipeImage, then updates local recipe state with the new imageUrl",
+        "updateRecipeImageUrl(recipeId: UUID, imageUrl: String) async throws \u2014 for URL-pasted images, calls RecipeService.updateRecipeImage directly",
+        "removeRecipeImage(recipeId: UUID) async throws \u2014 calls RecipeService.removeRecipeImage, clears local recipe state imageUrl",
         "Error handling with error property for UI display",
         "Build succeeds"
       ],
       "priority": 4,
       "passes": true,
-      "notes": "Added uploadRecipeImage, updateRecipeImageUrl, and removeRecipeImage to RecipeViewModel. Updates local state and activeRecipeDetail. Build succeeds.",
+      "notes": "Added uploadImage and removeImage to RecipeViewModel. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -134,24 +136,26 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "ViewModel actions bridging storage service and recipe service"
+      "testIntensityReason": "ViewModel actions bridging storage service and recipe service",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:40:00Z"
     },
     {
       "id": "US-005",
-      "title": "RecipeTextParser — Port parseRecipeText & stripQuantity to Swift",
+      "title": "RecipeTextParser \u2014 Port parseRecipeText & stripQuantity to Swift",
       "description": "Port the React text parsing logic to Swift so clipboard-pasted ingredient lists can be parsed into structured ingredient data.",
       "acceptanceCriteria": [
         "Create Services/RecipeTextParser.swift (or Utils/RecipeTextParser.swift)",
         "struct RecipeTextParser with static functions",
-        "static func parseRecipeText(_ text: String) -> [(name: String, category: String)] — splits by newlines, strips bullet prefixes (-, *, •), filters empty lines and section headers (instructions, directions, steps, method), runs stripQuantity on each line, deduplicates by lowercase name, skips names shorter than 2 characters, capitalizes first letter, auto-categorizes via CategoryDefinitions.categorizeItem",
-        "static func stripQuantity(_ line: String) -> String — removes parenthetical notes (...), removes everything after comma, strips leading numbers/fractions, strips measurement unit words (cups, tbsp, tsp, oz, lbs, grams, ml, cloves, slices, pieces, cans, packages, bunches, heads, stalks, sprigs, pinch, dash, handful — with plural variants), strips trailing 'of'. Falls back to original minus numbers if stripping removed everything.",
+        "static func parseRecipeText(_ text: String) -> [(name: String, category: String)] \u2014 splits by newlines, strips bullet prefixes (-, *, \u2022), filters empty lines and section headers (instructions, directions, steps, method), runs stripQuantity on each line, deduplicates by lowercase name, skips names shorter than 2 characters, capitalizes first letter, auto-categorizes via CategoryDefinitions.categorizeItem",
+        "static func stripQuantity(_ line: String) -> String \u2014 removes parenthetical notes (...), removes everything after comma, strips leading numbers/fractions, strips measurement unit words (cups, tbsp, tsp, oz, lbs, grams, ml, cloves, slices, pieces, cans, packages, bunches, heads, stalks, sprigs, pinch, dash, handful \u2014 with plural variants), strips trailing 'of'. Falls back to original minus numbers if stripping removed everything.",
         "Unit pattern covers all units from React: cups?, tablespoons?, teaspoons?, oz, ounces?, lbs?, pounds?, grams?, kg, ml, liters?, quarts?, pints?, gallons?, cloves?, slices?, pieces?, cans?, packages?, bunches?, heads?, stalks?, sprigs?, pinch(es)?, dash(es)?, handful(s)?",
-        "Verified against test cases: '2 cups flour' → 'Flour', '1/2 lb ground beef' → 'Ground beef', '3 cloves garlic, minced' → 'Garlic', '1 can tomato sauce (15 oz)' → 'Tomato sauce'",
+        "Verified against test cases: '2 cups flour' \u2192 'Flour', '1/2 lb ground beef' \u2192 'Ground beef', '3 cloves garlic, minced' \u2192 'Garlic', '1 can tomato sauce (15 oz)' \u2192 'Tomato sauce'",
         "Build succeeds"
       ],
       "priority": 5,
       "passes": true,
-      "notes": "Created Utils/RecipeTextParser.swift with parseRecipeText and stripQuantity. Handles all unit patterns from React. Build succeeds.",
+      "notes": "RecipeTextParser with parseRecipeText and stripQuantity ported from JS. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -166,11 +170,13 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Regex-heavy text parsing with multiple edge cases"
+      "testIntensityReason": "Regex-heavy text parsing with multiple edge cases",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:45:00Z"
     },
     {
       "id": "US-006",
-      "title": "RecipeFormSheet — Import from Clipboard Button",
+      "title": "RecipeFormSheet \u2014 Import from Clipboard Button",
       "description": "Add an 'Import from Clipboard' button to the ingredients section of RecipeFormSheet. Tapping it reads the system clipboard, parses it, and appends the extracted ingredients to the form.",
       "acceptanceCriteria": [
         "Add an 'Import from Clipboard' button in the ingredients section header (next to '+ Add' button), with a clipboard SF Symbol icon",
@@ -186,7 +192,7 @@
       ],
       "priority": 6,
       "passes": true,
-      "notes": "Added clipboard import button to ingredients section header. Shows feedback for empty clipboard, no results, or success with count. Auto-clears feedback after 3 seconds. Build succeeds.",
+      "notes": "Import from Clipboard button in RecipeFormSheet ingredients section. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -201,21 +207,23 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Simple button wiring clipboard read to existing parser"
+      "testIntensityReason": "Simple button wiring clipboard read to existing parser",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:48:00Z"
     },
     {
       "id": "US-007",
-      "title": "Add-to-List Service Function — Batch Insert Items",
+      "title": "Add-to-List Service Function \u2014 Batch Insert Items",
       "description": "Create a function to batch-insert ingredients as shopping list items, with auto-categorization.",
       "acceptanceCriteria": [
-        "Add to ItemService.swift (or create a new helper): static func addIngredientItems(listId: UUID, ingredients: [(name: String, quantity: String?)]) async throws — for each ingredient, creates an item row with: list_id = listId, name = ingredient.name, category = CategoryDefinitions.categorizeItem(ingredient.name), is_checked = false, quantity = 1 (numeric default, NOT the recipe's measurement string)",
+        "Add to ItemService.swift (or create a new helper): static func addIngredientItems(listId: UUID, ingredients: [(name: String, quantity: String?)]) async throws \u2014 for each ingredient, creates an item row with: list_id = listId, name = ingredient.name, category = CategoryDefinitions.categorizeItem(ingredient.name), is_checked = false, quantity = 1 (numeric default, NOT the recipe's measurement string)",
         "Batch insert via single Supabase .insert() call (array of rows)",
         "Handles empty ingredient list gracefully (no-op)",
         "Build succeeds"
       ],
       "priority": 7,
       "passes": true,
-      "notes": "Added addIngredientItems to ItemService with IngredientItem DTO. Batch insert with auto-categorization. Build succeeds.",
+      "notes": "addIngredientItems batch insert in ItemService with auto-categorization. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -230,7 +238,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Cross-domain insert bridging recipes and shopping list items with auto-categorization"
+      "testIntensityReason": "Cross-domain insert bridging recipes and shopping list items with auto-categorization",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:50:00Z"
     },
     {
       "id": "US-008",
