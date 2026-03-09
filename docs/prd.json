@@ -116,8 +116,10 @@
         "Build succeeds"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:30:00Z",
+      "passes": true,
+      "notes": "Avatar section with AsyncImage + fallback, camera/library upload, loading overlay, error state. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
