@@ -1,5 +1,7 @@
 import SwiftUI
 import PhotosUI
+import Supabase
+import Auth
 
 struct SettingsView: View {
     @Environment(AuthViewModel.self) private var authViewModel
@@ -10,6 +12,9 @@ struct SettingsView: View {
     @State private var showCamera = false
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var photoPickerPresented = false
+    @State private var showNameAlert = false
+    @State private var editedName = ""
+    @State private var isSavingName = false
     
     var body: some View {
         NavigationStack {
@@ -37,6 +42,22 @@ struct SettingsView: View {
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
+                    
+                    Button {
+                        editedName = authViewModel.displayName
+                        showNameAlert = true
+                    } label: {
+                        HStack {
+                            Text("Display Name")
+                            Spacer()
+                            Text(authViewModel.displayName)
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .foregroundStyle(.primary)
                 }
                 
                 Section {
@@ -78,6 +99,15 @@ struct SettingsView: View {
                         await uploadAvatar(imageData: data)
                     }
                 }
+            }
+            .alert("Edit Display Name", isPresented: $showNameAlert) {
+                TextField("Display Name", text: $editedName)
+                Button("Cancel", role: .cancel) {}
+                Button("Save") {
+                    Task { await saveDisplayName() }
+                }
+            } message: {
+                Text("Enter your display name")
             }
         }
     }
@@ -132,5 +162,21 @@ struct SettingsView: View {
             uploadError = error.localizedDescription
         }
         isUploading = false
+    }
+    
+    private func saveDisplayName() async {
+        let trimmed = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let userId = authViewModel.currentUser?.id else { return }
+        isSavingName = true
+        do {
+            try await ProfileService.updateDisplayName(userId: userId, name: trimmed)
+            try await SupabaseManager.shared.client.auth.update(
+                user: UserAttributes(data: ["full_name": .string(trimmed)])
+            )
+            await authViewModel.refreshProfile()
+        } catch {
+            print("[SettingsView] Failed to update display name: \(error.localizedDescription)")
+        }
+        isSavingName = false
     }
 }
