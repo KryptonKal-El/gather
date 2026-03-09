@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F6A7B8C9D0E253 /* ItemService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E252 /* ItemService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E255 /* HistoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E254 /* HistoryService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E257 /* StoreService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E256 /* StoreService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E24B /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E24D /* HistoryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24C /* HistoryEntry.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E24F /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
@@ -38,6 +41,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A1B2C3D4E5F6A7B8C9D0E252 /* ItemService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E254 /* HistoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E256 /* StoreService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E24C /* HistoryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryEntry.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Store.swift; sourceTree = "<group>"; };
@@ -150,6 +156,9 @@
 			children = (
 				B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E252 /* ItemService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E254 /* HistoryService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E256 /* StoreService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -308,6 +317,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F6A7B8C9D0E253 /* ItemService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E255 /* HistoryService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E257 /* StoreService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E24B /* Item.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E24D /* HistoryEntry.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E24F /* Store.swift in Sources */,
