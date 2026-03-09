@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State private var showNameAlert = false
     @State private var editedName = ""
     @State private var isSavingName = false
+    @State private var appearanceSetting = AppearanceManager.shared.setting
     
     var body: some View {
         NavigationStack {
@@ -58,6 +59,18 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundStyle(.primary)
+                }
+                
+                Section("Appearance") {
+                    Picker("Appearance", selection: $appearanceSetting) {
+                        ForEach(AppearanceManager.AppearanceSetting.allCases, id: \.self) { option in
+                            Text(option.displayName).tag(option)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: appearanceSetting) { _, newValue in
+                        AppearanceManager.shared.setting = newValue
+                    }
                 }
                 
                 Section {
