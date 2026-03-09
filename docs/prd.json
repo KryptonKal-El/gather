@@ -349,9 +349,10 @@
         "Verify on device/simulator with two clients"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "Verification-only story. Realtime subscription set up in US-002 via StoreViewModel.setupRealtimeSubscription() — listens on stores table with user_id filter using AnyAction.self to catch INSERT/UPDATE/DELETE. Refetches full store list on any change. Pull-to-refresh via .refreshable on StoreBrowserView. Category edits sync because categories is a JSONB column on the stores table. Supabase SDK handles reconnection after background. Build verified.",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:05:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
