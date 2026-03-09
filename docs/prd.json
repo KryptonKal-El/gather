@@ -268,8 +268,10 @@
         "Verify on device/simulator"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "ScrollView+LazyVStack grouped list with collapsible store sections (chevron + colored dot + count), category subgroups (dot + name + count), item rows (checkbox + name + qty badge + price), double-tap toggle, checked section with clear button + confirmation alert, pull-to-refresh, loading/empty states. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:15:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Detail view for a single list showing items, sharing status, and empty state.
+/// Detail view for a single list showing items grouped by store and category.
 struct ListDetailView: View {
     let list: GatherList
     let viewModel: ListViewModel
@@ -14,6 +14,11 @@ struct ListDetailView: View {
     @State private var itemName: String = ""
     @State private var selectedStoreId: UUID?
     @FocusState private var isInputFocused: Bool
+    
+    @State private var collapsedStores: Set<String> = []
+    @State private var showClearCheckedAlert = false
+    
+    private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
@@ -46,13 +51,13 @@ struct ListDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
-                if detailViewModel?.items.isEmpty ?? (list.itemCount == 0) {
+                if detailViewModel == nil || detailViewModel?.isLoading == true {
+                    loadingState
+                } else if detailViewModel?.items.isEmpty ?? true {
                     emptyState
                 } else {
-                    itemsPlaceholder
+                    itemListContent
                 }
-                
-                Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             
@@ -75,10 +80,30 @@ struct ListDetailView: View {
                 shareStatusIndicator
             }
         }
+        .alert("Clear checked items?", isPresented: $showClearCheckedAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Clear", role: .destructive) {
+                Task {
+                    await detailViewModel?.clearChecked()
+                }
+            }
+        } message: {
+            Text("This will permanently delete all checked items.")
+        }
         .task {
             await initializeDetailViewModel()
             await loadShareInfo()
         }
+    }
+    
+    // MARK: - Loading State
+    
+    private var loadingState: some View {
+        VStack {
+            ProgressView()
+                .scaleEffect(1.2)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Empty State
@@ -89,34 +114,231 @@ struct ListDetailView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
             
-            Text("No items yet")
+            Text("Your list is empty")
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("Add items to get started")
+            Text("Add items below")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    // MARK: - Items Placeholder
+    // MARK: - Item List Content
     
-    private var itemsPlaceholder: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "list.bullet")
-                .font(.system(size: 48))
+    private var itemListContent: some View {
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: []) {
+                uncheckedItemsSection
+                
+                if let vm = detailViewModel, !vm.checkedItems.isEmpty {
+                    checkedItemsSection
+                }
+            }
+            .padding(.bottom, 80)
+        }
+        .refreshable {
+            await detailViewModel?.refresh()
+        }
+    }
+    
+    // MARK: - Unchecked Items Section
+    
+    @ViewBuilder
+    private var uncheckedItemsSection: some View {
+        if let vm = detailViewModel {
+            let groupedByStore = vm.groupedByStore
+            let hasStores = vm.stores.count > 0
+            
+            ForEach(Array(groupedByStore.enumerated()), id: \.offset) { index, group in
+                let store = group.store
+                let items = group.items
+                let storeKey = store?.id.uuidString ?? unassignedKey
+                let isCollapsed = collapsedStores.contains(storeKey)
+                
+                if hasStores {
+                    storeHeader(store: store, itemCount: items.count, isCollapsed: isCollapsed) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            if isCollapsed {
+                                collapsedStores.remove(storeKey)
+                            } else {
+                                collapsedStores.insert(storeKey)
+                            }
+                        }
+                    }
+                    
+                    if !isCollapsed {
+                        categoryGroupsView(items: items, store: store)
+                    }
+                } else {
+                    categoryGroupsView(items: items, store: nil)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Store Header
+    
+    private func storeHeader(
+        store: Store?,
+        itemCount: Int,
+        isCollapsed: Bool,
+        onTap: @escaping () -> Void
+    ) -> some View {
+        Button(action: onTap) {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(isCollapsed ? 0 : 90))
+                
+                Circle()
+                    .fill(Color(hex: store?.color ?? "#9e9e9e"))
+                    .frame(width: 10, height: 10)
+                
+                Text(store?.name ?? "Unassigned")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Text("(\(itemCount))")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.secondarySystemGroupedBackground))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+    
+    // MARK: - Category Groups View
+    
+    private func categoryGroupsView(items: [Item], store: Store?) -> some View {
+        let categoryGroups = detailViewModel?.groupByCategory(items, store: store) ?? []
+        
+        return ForEach(Array(categoryGroups.enumerated()), id: \.offset) { index, group in
+            let category = group.category
+            let categoryItems = group.items
+            
+            categoryHeader(category: category, itemCount: categoryItems.count)
+            
+            ForEach(categoryItems) { item in
+                itemRow(item: item, isChecked: false)
+            }
+        }
+    }
+    
+    // MARK: - Category Header
+    
+    private func categoryHeader(category: CategoryDef, itemCount: Int) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(Color(hex: category.color))
+                .frame(width: 8, height: 8)
+            
+            Text(category.name)
+                .font(.subheadline)
+                .fontWeight(.medium)
                 .foregroundStyle(.secondary)
             
-            Text("\(detailViewModel?.items.count ?? list.itemCount) items")
-                .font(.title2)
-                .fontWeight(.semibold)
-            
-            Text("Item list coming in Phase 3")
-                .font(.subheadline)
+            Text("(\(itemCount))")
+                .font(.caption)
                 .foregroundStyle(.tertiary)
+            
+            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .padding(.leading, 20)
+    }
+    
+    // MARK: - Item Row
+    
+    private func itemRow(item: Item, isChecked: Bool) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(isChecked ? .secondary : listColor)
+            
+            Text(item.name)
+                .strikethrough(isChecked)
+                .foregroundStyle(isChecked ? .secondary : .primary)
+            
+            if item.quantity > 1 {
+                Text("×\(item.quantity)")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(Color(.systemGray))
+                    )
+            }
+            
+            Spacer()
+            
+            if let price = item.price {
+                Text(formatPrice(price))
+                    .font(.subheadline)
+                    .foregroundStyle(isChecked ? .tertiary : .secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .padding(.leading, 28)
+        .background(Color(.systemBackground))
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            Task {
+                await detailViewModel?.toggleItem(item)
+            }
+        }
+    }
+    
+    // MARK: - Checked Items Section
+    
+    @ViewBuilder
+    private var checkedItemsSection: some View {
+        if let vm = detailViewModel {
+            let checkedItems = vm.checkedItems
+            
+            HStack {
+                Text("Checked (\(checkedItems.count))")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                
+                Spacer()
+                
+                Button("Clear checked") {
+                    showClearCheckedAlert = true
+                }
+                .font(.subheadline)
+                .foregroundStyle(.red)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .padding(.top, 8)
+            .background(Color(.secondarySystemGroupedBackground))
+            
+            ForEach(checkedItems) { item in
+                itemRow(item: item, isChecked: true)
+            }
+        }
+    }
+    
+    // MARK: - Price Formatting
+    
+    private func formatPrice(_ price: Decimal) -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "USD"
+        return formatter.string(from: price as NSDecimalNumber) ?? "$\(price)"
     }
     
     // MARK: - Share Status Indicator
