@@ -90,8 +90,10 @@
         "Build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:30:00Z",
+      "passes": true,
+      "notes": "Wired SuggestionEngine + SuggestionsView into ListDetailView. AI suggestions section appears as first section in item list, hidden when no history. onAdd uses addItem with selectedStoreId.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -61,6 +61,17 @@ struct ListDetailView: View {
         isInputFocused && !filteredSuggestions.isEmpty
     }
     
+    private var aiSuggestions: [ItemSuggestion] {
+        SuggestionEngine.getSuggestions(
+            history: detailViewModel?.historyEntries ?? [],
+            currentItems: detailViewModel?.uncheckedItems ?? []
+        )
+    }
+    
+    private var showAISuggestions: Bool {
+        !(detailViewModel?.historyEntries.isEmpty ?? true) && !aiSuggestions.isEmpty
+    }
+    
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
@@ -201,6 +212,18 @@ struct ListDetailView: View {
     
     private var itemListContent: some View {
         List {
+            if showAISuggestions {
+                Section {
+                    SuggestionsView(suggestions: aiSuggestions) { name in
+                        Task {
+                            await detailViewModel?.addItem(name: name, storeId: selectedStoreId)
+                        }
+                    }
+                }
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+            
             uncheckedItemsSection
             
             if let vm = detailViewModel, !vm.checkedItems.isEmpty {
