@@ -14,6 +14,7 @@ struct RecipeDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showMoveSheet = false
     @State private var showAddToListSheet = false
+    @State private var addAllToList = false
     @State private var editIngredients: [RecipeIngredient] = []
     @State private var editSteps: [RecipeStep] = []
     
@@ -31,30 +32,39 @@ struct RecipeDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button {
-                        Task {
-                            await viewModel.selectRecipe(id: recipe.id)
-                            if let detail = viewModel.activeRecipeDetail {
-                                editIngredients = detail.ingredients
-                                editSteps = detail.steps
+                        addAllToList = true
+                        showAddToListSheet = true
+                    } label: {
+                        Label("Add to List", systemImage: "cart.badge.plus")
+                    }
+                    
+                    if recipe.ownerId == userId {
+                        Button {
+                            Task {
+                                await viewModel.selectRecipe(id: recipe.id)
+                                if let detail = viewModel.activeRecipeDetail {
+                                    editIngredients = detail.ingredients
+                                    editSteps = detail.steps
+                                }
+                                showEditSheet = true
                             }
-                            showEditSheet = true
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
                         }
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    
-                    Button {
-                        showMoveSheet = true
-                    } label: {
-                        Label("Move to Collection", systemImage: "folder")
-                    }
-                    
-                    Divider()
-                    
-                    Button(role: .destructive) {
-                        showDeleteConfirm = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                        
+                        Button {
+                            showMoveSheet = true
+                        } label: {
+                            Label("Move to Collection", systemImage: "folder")
+                        }
+                        
+                        Divider()
+                        
+                        Button(role: .destructive) {
+                            showDeleteConfirm = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -74,11 +84,12 @@ struct RecipeDetailView: View {
         }
         .sheet(isPresented: $showAddToListSheet) {
             AddToListSheet(
-                ingredients: checkedIngredientsData,
+                ingredients: addAllToList ? allIngredientsData : checkedIngredientsData,
                 userId: userId,
                 userEmail: userEmail,
                 onDismiss: {
                     checkedIngredients.removeAll()
+                    addAllToList = false
                     showAddToListSheet = false
                 }
             )
@@ -267,6 +278,11 @@ struct RecipeDetailView: View {
         return ingredients
             .filter { checkedIngredients.contains($0.id) }
             .map { (name: $0.name, quantity: $0.quantity) }
+    }
+    
+    private var allIngredientsData: [(name: String, quantity: String?)] {
+        guard let ingredients = viewModel.activeRecipeDetail?.ingredients else { return [] }
+        return ingredients.map { (name: $0.name, quantity: $0.quantity) }
     }
     
     private func toggleIngredient(_ id: UUID) {
