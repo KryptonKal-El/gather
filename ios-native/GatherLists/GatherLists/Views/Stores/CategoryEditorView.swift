@@ -10,6 +10,9 @@ struct CategoryEditorView: View {
     @State private var newCategoryName = ""
     @State private var categoryToDelete: CategoryDef?
     @State private var showDeleteConfirm = false
+    @State private var showReplaceConfirm = false
+    @State private var pendingCopySource: [CategoryDef]?
+    @State private var replaceAlertMessage = ""
     
     private let categoryPresetColors = [
         "#4caf50", "#2196f3", "#e53935", "#ff9800", "#00bcd4",
@@ -34,11 +37,39 @@ struct CategoryEditorView: View {
         }
         .navigationTitle("\(store.name) Categories")
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                if !categories.isEmpty {
+                    EditButton()
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showAddAlert = true
                 } label: {
                     Image(systemName: "plus")
+                }
+            }
+            ToolbarItem(placement: .secondaryAction) {
+                Menu {
+                    Button {
+                        copyCategories(from: CategoryDefinitions.defaults, sourceLabel: "defaults")
+                    } label: {
+                        Label("Copy Default Categories", systemImage: "arrow.down.doc")
+                    }
+                    
+                    if !otherStores.isEmpty {
+                        Menu("Copy from Store...") {
+                            ForEach(otherStores) { otherStore in
+                                Button {
+                                    copyCategories(from: otherStore.categories, sourceLabel: "categories from \(otherStore.name)")
+                                } label: {
+                                    Label("\(otherStore.name) (\(otherStore.categories.count))", systemImage: "storefront")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -56,6 +87,19 @@ struct CategoryEditorView: View {
             Button("Cancel", role: .cancel) {}
         } message: { cat in
             Text("Delete \"\(cat.name)\"?")
+        }
+        .alert("Replace Categories?", isPresented: $showReplaceConfirm) {
+            Button("Replace", role: .destructive) {
+                if let source = pendingCopySource {
+                    categories = source
+                    Task { await viewModel.updateCategories(store.id, categories: categories) }
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                pendingCopySource = nil
+            }
+        } message: {
+            Text(replaceAlertMessage)
         }
     }
     
@@ -79,6 +123,12 @@ struct CategoryEditorView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
+                }
+            }
+            .onMove { source, destination in
+                categories.move(fromOffsets: source, toOffset: destination)
+                Task {
+                    await viewModel.updateCategories(store.id, categories: categories)
                 }
             }
         }
@@ -148,6 +198,21 @@ struct CategoryEditorView: View {
         
         Task {
             await viewModel.updateCategories(store.id, categories: categories)
+        }
+    }
+    
+    private var otherStores: [Store] {
+        viewModel.stores.filter { $0.id != store.id }
+    }
+    
+    private func copyCategories(from source: [CategoryDef], sourceLabel: String) {
+        if categories.isEmpty {
+            categories = source
+            Task { await viewModel.updateCategories(store.id, categories: categories) }
+        } else {
+            pendingCopySource = source
+            replaceAlertMessage = "Replace \(categories.count) existing categories with \(sourceLabel)?"
+            showReplaceConfirm = true
         }
     }
 }

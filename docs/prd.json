@@ -313,9 +313,10 @@
         "Verify on device/simulator"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "EditButton in leading toolbar enables drag handles + .onMove for reordering. Toolbar menu with 'Copy Default Categories' and 'Copy from Store...' submenu listing other stores with category count. Replace confirmation alert when categories already exist. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:55:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
