@@ -283,6 +283,16 @@
       "updatedAt": "2026-03-09",
       "startedAt": "2026-03-09T12:00:00Z",
       "currentStory": "US-006"
+    },
+    {
+      "id": "prd-swift-lists-core",
+      "name": "Native Swift iOS App — Phase 2: Lists Core",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-lists-core.md",
+      "jsonPath": "docs/prds/prd-swift-lists-core.json",
+      "branchName": "feature/swift-lists-core",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
