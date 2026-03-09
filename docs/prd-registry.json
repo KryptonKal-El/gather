@@ -317,12 +317,14 @@
     {
       "id": "prd-swift-stores",
       "name": "Native Swift iOS App — Phase 4: Store Management",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
       "branchName": "feature/swift-stores",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09"
+      "updatedAt": "2026-03-09",
+      "startedAt": "2026-03-09T22:10:00Z",
+      "currentStory": "US-001"
     },
     {
       "id": "prd-swift-recipes-core",
@@ -331,6 +333,14 @@
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
       "branchName": "feature/swift-recipes-core",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
+    },
+    {
+      "id": "prd-swift-recipes-advanced",
+      "name": "Native Swift iOS App — Phase 6: Recipes Advanced",
+      "status": "draft",
+      "filePath": "docs/drafts/prd-swift-recipes-advanced.md",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09"
     }

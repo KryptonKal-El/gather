@@ -16,4 +16,154 @@ struct StoreService {
             .value
         return stores
     }
+    
+    /// Creates a new store for a user.
+    static func createStore(
+        userId: UUID,
+        name: String,
+        color: String?,
+        categories: [CategoryDef]
+    ) async throws -> Store {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else {
+            throw StoreServiceError.emptyName
+        }
+        
+        let existingStores = try await fetchStores(userId: userId)
+        let sortOrder = existingStores.count
+        
+        let newStore = NewStore(
+            userId: userId,
+            name: trimmedName,
+            color: color,
+            categories: categories,
+            sortOrder: sortOrder
+        )
+        
+        let store: Store = try await client
+            .from("stores")
+            .insert(newStore)
+            .select()
+            .single()
+            .execute()
+            .value
+        return store
+    }
+    
+    /// Partially updates a store. Only non-nil fields are sent.
+    static func updateStore(
+        storeId: UUID,
+        name: String? = nil,
+        color: String? = nil,
+        categories: [CategoryDef]? = nil
+    ) async throws {
+        let update = StoreUpdate(
+            name: name,
+            color: color,
+            categories: categories
+        )
+        try await client
+            .from("stores")
+            .update(update)
+            .eq("id", value: storeId)
+            .execute()
+    }
+    
+    /// Deletes a store.
+    static func deleteStore(storeId: UUID) async throws {
+        try await client
+            .from("stores")
+            .delete()
+            .eq("id", value: storeId)
+            .execute()
+    }
+    
+    /// Saves the order of stores by upserting all stores with updated sort_order values.
+    static func saveStoreOrder(userId: UUID, stores: [Store]) async throws {
+        let entries = stores.enumerated().map { index, store in
+            StoreOrderEntry(
+                id: store.id,
+                userId: userId,
+                name: store.name,
+                color: store.color,
+                categories: store.categories,
+                sortOrder: index,
+                createdAt: store.createdAt
+            )
+        }
+        try await client
+            .from("stores")
+            .upsert(entries, onConflict: "id")
+            .execute()
+    }
+}
+
+// MARK: - Errors
+
+enum StoreServiceError: Error, LocalizedError {
+    case emptyName
+    
+    var errorDescription: String? {
+        switch self {
+        case .emptyName:
+            return "Store name cannot be empty"
+        }
+    }
+}
+
+// MARK: - DTOs
+
+private struct NewStore: Encodable {
+    let userId: UUID
+    let name: String
+    let color: String?
+    let categories: [CategoryDef]
+    let sortOrder: Int
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case name
+        case color
+        case categories
+        case sortOrder = "sort_order"
+    }
+}
+
+private struct StoreUpdate: Encodable {
+    var name: String?
+    var color: String?
+    var categories: [CategoryDef]?
+    
+    enum CodingKeys: String, CodingKey {
+        case name
+        case color
+        case categories
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        if let name = name { try container.encode(name, forKey: .name) }
+        if let color = color { try container.encode(color, forKey: .color) }
+        if let categories = categories { try container.encode(categories, forKey: .categories) }
+    }
+}
+
+private struct StoreOrderEntry: Encodable {
+    let id: UUID
+    let userId: UUID
+    let name: String
+    let color: String?
+    let categories: [CategoryDef]
+    let sortOrder: Int
+    let createdAt: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case userId = "user_id"
+        case name
+        case color
+        case categories
+        case sortOrder = "sort_order"
+        case createdAt = "created_at"
+    }
 }
