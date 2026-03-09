@@ -7,6 +7,7 @@ struct ListDetailView: View {
     let isOwned: Bool
     
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.undoManager) private var undoManager
     
     @State private var detailViewModel: ListDetailViewModel?
     @State private var shareCount: Int = 0
@@ -93,7 +94,10 @@ struct ListDetailView: View {
             Button("Cancel", role: .cancel) { }
             Button("Clear", role: .destructive) {
                 Task {
-                    await detailViewModel?.clearChecked()
+                    let cleared = await detailViewModel?.clearChecked() ?? []
+                    if !cleared.isEmpty {
+                        registerClearCheckedUndo(for: cleared)
+                    }
                 }
             }
         } message: {
@@ -285,7 +289,9 @@ struct ListDetailView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task {
-                                await detailViewModel?.deleteItem(item)
+                                if await detailViewModel?.deleteItem(item) != nil {
+                                    registerDeleteUndo(for: item)
+                                }
                             }
                         } label: {
                             Label("Delete", systemImage: "trash")
@@ -522,7 +528,9 @@ struct ListDetailView: View {
         // Delete
         Button(role: .destructive) {
             Task {
-                await detailViewModel?.deleteItem(item)
+                if await detailViewModel?.deleteItem(item) != nil {
+                    registerDeleteUndo(for: item)
+                }
             }
         } label: {
             Label("Delete", systemImage: "trash")
@@ -582,7 +590,9 @@ struct ListDetailView: View {
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task {
-                                await detailViewModel?.deleteItem(item)
+                                if await detailViewModel?.deleteItem(item) != nil {
+                                    registerDeleteUndo(for: item)
+                                }
                             }
                         } label: {
                             Label("Delete", systemImage: "trash")
@@ -778,4 +788,32 @@ struct ListDetailView: View {
         }
         isLoadingShares = false
     }
+    
+    // MARK: - Undo Registration
+    
+    private func registerDeleteUndo(for item: Item) {
+        guard let undoManager else { return }
+        undoManager.registerUndo(withTarget: UndoHelper.shared) { _ in
+            Task { @MainActor in
+                await self.detailViewModel?.restoreItem(item)
+            }
+        }
+        undoManager.setActionName("Delete \(item.name)")
+    }
+    
+    private func registerClearCheckedUndo(for items: [Item]) {
+        guard let undoManager, !items.isEmpty else { return }
+        undoManager.registerUndo(withTarget: UndoHelper.shared) { _ in
+            Task { @MainActor in
+                await self.detailViewModel?.restoreItems(items)
+            }
+        }
+        let count = items.count
+        undoManager.setActionName("Clear \(count) Checked Item\(count == 1 ? "" : "s")")
+    }
+}
+
+/// NSObject target for UndoManager since SwiftUI views are value types.
+final class UndoHelper: NSObject {
+    static let shared = UndoHelper()
 }

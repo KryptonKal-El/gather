@@ -127,7 +127,9 @@ struct ItemService {
         category: String?,
         storeId: UUID?,
         quantity: Int,
-        isChecked: Bool
+        isChecked: Bool,
+        price: Decimal?,
+        imageUrl: String?
     ) async throws -> Item {
         let restoreData = RestoreItem(
             listId: listId,
@@ -135,7 +137,9 @@ struct ItemService {
             category: category,
             storeId: storeId,
             quantity: quantity,
-            isChecked: isChecked
+            isChecked: isChecked,
+            price: price,
+            imageUrl: imageUrl
         )
         let item: Item = try await client
             .from("items")
@@ -145,6 +149,25 @@ struct ItemService {
             .execute()
             .value
         return item
+    }
+    
+    /// Batch restores multiple items for undo functionality.
+    static func restoreItems(listId: UUID, items: [Item]) async throws -> [Item] {
+        var restored: [Item] = []
+        for item in items {
+            let restoredItem = try await restoreItem(
+                listId: listId,
+                name: item.name,
+                category: item.category,
+                storeId: item.storeId,
+                quantity: item.quantity,
+                isChecked: item.isChecked,
+                price: item.price,
+                imageUrl: item.imageUrl
+            )
+            restored.append(restoredItem)
+        }
+        return restored
     }
 }
 
@@ -224,6 +247,8 @@ private struct RestoreItem: Encodable {
     let storeId: UUID?
     let quantity: Int
     let isChecked: Bool
+    let price: Decimal?
+    let imageUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -232,5 +257,7 @@ private struct RestoreItem: Encodable {
         case storeId = "store_id"
         case quantity
         case isChecked = "is_checked"
+        case price
+        case imageUrl = "image_url"
     }
 }

@@ -287,13 +287,16 @@ final class ListDetailViewModel {
         }
     }
     
-    func deleteItem(_ item: Item) async {
+    @discardableResult
+    func deleteItem(_ item: Item) async -> Item? {
         do {
             try await ItemService.deleteItem(itemId: item.id)
             items.removeAll { $0.id == item.id }
+            return item
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to delete item: \(error.localizedDescription)")
+            return nil
         }
     }
     
@@ -347,16 +350,20 @@ final class ListDetailViewModel {
         }
     }
     
-    func clearChecked() async {
-        let checkedIds = items.filter { $0.isChecked }.map { $0.id }
-        guard !checkedIds.isEmpty else { return }
+    @discardableResult
+    func clearChecked() async -> [Item] {
+        let checkedItems = items.filter { $0.isChecked }
+        guard !checkedItems.isEmpty else { return [] }
+        let checkedIds = checkedItems.map { $0.id }
         
         do {
             try await ItemService.deleteItems(itemIds: checkedIds)
             items.removeAll { $0.isChecked }
+            return checkedItems
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to clear checked items: \(error.localizedDescription)")
+            return []
         }
     }
     
@@ -368,12 +375,24 @@ final class ListDetailViewModel {
                 category: item.category,
                 storeId: item.storeId,
                 quantity: item.quantity,
-                isChecked: item.isChecked
+                isChecked: item.isChecked,
+                price: item.price,
+                imageUrl: item.imageUrl
             )
             items.append(restoredItem)
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to restore item: \(error.localizedDescription)")
+        }
+    }
+    
+    func restoreItems(_ itemsToRestore: [Item]) async {
+        do {
+            let restored = try await ItemService.restoreItems(listId: listId, items: itemsToRestore)
+            items.append(contentsOf: restored)
+        } catch {
+            self.error = error.localizedDescription
+            print("[ListDetailViewModel] Failed to restore items: \(error.localizedDescription)")
         }
     }
     

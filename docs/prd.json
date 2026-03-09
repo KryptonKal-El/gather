@@ -1,7 +1,7 @@
 {
   "project": "Gather Lists",
   "branchName": "feature/swift-shopping-list",
-  "description": "Native Swift iOS App — Phase 3: Shopping List Items (add, view, edit, check, delete, undo, realtime sync, store+category grouping)",
+  "description": "Native Swift iOS App \u2014 Phase 3: Shopping List Items (add, view, edit, check, delete, undo, realtime sync, store+category grouping)",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -45,7 +45,7 @@
       "description": "As a developer, I need the 12 default category definitions and the auto-categorization algorithm in Swift so new items can be automatically categorized.",
       "acceptanceCriteria": [
         "CategoryDefinitions enum/struct contains all 12 default categories with keys, display names, colors, and keyword arrays matching the React implementation exactly",
-        "categorizeItem(_ name: String, categories: [CategoryDef]?) function implements 3-pass matching: exact → multi-word phrase → single-word fallback → other",
+        "categorizeItem(_ name: String, categories: [CategoryDef]?) function implements 3-pass matching: exact \u2192 multi-word phrase \u2192 single-word fallback \u2192 other",
         "When categories parameter is nil or empty, uses the 12 defaults",
         "When categories are provided (from a store), uses those instead",
         "Case-insensitive matching",
@@ -77,7 +77,7 @@
     },
     {
       "id": "US-003",
-      "title": "ItemService — CRUD Operations",
+      "title": "ItemService \u2014 CRUD Operations",
       "description": "As a developer, I need a service layer for item CRUD so view models can perform all item operations through a clean API.",
       "acceptanceCriteria": [
         "ItemService class with methods: fetchItems(listId:), addItem(listId:, name:, category:, storeId:), updateItem(itemId:, updates:), toggleItem(itemId:, isChecked:), deleteItem(itemId:), deleteItems(itemIds:), restoreItem(listId:, itemData:)",
@@ -111,7 +111,7 @@
     },
     {
       "id": "US-004",
-      "title": "HistoryService — Autocomplete Data",
+      "title": "HistoryService \u2014 Autocomplete Data",
       "description": "As a developer, I need a service to fetch and write item history so the add-item form can offer autocomplete suggestions.",
       "acceptanceCriteria": [
         "HistoryService class with methods: fetchHistory(userId:), addHistoryEntry(userId:, name:), addHistoryEntries(userId:, names:)",
@@ -142,7 +142,7 @@
     },
     {
       "id": "US-005",
-      "title": "StoreService — Read-Only for Grouping",
+      "title": "StoreService \u2014 Read-Only for Grouping",
       "description": "As a developer, I need to fetch the user's stores so items can be grouped by store in the list view. Full store CRUD is Phase 4.",
       "acceptanceCriteria": [
         "StoreService class with methods: fetchStores(userId:), subscribeStores(userId:) with realtime subscription on stores table filtered by user_id",
@@ -173,7 +173,7 @@
     },
     {
       "id": "US-006",
-      "title": "ListDetailViewModel — @Observable State + Realtime",
+      "title": "ListDetailViewModel \u2014 @Observable State + Realtime",
       "description": "As a developer, I need a view model that manages the item list state for a single list, including realtime updates, store data, and history.",
       "acceptanceCriteria": [
         "ListDetailViewModel is @Observable",
@@ -211,7 +211,7 @@
     },
     {
       "id": "US-007",
-      "title": "Add Item Bar — Bottom Input with Autocomplete",
+      "title": "Add Item Bar \u2014 Bottom Input with Autocomplete",
       "description": "As a user, I want a text field at the bottom of the list to quickly add items, with suggestions from my past items, so adding groceries is fast.",
       "acceptanceCriteria": [
         "Sticky input bar pinned to the bottom of the screen (above safe area / home indicator)",
@@ -250,7 +250,7 @@
     },
     {
       "id": "US-008",
-      "title": "Item List View — Store + Category Grouping",
+      "title": "Item List View \u2014 Store + Category Grouping",
       "description": "As a user, I want to see my items organized by store and then by category so I can shop efficiently aisle by aisle.",
       "acceptanceCriteria": [
         "List view shows unchecked items grouped by store (if stores exist), then by category within each store",
@@ -261,7 +261,7 @@
         "Each item row shows: item name, quantity badge (if qty > 1), store badge (colored pill), category badge (colored pill), price (if set, formatted as $X.XX)",
         "Double-tap on an item row toggles checked/unchecked",
         "Checked items appear in a separate Checked (N) section at the bottom",
-        "Clear checked button in checked section header — tap shows confirmation alert, then deletes all checked items",
+        "Clear checked button in checked section header \u2014 tap shows confirmation alert, then deletes all checked items",
         "Empty state: Your list is empty with hint Add items below",
         "Pull-to-refresh triggers a full re-fetch of items",
         "Build succeeds",
@@ -290,7 +290,7 @@
     },
     {
       "id": "US-009",
-      "title": "Item Context Menu — Long-Press Edit",
+      "title": "Item Context Menu \u2014 Long-Press Edit",
       "description": "As a user, I want to long-press an item to edit its details so I can change the name, quantity, price, store, or category without leaving the list.",
       "acceptanceCriteria": [
         "Long-press on any item row shows a native iOS context menu",
@@ -396,7 +396,7 @@
     },
     {
       "id": "US-012",
-      "title": "Realtime Sync — Cross-Device Verification",
+      "title": "Realtime Sync \u2014 Cross-Device Verification",
       "description": "As a user, I want changes made on the web app (or another device) to appear on my phone in real-time so my list is always current.",
       "acceptanceCriteria": [
         "Adding an item on the React PWA appears on the Swift app within ~2 seconds (without manual refresh)",
