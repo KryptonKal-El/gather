@@ -63,6 +63,7 @@
 		A1B2C3D4E5F6A7B8C9D0E287 /* ImageCompressor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E291 /* RecipeTextParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -124,6 +125,7 @@
 		A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCompressor.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTextParser.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToListSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -279,6 +281,7 @@
 				A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E27F /* ShareCollectionSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E281 /* EditCollectionSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */,
 			);
 			path = Recipes;
 			sourceTree = "<group>";
@@ -451,6 +454,7 @@
 				A1B2C3D4E5F6A7B8C9D0E287 /* ImageCompressor.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E291 /* RecipeTextParser.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
