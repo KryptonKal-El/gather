@@ -420,8 +420,10 @@
         "Build succeeds"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:30:00Z",
+      "passes": true,
+      "notes": "Add to List in toolbar menu for all recipes. Edit/Move/Delete shown only for owned recipes. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -450,6 +452,8 @@
         "Build succeeds"
       ],
       "priority": 14,
+      "status": "completed",
+      "completedAt": "2026-03-09T20:00:00Z",
       "passes": true,
       "notes": "ImageCompressor.swift in new Utils group. Resize + JPEG compress. Build succeeds.",
       "supportArticleRequired": false,

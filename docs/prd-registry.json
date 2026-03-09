@@ -344,15 +344,17 @@
     },
     {
       "id": "prd-swift-recipes-advanced",
-      "name": "Native Swift iOS App \u2014 Phase 6: Recipes Advanced",
-      "status": "in_progress",
+      "name": "Native Swift iOS App — Phase 6: Recipes Advanced",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-advanced.md",
       "jsonPath": "docs/prds/prd-swift-recipes-advanced.json",
       "branchName": "feature/swift-recipes-advanced",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-10",
       "startedAt": "2026-03-10T02:15:00Z",
-      "currentStory": "US-013"
+      "completedAt": "2026-03-09T22:30:00Z",
+      "currentStory": null,
+      "notes": "All 14 stories complete. StorageService, RecipeService image ops, RecipeFormSheet image section (camera+photo+URL), RecipeViewModel image upload, RecipeTextParser clipboard import, batch add-to-list, AddToListSheet list picker, RecipeDetailView add-to-list button + 3-dot menu, RecipeTemplate data+VM actions, CollectionBrowserView templates section, ImageCompressor utility. Build succeeds."
     },
     {
       "id": "prd-swift-settings-images",
