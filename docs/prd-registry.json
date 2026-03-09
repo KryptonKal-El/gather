@@ -321,6 +321,16 @@
       "branchName": "feature/swift-stores",
       "createdAt": "2026-03-09",
       "updatedAt": "2026-03-09"
+    },
+    {
+      "id": "prd-swift-recipes-core",
+      "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
+      "status": "ready",
+      "filePath": "docs/prds/prd-swift-recipes-core.md",
+      "jsonPath": "docs/prds/prd-swift-recipes-core.json",
+      "branchName": "feature/swift-recipes-core",
+      "createdAt": "2026-03-09",
+      "updatedAt": "2026-03-09"
     }
   ]
 }
