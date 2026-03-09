@@ -56,6 +56,7 @@
 		A1B2C3D4E5F6A7B8C9D0E278 /* CreateCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E27A /* CollectionRecipeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E279 /* CollectionRecipeListView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E27C /* RecipeFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E27E /* RecipeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -110,6 +111,7 @@
 		A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCollectionSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E279 /* CollectionRecipeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionRecipeListView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +262,7 @@
 				A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E279 /* CollectionRecipeListView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */,
 			);
 			path = Recipes;
 			sourceTree = "<group>";
@@ -415,6 +418,7 @@
 				A1B2C3D4E5F6A7B8C9D0E278 /* CreateCollectionSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E27A /* CollectionRecipeListView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E27C /* RecipeFormSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E27E /* RecipeDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

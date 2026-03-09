@@ -362,8 +362,8 @@
         "Build succeeds"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "RecipeDetailView with hero AsyncImage, checkable ingredients (local state with strikethrough), numbered steps with circle badges, toolbar menu (edit/move/delete), loading state. Wired into CollectionRecipeListView navigation destination.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -378,7 +378,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Detail view with async image loading, local checkbox state, and ownership-aware menus"
+      "testIntensityReason": "Detail view with async image loading, local checkbox state, and ownership-aware menus",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:27:28Z"
     },
     {
       "id": "US-011",

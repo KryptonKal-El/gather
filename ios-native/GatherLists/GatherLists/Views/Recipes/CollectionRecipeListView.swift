@@ -71,10 +71,8 @@ struct CollectionRecipeListView: View {
         .onAppear {
             viewModel.selectCollection(id: collection.id)
         }
-        // Navigation destination for RecipeDetailView (placeholder until US-010)
         .navigationDestination(for: Recipe.self) { recipe in
-            Text("Recipe Detail: \(recipe.name)")
-                .navigationTitle(recipe.name)
+            RecipeDetailView(recipe: recipe, viewModel: viewModel)
         }
     }
     
