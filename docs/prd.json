@@ -81,8 +81,10 @@
         "Build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:15:00Z",
+      "passes": true,
+      "notes": "Profile property + computed displayName/avatarUrl/email + refreshProfile(). Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
