@@ -331,12 +331,14 @@
     {
       "id": "prd-swift-recipes-core",
       "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
       "branchName": "feature/swift-recipes-core",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09"
+      "updatedAt": "2026-03-10",
+      "startedAt": "2026-03-10T00:15:00Z",
+      "currentStory": "US-002"
     },
     {
       "id": "prd-swift-recipes-advanced",
