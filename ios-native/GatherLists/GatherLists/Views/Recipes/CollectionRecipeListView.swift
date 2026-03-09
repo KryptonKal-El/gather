@@ -11,6 +11,9 @@ struct CollectionRecipeListView: View {
     @State private var showDeleteConfirm = false
     @State private var showMoveSheet = false
     @State private var recipeToMove: Recipe?
+    @State private var editIngredients: [RecipeIngredient] = []
+    @State private var editSteps: [RecipeStep] = []
+    @State private var isLoadingEdit = false
     
     private var filteredRecipes: [Recipe] {
         let collectionRecipes = viewModel.recipes.filter { $0.collectionId == collection.id }
@@ -44,30 +47,15 @@ struct CollectionRecipeListView: View {
             await viewModel.refresh()
         }
         .sheet(isPresented: $showCreateRecipe) {
-            // RecipeFormSheet will be created in US-009 — placeholder for now
-            NavigationStack {
-                Text("Create Recipe")
-                    .navigationTitle("New Recipe")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { showCreateRecipe = false }
-                        }
-                    }
-            }
+            RecipeFormSheet(viewModel: viewModel)
         }
         .sheet(item: $recipeToEdit) { recipe in
-            // RecipeFormSheet edit mode — placeholder for now
-            NavigationStack {
-                Text("Edit Recipe: \(recipe.name)")
-                    .navigationTitle("Edit Recipe")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Cancel") { recipeToEdit = nil }
-                        }
-                    }
-            }
+            RecipeFormSheet(
+                viewModel: viewModel,
+                editRecipe: recipe,
+                editIngredients: editIngredients,
+                editSteps: editSteps
+            )
         }
         .sheet(isPresented: $showMoveSheet) {
             moveToCollectionSheet
@@ -99,7 +87,19 @@ struct CollectionRecipeListView: View {
                 }
                 .contextMenu {
                     Button {
-                        recipeToEdit = recipe
+                        Task {
+                            isLoadingEdit = true
+                            await viewModel.selectRecipe(id: recipe.id)
+                            if let detail = viewModel.activeRecipeDetail {
+                                editIngredients = detail.ingredients
+                                editSteps = detail.steps
+                            } else {
+                                editIngredients = []
+                                editSteps = []
+                            }
+                            recipeToEdit = recipe
+                            isLoadingEdit = false
+                        }
                     } label: {
                         Label("Edit", systemImage: "pencil")
                     }

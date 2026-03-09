@@ -324,8 +324,8 @@
         "Build succeeds"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "RecipeFormSheet with dual-mode create/edit, structured ingredients with quantity + reorder, numbered steps + reorder, validation, loading overlay. Wired into CollectionRecipeListView replacing placeholders.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -340,7 +340,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Form with dynamic ingredient/step lists, reorder, validation, and create/edit dual mode"
+      "testIntensityReason": "Form with dynamic ingredient/step lists, reorder, validation, and create/edit dual mode",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:24:41Z"
     },
     {
       "id": "US-010",
