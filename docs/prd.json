@@ -355,8 +355,10 @@
         "Build succeeds"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "saveTemplateAsRecipe and templateIngredientsForList added to RecipeViewModel. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-10T04:30:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
