@@ -384,8 +384,10 @@
         "Build succeeds"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T02:25:00Z",
+      "passes": true,
+      "notes": "Set/Change Image + Remove Image actions in context menu. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
