@@ -125,8 +125,10 @@
         "Build succeeds"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T00:45:00Z",
+      "passes": true,
+      "notes": "OfflineCache actor with CachedEntry<T> wrapper for timestamped JSON caching. FileManager-backed, thread-safe via Swift actor. save/load/remove/clearAll methods.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

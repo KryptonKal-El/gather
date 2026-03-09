@@ -74,6 +74,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A3 /* ItemSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A5 /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A7 /* SuggestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A6 /* SuggestionsView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -146,6 +147,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSuggestion.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A6 /* SuggestionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionsView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -245,6 +247,7 @@
 				A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -495,6 +498,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2A3 /* ItemSuggestion.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A5 /* SuggestionEngine.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A7 /* SuggestionsView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
