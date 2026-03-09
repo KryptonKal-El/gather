@@ -261,8 +261,10 @@
         "Build succeeds"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "AddToListSheet.swift created with ingredient summary, list picker (owned + shared via ListService), single-select checkmark, batch add via ItemService, success state with 1.5s auto-dismiss. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-10T04:00:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
