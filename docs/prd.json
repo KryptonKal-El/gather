@@ -1,19 +1,19 @@
 {
   "project": "Gather",
   "branchName": "feature/swift-recipes-core",
-  "description": "Native Swift iOS App — Phase 5: Recipes & Collections Core. Build the full recipes and collections experience in SwiftUI with collection browser, recipe CRUD, ingredient/step management, collection sharing, and realtime sync.",
+  "description": "Native Swift iOS App \u2014 Phase 5: Recipes & Collections Core. Build the full recipes and collections experience in SwiftUI with collection browser, recipe CRUD, ingredient/step management, collection sharing, and realtime sync.",
   "credentialRequirements": [],
   "userStories": [
     {
       "id": "US-001",
-      "title": "Data Models — Recipe, Ingredient, Step, Collection, CollectionShare",
+      "title": "Data Models \u2014 Recipe, Ingredient, Step, Collection, CollectionShare",
       "description": "Create Codable model structs for all recipe and collection database tables so the service layer can decode Supabase responses.",
       "acceptanceCriteria": [
-        "Create Models/Recipe.swift with struct Recipe: Codable, Identifiable, Hashable — fields: id (UUID), ownerId (UUID), name (String), description (String?), imageUrl (String?), ingredientCount (Int), stepCount (Int), collectionId (UUID), createdAt (Date), updatedAt (Date). CodingKeys mapping snake_case.",
-        "Create Models/RecipeIngredient.swift with struct RecipeIngredient: Codable, Identifiable, Hashable — fields: id (UUID), recipeId (UUID), name (String), quantity (String?), sortOrder (Int). CodingKeys mapping snake_case.",
-        "Create Models/RecipeStep.swift with struct RecipeStep: Codable, Identifiable, Hashable — fields: id (UUID), recipeId (UUID), instruction (String), sortOrder (Int). CodingKeys mapping snake_case.",
-        "Create Models/RecipeCollection.swift with struct RecipeCollection: Codable, Identifiable, Hashable — fields: id (UUID), ownerId (UUID), name (String), emoji (String?), description (String?), isDefault (Bool), sortOrder (Int), createdAt (Date), updatedAt (Date). CodingKeys mapping snake_case. Name the struct RecipeCollection to avoid collision with Swift's Collection protocol.",
-        "Create Models/CollectionShare.swift with struct CollectionShare: Codable, Identifiable — fields: id (UUID), collectionId (UUID), sharedWithEmail (String), sharedBy (UUID?), permission (String), addedAt (Date). CodingKeys mapping snake_case.",
+        "Create Models/Recipe.swift with struct Recipe: Codable, Identifiable, Hashable \u2014 fields: id (UUID), ownerId (UUID), name (String), description (String?), imageUrl (String?), ingredientCount (Int), stepCount (Int), collectionId (UUID), createdAt (Date), updatedAt (Date). CodingKeys mapping snake_case.",
+        "Create Models/RecipeIngredient.swift with struct RecipeIngredient: Codable, Identifiable, Hashable \u2014 fields: id (UUID), recipeId (UUID), name (String), quantity (String?), sortOrder (Int). CodingKeys mapping snake_case.",
+        "Create Models/RecipeStep.swift with struct RecipeStep: Codable, Identifiable, Hashable \u2014 fields: id (UUID), recipeId (UUID), instruction (String), sortOrder (Int). CodingKeys mapping snake_case.",
+        "Create Models/RecipeCollection.swift with struct RecipeCollection: Codable, Identifiable, Hashable \u2014 fields: id (UUID), ownerId (UUID), name (String), emoji (String?), description (String?), isDefault (Bool), sortOrder (Int), createdAt (Date), updatedAt (Date). CodingKeys mapping snake_case. Name the struct RecipeCollection to avoid collision with Swift's Collection protocol.",
+        "Create Models/CollectionShare.swift with struct CollectionShare: Codable, Identifiable \u2014 fields: id (UUID), collectionId (UUID), sharedWithEmail (String), sharedBy (UUID?), permission (String), addedAt (Date). CodingKeys mapping snake_case.",
         "All models use UUID for IDs, Date for timestamps",
         "Build succeeds"
       ],
@@ -40,15 +40,15 @@
     },
     {
       "id": "US-002",
-      "title": "RecipeService — Collection CRUD & Default Collection",
+      "title": "RecipeService \u2014 Collection CRUD & Default Collection",
       "description": "Create a service layer for collection operations following the same static-struct pattern as ListService and StoreService.",
       "acceptanceCriteria": [
         "Create Services/RecipeService.swift as struct RecipeService with private static var client: SupabaseClient { SupabaseManager.shared.client }",
-        "fetchCollections(userId: UUID) async throws -> [RecipeCollection] — fetches all owned collections ordered by sort_order, created_at",
-        "createCollection(userId: UUID, name: String, emoji: String?, description: String?) async throws -> RecipeCollection — inserts and returns the new collection",
-        "updateCollection(collectionId: UUID, name: String?, emoji: String?, description: String?) async throws — partial update, only non-nil fields",
-        "deleteCollection(collectionId: UUID) async throws — deletes the collection (caller must handle recipes first — DB has RESTRICT FK)",
-        "ensureDefaultCollection(userId: UUID) async throws -> RecipeCollection — checks for existing is_default = true collection; if none, creates 'My Recipes' with emoji 📖 and is_default = true; returns the default collection either way",
+        "fetchCollections(userId: UUID) async throws -> [RecipeCollection] \u2014 fetches all owned collections ordered by sort_order, created_at",
+        "createCollection(userId: UUID, name: String, emoji: String?, description: String?) async throws -> RecipeCollection \u2014 inserts and returns the new collection",
+        "updateCollection(collectionId: UUID, name: String?, emoji: String?, description: String?) async throws \u2014 partial update, only non-nil fields",
+        "deleteCollection(collectionId: UUID) async throws \u2014 deletes the collection (caller must handle recipes first \u2014 DB has RESTRICT FK)",
+        "ensureDefaultCollection(userId: UUID) async throws -> RecipeCollection \u2014 checks for existing is_default = true collection; if none, creates 'My Recipes' with emoji \ud83d\udcd6 and is_default = true; returns the default collection either way",
         "Private DTOs (NewCollection, CollectionUpdate) with CodingKeys for snake_case, matching the ListService pattern",
         "All functions follow async/throws error pattern",
         "Build succeeds"
@@ -76,18 +76,18 @@
     },
     {
       "id": "US-003",
-      "title": "RecipeService — Recipe CRUD & Ingredients/Steps",
+      "title": "RecipeService \u2014 Recipe CRUD & Ingredients/Steps",
       "description": "Add recipe CRUD functions to RecipeService, including ingredient and step management.",
       "acceptanceCriteria": [
-        "fetchRecipes(userId: UUID) async throws -> [Recipe] — fetches all owned recipes ordered by created_at descending",
-        "fetchRecipesForCollection(collectionId: UUID) async throws -> [Recipe] — fetches recipes in a specific collection ordered by created_at descending",
-        "createRecipe(userId: UUID, name: String, description: String?, collectionId: UUID, ingredients: [(name: String, quantity: String?)], steps: [String]) async throws -> Recipe — inserts recipe row, then ingredient rows (sort_order = array index), then step rows (sort_order = array index). Updates ingredient_count and step_count on the recipe. Returns the recipe.",
-        "updateRecipe(recipeId: UUID, name: String?, description: String?) async throws — updates recipe fields",
-        "deleteRecipe(recipeId: UUID) async throws — deletes recipe (ingredients/steps cascade)",
-        "updateRecipeIngredients(recipeId: UUID, ingredients: [(name: String, quantity: String?)]) async throws — deletes all existing ingredients, inserts new ones with sort_order, updates ingredient_count on the recipe",
-        "updateRecipeSteps(recipeId: UUID, steps: [String]) async throws — deletes all existing steps, inserts new ones with sort_order, updates step_count on the recipe",
-        "fetchRecipeDetail(recipeId: UUID) async throws -> (recipe: Recipe, ingredients: [RecipeIngredient], steps: [RecipeStep]) — fetches recipe + ingredients (ordered by sort_order) + steps (ordered by sort_order)",
-        "moveRecipeToCollection(recipeId: UUID, collectionId: UUID) async throws — updates collection_id on the recipe",
+        "fetchRecipes(userId: UUID) async throws -> [Recipe] \u2014 fetches all owned recipes ordered by created_at descending",
+        "fetchRecipesForCollection(collectionId: UUID) async throws -> [Recipe] \u2014 fetches recipes in a specific collection ordered by created_at descending",
+        "createRecipe(userId: UUID, name: String, description: String?, collectionId: UUID, ingredients: [(name: String, quantity: String?)], steps: [String]) async throws -> Recipe \u2014 inserts recipe row, then ingredient rows (sort_order = array index), then step rows (sort_order = array index). Updates ingredient_count and step_count on the recipe. Returns the recipe.",
+        "updateRecipe(recipeId: UUID, name: String?, description: String?) async throws \u2014 updates recipe fields",
+        "deleteRecipe(recipeId: UUID) async throws \u2014 deletes recipe (ingredients/steps cascade)",
+        "updateRecipeIngredients(recipeId: UUID, ingredients: [(name: String, quantity: String?)]) async throws \u2014 deletes all existing ingredients, inserts new ones with sort_order, updates ingredient_count on the recipe",
+        "updateRecipeSteps(recipeId: UUID, steps: [String]) async throws \u2014 deletes all existing steps, inserts new ones with sort_order, updates step_count on the recipe",
+        "fetchRecipeDetail(recipeId: UUID) async throws -> (recipe: Recipe, ingredients: [RecipeIngredient], steps: [RecipeStep]) \u2014 fetches recipe + ingredients (ordered by sort_order) + steps (ordered by sort_order)",
+        "moveRecipeToCollection(recipeId: UUID, collectionId: UUID) async throws \u2014 updates collection_id on the recipe",
         "Private DTOs with CodingKeys for inserts",
         "Build succeeds"
       ],
@@ -114,13 +114,13 @@
     },
     {
       "id": "US-004",
-      "title": "RecipeService — Collection Sharing",
+      "title": "RecipeService \u2014 Collection Sharing",
       "description": "Add collection sharing functions to RecipeService, following the same pattern as ListService share operations and ShareListSheet.",
       "acceptanceCriteria": [
-        "shareCollection(collectionId: UUID, email: String, sharedBy: UUID) async throws — normalizes email (lowercase, trimmed), inserts into collection_shares with permission = 'write'",
-        "unshareCollection(collectionId: UUID, email: String) async throws — deletes the matching collection_shares row",
-        "fetchCollectionShares(collectionId: UUID) async throws -> [CollectionShare] — fetches all share records for the collection",
-        "fetchSharedCollections(email: String) async throws -> [RecipeCollection] — fetches collections shared with this email by joining collection_shares → collections, or by fetching share records then fetching the collections",
+        "shareCollection(collectionId: UUID, email: String, sharedBy: UUID) async throws \u2014 normalizes email (lowercase, trimmed), inserts into collection_shares with permission = 'write'",
+        "unshareCollection(collectionId: UUID, email: String) async throws \u2014 deletes the matching collection_shares row",
+        "fetchCollectionShares(collectionId: UUID) async throws -> [CollectionShare] \u2014 fetches all share records for the collection",
+        "fetchSharedCollections(email: String) async throws -> [RecipeCollection] \u2014 fetches collections shared with this email by joining collection_shares \u2192 collections, or by fetching share records then fetching the collections",
         "All email inputs normalized to lowercase/trimmed (match ListService.shareList pattern)",
         "Private DTOs with CodingKeys for inserts",
         "Build succeeds"
@@ -148,7 +148,7 @@
     },
     {
       "id": "US-005",
-      "title": "RecipeViewModel — @Observable State & Realtime",
+      "title": "RecipeViewModel \u2014 @Observable State & Realtime",
       "description": "Create the main view model for recipes and collections, following the ListViewModel pattern with @Observable, realtime subscriptions, and state management.",
       "acceptanceCriteria": [
         "Create ViewModels/RecipeViewModel.swift as @Observable @MainActor final class RecipeViewModel",
@@ -158,9 +158,9 @@
         "loadData() fetches owned collections (+ ensures default), shared collections, and all owned recipes in parallel. Sets activeCollectionId to the default collection.",
         "Realtime channels: Subscribe to collections (filtered by owner_id), collection_shares (filtered by shared_with_email), and recipes (filtered by owner_id). On any change event, re-fetch all data (same pattern as ListViewModel).",
         "nonisolated(unsafe) for channel/task properties, proper deinit cancellation (match ListViewModel)",
-        "Collection actions: createCollection(name:emoji:description:), updateCollection(id:name:emoji:description:), deleteCollection(id:deleteRecipes:) — if deleteRecipes is false, moves recipes to default collection first; if the active collection is deleted, falls back to default",
-        "Recipe actions: createRecipe(name:description:ingredients:steps:) — creates in activeCollectionId, updateRecipe(id:name:description:), deleteRecipe(id:), updateIngredients(recipeId:ingredients:), updateSteps(recipeId:steps:), moveRecipe(recipeId:toCollectionId:)",
-        "Selection actions: selectCollection(id:) — sets activeCollectionId, clears activeRecipeId; selectRecipe(id:) — sets activeRecipeId, fetches recipe detail",
+        "Collection actions: createCollection(name:emoji:description:), updateCollection(id:name:emoji:description:), deleteCollection(id:deleteRecipes:) \u2014 if deleteRecipes is false, moves recipes to default collection first; if the active collection is deleted, falls back to default",
+        "Recipe actions: createRecipe(name:description:ingredients:steps:) \u2014 creates in activeCollectionId, updateRecipe(id:name:description:), deleteRecipe(id:), updateIngredients(recipeId:ingredients:), updateSteps(recipeId:steps:), moveRecipe(recipeId:toCollectionId:)",
+        "Selection actions: selectCollection(id:) \u2014 sets activeCollectionId, clears activeRecipeId; selectRecipe(id:) \u2014 sets activeRecipeId, fetches recipe detail",
         "Share actions: shareCollection(id:email:), unshareCollection(id:email:)",
         "refresh() async function for pull-to-refresh",
         "Build succeeds"
@@ -188,20 +188,20 @@
     },
     {
       "id": "US-006",
-      "title": "Collection Browser View — List + Search + Create",
-      "description": "Build the root view of the Recipes tab — a collection browser showing owned and shared collections with search, create, and management actions.",
+      "title": "Collection Browser View \u2014 List + Search + Create",
+      "description": "Build the root view of the Recipes tab \u2014 a collection browser showing owned and shared collections with search, create, and management actions.",
       "acceptanceCriteria": [
         "Create Views/Recipes/CollectionBrowserView.swift",
-        "NavigationStack wrapping the entire view for 3-level drill-down (collections → recipes → detail)",
+        "NavigationStack wrapping the entire view for 3-level drill-down (collections \u2192 recipes \u2192 detail)",
         ".navigationTitle(\"Recipes\")",
         ".searchable(text:) bound to view model's searchQuery for filtering collections by name",
         "Toolbar: + button that presents CreateCollectionSheet as a .sheet",
-        "\"My Collections\" section: Grouped inset List showing owned collections — each row shows emoji (or 📁 default) + name + recipe count badge + chevron. NavigationLink pushes to CollectionRecipeListView",
-        "\"Shared with Me\" section: Shows shared collections — each row shows emoji + name + \"Shared\" badge + chevron. NavigationLink pushes to CollectionRecipeListView",
+        "\"My Collections\" section: Grouped inset List showing owned collections \u2014 each row shows emoji (or \ud83d\udcc1 default) + name + recipe count badge + chevron. NavigationLink pushes to CollectionRecipeListView",
+        "\"Shared with Me\" section: Shows shared collections \u2014 each row shows emoji + name + \"Shared\" badge + chevron. NavigationLink pushes to CollectionRecipeListView",
         "Swipe actions on owned collections: .swipeActions(edge: .trailing) with Delete (red, destructive). Delete shows .confirmationDialog with two options: \"Delete collection and N recipes\" vs \"Move N recipes to [Default] and delete\" (same as React DeleteCollectionDialog)",
         "Context menu on owned collections: Rename, Share, Delete",
         "Context menu on shared collections: Leave (unshare self)",
-        "Empty state: When no collections exist — icon + \"No collections yet\" + \"Create one to organize your recipes\" text",
+        "Empty state: When no collections exist \u2014 icon + \"No collections yet\" + \"Create one to organize your recipes\" text",
         "Loading state: ProgressView while isLoading is true and collections are empty",
         "Pull-to-refresh via .refreshable { await viewModel.refresh() }",
         "Build succeeds"
@@ -236,15 +236,15 @@
         ".sheet presentation (presented from CollectionBrowserView's + toolbar button)",
         "NavigationStack with title \"New Collection\", Cancel + Save toolbar buttons",
         "Name field: TextField for collection name, required (Save disabled when empty)",
-        "Emoji picker: Reuse EmojiPickerView component from Phase 2. Default emoji: 📖. Tapping the emoji opens the picker.",
+        "Emoji picker: Reuse EmojiPickerView component from Phase 2. Default emoji: \ud83d\udcd6. Tapping the emoji opens the picker.",
         "Description field: Optional TextField for description",
         "Save action: Calls viewModel.createCollection(name:emoji:description:), dismisses on success",
         "Loading state: ProgressView on Save button while creating",
         "Build succeeds"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "CreateCollectionSheet with name, emoji picker, description. Wired into CollectionBrowserView.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -259,11 +259,13 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Simple form sheet reusing existing patterns"
+      "testIntensityReason": "Simple form sheet reusing existing patterns",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:20:17Z"
     },
     {
       "id": "US-008",
-      "title": "Collection Recipe List View — Browse Recipes Within Collection",
+      "title": "Collection Recipe List View \u2014 Browse Recipes Within Collection",
       "description": "When a collection is tapped in the browser, push to a recipe list showing all recipes within that collection, with search, create, and management actions.",
       "acceptanceCriteria": [
         "Create Views/Recipes/CollectionRecipeListView.swift",
@@ -271,19 +273,19 @@
         ".navigationTitle(collection.name) with the collection emoji in the title or as a leading element",
         ".searchable(text:) for filtering recipes within this collection by name",
         "Toolbar: + button that presents RecipeFormSheet as a .sheet",
-        "Recipe rows: Each row shows recipe image thumbnail (async loaded from imageUrl, or a placeholder icon if none) + name + subtitle showing \"N ingredients · M steps\". NavigationLink pushes to RecipeDetailView",
+        "Recipe rows: Each row shows recipe image thumbnail (async loaded from imageUrl, or a placeholder icon if none) + name + subtitle showing \"N ingredients \u00b7 M steps\". NavigationLink pushes to RecipeDetailView",
         "Swipe actions on owned recipes: .swipeActions(edge: .trailing) with Delete (red, destructive, with .confirmationDialog)",
         "Context menu on owned recipes: Edit, Move to Collection, Delete",
         "Context menu on recipes in shared collections (added by current user): Edit, Remove",
         "Context menu on recipes in shared collections (added by others): View only (no destructive actions)",
         "\"Move to Collection\" action: Presents a picker sheet listing all owned collections (excluding current). Selecting one calls viewModel.moveRecipe(recipeId:toCollectionId:)",
-        "Empty state: When collection has no recipes — icon + \"No recipes yet\" + \"Tap + to create one\"",
+        "Empty state: When collection has no recipes \u2014 icon + \"No recipes yet\" + \"Tap + to create one\"",
         "On appear, calls viewModel.selectCollection(id: collection.id) to set the active collection",
         "Build succeeds"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "CollectionRecipeListView with recipe rows, AsyncImage thumbnails, context menu (edit/move/delete), search, empty state. Wired into CollectionBrowserView navigation.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -298,7 +300,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Recipe list with context-sensitive menus based on ownership"
+      "testIntensityReason": "Recipe list with context-sensitive menus based on ownership",
+      "status": "completed",
+      "completedAt": "2026-03-09T16:20:17Z"
     },
     {
       "id": "US-009",
@@ -340,15 +344,15 @@
     },
     {
       "id": "US-010",
-      "title": "Recipe Detail View — Scrollable Content + Ingredient Checkboxes",
-      "description": "Pushed view showing full recipe details — hero image (if present), checkable ingredients, numbered steps, and action menu.",
+      "title": "Recipe Detail View \u2014 Scrollable Content + Ingredient Checkboxes",
+      "description": "Pushed view showing full recipe details \u2014 hero image (if present), checkable ingredients, numbered steps, and action menu.",
       "acceptanceCriteria": [
         "Create Views/Recipes/RecipeDetailView.swift",
         "Takes recipeId: UUID and viewModel: RecipeViewModel. On appear, calls viewModel.selectRecipe(id:) to fetch detail.",
         "Navigation title: Recipe name",
         "Hero image: If imageUrl is non-nil, show AsyncImage full-width at top with placeholder and loading states. Aspect ratio fill, max height ~250pt, clipped. If no image, omit the section entirely (no empty placeholder).",
         "Description: If non-nil, show below hero image in .secondary style",
-        "Ingredients section: \"Ingredients\" header with count badge. Each ingredient shows a checkbox (tappable circle) + quantity (if present, in .secondary) + name. Checked state is local @State only (not persisted — prep for Phase 6 add-to-list). Checked ingredients get strikethrough styling.",
+        "Ingredients section: \"Ingredients\" header with count badge. Each ingredient shows a checkbox (tappable circle) + quantity (if present, in .secondary) + name. Checked state is local @State only (not persisted \u2014 prep for Phase 6 add-to-list). Checked ingredients get strikethrough styling.",
         "Steps section: \"Steps\" header with count badge. Each step shows a numbered circle (1, 2, 3...) + instruction text. Read-only.",
         "Toolbar menu (3-dot / ellipsis): For owned recipes: Edit (presents RecipeFormSheet), Move to Collection (presents collection picker), Delete (.confirmationDialog). For shared collection recipes the user added: Edit, Remove. For shared collection recipes added by others: no menu or view-only.",
         "Loading state: ProgressView while activeRecipeDetail is nil and loading",
@@ -377,11 +381,11 @@
     {
       "id": "US-011",
       "title": "Share Collection Sheet",
-      "description": "Sheet for managing collection sharing — add and remove collaborators by email. Follows the ShareListSheet pattern exactly.",
+      "description": "Sheet for managing collection sharing \u2014 add and remove collaborators by email. Follows the ShareListSheet pattern exactly.",
       "acceptanceCriteria": [
         "Create Views/Recipes/ShareCollectionSheet.swift",
         "Takes collection: RecipeCollection, viewModel: RecipeViewModel, ownerEmail: String",
-        "Layout matches ShareListSheet structure — NavigationStack with \"Share [Collection Name]\" title, \"Done\" toolbar button, add collaborator section at top, collaborator list below",
+        "Layout matches ShareListSheet structure \u2014 NavigationStack with \"Share [Collection Name]\" title, \"Done\" toolbar button, add collaborator section at top, collaborator list below",
         "Add section: TextField for email + \"Add\" button. Validation: non-empty, contains @ and ., not the owner's email, not already shared. Error banner shown inline.",
         "Collaborator list: List with Section(\"Collaborators\") showing each share's email + added date + trash button. .onDelete for swipe-to-delete.",
         "Loading states: ProgressView on Add button while adding, ProgressView on individual row while removing, ProgressView with \"Loading collaborators...\" when list is empty and loading",
@@ -413,7 +417,7 @@
     },
     {
       "id": "US-012",
-      "title": "Wire Recipes Tab — Replace Placeholder in MainTabView",
+      "title": "Wire Recipes Tab \u2014 Replace Placeholder in MainTabView",
       "description": "Replace RecipesPlaceholderView with the real CollectionBrowserView wired to a RecipeViewModel, and pass the view model through the environment.",
       "acceptanceCriteria": [
         "In MainTabView.swift, replace RecipesPlaceholderView() with CollectionBrowserView()",
@@ -423,7 +427,7 @@
         "Remove RecipesPlaceholderView struct entirely",
         "Tab icon stays \"book\", label stays \"Recipes\"",
         "Build succeeds on iPhone simulator",
-        "Full navigation flow works: tap Recipes tab → see collections → tap collection → see recipes → tap recipe → see detail → back works at each level"
+        "Full navigation flow works: tap Recipes tab \u2192 see collections \u2192 tap collection \u2192 see recipes \u2192 tap recipe \u2192 see detail \u2192 back works at each level"
       ],
       "priority": 12,
       "passes": false,
@@ -442,11 +446,11 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "high",
-      "testIntensityReason": "Integration story wiring all views together — full navigation flow must work end-to-end"
+      "testIntensityReason": "Integration story wiring all views together \u2014 full navigation flow must work end-to-end"
     },
     {
       "id": "US-013",
-      "title": "Rename Collection — Inline Edit",
+      "title": "Rename Collection \u2014 Inline Edit",
       "description": "Allow renaming a collection and changing its emoji from the context menu.",
       "acceptanceCriteria": [
         "\"Rename\" in the collection context menu presents an edit sheet (.sheet) with pre-filled name and emoji",
@@ -476,7 +480,7 @@
     },
     {
       "id": "US-014",
-      "title": "Realtime Sync — Cross-Device Verification",
+      "title": "Realtime Sync \u2014 Cross-Device Verification",
       "description": "Verify that all recipe and collection changes sync in real-time across devices/sessions, matching the ListViewModel realtime behavior.",
       "acceptanceCriteria": [
         "Collections channel: Subscribes to collections table filtered by owner_id. Any INSERT/UPDATE/DELETE triggers full data re-fetch.",

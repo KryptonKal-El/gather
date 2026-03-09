@@ -71,17 +71,8 @@ struct CollectionBrowserView: View {
                 }
             }
             .sheet(isPresented: $showCreateSheet) {
-                // TODO: CreateCollectionSheet — US-007
-                NavigationStack {
-                    Text("Create Collection")
-                        .navigationTitle("New Collection")
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                Button("Cancel") {
-                                    showCreateSheet = false
-                                }
-                            }
-                        }
+                if let vm = viewModel {
+                    CreateCollectionSheet(viewModel: vm)
                 }
             }
             .sheet(item: $collectionToShare) { collection in
@@ -221,9 +212,9 @@ struct CollectionBrowserView: View {
             set: { vm.searchQuery = $0 }
         ), prompt: "Search collections")
         .navigationDestination(for: RecipeCollection.self) { collection in
-            // TODO: CollectionRecipeListView — US-008
-            Text("Recipes in \(collection.name)")
-                .navigationTitle(collection.name)
+            if let vm = viewModel {
+                CollectionRecipeListView(collection: collection, viewModel: vm)
+            }
         }
     }
     
