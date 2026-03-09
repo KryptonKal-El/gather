@@ -6,8 +6,14 @@ struct ListDetailView: View {
     let viewModel: ListViewModel
     let isOwned: Bool
     
+    @Environment(AuthViewModel.self) private var authViewModel
+    
+    @State private var detailViewModel: ListDetailViewModel?
     @State private var shareCount: Int = 0
     @State private var isLoadingShares = false
+    @State private var itemName: String = ""
+    @State private var selectedStoreId: UUID?
+    @FocusState private var isInputFocused: Bool
     
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
@@ -20,17 +26,42 @@ struct ListDetailView: View {
         Color(hex: list.color)
     }
     
+    private var isItemNameEmpty: Bool {
+        itemName.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    
+    private var filteredSuggestions: [String] {
+        guard !isItemNameEmpty, let vm = detailViewModel else { return [] }
+        let query = itemName.lowercased()
+        return vm.uniqueHistoryNames
+            .filter { $0.lowercased().contains(query) }
+            .prefix(5)
+            .map { $0 }
+    }
+    
+    private var showSuggestions: Bool {
+        isInputFocused && !filteredSuggestions.isEmpty
+    }
+    
     var body: some View {
-        VStack(spacing: 0) {
-            if list.itemCount == 0 {
-                emptyState
-            } else {
-                itemsPlaceholder
+        ZStack(alignment: .bottom) {
+            VStack(spacing: 0) {
+                if detailViewModel?.items.isEmpty ?? (list.itemCount == 0) {
+                    emptyState
+                } else {
+                    itemsPlaceholder
+                }
+                
+                Spacer()
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             
-            Spacer()
-            
-            addItemToolbar
+            VStack(spacing: 0) {
+                if showSuggestions {
+                    suggestionsOverlay
+                }
+                addItemToolbar
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemGroupedBackground))
@@ -45,6 +76,7 @@ struct ListDetailView: View {
             }
         }
         .task {
+            await initializeDetailViewModel()
             await loadShareInfo()
         }
     }
@@ -76,7 +108,7 @@ struct ListDetailView: View {
                 .font(.system(size: 48))
                 .foregroundStyle(.secondary)
             
-            Text("\(list.itemCount) items")
+            Text("\(detailViewModel?.items.count ?? list.itemCount) items")
                 .font(.title2)
                 .fontWeight(.semibold)
             
@@ -115,18 +147,64 @@ struct ListDetailView: View {
         }
     }
     
+    // MARK: - Suggestions Overlay
+    
+    private var suggestionsOverlay: some View {
+        VStack(spacing: 0) {
+            ForEach(filteredSuggestions, id: \.self) { suggestion in
+                Button {
+                    itemName = suggestion
+                } label: {
+                    HStack {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Text(suggestion)
+                            .foregroundStyle(.primary)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                
+                if suggestion != filteredSuggestions.last {
+                    Divider()
+                        .padding(.leading, 44)
+                }
+            }
+        }
+        .background(Color(.systemBackground))
+        .overlay(alignment: .top) {
+            Divider()
+        }
+    }
+    
     // MARK: - Add Item Toolbar
     
     private var addItemToolbar: some View {
         HStack(spacing: 12) {
-            Image(systemName: "plus.circle.fill")
-                .font(.title2)
-                .foregroundStyle(listColor)
+            if let vm = detailViewModel, !vm.stores.isEmpty {
+                storePicker(stores: vm.stores)
+            }
             
-            Text("Add item...")
-                .foregroundStyle(.secondary)
+            TextField("Add an item...", text: $itemName)
+                .textFieldStyle(.plain)
+                .focused($isInputFocused)
+                .submitLabel(.done)
+                .onSubmit {
+                    handleAddItem()
+                }
             
-            Spacer()
+            Button {
+                handleAddItem()
+            } label: {
+                Image(systemName: "plus.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(isItemNameEmpty ? Color(.tertiaryLabel) : listColor)
+            }
+            .disabled(isItemNameEmpty)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
@@ -136,7 +214,73 @@ struct ListDetailView: View {
         }
     }
     
+    // MARK: - Store Picker
+    
+    private func storePicker(stores: [Store]) -> some View {
+        Menu {
+            Button {
+                selectedStoreId = nil
+            } label: {
+                HStack {
+                    Text("No store")
+                    if selectedStoreId == nil {
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+            
+            Divider()
+            
+            ForEach(stores) { store in
+                Button {
+                    selectedStoreId = store.id
+                } label: {
+                    HStack {
+                        Text(store.name)
+                        if selectedStoreId == store.id {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            if let storeId = selectedStoreId,
+               let store = stores.first(where: { $0.id == storeId }) {
+                Text(store.name)
+                    .font(.subheadline)
+                    .foregroundStyle(listColor)
+                    .lineLimit(1)
+            } else {
+                Image(systemName: "storefront")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .menuStyle(.borderlessButton)
+    }
+    
+    // MARK: - Actions
+    
+    private func handleAddItem() {
+        let trimmedName = itemName.trimmingCharacters(in: .whitespaces)
+        guard !trimmedName.isEmpty else { return }
+        
+        Task {
+            await detailViewModel?.addItem(name: trimmedName, storeId: selectedStoreId)
+            itemName = ""
+            isInputFocused = true
+        }
+    }
+    
     // MARK: - Data Loading
+    
+    private func initializeDetailViewModel() async {
+        guard let userId = authViewModel.currentUser?.id else {
+            print("[ListDetailView] No authenticated user, cannot create detail view model")
+            return
+        }
+        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId)
+    }
     
     private func loadShareInfo() async {
         guard isOwned else { return }

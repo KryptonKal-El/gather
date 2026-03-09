@@ -228,8 +228,10 @@
         "Verify on device/simulator"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Functional add item bar with autocomplete overlay (up to 5 matching history names), compact Menu store picker, @FocusState for rapid entry, return key + button submit. ListDetailViewModel initialized from AuthViewModel user ID. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:00:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
