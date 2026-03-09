@@ -317,14 +317,16 @@
     {
       "id": "prd-swift-stores",
       "name": "Native Swift iOS App — Phase 4: Store Management",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
       "branchName": "feature/swift-stores",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09",
+      "updatedAt": "2026-03-10",
       "startedAt": "2026-03-09T22:10:00Z",
-      "currentStory": "US-010"
+      "completedAt": "2026-03-10T00:10:00Z",
+      "currentStory": null,
+      "notes": "All 10 stories complete. Full store CRUD (create/update/delete/reorder), StoreViewModel with @Observable + realtime, StoreBrowserView with search/edit mode/swipe-delete/context menu, CreateStoreSheet + EditStoreSheet with 18 preset colors + custom ColorPicker, CategoryEditorView with add/delete/reorder/copy from defaults or other stores, CategoryDetailView with name/color/keyword editing + auto-persist, realtime sync verified."
     },
     {
       "id": "prd-swift-recipes-core",
