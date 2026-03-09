@@ -206,9 +206,10 @@
         "Verify on device/simulator"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "Already fully implemented in US-003 StoreBrowserView: swipe-to-delete (.swipeActions), context menu destructive Delete, confirmation alert mentioning items becoming unassigned, deleteStore call. No additional code changes needed.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:15:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
