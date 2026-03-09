@@ -306,8 +306,10 @@
         "Verify on device/simulator"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Context menu with Edit Name (alert), Quantity (1-10 submenu + custom), Price (set/remove), Store picker, Category picker, Delete. Added clearStoreId/clearPrice to service+viewmodel for explicit null encoding.",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:10:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -60,14 +60,17 @@ struct ItemService {
     }
     
     /// Partially updates an item. Only non-nil fields are sent.
+    /// Use `clearStoreId` or `clearPrice` to explicitly set those fields to null.
     static func updateItem(
         itemId: UUID,
         name: String? = nil,
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
+        clearStoreId: Bool = false,
         quantity: Int? = nil,
         price: Decimal? = nil,
+        clearPrice: Bool = false,
         imageUrl: String? = nil
     ) async throws {
         let update = ItemUpdate(
@@ -75,8 +78,10 @@ struct ItemService {
             category: category,
             isChecked: isChecked,
             storeId: storeId,
+            clearStoreId: clearStoreId,
             quantity: quantity,
             price: price,
+            clearPrice: clearPrice,
             imageUrl: imageUrl
         )
         try await client
@@ -168,8 +173,10 @@ private struct ItemUpdate: Encodable {
     var category: String?
     var isChecked: Bool?
     var storeId: UUID?
+    var clearStoreId: Bool = false
     var quantity: Int?
     var price: Decimal?
+    var clearPrice: Bool = false
     var imageUrl: String?
     
     enum CodingKeys: String, CodingKey {
@@ -187,9 +194,17 @@ private struct ItemUpdate: Encodable {
         if let name = name { try container.encode(name, forKey: .name) }
         if let category = category { try container.encode(category, forKey: .category) }
         if let isChecked = isChecked { try container.encode(isChecked, forKey: .isChecked) }
-        if let storeId = storeId { try container.encode(storeId, forKey: .storeId) }
+        if clearStoreId {
+            try container.encodeNil(forKey: .storeId)
+        } else if let storeId = storeId {
+            try container.encode(storeId, forKey: .storeId)
+        }
         if let quantity = quantity { try container.encode(quantity, forKey: .quantity) }
-        if let price = price { try container.encode(price, forKey: .price) }
+        if clearPrice {
+            try container.encodeNil(forKey: .price)
+        } else if let price = price {
+            try container.encode(price, forKey: .price)
+        }
         if let imageUrl = imageUrl { try container.encode(imageUrl, forKey: .imageUrl) }
     }
 }

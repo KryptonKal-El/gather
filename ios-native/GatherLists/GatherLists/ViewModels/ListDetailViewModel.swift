@@ -303,8 +303,10 @@ final class ListDetailViewModel {
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
+        clearStoreId: Bool = false,
         quantity: Int? = nil,
         price: Decimal? = nil,
+        clearPrice: Bool = false,
         imageUrl: String? = nil
     ) async {
         do {
@@ -314,8 +316,10 @@ final class ListDetailViewModel {
                 category: category,
                 isChecked: isChecked,
                 storeId: storeId,
+                clearStoreId: clearStoreId,
                 quantity: quantity,
                 price: price,
+                clearPrice: clearPrice,
                 imageUrl: imageUrl
             )
             
@@ -324,9 +328,17 @@ final class ListDetailViewModel {
                 if let name = name { items[index].name = name }
                 if let category = category { items[index].category = category }
                 if let isChecked = isChecked { items[index].isChecked = isChecked }
-                if let storeId = storeId { items[index].storeId = storeId }
+                if clearStoreId {
+                    items[index].storeId = nil
+                } else if let storeId = storeId {
+                    items[index].storeId = storeId
+                }
                 if let quantity = quantity { items[index].quantity = quantity }
-                if let price = price { items[index].price = price }
+                if clearPrice {
+                    items[index].price = nil
+                } else if let price = price {
+                    items[index].price = price
+                }
                 if let imageUrl = imageUrl { items[index].imageUrl = imageUrl }
             }
         } catch {

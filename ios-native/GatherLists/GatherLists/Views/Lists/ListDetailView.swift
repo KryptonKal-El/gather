@@ -18,6 +18,15 @@ struct ListDetailView: View {
     @State private var collapsedStores: Set<String> = []
     @State private var showClearCheckedAlert = false
     
+    // Context menu edit states
+    @State private var editingItem: Item?
+    @State private var showEditNameAlert = false
+    @State private var editNameText = ""
+    @State private var showEditPriceAlert = false
+    @State private var editPriceText = ""
+    @State private var showCustomQuantityAlert = false
+    @State private var customQuantityText = ""
+    
     private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
@@ -89,6 +98,46 @@ struct ListDetailView: View {
             }
         } message: {
             Text("This will permanently delete all checked items.")
+        }
+        .alert("Edit Name", isPresented: $showEditNameAlert) {
+            TextField("Item name", text: $editNameText)
+            Button("Cancel", role: .cancel) { }
+            Button("Save") {
+                guard let item = editingItem,
+                      !editNameText.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                Task {
+                    await detailViewModel?.updateItem(
+                        item.id,
+                        name: editNameText.trimmingCharacters(in: .whitespaces)
+                    )
+                }
+            }
+        }
+        .alert("Set Price", isPresented: $showEditPriceAlert) {
+            TextField("Price", text: $editPriceText)
+                .keyboardType(.decimalPad)
+            Button("Cancel", role: .cancel) { }
+            Button("Save") {
+                guard let item = editingItem else { return }
+                if let price = Decimal(string: editPriceText) {
+                    Task {
+                        await detailViewModel?.updateItem(item.id, price: price)
+                    }
+                }
+            }
+        }
+        .alert("Custom Quantity", isPresented: $showCustomQuantityAlert) {
+            TextField("Quantity", text: $customQuantityText)
+                .keyboardType(.numberPad)
+            Button("Cancel", role: .cancel) { }
+            Button("Save") {
+                guard let item = editingItem,
+                      let qty = Int(customQuantityText),
+                      qty >= 1 else { return }
+                Task {
+                    await detailViewModel?.updateItem(item.id, quantity: qty)
+                }
+            }
         }
         .task {
             await initializeDetailViewModel()
@@ -299,6 +348,188 @@ struct ListDetailView: View {
                 await detailViewModel?.toggleItem(item)
             }
         }
+        .contextMenu {
+            itemContextMenu(item: item)
+        }
+    }
+    
+    // MARK: - Item Context Menu
+    
+    @ViewBuilder
+    private func itemContextMenu(item: Item) -> some View {
+        // Edit Name
+        Button {
+            editingItem = item
+            editNameText = item.name
+            showEditNameAlert = true
+        } label: {
+            Label("Edit Name", systemImage: "pencil")
+        }
+        
+        // Quantity submenu
+        Menu {
+            ForEach(1...10, id: \.self) { qty in
+                Button {
+                    Task {
+                        await detailViewModel?.updateItem(item.id, quantity: qty)
+                    }
+                } label: {
+                    HStack {
+                        Text("\(qty)")
+                        if item.quantity == qty {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+            
+            Divider()
+            
+            Button {
+                editingItem = item
+                customQuantityText = "\(item.quantity)"
+                showCustomQuantityAlert = true
+            } label: {
+                Label("Custom...", systemImage: "number")
+            }
+        } label: {
+            Label("Quantity: \(item.quantity)", systemImage: "number.circle")
+        }
+        
+        // Price submenu
+        Menu {
+            Button {
+                editingItem = item
+                editPriceText = item.price.map { "\($0)" } ?? ""
+                showEditPriceAlert = true
+            } label: {
+                Label("Set Price...", systemImage: "dollarsign.circle")
+            }
+            
+            if item.price != nil {
+                Button(role: .destructive) {
+                    Task {
+                        await detailViewModel?.updateItem(item.id, clearPrice: true)
+                    }
+                } label: {
+                    Label("Remove Price", systemImage: "xmark.circle")
+                }
+            }
+        } label: {
+            let priceLabel = item.price.map { formatPrice($0) } ?? "None"
+            Label("Price: \(priceLabel)", systemImage: "dollarsign.circle")
+        }
+        
+        // Store submenu
+        Menu {
+            Button {
+                Task {
+                    await detailViewModel?.updateItem(item.id, clearStoreId: true)
+                }
+            } label: {
+                HStack {
+                    Text("No store")
+                    if item.storeId == nil {
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+            
+            Divider()
+            
+            ForEach(detailViewModel?.stores ?? []) { store in
+                Button {
+                    Task {
+                        await detailViewModel?.updateItem(item.id, storeId: store.id)
+                    }
+                } label: {
+                    HStack {
+                        Text(store.name)
+                        if item.storeId == store.id {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            let storeName: String = {
+                if let storeId = item.storeId,
+                   let store = detailViewModel?.stores.first(where: { $0.id == storeId }) {
+                    return store.name
+                }
+                return "None"
+            }()
+            Label("Store: \(storeName)", systemImage: "storefront")
+        }
+        
+        // Category submenu
+        Menu {
+            let categories = categoriesForItem(item)
+            
+            Button {
+                Task {
+                    await detailViewModel?.updateItem(item.id, category: "other")
+                }
+            } label: {
+                HStack {
+                    Text("No category")
+                    if item.category == nil || item.category == "other" {
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+            
+            Divider()
+            
+            ForEach(categories.filter { $0.key != "other" }, id: \.key) { cat in
+                Button {
+                    Task {
+                        await detailViewModel?.updateItem(item.id, category: cat.key)
+                    }
+                } label: {
+                    HStack {
+                        Text(cat.name)
+                        if item.category == cat.key {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+        } label: {
+            let categoryName = categoryNameForItem(item)
+            Label("Category: \(categoryName)", systemImage: "tag")
+        }
+        
+        Divider()
+        
+        // Delete
+        Button(role: .destructive) {
+            Task {
+                await detailViewModel?.deleteItem(item)
+            }
+        } label: {
+            Label("Delete", systemImage: "trash")
+        }
+    }
+    
+    // MARK: - Context Menu Helpers
+    
+    private func categoriesForItem(_ item: Item) -> [CategoryDef] {
+        if let storeId = item.storeId,
+           let store = detailViewModel?.stores.first(where: { $0.id == storeId }),
+           !store.categories.isEmpty {
+            return store.categories
+        }
+        return CategoryDefinitions.defaults
+    }
+    
+    private func categoryNameForItem(_ item: Item) -> String {
+        let categories = categoriesForItem(item)
+        if let categoryKey = item.category,
+           let cat = categories.first(where: { $0.key == categoryKey }) {
+            return cat.name
+        }
+        return "None"
     }
     
     // MARK: - Checked Items Section
