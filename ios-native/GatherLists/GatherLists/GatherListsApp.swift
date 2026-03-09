@@ -13,7 +13,7 @@ struct GatherListsApp: App {
                     MainTabView()
                         .environment(authViewModel)
                 } else {
-                    LoginPlaceholderView()
+                    LoginView()
                         .environment(authViewModel)
                 }
             }
@@ -35,16 +35,6 @@ struct MainTabView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
-        }
-        .padding()
-    }
-}
-
-struct LoginPlaceholderView: View {
-    var body: some View {
-        VStack {
-            Text("Login View")
-                .font(.title)
         }
         .padding()
     }

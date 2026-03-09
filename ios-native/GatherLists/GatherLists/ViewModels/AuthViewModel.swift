@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import Supabase
+import Auth
 
 /// Manages authentication state and session persistence.
 @Observable
@@ -71,6 +72,35 @@ final class AuthViewModel {
         } catch {
             self.error = error.localizedDescription
             print("[AuthViewModel] Sign out failed: \(error.localizedDescription)")
+        }
+    }
+    
+    func signInWithApple(idToken: String, nonce: String, fullName: PersonNameComponents?) async {
+        error = nil
+        do {
+            try await SupabaseManager.shared.client.auth.signInWithIdToken(
+                credentials: OpenIDConnectCredentials(
+                    provider: .apple,
+                    idToken: idToken,
+                    nonce: nonce
+                )
+            )
+            
+            if fullName?.givenName != nil || fullName?.familyName != nil {
+                let name = [fullName?.givenName, fullName?.familyName]
+                    .compactMap { $0 }
+                    .joined(separator: " ")
+                if !name.isEmpty {
+                    try await SupabaseManager.shared.client.auth.update(
+                        user: UserAttributes(data: ["full_name": .string(name)])
+                    )
+                }
+            }
+            
+            print("[AuthViewModel] Apple Sign-In successful")
+        } catch {
+            self.error = error.localizedDescription
+            print("[AuthViewModel] Apple Sign-In failed: \(error.localizedDescription)")
         }
     }
     

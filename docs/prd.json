@@ -145,8 +145,10 @@
         "xcodebuild build succeeds"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T14:00:00Z",
+      "passes": true,
+      "notes": "Native Apple Sign-In via AuthenticationServices + Supabase signInWithIdToken. SHA256 nonce, full name capture on first auth. LoginView with brand styling. Entitlements updated. Build succeeds.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
