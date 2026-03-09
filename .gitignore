@@ -44,3 +44,13 @@ test-results/
 playwright-report/
 .auth/
 e2e/.env.test
+
+# iOS native (Xcode)
+ios-native/**/xcuserdata/
+ios-native/**/DerivedData/
+ios-native/**/build/
+ios-native/**/*.xcworkspace/xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM

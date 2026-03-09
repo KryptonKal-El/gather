@@ -275,12 +275,14 @@
     {
       "id": "prd-swift-ios-setup",
       "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
       "branchName": "feature/swift-ios-setup",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09"
+      "updatedAt": "2026-03-09",
+      "startedAt": "2026-03-09T12:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }
