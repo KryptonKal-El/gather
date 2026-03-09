@@ -315,6 +315,28 @@ struct RecipeService {
             .execute()
     }
     
+    // MARK: - Recipe Image
+    
+    /// Updates the image URL for a recipe.
+    static func updateRecipeImage(recipeId: UUID, imageUrl: String) async throws {
+        let update = RecipeImageUpdate(imageUrl: imageUrl, updatedAt: Date())
+        try await client
+            .from("recipes")
+            .update(update)
+            .eq("id", value: recipeId)
+            .execute()
+    }
+    
+    /// Removes the image URL from a recipe (sets to null).
+    static func removeRecipeImage(recipeId: UUID) async throws {
+        let update = RecipeImageRemove(updatedAt: Date())
+        try await client
+            .from("recipes")
+            .update(update)
+            .eq("id", value: recipeId)
+            .execute()
+    }
+    
     // MARK: - Collection Sharing
     
     /// Shares a collection with a user by email.
@@ -486,6 +508,31 @@ private struct RecipeMoveUpdate: Encodable {
     
     enum CodingKeys: String, CodingKey {
         case collectionId = "collection_id"
+    }
+}
+
+private struct RecipeImageUpdate: Encodable {
+    let imageUrl: String
+    let updatedAt: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case imageUrl = "image_url"
+        case updatedAt = "updated_at"
+    }
+}
+
+private struct RecipeImageRemove: Encodable {
+    let updatedAt: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case imageUrl = "image_url"
+        case updatedAt = "updated_at"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeNil(forKey: .imageUrl)
+        try container.encode(updatedAt, forKey: .updatedAt)
     }
 }
 
