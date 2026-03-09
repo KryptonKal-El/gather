@@ -1,14 +1,14 @@
 {
-  "sessionId": "builder-2026-03-06-ios-ui-cleanup",
-  "lastHeartbeat": "2026-03-06T21:00:00Z",
+  "sessionId": "builder-2026-03-09-swift-ios-setup",
+  "lastHeartbeat": "2026-03-09T16:30:00Z",
   "activePrd": {
-    "id": "prd-ios-ui-cleanup",
-    "name": "iOS UI Cleanup",
+    "id": "prd-swift-ios-setup",
+    "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
     "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010"],
+    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007"],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 10,
+    "totalStories": 7,
     "testingRigor": "standard",
     "status": "completed"
   },
@@ -17,18 +17,15 @@
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-06T20:00:00Z",
+    "lastSyncedAt": "2026-03-09T16:30:00Z",
     "items": [
-      {"content": "US-001: CSS Quick Wins — Tighten Spacing & Sizing", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Remove Store Badge Dashed Border in Edit Panel", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Remove Chevron from List Items", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Hide Price Placeholder When No Price Set", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: AddItemForm — Single-Line Compact Layout", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Replace '+ New' Button with iOS-Style Plus Button", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: Improve Navigation Push Transition", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-007"},
-      {"content": "US-008: Image Lightbox — Larger Preview & Relocated Remove Button", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-008"},
-      {"content": "US-009: Collapsible Store Groups in Shopping List", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-009"},
-      {"content": "US-010: Store Manager — Full ListSelector-Like Treatment", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-010"}
+      {"content": "US-001: Create Xcode Project & Folder Structure", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: Integrate Supabase Swift SDK & Configuration", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Auth State Management & Session Persistence", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: Apple Sign-In Flow", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: Email/Password Sign-In & Sign-Up", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: Authenticated Tab Bar Shell", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: App Icon, Launch Screen & Entitlements", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"}
     ]
   },
   "uncommittedWork": null,

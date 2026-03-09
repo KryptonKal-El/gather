@@ -1,0 +1,32 @@
+import Foundation
+
+/// A shopping list owned by a user, mapped to the `lists` Supabase table.
+struct GatherList: Codable, Identifiable {
+    let id: UUID
+    let ownerId: UUID
+    var name: String
+    var emoji: String?
+    var itemCount: Int
+    var color: String
+    let createdAt: Date
+    
+    init(id: UUID = UUID(), ownerId: UUID, name: String, emoji: String? = nil, itemCount: Int = 0, color: String = "#1565c0", createdAt: Date = Date()) {
+        self.id = id
+        self.ownerId = ownerId
+        self.name = name
+        self.emoji = emoji
+        self.itemCount = itemCount
+        self.color = color
+        self.createdAt = createdAt
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case ownerId = "owner_id"
+        case name
+        case emoji
+        case itemCount = "item_count"
+        case color
+        case createdAt = "created_at"
+    }
+}
