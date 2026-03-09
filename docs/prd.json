@@ -294,8 +294,10 @@
         "Build succeeds"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Add-to-List button in RecipeDetailView ingredients section. Enabled when N>0 checked, disabled otherwise. Presents AddToListSheet, clears checkmarks on success. userId/userEmail threaded through CollectionRecipeListView. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-10T04:10:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
