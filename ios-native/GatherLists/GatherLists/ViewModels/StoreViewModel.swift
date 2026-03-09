@@ -11,6 +11,7 @@ final class StoreViewModel {
     var isLoading = false
     var error: String?
     var isShowingCachedData = false
+    var cachedAt: Date?
     
     private let userId: UUID
     
@@ -35,12 +36,14 @@ final class StoreViewModel {
         // Load cached data first for instant display
         if let cached: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
             stores = cached.data
+            cachedAt = cached.cachedAt
         }
         
         // Fetch fresh data from Supabase
         do {
             stores = try await StoreService.fetchStores(userId: userId)
             isShowingCachedData = false
+            cachedAt = nil
             await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
@@ -79,6 +82,7 @@ final class StoreViewModel {
         do {
             stores = try await StoreService.fetchStores(userId: userId)
             isShowingCachedData = false
+            cachedAt = nil
             await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription

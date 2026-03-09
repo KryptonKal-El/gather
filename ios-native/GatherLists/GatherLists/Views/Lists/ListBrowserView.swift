@@ -98,6 +98,12 @@ struct ListBrowserView: View {
     @ViewBuilder
     private func listContent(vm: ListViewModel) -> some View {
         List {
+            if vm.isShowingCachedData {
+                CachedDataBanner(cachedAt: vm.cachedAt)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+            }
+            
             if !ownedFiltered.isEmpty {
                 Section("My Lists") {
                     ForEach(ownedFiltered) { list in

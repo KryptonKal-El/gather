@@ -14,6 +14,7 @@ final class ListViewModel {
     var error: String?
     var searchQuery = ""
     var isShowingCachedData = false
+    var cachedAt: Date?
     
     private let userId: UUID
     private let userEmail: String
@@ -55,12 +56,16 @@ final class ListViewModel {
         error = nil
         
         // Load cached data first for instant display
-        if let cachedOwned: CachedEntry<[GatherList]> = await OfflineCache.shared.load(forKey: "lists-owned-\(userId.uuidString)") {
+        let cachedOwned: CachedEntry<[GatherList]>? = await OfflineCache.shared.load(forKey: "lists-owned-\(userId.uuidString)")
+        let cachedShared: CachedEntry<[GatherList]>? = await OfflineCache.shared.load(forKey: "lists-shared-\(userId.uuidString)")
+        
+        if let cachedOwned {
             ownedLists = cachedOwned.data
         }
-        if let cachedShared: CachedEntry<[GatherList]> = await OfflineCache.shared.load(forKey: "lists-shared-\(userId.uuidString)") {
+        if let cachedShared {
             sharedLists = cachedShared.data
         }
+        cachedAt = cachedOwned?.cachedAt ?? cachedShared?.cachedAt
         if activeListId == nil, let firstList = allLists.first {
             activeListId = firstList.id
         }
@@ -74,6 +79,7 @@ final class ListViewModel {
             ownedLists = ownedResult
             sharedLists = sharedResult
             isShowingCachedData = false
+            cachedAt = nil
             
             if activeListId == nil, let firstList = allLists.first {
                 activeListId = firstList.id
@@ -146,6 +152,7 @@ final class ListViewModel {
             ownedLists = ownedResult
             sharedLists = sharedResult
             isShowingCachedData = false
+            cachedAt = nil
             
             // Verify active list still exists
             if let activeId = activeListId, !allLists.contains(where: { $0.id == activeId }) {

@@ -77,6 +77,12 @@ struct StoreBrowserView: View {
     @ViewBuilder
     private func storeListContent(vm: StoreViewModel) -> some View {
         List {
+            if vm.isShowingCachedData {
+                CachedDataBanner(cachedAt: vm.cachedAt)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+            }
+            
             ForEach(filteredStores) { store in
                 NavigationLink(value: store) {
                     storeRow(store)

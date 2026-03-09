@@ -75,6 +75,10 @@ struct ListDetailView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
+                if detailViewModel?.isShowingCachedData == true {
+                    CachedDataBanner(cachedAt: detailViewModel?.cachedAt)
+                }
+                
                 if detailViewModel == nil || detailViewModel?.isLoading == true {
                     loadingState
                 } else if detailViewModel?.items.isEmpty ?? true {

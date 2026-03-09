@@ -14,6 +14,7 @@ final class ListDetailViewModel {
     var isLoading = false
     var error: String?
     var isShowingCachedData = false
+    var cachedAt: Date?
     
     // Identifiers
     private let listId: UUID
@@ -143,8 +144,10 @@ final class ListDetailViewModel {
         error = nil
         
         // Load cached data first for instant display
-        if let cachedItems: CachedEntry<[Item]> = await OfflineCache.shared.load(forKey: "items-\(listId.uuidString)") {
+        let cachedItems: CachedEntry<[Item]>? = await OfflineCache.shared.load(forKey: "items-\(listId.uuidString)")
+        if let cachedItems {
             items = cachedItems.data
+            cachedAt = cachedItems.cachedAt
         }
         if let cachedStores: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
             stores = cachedStores.data
@@ -164,6 +167,7 @@ final class ListDetailViewModel {
             stores = storesResult
             historyEntries = historyResult
             isShowingCachedData = false
+            cachedAt = nil
             
             // Cache the fresh data
             await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
@@ -246,6 +250,7 @@ final class ListDetailViewModel {
         do {
             items = try await ItemService.fetchItems(listId: listId)
             isShowingCachedData = false
+            cachedAt = nil
             await OfflineCache.shared.save(items, forKey: "items-\(listId.uuidString)")
         } catch {
             self.error = error.localizedDescription

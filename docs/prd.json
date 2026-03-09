@@ -191,8 +191,10 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-09T00:00:00Z",
+      "passes": true,
+      "notes": "CachedDataBanner component with amber styling, relative time formatting (just now/Xm ago/Xh ago/yesterday/Xd ago). Wired into ListBrowserView, ListDetailView, StoreBrowserView. cachedAt property added to all three ViewModels.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
