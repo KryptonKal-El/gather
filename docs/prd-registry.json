@@ -358,13 +358,15 @@
     },
     {
       "id": "prd-swift-settings-images",
-      "name": "Native Swift iOS App \u2014 Phase 7: Settings, Profile & Item Images",
-      "status": "ready",
+      "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-swift-settings-images.md",
       "jsonPath": "docs/prds/prd-swift-settings-images.json",
       "branchName": "feature/swift-settings-images",
       "createdAt": "2026-03-09",
-      "updatedAt": "2026-03-09"
+      "updatedAt": "2026-03-09",
+      "startedAt": "2026-03-09T23:00:00Z",
+      "currentStory": "US-001"
     },
     {
       "id": "prd-swift-final-polish",
