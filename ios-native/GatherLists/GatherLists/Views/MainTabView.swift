@@ -18,7 +18,8 @@ struct MainTabView: View {
                     Label("Recipes", systemImage: "book")
                 }
             
-            StoresPlaceholderView()
+            StoreBrowserView()
+                .environment(authViewModel)
                 .tabItem {
                     Label("Stores", systemImage: "storefront")
                 }
@@ -49,18 +50,4 @@ struct RecipesPlaceholderView: View {
     }
 }
 
-struct StoresPlaceholderView: View {
-    var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                Image(systemName: "storefront")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.secondary)
-                Text("Stores — Coming Soon")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-            .navigationTitle("Stores")
-        }
-    }
-}
+

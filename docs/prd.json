@@ -99,9 +99,10 @@
         "Verify on device/simulator"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "StoreBrowserView with search, edit mode reorder, context menu, swipe-to-delete, NavigationStack. CreateStoreSheet, EditStoreSheet, CategoryEditorView stubs. MainTabView updated. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T22:30:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

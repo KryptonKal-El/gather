@@ -40,6 +40,10 @@
 		D3E4F5A6B7C8D9E0F1A2B3C4 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4F5A6B7C8D9E0F1A2B3C5 /* LoginView.swift */; };
 		E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */; };
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E25E /* StoreBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E25D /* StoreBrowserView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E260 /* CreateStoreSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E25F /* CreateStoreSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E262 /* EditStoreSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E261 /* EditStoreSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E264 /* CategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E263 /* CategoryEditorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,6 +82,10 @@
 		D3E4F5A6B7C8D9E0F1A2B3C5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E25D /* StoreBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreBrowserView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E25F /* CreateStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateStoreSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E261 /* EditStoreSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditStoreSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E263 /* CategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryEditorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -224,6 +232,10 @@
 		A1B2C3D4E5F6A7B8C9D0E218 /* Stores */ = {
 			isa = PBXGroup;
 			children = (
+				A1B2C3D4E5F6A7B8C9D0E25D /* StoreBrowserView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E25F /* CreateStoreSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E261 /* EditStoreSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E263 /* CategoryEditorView.swift */,
 			);
 			path = Stores;
 			sourceTree = "<group>";
@@ -351,6 +363,10 @@
 				D3E4F5A6B7C8D9E0F1A2B3C4 /* LoginView.swift in Sources */,
 				E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */,
 				F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E25E /* StoreBrowserView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E260 /* CreateStoreSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E262 /* EditStoreSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E264 /* CategoryEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
