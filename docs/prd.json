@@ -244,9 +244,10 @@
         "Verify on device/simulator"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
-      "status": "pending",
+      "passes": true,
+      "notes": "CategoryEditorView with local mutable categories state, List with colored dot rows showing keyword counts, NavigationLink to detail placeholder (US-008), add via alert with auto-generated key and preset color, swipe-to-delete with confirmation, empty state. All mutations persist immediately. Build succeeds.",
+      "status": "completed",
+      "completedAt": "2026-03-09T23:25:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
