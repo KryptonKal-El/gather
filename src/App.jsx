@@ -28,6 +28,7 @@ import { AddToListModal } from './components/AddToListModal.jsx';
 import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
 import { OnlineRecipeSearch } from './components/OnlineRecipeSearch.jsx';
 import { OnlineRecipePreview } from './components/OnlineRecipePreview.jsx';
+import { SaveRecipeModal } from './components/SaveRecipeModal.jsx';
 import styles from './App.module.css';
 
 /**
@@ -71,6 +72,7 @@ export const App = () => {
   const [restoredItemIds, setRestoredItemIds] = useState(new Set());
   const [showOnlineSearch, setShowOnlineSearch] = useState(false);
   const [onlinePreviewRecipe, setOnlinePreviewRecipe] = useState(null);
+  const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -175,6 +177,50 @@ export const App = () => {
       });
     }
     await recipeActions.moveRecipe(recipeId, targetCollectionId);
+  };
+
+  const handleSaveOnlineRecipe = async (collectionId) => {
+    const detail = saveRecipeDetail;
+    if (!detail) return;
+
+    const descParts = [];
+    if (detail.readyInMinutes) descParts.push(`Ready in ${detail.readyInMinutes} minutes`);
+    if (detail.servings) descParts.push(`Serves ${detail.servings}`);
+    if (detail.sourceUrl) descParts.push(`Source: ${detail.sourceUrl}`);
+    const description = descParts.join(' · ');
+
+    const newId = await recipeActions.createRecipe({
+      name: detail.title,
+      description,
+      collectionId,
+    });
+
+    if (!newId) throw new Error('Failed to create recipe');
+
+    if (detail.extendedIngredients?.length > 0) {
+      const ingredients = detail.extendedIngredients.map((ing, idx) => ({
+        name: ing.name,
+        quantity: ing.original,
+        sortOrder: idx,
+      }));
+      await recipeActions.updateIngredients(newId, ingredients);
+    }
+
+    const steps = detail.analyzedInstructions?.[0]?.steps ?? [];
+    if (steps.length > 0) {
+      const stepData = steps.map((s) => ({
+        instruction: s.step,
+        sortOrder: s.number - 1,
+      }));
+      await recipeActions.updateSteps(newId, stepData);
+    }
+
+    recipeActions.selectCollection(collectionId);
+    recipeActions.selectRecipe(newId);
+
+    setOnlinePreviewRecipe(null);
+    setShowOnlineSearch(false);
+    setSaveRecipeDetail(null);
   };
 
   const handleUnshareList = async (listId, email) => {
@@ -409,9 +455,7 @@ export const App = () => {
           <div className={styles.mobileFullScreen}>
             <OnlineRecipePreview
               recipe={onlinePreviewRecipe}
-              onSaveAsRecipe={(detail) => {
-                console.log('Save as Recipe (US-006):', detail);
-              }}
+              onSaveAsRecipe={(detail) => setSaveRecipeDetail(detail)}
               onAddToList={(ingredients) => {
                 setAddToListIngredients(ingredients);
               }}
@@ -647,9 +691,7 @@ export const App = () => {
           {onlinePreviewRecipe ? (
             <OnlineRecipePreview
               recipe={onlinePreviewRecipe}
-              onSaveAsRecipe={(detail) => {
-                console.log('Save as Recipe (US-006):', detail);
-              }}
+              onSaveAsRecipe={(detail) => setSaveRecipeDetail(detail)}
               onAddToList={(ingredients) => {
                 setAddToListIngredients(ingredients);
               }}
@@ -876,6 +918,16 @@ export const App = () => {
           />
         );
       })()}
+
+      {saveRecipeDetail && (
+        <SaveRecipeModal
+          recipeDetail={saveRecipeDetail}
+          collections={recipeState.collections}
+          activeCollectionId={recipeState.activeCollectionId}
+          onSave={handleSaveOnlineRecipe}
+          onClose={() => setSaveRecipeDetail(null)}
+        />
+      )}
 
       {isMobile && <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />}
 

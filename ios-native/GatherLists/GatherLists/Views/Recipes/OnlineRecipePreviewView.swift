@@ -5,12 +5,15 @@ struct OnlineRecipePreviewView: View {
     let recipe: SpoonacularSearchResult
     let userId: UUID
     let userEmail: String
+    let collections: [RecipeCollection]
+    let activeCollectionId: UUID?
     
     @State private var detail: SpoonacularRecipeDetail?
     @State private var isLoading = true
     @State private var error: String?
     @State private var showAddToList = false
-    @State private var showSaveConfirmation = false
+    @State private var showSaveSheet = false
+    @State private var savedRecipeId: UUID?
     
     var body: some View {
         Group {
@@ -40,10 +43,22 @@ struct OnlineRecipePreviewView: View {
                 }
             }
         }
-        .alert("Coming Soon", isPresented: $showSaveConfirmation) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Saving recipes from online search will be available soon.")
+        .sheet(isPresented: $showSaveSheet) {
+            if let detail = detail {
+                SaveRecipeSheet(
+                    recipeDetail: detail,
+                    collections: collections,
+                    activeCollectionId: activeCollectionId,
+                    userId: userId,
+                    onSaved: { recipeId in
+                        savedRecipeId = recipeId
+                        showSaveSheet = false
+                    },
+                    onDismiss: {
+                        showSaveSheet = false
+                    }
+                )
+            }
         }
     }
     
@@ -175,7 +190,7 @@ struct OnlineRecipePreviewView: View {
     private var actionButtons: some View {
         VStack(spacing: 12) {
             Button {
-                showSaveConfirmation = true
+                showSaveSheet = true
             } label: {
                 HStack {
                     Image(systemName: "bookmark")

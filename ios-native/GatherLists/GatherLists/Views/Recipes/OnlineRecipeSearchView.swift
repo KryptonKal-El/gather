@@ -4,6 +4,8 @@ import SwiftUI
 struct OnlineRecipeSearchView: View {
     let userId: UUID
     let userEmail: String
+    let collections: [RecipeCollection]
+    let activeCollectionId: UUID?
     
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
@@ -85,7 +87,13 @@ struct OnlineRecipeSearchView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(results) { recipe in
                         NavigationLink {
-                            OnlineRecipePreviewView(recipe: recipe, userId: userId, userEmail: userEmail)
+                            OnlineRecipePreviewView(
+                                recipe: recipe,
+                                userId: userId,
+                                userEmail: userEmail,
+                                collections: collections,
+                                activeCollectionId: activeCollectionId
+                            )
                         } label: {
                             listRow(recipe: recipe)
                         }
@@ -98,7 +106,13 @@ struct OnlineRecipeSearchView: View {
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(results) { recipe in
                         NavigationLink {
-                            OnlineRecipePreviewView(recipe: recipe, userId: userId, userEmail: userEmail)
+                            OnlineRecipePreviewView(
+                                recipe: recipe,
+                                userId: userId,
+                                userEmail: userEmail,
+                                collections: collections,
+                                activeCollectionId: activeCollectionId
+                            )
                         } label: {
                             gridCard(recipe: recipe)
                         }

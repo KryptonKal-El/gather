@@ -1,0 +1,242 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.15s ease;
+}
+
+.modal {
+  background: var(--bg-card);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px var(--overlay-strong);
+  width: 100%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: scaleIn 0.15s ease;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+
+.closeBtn:hover {
+  color: var(--text-primary);
+}
+
+.content {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.recipeSummary {
+  margin-bottom: 1.25rem;
+}
+
+.summaryLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 0.35rem;
+}
+
+.recipeName {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.noCollections {
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.noCollectionsMsg {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem;
+}
+
+.noCollectionsHint {
+  font-size: 0.85rem;
+  color: var(--text-placeholder);
+  margin: 0;
+}
+
+.chooseLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.75rem;
+}
+
+.collectionSelector {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.collectionItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.collectionItem:last-child {
+  border-bottom: none;
+}
+
+.collectionItem:hover {
+  background: var(--bg-hover);
+}
+
+.collectionItemSelected {
+  background: var(--primary-tint);
+}
+
+.collectionItemSelected:hover {
+  background: var(--primary-tint);
+}
+
+.collectionEmoji {
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.collectionName {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkmark {
+  font-size: 1rem;
+  color: var(--primary);
+  font-weight: 700;
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+
+.saveBtn {
+  display: block;
+  width: 100%;
+  height: 48px;
+  background: var(--primary);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.successMsg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--success, #22c55e);
+  text-align: center;
+}
+
+.successIcon {
+  font-size: 1.25rem;
+}
+
+@media (max-width: 700px) {
+  .backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-width: none;
+    border-radius: 16px 16px 0 0;
+    max-height: 90vh;
+    animation: slideUp 0.2s ease;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
