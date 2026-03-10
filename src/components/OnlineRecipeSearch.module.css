@@ -479,3 +479,20 @@
     gap: 0.5rem;
   }
 }
+
+/* Attribution */
+.attribution {
+  text-align: center;
+  padding: 1rem 0 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.attributionLink {
+  color: var(--text-muted);
+  text-decoration: underline;
+}
+
+.attributionLink:hover {
+  color: var(--text-secondary);
+}

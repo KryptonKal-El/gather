@@ -328,6 +328,17 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
 
       <div className={styles.resultsArea}>
         {renderResults()}
+        <div className={styles.attribution}>
+          Powered by{' '}
+          <a
+            href="https://spoonacular.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.attributionLink}
+          >
+            Spoonacular
+          </a>
+        </div>
       </div>
     </div>
   );

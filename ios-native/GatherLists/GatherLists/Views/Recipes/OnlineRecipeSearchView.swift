@@ -121,7 +121,20 @@ struct OnlineRecipeSearchView: View {
                 }
                 .padding()
             }
+            attributionView
         }
+    }
+    
+    @ViewBuilder
+    private var attributionView: some View {
+        HStack(spacing: 4) {
+            Text("Powered by")
+            Link("Spoonacular", destination: URL(string: "https://spoonacular.com")!)
+        }
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
     }
     
     @ViewBuilder
@@ -286,6 +299,8 @@ struct OnlineRecipeSearchView: View {
             Text("Search for recipes to get started")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            
+            attributionView
         }
         .padding()
     }
