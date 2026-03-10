@@ -415,14 +415,16 @@
     {
       "id": "prd-item-units",
       "name": "Item Units",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-item-units.md",
       "jsonPath": "docs/prds/prd-item-units.json",
       "branchName": "feature/item-units",
       "createdAt": "2026-03-10",
       "updatedAt": "2026-03-10",
       "startedAt": "2026-03-10T22:00:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-03-10T23:30:00Z",
+      "currentStory": null,
+      "notes": "All 8 stories complete. Database unit column, ITEM_UNITS constants (React+Swift), model+service layer updates, unit picker in edit forms, conditional row display (qty+unit for non-each). Both platforms."
     },
     {
       "id": "prd-online-recipe-search",
