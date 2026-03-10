@@ -470,6 +470,12 @@ struct ListDetailView: View {
         }
         .padding(.leading, 16)
         .background(Color(.systemBackground))
+        .overlay(alignment: .bottom) {
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(height: 1 / UIScreen.main.scale)
+                .padding(.leading, 44)
+        }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             Task {
