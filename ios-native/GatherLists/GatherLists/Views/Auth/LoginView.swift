@@ -35,29 +35,7 @@ struct LoginView: View {
             VStack(spacing: 24) {
                 Spacer().frame(height: 60)
                 
-                VStack(spacing: 12) {
-                    Image(systemName: "leaf.fill")
-                        .font(.system(size: 60))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [
-                                    Color(red: 0xB5/255, green: 0xE8/255, blue: 0xC8/255),
-                                    Color(red: 0xA8/255, green: 0xD8/255, blue: 0xEA/255)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                    
-                    Text("Gather Lists")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(brandGreen)
-                    
-                    Text("Gather your lists, meals, and more.")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                }
+                StackedLogoView()
                 
                 Spacer().frame(height: 20)
                 
