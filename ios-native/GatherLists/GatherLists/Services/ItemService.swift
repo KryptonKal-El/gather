@@ -198,48 +198,38 @@ struct ItemService {
         return restored
     }
     
-    /// Batch inserts ingredients as shopping list items with auto-categorization.
-    /// Skips ingredients that already exist in the list (case-insensitive match).
-    /// - Returns: Tuple of (added count, skipped count).
-    @discardableResult
-    static func addIngredientItems(
+    /// Batch inserts new items and updates quantities for duplicates from a preview.
+    static func applyIngredientPreview(
         listId: UUID,
-        ingredients: [(name: String, quantity: String?, amount: Double?, unit: String?)]
-    ) async throws -> (added: Int, skipped: Int) {
-        guard !ingredients.isEmpty else { return (0, 0) }
+        newItems: [PreviewNewItem],
+        duplicates: [PreviewDuplicateItem]
+    ) async throws -> (added: Int, updated: Int) {
+        let itemsToAdd = newItems.filter { !$0.isExcluded }
+        let itemsToUpdate = duplicates.filter { !$0.isExcluded && $0.newQuantity != $0.currentQuantity }
         
-        let existingItems = try await fetchItems(listId: listId)
-        let existingNames = Set(existingItems.map { $0.name.lowercased() })
-        
-        let newIngredients = ingredients.filter { ingredient in
-            let name = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
-            return !existingNames.contains(name.lowercased())
+        if !itemsToAdd.isEmpty {
+            let insertData = itemsToAdd.map { item in
+                IngredientItem(
+                    listId: listId,
+                    name: item.name,
+                    category: item.category,
+                    quantity: item.quantity,
+                    isChecked: false,
+                    unit: item.unit
+                )
+            }
+            
+            try await client
+                .from("items")
+                .insert(insertData)
+                .execute()
         }
         
-        let skipped = ingredients.count - newIngredients.count
-        guard !newIngredients.isEmpty else { return (0, skipped) }
-        
-        let newItems = newIngredients.map { ingredient in
-            let capitalizedName = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
-            let category = CategoryDefinitions.categorizeItem(capitalizedName)
-            let resolvedQuantity = max(1, Int((ingredient.amount ?? 1).rounded()))
-            let resolvedUnit = ingredient.unit.map { ItemUnit.mapFromSpoonacular($0) } ?? "each"
-            return IngredientItem(
-                listId: listId,
-                name: capitalizedName,
-                category: category,
-                quantity: resolvedQuantity,
-                isChecked: false,
-                unit: resolvedUnit
-            )
+        for duplicate in itemsToUpdate {
+            try await updateItem(itemId: duplicate.id, quantity: duplicate.newQuantity)
         }
         
-        try await client
-            .from("items")
-            .insert(newItems)
-            .execute()
-        
-        return (newItems.count, skipped)
+        return (itemsToAdd.count, itemsToUpdate.count)
     }
 }
 

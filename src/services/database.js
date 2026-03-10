@@ -175,18 +175,31 @@ export const subscribeLists = (userId, callback) => {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetches all item names for a list (for deduplication).
+ * Fetches items for a list with id, name, quantity, and unit (for dedup preview).
  * @param {string} listId - List ID
- * @returns {Promise<Set<string>>} Set of lowercase item names
+ * @returns {Promise<Array<{id: string, name: string, quantity: number, unit: string}>>}
  */
-export const fetchItemNamesForList = async (listId) => {
+export const fetchItemsForList = async (listId) => {
   const { data, error } = await supabase
     .from('items')
-    .select('name')
+    .select('id, name, quantity, unit')
     .eq('list_id', listId);
 
   if (error) throw new Error(`Failed to fetch items for list: ${listId}`, { cause: error });
-  return new Set(data.map((row) => row.name.toLowerCase()));
+  return data;
+};
+
+/**
+ * Batch updates quantities on existing items.
+ * @param {Array<{id: string, quantity: number}>} updates - Items to update
+ */
+export const batchUpdateItemQuantities = async (updates) => {
+  const promises = updates.map(({ id, quantity }) =>
+    supabase.from('items').update({ quantity }).eq('id', id)
+  );
+  const results = await Promise.all(promises);
+  const failed = results.find((r) => r.error);
+  if (failed?.error) throw new Error('Failed to update item quantities', { cause: failed.error });
 };
 
 /**

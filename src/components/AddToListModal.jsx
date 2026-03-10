@@ -1,13 +1,13 @@
 /**
  * AddToListModal — modal for adding recipe ingredients to a shopping list.
- * Shows selected ingredients, allows choosing a list, and adds items.
+ * Two-step flow: select list → preview items with dedup merge.
  */
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { categorizeItem } from '../utils/categories.js';
 import { mapSpoonacularUnit } from '../utils/unitMapping.js';
-import { fetchItemNamesForList } from '../services/database.js';
+import { fetchItemsForList, batchUpdateItemQuantities } from '../services/database.js';
 import styles from './AddToListModal.module.css';
 
 const MAX_VISIBLE_INGREDIENTS = 5;
@@ -15,16 +15,21 @@ const MAX_VISIBLE_INGREDIENTS = 5;
 /**
  * Modal for adding recipe ingredients to a shopping list.
  * @param {Object} props
- * @param {Array<{name: string, quantity: string}>} props.ingredients - Selected ingredients
+ * @param {Array<{name: string, quantity: string, amount: number, unit: string}>} props.ingredients - Selected ingredients
  * @param {Array} props.lists - User's shopping lists
  * @param {Function} props.onAddItems - Called with (listId, items) to add items
  * @param {Function} props.onClose - Called to close the modal
  */
 export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
   const [selectedListId, setSelectedListId] = useState(lists[0]?.id ?? null);
-  const [isAdding, setIsAdding] = useState(false);
+  const [step, setStep] = useState('select');
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  const [newItems, setNewItems] = useState([]);
+  const [duplicateItems, setDuplicateItems] = useState([]);
 
   useEffect(() => {
     if (!success) return;
@@ -46,52 +51,350 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleAddItems = async () => {
+  const handleReview = async () => {
     if (!selectedListId) return;
 
-    setIsAdding(true);
+    setIsLoadingPreview(true);
     setError(null);
 
     try {
-      const existingNames = await fetchItemNamesForList(selectedListId);
+      const existing = await fetchItemsForList(selectedListId);
+      const existingMap = new Map(
+        existing.map((item) => [item.name.toLowerCase(), item])
+      );
 
-      const items = ingredients.map((ing) => ({
-        name: ing.name,
-        category: categorizeItem(ing.name),
-        isChecked: false,
-        quantity: Math.max(1, Math.round(ing.amount ?? 1)),
-        unit: ing.unit ? mapSpoonacularUnit(ing.unit) : 'each',
-      }));
+      const newList = [];
+      const dupList = [];
 
-      const newItems = items.filter((item) => !existingNames.has(item.name.toLowerCase()));
-      const addedCount = newItems.length;
-      const skippedCount = items.length - addedCount;
+      for (const ing of ingredients) {
+        const name = ing.name;
+        const quantity = Math.max(1, Math.round(ing.amount ?? 1));
+        const unit = ing.unit ? mapSpoonacularUnit(ing.unit) : 'each';
+        const category = categorizeItem(name);
+        const key = name.toLowerCase();
 
-      if (addedCount > 0) {
-        await onAddItems(selectedListId, newItems);
+        const existingItem = existingMap.get(key);
+        if (existingItem) {
+          dupList.push({
+            id: existingItem.id,
+            name: existingItem.name,
+            currentQuantity: existingItem.quantity,
+            newQuantity: existingItem.quantity + quantity,
+            unit: existingItem.unit ?? 'each',
+            isExcluded: false,
+          });
+        } else {
+          newList.push({
+            tempId: crypto.randomUUID(),
+            name,
+            quantity,
+            unit,
+            category,
+            isExcluded: false,
+          });
+        }
+      }
+
+      setNewItems(newList);
+      setDuplicateItems(dupList);
+      setStep('preview');
+    } catch (err) {
+      setError(err.message ?? 'Failed to load preview');
+    } finally {
+      setIsLoadingPreview(false);
+    }
+  };
+
+  const handleBack = () => {
+    setStep('select');
+    setNewItems([]);
+    setDuplicateItems([]);
+    setError(null);
+  };
+
+  const toggleNewItem = (tempId) => {
+    setNewItems((prev) =>
+      prev.map((item) =>
+        item.tempId === tempId ? { ...item, isExcluded: !item.isExcluded } : item
+      )
+    );
+  };
+
+  const toggleDuplicateItem = (id) => {
+    setDuplicateItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, isExcluded: !item.isExcluded } : item
+      )
+    );
+  };
+
+  const updateNewItemQty = (tempId, delta) => {
+    setNewItems((prev) =>
+      prev.map((item) => {
+        if (item.tempId !== tempId) return item;
+        const newQty = Math.max(1, item.quantity + delta);
+        return { ...item, quantity: newQty };
+      })
+    );
+  };
+
+  const updateDuplicateQty = (id, delta) => {
+    setDuplicateItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+        const newQty = Math.max(item.currentQuantity, item.newQuantity + delta);
+        return { ...item, newQuantity: newQty };
+      })
+    );
+  };
+
+  const handleConfirm = async () => {
+    setIsConfirming(true);
+    setError(null);
+
+    try {
+      const itemsToAdd = newItems
+        .filter((item) => !item.isExcluded)
+        .map((item) => ({
+          name: item.name,
+          category: item.category,
+          isChecked: false,
+          quantity: item.quantity,
+          unit: item.unit,
+        }));
+
+      const itemsToUpdate = duplicateItems
+        .filter((item) => !item.isExcluded)
+        .map((item) => ({
+          id: item.id,
+          quantity: item.newQuantity,
+        }));
+
+      if (itemsToAdd.length > 0) {
+        await onAddItems(selectedListId, itemsToAdd);
+      }
+
+      if (itemsToUpdate.length > 0) {
+        await batchUpdateItemQuantities(itemsToUpdate);
       }
 
       const selectedList = lists.find((l) => l.id === selectedListId);
       const listName = selectedList?.name ?? 'list';
 
       let message;
-      if (addedCount > 0 && skippedCount > 0) {
-        message = `Added ${addedCount} item${addedCount !== 1 ? 's' : ''} to ${listName} (${skippedCount} already in list)`;
-      } else if (skippedCount > 0 && addedCount === 0) {
-        message = `All ${skippedCount} item${skippedCount !== 1 ? 's' : ''} already in ${listName}`;
+      if (itemsToAdd.length > 0 && itemsToUpdate.length > 0) {
+        message = `Added ${itemsToAdd.length}, updated ${itemsToUpdate.length} items in ${listName}`;
+      } else if (itemsToAdd.length > 0) {
+        message = `Added ${itemsToAdd.length} item${itemsToAdd.length !== 1 ? 's' : ''} to ${listName}`;
+      } else if (itemsToUpdate.length > 0) {
+        message = `Updated ${itemsToUpdate.length} item${itemsToUpdate.length !== 1 ? 's' : ''} in ${listName}`;
       } else {
-        message = `Added ${addedCount} item${addedCount !== 1 ? 's' : ''} to ${listName}`;
+        message = 'No changes made';
       }
 
       setSuccess({ message });
     } catch (err) {
-      setError(err.message ?? 'Failed to add items');
-      setIsAdding(false);
+      setError(err.message ?? 'Failed to save changes');
+      setIsConfirming(false);
     }
+  };
+
+  const includedNewCount = newItems.filter((i) => !i.isExcluded).length;
+  const includedDupCount = duplicateItems.filter((i) => !i.isExcluded).length;
+
+  const getConfirmButtonText = () => {
+    if (isConfirming) return 'Saving...';
+    if (includedNewCount > 0 && includedDupCount > 0) {
+      return `Add ${includedNewCount} Items, Update ${includedDupCount}`;
+    }
+    if (includedNewCount > 0) {
+      return `Add ${includedNewCount} Item${includedNewCount !== 1 ? 's' : ''}`;
+    }
+    if (includedDupCount > 0) {
+      return `Update ${includedDupCount} Item${includedDupCount !== 1 ? 's' : ''}`;
+    }
+    return 'Nothing Selected';
   };
 
   const visibleIngredients = ingredients.slice(0, MAX_VISIBLE_INGREDIENTS);
   const remainingCount = ingredients.length - MAX_VISIBLE_INGREDIENTS;
+
+  const renderSelectStep = () => (
+    <>
+      <div className={styles.ingredientSummary}>
+        <p className={styles.summaryLabel}>
+          Adding {ingredients.length} ingredient{ingredients.length !== 1 ? 's' : ''}:
+        </p>
+        <ul className={styles.ingredientList}>
+          {visibleIngredients.map((ing, index) => (
+            <li key={`${ing.name}-${index}`} className={styles.ingredientItem}>
+              {ing.name}
+            </li>
+          ))}
+        </ul>
+        {remainingCount > 0 && (
+          <p className={styles.moreLabel}>and {remainingCount} more...</p>
+        )}
+      </div>
+
+      {lists.length === 0 ? (
+        <div className={styles.noLists}>
+          <p className={styles.noListsMsg}>No lists yet. Create a list first!</p>
+          <p className={styles.noListsHint}>Go to the Lists tab to create one.</p>
+        </div>
+      ) : (
+        <>
+          <p className={styles.chooseLabel}>Choose a list:</p>
+          <div className={styles.listSelector}>
+            {lists.map((list) => {
+              const isSelected = list.id === selectedListId;
+              return (
+                <button
+                  key={list.id}
+                  type="button"
+                  className={`${styles.listItem} ${isSelected ? styles.listItemSelected : ''}`}
+                  onClick={() => setSelectedListId(list.id)}
+                  aria-pressed={isSelected}
+                >
+                  <span className={styles.listEmoji}>{list.emoji ?? '🛒'}</span>
+                  <span className={styles.listName}>{list.name}</span>
+                  {isSelected && <span className={styles.checkmark}>✓</span>}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {error && <p className={styles.error}>{error}</p>}
+
+      <button
+        type="button"
+        className={styles.addBtn}
+        onClick={handleReview}
+        disabled={!selectedListId || isLoadingPreview || lists.length === 0}
+      >
+        {isLoadingPreview ? 'Loading...' : 'Review Items'}
+      </button>
+    </>
+  );
+
+  const renderPreviewRow = (item, isDuplicate) => {
+    const isExcluded = item.isExcluded;
+    const rowClass = `${styles.previewRow} ${isExcluded ? styles.previewRowExcluded : ''}`;
+    const checkClass = `${styles.previewCheck} ${isExcluded ? styles.previewCheckExcluded : ''}`;
+    const nameClass = `${styles.previewName} ${isExcluded ? styles.previewNameExcluded : ''}`;
+
+    const handleToggle = () => {
+      if (isDuplicate) {
+        toggleDuplicateItem(item.id);
+      } else {
+        toggleNewItem(item.tempId);
+      }
+    };
+
+    const handleQtyChange = (delta) => {
+      if (isDuplicate) {
+        updateDuplicateQty(item.id, delta);
+      } else {
+        updateNewItemQty(item.tempId, delta);
+      }
+    };
+
+    const currentQty = isDuplicate ? item.newQuantity : item.quantity;
+    const minQty = isDuplicate ? item.currentQuantity : 1;
+
+    return (
+      <li key={isDuplicate ? item.id : item.tempId} className={rowClass}>
+        <button type="button" className={checkClass} onClick={handleToggle}>
+          {isExcluded ? '☐' : '☑'}
+        </button>
+        <div className={styles.previewInfo}>
+          <div className={nameClass}>{item.name}</div>
+          {isDuplicate && (
+            <div className={styles.previewSub}>
+              {item.currentQuantity} → {item.newQuantity} {item.unit}
+            </div>
+          )}
+        </div>
+        <div className={styles.qtyStepper}>
+          <button
+            type="button"
+            className={styles.qtyBtn}
+            onClick={() => handleQtyChange(-1)}
+            disabled={currentQty <= minQty}
+          >
+            −
+          </button>
+          <span className={styles.qtyValue}>{currentQty}</span>
+          <button
+            type="button"
+            className={styles.qtyBtn}
+            onClick={() => handleQtyChange(1)}
+          >
+            +
+          </button>
+        </div>
+        <span className={styles.unitLabel}>{item.unit}</span>
+      </li>
+    );
+  };
+
+  const renderPreviewStep = () => {
+    const hasNewItems = newItems.length > 0;
+    const hasDuplicates = duplicateItems.length > 0;
+    const isEmpty = !hasNewItems && !hasDuplicates;
+
+    return (
+      <>
+        {isEmpty ? (
+          <div className={styles.emptyPreview}>
+            <p>No items to preview.</p>
+          </div>
+        ) : (
+          <>
+            {hasNewItems && (
+              <>
+                <p className={styles.sectionLabel}>New Items</p>
+                <ul className={styles.previewList}>
+                  {newItems.map((item) => renderPreviewRow(item, false))}
+                </ul>
+              </>
+            )}
+            {hasDuplicates && (
+              <>
+                <p className={styles.sectionLabel}>Already in List — Update Quantity</p>
+                <ul className={styles.previewList}>
+                  {duplicateItems.map((item) => renderPreviewRow(item, true))}
+                </ul>
+              </>
+            )}
+          </>
+        )}
+
+        {error && <p className={styles.error}>{error}</p>}
+
+        {success ? (
+          <div className={styles.successMsg}>
+            <span className={styles.successIcon}>✅</span>
+            <span>{success.message}</span>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={styles.confirmBtn}
+            onClick={handleConfirm}
+            disabled={
+              isConfirming ||
+              (includedNewCount === 0 && includedDupCount === 0)
+            }
+          >
+            {getConfirmButtonText()}
+          </button>
+        )}
+      </>
+    );
+  };
 
   return createPortal(
     <div
@@ -103,7 +406,14 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
     >
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h3 className={styles.title}>Add to Shopping List</h3>
+          {step === 'preview' ? (
+            <button type="button" className={styles.backBtn} onClick={handleBack}>
+              ← Back
+            </button>
+          ) : null}
+          <h3 className={styles.title}>
+            {step === 'select' ? 'Add to Shopping List' : 'Review Items'}
+          </h3>
           <button
             className={styles.closeBtn}
             onClick={onClose}
@@ -115,70 +425,7 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
         </div>
 
         <div className={styles.content}>
-          <div className={styles.ingredientSummary}>
-            <p className={styles.summaryLabel}>
-              Adding {ingredients.length} ingredient{ingredients.length !== 1 ? 's' : ''}:
-            </p>
-            <ul className={styles.ingredientList}>
-              {visibleIngredients.map((ing, index) => (
-                <li key={`${ing.name}-${index}`} className={styles.ingredientItem}>
-                  {ing.name}
-                </li>
-              ))}
-            </ul>
-            {remainingCount > 0 && (
-              <p className={styles.moreLabel}>and {remainingCount} more...</p>
-            )}
-          </div>
-
-          {lists.length === 0 ? (
-            <div className={styles.noLists}>
-              <p className={styles.noListsMsg}>No lists yet. Create a list first!</p>
-              <p className={styles.noListsHint}>Go to the Lists tab to create one.</p>
-            </div>
-          ) : (
-            <>
-              <p className={styles.chooseLabel}>Choose a list:</p>
-              <div className={styles.listSelector}>
-                {lists.map((list) => {
-                  const isSelected = list.id === selectedListId;
-                  return (
-                    <button
-                      key={list.id}
-                      type="button"
-                      className={`${styles.listItem} ${isSelected ? styles.listItemSelected : ''}`}
-                      onClick={() => setSelectedListId(list.id)}
-                      aria-pressed={isSelected}
-                    >
-                      <span className={styles.listEmoji}>{list.emoji ?? '🛒'}</span>
-                      <span className={styles.listName}>{list.name}</span>
-                      {isSelected && <span className={styles.checkmark}>✓</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {error && <p className={styles.error}>{error}</p>}
-
-          {success ? (
-            <div className={styles.successMsg}>
-              <span className={styles.successIcon}>✅</span>
-              <span>{success.message}</span>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className={styles.addBtn}
-              onClick={handleAddItems}
-              disabled={!selectedListId || isAdding || lists.length === 0}
-            >
-              {isAdding
-                ? 'Adding...'
-                : `Add ${ingredients.length} Item${ingredients.length !== 1 ? 's' : ''}`}
-            </button>
-          )}
+          {step === 'select' ? renderSelectStep() : renderPreviewStep()}
         </div>
       </div>
     </div>,
