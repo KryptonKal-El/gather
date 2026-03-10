@@ -50,6 +50,8 @@ export const OnlineRecipePreview = ({ recipe, onSaveAsRecipe, onAddToList, onBac
       const ingredients = detail.extendedIngredients.map((i) => ({
         name: i.name,
         quantity: i.original,
+        amount: i.amount,
+        unit: i.unit,
       }));
       onAddToList(ingredients);
     }

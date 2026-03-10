@@ -290,6 +290,7 @@ export const ShoppingListProvider = ({ children }) => {
         isChecked: false,
         store: storeId,
         quantity: item.quantity ?? 1,
+        unit: item.unit ?? 'each',
         price: item.price ?? null,
         imageUrl: item.imageUrl ?? null,
       };

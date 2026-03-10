@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { categorizeItem } from '../utils/categories.js';
+import { mapSpoonacularUnit } from '../utils/unitMapping.js';
 import styles from './AddToListModal.module.css';
 
 const MAX_VISIBLE_INGREDIENTS = 5;
@@ -55,6 +56,8 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
         name: ing.name,
         category: categorizeItem(ing.name),
         isChecked: false,
+        quantity: Math.max(1, Math.round(ing.amount ?? 1)),
+        unit: ing.unit ? mapSpoonacularUnit(ing.unit) : 'each',
       }));
 
       await onAddItems(selectedListId, items);
@@ -171,6 +174,8 @@ AddToListModal.propTypes = {
     PropTypes.shape({
       name: PropTypes.string.isRequired,
       quantity: PropTypes.string,
+      amount: PropTypes.number,
+      unit: PropTypes.string,
     })
   ).isRequired,
   lists: PropTypes.arrayOf(
