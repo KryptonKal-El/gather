@@ -14,10 +14,10 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-haw">
-                                <rect key="frame" x="136.5" y="366" width="120" height="120"/>
+                                <rect key="frame" x="96.5" y="345.5" width="200" height="161"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="120" id="W1a-bc-d2E"/>
-                                    <constraint firstAttribute="height" constant="120" id="H1a-bc-d2E"/>
+                                    <constraint firstAttribute="width" constant="200" id="W1a-bc-d2E"/>
+                                    <constraint firstAttribute="height" constant="161" id="H1a-bc-d2E"/>
                                 </constraints>
                             </imageView>
                         </subviews>
@@ -35,7 +35,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchLogo" width="120" height="120"/>
+        <image name="LaunchLogo" width="280" height="225"/>
         <namedColor name="LaunchBackground">
             <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
