@@ -344,15 +344,18 @@
 }
 
 .remapDropdown {
+  position: relative;
+  z-index: 10;
   margin-top: 0.35rem;
   border: 1px solid var(--border-default);
   border-radius: 8px;
   background: var(--bg-card);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
   max-height: 180px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  opacity: 1 !important;
 }
 
 .remapSearch {
@@ -361,7 +364,7 @@
   border-bottom: 1px solid var(--border-subtle);
   font-size: 0.8rem;
   color: var(--text-primary);
-  background: transparent;
+  background: var(--bg-card);
   outline: none;
 }
 
@@ -383,7 +386,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 0.45rem 0.6rem;
-  background: none;
+  background: var(--bg-card);
   border: none;
   border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
