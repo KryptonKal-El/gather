@@ -330,7 +330,7 @@ struct ListDetailView: View {
                     Text(formatPrice(total))
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundStyle(.green)
+                        .foregroundStyle(Color(hex: "#3D7A63"))
                 }
             }
             .padding(.horizontal, 16)
