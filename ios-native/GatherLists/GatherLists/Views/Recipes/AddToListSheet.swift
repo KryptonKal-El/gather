@@ -38,6 +38,7 @@ struct AddToListSheet: View {
     @State private var newItems: [PreviewNewItem] = []
     @State private var duplicateItems: [PreviewDuplicateItem] = []
     @State private var existingItems: [Item] = []
+    @State private var historyNames: [String] = []
     @State private var remapSourceId: UUID?
     @State private var remapSearchText = ""
     
@@ -72,6 +73,23 @@ struct AddToListSheet: View {
             return availableForRemap
         }
         return availableForRemap.filter { $0.name.localizedCaseInsensitiveContains(remapSearchText) }
+    }
+    
+    private var availableHistoryNames: [String] {
+        let existingItemNames = Set(existingItems.map { $0.name.lowercased() })
+        let duplicateNames = Set(duplicateItems.map { $0.name.lowercased() })
+        let newItemNames = Set(newItems.map { $0.name.lowercased() })
+        return historyNames.filter { name in
+            let lower = name.lowercased()
+            return !existingItemNames.contains(lower) && !duplicateNames.contains(lower) && !newItemNames.contains(lower)
+        }
+    }
+    
+    private var filteredHistoryNames: [String] {
+        if remapSearchText.isEmpty {
+            return availableHistoryNames
+        }
+        return availableHistoryNames.filter { $0.localizedCaseInsensitiveContains(remapSearchText) }
     }
     
     private var confirmButtonText: String {
@@ -258,7 +276,7 @@ struct AddToListSheet: View {
                         Section {
                             ForEach($newItems) { $item in
                                 PreviewNewItemRow(item: $item, onNameTap: {
-                                    if availableForRemap.isEmpty { return }
+                                    if availableForRemap.isEmpty && availableHistoryNames.isEmpty { return }
                                     remapSourceId = item.id
                                 })
                             }
@@ -354,8 +372,25 @@ struct AddToListSheet: View {
         
         Task {
             do {
-                let existingItems = try await ItemService.fetchItems(listId: listId)
+                async let existingTask = ItemService.fetchItems(listId: listId)
+                async let historyTask = HistoryService.fetchHistory(userId: userId)
+                
+                let existingItems = try await existingTask
+                let historyEntries = try await historyTask
                 self.existingItems = existingItems
+                
+                let existingNames = Set(existingItems.map { $0.name.lowercased() })
+                var seen = Set<String>()
+                var uniqueNames: [String] = []
+                for entry in historyEntries {
+                    let lower = entry.name.lowercased()
+                    if !seen.contains(lower) && !existingNames.contains(lower) {
+                        seen.insert(lower)
+                        uniqueNames.append(entry.name)
+                    }
+                }
+                self.historyNames = uniqueNames.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
+                
                 let existingByName = Dictionary(
                     existingItems.map { ($0.name.lowercased(), $0) },
                     uniquingKeysWith: { first, _ in first }
@@ -416,6 +451,21 @@ struct AddToListSheet: View {
         remapSourceId = nil
     }
     
+    private func renameNewItem(newItemId: UUID, to name: String) {
+        guard let index = newItems.firstIndex(where: { $0.id == newItemId }) else { return }
+        let old = newItems[index]
+        newItems[index] = PreviewNewItem(
+            name: name,
+            quantity: old.quantity,
+            recipeQuantity: old.recipeQuantity,
+            unit: old.unit,
+            category: old.category
+        )
+        newItems[index].isExcluded = old.isExcluded
+        remapSourceId = nil
+        remapSearchText = ""
+    }
+    
     private func confirmChanges() {
         guard let listId = selectedListId, let list = selectedList else { return }
         
@@ -450,21 +500,45 @@ struct AddToListSheet: View {
     private var remapPickerSheet: some View {
         NavigationStack {
             List {
-                ForEach(filteredRemapItems) { item in
-                    Button {
-                        if let sourceId = remapSourceId {
-                            remapNewItem(newItemId: sourceId, to: item)
-                        }
-                    } label: {
-                        HStack {
-                            Text(item.name)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text("\(item.quantity) \(item.unit)")
-                                .foregroundStyle(.secondary)
-                                .font(.subheadline)
+                if !filteredRemapItems.isEmpty {
+                    Section("On This List") {
+                        ForEach(filteredRemapItems) { item in
+                            Button {
+                                if let sourceId = remapSourceId {
+                                    remapNewItem(newItemId: sourceId, to: item)
+                                }
+                            } label: {
+                                HStack {
+                                    Text(item.name)
+                                        .foregroundStyle(.primary)
+                                    Spacer()
+                                    Text("\(item.quantity) \(item.unit)")
+                                        .foregroundStyle(.secondary)
+                                        .font(.subheadline)
+                                }
+                            }
                         }
                     }
+                }
+                
+                if !filteredHistoryNames.isEmpty {
+                    Section("Previously Used") {
+                        ForEach(filteredHistoryNames, id: \.self) { name in
+                            Button {
+                                if let sourceId = remapSourceId {
+                                    renameNewItem(newItemId: sourceId, to: name)
+                                }
+                            } label: {
+                                Text(name)
+                                    .foregroundStyle(.primary)
+                            }
+                        }
+                    }
+                }
+                
+                if filteredRemapItems.isEmpty && filteredHistoryNames.isEmpty {
+                    Text("No matching items")
+                        .foregroundStyle(.secondary)
                 }
             }
             .searchable(text: $remapSearchText, prompt: "Search items")

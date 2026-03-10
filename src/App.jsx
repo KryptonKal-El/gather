@@ -874,6 +874,7 @@ export const App = () => {
         <AddToListModal
           ingredients={addToListIngredients}
           lists={state.lists}
+          history={state.history}
           onAddItems={(listId, items) => actions.addItems(listId, items)}
           onClose={() => setAddToListIngredients(null)}
         />

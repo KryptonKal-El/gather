@@ -20,7 +20,7 @@ const MAX_VISIBLE_INGREDIENTS = 5;
  * @param {Function} props.onAddItems - Called with (listId, items) to add items
  * @param {Function} props.onClose - Called to close the modal
  */
-export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
+export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, onClose }) => {
   const [selectedListId, setSelectedListId] = useState(lists[0]?.id ?? null);
   const [step, setStep] = useState('select');
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
@@ -163,6 +163,29 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
       )
     : availableForRemap;
 
+  const existingItemNames = new Set(existingItems.map((i) => i.name.toLowerCase()));
+  const duplicateNames = new Set(duplicateItems.map((d) => d.name.toLowerCase()));
+  const newItemNames = new Set(newItems.map((n) => n.name.toLowerCase()));
+
+  const availableHistoryNames = (() => {
+    const seen = new Set();
+    const result = [];
+    for (const entry of history) {
+      const lower = entry.name.toLowerCase();
+      if (!seen.has(lower) && !existingItemNames.has(lower) && !duplicateNames.has(lower) && !newItemNames.has(lower)) {
+        seen.add(lower);
+        result.push(entry.name);
+      }
+    }
+    return result.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+  })();
+
+  const filteredHistoryNames = remapSearch
+    ? availableHistoryNames.filter((name) =>
+        name.toLowerCase().includes(remapSearch.toLowerCase())
+      )
+    : availableHistoryNames;
+
   const handleRemap = (newItemTempId, existingItem) => {
     const foundNewItem = newItems.find((n) => n.tempId === newItemTempId);
     if (!foundNewItem) return;
@@ -179,6 +202,16 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
         isExcluded: false,
       },
     ]);
+    setRemapOpenId(null);
+    setRemapSearch('');
+  };
+
+  const handleRenameFromHistory = (newItemTempId, newName) => {
+    setNewItems((prev) =>
+      prev.map((item) =>
+        item.tempId === newItemTempId ? { ...item, name: newName } : item
+      )
+    );
     setRemapOpenId(null);
     setRemapSearch('');
   };
@@ -350,15 +383,15 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
           ) : (
             <button
               type="button"
-              className={`${nameClass} ${!item.isExcluded && availableForRemap.length > 0 ? styles.remapTrigger : ''}`}
+              className={`${nameClass} ${!item.isExcluded && (availableForRemap.length > 0 || availableHistoryNames.length > 0) ? styles.remapTrigger : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
-                if (!item.isExcluded && availableForRemap.length > 0) {
+                if (!item.isExcluded && (availableForRemap.length > 0 || availableHistoryNames.length > 0)) {
                   setRemapOpenId(remapOpenId === item.tempId ? null : item.tempId);
                   setRemapSearch('');
                 }
               }}
-              disabled={item.isExcluded || availableForRemap.length === 0}
+              disabled={item.isExcluded || (availableForRemap.length === 0 && availableHistoryNames.length === 0)}
             >
               {item.name}
             </button>
@@ -379,21 +412,42 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
                 autoFocus
               />
               <ul className={styles.remapList}>
-                {filteredRemapItems.map((existing) => (
-                  <li key={existing.id}>
-                    <button
-                      type="button"
-                      className={styles.remapOption}
-                      onClick={() => handleRemap(item.tempId, existing)}
-                    >
-                      <span>{existing.name}</span>
-                      <span className={styles.remapQty}>
-                        {existing.quantity} {existing.unit ?? 'each'}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-                {filteredRemapItems.length === 0 && (
+                {filteredRemapItems.length > 0 && (
+                  <>
+                    <li className={styles.remapSectionHeader}>On This List</li>
+                    {filteredRemapItems.map((existing) => (
+                      <li key={existing.id}>
+                        <button
+                          type="button"
+                          className={styles.remapOption}
+                          onClick={() => handleRemap(item.tempId, existing)}
+                        >
+                          <span>{existing.name}</span>
+                          <span className={styles.remapQty}>
+                            {existing.quantity} {existing.unit ?? 'each'}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </>
+                )}
+                {filteredHistoryNames.length > 0 && (
+                  <>
+                    <li className={styles.remapSectionHeader}>Previously Used</li>
+                    {filteredHistoryNames.map((name) => (
+                      <li key={`history-${name}`}>
+                        <button
+                          type="button"
+                          className={styles.remapOption}
+                          onClick={() => handleRenameFromHistory(item.tempId, name)}
+                        >
+                          <span>{name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </>
+                )}
+                {filteredRemapItems.length === 0 && filteredHistoryNames.length === 0 && (
                   <li className={styles.remapEmpty}>No matching items</li>
                 )}
               </ul>
@@ -532,6 +586,7 @@ AddToListModal.propTypes = {
       emoji: PropTypes.string,
     })
   ).isRequired,
+  history: PropTypes.array,
   onAddItems: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };
