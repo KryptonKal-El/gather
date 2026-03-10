@@ -11,6 +11,7 @@ struct Item: Codable, Identifiable, Hashable {
     var quantity: Int
     var price: Decimal?
     var imageUrl: String?
+    var unit: String
     let addedAt: Date
     
     init(
@@ -23,6 +24,7 @@ struct Item: Codable, Identifiable, Hashable {
         quantity: Int = 1,
         price: Decimal? = nil,
         imageUrl: String? = nil,
+        unit: String = "each",
         addedAt: Date = Date()
     ) {
         self.id = id
@@ -34,6 +36,7 @@ struct Item: Codable, Identifiable, Hashable {
         self.quantity = quantity
         self.price = price
         self.imageUrl = imageUrl
+        self.unit = unit
         self.addedAt = addedAt
     }
     
@@ -47,6 +50,7 @@ struct Item: Codable, Identifiable, Hashable {
         case quantity
         case price
         case imageUrl = "image_url"
+        case unit
         case addedAt = "added_at"
     }
 }

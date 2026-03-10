@@ -363,7 +363,8 @@ final class ListDetailViewModel {
                 stores: stores,
                 quantity: pastItem?.quantity ?? 1,
                 price: pastItem?.price,
-                imageUrl: pastItem?.imageUrl
+                imageUrl: pastItem?.imageUrl,
+                unit: pastItem?.unit ?? "each"
             )
             items.append(newItem)
             
@@ -410,7 +411,8 @@ final class ListDetailViewModel {
         quantity: Int? = nil,
         price: Decimal? = nil,
         clearPrice: Bool = false,
-        imageUrl: String? = nil
+        imageUrl: String? = nil,
+        unit: String? = nil
     ) async {
         do {
             try await ItemService.updateItem(
@@ -423,7 +425,8 @@ final class ListDetailViewModel {
                 quantity: quantity,
                 price: price,
                 clearPrice: clearPrice,
-                imageUrl: imageUrl
+                imageUrl: imageUrl,
+                unit: unit
             )
             
             // Update local state for instant feedback
@@ -443,6 +446,7 @@ final class ListDetailViewModel {
                     items[index].price = price
                 }
                 if let imageUrl = imageUrl { items[index].imageUrl = imageUrl }
+                if let unit = unit { items[index].unit = unit }
             }
         } catch {
             self.error = error.localizedDescription

@@ -184,7 +184,7 @@ struct ListDetailView: View {
             EditItemSheet(
                 item: item,
                 stores: detailViewModel?.stores ?? [],
-                onSave: { name, quantity, price, storeId, clearStoreId, category in
+                onSave: { name, quantity, price, storeId, clearStoreId, category, unit in
                     Task {
                         await detailViewModel?.updateItem(
                             item.id,
@@ -194,7 +194,8 @@ struct ListDetailView: View {
                             clearStoreId: clearStoreId,
                             quantity: quantity,
                             price: price,
-                            clearPrice: item.price != nil && price == nil
+                            clearPrice: item.price != nil && price == nil,
+                            unit: unit
                         )
                     }
                 },
@@ -424,7 +425,18 @@ struct ListDetailView: View {
                     .strikethrough(isChecked)
                     .foregroundStyle(isChecked ? .secondary : .primary)
                 
-                if item.quantity > 1 {
+                if item.unit != "each" {
+                    Text("\(item.quantity) \(item.unit)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color(.systemGray))
+                        )
+                } else if item.quantity > 1 {
                     Text("×\(item.quantity)")
                         .font(.caption)
                         .fontWeight(.medium)

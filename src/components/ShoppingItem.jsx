@@ -4,6 +4,7 @@ import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllC
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
 import { ImagePicker } from './ImagePicker.jsx';
+import { ITEM_UNITS } from '../constants/units.js';
 import styles from './ShoppingItem.module.css';
 
 /**
@@ -19,6 +20,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [priceValue, setPriceValue] = useState('');
   const [nameValue, setNameValue] = useState('');
+  const [unitValue, setUnitValue] = useState('each');
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -138,6 +140,12 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     }
   };
 
+  const handleUnitChange = (e) => {
+    const newUnit = e.target.value;
+    setUnitValue(newUnit);
+    onUpdateItem(item.id, { unit: newUnit });
+  };
+
   const handleNameKeyDown = (e) => {
     if (e.key === 'Enter') {
       commitName();
@@ -153,6 +161,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
     } else {
       setNameValue(item.name);
       setPriceValue(price !== null ? price.toFixed(2) : '');
+      setUnitValue(item.unit ?? 'each');
       setIsEditOpen(true);
     }
   };
@@ -314,7 +323,10 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
           <span className={styles.label}>
             <span className={styles.name}>
               {item.name}
-              {qty > 1 && <span className={styles.qty}> ({qty})</span>}
+              {(item.unit && item.unit !== 'each')
+                ? <span className={styles.qty}> ({qty} {item.unit})</span>
+                : qty > 1 && <span className={styles.qty}> ({qty})</span>
+              }
             </span>
           </span>
           <div className={styles.badges}>
@@ -384,6 +396,18 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
                 +
               </button>
             </div>
+          </div>
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Unit</span>
+            <select
+              className={styles.unitSelect}
+              value={unitValue}
+              onChange={handleUnitChange}
+            >
+              {ITEM_UNITS.map((u) => (
+                <option key={u.value} value={u.value}>{u.label}</option>
+              ))}
+            </select>
           </div>
           <div className={styles.editRow}>
             <span className={styles.editLabel}>Price</span>
@@ -526,6 +550,7 @@ ShoppingItem.propTypes = {
     quantity: PropTypes.number,
     price: PropTypes.number,
     imageUrl: PropTypes.string,
+    unit: PropTypes.string,
   }).isRequired,
   stores: PropTypes.array,
   onToggle: PropTypes.func.isRequired,

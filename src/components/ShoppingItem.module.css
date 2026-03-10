@@ -220,6 +220,23 @@
   line-height: 2.5rem;
 }
 
+.unitSelect {
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.unitSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 .priceEdit {
   display: flex;
   align-items: center;

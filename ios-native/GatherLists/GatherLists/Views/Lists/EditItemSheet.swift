@@ -3,7 +3,7 @@ import SwiftUI
 struct EditItemSheet: View {
     let item: Item
     let stores: [Store]
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -13,11 +13,12 @@ struct EditItemSheet: View {
     @State private var priceText: String
     @State private var selectedStoreId: UUID?
     @State private var selectedCategory: String?
+    @State private var selectedUnit: String
     
     init(
         item: Item,
         stores: [Store],
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -30,6 +31,7 @@ struct EditItemSheet: View {
         _priceText = State(initialValue: item.price.map { "\($0)" } ?? "")
         _selectedStoreId = State(initialValue: item.storeId)
         _selectedCategory = State(initialValue: item.category)
+        _selectedUnit = State(initialValue: item.unit)
     }
     
     private var availableCategories: [CategoryDef] {
@@ -54,6 +56,11 @@ struct EditItemSheet: View {
                 
                 Section {
                     Stepper("Quantity: \(quantity)", value: $quantity, in: 1...99)
+                    Picker("Unit", selection: $selectedUnit) {
+                        ForEach(ItemUnit.allCases) { unit in
+                            Text(unit.displayName).tag(unit.rawValue)
+                        }
+                    }
                     TextField("Price", text: $priceText)
                         .keyboardType(.decimalPad)
                 }
@@ -134,7 +141,7 @@ struct EditItemSheet: View {
                         let trimmedName = name.trimmingCharacters(in: .whitespaces)
                         let price = Decimal(string: priceText)
                         let clearStoreId = item.storeId != nil && selectedStoreId == nil
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory)
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit)
                         dismiss()
                     }
                     .disabled(isSaveDisabled)

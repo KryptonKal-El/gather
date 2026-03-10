@@ -194,6 +194,7 @@ export const addItem = async (userId, listId, item) => {
         quantity: item.quantity ?? 1,
         price: item.price ?? null,
         image_url: item.imageUrl ?? null,
+        unit: item.unit ?? 'each',
       })
       .select('id')
       .single();
@@ -224,6 +225,7 @@ export const addItems = async (userId, listId, items) => {
       quantity: item.quantity ?? 1,
       price: item.price ?? null,
       image_url: item.imageUrl ?? null,
+      unit: item.unit ?? 'each',
     }));
 
     const { error } = await supabase.from('items').insert(rows);
@@ -256,6 +258,7 @@ export const updateItem = async (userId, listId, itemId, updates) => {
     if (updates.price !== undefined) mapped.price = updates.price;
     if (updates.imageUrl !== undefined) mapped.image_url = updates.imageUrl;
     if (updates.image_url !== undefined) mapped.image_url = updates.image_url;
+    if (updates.unit !== undefined) mapped.unit = updates.unit;
 
     const { error } = await supabase
       .from('items')
@@ -340,6 +343,7 @@ export const subscribeItems = (userId, listId, callback) => {
           quantity: row.quantity,
           price: row.price,
           imageUrl: row.image_url,
+          unit: row.unit ?? 'each',
           addedAt: row.added_at,
         }))
       );

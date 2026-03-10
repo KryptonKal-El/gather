@@ -415,12 +415,14 @@
     {
       "id": "prd-item-units",
       "name": "Item Units",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-item-units.md",
       "jsonPath": "docs/prds/prd-item-units.json",
       "branchName": "feature/item-units",
       "createdAt": "2026-03-10",
-      "updatedAt": "2026-03-10"
+      "updatedAt": "2026-03-10",
+      "startedAt": "2026-03-10T22:00:00Z",
+      "currentStory": "US-001"
     },
     {
       "id": "prd-online-recipe-search",
