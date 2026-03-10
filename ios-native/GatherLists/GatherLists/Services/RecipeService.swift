@@ -141,7 +141,8 @@ struct RecipeService {
         description: String?,
         collectionId: UUID,
         ingredients: [(name: String, quantity: String?)],
-        steps: [String]
+        steps: [String],
+        imageUrl: String? = nil
     ) async throws -> Recipe {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
@@ -152,7 +153,8 @@ struct RecipeService {
             ownerId: userId,
             name: trimmedName,
             description: description,
-            collectionId: collectionId
+            collectionId: collectionId,
+            imageUrl: imageUrl
         )
         
         let recipe: Recipe = try await client
@@ -452,12 +454,14 @@ private struct NewRecipe: Encodable {
     let name: String
     let description: String?
     let collectionId: UUID
+    let imageUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case ownerId = "owner_id"
         case name
         case description
         case collectionId = "collection_id"
+        case imageUrl = "image_url"
     }
 }
 

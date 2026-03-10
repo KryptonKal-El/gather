@@ -169,7 +169,8 @@ struct SaveRecipeSheet: View {
                     description: description,
                     collectionId: collectionId,
                     ingredients: ingredients,
-                    steps: steps
+                    steps: steps,
+                    imageUrl: recipeDetail.image
                 )
                 
                 successMessage = "Saved to \(selectedCollection.name)"

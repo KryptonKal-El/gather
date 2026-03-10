@@ -26,6 +26,7 @@ export const createRecipe = async (userId, recipe) => {
         owner_id: userId,
         name: recipe.name,
         description: recipe.description ?? null,
+        image_url: recipe.imageUrl ?? null,
         ingredient_count: recipe.ingredients?.length ?? 0,
         step_count: recipe.steps?.length ?? 0,
         collection_id: recipe.collectionId,

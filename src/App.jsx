@@ -193,6 +193,7 @@ export const App = () => {
       name: detail.title,
       description,
       collectionId,
+      imageUrl: detail.image ?? null,
     });
 
     if (!newId) throw new Error('Failed to create recipe');
