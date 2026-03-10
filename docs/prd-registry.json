@@ -411,6 +411,27 @@
       "completedAt": "2026-03-10T18:30:00Z",
       "currentStory": null,
       "notes": "All 5 stories complete. Edit pencil button on item row, EditItemSheet form (name/qty/price/store/category/image), checkbox-only single-tap toggle with 44pt target, double-tap row body toggle, store color indicator in add-item bar."
+    },
+    {
+      "id": "prd-item-units",
+      "name": "Item Units",
+      "status": "ready",
+      "filePath": "docs/prds/prd-item-units.md",
+      "jsonPath": "docs/prds/prd-item-units.json",
+      "branchName": "feature/item-units",
+      "createdAt": "2026-03-10",
+      "updatedAt": "2026-03-10"
+    },
+    {
+      "id": "prd-online-recipe-search",
+      "name": "Online Recipe Search via Spoonacular API",
+      "status": "ready",
+      "filePath": "docs/prds/prd-online-recipe-search.md",
+      "jsonPath": "docs/prds/prd-online-recipe-search.json",
+      "branchName": "feature/online-recipe-search",
+      "createdAt": "2026-03-10",
+      "updatedAt": "2026-03-10",
+      "dependsOn": ["prd-item-units"]
     }
   ]
 }
