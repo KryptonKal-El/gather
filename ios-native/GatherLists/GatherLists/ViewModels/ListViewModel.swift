@@ -178,7 +178,7 @@ final class ListViewModel {
     func createList(name: String, emoji: String?, color: String) async {
         error = nil
         do {
-            let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color)
+            let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count)
             ownedLists.append(newList)
             activeListId = newList.id
         } catch {
@@ -229,6 +229,23 @@ final class ListViewModel {
     
     func selectList(id: UUID) {
         activeListId = id
+    }
+    
+    func moveList(from source: IndexSet, to destination: Int) {
+        ownedLists.move(fromOffsets: source, toOffset: destination)
+        
+        let userId = self.userId
+        let currentLists = self.ownedLists
+        Task {
+            do {
+                try await ListService.saveListOrder(userId: userId, lists: currentLists)
+            } catch {
+                await MainActor.run {
+                    self.error = error.localizedDescription
+                }
+                print("[ListViewModel] Failed to save list order: \(error.localizedDescription)")
+            }
+        }
     }
     
     // MARK: - Share Actions

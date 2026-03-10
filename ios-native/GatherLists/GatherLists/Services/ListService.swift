@@ -7,21 +7,21 @@ struct ListService {
     
     // MARK: - List Operations
     
-    /// Fetches all lists owned by the given user, ordered by creation date ascending.
+    /// Fetches all lists owned by the given user, ordered by sort_order ascending.
     static func fetchOwnedLists(userId: UUID) async throws -> [GatherList] {
         let lists: [GatherList] = try await client
             .from("lists")
             .select()
             .eq("owner_id", value: userId)
-            .order("created_at", ascending: true)
+            .order("sort_order", ascending: true)
             .execute()
             .value
         return lists
     }
     
     /// Creates a new list and returns it.
-    static func createList(userId: UUID, name: String, emoji: String?, color: String) async throws -> GatherList {
-        let newList = NewList(ownerId: userId, name: name, emoji: emoji, color: color)
+    static func createList(userId: UUID, name: String, emoji: String?, color: String, sortOrder: Int = 0) async throws -> GatherList {
+        let newList = NewList(ownerId: userId, name: name, emoji: emoji, color: color, sortOrder: sortOrder)
         let list: GatherList = try await client
             .from("lists")
             .insert(newList)
@@ -48,6 +48,26 @@ struct ListService {
             .from("lists")
             .delete()
             .eq("id", value: listId)
+            .execute()
+    }
+    
+    /// Saves the order of lists by upserting all lists with updated sort_order values.
+    static func saveListOrder(userId: UUID, lists: [GatherList]) async throws {
+        let entries = lists.enumerated().map { index, list in
+            ListOrderEntry(
+                id: list.id,
+                ownerId: userId,
+                name: list.name,
+                emoji: list.emoji,
+                itemCount: list.itemCount,
+                color: list.color,
+                sortOrder: index,
+                createdAt: list.createdAt
+            )
+        }
+        try await client
+            .from("lists")
+            .upsert(entries, onConflict: "id")
             .execute()
     }
     
@@ -122,11 +142,13 @@ private struct NewList: Encodable {
     let emoji: String?
     let color: String
     let itemCount: Int = 0
+    let sortOrder: Int
     
     enum CodingKeys: String, CodingKey {
         case ownerId = "owner_id"
         case name, emoji, color
         case itemCount = "item_count"
+        case sortOrder = "sort_order"
     }
 }
 
@@ -145,5 +167,28 @@ private struct NewListShare: Encodable {
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
         case sharedWithEmail = "shared_with_email"
+    }
+}
+
+/// Lightweight struct for upserting list order.
+private struct ListOrderEntry: Encodable {
+    let id: UUID
+    let ownerId: UUID
+    let name: String
+    let emoji: String?
+    let itemCount: Int
+    let color: String
+    let sortOrder: Int
+    let createdAt: Date
+    
+    enum CodingKeys: String, CodingKey {
+        case id
+        case ownerId = "owner_id"
+        case name
+        case emoji
+        case itemCount = "item_count"
+        case color
+        case sortOrder = "sort_order"
+        case createdAt = "created_at"
     }
 }

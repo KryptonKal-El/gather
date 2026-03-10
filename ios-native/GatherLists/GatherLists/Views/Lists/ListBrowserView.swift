@@ -52,6 +52,11 @@ struct ListBrowserView: View {
             }
             .navigationTitle("Lists")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if let vm = viewModel, !vm.ownedLists.isEmpty {
+                        EditButton()
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         showCreateSheet = true
@@ -110,7 +115,7 @@ struct ListBrowserView: View {
                         NavigationLink(value: list) {
                             ListRowView(list: list, isShared: false)
                         }
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
                         .contextMenu {
                             Button {
                                 listToEdit = list
@@ -142,6 +147,9 @@ struct ListBrowserView: View {
                             }
                         }
                     }
+                    .onMove { source, destination in
+                        viewModel?.moveList(from: source, to: destination)
+                    }
                 }
             }
             
@@ -151,7 +159,7 @@ struct ListBrowserView: View {
                         NavigationLink(value: list) {
                             ListRowView(list: list, isShared: true)
                         }
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 10))
                     }
                 }
             }
