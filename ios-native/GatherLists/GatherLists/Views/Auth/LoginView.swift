@@ -3,6 +3,7 @@ import AuthenticationServices
 import CryptoKit
 
 struct LoginView: View {
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var currentNonce: String?
     @State private var isSigningIn = false
@@ -47,7 +48,7 @@ struct LoginView: View {
                 } onCompletion: { result in
                     handleAppleSignIn(result)
                 }
-                .signInWithAppleButtonStyle(.black)
+                .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
                 .frame(height: 50)
                 .frame(maxWidth: 360)
                 
@@ -145,10 +146,7 @@ struct LoginView: View {
             }
             .padding()
         }
-        .scrollDismissesKeyboard(.interactively)
-        .onTapGesture {
-            focusedField = nil
-        }
+        .scrollDismissesKeyboard(.immediately)
     }
     
     private func handleEmailAuth() {
