@@ -480,6 +480,7 @@ struct AddToListSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationBackground(.regularMaterial)
     }
 }
 
