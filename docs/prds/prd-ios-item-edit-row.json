@@ -120,8 +120,10 @@
         "Xcode build succeeds"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T18:25:00Z",
+      "passes": true,
+      "notes": "Added .onTapGesture(count: 2) on row after contentShape, before contextMenu. Child Button/onTapGesture handlers naturally take precedence.",
       "testIntensity": "high",
       "testIntensityReason": "Gesture precedence is tricky — must coexist with single-tap, long-press, swipe",
       "supportArticleRequired": false,

@@ -446,6 +446,11 @@ struct ListDetailView: View {
         .padding(.leading, 28)
         .background(Color(.systemBackground))
         .contentShape(Rectangle())
+        .onTapGesture(count: 2) {
+            Task {
+                await detailViewModel?.toggleItem(item)
+            }
+        }
         .contextMenu {
             itemContextMenu(item: item)
         }
