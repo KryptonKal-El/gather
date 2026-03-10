@@ -401,14 +401,16 @@
     {
       "id": "prd-ios-item-edit-row",
       "name": "iOS Item Row — Edit Button, Tap Behavior & Store Indicator",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-ios-item-edit-row.md",
       "jsonPath": "docs/prds/prd-ios-item-edit-row.json",
       "branchName": "feature/ios-item-edit-row",
       "createdAt": "2026-03-10",
       "updatedAt": "2026-03-10",
       "startedAt": "2026-03-10T18:00:00Z",
-      "currentStory": "US-001"
+      "completedAt": "2026-03-10T18:30:00Z",
+      "currentStory": null,
+      "notes": "All 5 stories complete. Edit pencil button on item row, EditItemSheet form (name/qty/price/store/category/image), checkbox-only single-tap toggle with 44pt target, double-tap row body toggle, store color indicator in add-item bar."
     }
   ]
 }

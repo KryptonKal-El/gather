@@ -153,8 +153,10 @@
         "Xcode build succeeds"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T18:30:00Z",
+      "passes": true,
+      "notes": "Replaced Text(store.name) with VStack of storefront icon + caption2 name, both tinted via Color(hex:) from store.color. Falls back to .secondary.",
       "testIntensity": "low",
       "testIntensityReason": null,
       "supportArticleRequired": false,

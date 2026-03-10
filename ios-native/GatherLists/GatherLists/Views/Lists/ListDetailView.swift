@@ -893,10 +893,16 @@ struct ListDetailView: View {
         } label: {
             if let storeId = selectedStoreId,
                let store = stores.first(where: { $0.id == storeId }) {
-                Text(store.name)
-                    .font(.subheadline)
-                    .foregroundStyle(listColor)
-                    .lineLimit(1)
+                let storeColor = store.color.flatMap { Color(hex: $0) } ?? Color.secondary
+                VStack(spacing: 2) {
+                    Image(systemName: "storefront")
+                        .font(.subheadline)
+                        .foregroundStyle(storeColor)
+                    Text(store.name)
+                        .font(.caption2)
+                        .foregroundStyle(storeColor)
+                        .lineLimit(1)
+                }
             } else {
                 Image(systemName: "storefront")
                     .font(.subheadline)
