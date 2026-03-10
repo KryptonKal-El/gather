@@ -26,6 +26,8 @@ import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
 import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
+import { OnlineRecipeSearch } from './components/OnlineRecipeSearch.jsx';
+import { OnlineRecipePreview } from './components/OnlineRecipePreview.jsx';
 import styles from './App.module.css';
 
 /**
@@ -67,6 +69,8 @@ export const App = () => {
   const [desktopView, setDesktopView] = useState('lists');
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
   const [restoredItemIds, setRestoredItemIds] = useState(new Set());
+  const [showOnlineSearch, setShowOnlineSearch] = useState(false);
+  const [onlinePreviewRecipe, setOnlinePreviewRecipe] = useState(null);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -399,6 +403,36 @@ export const App = () => {
         );
       }
 
+      // Online recipe preview
+      if (onlinePreviewRecipe) {
+        return (
+          <div className={styles.mobileFullScreen}>
+            <OnlineRecipePreview
+              recipe={onlinePreviewRecipe}
+              onSaveAsRecipe={(detail) => {
+                console.log('Save as Recipe (US-006):', detail);
+              }}
+              onAddToList={(ingredients) => {
+                setAddToListIngredients(ingredients);
+              }}
+              onBack={() => setOnlinePreviewRecipe(null)}
+            />
+          </div>
+        );
+      }
+
+      // Online recipe search
+      if (showOnlineSearch) {
+        return (
+          <div className={styles.mobileFullScreen}>
+            <OnlineRecipeSearch
+              onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
+              onBack={() => setShowOnlineSearch(false)}
+            />
+          </div>
+        );
+      }
+
       const showDetail = openRecipeId && recipeState.activeRecipe;
       const showListScreen = !openRecipeId || transition;
       const showDetailScreen = showDetail || transition === 'popping';
@@ -469,6 +503,7 @@ export const App = () => {
                   onSaveTemplate={handleSaveTemplate}
                   onAddTemplateToList={handleAddTemplateToList}
                   onCollectionBack={handleMobileCollectionBack}
+                  onSearchOnline={() => setShowOnlineSearch(true)}
                 />
               </div>
             </section>
@@ -609,33 +644,52 @@ export const App = () => {
     const renderRecipesView = () => (
       <>
         <aside className={styles.sidebar}>
-          <RecipeSelector
-            recipes={recipeState.recipes}
-            collections={recipeState.collections}
-            sharedCollections={recipeState.sharedCollections}
-            activeCollectionId={recipeState.activeCollectionId}
-            allRecipes={recipeState.allRecipes}
-            currentUserId={user.id}
-            onSelect={(recipeId) => {
-              recipeActions.selectRecipe(recipeId);
-              setDesktopRecipeFormId(null);
-            }}
-            onCreate={() => setDesktopRecipeFormId('create')}
-            onEdit={(recipeId) => {
-              recipeActions.selectRecipe(recipeId);
-              setDesktopRecipeFormId(recipeId);
-            }}
-            onDelete={recipeActions.deleteRecipe}
-            onSelectCollection={recipeActions.selectCollection}
-            onCreateCollection={recipeActions.createCollection}
-            onUpdateCollection={recipeActions.updateCollection}
-            onDeleteCollection={recipeActions.deleteCollection}
-            onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
-            onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
-            onMoveRecipe={handleMoveRecipe}
-            onSaveTemplate={handleSaveTemplate}
-            onAddTemplateToList={handleAddTemplateToList}
-          />
+          {onlinePreviewRecipe ? (
+            <OnlineRecipePreview
+              recipe={onlinePreviewRecipe}
+              onSaveAsRecipe={(detail) => {
+                console.log('Save as Recipe (US-006):', detail);
+              }}
+              onAddToList={(ingredients) => {
+                setAddToListIngredients(ingredients);
+              }}
+              onBack={() => setOnlinePreviewRecipe(null)}
+            />
+          ) : showOnlineSearch ? (
+            <OnlineRecipeSearch
+              onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
+              onBack={() => setShowOnlineSearch(false)}
+            />
+          ) : (
+            <RecipeSelector
+              recipes={recipeState.recipes}
+              collections={recipeState.collections}
+              sharedCollections={recipeState.sharedCollections}
+              activeCollectionId={recipeState.activeCollectionId}
+              allRecipes={recipeState.allRecipes}
+              currentUserId={user.id}
+              onSelect={(recipeId) => {
+                recipeActions.selectRecipe(recipeId);
+                setDesktopRecipeFormId(null);
+              }}
+              onCreate={() => setDesktopRecipeFormId('create')}
+              onEdit={(recipeId) => {
+                recipeActions.selectRecipe(recipeId);
+                setDesktopRecipeFormId(recipeId);
+              }}
+              onDelete={recipeActions.deleteRecipe}
+              onSelectCollection={recipeActions.selectCollection}
+              onCreateCollection={recipeActions.createCollection}
+              onUpdateCollection={recipeActions.updateCollection}
+              onDeleteCollection={recipeActions.deleteCollection}
+              onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
+              onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
+              onMoveRecipe={handleMoveRecipe}
+              onSaveTemplate={handleSaveTemplate}
+              onAddTemplateToList={handleAddTemplateToList}
+              onSearchOnline={() => setShowOnlineSearch(true)}
+            />
+          )}
         </aside>
 
         <section className={styles.content}>
