@@ -26,49 +26,47 @@ struct OnlineRecipeSearchView: View {
     ]
     
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    loadingView
-                } else if let errorMessage = error {
-                    errorView(message: errorMessage)
-                } else if hasSearched && results.isEmpty {
-                    emptyResultsView
-                } else if results.isEmpty {
-                    initialStateView
-                } else {
-                    resultsList
-                }
+        Group {
+            if isLoading {
+                loadingView
+            } else if let errorMessage = error {
+                errorView(message: errorMessage)
+            } else if hasSearched && results.isEmpty {
+                emptyResultsView
+            } else if results.isEmpty {
+                initialStateView
+            } else {
+                resultsList
             }
-            .navigationTitle("Search Online")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if !results.isEmpty {
-                    ToolbarItem(placement: .primaryAction) {
-                        Picker("View", selection: $viewMode) {
-                            ForEach(ViewMode.allCases, id: \.self) { mode in
-                                Text(mode.rawValue).tag(mode)
-                            }
+        }
+        .navigationTitle("Search Online")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !results.isEmpty {
+                ToolbarItem(placement: .primaryAction) {
+                    Picker("View", selection: $viewMode) {
+                        ForEach(ViewMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
                         }
-                        .pickerStyle(.segmented)
-                        .frame(width: 120)
                     }
+                    .pickerStyle(.segmented)
+                    .frame(width: 120)
                 }
             }
-            .searchable(text: $searchText, prompt: "Search recipes")
-            .onChange(of: searchText) { _, newValue in
-                searchTask?.cancel()
-                guard !newValue.trimmingCharacters(in: .whitespaces).isEmpty else {
-                    results = []
-                    hasSearched = false
-                    error = nil
-                    return
-                }
-                searchTask = Task {
-                    try? await Task.sleep(for: .milliseconds(300))
-                    guard !Task.isCancelled else { return }
-                    await performSearch(query: newValue)
-                }
+        }
+        .searchable(text: $searchText, prompt: "Search recipes")
+        .onChange(of: searchText) { _, newValue in
+            searchTask?.cancel()
+            guard !newValue.trimmingCharacters(in: .whitespaces).isEmpty else {
+                results = []
+                hasSearched = false
+                error = nil
+                return
+            }
+            searchTask = Task {
+                try? await Task.sleep(for: .milliseconds(300))
+                guard !Task.isCancelled else { return }
+                await performSearch(query: newValue)
             }
         }
     }
