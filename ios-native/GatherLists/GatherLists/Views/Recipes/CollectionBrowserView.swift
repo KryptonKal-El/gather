@@ -13,6 +13,7 @@ struct CollectionBrowserView: View {
     @State private var showTemplateAddToList = false
     @State private var templateIngredientsForSheet: [(name: String, quantity: String?)] = []
     @State private var templateSaveSuccess: String?
+    @State private var showOnlineSearch = false
     
     private var ownedFiltered: [RecipeCollection] {
         guard let vm = viewModel else { return [] }
@@ -124,6 +125,14 @@ struct CollectionBrowserView: View {
     @ViewBuilder
     private func listContent(vm: RecipeViewModel) -> some View {
         List {
+            Section {
+                NavigationLink {
+                    OnlineRecipeSearchView()
+                } label: {
+                    Label("Search Online", systemImage: "globe")
+                }
+            }
+            
             if !ownedFiltered.isEmpty {
                 Section("My Collections") {
                     ForEach(ownedFiltered) { collection in

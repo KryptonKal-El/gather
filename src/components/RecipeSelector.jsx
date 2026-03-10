@@ -38,6 +38,8 @@ export const RecipeSelector = ({
   currentUserId,
   // US-010: Collection drill-down with browser history
   onCollectionBack,
+  // US-002: Online recipe search
+  onSearchOnline,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -1182,13 +1184,37 @@ export const RecipeSelector = ({
       <div className={styles.mobileHeader}>
         <div className={styles.header}>
           <h2 className={styles.title}>Collections</h2>
-          <button
-            className={styles.circleBtn}
-            onClick={() => setShowNewCollectionForm(true)}
-            aria-label="New collection"
-          >
-            +
-          </button>
+          <div className={styles.headerActions}>
+            {onSearchOnline && (
+              <button
+                type="button"
+                className={styles.searchOnlineBtn}
+                onClick={onSearchOnline}
+                aria-label="Search online recipes"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </button>
+            )}
+            <button
+              className={styles.circleBtn}
+              onClick={() => setShowNewCollectionForm(true)}
+              aria-label="New collection"
+            >
+              +
+            </button>
+          </div>
         </div>
         {renderSearchBar('Search collections...')}
       </div>
@@ -1252,12 +1278,36 @@ export const RecipeSelector = ({
     <div className={styles.container}>
       <div className={styles.header}>
         <h2 className={styles.title}>Collections</h2>
-        <button
-          className={styles.newBtn}
-          onClick={() => setShowNewCollectionForm(true)}
-        >
-          + New
-        </button>
+        <div className={styles.headerActions}>
+          {onSearchOnline && (
+            <button
+              type="button"
+              className={styles.searchOnlineBtnDesktop}
+              onClick={onSearchOnline}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Search Online
+            </button>
+          )}
+          <button
+            className={styles.newBtn}
+            onClick={() => setShowNewCollectionForm(true)}
+          >
+            + New
+          </button>
+        </div>
       </div>
 
       {renderSearchBar('Search collections...')}
@@ -1431,4 +1481,6 @@ RecipeSelector.propTypes = {
   currentUserId: PropTypes.string,
   // US-010: Collection drill-down with browser history
   onCollectionBack: PropTypes.func,
+  // US-002: Online recipe search
+  onSearchOnline: PropTypes.func,
 };

@@ -116,6 +116,56 @@
   transform: scale(1.1);
 }
 
+/* Header actions container */
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Search Online button (mobile) */
+.searchOnlineBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-default);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.searchOnlineBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Search Online button (desktop) */
+.searchOnlineBtnDesktop {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.searchOnlineBtnDesktop:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .lists {
   display: flex;
   flex-direction: column;
@@ -482,6 +532,13 @@
     min-width: 32px;
     min-height: 32px;
     font-size: 1.3rem;
+  }
+
+  .searchOnlineBtn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
   }
 
   /* Search bar inside the fixed header */
