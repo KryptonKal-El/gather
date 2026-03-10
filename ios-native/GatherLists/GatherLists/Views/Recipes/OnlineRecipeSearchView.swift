@@ -7,7 +7,6 @@ struct OnlineRecipeSearchView: View {
     let collections: [RecipeCollection]
     let activeCollectionId: UUID?
     
-    @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var results: [SpoonacularSearchResult] = []
     @State private var isLoading = false
@@ -44,11 +43,6 @@ struct OnlineRecipeSearchView: View {
             .navigationTitle("Search Online")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
                 if !results.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Picker("View", selection: $viewMode) {
