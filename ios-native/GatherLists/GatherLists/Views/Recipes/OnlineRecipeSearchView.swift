@@ -2,6 +2,9 @@ import SwiftUI
 
 /// Search for recipes online via the Spoonacular API.
 struct OnlineRecipeSearchView: View {
+    let userId: UUID
+    let userEmail: String
+    
     @Environment(\.dismiss) private var dismiss
     @State private var searchText = ""
     @State private var results: [SpoonacularSearchResult] = []
@@ -82,7 +85,7 @@ struct OnlineRecipeSearchView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(results) { recipe in
                         NavigationLink {
-                            recipePreviewPlaceholder(recipe: recipe)
+                            OnlineRecipePreviewView(recipe: recipe, userId: userId, userEmail: userEmail)
                         } label: {
                             listRow(recipe: recipe)
                         }
@@ -95,7 +98,7 @@ struct OnlineRecipeSearchView: View {
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(results) { recipe in
                         NavigationLink {
-                            recipePreviewPlaceholder(recipe: recipe)
+                            OnlineRecipePreviewView(recipe: recipe, userId: userId, userEmail: userEmail)
                         } label: {
                             gridCard(recipe: recipe)
                         }
@@ -196,48 +199,6 @@ struct OnlineRecipeSearchView: View {
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 10))
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
-    }
-    
-    @ViewBuilder
-    private func recipePreviewPlaceholder(recipe: SpoonacularSearchResult) -> some View {
-        VStack(spacing: 16) {
-            AsyncImage(url: URL(string: recipe.image)) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                case .failure, .empty:
-                    Color.gray.opacity(0.2)
-                @unknown default:
-                    Color.gray.opacity(0.2)
-                }
-            }
-            .frame(maxHeight: 250)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            
-            Text(recipe.title)
-                .font(.title2)
-                .fontWeight(.bold)
-                .multilineTextAlignment(.center)
-            
-            HStack(spacing: 24) {
-                Label("\(recipe.readyInMinutes) min", systemImage: "clock")
-                Label("\(recipe.servings) servings", systemImage: "person.2")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.secondary)
-            
-            Text("Recipe preview will be implemented in US-005")
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-                .padding(.top)
-            
-            Spacer()
-        }
-        .padding()
-        .navigationTitle("Preview")
-        .navigationBarTitleDisplayMode(.inline)
     }
     
     private var loadingView: some View {

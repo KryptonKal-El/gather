@@ -127,7 +127,7 @@ struct CollectionBrowserView: View {
         List {
             Section {
                 NavigationLink {
-                    OnlineRecipeSearchView()
+                    OnlineRecipeSearchView(userId: viewModel?.userId ?? UUID(), userEmail: viewModel?.userEmail ?? "")
                 } label: {
                     Label("Search Online", systemImage: "globe")
                 }
