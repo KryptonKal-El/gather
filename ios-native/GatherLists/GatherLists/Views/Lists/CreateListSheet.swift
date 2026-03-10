@@ -52,6 +52,7 @@ struct CreateListSheet: View {
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                         }
+                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                 }
@@ -85,27 +86,28 @@ struct CreateListSheet: View {
     }
     
     private var colorPickerRow: some View {
-        HStack(spacing: 12) {
-            ForEach(presetColors, id: \.self) { colorHex in
-                Button {
-                    selectedColor = colorHex
-                } label: {
-                    Circle()
-                        .fill(Color(hex: colorHex))
-                        .frame(width: 32, height: 32)
-                        .overlay {
-                            if selectedColor == colorHex {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                ForEach(presetColors, id: \.self) { colorHex in
+                    Button {
+                        selectedColor = colorHex
+                    } label: {
+                        Circle()
+                            .fill(Color(hex: colorHex))
+                            .frame(width: 32, height: 32)
+                            .overlay {
+                                if selectedColor == colorHex {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 14, weight: .bold))
+                                        .foregroundStyle(.white)
+                                }
                             }
-                        }
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
+            .padding(.vertical, 4)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 4)
     }
     
     private func createList() {
