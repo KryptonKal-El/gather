@@ -180,6 +180,29 @@ struct ListDetailView: View {
                 }
             )
         }
+        .sheet(item: $editSheetItem) { item in
+            EditItemSheet(
+                item: item,
+                stores: detailViewModel?.stores ?? [],
+                onSave: { name, quantity, price, storeId, clearStoreId, category in
+                    Task {
+                        await detailViewModel?.updateItem(
+                            item.id,
+                            name: name,
+                            category: category,
+                            storeId: storeId,
+                            clearStoreId: clearStoreId,
+                            quantity: quantity,
+                            price: price,
+                            clearPrice: item.price != nil && price == nil
+                        )
+                    }
+                },
+                onImageTap: {
+                    imagePickerItem = item
+                }
+            )
+        }
         .task {
             await initializeDetailViewModel()
             await loadShareInfo()

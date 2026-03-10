@@ -63,6 +63,7 @@
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2B2 /* EditItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A3 /* ItemSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A5 /* SuggestionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */; };
@@ -140,6 +141,7 @@
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductSearchService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemImagePickerSheet.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemSuggestion.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestionEngine.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				A1B2C3D4E5F6A7B8C9D0E23C /* ListDetailPlaceholderView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */,
 			);
 			path = Lists;
@@ -523,6 +526,7 @@
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2B2 /* EditItemSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A3 /* ItemSuggestion.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A5 /* SuggestionEngine.swift in Sources */,
@@ -667,7 +671,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -698,7 +702,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

@@ -51,8 +51,10 @@
         "Xcode build succeeds"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T18:15:00Z",
+      "passes": true,
+      "notes": "Created EditItemSheet.swift with Form-based editor. Wired in ListDetailView via .sheet(item: $editSheetItem). Save calls updateItem with change detection for clearStoreId/clearPrice.",
       "testIntensity": "medium",
       "testIntensityReason": "New view with form logic, store-category dependency, and save flow",
       "supportArticleRequired": false,
