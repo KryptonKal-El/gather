@@ -273,16 +273,16 @@ struct RecipeDetailView: View {
         }
     }
     
-    private var checkedIngredientsData: [(name: String, quantity: String?)] {
+    private var checkedIngredientsData: [(name: String, quantity: String?, amount: Double?, unit: String?)] {
         guard let ingredients = viewModel.activeRecipeDetail?.ingredients else { return [] }
         return ingredients
             .filter { checkedIngredients.contains($0.id) }
-            .map { (name: $0.name, quantity: $0.quantity) }
+            .map { (name: $0.name, quantity: $0.quantity, amount: nil, unit: nil) }
     }
     
-    private var allIngredientsData: [(name: String, quantity: String?)] {
+    private var allIngredientsData: [(name: String, quantity: String?, amount: Double?, unit: String?)] {
         guard let ingredients = viewModel.activeRecipeDetail?.ingredients else { return [] }
-        return ingredients.map { (name: $0.name, quantity: $0.quantity) }
+        return ingredients.map { (name: $0.name, quantity: $0.quantity, amount: nil, unit: nil) }
     }
     
     private func toggleIngredient(_ id: UUID) {

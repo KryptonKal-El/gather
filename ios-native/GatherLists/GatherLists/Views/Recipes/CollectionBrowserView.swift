@@ -11,7 +11,7 @@ struct CollectionBrowserView: View {
     @State private var collectionToRename: RecipeCollection?
     @State private var expandedTemplateId: String?
     @State private var showTemplateAddToList = false
-    @State private var templateIngredientsForSheet: [(name: String, quantity: String?)] = []
+    @State private var templateIngredientsForSheet: [(name: String, quantity: String?, amount: Double?, unit: String?)] = []
     @State private var templateSaveSuccess: String?
     @State private var showOnlineSearch = false
     

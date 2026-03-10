@@ -469,9 +469,9 @@ final class RecipeViewModel {
         }
     }
     
-    func templateIngredientsForList(template: RecipeTemplate) -> [(name: String, quantity: String?)] {
+    func templateIngredientsForList(template: RecipeTemplate) -> [(name: String, quantity: String?, amount: Double?, unit: String?)] {
         template.ingredients.map { name in
-            (name: name.prefix(1).uppercased() + String(name.dropFirst()), quantity: nil as String?)
+            (name: name.prefix(1).uppercased() + String(name.dropFirst()), quantity: nil as String?, amount: nil as Double?, unit: nil as String?)
         }
     }
     

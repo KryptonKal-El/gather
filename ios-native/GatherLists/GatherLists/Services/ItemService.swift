@@ -202,19 +202,22 @@ struct ItemService {
     /// Used by the "Add to List" flow from recipes.
     static func addIngredientItems(
         listId: UUID,
-        ingredients: [(name: String, quantity: String?)]
+        ingredients: [(name: String, quantity: String?, amount: Double?, unit: String?)]
     ) async throws {
         guard !ingredients.isEmpty else { return }
         
         let newItems = ingredients.map { ingredient in
             let capitalizedName = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
             let category = CategoryDefinitions.categorizeItem(capitalizedName)
+            let resolvedQuantity = max(1, Int((ingredient.amount ?? 1).rounded()))
+            let resolvedUnit = ingredient.unit.map { ItemUnit.mapFromSpoonacular($0) } ?? "each"
             return IngredientItem(
                 listId: listId,
                 name: capitalizedName,
                 category: category,
-                quantity: 1,
-                isChecked: false
+                quantity: resolvedQuantity,
+                isChecked: false,
+                unit: resolvedUnit
             )
         }
         

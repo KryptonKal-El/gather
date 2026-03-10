@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A bottom sheet for adding recipe ingredients to a shopping list.
 struct AddToListSheet: View {
-    let ingredients: [(name: String, quantity: String?)]
+    let ingredients: [(name: String, quantity: String?, amount: Double?, unit: String?)]
     let userId: UUID
     let userEmail: String
     var onDismiss: () -> Void

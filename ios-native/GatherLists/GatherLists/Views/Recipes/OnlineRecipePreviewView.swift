@@ -35,7 +35,7 @@ struct OnlineRecipePreviewView: View {
         .sheet(isPresented: $showAddToList) {
             if let detail = detail {
                 AddToListSheet(
-                    ingredients: detail.extendedIngredients.map { ($0.name, $0.original) },
+                    ingredients: detail.extendedIngredients.map { ($0.name, $0.original, $0.amount, $0.unit) },
                     userId: userId,
                     userEmail: userEmail
                 ) {
