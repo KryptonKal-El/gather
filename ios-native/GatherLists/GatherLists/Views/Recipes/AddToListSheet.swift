@@ -4,6 +4,7 @@ struct PreviewNewItem: Identifiable {
     let id = UUID()
     let name: String
     var quantity: Int
+    let recipeQuantity: Int
     let unit: String
     let category: String
     var isExcluded: Bool = false
@@ -36,6 +37,9 @@ struct AddToListSheet: View {
     @State private var isLoadingPreview = false
     @State private var newItems: [PreviewNewItem] = []
     @State private var duplicateItems: [PreviewDuplicateItem] = []
+    @State private var existingItems: [Item] = []
+    @State private var remapSourceId: UUID?
+    @State private var remapSearchText = ""
     
     private var ingredientSummary: String {
         let names = ingredients.prefix(5).map { $0.name }
@@ -56,6 +60,18 @@ struct AddToListSheet: View {
     
     private var nonExcludedDuplicateCount: Int {
         duplicateItems.filter { !$0.isExcluded }.count
+    }
+    
+    private var availableForRemap: [Item] {
+        let usedIds = Set(duplicateItems.map { $0.id })
+        return existingItems.filter { !usedIds.contains($0.id) }
+    }
+    
+    private var filteredRemapItems: [Item] {
+        if remapSearchText.isEmpty {
+            return availableForRemap
+        }
+        return availableForRemap.filter { $0.name.localizedCaseInsensitiveContains(remapSearchText) }
     }
     
     private var confirmButtonText: String {
@@ -241,7 +257,10 @@ struct AddToListSheet: View {
                     if !newItems.isEmpty {
                         Section {
                             ForEach($newItems) { $item in
-                                PreviewNewItemRow(item: $item)
+                                PreviewNewItemRow(item: $item, onNameTap: {
+                                    if availableForRemap.isEmpty { return }
+                                    remapSourceId = item.id
+                                })
                             }
                         } header: {
                             Text("New Items")
@@ -292,6 +311,12 @@ struct AddToListSheet: View {
             .padding()
             .background(Color(.systemGroupedBackground))
         }
+        .sheet(isPresented: Binding(
+            get: { remapSourceId != nil },
+            set: { if !$0 { remapSourceId = nil } }
+        )) {
+            remapPickerSheet
+        }
     }
     
     private func loadLists() async {
@@ -330,6 +355,7 @@ struct AddToListSheet: View {
         Task {
             do {
                 let existingItems = try await ItemService.fetchItems(listId: listId)
+                self.existingItems = existingItems
                 let existingByName = Dictionary(
                     existingItems.map { ($0.name.lowercased(), $0) },
                     uniquingKeysWith: { first, _ in first }
@@ -357,6 +383,7 @@ struct AddToListSheet: View {
                         newItemsTemp.append(PreviewNewItem(
                             name: capitalizedName,
                             quantity: resolvedQuantity,
+                            recipeQuantity: resolvedQuantity,
                             unit: resolvedUnit,
                             category: category
                         ))
@@ -372,6 +399,21 @@ struct AddToListSheet: View {
             
             isLoadingPreview = false
         }
+    }
+    
+    private func remapNewItem(newItemId: UUID, to existingItem: Item) {
+        guard let index = newItems.firstIndex(where: { $0.id == newItemId }) else { return }
+        let foundNewItem = newItems.remove(at: index)
+        
+        duplicateItems.append(PreviewDuplicateItem(
+            id: existingItem.id,
+            name: existingItem.name,
+            currentQuantity: existingItem.quantity,
+            newQuantity: existingItem.quantity + foundNewItem.recipeQuantity,
+            unit: existingItem.unit
+        ))
+        
+        remapSourceId = nil
     }
     
     private func confirmChanges() {
@@ -403,12 +445,49 @@ struct AddToListSheet: View {
             }
         }
     }
+    
+    @ViewBuilder
+    private var remapPickerSheet: some View {
+        NavigationStack {
+            List {
+                ForEach(filteredRemapItems) { item in
+                    Button {
+                        if let sourceId = remapSourceId {
+                            remapNewItem(newItemId: sourceId, to: item)
+                        }
+                    } label: {
+                        HStack {
+                            Text(item.name)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            Text("\(item.quantity) \(item.unit)")
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                    }
+                }
+            }
+            .searchable(text: $remapSearchText, prompt: "Search items")
+            .navigationTitle("Merge with...")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        remapSourceId = nil
+                        remapSearchText = ""
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
 }
 
 // MARK: - Row Views
 
 private struct PreviewNewItemRow: View {
     @Binding var item: PreviewNewItem
+    var onNameTap: () -> Void
     
     var body: some View {
         HStack {
@@ -421,9 +500,16 @@ private struct PreviewNewItemRow: View {
             }
             .buttonStyle(.plain)
             
-            Text(item.name)
-                .strikethrough(item.isExcluded)
-                .foregroundStyle(item.isExcluded ? Color.secondary : Color.primary)
+            Button {
+                onNameTap()
+            } label: {
+                Text(item.name)
+                    .strikethrough(item.isExcluded)
+                    .foregroundStyle(item.isExcluded ? Color.secondary : Color.accentColor)
+                    .underline(!item.isExcluded, color: Color.accentColor.opacity(0.4))
+            }
+            .buttonStyle(.plain)
+            .disabled(item.isExcluded)
             
             Spacer()
             

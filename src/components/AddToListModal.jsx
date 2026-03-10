@@ -30,6 +30,9 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
 
   const [newItems, setNewItems] = useState([]);
   const [duplicateItems, setDuplicateItems] = useState([]);
+  const [existingItems, setExistingItems] = useState([]);
+  const [remapOpenId, setRemapOpenId] = useState(null);
+  const [remapSearch, setRemapSearch] = useState('');
 
   useEffect(() => {
     if (!success) return;
@@ -88,6 +91,7 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
             tempId: crypto.randomUUID(),
             name,
             quantity,
+            recipeQuantity: quantity,
             unit,
             category,
             isExcluded: false,
@@ -97,6 +101,7 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
 
       setNewItems(newList);
       setDuplicateItems(dupList);
+      setExistingItems(existing);
       setStep('preview');
     } catch (err) {
       setError(err.message ?? 'Failed to load preview');
@@ -109,6 +114,8 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
     setStep('select');
     setNewItems([]);
     setDuplicateItems([]);
+    setRemapOpenId(null);
+    setRemapSearch('');
     setError(null);
   };
 
@@ -146,6 +153,34 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
         return { ...item, newQuantity: newQty };
       })
     );
+  };
+
+  const usedExistingIds = new Set(duplicateItems.map((d) => d.id));
+  const availableForRemap = existingItems.filter((item) => !usedExistingIds.has(item.id));
+  const filteredRemapItems = remapSearch
+    ? availableForRemap.filter((item) =>
+        item.name.toLowerCase().includes(remapSearch.toLowerCase())
+      )
+    : availableForRemap;
+
+  const handleRemap = (newItemTempId, existingItem) => {
+    const foundNewItem = newItems.find((n) => n.tempId === newItemTempId);
+    if (!foundNewItem) return;
+
+    setNewItems((prev) => prev.filter((n) => n.tempId !== newItemTempId));
+    setDuplicateItems((prev) => [
+      ...prev,
+      {
+        id: existingItem.id,
+        name: existingItem.name,
+        currentQuantity: existingItem.quantity,
+        newQuantity: existingItem.quantity + foundNewItem.recipeQuantity,
+        unit: existingItem.unit ?? 'each',
+        isExcluded: false,
+      },
+    ]);
+    setRemapOpenId(null);
+    setRemapSearch('');
   };
 
   const handleConfirm = async () => {
@@ -310,10 +345,58 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
           {isExcluded ? '☐' : '☑'}
         </button>
         <div className={styles.previewInfo}>
-          <div className={nameClass}>{item.name}</div>
+          {isDuplicate ? (
+            <div className={nameClass}>{item.name}</div>
+          ) : (
+            <button
+              type="button"
+              className={`${nameClass} ${!item.isExcluded && availableForRemap.length > 0 ? styles.remapTrigger : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!item.isExcluded && availableForRemap.length > 0) {
+                  setRemapOpenId(remapOpenId === item.tempId ? null : item.tempId);
+                  setRemapSearch('');
+                }
+              }}
+              disabled={item.isExcluded || availableForRemap.length === 0}
+            >
+              {item.name}
+            </button>
+          )}
           {isDuplicate && (
             <div className={styles.previewSub}>
               {item.currentQuantity} → {item.newQuantity} {item.unit}
+            </div>
+          )}
+          {!isDuplicate && remapOpenId === item.tempId && (
+            <div className={styles.remapDropdown}>
+              <input
+                type="text"
+                className={styles.remapSearch}
+                placeholder="Search items..."
+                value={remapSearch}
+                onChange={(e) => setRemapSearch(e.target.value)}
+                autoFocus
+              />
+              <ul className={styles.remapList}>
+                {filteredRemapItems.map((existing) => (
+                  <li key={existing.id}>
+                    <button
+                      type="button"
+                      className={styles.remapOption}
+                      onClick={() => handleRemap(item.tempId, existing)}
+                    >
+                      <span>{existing.name}</span>
+                      <span className={styles.remapQty}>
+                        {existing.quantity} {existing.unit ?? 'each'}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+                {filteredRemapItems.length === 0 && (
+                  <li className={styles.remapEmpty}>No matching items</li>
+                )}
+              </ul>
             </div>
           )}
         </div>

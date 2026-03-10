@@ -317,6 +317,104 @@
   margin-top: 1px;
 }
 
+.remapTrigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--primary-tint, rgba(59, 130, 246, 0.4));
+  text-underline-offset: 2px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+}
+
+.remapTrigger:disabled {
+  color: var(--text-placeholder);
+  text-decoration: none;
+  cursor: default;
+}
+
+.remapDropdown {
+  margin-top: 0.35rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 180px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.remapSearch {
+  padding: 0.5rem 0.6rem;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  background: transparent;
+  outline: none;
+}
+
+.remapSearch::placeholder {
+  color: var(--text-placeholder);
+}
+
+.remapList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.remapOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.remapOption:last-child {
+  border-bottom: none;
+}
+
+.remapOption:hover {
+  background: var(--bg-hover);
+}
+
+.remapQty {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.remapEmpty {
+  padding: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--text-placeholder);
+  text-align: center;
+}
+
 .qtyStepper {
   display: flex;
   align-items: center;
