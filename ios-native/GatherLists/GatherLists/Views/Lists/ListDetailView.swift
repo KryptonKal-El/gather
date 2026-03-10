@@ -270,7 +270,7 @@ struct ListDetailView: View {
                 let isCollapsed = collapsedStores.contains(storeKey)
                 
                 if hasStores {
-                    storeHeader(store: store, itemCount: items.count, isCollapsed: isCollapsed) {
+                    storeHeader(store: store, items: items, isCollapsed: isCollapsed) {
                         withAnimation(.easeInOut(duration: 0.2)) {
                             if isCollapsed {
                                 collapsedStores.remove(storeKey)
@@ -297,11 +297,15 @@ struct ListDetailView: View {
     
     private func storeHeader(
         store: Store?,
-        itemCount: Int,
+        items: [Item],
         isCollapsed: Bool,
         onTap: @escaping () -> Void
     ) -> some View {
-        Button(action: onTap) {
+        let total = items.reduce(Decimal.zero) { sum, item in
+            sum + (item.price ?? Decimal.zero) * Decimal(item.quantity)
+        }
+        
+        return Button(action: onTap) {
             HStack(spacing: 10) {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 12, weight: .semibold))
@@ -316,11 +320,18 @@ struct ListDetailView: View {
                     .font(.headline)
                     .foregroundStyle(.primary)
                 
-                Text("(\(itemCount))")
+                Text("(\(items.count))")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 
                 Spacer()
+                
+                if total > Decimal.zero {
+                    Text(formatPrice(total))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
