@@ -879,3 +879,33 @@ export const subscribeStores = (userId, callback) => {
     supabase.removeChannel(channel);
   };
 };
+
+/**
+ * Fetches stores by an array of IDs. Used to load shared-list owner stores
+ * that the RLS policy now permits reading.
+ * @param {string[]} storeIds - Array of store UUIDs to fetch
+ * @returns {Promise<Array>} Array of store objects (same shape as subscribeStores callback)
+ */
+export const fetchStoresByIds = async (storeIds) => {
+  if (!storeIds.length) return [];
+  const { data, error } = await supabase
+    .from('stores')
+    .select('*')
+    .in('id', storeIds)
+    .order('sort_order', { ascending: true });
+
+  if (error) {
+    console.error('Failed to fetch stores by IDs:', error);
+    return [];
+  }
+
+  return data.map((row) => ({
+    id: row.id,
+    name: row.name,
+    color: row.color,
+    categories: row.categories,
+    order: row.sort_order,
+    createdAt: row.created_at,
+    _isShared: true,
+  }));
+};

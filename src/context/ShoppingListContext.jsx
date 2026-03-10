@@ -3,7 +3,7 @@
  * Real-time listeners push data into state. Actions call Supabase directly.
  * Supports both owned lists and lists shared by other users.
  */
-import { createContext, useState, useEffect, useCallback, useRef } from 'react';
+import { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { categorizeItem, DEFAULT_CATEGORIES } from '../utils/categories.js';
 import { useAuth } from './AuthContext.jsx';
 import {
@@ -30,6 +30,7 @@ import {
   saveStoreOrder,
   shareList as dbShareList,
   unshareList as dbUnshareList,
+  fetchStoresByIds,
 } from '../services/database.js';
 
 /** Capitalizes the first letter of a string. */
@@ -54,6 +55,7 @@ export const ShoppingListProvider = ({ children }) => {
   const [activeItems, setActiveItems] = useState([]);
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
+  const [sharedStores, setSharedStores] = useState([]);
 
   // Track whether we've auto-selected a list on initial load
   const hasAutoSelected = useRef(false);
@@ -161,6 +163,39 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeStores(userId, setStores);
   }, [userId]);
 
+  // Fetch shared stores when viewing a shared list
+  useEffect(() => {
+    if (!isActiveListShared || activeItems.length === 0) {
+      setSharedStores([]);
+      return;
+    }
+
+    const missingStoreIds = [
+      ...new Set(
+        activeItems
+          .map((item) => item.storeId)
+          .filter((id) => id && !stores.some((s) => s.id === id))
+      ),
+    ];
+
+    if (missingStoreIds.length === 0) {
+      setSharedStores([]);
+      return;
+    }
+
+    let cancelled = false;
+    fetchStoresByIds(missingStoreIds).then((result) => {
+      if (!cancelled) setSharedStores(result);
+    });
+
+    return () => { cancelled = true; };
+  }, [isActiveListShared, activeItems, stores]);
+
+  const allStores = useMemo(() => {
+    if (!isActiveListShared) return stores;
+    return [...stores, ...sharedStores.filter((ss) => !stores.some((s) => s.id === ss.id))];
+  }, [isActiveListShared, stores, sharedStores]);
+
   // -----------------------------------------------------------------------
   // Helpers
   // -----------------------------------------------------------------------
@@ -171,9 +206,9 @@ export const ShoppingListProvider = ({ children }) => {
    */
   const getCategoriesForStore = useCallback((storeId) => {
     if (!storeId) return DEFAULT_CATEGORIES;
-    const store = stores.find((s) => s.id === storeId);
+    const store = allStores.find((s) => s.id === storeId);
     return store?.categories ?? DEFAULT_CATEGORIES;
-  }, [stores]);
+  }, [allStores]);
 
   /**
    * Returns the ownerUid for a given list ID (could be the current user
@@ -399,7 +434,7 @@ export const ShoppingListProvider = ({ children }) => {
     lists: allLists,
     activeListId,
     history,
-    stores,
+    stores: allStores,
   };
 
   const actions = {
