@@ -392,9 +392,18 @@ struct ListDetailView: View {
     
     private func itemRow(item: Item, isChecked: Bool) -> some View {
         HStack(spacing: 12) {
-            Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
-                .font(.title3)
-                .foregroundStyle(isChecked ? .secondary : listColor)
+            Button {
+                Task {
+                    await detailViewModel?.toggleItem(item)
+                }
+            } label: {
+                Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundStyle(isChecked ? .secondary : listColor)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
             
             itemThumbnail(item: item)
             
@@ -437,11 +446,6 @@ struct ListDetailView: View {
         .padding(.leading, 28)
         .background(Color(.systemBackground))
         .contentShape(Rectangle())
-        .onTapGesture {
-            Task {
-                await detailViewModel?.toggleItem(item)
-            }
-        }
         .contextMenu {
             itemContextMenu(item: item)
         }

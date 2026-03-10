@@ -84,8 +84,10 @@
         "Xcode build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-10T18:20:00Z",
+      "passes": true,
+      "notes": "Removed row-level onTapGesture. Wrapped checkbox Image in Button with 44×44pt frame and contentShape.",
       "testIntensity": "medium",
       "testIntensityReason": "Gesture refactor — must not break existing interactions",
       "supportArticleRequired": false,
