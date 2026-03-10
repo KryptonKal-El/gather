@@ -29,6 +29,8 @@ final class ListDetailViewModel {
     nonisolated(unsafe) private var historyChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var itemsTask: Task<Void, Never>?
     nonisolated(unsafe) private var storesTask: Task<Void, Never>?
+    nonisolated(unsafe) private var sharedStoresChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var sharedStoresTask: Task<Void, Never>?
     nonisolated(unsafe) private var historyTask: Task<Void, Never>?
     
     // MARK: - Computed Properties
@@ -236,6 +238,26 @@ final class ListDetailViewModel {
             await storesCh.subscribe()
             for await _ in storesChanges {
                 await refetchStores()
+            }
+        }
+        
+        // Channel for owner's stores (shared lists only)
+        if isSharedList {
+            let sharedStoresCh = client.realtimeV2.channel("owner-stores-\(ownerId.uuidString)")
+            sharedStoresChannel = sharedStoresCh
+            
+            let sharedStoresChanges = sharedStoresCh.postgresChange(
+                AnyAction.self,
+                schema: "public",
+                table: "stores",
+                filter: "user_id=eq.\(ownerId.uuidString)"
+            )
+            
+            sharedStoresTask = Task {
+                await sharedStoresCh.subscribe()
+                for await _ in sharedStoresChanges {
+                    await refetchStores()
+                }
             }
         }
         
@@ -451,15 +473,18 @@ final class ListDetailViewModel {
     deinit {
         itemsTask?.cancel()
         storesTask?.cancel()
+        sharedStoresTask?.cancel()
         historyTask?.cancel()
         
         let itemsCh = itemsChannel
         let storesCh = storesChannel
+        let sharedStoresCh = sharedStoresChannel
         let historyCh = historyChannel
         
         Task {
             await itemsCh?.unsubscribe()
             await storesCh?.unsubscribe()
+            await sharedStoresCh?.unsubscribe()
             await historyCh?.unsubscribe()
         }
     }
