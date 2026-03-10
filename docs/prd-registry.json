@@ -387,12 +387,16 @@
     {
       "id": "prd-shared-store-visibility",
       "name": "Shared List Store Visibility",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-shared-store-visibility.md",
       "jsonPath": "docs/prds/prd-shared-store-visibility.json",
       "branchName": "feature/shared-store-visibility",
       "createdAt": "2026-03-10",
-      "updatedAt": "2026-03-10"
+      "updatedAt": "2026-03-10",
+      "startedAt": "2026-03-10T14:00:00Z",
+      "completedAt": "2026-03-10T17:00:00Z",
+      "currentStory": null,
+      "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items→list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
     }
   ]
 }

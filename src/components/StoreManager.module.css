@@ -848,6 +848,43 @@
   cursor: default;
 }
 
+/* Shared store indicators */
+.sharedStoreRow {
+  cursor: default;
+}
+
+.sharedBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-placeholder);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.sharedDivider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.25rem 0.25rem;
+}
+
+.sharedDividerText {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-hint);
+  white-space: nowrap;
+}
+
+.sharedDivider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-light);
+}
+
 /* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */

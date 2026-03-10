@@ -389,6 +389,11 @@ export const StoreManager = ({
     ? stores.filter((s) => s.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
     : stores;
 
+  const ownStores = stores.filter((s) => !s._isShared);
+  const sharedStores = stores.filter((s) => s._isShared);
+  const filteredOwnStores = filteredStores.filter((s) => !s._isShared);
+  const filteredSharedStores = filteredStores.filter((s) => s._isShared);
+
   const handleCreate = (e) => {
     e.preventDefault();
     const trimmed = newName.trim();
@@ -421,9 +426,9 @@ export const StoreManager = ({
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    const oldIndex = stores.findIndex((s) => s.id === active.id);
-    const newIndex = stores.findIndex((s) => s.id === over.id);
-    onReorder(arrayMove(stores, oldIndex, newIndex));
+    const oldIndex = ownStores.findIndex((s) => s.id === active.id);
+    const newIndex = ownStores.findIndex((s) => s.id === over.id);
+    onReorder(arrayMove(ownStores, oldIndex, newIndex));
   };
 
   const sensors = useSensors(
@@ -509,11 +514,11 @@ export const StoreManager = ({
     return (
       <div className={styles.storeItem}>
         <div
-          className={styles.storeItemRow}
-          onClick={() => toggleCatExpanded(store.id)}
+          className={`${styles.storeItemRow} ${store._isShared ? styles.sharedStoreRow : ''}`}
+          onClick={() => !store._isShared && toggleCatExpanded(store.id)}
           {...(dragProps && isMobile ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
         >
-          {!isMobile && dragProps && (
+          {!isMobile && dragProps && !store._isShared && (
             <button type="button" className={styles.dragHandle} {...dragProps.attributes} {...dragProps.listeners} onClick={(e) => e.stopPropagation()} aria-label="Drag to reorder">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
@@ -524,52 +529,59 @@ export const StoreManager = ({
           )}
           <span className={styles.storeDot} style={{ backgroundColor: store.color }} />
           <span className={styles.storeName}>{store.name}</span>
-          <span className={styles.catCount}>{store.categories?.length ?? 0} categories</span>
-          <svg
-            className={`${styles.expandChevron} ${catExpandedId === store.id ? styles.expandChevronOpen : ''}`}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-          <div className={styles.menuWrap} ref={menuOpenId === store.id ? menuRef : null} onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className={styles.menuBtn}
-              onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
-              aria-label="Store options"
-            >
-              ⋯
-            </button>
-            {menuOpenId === store.id && !isMobile && (
-              <div className={styles.menuDropdown}>
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => handleStartEdit(store)}
-                >
-                  Edit Name &amp; Color
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.menuDanger}`}
-                  onClick={() => { setConfirmingDeleteId(store.id); setMenuOpenId(null); }}
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
+          {store._isShared && <span className={styles.sharedBadge}>shared</span>}
+          {!store._isShared && (
+            <>
+              <span className={styles.catCount}>{store.categories?.length ?? 0} categories</span>
+              <svg
+                className={`${styles.expandChevron} ${catExpandedId === store.id ? styles.expandChevronOpen : ''}`}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </>
+          )}
+          {!store._isShared && (
+            <div className={styles.menuWrap} ref={menuOpenId === store.id ? menuRef : null} onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                className={styles.menuBtn}
+                onClick={() => setMenuOpenId(menuOpenId === store.id ? null : store.id)}
+                aria-label="Store options"
+              >
+                ⋯
+              </button>
+              {menuOpenId === store.id && !isMobile && (
+                <div className={styles.menuDropdown}>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={() => handleStartEdit(store)}
+                  >
+                    Edit Name &amp; Color
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.menuItem} ${styles.menuDanger}`}
+                    onClick={() => { setConfirmingDeleteId(store.id); setMenuOpenId(null); }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {menuOpenId === store.id && isMobile && (
+        {!store._isShared && menuOpenId === store.id && isMobile && (
           <>
             <div className={styles.actionSheetBackdrop} onClick={() => setMenuOpenId(null)} />
             <div className={styles.actionSheet} ref={actionSheetRef}>
@@ -601,7 +613,7 @@ export const StoreManager = ({
           </>
         )}
 
-        {catExpandedId === store.id && (
+        {!store._isShared && catExpandedId === store.id && (
           <StoreCategoryEditor
             categories={store.categories ?? []}
             otherStores={stores.filter((s) => s.id !== store.id)}
@@ -609,7 +621,7 @@ export const StoreManager = ({
           />
         )}
 
-        {confirmingDeleteId === store.id && (
+        {!store._isShared && confirmingDeleteId === store.id && (
           <ConfirmDialog
             message={`Delete store "${store.name}"?`}
             onConfirm={() => { onDelete(store.id); setConfirmingDeleteId(null); }}
@@ -676,17 +688,37 @@ export const StoreManager = ({
             </p>
           )}
           {!searchQuery.trim() ? (
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
-              <SortableContext items={stores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-                {stores.map((store, index) => (
-                  <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
-                    {(dragProps) => renderStoreItem(store, index, dragProps)}
-                  </SortableStoreItem>
-                ))}
-              </SortableContext>
-            </DndContext>
+            <>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
+                <SortableContext items={ownStores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                  {ownStores.map((store, index) => (
+                    <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
+                      {(dragProps) => renderStoreItem(store, index, dragProps)}
+                    </SortableStoreItem>
+                  ))}
+                </SortableContext>
+              </DndContext>
+              {sharedStores.length > 0 && (
+                <>
+                  <div className={styles.sharedDivider}>
+                    <span className={styles.sharedDividerText}>Shared with you</span>
+                  </div>
+                  {sharedStores.map((store, index) => renderStoreItem(store, index, null))}
+                </>
+              )}
+            </>
           ) : (
-            filteredStores.map((store, index) => renderStoreItem(store, index, null))
+            <>
+              {filteredOwnStores.map((store, index) => renderStoreItem(store, index, null))}
+              {filteredSharedStores.length > 0 && (
+                <>
+                  <div className={styles.sharedDivider}>
+                    <span className={styles.sharedDividerText}>Shared with you</span>
+                  </div>
+                  {filteredSharedStores.map((store, index) => renderStoreItem(store, index, null))}
+                </>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -696,7 +728,7 @@ export const StoreManager = ({
   const renderDesktopLayout = () => (
     <div className={styles.container}>
       <div className={styles.headerRow}>
-        <h4 className={styles.sectionTitle}>Your Stores ({stores.length})</h4>
+        <h4 className={styles.sectionTitle}>Your Stores ({ownStores.length})</h4>
         <button className={styles.newBtn} onClick={() => setIsCreating(!isCreating)}>
           {isCreating ? 'Cancel' : '+ New'}
         </button>
@@ -742,17 +774,37 @@ export const StoreManager = ({
           </p>
         )}
         {!searchQuery.trim() ? (
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
-            <SortableContext items={stores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-              {stores.map((store, index) => (
-                <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
-                  {(dragProps) => renderStoreItem(store, index, dragProps)}
-                </SortableStoreItem>
-              ))}
-            </SortableContext>
-          </DndContext>
+          <>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
+              <SortableContext items={ownStores.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                {ownStores.map((store, index) => (
+                  <SortableStoreItem key={store.id} id={store.id} isMobile={isMobile}>
+                    {(dragProps) => renderStoreItem(store, index, dragProps)}
+                  </SortableStoreItem>
+                ))}
+              </SortableContext>
+            </DndContext>
+            {sharedStores.length > 0 && (
+              <>
+                <div className={styles.sharedDivider}>
+                  <span className={styles.sharedDividerText}>Shared with you</span>
+                </div>
+                {sharedStores.map((store, index) => renderStoreItem(store, index, null))}
+              </>
+            )}
+          </>
         ) : (
-          filteredStores.map((store, index) => renderStoreItem(store, index, null))
+          <>
+            {filteredOwnStores.map((store, index) => renderStoreItem(store, index, null))}
+            {filteredSharedStores.length > 0 && (
+              <>
+                <div className={styles.sharedDivider}>
+                  <span className={styles.sharedDividerText}>Shared with you</span>
+                </div>
+                {filteredSharedStores.map((store, index) => renderStoreItem(store, index, null))}
+              </>
+            )}
+          </>
         )}
       </div>
     </div>

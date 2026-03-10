@@ -124,6 +124,10 @@ struct ItemImagePickerSheet: View {
             HStack {
                 TextField("Search...", text: $searchQuery)
                     .textFieldStyle(.roundedBorder)
+                    .submitLabel(.search)
+                    .onSubmit {
+                        performSearch()
+                    }
                 
                 Button("Search") {
                     performSearch()
