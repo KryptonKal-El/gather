@@ -31,6 +31,9 @@ struct ListDetailView: View {
     // Image picker state
     @State private var imagePickerItem: Item?
     
+    // Edit sheet state
+    @State private var editSheetItem: Item?
+    
     private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
@@ -396,6 +399,15 @@ struct ListDetailView: View {
                     .font(.subheadline)
                     .foregroundStyle(isChecked ? .tertiary : .secondary)
             }
+            
+            Button {
+                editSheetItem = item
+            } label: {
+                Image(systemName: "pencil")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)

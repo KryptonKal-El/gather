@@ -401,12 +401,14 @@
     {
       "id": "prd-ios-item-edit-row",
       "name": "iOS Item Row — Edit Button, Tap Behavior & Store Indicator",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-ios-item-edit-row.md",
       "jsonPath": "docs/prds/prd-ios-item-edit-row.json",
       "branchName": "feature/ios-item-edit-row",
       "createdAt": "2026-03-10",
-      "updatedAt": "2026-03-10"
+      "updatedAt": "2026-03-10",
+      "startedAt": "2026-03-10T18:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }
