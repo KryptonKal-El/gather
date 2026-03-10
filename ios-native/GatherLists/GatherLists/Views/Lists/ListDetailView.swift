@@ -456,7 +456,6 @@ struct ListDetailView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .background(Color(.secondarySystemBackground))
         }
         .padding(.horizontal, 16)
         .background(Color(.systemBackground))
