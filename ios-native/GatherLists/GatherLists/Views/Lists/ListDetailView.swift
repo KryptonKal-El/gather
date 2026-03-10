@@ -391,59 +391,74 @@ struct ListDetailView: View {
     // MARK: - Item Row
     
     private func itemRow(item: Item, isChecked: Bool) -> some View {
-        HStack(spacing: 12) {
-            Button {
-                Task {
-                    await detailViewModel?.toggleItem(item)
+        HStack(spacing: 0) {
+            // Main row content
+            HStack(spacing: 12) {
+                Button {
+                    Task {
+                        await detailViewModel?.toggleItem(item)
+                    }
+                } label: {
+                    Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundStyle(isChecked ? .secondary : listColor)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
-            } label: {
-                Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isChecked ? .secondary : listColor)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                
+                itemThumbnail(item: item)
+                
+                Text(item.name)
+                    .strikethrough(isChecked)
+                    .foregroundStyle(isChecked ? .secondary : .primary)
+                
+                if item.quantity > 1 {
+                    Text("×\(item.quantity)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color(.systemGray))
+                        )
+                }
+                
+                Spacer()
+                
+                if let price = item.price {
+                    Text(formatPrice(price))
+                        .font(.subheadline)
+                        .foregroundStyle(isChecked ? .tertiary : .secondary)
+                }
             }
-            .buttonStyle(.plain)
+            .padding(.leading, 28)
+            .padding(.trailing, 12)
+            .padding(.vertical, 10)
             
-            itemThumbnail(item: item)
+            // Vertical separator
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(width: 1)
+                .padding(.vertical, 6)
             
-            Text(item.name)
-                .strikethrough(isChecked)
-                .foregroundStyle(isChecked ? .secondary : .primary)
-            
-            if item.quantity > 1 {
-                Text("×\(item.quantity)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(Color(.systemGray))
-                    )
-            }
-            
-            Spacer()
-            
-            if let price = item.price {
-                Text(formatPrice(price))
-                    .font(.subheadline)
-                    .foregroundStyle(isChecked ? .tertiary : .secondary)
-            }
-            
+            // Edit button zone
             Button {
                 editSheetItem = item
             } label: {
                 Image(systemName: "pencil")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .frame(width: 44)
+                    .frame(maxHeight: .infinity)
+                    .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .background(Color(.secondarySystemBackground))
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .padding(.leading, 28)
         .background(Color(.systemBackground))
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
