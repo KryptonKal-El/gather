@@ -457,7 +457,7 @@ struct ListDetailView: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 16)
+        .padding(.leading, 16)
         .background(Color(.systemBackground))
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
