@@ -349,6 +349,32 @@ final class ListDetailViewModel {
         }
     }
     
+    /// Adds an item from a history suggestion, carrying over data from the most recent past item.
+    func addItemFromSuggestion(name: String, fallbackStoreId: UUID?) async {
+        do {
+            let pastItem = try await ItemService.fetchLastItemByName(name, userId: userId)
+            
+            let storeId = pastItem?.storeId ?? fallbackStoreId
+            let newItem = try await ItemService.addItem(
+                listId: listId,
+                name: name,
+                category: pastItem?.category,
+                storeId: storeId,
+                stores: stores,
+                quantity: pastItem?.quantity ?? 1,
+                price: pastItem?.price,
+                imageUrl: pastItem?.imageUrl
+            )
+            items.append(newItem)
+            
+            let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
+            try await HistoryService.addHistoryEntry(userId: userId, name: capitalizedName)
+        } catch {
+            self.error = error.localizedDescription
+            print("[ListDetailViewModel] Failed to add item from suggestion: \(error.localizedDescription)")
+        }
+    }
+    
     func toggleItem(_ item: Item) async {
         do {
             try await ItemService.toggleItem(itemId: item.id, isChecked: !item.isChecked)

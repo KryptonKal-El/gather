@@ -17,13 +17,30 @@ struct ItemService {
         return items
     }
     
+    /// Finds the most recent item with a matching name across all of a user's owned lists.
+    static func fetchLastItemByName(_ name: String, userId: UUID) async throws -> Item? {
+        let items: [Item] = try await client
+            .from("items")
+            .select("*, lists!inner(owner_id)")
+            .eq("lists.owner_id", value: userId)
+            .ilike("name", pattern: name)
+            .order("added_at", ascending: false)
+            .limit(1)
+            .execute()
+            .value
+        return items.first
+    }
+    
     /// Adds a new item to a list with auto-categorization.
     static func addItem(
         listId: UUID,
         name: String,
         category: String?,
         storeId: UUID?,
-        stores: [Store]
+        stores: [Store],
+        quantity: Int = 1,
+        price: Decimal? = nil,
+        imageUrl: String? = nil
     ) async throws -> Item {
         let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
         
@@ -45,8 +62,10 @@ struct ItemService {
             name: capitalizedName,
             category: resolvedCategory,
             storeId: storeId,
-            quantity: 1,
-            isChecked: false
+            quantity: quantity,
+            isChecked: false,
+            price: price,
+            imageUrl: imageUrl
         )
         
         let item: Item = try await client
@@ -208,6 +227,8 @@ private struct NewItem: Encodable {
     let storeId: UUID?
     let quantity: Int
     let isChecked: Bool
+    let price: Decimal?
+    let imageUrl: String?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -216,6 +237,20 @@ private struct NewItem: Encodable {
         case storeId = "store_id"
         case quantity
         case isChecked = "is_checked"
+        case price
+        case imageUrl = "image_url"
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(listId, forKey: .listId)
+        try container.encode(name, forKey: .name)
+        try container.encode(category, forKey: .category)
+        try container.encode(quantity, forKey: .quantity)
+        try container.encode(isChecked, forKey: .isChecked)
+        if let storeId { try container.encode(storeId, forKey: .storeId) }
+        if let price { try container.encode(price, forKey: .price) }
+        if let imageUrl { try container.encode(imageUrl, forKey: .imageUrl) }
     }
 }
 

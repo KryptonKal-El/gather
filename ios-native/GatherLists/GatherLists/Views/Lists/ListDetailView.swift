@@ -800,7 +800,12 @@ struct ListDetailView: View {
         VStack(spacing: 0) {
             ForEach(filteredSuggestions, id: \.self) { suggestion in
                 Button {
-                    itemName = suggestion
+                    let storeId = selectedStoreId
+                    itemName = ""
+                    isInputFocused = true
+                    Task {
+                        await detailViewModel?.addItemFromSuggestion(name: suggestion, fallbackStoreId: storeId)
+                    }
                 } label: {
                     HStack {
                         Image(systemName: "clock.arrow.circlepath")
