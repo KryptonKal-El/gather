@@ -882,7 +882,7 @@ struct ListDetailView: View {
             print("[ListDetailView] No authenticated user, cannot create detail view model")
             return
         }
-        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId)
+        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId, ownerId: list.ownerId)
     }
     
     private func loadShareInfo() async {

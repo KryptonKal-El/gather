@@ -17,6 +17,19 @@ struct StoreService {
         return stores
     }
     
+    /// Fetches stores by their IDs. Used to load shared-list owner stores.
+    static func fetchStoresByIds(_ ids: [UUID]) async throws -> [Store] {
+        guard !ids.isEmpty else { return [] }
+        let stores: [Store] = try await client
+            .from("stores")
+            .select()
+            .in("id", values: ids.map { $0.uuidString })
+            .order("sort_order", ascending: true)
+            .execute()
+            .value
+        return stores
+    }
+    
     /// Creates a new store for a user.
     static func createStore(
         userId: UUID,

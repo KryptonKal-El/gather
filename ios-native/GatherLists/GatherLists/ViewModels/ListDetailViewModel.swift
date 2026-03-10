@@ -19,6 +19,9 @@ final class ListDetailViewModel {
     // Identifiers
     private let listId: UUID
     private let userId: UUID
+    private let ownerId: UUID
+    
+    var isSharedList: Bool { ownerId != userId }
     
     // Realtime channels and tasks
     nonisolated(unsafe) private var itemsChannel: RealtimeChannelV2?
@@ -127,9 +130,10 @@ final class ListDetailViewModel {
     
     // MARK: - Initialization
     
-    init(listId: UUID, userId: UUID) {
+    init(listId: UUID, userId: UUID, ownerId: UUID) {
         self.listId = listId
         self.userId = userId
+        self.ownerId = ownerId
         
         Task {
             await loadData()
@@ -166,6 +170,16 @@ final class ListDetailViewModel {
             items = itemsResult
             stores = storesResult
             historyEntries = historyResult
+            
+            if isSharedList {
+                let ownStoreIds = Set(storesResult.map { $0.id })
+                let missingStoreIds = Set(itemsResult.compactMap { $0.storeId }).subtracting(ownStoreIds)
+                if !missingStoreIds.isEmpty {
+                    let sharedStores = try await StoreService.fetchStoresByIds(Array(missingStoreIds))
+                    stores = storesResult + sharedStores
+                }
+            }
+            
             isShowingCachedData = false
             cachedAt = nil
             
@@ -260,7 +274,16 @@ final class ListDetailViewModel {
     
     private func refetchStores() async {
         do {
-            stores = try await StoreService.fetchStores(userId: userId)
+            var result = try await StoreService.fetchStores(userId: userId)
+            if isSharedList {
+                let ownStoreIds = Set(result.map { $0.id })
+                let missingStoreIds = Set(items.compactMap { $0.storeId }).subtracting(ownStoreIds)
+                if !missingStoreIds.isEmpty {
+                    let sharedStores = try await StoreService.fetchStoresByIds(Array(missingStoreIds))
+                    result += sharedStores
+                }
+            }
+            stores = result
             await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
