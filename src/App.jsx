@@ -320,28 +320,6 @@ export const App = () => {
     }
   };
 
-  const handleSaveTemplate = async (template) => {
-    const ingredients = template.ingredients.map((name, i) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      quantity: '',
-      sortOrder: i,
-    }));
-    await recipeActions.createRecipe({
-      name: template.name,
-      description: template.description,
-      ingredients,
-      steps: [],
-    });
-  };
-
-  const handleAddTemplateToList = (template) => {
-    const ingredients = template.ingredients.map((name) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
-      quantity: '',
-    }));
-    setAddToListIngredients(ingredients);
-  };
-
   const renderMobileContent = () => {
     if (activeTab === 'lists') {
       const showDetail = openListId && activeList;
@@ -544,8 +522,6 @@ export const App = () => {
                   onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
                   onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
                   onMoveRecipe={handleMoveRecipe}
-                  onSaveTemplate={handleSaveTemplate}
-                  onAddTemplateToList={handleAddTemplateToList}
                   onCollectionBack={handleMobileCollectionBack}
                   onSearchOnline={() => setShowOnlineSearch(true)}
                 />
@@ -727,8 +703,6 @@ export const App = () => {
               onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
               onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
               onMoveRecipe={handleMoveRecipe}
-              onSaveTemplate={handleSaveTemplate}
-              onAddTemplateToList={handleAddTemplateToList}
               onSearchOnline={() => setShowOnlineSearch(true)}
             />
           )}

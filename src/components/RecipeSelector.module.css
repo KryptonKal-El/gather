@@ -227,6 +227,18 @@
   color: var(--text-muted);
 }
 
+.findRecipesIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--primary-tint);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
 .listText {
   display: flex;
   flex-direction: column;

@@ -51,67 +51,6 @@ const stripQuantity = (line) => {
 };
 
 /**
- * Pre-built recipe templates for common meals.
- * Each has a name, description, and list of ingredients.
- */
-export const RECIPE_TEMPLATES = [
-  {
-    id: 'spaghetti-bolognese',
-    name: 'Spaghetti Bolognese',
-    description: 'Classic Italian pasta with meat sauce',
-    ingredients: [
-      'spaghetti', 'ground beef', 'tomato sauce', 'onion',
-      'garlic', 'olive oil', 'parmesan', 'salt', 'pepper', 'basil',
-    ],
-  },
-  {
-    id: 'chicken-stir-fry',
-    name: 'Chicken Stir Fry',
-    description: 'Quick and easy weeknight dinner',
-    ingredients: [
-      'chicken breast', 'broccoli', 'bell pepper', 'soy sauce',
-      'garlic', 'ginger', 'rice', 'vegetable oil', 'sesame oil',
-    ],
-  },
-  {
-    id: 'tacos',
-    name: 'Tacos',
-    description: 'Build-your-own taco night',
-    ingredients: [
-      'ground beef', 'tortillas', 'cheese', 'lettuce', 'tomatoes',
-      'sour cream', 'salsa', 'onion', 'cilantro', 'lime',
-    ],
-  },
-  {
-    id: 'caesar-salad',
-    name: 'Caesar Salad',
-    description: 'Classic caesar with homemade dressing',
-    ingredients: [
-      'romaine lettuce', 'parmesan', 'croutons', 'lemon',
-      'garlic', 'olive oil', 'anchovy paste', 'eggs',
-    ],
-  },
-  {
-    id: 'pancakes',
-    name: 'Pancakes',
-    description: 'Fluffy breakfast pancakes',
-    ingredients: [
-      'flour', 'eggs', 'milk', 'butter', 'sugar',
-      'baking powder', 'salt', 'vanilla', 'maple syrup',
-    ],
-  },
-  {
-    id: 'grilled-salmon',
-    name: 'Grilled Salmon',
-    description: 'Simple grilled salmon with vegetables',
-    ingredients: [
-      'salmon', 'lemon', 'garlic', 'olive oil', 'asparagus',
-      'salt', 'pepper', 'butter', 'dill',
-    ],
-  },
-];
-
-/**
  * Parses raw recipe text into structured shopping list items.
  * Handles various formats:
  * - "2 cups flour"
@@ -151,18 +90,4 @@ export const parseRecipeText = (recipeText) => {
   }
 
   return items;
-};
-
-/**
- * Converts a recipe template's ingredients into shopping list items.
- * @param {Object} template - A recipe template from RECIPE_TEMPLATES
- * @returns {Array<{id: string, name: string, category: string, isChecked: boolean}>}
- */
-export const recipeTemplateToItems = (template) => {
-  return template.ingredients.map((ingredient) => ({
-    id: uuidv4(),
-    name: ingredient.charAt(0).toUpperCase() + ingredient.slice(1),
-    category: categorizeItem(ingredient),
-    isChecked: false,
-  }));
 };

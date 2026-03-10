@@ -4,7 +4,6 @@ import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { DeleteCollectionDialog } from './DeleteCollectionDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
-import { RECIPE_TEMPLATES } from '../services/recipes.js';
 import styles from './RecipeSelector.module.css';
 
 /**
@@ -31,8 +30,6 @@ export const RecipeSelector = ({
   onCreate,
   onEdit,
   onDelete,
-  onSaveTemplate,
-  onAddTemplateToList,
   // US-007: Recipe list within collection
   onMoveRecipe,
   currentUserId,
@@ -44,7 +41,6 @@ export const RecipeSelector = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const [menuOpenId, setMenuOpenId] = useState(null);
-  const [expandedTemplateId, setExpandedTemplateId] = useState(null);
   const [showNewCollectionForm, setShowNewCollectionForm] = useState(false);
   const [newCollectionName, setNewCollectionName] = useState('');
   const [newCollectionEmoji, setNewCollectionEmoji] = useState('📁');
@@ -657,71 +653,40 @@ export const RecipeSelector = ({
     );
   };
 
-  const handleTemplateClick = (templateId) => {
-    setExpandedTemplateId(expandedTemplateId === templateId ? null : templateId);
-  };
-
-  const renderTemplatesSection = () => (
+  const renderFindRecipesSection = () => (
     <>
       <div className={styles.sectionHeader}>
-        <h3 className={styles.sectionTitle}>Browse Templates</h3>
+        <h3 className={styles.sectionTitle}>Find Recipes</h3>
       </div>
-      <div className={styles.templatesSection}>
-        <div className={styles.templateCards}>
-          {RECIPE_TEMPLATES.map((template) => (
-            <button
-              key={template.id}
-              type="button"
-              className={`${styles.templateCard} ${expandedTemplateId === template.id ? styles.templateCardActive : ''}`}
-              onClick={() => handleTemplateClick(template.id)}
-            >
-              <span className={styles.templateName}>{template.name}</span>
-              <span className={styles.templateDesc}>{template.description}</span>
-              <span className={styles.templateCount}>{template.ingredients.length} ingredients</span>
-            </button>
-          ))}
-        </div>
-        {expandedTemplateId && (() => {
-          const template = RECIPE_TEMPLATES.find((t) => t.id === expandedTemplateId);
-          if (!template) return null;
-          return (
-            <div className={styles.templateDetail}>
-              <div className={styles.templateDetailHeader}>
-                <span className={styles.templateName}>{template.name}</span>
-                <span className={styles.templateDesc}>{template.description}</span>
-              </div>
-              <div className={styles.templateIngredients}>
-                {template.ingredients.map((ingredient) => (
-                  <span key={ingredient} className={styles.templateIngredient}>
-                    {ingredient.charAt(0).toUpperCase() + ingredient.slice(1)}
-                  </span>
-                ))}
-              </div>
-              <div className={styles.templateActions}>
-                <button
-                  type="button"
-                  className={styles.templateSaveBtn}
-                  onClick={() => {
-                    onSaveTemplate?.(template);
-                    setExpandedTemplateId(null);
-                  }}
-                >
-                  Save as Recipe
-                </button>
-                <button
-                  type="button"
-                  className={styles.templateAddBtn}
-                  onClick={() => {
-                    onAddTemplateToList?.(template);
-                    setExpandedTemplateId(null);
-                  }}
-                >
-                  Add to List
-                </button>
-              </div>
+      <div className={styles.lists}>
+        <div className={styles.listItem}>
+          <button
+            className={styles.listBtn}
+            onClick={onSearchOnline}
+            type="button"
+          >
+            <div className={styles.findRecipesIcon}>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
             </div>
-          );
-        })()}
+            <span className={styles.listText}>
+              <span className={styles.listName}>Search recipes online</span>
+            </span>
+            <span className={styles.chevron}>›</span>
+          </button>
+        </div>
       </div>
     </>
   );
@@ -1123,7 +1088,7 @@ export const RecipeSelector = ({
           {filteredRecipes.map(renderCollectionRecipeItem)}
         </div>
 
-        {renderTemplatesSection()}
+        {renderFindRecipesSection()}
       </div>
 
       {renderMovePicker()}
@@ -1169,7 +1134,7 @@ export const RecipeSelector = ({
         {filteredRecipes.map(renderCollectionRecipeItem)}
       </div>
 
-      {renderTemplatesSection()}
+      {renderFindRecipesSection()}
 
       {renderMovePicker()}
     </div>
@@ -1185,28 +1150,6 @@ export const RecipeSelector = ({
         <div className={styles.header}>
           <h2 className={styles.title}>Collections</h2>
           <div className={styles.headerActions}>
-            {onSearchOnline && (
-              <button
-                type="button"
-                className={styles.searchOnlineBtn}
-                onClick={onSearchOnline}
-                aria-label="Search online recipes"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </button>
-            )}
             <button
               className={styles.circleBtn}
               onClick={() => setShowNewCollectionForm(true)}
@@ -1248,7 +1191,7 @@ export const RecipeSelector = ({
           </>
         )}
 
-        {renderTemplatesSection()}
+        {renderFindRecipesSection()}
       </div>
 
       {/* Delete collection confirmation */}
@@ -1279,28 +1222,6 @@ export const RecipeSelector = ({
       <div className={styles.header}>
         <h2 className={styles.title}>Collections</h2>
         <div className={styles.headerActions}>
-          {onSearchOnline && (
-            <button
-              type="button"
-              className={styles.searchOnlineBtnDesktop}
-              onClick={onSearchOnline}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              Search Online
-            </button>
-          )}
           <button
             className={styles.newBtn}
             onClick={() => setShowNewCollectionForm(true)}
@@ -1339,7 +1260,7 @@ export const RecipeSelector = ({
         </>
       )}
 
-      {renderTemplatesSection()}
+      {renderFindRecipesSection()}
 
       {/* Delete collection confirmation */}
       {confirmingDeleteId && collections?.some((c) => c.id === confirmingDeleteId) && (
@@ -1400,7 +1321,7 @@ export const RecipeSelector = ({
           </>
         )}
 
-        {renderTemplatesSection()}
+        {renderFindRecipesSection()}
       </div>
     </div>
   );
@@ -1434,7 +1355,7 @@ export const RecipeSelector = ({
         </>
       )}
 
-      {renderTemplatesSection()}
+      {renderFindRecipesSection()}
     </div>
   );
 
@@ -1474,8 +1395,6 @@ RecipeSelector.propTypes = {
   onCreate: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onSaveTemplate: PropTypes.func,
-  onAddTemplateToList: PropTypes.func,
   // US-007: Recipe list within collection
   onMoveRecipe: PropTypes.func,
   currentUserId: PropTypes.string,

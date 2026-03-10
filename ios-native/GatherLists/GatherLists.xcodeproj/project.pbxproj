@@ -58,7 +58,7 @@
 		A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E291 /* RecipeTextParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */; };
-		A1B2C3D4E5F6A7B8C9D0E295 /* RecipeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E294 /* RecipeTemplate.swift */; };
+
 		A1B2C3D4E5F6A7B8C9D0E297 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
@@ -141,7 +141,7 @@
 		A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTextParser.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToListSheet.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E294 /* RecipeTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTemplate.swift; sourceTree = "<group>"; };
+
 		A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
@@ -247,7 +247,6 @@
 				A1B2C3D4E5F6A7B8C9D0E26B /* RecipeStep.swift */,
 				A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */,
 				A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */,
-				A1B2C3D4E5F6A7B8C9D0E294 /* RecipeTemplate.swift */,
 				A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */,
 			);
@@ -536,7 +535,6 @@
 				A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E291 /* RecipeTextParser.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */,
-				A1B2C3D4E5F6A7B8C9D0E295 /* RecipeTemplate.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E297 /* Profile.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,

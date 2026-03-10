@@ -440,41 +440,6 @@ final class RecipeViewModel {
         }
     }
     
-    // MARK: - Template Actions
-    
-    func saveTemplateAsRecipe(template: RecipeTemplate) async {
-        guard let collectionId = activeCollectionId else {
-            error = "No collection selected"
-            return
-        }
-        
-        error = nil
-        do {
-            let ingredients = template.ingredients.enumerated().map { (index, name) in
-                (name: name.prefix(1).uppercased() + name.dropFirst(), quantity: nil as String?)
-            }
-            
-            let newRecipe = try await RecipeService.createRecipe(
-                userId: userId,
-                name: template.name,
-                description: template.description,
-                collectionId: collectionId,
-                ingredients: ingredients,
-                steps: []
-            )
-            recipes.append(newRecipe)
-        } catch {
-            self.error = error.localizedDescription
-            print("[RecipeViewModel] Failed to save template as recipe: \(error.localizedDescription)")
-        }
-    }
-    
-    func templateIngredientsForList(template: RecipeTemplate) -> [(name: String, quantity: String?, amount: Double?, unit: String?)] {
-        template.ingredients.map { name in
-            (name: name.prefix(1).uppercased() + String(name.dropFirst()), quantity: nil as String?, amount: nil as Double?, unit: nil as String?)
-        }
-    }
-    
     // MARK: - Selection Actions
     
     func selectCollection(id: UUID) {

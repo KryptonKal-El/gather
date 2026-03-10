@@ -9,11 +9,6 @@ struct CollectionBrowserView: View {
     @State private var showDeleteDialog = false
     @State private var collectionToShare: RecipeCollection?
     @State private var collectionToRename: RecipeCollection?
-    @State private var expandedTemplateId: String?
-    @State private var showTemplateAddToList = false
-    @State private var templateIngredientsForSheet: [(name: String, quantity: String?, amount: Double?, unit: String?)] = []
-    @State private var templateSaveSuccess: String?
-    @State private var showOnlineSearch = false
     
     private var ownedFiltered: [RecipeCollection] {
         guard let vm = viewModel else { return [] }
@@ -105,17 +100,6 @@ struct CollectionBrowserView: View {
                     EditCollectionSheet(collection: collection, viewModel: vm)
                 }
             }
-            .sheet(isPresented: $showTemplateAddToList) {
-                if let vm = viewModel {
-                    AddToListSheet(
-                        ingredients: templateIngredientsForSheet,
-                        userId: vm.userId,
-                        userEmail: vm.userEmail
-                    ) {
-                        showTemplateAddToList = false
-                    }
-                }
-            }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -125,19 +109,6 @@ struct CollectionBrowserView: View {
     @ViewBuilder
     private func listContent(vm: RecipeViewModel) -> some View {
         List {
-            Section {
-                NavigationLink {
-                    OnlineRecipeSearchView(
-                        userId: viewModel?.userId ?? UUID(),
-                        userEmail: viewModel?.userEmail ?? "",
-                        collections: viewModel?.collections ?? [],
-                        activeCollectionId: viewModel?.activeCollectionId
-                    )
-                } label: {
-                    Label("Search Online", systemImage: "globe")
-                }
-            }
-            
             if !ownedFiltered.isEmpty {
                 Section("My Collections") {
                     ForEach(ownedFiltered) { collection in
@@ -204,9 +175,16 @@ struct CollectionBrowserView: View {
                 }
             }
             
-            Section("Recipe Templates") {
-                ForEach(RecipeTemplate.all) { template in
-                    templateRow(template: template, vm: vm)
+            Section("Find Recipes") {
+                NavigationLink {
+                    OnlineRecipeSearchView(
+                        userId: viewModel?.userId ?? UUID(),
+                        userEmail: viewModel?.userEmail ?? "",
+                        collections: viewModel?.collections ?? [],
+                        activeCollectionId: viewModel?.activeCollectionId
+                    )
+                } label: {
+                    Label("Search recipes online", systemImage: "globe")
                 }
             }
             
@@ -277,108 +255,6 @@ struct CollectionBrowserView: View {
                 .clipShape(Capsule())
         }
         .padding(.vertical, 4)
-    }
-    
-    @ViewBuilder
-    private func templateRow(template: RecipeTemplate, vm: RecipeViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Button {
-                withAnimation {
-                    if expandedTemplateId == template.id {
-                        expandedTemplateId = nil
-                    } else {
-                        expandedTemplateId = template.id
-                    }
-                }
-            } label: {
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(template.name)
-                            .font(.body)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.primary)
-                        Text(template.description)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    
-                    Spacer()
-                    
-                    Text("\(template.ingredients.count) ingredients")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(.systemGray5))
-                        .clipShape(Capsule())
-                    
-                    Image(systemName: expandedTemplateId == template.id ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 4)
-            }
-            .buttonStyle(.plain)
-            
-            if expandedTemplateId == template.id {
-                VStack(alignment: .leading, spacing: 12) {
-                    Divider()
-                    
-                    ForEach(template.ingredients, id: \.self) { ingredient in
-                        Text(ingredient.prefix(1).uppercased() + ingredient.dropFirst())
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
-                    }
-                    
-                    HStack(spacing: 12) {
-                        Button {
-                            Task {
-                                await vm.saveTemplateAsRecipe(template: template)
-                                templateSaveSuccess = template.id
-                                try? await Task.sleep(for: .seconds(1.5))
-                                if templateSaveSuccess == template.id {
-                                    templateSaveSuccess = nil
-                                }
-                            }
-                        } label: {
-                            HStack {
-                                Image(systemName: templateSaveSuccess == template.id ? "checkmark" : "bookmark")
-                                Text(templateSaveSuccess == template.id ? "Saved!" : "Save as Recipe")
-                            }
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color.blue.opacity(0.1))
-                            .foregroundStyle(.blue)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                        
-                        Button {
-                            templateIngredientsForSheet = vm.templateIngredientsForList(template: template)
-                            showTemplateAddToList = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "cart.badge.plus")
-                                Text("Add to List")
-                            }
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 10)
-                            .background(Color.green.opacity(0.1))
-                            .foregroundStyle(.green)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                        .buttonStyle(.plain)
-                    }
-                    .padding(.top, 8)
-                }
-                .padding(.vertical, 8)
-            }
-        }
     }
     
     private var loadingView: some View {
