@@ -30,7 +30,7 @@ import {
   saveStoreOrder,
   shareList as dbShareList,
   unshareList as dbUnshareList,
-  fetchStoresByIds,
+  subscribeSharedStores,
 } from '../services/database.js';
 
 /** Capitalizes the first letter of a string. */
@@ -163,9 +163,9 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeStores(userId, setStores);
   }, [userId]);
 
-  // Fetch shared stores when viewing a shared list
+  // Subscribe to shared stores when viewing a shared list
   useEffect(() => {
-    if (!isActiveListShared || activeItems.length === 0) {
+    if (!isActiveListShared || !activeListOwnerUid || activeItems.length === 0) {
       setSharedStores([]);
       return;
     }
@@ -183,13 +183,8 @@ export const ShoppingListProvider = ({ children }) => {
       return;
     }
 
-    let cancelled = false;
-    fetchStoresByIds(missingStoreIds).then((result) => {
-      if (!cancelled) setSharedStores(result);
-    });
-
-    return () => { cancelled = true; };
-  }, [isActiveListShared, activeItems, stores]);
+    return subscribeSharedStores(activeListOwnerUid, missingStoreIds, setSharedStores);
+  }, [isActiveListShared, activeListOwnerUid, activeItems, stores]);
 
   const allStores = useMemo(() => {
     if (!isActiveListShared) return stores;

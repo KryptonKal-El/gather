@@ -909,3 +909,49 @@ export const fetchStoresByIds = async (storeIds) => {
     _isShared: true,
   }));
 };
+
+/**
+ * Subscribes to realtime changes on a set of shared stores by ID.
+ * Performs initial fetch and listens for changes on the owner's stores.
+ * @param {string} ownerUid - The store owner's user ID (for the realtime filter)
+ * @param {string[]} storeIds - Array of store UUIDs to fetch
+ * @param {function} callback - Called with array of store objects on each update
+ * @returns {function} Unsubscribe function
+ */
+export const subscribeSharedStores = (ownerUid, storeIds, callback) => {
+  if (!storeIds.length) {
+    callback([]);
+    return () => {};
+  }
+
+  const fetchShared = async () => {
+    const result = await fetchStoresByIds(storeIds);
+    callback(result);
+  };
+
+  fetchShared();
+
+  const channel = supabase
+    .channel(`shared-stores-${ownerUid}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'stores',
+        filter: `user_id=eq.${ownerUid}`,
+      },
+      () => {
+        fetchShared();
+      }
+    )
+    .subscribe((status, err) => {
+      if (status === 'CHANNEL_ERROR') {
+        console.error('[subscribeSharedStores] Realtime subscription error:', err);
+      }
+    });
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
