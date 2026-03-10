@@ -216,18 +216,6 @@ struct ListDetailView: View {
     
     private var itemListContent: some View {
         List {
-            if showAISuggestions {
-                Section {
-                    SuggestionsView(suggestions: aiSuggestions) { name in
-                        Task {
-                            await detailViewModel?.addItem(name: name, storeId: selectedStoreId)
-                        }
-                    }
-                }
-                .listRowSeparator(.hidden)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-            
             uncheckedItemsSection
             
             if let vm = detailViewModel, !vm.checkedItems.isEmpty {
