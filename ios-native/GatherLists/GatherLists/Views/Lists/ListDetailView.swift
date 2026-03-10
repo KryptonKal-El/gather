@@ -355,8 +355,8 @@ struct ListDetailView: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             
-            ForEach(categoryItems) { item in
-                itemRow(item: item, isChecked: false)
+            ForEach(Array(categoryItems.enumerated()), id: \.element.id) { idx, item in
+                itemRow(item: item, isChecked: false, showSeparator: idx < categoryItems.count - 1)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task {
@@ -401,7 +401,7 @@ struct ListDetailView: View {
     
     // MARK: - Item Row
     
-    private func itemRow(item: Item, isChecked: Bool) -> some View {
+    private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true) -> some View {
         HStack(spacing: 0) {
             // Main row content
             HStack(spacing: 12) {
@@ -471,10 +471,12 @@ struct ListDetailView: View {
         .padding(.leading, 16)
         .background(Color(.systemBackground))
         .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(Color(.separator))
-                .frame(height: 1 / UIScreen.main.scale)
-                .padding(.leading, 44)
+            if showSeparator {
+                Rectangle()
+                    .fill(Color(.separator))
+                    .frame(height: 1 / UIScreen.main.scale)
+                    .padding(.leading, 44)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
@@ -768,8 +770,8 @@ struct ListDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             
-            ForEach(checkedItems) { item in
-                itemRow(item: item, isChecked: true)
+            ForEach(Array(checkedItems.enumerated()), id: \.element.id) { idx, item in
+                itemRow(item: item, isChecked: true, showSeparator: idx < checkedItems.count - 1)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task {
