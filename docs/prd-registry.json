@@ -397,6 +397,16 @@
       "completedAt": "2026-03-10T17:00:00Z",
       "currentStory": null,
       "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items→list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
+    },
+    {
+      "id": "prd-ios-item-edit-row",
+      "name": "iOS Item Row — Edit Button, Tap Behavior & Store Indicator",
+      "status": "ready",
+      "filePath": "docs/prds/prd-ios-item-edit-row.md",
+      "jsonPath": "docs/prds/prd-ios-item-edit-row.json",
+      "branchName": "feature/ios-item-edit-row",
+      "createdAt": "2026-03-10",
+      "updatedAt": "2026-03-10"
     }
   ]
 }
