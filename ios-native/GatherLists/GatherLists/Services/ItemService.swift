@@ -199,14 +199,27 @@ struct ItemService {
     }
     
     /// Batch inserts ingredients as shopping list items with auto-categorization.
-    /// Used by the "Add to List" flow from recipes.
+    /// Skips ingredients that already exist in the list (case-insensitive match).
+    /// - Returns: Tuple of (added count, skipped count).
+    @discardableResult
     static func addIngredientItems(
         listId: UUID,
         ingredients: [(name: String, quantity: String?, amount: Double?, unit: String?)]
-    ) async throws {
-        guard !ingredients.isEmpty else { return }
+    ) async throws -> (added: Int, skipped: Int) {
+        guard !ingredients.isEmpty else { return (0, 0) }
         
-        let newItems = ingredients.map { ingredient in
+        let existingItems = try await fetchItems(listId: listId)
+        let existingNames = Set(existingItems.map { $0.name.lowercased() })
+        
+        let newIngredients = ingredients.filter { ingredient in
+            let name = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
+            return !existingNames.contains(name.lowercased())
+        }
+        
+        let skipped = ingredients.count - newIngredients.count
+        guard !newIngredients.isEmpty else { return (0, skipped) }
+        
+        let newItems = newIngredients.map { ingredient in
             let capitalizedName = ingredient.name.prefix(1).uppercased() + ingredient.name.dropFirst()
             let category = CategoryDefinitions.categorizeItem(capitalizedName)
             let resolvedQuantity = max(1, Int((ingredient.amount ?? 1).rounded()))
@@ -225,6 +238,8 @@ struct ItemService {
             .from("items")
             .insert(newItems)
             .execute()
+        
+        return (newItems.count, skipped)
     }
 }
 

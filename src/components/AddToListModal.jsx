@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { categorizeItem } from '../utils/categories.js';
 import { mapSpoonacularUnit } from '../utils/unitMapping.js';
+import { fetchItemNamesForList } from '../services/database.js';
 import styles from './AddToListModal.module.css';
 
 const MAX_VISIBLE_INGREDIENTS = 5;
@@ -52,6 +53,8 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
     setError(null);
 
     try {
+      const existingNames = await fetchItemNamesForList(selectedListId);
+
       const items = ingredients.map((ing) => ({
         name: ing.name,
         category: categorizeItem(ing.name),
@@ -60,13 +63,27 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
         unit: ing.unit ? mapSpoonacularUnit(ing.unit) : 'each',
       }));
 
-      await onAddItems(selectedListId, items);
+      const newItems = items.filter((item) => !existingNames.has(item.name.toLowerCase()));
+      const addedCount = newItems.length;
+      const skippedCount = items.length - addedCount;
+
+      if (addedCount > 0) {
+        await onAddItems(selectedListId, newItems);
+      }
 
       const selectedList = lists.find((l) => l.id === selectedListId);
-      setSuccess({
-        count: items.length,
-        listName: selectedList?.name ?? 'list',
-      });
+      const listName = selectedList?.name ?? 'list';
+
+      let message;
+      if (addedCount > 0 && skippedCount > 0) {
+        message = `Added ${addedCount} item${addedCount !== 1 ? 's' : ''} to ${listName} (${skippedCount} already in list)`;
+      } else if (skippedCount > 0 && addedCount === 0) {
+        message = `All ${skippedCount} item${skippedCount !== 1 ? 's' : ''} already in ${listName}`;
+      } else {
+        message = `Added ${addedCount} item${addedCount !== 1 ? 's' : ''} to ${listName}`;
+      }
+
+      setSuccess({ message });
     } catch (err) {
       setError(err.message ?? 'Failed to add items');
       setIsAdding(false);
@@ -148,7 +165,7 @@ export const AddToListModal = ({ ingredients, lists, onAddItems, onClose }) => {
           {success ? (
             <div className={styles.successMsg}>
               <span className={styles.successIcon}>✅</span>
-              <span>Added {success.count} item{success.count !== 1 ? 's' : ''} to {success.listName}</span>
+              <span>{success.message}</span>
             </div>
           ) : (
             <button

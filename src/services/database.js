@@ -175,6 +175,21 @@ export const subscribeLists = (userId, callback) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * Fetches all item names for a list (for deduplication).
+ * @param {string} listId - List ID
+ * @returns {Promise<Set<string>>} Set of lowercase item names
+ */
+export const fetchItemNamesForList = async (listId) => {
+  const { data, error } = await supabase
+    .from('items')
+    .select('name')
+    .eq('list_id', listId);
+
+  if (error) throw new Error(`Failed to fetch items for list: ${listId}`, { cause: error });
+  return new Set(data.map((row) => row.name.toLowerCase()));
+};
+
+/**
  * Adds a single item to a list. Returns the generated ID.
  * @param {string} userId - User ID (kept for API compatibility)
  * @param {string} listId - List ID

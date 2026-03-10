@@ -201,8 +201,14 @@ struct AddToListSheet: View {
         
         Task {
             do {
-                try await ItemService.addIngredientItems(listId: listId, ingredients: ingredients)
-                successMessage = "Added \(ingredients.count) items to \(selectedList.name)"
+                let result = try await ItemService.addIngredientItems(listId: listId, ingredients: ingredients)
+                if result.skipped > 0 && result.added > 0 {
+                    successMessage = "Added \(result.added) items to \(selectedList.name) (\(result.skipped) already in list)"
+                } else if result.skipped > 0 {
+                    successMessage = "All \(result.skipped) items already in \(selectedList.name)"
+                } else {
+                    successMessage = "Added \(result.added) items to \(selectedList.name)"
+                }
             } catch {
                 self.error = "Failed to add items: \(error.localizedDescription)"
                 isAdding = false
