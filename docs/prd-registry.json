@@ -383,6 +383,16 @@
       "completedAt": "2026-03-09T00:50:00Z",
       "currentStory": null,
       "notes": "All 11 stories complete. SuggestionEngine (18 pairings + frequency + recency), SuggestionsView chip grid, ListDetailView wiring, OfflineCache actor with CachedEntry, ViewModel cache integration (lists/stores/history/collections/recipes), CachedDataBanner stale indicator, onOpenURL deep link handler, AuthViewModel setSession, RecipeViewModel offline cache, Capacitor WebView shell removed (ios/ directory, 8 deps, all platform checks), post-removal PWA verification passed."
+    },
+    {
+      "id": "prd-shared-store-visibility",
+      "name": "Shared List Store Visibility",
+      "status": "ready",
+      "filePath": "docs/prds/prd-shared-store-visibility.md",
+      "jsonPath": "docs/prds/prd-shared-store-visibility.json",
+      "branchName": "feature/shared-store-visibility",
+      "createdAt": "2026-03-10",
+      "updatedAt": "2026-03-10"
     }
   ]
 }
