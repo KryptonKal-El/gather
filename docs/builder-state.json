@@ -1,31 +1,34 @@
 {
-  "sessionId": "builder-2026-03-09-swift-ios-setup",
-  "lastHeartbeat": "2026-03-09T16:30:00Z",
+  "sessionId": "builder-2026-03-10-online-recipe-search",
+  "lastHeartbeat": "2026-03-10T23:45:00Z",
   "activePrd": {
-    "id": "prd-swift-ios-setup",
-    "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
-    "currentStory": null,
-    "storiesCompleted": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007"],
+    "id": "prd-online-recipe-search",
+    "name": "Online Recipe Search via Spoonacular API",
+    "currentStory": "US-001",
+    "storiesCompleted": [],
     "storiesBlocked": [],
     "storiesSkipped": [],
-    "totalStories": 7,
+    "totalStories": 10,
     "testingRigor": "standard",
-    "status": "completed"
+    "status": "in_progress"
   },
   "adhocQueue": [],
   "pendingTests": {},
   "pendingUpdates": {},
   "uiTodos": {
     "flow": "prd",
-    "lastSyncedAt": "2026-03-09T16:30:00Z",
+    "lastSyncedAt": "2026-03-10T23:45:00Z",
     "items": [
-      {"content": "US-001: Create Xcode Project & Folder Structure", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-001"},
-      {"content": "US-002: Integrate Supabase Swift SDK & Configuration", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-002"},
-      {"content": "US-003: Auth State Management & Session Persistence", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-003"},
-      {"content": "US-004: Apple Sign-In Flow", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-004"},
-      {"content": "US-005: Email/Password Sign-In & Sign-Up", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-005"},
-      {"content": "US-006: Authenticated Tab Bar Shell", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-006"},
-      {"content": "US-007: App Icon, Launch Screen & Entitlements", "status": "completed", "priority": "high", "flow": "prd", "refId": "US-007"}
+      {"content": "US-001: Supabase Edge Function — Recipe Search Proxy", "status": "in_progress", "priority": "high", "flow": "prd", "refId": "US-001"},
+      {"content": "US-002: React — Recipe Search UI", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-002"},
+      {"content": "US-003: Swift — Recipe Search UI", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-003"},
+      {"content": "US-004: React — Recipe Preview & Actions", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-004"},
+      {"content": "US-005: Swift — Recipe Preview & Actions", "status": "pending", "priority": "high", "flow": "prd", "refId": "US-005"},
+      {"content": "US-006: React — Save Online Recipe to Collection", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-006"},
+      {"content": "US-007: Swift — Save Online Recipe to Collection", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-007"},
+      {"content": "US-008: React — Add Ingredients to Shopping List", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-008"},
+      {"content": "US-009: Swift — Add Ingredients to Shopping List", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-009"},
+      {"content": "US-010: Spoonacular Attribution", "status": "pending", "priority": "medium", "flow": "prd", "refId": "US-010"}
     ]
   },
   "uncommittedWork": null,
