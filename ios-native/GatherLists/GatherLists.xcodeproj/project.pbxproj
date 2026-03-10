@@ -374,10 +374,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1B2C3D4E5F6A7B8C9D0E206 /* Build configuration list for PBXNativeTarget "GatherLists" */;
 			buildPhases = (
-				A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */,
 				A1B2C3D4E5F6A7B8C9D0E207 /* Sources */,
 				A1B2C3D4E5F6A7B8C9D0E200 /* Frameworks */,
 				A1B2C3D4E5F6A7B8C9D0E208 /* Resources */,
+				A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */,
 			);
 			buildRules = (
 			);
@@ -441,6 +441,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Increment Build Number (Archive Only)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ] && [ \"${ACTION}\" = \"install\" ]; then\n  cd \"${PROJECT_DIR}\"\n  buildNumber=$(xcrun agvtool what-version -terse 2>/dev/null)\n  if [ -z \"$buildNumber\" ] || ! [ \"$buildNumber\" -eq \"$buildNumber\" ] 2>/dev/null; then\n    buildNumber=0\n  fi\n  buildNumber=$((buildNumber + 1))\n  xcrun agvtool new-version -all \"$buildNumber\" > /dev/null 2>&1\n  # Also update the already-built plist so this archive gets the new number\n  PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n  if [ -f \"$PLIST\" ]; then\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$PLIST\"\n  fi\n  echo \"Build number incremented to $buildNumber\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		A1B2C3D4E5F6A7B8C9D0E207 /* Sources */ = {
@@ -516,24 +534,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Increment Build Number (Archive Only)";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ] && [ \"${ACTION}\" = \"install\" ]; then\n  cd \"${PROJECT_DIR}\"\n  buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${INFOPLIST_FILE}\" 2>/dev/null)\n  if [ -z \"$buildNumber\" ]; then\n    buildNumber=0\n  fi\n  buildNumber=$((buildNumber + 1))\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${INFOPLIST_FILE}\"\n  echo \"Build number incremented to $buildNumber\"\nfi\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		A1B2C3D4E5F6A7B8C9D0E20B /* Debug */ = {
@@ -667,7 +667,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -698,7 +698,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
