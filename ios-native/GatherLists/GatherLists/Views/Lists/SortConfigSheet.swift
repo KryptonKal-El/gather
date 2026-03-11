@@ -92,6 +92,7 @@ struct SortConfigSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+        .presentationBackground(.regularMaterial)
     }
     
     private func moveLevel(from source: IndexSet, to destination: Int) {
