@@ -294,8 +294,10 @@
         "Uses native iOS patterns (e.g., Menu with Picker or action sheet)"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T13:45:00Z",
+      "passes": true,
+      "notes": "Sort Menu in nav bar with SortMode.allCases + Use default option. Switches itemListContent rendering based on activeSortMode. Persists via PreferenceService.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

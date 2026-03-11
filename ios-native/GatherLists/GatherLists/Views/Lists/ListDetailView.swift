@@ -34,6 +34,10 @@ struct ListDetailView: View {
     // Edit sheet state
     @State private var editSheetItem: Item?
     
+    // Sort preferences
+    @State private var userPreferences: UserPreferences?
+    @State private var activeSortMode: SortMode = .storeCategory
+    
     private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
@@ -107,7 +111,8 @@ struct ListDetailView: View {
         .toolbarBackground(listColor, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                sortMenu
                 shareStatusIndicator
             }
         }
@@ -207,6 +212,7 @@ struct ListDetailView: View {
         .task {
             await initializeDetailViewModel()
             await loadShareInfo()
+            await loadSortPreferences()
         }
     }
     
@@ -243,10 +249,10 @@ struct ListDetailView: View {
     
     private var itemListContent: some View {
         List {
-            uncheckedItemsSection
+            sortedUncheckedSection
             
             if let vm = detailViewModel, !vm.checkedItems.isEmpty {
-                checkedItemsSection
+                sortedCheckedSection
             }
         }
         .listStyle(.plain)
@@ -291,6 +297,78 @@ struct ListDetailView: View {
                     categoryGroupsView(items: items, store: nil)
                 }
             }
+        }
+    }
+    
+    // MARK: - Sorted Unchecked Section
+    
+    @ViewBuilder
+    private var sortedUncheckedSection: some View {
+        switch activeSortMode {
+        case .storeCategory:
+            uncheckedItemsSection
+        case .category:
+            categoryOnlySection
+        case .alpha:
+            flatItemsSection(items: detailViewModel?.sortedAlpha ?? [])
+        case .dateAdded:
+            flatItemsSection(items: detailViewModel?.sortedByDateAdded ?? [])
+        }
+    }
+    
+    // MARK: - Category Only Section
+    
+    @ViewBuilder
+    private var categoryOnlySection: some View {
+        if let vm = detailViewModel {
+            let groups = vm.groupedByCategory
+            ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
+                categoryHeader(category: group.category, itemCount: group.items.count)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                
+                ForEach(Array(group.items.enumerated()), id: \.element.id) { idx, item in
+                    itemRow(item: item, isChecked: false, showSeparator: idx < group.items.count - 1)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                Task {
+                                    if await detailViewModel?.deleteItem(item) != nil {
+                                        registerDeleteUndo(for: item)
+                                    }
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Flat Items Section
+    
+    @ViewBuilder
+    private func flatItemsSection(items: [Item]) -> some View {
+        ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+            itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        Task {
+                            if await detailViewModel?.deleteItem(item) != nil {
+                                registerDeleteUndo(for: item)
+                            }
+                        }
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
         }
     }
     
@@ -802,6 +880,54 @@ struct ListDetailView: View {
         }
     }
     
+    // MARK: - Sorted Checked Section
+    
+    @ViewBuilder
+    private var sortedCheckedSection: some View {
+        if let vm = detailViewModel {
+            let sortedChecked = vm.sortedCheckedItems(for: activeSortMode)
+            
+            HStack {
+                Text("Checked (\(sortedChecked.count))")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                
+                Spacer()
+                
+                Button("Clear checked") {
+                    showClearCheckedAlert = true
+                }
+                .font(.subheadline)
+                .foregroundStyle(.red)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .padding(.top, 8)
+            .background(Color(.secondarySystemGroupedBackground))
+            .listRowInsets(EdgeInsets())
+            .listRowSeparator(.hidden)
+            .listRowBackground(Color.clear)
+            
+            ForEach(Array(sortedChecked.enumerated()), id: \.element.id) { idx, item in
+                itemRow(item: item, isChecked: true, showSeparator: idx < sortedChecked.count - 1)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            Task {
+                                if await detailViewModel?.deleteItem(item) != nil {
+                                    registerDeleteUndo(for: item)
+                                }
+                            }
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+            }
+        }
+    }
+    
     // MARK: - Price Formatting
     
     private func formatPrice(_ price: Decimal) -> String {
@@ -836,6 +962,42 @@ struct ListDetailView: View {
             }
             .font(.subheadline)
             .foregroundStyle(.white)
+        }
+    }
+    
+    // MARK: - Sort Menu
+    
+    private var sortMenu: some View {
+        Menu {
+            ForEach(SortMode.allCases, id: \.self) { mode in
+                Button {
+                    Task {
+                        await selectSortMode(mode)
+                    }
+                } label: {
+                    HStack {
+                        Text(mode.label)
+                        if activeSortMode == mode {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
+            }
+
+            if list.sortMode != nil {
+                Divider()
+                Button {
+                    Task {
+                        await selectSortMode(nil)
+                    }
+                } label: {
+                    Text("Use default")
+                }
+            }
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+                .font(.subheadline)
+                .foregroundStyle(.white)
         }
     }
     
@@ -964,6 +1126,22 @@ struct ListDetailView: View {
     
     // MARK: - Actions
     
+    private func selectSortMode(_ mode: SortMode?) async {
+        do {
+            try await PreferenceService.updateListSortMode(listId: list.id, mode: mode)
+            if let mode {
+                activeSortMode = mode
+            } else {
+                activeSortMode = PreferenceService.effectiveSortMode(
+                    for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortMode: nil, createdAt: list.createdAt),
+                    userPreferences: userPreferences
+                )
+            }
+        } catch {
+            print("[ListDetailView] Failed to update sort mode: \(error.localizedDescription)")
+        }
+    }
+    
     private func handleAddItem() {
         let trimmedName = itemName.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else { return }
@@ -995,6 +1173,16 @@ struct ListDetailView: View {
             print("[ListDetailView] Failed to load shares: \(error.localizedDescription)")
         }
         isLoadingShares = false
+    }
+    
+    private func loadSortPreferences() async {
+        do {
+            let prefs = try await PreferenceService.fetchUserPreferences()
+            userPreferences = prefs
+            activeSortMode = PreferenceService.effectiveSortMode(for: list, userPreferences: prefs)
+        } catch {
+            print("[ListDetailView] Failed to load sort preferences: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Undo Registration
