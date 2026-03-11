@@ -44,8 +44,10 @@
         "Existing RLS policies on lists continue to work without modification"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T12:10:00Z",
+      "passes": true,
+      "notes": "Migration adds nullable sort_mode column with CHECK constraint to lists table",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
