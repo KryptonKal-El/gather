@@ -5,6 +5,8 @@ struct PreferenceService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
     private static var cachedPreferences: UserPreferences?
     
+    /// Fetches user preferences. Returns cached version if available.
+    /// Falls back to system default config if no row exists.
     static func fetchUserPreferences() async throws -> UserPreferences {
         if let cached = cachedPreferences {
             return cached
@@ -20,29 +22,45 @@ struct PreferenceService {
             .execute()
             .value
         
-        let result = rows.first ?? UserPreferences(userId: userId, defaultSortMode: "store-category")
+        let defaultConfig = SortPipeline.systemDefault.map { $0.rawValue }
+        let result = rows.first ?? UserPreferences(userId: userId, defaultSortConfig: defaultConfig)
         cachedPreferences = result
         return result
     }
     
+    /// Clears cached preferences (call on sign-out or preference change from realtime).
     static func clearCache() {
         cachedPreferences = nil
     }
     
-    static func updateDefaultSortMode(_ mode: SortMode) async throws {
+    /// Upserts the user's default sort config. Validates before writing.
+    static func updateDefaultSortConfig(_ config: [SortLevel]) async throws {
+        guard SortPipeline.isValid(config) else {
+            throw NSError(domain: "PreferenceService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid sort config"])
+        }
+        
         let userId = try await client.auth.session.user.id
-        let upsertData = UserPreferencesUpsert(userId: userId, defaultSortMode: mode.rawValue)
+        let configStrings = config.map { $0.rawValue }
+        let upsertData = UserPreferencesUpsert(userId: userId, defaultSortConfig: configStrings)
         
         try await client
             .from("user_preferences")
             .upsert(upsertData)
             .execute()
         
-        cachedPreferences = UserPreferences(userId: userId, defaultSortMode: mode.rawValue)
+        cachedPreferences = UserPreferences(userId: userId, defaultSortConfig: configStrings)
     }
     
-    static func updateListSortMode(listId: UUID, mode: SortMode?) async throws {
-        let update = ListSortModeUpdate(sortMode: mode?.rawValue)
+    /// Updates per-list sort config. Pass nil to clear override.
+    static func updateListSortConfig(listId: UUID, config: [SortLevel]?) async throws {
+        if let config = config {
+            guard SortPipeline.isValid(config) else {
+                throw NSError(domain: "PreferenceService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid sort config"])
+            }
+        }
+        
+        let configStrings = config?.map { $0.rawValue }
+        let update = ListSortConfigUpdate(sortConfig: configStrings)
         
         try await client
             .from("lists")
@@ -51,16 +69,21 @@ struct PreferenceService {
             .execute()
     }
     
-    static func effectiveSortMode(for list: GatherList, userPreferences: UserPreferences?) -> SortMode {
-        if let listMode = list.sortMode, let mode = SortMode(rawValue: listMode) {
-            return mode
+    /// Resolves the effective sort config for a list.
+    /// Priority: per-list override → global default → system default.
+    static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?) -> [SortLevel] {
+        let configStrings: [String]
+        
+        if let listConfig = list.sortConfig {
+            configStrings = listConfig
+        } else if let prefs = userPreferences {
+            configStrings = prefs.defaultSortConfig
+        } else {
+            return SortPipeline.systemDefault
         }
         
-        if let prefs = userPreferences, let mode = SortMode(rawValue: prefs.defaultSortMode) {
-            return mode
-        }
-        
-        return .storeCategory
+        let levels = SortPipeline.normalize(configStrings.compactMap { SortLevel(rawValue: $0) })
+        return levels
     }
 }
 
@@ -68,18 +91,18 @@ struct PreferenceService {
 
 private struct UserPreferencesUpsert: Encodable {
     let userId: UUID
-    let defaultSortMode: String
+    let defaultSortConfig: [String]
     
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
-        case defaultSortMode = "default_sort_mode"
+        case defaultSortConfig = "default_sort_config"
     }
 }
 
-private struct ListSortModeUpdate: Encodable {
-    let sortMode: String?
+private struct ListSortConfigUpdate: Encodable {
+    let sortConfig: [String]?
     
     enum CodingKeys: String, CodingKey {
-        case sortMode = "sort_mode"
+        case sortConfig = "sort_config"
     }
 }
