@@ -8,7 +8,8 @@ import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
 import { useSortPreferences } from '../hooks/useSortPreferences.js';
-import { SORT_MODES } from '../services/preferences.js';
+import { SortLevelEditor } from './SortLevelEditor.jsx';
+import { SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
 import styles from './MobileSettings.module.css';
 
 /**
@@ -26,7 +27,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
-  const currentDefaultSort = userPreferences?.default_sort_mode ?? 'store-category';
+  const currentDefaultSort = userPreferences?.default_sort_config ?? SYSTEM_DEFAULT_SORT_CONFIG;
 
   const displayName = user?.user_metadata?.full_name ?? user?.profile?.display_name ?? 'User';
   const email = user?.email ?? '';
@@ -56,9 +57,9 @@ export const MobileSettings = ({ user, onSignOut }) => {
     }
   };
 
-  const handleDefaultSortChange = async (e) => {
+  const handleDefaultSortChange = async (config) => {
     try {
-      await updateDefaultSort(e.target.value);
+      await updateDefaultSort(config);
     } catch (err) {
       console.error('Failed to update default sort:', err);
     }
@@ -133,22 +134,14 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
       <h3 className={styles.sectionHeader}>Display</h3>
       <div className={styles.section}>
-        <div className={styles.selectRow}>
-          <span className={styles.selectLabel}>Default Sort</span>
-          <select
-            className={styles.select}
-            value={currentDefaultSort}
-            onChange={handleDefaultSortChange}
-            disabled={prefsLoading}
-            aria-label="Default sort mode"
-          >
-            {SORT_MODES.map((mode) => (
-              <option key={mode.key} value={mode.key}>
-                {mode.label}
-              </option>
-            ))}
-          </select>
+        <div className={styles.sortHeader}>
+          <span className={styles.sortLabel}>Default Sort</span>
         </div>
+        <SortLevelEditor
+          config={currentDefaultSort}
+          onConfigChange={handleDefaultSortChange}
+          disabled={prefsLoading}
+        />
       </div>
 
       <h3 className={styles.sectionHeader}>Account Actions</h3>

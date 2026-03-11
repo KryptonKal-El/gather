@@ -1,0 +1,122 @@
+.editor {
+  width: 100%;
+}
+
+.editor.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.levelRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.levelRow:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.levelRowLast {
+  border-bottom: none;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.levelLabel {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.removeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.removeBtn:hover:not(:disabled) {
+  color: var(--danger, #e53935);
+  background: rgba(229, 57, 53, 0.1);
+}
+
+.removeBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.addSection {
+  position: relative;
+}
+
+.addBtn {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.addBtn:hover:not(:disabled) {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.addBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.addMenu {
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-hover, rgba(0, 0, 0, 0.02));
+}
+
+.addOption {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem 0.5rem 2.5rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.addOption:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
