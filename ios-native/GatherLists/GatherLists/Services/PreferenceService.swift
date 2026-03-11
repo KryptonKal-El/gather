@@ -12,15 +12,15 @@ struct PreferenceService {
         
         let userId = try await client.auth.session.user.id
         
-        let preferences: UserPreferences? = try await client
+        let rows: [UserPreferences] = try await client
             .from("user_preferences")
             .select()
             .eq("user_id", value: userId)
-            .maybeSingle()
+            .limit(1)
             .execute()
             .value
         
-        let result = preferences ?? UserPreferences(userId: userId, defaultSortMode: "store-category")
+        let result = rows.first ?? UserPreferences(userId: userId, defaultSortMode: "store-category")
         cachedPreferences = result
         return result
     }
