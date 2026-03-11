@@ -310,8 +310,10 @@
         "Uses native iOS patterns (e.g., EditMode, onMove, onDelete)"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T19:30:00Z",
+      "notes": "Created SortConfigSheet.swift with reorderable list (onMove/onDelete), Add Level section, Use Default button. Replaced interim 4-preset Menu in ListDetailView with sheet presentation. Registered in pbxproj (4 sections).",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

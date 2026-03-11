@@ -40,6 +40,7 @@ struct ListDetailView: View {
     @State private var userPreferences: UserPreferences?
     @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
     @State private var preferencesTask: Task<Void, Never>?
+    @State private var showSortSheet = false
     
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
@@ -925,43 +926,21 @@ struct ListDetailView: View {
     // MARK: - Sort Menu
     
     private var sortMenu: some View {
-        Menu {
-            let presets: [(label: String, config: [SortLevel])] = [
-                ("Store → Category → Name", [.store, .category, .name]),
-                ("Category → Name", [.category, .name]),
-                ("Alphabetical", [.name]),
-                ("Date Added", [.date])
-            ]
-            
-            ForEach(Array(presets.enumerated()), id: \.offset) { _, preset in
-                Button {
-                    Task {
-                        await selectSortConfig(preset.config)
-                    }
-                } label: {
-                    HStack {
-                        Text(preset.label)
-                        if activeSortConfig == preset.config {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
-            
-            if list.sortConfig != nil {
-                Divider()
-                Button {
-                    Task {
-                        await selectSortConfig(nil)
-                    }
-                } label: {
-                    Text("Use default")
-                }
-            }
+        Button {
+            showSortSheet = true
         } label: {
             Image(systemName: "arrow.up.arrow.down")
                 .font(.subheadline)
                 .foregroundStyle(.white)
+        }
+        .sheet(isPresented: $showSortSheet) {
+            SortConfigSheet(
+                activeSortConfig: $activeSortConfig,
+                hasOverride: list.sortConfig != nil,
+                onConfigChange: { config in
+                    await selectSortConfig(config)
+                }
+            )
         }
     }
     
