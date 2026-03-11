@@ -53,7 +53,6 @@ struct SortConfigSheet: View {
                                     Image(systemName: "plus.circle.fill")
                                         .foregroundStyle(.green)
                                     Text(Self.levelLabels[level] ?? level.rawValue)
-                                        .foregroundStyle(.primary)
                                 }
                             }
                         }
@@ -70,7 +69,6 @@ struct SortConfigSheet: View {
                         } label: {
                             HStack {
                                 Image(systemName: "arrow.uturn.backward")
-                                    .foregroundStyle(.secondary)
                                 Text("Use Default")
                             }
                         }
@@ -83,6 +81,8 @@ struct SortConfigSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.blue)
                 }
             }
             .onAppear {
