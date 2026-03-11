@@ -134,7 +134,7 @@ export const subscribeLists = (userId, callback) => {
           itemCount: row.item_count,
           ownerId: row.owner_id,
           createdAt: row.created_at,
-          sortMode: row.sort_mode,
+          sortConfig: row.sort_config,
         }))
       );
     } catch (error) {
@@ -700,7 +700,7 @@ export const subscribeList = (ownerUid, listId, callback) => {
         itemCount: data.item_count,
         ownerId: data.owner_id,
         createdAt: data.created_at,
-        sortMode: data.sort_mode,
+        sortConfig: data.sort_config,
       });
     } catch (error) {
       console.error('Failed to fetch list:', error);

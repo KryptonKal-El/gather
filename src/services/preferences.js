@@ -1,21 +1,51 @@
 /**
  * Preference service layer for Gather.
- * Provides functions for reading/writing user sort preferences.
+ * Provides functions for reading/writing user sort preferences (v2 pipeline).
  */
 import { supabase } from './supabase.js';
+import { SYSTEM_DEFAULT_SORT_CONFIG, isValidSortConfig } from '../utils/sortPipeline.js';
+
+export { SYSTEM_DEFAULT_SORT_CONFIG };
 
 // ---------------------------------------------------------------------------
-// Sort Mode Constants
+// V1 Compatibility (for UI components not yet migrated to v2 pipeline)
 // ---------------------------------------------------------------------------
 
+/**
+ * @deprecated Use SYSTEM_DEFAULT_SORT_CONFIG and config arrays instead.
+ * Retained for backward compatibility with SortPicker and MobileSettings.
+ */
 export const SORT_MODES = [
-  { key: 'store-category', label: 'Store & Category' },
-  { key: 'category', label: 'Category' },
-  { key: 'alpha', label: 'A–Z' },
-  { key: 'date-added', label: 'Date Added' },
+  { key: 'store-category', label: 'Store & Category', config: ['store', 'category', 'name'] },
+  { key: 'category', label: 'Category', config: ['category', 'name'] },
+  { key: 'alpha', label: 'A–Z', config: ['name'] },
+  { key: 'date-added', label: 'Date Added', config: ['date'] },
 ];
 
+/** @deprecated Use SYSTEM_DEFAULT_SORT_CONFIG instead */
 export const DEFAULT_SORT_MODE = 'store-category';
+
+/**
+ * Converts a v1 mode key to v2 config array.
+ * @param {string} modeKey - v1 mode key (e.g., 'store-category')
+ * @returns {string[]} v2 config array
+ */
+export const modeKeyToConfig = (modeKey) => {
+  const mode = SORT_MODES.find((m) => m.key === modeKey);
+  return mode?.config ?? SYSTEM_DEFAULT_SORT_CONFIG;
+};
+
+/**
+ * Converts a v2 config array to v1 mode key (best match).
+ * @param {string[]} config - v2 config array
+ * @returns {string} v1 mode key
+ */
+export const configToModeKey = (config) => {
+  if (!Array.isArray(config)) return DEFAULT_SORT_MODE;
+  const configStr = config.join(',');
+  const mode = SORT_MODES.find((m) => m.config.join(',') === configStr);
+  return mode?.key ?? DEFAULT_SORT_MODE;
+};
 
 // ---------------------------------------------------------------------------
 // User Preferences
@@ -25,7 +55,7 @@ export const DEFAULT_SORT_MODE = 'store-category';
  * Fetches the user's preferences row. If no row exists, returns a default object.
  * Does NOT auto-insert a row.
  * @param {string} userId - User ID
- * @returns {Promise<{user_id: string, default_sort_mode: string}>}
+ * @returns {Promise<{user_id: string, default_sort_config: string[]}>}
  */
 export const getUserPreferences = async (userId) => {
   try {
@@ -38,7 +68,7 @@ export const getUserPreferences = async (userId) => {
     if (error) throw error;
 
     if (!data) {
-      return { user_id: userId, default_sort_mode: DEFAULT_SORT_MODE };
+      return { user_id: userId, default_sort_config: SYSTEM_DEFAULT_SORT_CONFIG };
     }
 
     return data;
@@ -48,59 +78,67 @@ export const getUserPreferences = async (userId) => {
 };
 
 /**
- * Upserts the user's default sort mode in user_preferences.
- * Uses upsert with onConflict to handle first-time writes.
+ * Upserts the user's default sort config in user_preferences.
+ * Validates config before writing.
  * @param {string} userId - User ID
- * @param {string} mode - Sort mode key (e.g., 'store-category', 'alpha')
+ * @param {string[]} config - Sort config array (e.g., ['store', 'category', 'name'])
  */
-export const updateDefaultSortMode = async (userId, mode) => {
+export const updateDefaultSortConfig = async (userId, config) => {
+  if (!isValidSortConfig(config)) {
+    throw new Error(`Invalid sort config: ${JSON.stringify(config)}`);
+  }
+
   try {
     const { error } = await supabase
       .from('user_preferences')
       .upsert(
-        { user_id: userId, default_sort_mode: mode },
+        { user_id: userId, default_sort_config: config },
         { onConflict: 'user_id' }
       );
 
     if (error) throw error;
   } catch (error) {
-    throw new Error(`Failed to update default sort mode: userId=${userId}, mode=${mode}`, { cause: error });
+    throw new Error(`Failed to update default sort config: userId=${userId}`, { cause: error });
   }
 };
 
 // ---------------------------------------------------------------------------
-// List Sort Mode
+// List Sort Config
 // ---------------------------------------------------------------------------
 
 /**
- * Updates the sort_mode column on a list. Pass null to clear the override.
+ * Updates the sort_config column on a list. Pass null to clear the override.
  * @param {string} listId - List ID to update
- * @param {string|null} mode - Sort mode key, or null to clear
+ * @param {string[]|null} config - Sort config array, or null to clear
  */
-export const updateListSortMode = async (listId, mode) => {
+export const updateListSortConfig = async (listId, config) => {
+  if (config !== null && !isValidSortConfig(config)) {
+    throw new Error(`Invalid sort config: ${JSON.stringify(config)}`);
+  }
+
   try {
     const { error } = await supabase
       .from('lists')
-      .update({ sort_mode: mode })
+      .update({ sort_config: config })
       .eq('id', listId);
 
     if (error) throw error;
   } catch (error) {
-    throw new Error(`Failed to update list sort mode: listId=${listId}, mode=${mode}`, { cause: error });
+    throw new Error(`Failed to update list sort config: listId=${listId}`, { cause: error });
   }
 };
 
 // ---------------------------------------------------------------------------
-// Sort Mode Resolution
+// Sort Config Resolution
 // ---------------------------------------------------------------------------
 
 /**
- * Pure function that resolves the effective sort mode for a list.
- * Returns list.sort_mode if set, otherwise falls back to user preference, then default.
- * @param {object} list - List object (may have sort_mode property)
- * @param {object|null} userPreferences - User preferences object (may have default_sort_mode)
- * @returns {string} The resolved sort mode key
+ * Pure function that resolves the effective sort config for a list.
+ * Returns list.sort_config if set, otherwise falls back to user preference, then system default.
+ * @param {object} list - List object (may have sort_config property, snake_case)
+ * @param {object|null} userPreferences - User preferences object (may have default_sort_config)
+ * @returns {string[]} The resolved sort config array
  */
-export const getEffectiveSortMode = (list, userPreferences) => {
-  return list.sort_mode ?? userPreferences?.default_sort_mode ?? DEFAULT_SORT_MODE;
+export const getEffectiveSortConfig = (list, userPreferences) => {
+  return list.sort_config ?? userPreferences?.default_sort_config ?? SYSTEM_DEFAULT_SORT_CONFIG;
 };

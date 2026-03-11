@@ -1,20 +1,26 @@
 /**
  * Custom hook for managing sort preferences.
- * Fetches user preferences and provides helpers for resolving effective sort mode.
+ * Fetches user preferences and provides helpers for resolving effective sort config.
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { supabase } from '../services/supabase.js';
-import { getUserPreferences, getEffectiveSortMode, updateListSortMode, updateDefaultSortMode } from '../services/preferences.js';
+import {
+  getUserPreferences,
+  getEffectiveSortConfig,
+  updateListSortConfig,
+  updateDefaultSortConfig,
+  SYSTEM_DEFAULT_SORT_CONFIG,
+} from '../services/preferences.js';
 
 /**
  * Hook that provides sort preference state and actions.
  * @returns {{
  *   userPreferences: object|null,
  *   loading: boolean,
- *   effectiveSortMode: (list: object) => string,
- *   updateListSort: (listId: string, mode: string|null) => Promise<void>,
- *   updateDefaultSort: (mode: string) => Promise<void>
+ *   effectiveSortConfig: (list: object) => string[],
+ *   updateListSort: (listId: string, config: string[]|null) => Promise<void>,
+ *   updateDefaultSort: (config: string[]) => Promise<void>
  * }}
  */
 export const useSortPreferences = () => {
@@ -58,7 +64,7 @@ export const useSortPreferences = () => {
         },
         (payload) => {
           if (payload.eventType === 'DELETE') {
-            setUserPreferences({ user_id: user.id, default_sort_mode: 'store-category' });
+            setUserPreferences({ user_id: user.id, default_sort_config: SYSTEM_DEFAULT_SORT_CONFIG });
           } else {
             setUserPreferences(payload.new);
           }
@@ -71,30 +77,32 @@ export const useSortPreferences = () => {
     };
   }, [user]);
 
-  const effectiveSortMode = useCallback(
+  const effectiveSortConfig = useCallback(
     (list) => {
-      if (!list) return 'store-category';
-      // getEffectiveSortMode expects { sort_mode } but our list objects use camelCase sortMode
-      return getEffectiveSortMode({ sort_mode: list.sortMode }, userPreferences);
+      if (!list) return SYSTEM_DEFAULT_SORT_CONFIG;
+      return getEffectiveSortConfig({ sort_config: list.sortConfig }, userPreferences);
     },
     [userPreferences]
   );
 
   const updateListSort = useCallback(
-    async (listId, mode) => {
-      await updateListSortMode(listId, mode);
+    async (listId, config) => {
+      await updateListSortConfig(listId, config);
     },
     []
   );
 
   const updateDefaultSort = useCallback(
-    async (mode) => {
+    async (config) => {
       if (!user) return;
-      await updateDefaultSortMode(user.id, mode);
-      setUserPreferences((prev) => prev ? { ...prev, default_sort_mode: mode } : { user_id: user.id, default_sort_mode: mode });
+      await updateDefaultSortConfig(user.id, config);
+      setUserPreferences((prev) => prev
+        ? { ...prev, default_sort_config: config }
+        : { user_id: user.id, default_sort_config: config }
+      );
     },
     [user]
   );
 
-  return { userPreferences, loading, effectiveSortMode, updateListSort, updateDefaultSort };
+  return { userPreferences, loading, effectiveSortConfig, updateListSort, updateDefaultSort };
 };

@@ -446,7 +446,7 @@
       "name": "List Item Sort Preferences",
       "status": "in_progress",
       "startedAt": "2026-03-11T15:00:00Z",
-      "currentStory": "US-004",
+      "currentStory": "US-005",
       "filePath": "docs/prds/prd-list-sort-preferences.md",
       "jsonPath": "docs/prds/prd-list-sort-preferences.json",
       "branchName": "feature/list-sort-preferences",
