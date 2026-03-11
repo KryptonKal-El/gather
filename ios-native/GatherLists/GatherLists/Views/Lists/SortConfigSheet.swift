@@ -55,6 +55,7 @@ struct SortConfigSheet: View {
                                     Text(Self.levelLabels[level] ?? level.rawValue)
                                 }
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -71,7 +72,9 @@ struct SortConfigSheet: View {
                                 Image(systemName: "arrow.uturn.backward")
                                 Text("Use Default")
                             }
+                            .foregroundStyle(.blue)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
