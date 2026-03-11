@@ -92,7 +92,7 @@ struct SortConfigSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
-        .presentationBackground(.regularMaterial)
+        .presentationBackground(Color(UIColor.systemGroupedBackground))
     }
     
     private func moveLevel(from source: IndexSet, to destination: Int) {
