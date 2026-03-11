@@ -229,8 +229,10 @@
         "Checked items remain at the bottom in all modes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T13:20:00Z",
+      "passes": true,
+      "notes": "ListDetailViewModel now has groupedByCategory, sortedAlpha, sortedByDateAdded computed properties and sortedCheckedItems(for:) method. All 4 modes match React behavior.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -89,6 +89,50 @@ final class ListDetailViewModel {
         return result
     }
     
+    /// Groups unchecked items by category only (no store sections), items sorted by addedAt ascending within each group.
+    var groupedByCategory: [(category: CategoryDef, items: [Item])] {
+        let categoryList = CategoryDefinitions.defaults
+        var categoryGroups: [String: [Item]] = [:]
+        var otherItems: [Item] = []
+        
+        let categoryKeys = Set(categoryList.map { $0.key })
+        
+        for item in uncheckedItems {
+            if let category = item.category, categoryKeys.contains(category) {
+                categoryGroups[category, default: []].append(item)
+            } else {
+                otherItems.append(item)
+            }
+        }
+        
+        var result: [(category: CategoryDef, items: [Item])] = []
+        for categoryDef in categoryList {
+            if var groupItems = categoryGroups[categoryDef.key], !groupItems.isEmpty {
+                groupItems.sort { $0.addedAt < $1.addedAt }
+                result.append((category: categoryDef, items: groupItems))
+            }
+        }
+        
+        if !otherItems.isEmpty {
+            otherItems.sort { $0.addedAt < $1.addedAt }
+            let otherCategory = categoryList.first { $0.key == "other" }
+                ?? CategoryDef(key: "other", name: "Other", color: "#9e9e9e", keywords: [])
+            result.append((category: otherCategory, items: otherItems))
+        }
+        
+        return result
+    }
+    
+    /// Unchecked items sorted A–Z by name (case-insensitive). Flat list, no grouping.
+    var sortedAlpha: [Item] {
+        uncheckedItems.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+    
+    /// Unchecked items sorted by addedAt descending (newest first). Flat list, no grouping.
+    var sortedByDateAdded: [Item] {
+        uncheckedItems.sorted { $0.addedAt > $1.addedAt }
+    }
+    
     // MARK: - Methods
     
     /// Groups items by category using store's categories or defaults.
@@ -128,6 +172,18 @@ final class ListDetailViewModel {
         }
         
         return result
+    }
+    
+    /// Checked items sorted according to the given sort mode.
+    func sortedCheckedItems(for sortMode: SortMode) -> [Item] {
+        switch sortMode {
+        case .alpha:
+            return checkedItems.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+        case .dateAdded:
+            return checkedItems.sorted { $0.addedAt > $1.addedAt }
+        case .storeCategory, .category:
+            return checkedItems
+        }
     }
     
     // MARK: - Initialization
