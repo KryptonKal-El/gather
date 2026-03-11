@@ -121,16 +121,16 @@ const computeSubtotal = (items) => {
 };
 
 /**
- * Displays the shopping list items grouped by store at the top level,
- * then by category within each store. Items without a store appear
- * in an "Unassigned" section. Checked items appear at the bottom.
- *
- * Category labels/colors within each store section use that store's
- * categories. Unassigned items use global DEFAULT_CATEGORIES.
+ * Displays the shopping list items using the specified sort mode.
+ * Supported modes:
+ *  - 'store-category' (default): grouped by store → category
+ *  - 'category': grouped by category only, no store sections
+ * Checked items always appear at the bottom regardless of mode.
  */
 export const ShoppingList = ({
   items,
   stores,
+  sortMode,
   onToggle,
   onRemove,
   onUpdateCategory,
@@ -206,10 +206,39 @@ export const ShoppingList = ({
     onRestoreAnimationDone,
   };
 
+  // Category mode: group unchecked items by category, sorted by added_at within each
+  const getCategoryModeGrouped = () => {
+    const categoryGrouped = groupByCategory(unchecked);
+    for (const key of Object.keys(categoryGrouped)) {
+      categoryGrouped[key].sort((a, b) =>
+        new Date(a.added_at ?? 0) - new Date(b.added_at ?? 0)
+      );
+    }
+    return categoryGrouped;
+  };
+
   return (
     <div className={styles.list}>
-      {/* Store sections (in store order) */}
-      {hasStores && stores.map((store) => {
+      {/* Category mode: flat category grouping (no store sections) */}
+      {sortMode === 'category' && unchecked.length > 0 && (
+        <CategoryGroup
+          grouped={getCategoryModeGrouped()}
+          categoryOrder={defaultOrder}
+          allLabels={defaultLabels}
+          allColors={defaultColors}
+          stores={stores}
+          onToggle={onToggle}
+          onRemove={onRemove}
+          onUpdateCategory={onUpdateCategory}
+          onUpdateStore={onUpdateStore}
+          onUpdateItem={onUpdateItem}
+          restoredItemIds={restoredItemIds}
+          onRestoreAnimationDone={onRestoreAnimationDone}
+        />
+      )}
+
+      {/* Store-category mode: store sections (in store order) */}
+      {sortMode === 'store-category' && hasStores && stores.map((store) => {
         const storeItems = byStore[store.id];
         if (!storeItems?.length) return null;
         const grouped = groupByCategory(storeItems);
@@ -258,8 +287,8 @@ export const ShoppingList = ({
         );
       })}
 
-      {/* Unassigned items */}
-      {unassigned.length > 0 && (
+      {/* Store-category mode: unassigned items */}
+      {sortMode === 'store-category' && unassigned.length > 0 && (
         <div className={hasStores ? styles.storeSection : undefined}>
           {hasStores && (
             <h3
@@ -325,6 +354,7 @@ export const ShoppingList = ({
 ShoppingList.propTypes = {
   items: PropTypes.array.isRequired,
   stores: PropTypes.array,
+  sortMode: PropTypes.string,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -337,6 +367,7 @@ ShoppingList.propTypes = {
 
 ShoppingList.defaultProps = {
   stores: [],
+  sortMode: 'store-category',
   restoredItemIds: null,
   onRestoreAnimationDone: null,
 };

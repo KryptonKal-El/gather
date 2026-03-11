@@ -137,8 +137,10 @@
         "Verify in browser"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T13:00:00Z",
+      "passes": true,
+      "notes": "ShoppingList.jsx refactored with sortMode prop. Category mode groups all unchecked items by category with added_at ascending sort within each group. Store-category mode unchanged.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
