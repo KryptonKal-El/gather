@@ -38,10 +38,8 @@ struct ListDetailView: View {
     
     // Sort preferences
     @State private var userPreferences: UserPreferences?
-    @State private var activeSortMode: SortMode = .storeCategory
+    @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
     @State private var preferencesTask: Task<Void, Never>?
-    
-    private let unassignedKey = "__unassigned__"
     
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
@@ -270,91 +268,174 @@ struct ListDetailView: View {
         }
     }
     
-    // MARK: - Unchecked Items Section
-    
-    @ViewBuilder
-    private var uncheckedItemsSection: some View {
-        if let vm = detailViewModel {
-            let groupedByStore = vm.groupedByStore
-            let hasStores = vm.stores.count > 0
-            
-            ForEach(Array(groupedByStore.enumerated()), id: \.offset) { index, group in
-                let store = group.store
-                let items = group.items
-                let storeKey = store?.id.uuidString ?? unassignedKey
-                let isCollapsed = collapsedStores.contains(storeKey)
-                
-                if hasStores {
-                    storeHeader(store: store, items: items, isCollapsed: isCollapsed) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            if isCollapsed {
-                                collapsedStores.remove(storeKey)
-                            } else {
-                                collapsedStores.insert(storeKey)
-                            }
-                        }
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    
-                    if !isCollapsed {
-                        categoryGroupsView(items: items, store: store)
-                    }
-                } else {
-                    categoryGroupsView(items: items, store: nil)
-                }
-            }
-        }
-    }
-    
     // MARK: - Sorted Unchecked Section
     
     @ViewBuilder
     private var sortedUncheckedSection: some View {
-        switch activeSortMode {
-        case .storeCategory:
-            uncheckedItemsSection
-        case .category:
-            categoryOnlySection
-        case .alpha:
-            flatItemsSection(items: detailViewModel?.sortedAlpha ?? [])
-        case .dateAdded:
-            flatItemsSection(items: detailViewModel?.sortedByDateAdded ?? [])
+        if let vm = detailViewModel {
+            let result = vm.pipelineResult(for: activeSortConfig)
+            
+            if let flatItems = result.items {
+                flatItemsSection(items: flatItems)
+            } else {
+                pipelineGroupsView(groups: result.groups, level: 1)
+                
+                if !result.ungrouped.isEmpty {
+                    flatItemsSection(items: result.ungrouped)
+                }
+            }
         }
     }
     
-    // MARK: - Category Only Section
+    // MARK: - Pipeline Groups View
     
     @ViewBuilder
-    private var categoryOnlySection: some View {
-        if let vm = detailViewModel {
-            let groups = vm.groupedByCategory
-            ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
-                categoryHeader(category: group.category, itemCount: group.items.count)
+    private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int) -> some View {
+        ForEach(Array(groups.enumerated()), id: \.element.key) { _, group in
+            if level == 1 {
+                level1Header(group: group)
+                
+                let groupKey = group.key
+                let isCollapsed = collapsedStores.contains(groupKey)
+                if !isCollapsed {
+                    if let subGroups = group.subGroups {
+                        pipelineGroupsView(groups: subGroups, level: level + 1)
+                    } else if let items = group.items {
+                        ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                            itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        Task {
+                                            if await detailViewModel?.deleteItem(item) != nil {
+                                                registerDeleteUndo(for: item)
+                                            }
+                                        }
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(Color.clear)
+                        }
+                    }
+                }
+            } else {
+                categoryHeader(label: group.label, color: group.color ?? "#9e9e9e", itemCount: (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0))
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
                 
-                ForEach(Array(group.items.enumerated()), id: \.element.id) { idx, item in
-                    itemRow(item: item, isChecked: false, showSeparator: idx < group.items.count - 1)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                Task {
-                                    if await detailViewModel?.deleteItem(item) != nil {
-                                        registerDeleteUndo(for: item)
+                if let subGroups = group.subGroups {
+                    pipelineGroupsView(groups: subGroups, level: level + 1)
+                } else if let items = group.items {
+                    ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                        itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    Task {
+                                        if await detailViewModel?.deleteItem(item) != nil {
+                                            registerDeleteUndo(for: item)
+                                        }
                                     }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
                             }
-                        }
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                    }
                 }
             }
         }
+    }
+    
+    // MARK: - Level 1 Header
+    
+    @ViewBuilder
+    private func level1Header(group: SortPipeline.SortGroup) -> some View {
+        let groupKey = group.key
+        let isCollapsed = collapsedStores.contains(groupKey)
+        let itemCount = countItems(in: group)
+        let total = totalPrice(in: group)
+        
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                if isCollapsed {
+                    collapsedStores.remove(groupKey)
+                } else {
+                    collapsedStores.insert(groupKey)
+                }
+            }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(isCollapsed ? 0 : 90))
+                
+                Circle()
+                    .fill(Color(hex: group.color ?? "#9e9e9e"))
+                    .frame(width: 10, height: 10)
+                
+                Text(group.label)
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                
+                Text("(\(itemCount))")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                Spacer()
+                
+                if total > Decimal.zero {
+                    Text(formatPrice(total))
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color(hex: "#3D7A63"))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Color(.secondarySystemGroupedBackground))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .listRowInsets(EdgeInsets())
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
+    }
+    
+    // MARK: - Group Helpers
+    
+    private func countItems(in group: SortPipeline.SortGroup) -> Int {
+        if let items = group.items {
+            return items.count
+        }
+        if let subGroups = group.subGroups {
+            return subGroups.reduce(0) { $0 + countItems(in: $1) }
+        }
+        return 0
+    }
+    
+    private func totalPrice(in group: SortPipeline.SortGroup) -> Decimal {
+        if let items = group.items {
+            return items.reduce(Decimal.zero) { $0 + ($1.price ?? .zero) * Decimal($1.quantity) }
+        }
+        if let subGroups = group.subGroups {
+            return subGroups.reduce(Decimal.zero) { $0 + totalPrice(in: $1) }
+        }
+        return Decimal.zero
+    }
+    
+    private func collectAllItems(from groups: [SortPipeline.SortGroup]) -> [Item] {
+        var result: [Item] = []
+        for group in groups {
+            if let items = group.items { result.append(contentsOf: items) }
+            if let subGroups = group.subGroups { result.append(contentsOf: collectAllItems(from: subGroups)) }
+        }
+        return result
     }
     
     // MARK: - Flat Items Section
@@ -380,105 +461,20 @@ struct ListDetailView: View {
         }
     }
     
-    // MARK: - Store Header
-    
-    private func storeHeader(
-        store: Store?,
-        items: [Item],
-        isCollapsed: Bool,
-        onTap: @escaping () -> Void
-    ) -> some View {
-        let total = items.reduce(Decimal.zero) { sum, item in
-            sum + (item.price ?? Decimal.zero) * Decimal(item.quantity)
-        }
-        
-        return Button(action: onTap) {
-            HStack(spacing: 10) {
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .rotationEffect(.degrees(isCollapsed ? 0 : 90))
-                
-                Circle()
-                    .fill(Color(hex: store?.color ?? "#9e9e9e"))
-                    .frame(width: 10, height: 10)
-                
-                Text(store?.name ?? "Unassigned")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                
-                Text("(\(items.count))")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                
-                Spacer()
-                
-                if total > Decimal.zero {
-                    Text(formatPrice(total))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color(hex: "#3D7A63"))
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.secondarySystemGroupedBackground))
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-    }
-    
-    // MARK: - Category Groups View
-    
-    private func categoryGroupsView(items: [Item], store: Store?) -> some View {
-        let categoryGroups = detailViewModel?.groupByCategory(items, store: store) ?? []
-        
-        return ForEach(Array(categoryGroups.enumerated()), id: \.offset) { index, group in
-            let category = group.category
-            let categoryItems = group.items
-            
-            categoryHeader(category: category, itemCount: categoryItems.count)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            
-            ForEach(Array(categoryItems.enumerated()), id: \.element.id) { idx, item in
-                itemRow(item: item, isChecked: false, showSeparator: idx < categoryItems.count - 1)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            Task {
-                                if await detailViewModel?.deleteItem(item) != nil {
-                                    registerDeleteUndo(for: item)
-                                }
-                            }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-            }
-        }
-    }
-    
     // MARK: - Category Header
     
-    private func categoryHeader(category: CategoryDef, itemCount: Int) -> some View {
+    private func categoryHeader(label: String, color: String, itemCount: Int) -> some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(Color(hex: category.color))
+                .fill(Color(hex: color))
                 .frame(width: 8, height: 8)
-            
-            Text(category.name)
+            Text(label)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundStyle(.secondary)
-            
             Text("(\(itemCount))")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
-            
             Spacer()
         }
         .padding(.horizontal, 16)
@@ -840,63 +836,16 @@ struct ListDetailView: View {
         return "None"
     }
     
-    // MARK: - Checked Items Section
-    
-    @ViewBuilder
-    private var checkedItemsSection: some View {
-        if let vm = detailViewModel {
-            let checkedItems = vm.checkedItems
-            
-            HStack {
-                Text("Checked (\(checkedItems.count))")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                
-                Spacer()
-                
-                Button("Clear checked") {
-                    showClearCheckedAlert = true
-                }
-                .font(.subheadline)
-                .foregroundStyle(.red)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .padding(.top, 8)
-            .background(Color(.secondarySystemGroupedBackground))
-            .listRowInsets(EdgeInsets())
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            
-            ForEach(Array(checkedItems.enumerated()), id: \.element.id) { idx, item in
-                itemRow(item: item, isChecked: true, showSeparator: idx < checkedItems.count - 1)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            Task {
-                                if await detailViewModel?.deleteItem(item) != nil {
-                                    registerDeleteUndo(for: item)
-                                }
-                            }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-            }
-        }
-    }
-    
     // MARK: - Sorted Checked Section
     
     @ViewBuilder
     private var sortedCheckedSection: some View {
         if let vm = detailViewModel {
-            let sortedChecked = vm.sortedCheckedItems(for: activeSortMode)
+            let result = vm.checkedPipelineResult(for: activeSortConfig)
+            let allChecked = result.items ?? collectAllItems(from: result.groups) + result.ungrouped
             
             HStack {
-                Text("Checked (\(sortedChecked.count))")
+                Text("Checked (\(allChecked.count))")
                     .font(.headline)
                     .foregroundStyle(.secondary)
                 
@@ -916,8 +865,8 @@ struct ListDetailView: View {
             .listRowSeparator(.hidden)
             .listRowBackground(Color.clear)
             
-            ForEach(Array(sortedChecked.enumerated()), id: \.element.id) { idx, item in
-                itemRow(item: item, isChecked: true, showSeparator: idx < sortedChecked.count - 1)
+            ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
+                itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
                             Task {
@@ -977,26 +926,33 @@ struct ListDetailView: View {
     
     private var sortMenu: some View {
         Menu {
-            ForEach(SortMode.allCases, id: \.self) { mode in
+            let presets: [(label: String, config: [SortLevel])] = [
+                ("Store → Category → Name", [.store, .category, .name]),
+                ("Category → Name", [.category, .name]),
+                ("Alphabetical", [.name]),
+                ("Date Added", [.date])
+            ]
+            
+            ForEach(Array(presets.enumerated()), id: \.offset) { _, preset in
                 Button {
                     Task {
-                        await selectSortMode(mode)
+                        await selectSortConfig(preset.config)
                     }
                 } label: {
                     HStack {
-                        Text(mode.label)
-                        if activeSortMode == mode {
+                        Text(preset.label)
+                        if activeSortConfig == preset.config {
                             Image(systemName: "checkmark")
                         }
                     }
                 }
             }
-
-            if list.sortMode != nil {
+            
+            if list.sortConfig != nil {
                 Divider()
                 Button {
                     Task {
-                        await selectSortMode(nil)
+                        await selectSortConfig(nil)
                     }
                 } label: {
                     Text("Use default")
@@ -1134,19 +1090,19 @@ struct ListDetailView: View {
     
     // MARK: - Actions
     
-    private func selectSortMode(_ mode: SortMode?) async {
+    private func selectSortConfig(_ config: [SortLevel]?) async {
         do {
-            try await PreferenceService.updateListSortMode(listId: list.id, mode: mode)
-            if let mode {
-                activeSortMode = mode
+            try await PreferenceService.updateListSortConfig(listId: list.id, config: config)
+            if let config = config {
+                activeSortConfig = config
             } else {
-                activeSortMode = PreferenceService.effectiveSortMode(
-                    for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortMode: nil, createdAt: list.createdAt),
+                activeSortConfig = PreferenceService.effectiveSortConfig(
+                    for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortConfig: nil, createdAt: list.createdAt),
                     userPreferences: userPreferences
                 )
             }
         } catch {
-            print("[ListDetailView] Failed to update sort mode: \(error.localizedDescription)")
+            print("[ListDetailView] Failed to update sort config: \(error.localizedDescription)")
         }
     }
     
@@ -1187,7 +1143,7 @@ struct ListDetailView: View {
         do {
             let prefs = try await PreferenceService.fetchUserPreferences()
             userPreferences = prefs
-            activeSortMode = PreferenceService.effectiveSortMode(for: list, userPreferences: prefs)
+            activeSortConfig = PreferenceService.effectiveSortConfig(for: list, userPreferences: prefs)
         } catch {
             print("[ListDetailView] Failed to load sort preferences: \(error.localizedDescription)")
         }

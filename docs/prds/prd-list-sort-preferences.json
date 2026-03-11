@@ -237,8 +237,10 @@
         "With system default config, output is identical to current behavior"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T18:30:00Z",
+      "notes": "Replaced v1 sort mode logic in ListDetailViewModel (removed 6 computed properties/methods, added pipelineResult/checkedPipelineResult). Rewrote ListDetailView rendering with recursive pipelineGroupsView, level1Header, pipeline-driven checked section. Removed all SortMode references. Interim sort menu with 4 presets until US-010.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -59,131 +59,16 @@ final class ListDetailViewModel {
         return result.sorted { $0.localizedCaseInsensitiveCompare($1) == .orderedAscending }
     }
     
-    /// Groups unchecked items by storeId, ordered by store's sortOrder, nil store at end.
-    var groupedByStore: [(store: Store?, items: [Item])] {
-        var storeGroups: [UUID: [Item]] = [:]
-        var noStoreItems: [Item] = []
-        
-        for item in uncheckedItems {
-            if let storeId = item.storeId {
-                storeGroups[storeId, default: []].append(item)
-            } else {
-                noStoreItems.append(item)
-            }
-        }
-        
-        // Sort stores by sortOrder
-        let sortedStores = stores.sorted { $0.sortOrder < $1.sortOrder }
-        
-        var result: [(store: Store?, items: [Item])] = []
-        for store in sortedStores {
-            if let items = storeGroups[store.id], !items.isEmpty {
-                result.append((store: store, items: items))
-            }
-        }
-        
-        if !noStoreItems.isEmpty {
-            result.append((store: nil, items: noStoreItems))
-        }
-        
-        return result
+    // MARK: - Pipeline Methods
+    
+    /// Applies the sort pipeline to unchecked items with the given effective config.
+    func pipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
+        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores)
     }
     
-    /// Groups unchecked items by category only (no store sections), items sorted by addedAt ascending within each group.
-    var groupedByCategory: [(category: CategoryDef, items: [Item])] {
-        let categoryList = CategoryDefinitions.defaults
-        var categoryGroups: [String: [Item]] = [:]
-        var otherItems: [Item] = []
-        
-        let categoryKeys = Set(categoryList.map { $0.key })
-        
-        for item in uncheckedItems {
-            if let category = item.category, categoryKeys.contains(category) {
-                categoryGroups[category, default: []].append(item)
-            } else {
-                otherItems.append(item)
-            }
-        }
-        
-        var result: [(category: CategoryDef, items: [Item])] = []
-        for categoryDef in categoryList {
-            if var groupItems = categoryGroups[categoryDef.key], !groupItems.isEmpty {
-                groupItems.sort { $0.addedAt < $1.addedAt }
-                result.append((category: categoryDef, items: groupItems))
-            }
-        }
-        
-        if !otherItems.isEmpty {
-            otherItems.sort { $0.addedAt < $1.addedAt }
-            let otherCategory = categoryList.first { $0.key == "other" }
-                ?? CategoryDef(key: "other", name: "Other", color: "#9e9e9e", keywords: [])
-            result.append((category: otherCategory, items: otherItems))
-        }
-        
-        return result
-    }
-    
-    /// Unchecked items sorted A–Z by name (case-insensitive). Flat list, no grouping.
-    var sortedAlpha: [Item] {
-        uncheckedItems.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-    }
-    
-    /// Unchecked items sorted by addedAt descending (newest first). Flat list, no grouping.
-    var sortedByDateAdded: [Item] {
-        uncheckedItems.sorted { $0.addedAt > $1.addedAt }
-    }
-    
-    // MARK: - Methods
-    
-    /// Groups items by category using store's categories or defaults.
-    func groupByCategory(_ items: [Item], store: Store?) -> [(category: CategoryDef, items: [Item])] {
-        let categoryList: [CategoryDef]
-        if let store = store, !store.categories.isEmpty {
-            categoryList = store.categories
-        } else {
-            categoryList = CategoryDefinitions.defaults
-        }
-        
-        var categoryGroups: [String: [Item]] = [:]
-        var otherItems: [Item] = []
-        
-        let categoryKeys = Set(categoryList.map { $0.key })
-        
-        for item in items {
-            if let category = item.category, categoryKeys.contains(category) {
-                categoryGroups[category, default: []].append(item)
-            } else {
-                otherItems.append(item)
-            }
-        }
-        
-        var result: [(category: CategoryDef, items: [Item])] = []
-        for categoryDef in categoryList {
-            if let groupItems = categoryGroups[categoryDef.key], !groupItems.isEmpty {
-                result.append((category: categoryDef, items: groupItems))
-            }
-        }
-        
-        // Add "Other" group at the end if there are uncategorized items
-        if !otherItems.isEmpty {
-            let otherCategory = categoryList.first { $0.key == "other" }
-                ?? CategoryDef(key: "other", name: "Other", color: "#9e9e9e", keywords: [])
-            result.append((category: otherCategory, items: otherItems))
-        }
-        
-        return result
-    }
-    
-    /// Checked items sorted according to the given sort mode.
-    func sortedCheckedItems(for sortMode: SortMode) -> [Item] {
-        switch sortMode {
-        case .alpha:
-            return checkedItems.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-        case .dateAdded:
-            return checkedItems.sorted { $0.addedAt > $1.addedAt }
-        case .storeCategory, .category:
-            return checkedItems
-        }
+    /// Applies the sort pipeline to checked items with the given effective config.
+    func checkedPipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
+        SortPipeline.apply(items: checkedItems, config: config, stores: stores)
     }
     
     // MARK: - Initialization
