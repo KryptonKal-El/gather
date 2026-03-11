@@ -4,6 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { supabase } from '../services/supabase.js';
 import { getUserPreferences, getEffectiveSortMode, updateListSortMode, updateDefaultSortMode } from '../services/preferences.js';
 
 /**
@@ -40,6 +41,34 @@ export const useSortPreferences = () => {
     };
     load();
     return () => { cancelled = true; };
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel(`user-preferences-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_preferences',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.eventType === 'DELETE') {
+            setUserPreferences({ user_id: user.id, default_sort_mode: 'store-category' });
+          } else {
+            setUserPreferences(payload.new);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const effectiveSortMode = useCallback(

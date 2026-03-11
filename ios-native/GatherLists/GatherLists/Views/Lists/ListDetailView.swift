@@ -1,4 +1,6 @@
 import SwiftUI
+import Supabase
+import Realtime
 
 /// Detail view for a single list showing items grouped by store and category.
 struct ListDetailView: View {
@@ -37,6 +39,7 @@ struct ListDetailView: View {
     // Sort preferences
     @State private var userPreferences: UserPreferences?
     @State private var activeSortMode: SortMode = .storeCategory
+    @State private var preferencesTask: Task<Void, Never>?
     
     private let unassignedKey = "__unassigned__"
     
@@ -213,6 +216,11 @@ struct ListDetailView: View {
             await initializeDetailViewModel()
             await loadShareInfo()
             await loadSortPreferences()
+            await subscribeToPreferences()
+        }
+        .onDisappear {
+            preferencesTask?.cancel()
+            preferencesTask = nil
         }
     }
     
@@ -1182,6 +1190,27 @@ struct ListDetailView: View {
             activeSortMode = PreferenceService.effectiveSortMode(for: list, userPreferences: prefs)
         } catch {
             print("[ListDetailView] Failed to load sort preferences: \(error.localizedDescription)")
+        }
+    }
+    
+    private func subscribeToPreferences() async {
+        guard let userId = try? await SupabaseManager.shared.client.auth.session.user.id else { return }
+        let client = SupabaseManager.shared.client
+        let channel = client.realtimeV2.channel("user-preferences-\(userId.uuidString)")
+        
+        let changes = channel.postgresChange(
+            AnyAction.self,
+            schema: "public",
+            table: "user_preferences",
+            filter: "user_id=eq.\(userId.uuidString)"
+        )
+        
+        preferencesTask = Task {
+            await channel.subscribe()
+            for await _ in changes {
+                PreferenceService.clearCache()
+                await loadSortPreferences()
+            }
         }
     }
     

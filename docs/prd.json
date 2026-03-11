@@ -387,9 +387,11 @@
         "When a per-list override is changed, other devices viewing that list see the updated sort",
         "No full page reload required — sort updates reactively"
       ],
+      "status": "completed",
+      "completedAt": "2026-03-11T19:00:00Z",
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "React: Added realtime subscription to user_preferences in useSortPreferences hook. Swift: Added realtime subscription in ListDetailView with cache clearing and preference re-fetch. Per-list sort_mode already syncs via existing lists table subscriptions.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

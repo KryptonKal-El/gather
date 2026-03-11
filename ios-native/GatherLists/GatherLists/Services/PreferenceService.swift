@@ -25,6 +25,10 @@ struct PreferenceService {
         return result
     }
     
+    static func clearCache() {
+        cachedPreferences = nil
+    }
+    
     static func updateDefaultSortMode(_ mode: SortMode) async throws {
         let userId = try await client.auth.session.user.id
         let upsertData = UserPreferencesUpsert(userId: userId, defaultSortMode: mode.rawValue)
