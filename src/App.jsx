@@ -43,7 +43,7 @@ export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
-  const { effectiveSortMode, updateListSort } = useSortPreferences();
+  const { effectiveSortConfig, updateListSort } = useSortPreferences();
   const { pushUndo } = useUndo();
   const [sharingListId, setSharingListId] = useState(null);
   const [sharingCollectionId, setSharingCollectionId] = useState(null);
@@ -324,12 +324,12 @@ export const App = () => {
     }
   };
 
-  const handleSortSelect = async (mode) => {
+  const handleSortSelect = async (config) => {
     if (!activeList) return;
     try {
-      await updateListSort(activeList.id, mode);
+      await updateListSort(activeList.id, config);
     } catch (err) {
-      console.error('Failed to update sort mode:', err);
+      console.error('Failed to update sort config:', err);
     }
   };
 
@@ -380,8 +380,8 @@ export const App = () => {
                 stores={state.stores}
                 history={state.history}
                 suggestions={suggestions}
-                sortMode={activeList ? effectiveSortMode(activeList) : 'store-category'}
-                listSortMode={activeList?.sortMode ?? null}
+                sortConfig={activeList ? effectiveSortConfig(activeList) : null}
+                listSortConfig={activeList?.sortConfig ?? null}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
                 onToggle={handleToggleItem}
@@ -654,8 +654,8 @@ export const App = () => {
                   {activeList.name}
                 </h2>
                 <SortPicker
-                  currentMode={effectiveSortMode(activeList)}
-                  hasOverride={activeList.sortMode != null}
+                  currentConfig={effectiveSortConfig(activeList)}
+                  hasOverride={activeList.sortConfig != null}
                   onSelect={handleSortSelect}
                 />
               </div>
@@ -663,7 +663,7 @@ export const App = () => {
               <ShoppingList
                 items={activeList.items}
                 stores={state.stores}
-                sortMode={effectiveSortMode(activeList)}
+                sortConfig={effectiveSortConfig(activeList)}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}

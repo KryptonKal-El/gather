@@ -14,8 +14,8 @@ export const MobileListDetail = ({
   stores,
   history,
   suggestions,
-  sortMode,
-  listSortMode,
+  sortConfig,
+  listSortConfig,
   isGuest,
   onBack,
   onAddItem,
@@ -58,8 +58,8 @@ export const MobileListDetail = ({
           {list.name}
         </h1>
         <SortPicker
-          currentMode={sortMode}
-          hasOverride={listSortMode != null}
+          currentConfig={sortConfig}
+          hasOverride={listSortConfig != null}
           onSelect={onSortSelect}
         />
         {!isGuest && (
@@ -94,7 +94,7 @@ export const MobileListDetail = ({
         <ShoppingList
           items={list.items}
           stores={stores}
-          sortMode={sortMode}
+          sortConfig={sortConfig}
           onToggle={onToggle}
           onRemove={onRemove}
           onUpdateCategory={onUpdateCategory}
@@ -120,8 +120,8 @@ MobileListDetail.propTypes = {
   stores: PropTypes.array.isRequired,
   history: PropTypes.array.isRequired,
   suggestions: PropTypes.array.isRequired,
-  sortMode: PropTypes.string,
-  listSortMode: PropTypes.string,
+  sortConfig: PropTypes.arrayOf(PropTypes.string),
+  listSortConfig: PropTypes.arrayOf(PropTypes.string),
   isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,
@@ -138,8 +138,8 @@ MobileListDetail.propTypes = {
 };
 
 MobileListDetail.defaultProps = {
-  sortMode: 'store-category',
-  listSortMode: null,
+  sortConfig: null,
+  listSortConfig: null,
   isGuest: false,
   restoredItemIds: null,
   onRestoreAnimationDone: null,
