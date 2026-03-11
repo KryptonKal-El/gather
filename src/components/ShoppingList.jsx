@@ -125,6 +125,8 @@ const computeSubtotal = (items) => {
  * Supported modes:
  *  - 'store-category' (default): grouped by store → category
  *  - 'category': grouped by category only, no store sections
+ *  - 'alpha': flat A–Z by name, no grouping headers
+ *  - 'date-added': flat by added_at descending (newest first), no grouping headers
  * Checked items always appear at the bottom regardless of mode.
  */
 export const ShoppingList = ({
@@ -217,6 +219,17 @@ export const ShoppingList = ({
     return categoryGrouped;
   };
 
+  // Sort checked items based on mode
+  const sortedCheckedItems = (() => {
+    if (sortMode === 'alpha') {
+      return [...checkedItems].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' }));
+    }
+    if (sortMode === 'date-added') {
+      return [...checkedItems].sort((a, b) => new Date(b.added_at ?? 0) - new Date(a.added_at ?? 0));
+    }
+    return checkedItems;
+  })();
+
   return (
     <div className={styles.list}>
       {/* Category mode: flat category grouping (no store sections) */}
@@ -235,6 +248,50 @@ export const ShoppingList = ({
           restoredItemIds={restoredItemIds}
           onRestoreAnimationDone={onRestoreAnimationDone}
         />
+      )}
+
+      {/* Alpha mode: flat A–Z by name */}
+      {sortMode === 'alpha' && unchecked.length > 0 && (
+        <>
+          {[...unchecked]
+            .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' }))
+            .map((item) => (
+              <ShoppingItem
+                key={item.id}
+                item={item}
+                stores={stores}
+                isRestored={restoredItemIds?.has(item.id)}
+                onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
+                onToggle={() => onToggle(item.id)}
+                onRemove={() => onRemove(item.id)}
+                onUpdateCategory={onUpdateCategory}
+                onUpdateStore={onUpdateStore}
+                onUpdateItem={onUpdateItem}
+              />
+            ))}
+        </>
+      )}
+
+      {/* Date-added mode: flat by added_at descending (newest first) */}
+      {sortMode === 'date-added' && unchecked.length > 0 && (
+        <>
+          {[...unchecked]
+            .sort((a, b) => new Date(b.added_at ?? 0) - new Date(a.added_at ?? 0))
+            .map((item) => (
+              <ShoppingItem
+                key={item.id}
+                item={item}
+                stores={stores}
+                isRestored={restoredItemIds?.has(item.id)}
+                onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
+                onToggle={() => onToggle(item.id)}
+                onRemove={() => onRemove(item.id)}
+                onUpdateCategory={onUpdateCategory}
+                onUpdateStore={onUpdateStore}
+                onUpdateItem={onUpdateItem}
+              />
+            ))}
+        </>
       )}
 
       {/* Store-category mode: store sections (in store order) */}
@@ -331,7 +388,7 @@ export const ShoppingList = ({
               />
             )}
           </div>
-          {checkedItems.map((item) => (
+          {sortedCheckedItems.map((item) => (
             <ShoppingItem
               key={item.id}
               item={item}
