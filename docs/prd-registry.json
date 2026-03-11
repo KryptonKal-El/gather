@@ -440,6 +440,18 @@
       "currentStory": null,
       "dependsOn": ["prd-item-units"],
       "notes": "All 10 stories complete. Spoonacular search-recipes edge function, React+Swift search UI with list/grid toggle, recipe preview with detail fetch, save-to-collection with collection picker, add-ingredients-to-list with quantity+unit mapping, Spoonacular attribution. Both web and iOS platforms."
+    },
+    {
+      "id": "prd-list-sort-preferences",
+      "name": "List Item Sort Preferences",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-list-sort-preferences.md",
+      "jsonPath": "docs/prds/prd-list-sort-preferences.json",
+      "branchName": "feature/list-sort-preferences",
+      "createdAt": "2026-03-11",
+      "updatedAt": "2026-03-11",
+      "startedAt": "2026-03-11T12:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }

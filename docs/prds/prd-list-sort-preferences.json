@@ -14,10 +14,8 @@
         "A trigger or application logic upserts a row on first access (no row required at signup — handle missing row gracefully)"
       ],
       "priority": 1,
-      "status": "completed",
-      "completedAt": "2026-03-11T12:05:00Z",
-      "passes": true,
-      "notes": "Migration creates user_preferences table with RLS, CHECK constraint, updated_at trigger, realtime publication",
+      "passes": false,
+      "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
