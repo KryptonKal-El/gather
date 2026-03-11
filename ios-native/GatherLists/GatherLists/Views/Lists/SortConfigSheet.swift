@@ -80,9 +80,11 @@ struct SortConfigSheet: View {
                 }
             }
             .environment(\.editMode, .constant(.active))
-            .scrollContentBackground(.visible)
+            .scrollContentBackground(.hidden)
+            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Sort Configuration")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color(UIColor.systemGroupedBackground), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
