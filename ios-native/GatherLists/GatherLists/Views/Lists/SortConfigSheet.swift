@@ -26,7 +26,7 @@ struct SortConfigSheet: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            Form {
                 Section {
                     ForEach(levels, id: \.self) { level in
                         HStack {
@@ -44,7 +44,7 @@ struct SortConfigSheet: View {
                 }
                 
                 if canAddMore {
-                    Section {
+                    Section("Add Level") {
                         ForEach(unusedLevels, id: \.self) { level in
                             Button {
                                 addLevel(level)
@@ -57,8 +57,6 @@ struct SortConfigSheet: View {
                                 }
                             }
                         }
-                    } header: {
-                        Text("Add Level")
                     }
                 }
                 
@@ -80,12 +78,8 @@ struct SortConfigSheet: View {
                 }
             }
             .environment(\.editMode, .constant(.active))
-            .scrollContentBackground(.hidden)
-            .background(Color(UIColor.systemGroupedBackground))
             .navigationTitle("Sort Configuration")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color(UIColor.systemGroupedBackground), for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
@@ -95,8 +89,6 @@ struct SortConfigSheet: View {
                 levels = activeSortConfig
             }
         }
-        .presentationDetents([.medium, .large])
-        .presentationBackground(Color(UIColor.systemGroupedBackground))
     }
     
     private func moveLevel(from source: IndexSet, to destination: Int) {
