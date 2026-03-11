@@ -109,8 +109,10 @@
         "Falls back to system default for empty or invalid config"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T17:00:00Z",
+      "notes": "SortPipeline.swift (356 lines) with SortLevel enum, SortPipeline.apply(), normalize(), isValid(), SortGroup, PipelineResult. Registered in pbxproj.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
