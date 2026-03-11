@@ -1,7 +1,7 @@
 {
   "project": "Gather",
   "branchName": "feature/list-sort-preferences",
-  "description": "Configurable sort modes for shopping list items with global default and per-list overrides, synced across devices via Supabase",
+  "description": "Configurable 3-level sort pipeline for shopping list items with global default and per-list overrides, synced across devices via Supabase",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -9,9 +9,9 @@
       "title": "User Preferences Table",
       "description": "As a developer, I need a user_preferences table in Supabase so sort preferences (and future preferences) can be stored server-side and synced across devices.",
       "acceptanceCriteria": [
-        "New migration creates user_preferences table with columns: user_id (uuid PK, FK to auth.users), default_sort_mode (text, default 'store-category'), created_at, updated_at",
+        "New migration creates user_preferences table with columns: user_id (uuid PK, FK to auth.users), default_sort_config (jsonb, default '[\"store\", \"category\", \"name\"]'), created_at, updated_at",
         "RLS policies: users can only read/update their own row",
-        "A trigger or application logic upserts a row on first access (no row required at signup — handle missing row gracefully)"
+        "Handle missing row gracefully in application logic (no row = system default)"
       ],
       "priority": 1,
       "passes": false,
@@ -34,10 +34,10 @@
     },
     {
       "id": "US-002",
-      "title": "Per-List Sort Override Column",
-      "description": "As a developer, I need a sort_mode column on the lists table so individual lists can override the global default.",
+      "title": "Per-List Sort Config Column",
+      "description": "As a developer, I need a sort_config column on the lists table so individual lists can override the global default.",
       "acceptanceCriteria": [
-        "New migration adds sort_mode (text, nullable, default NULL) to lists table",
+        "New migration adds sort_config (jsonb, nullable, default NULL) to lists table",
         "NULL means 'use global default' — no data migration needed",
         "Existing RLS policies on lists continue to work without modification"
       ],
@@ -62,13 +62,16 @@
     },
     {
       "id": "US-003",
-      "title": "Preference Service Layer (React)",
-      "description": "As a developer, I need service functions to read/write sort preferences from Supabase on the React web app.",
+      "title": "Sort Pipeline Engine (React)",
+      "description": "As a developer, I need a sort engine that takes a list of items and a sort config and returns grouped/sorted items for rendering.",
       "acceptanceCriteria": [
-        "getUserPreferences(userId) — fetches or returns defaults if no row exists",
-        "updateDefaultSortMode(userId, mode) — upserts the global default",
-        "updateListSortMode(listId, mode) — sets per-list override (null to clear)",
-        "getEffectiveSortMode(listId) — resolves per-list override → global default → system default"
+        "Utility function applySortPipeline(items, sortConfig, stores, categories) returns a nested structure: { groups: [{ key, label, subGroups: [{ key, label, items }] }] } (depth matches number of grouping levels)",
+        "Level 1 produces top-level groups with headers",
+        "Level 2 produces sub-groups within Level 1 groups with sub-headers",
+        "Level 3 sorts items within the lowest group (no headers)",
+        "With only 1 level that is name or date, returns a flat sorted list (no groups)",
+        "Works for all valid combinations of 1–3 levels from the 4 options",
+        "Falls back to system default ['store', 'category', 'name'] for empty or invalid config"
       ],
       "priority": 3,
       "passes": false,
@@ -86,17 +89,18 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": null
+      "testIntensity": "high",
+      "testIntensityReason": "Core algorithm with many valid combinations that must all produce correct output"
     },
     {
       "id": "US-004",
-      "title": "Preference Service Layer (Swift iOS)",
-      "description": "As a developer, I need service functions to read/write sort preferences from Supabase on the iOS app.",
+      "title": "Sort Pipeline Engine (Swift iOS)",
+      "description": "As a developer, I need the same sort pipeline engine for the iOS app.",
       "acceptanceCriteria": [
-        "PreferenceService with fetchUserPreferences(), updateDefaultSortMode(_:), updateListSortMode(listId:mode:), effectiveSortMode(for:) methods",
-        "Graceful handling when no user_preferences row exists (use system defaults)",
-        "Preferences cached locally so repeated reads don't hit the network"
+        "SortPipeline utility with apply(items:config:stores:categories:) method returning a nested grouped structure",
+        "Same grouping/sorting behavior as the React implementation for all valid configurations",
+        "Level 1 = section headers, Level 2 = sub-headers, Level 3 = sort within lowest group",
+        "Falls back to system default for empty or invalid config"
       ],
       "priority": 4,
       "passes": false,
@@ -114,19 +118,18 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": null
+      "testIntensity": "high",
+      "testIntensityReason": "Must match React behavior exactly across all valid combinations"
     },
     {
       "id": "US-005",
-      "title": "Sort Logic — Category Only Mode (React)",
-      "description": "As a user, I want to sort my list by category only so I can see all items grouped by category regardless of store.",
+      "title": "Preference Service Layer (React)",
+      "description": "As a developer, I need service functions to read/write sort preferences from Supabase on the React web app.",
       "acceptanceCriteria": [
-        "Items grouped by category using default category order (from categories.js)",
-        "Items with no category fall under 'Other' group at the end",
-        "Within each category, items appear in added_at ascending order",
-        "Checked items remain at the bottom, ungrouped",
-        "Verify in browser"
+        "getUserPreferences(userId) — fetches user_preferences row or returns defaults if no row exists",
+        "updateDefaultSortConfig(userId, config) — upserts the global default sort config",
+        "updateListSortConfig(listId, config) — sets per-list sort config override (null to clear)",
+        "getEffectiveSortConfig(list, userPreferences) — resolves per-list → global → system default"
       ],
       "priority": 5,
       "passes": false,
@@ -149,13 +152,12 @@
     },
     {
       "id": "US-006",
-      "title": "Sort Logic — Alphabetical Mode (React)",
-      "description": "As a user, I want to sort my list alphabetically so I can quickly scan for items by name.",
+      "title": "Preference Service Layer (Swift iOS)",
+      "description": "As a developer, I need service functions to read/write sort preferences from Supabase on the iOS app.",
       "acceptanceCriteria": [
-        "Items displayed in a flat list sorted A–Z by name (case-insensitive)",
-        "No grouping headers",
-        "Checked items remain at the bottom, also sorted A–Z",
-        "Verify in browser"
+        "PreferenceService with fetchUserPreferences(), updateDefaultSortConfig(_:), updateListSortConfig(listId:config:), effectiveSortConfig(for:userPreferences:) methods",
+        "Graceful handling when no user_preferences row exists (use system defaults)",
+        "Preferences cached locally so repeated reads don't hit the network"
       ],
       "priority": 6,
       "passes": false,
@@ -178,12 +180,15 @@
     },
     {
       "id": "US-007",
-      "title": "Sort Logic — Date Added Mode (React)",
-      "description": "As a user, I want to sort my list by date added so I can see my most recently added items first.",
+      "title": "Wire Sort Pipeline into ShoppingList (React)",
+      "description": "As a developer, I need to replace the existing hardcoded Store → Category grouping in ShoppingList.jsx with the sort pipeline engine, driven by the effective sort config for the current list.",
       "acceptanceCriteria": [
-        "Items displayed in a flat list sorted by added_at descending (newest first)",
-        "No grouping headers",
-        "Checked items remain at the bottom, sorted by added_at descending",
+        "ShoppingList.jsx calls applySortPipeline() with the effective sort config instead of the current hardcoded grouping logic",
+        "Renders section headers for Level 1 groups, sub-headers for Level 2 groups",
+        "Flat sort modes (single level name or date) render without any group headers",
+        "Existing collapse/expand behavior for store sections still works when store is Level 1",
+        "Checked items section at the bottom uses the same sort pipeline",
+        "With system default config ['store', 'category', 'name'], output is identical to the current behavior",
         "Verify in browser"
       ],
       "priority": 7,
@@ -202,17 +207,20 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": null
+      "testIntensity": "high",
+      "testIntensityReason": "Replacing core rendering logic — must not break existing behavior"
     },
     {
       "id": "US-008",
-      "title": "Sort Logic — All Modes (Swift iOS)",
-      "description": "As a user, I want the same four sort modes available on the iOS app.",
+      "title": "Wire Sort Pipeline into ListDetailView (Swift iOS)",
+      "description": "As a developer, I need to replace the existing hardcoded grouping in ListDetailViewModel with the sort pipeline engine, driven by the effective sort config.",
       "acceptanceCriteria": [
-        "ListDetailViewModel computed properties support all four modes: store-category, category, alpha, date-added",
-        "Grouping behavior matches React web exactly for each mode",
-        "Checked items remain at the bottom in all modes"
+        "ListDetailViewModel uses SortPipeline.apply() with the effective sort config",
+        "ListDetailView renders section headers for Level 1, sub-headers for Level 2",
+        "Flat sort modes render as plain lists without section headers",
+        "Existing collapse/expand behavior works when store is Level 1",
+        "Checked items section uses the same sort pipeline",
+        "With system default config, output is identical to current behavior"
       ],
       "priority": 8,
       "passes": false,
@@ -230,19 +238,23 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "testIntensity": "medium",
-      "testIntensityReason": "Must match React behavior exactly across all 4 modes"
+      "testIntensity": "high",
+      "testIntensityReason": "Replacing core rendering logic — must match React behavior"
     },
     {
       "id": "US-009",
-      "title": "Sort Picker in List View (React)",
-      "description": "As a user, I want a sort control in the list header so I can quickly change how the current list is sorted.",
+      "title": "Sort Picker UI (React)",
+      "description": "As a user, I want a sort picker in the list header where I can configure the sort levels by adding, removing, and reordering them.",
       "acceptanceCriteria": [
-        "Sort icon button (e.g., arrow-up-down icon) visible in the list header area",
-        "Tapping opens a popover/dropdown showing the four sort options with the current selection indicated",
-        "Selecting an option immediately applies the sort and persists as a per-list override",
-        "An option to 'Use default' clears the per-list override",
-        "Works on both mobile and desktop layouts",
+        "Sort icon button in the list header area (both mobile and desktop)",
+        "Tapping opens a popover/sheet showing the current sort levels as an ordered list",
+        "Each level row has a drag handle to reorder and an X button to remove",
+        "An '+ Add Level' button shows a picker with the remaining unused options",
+        "A 'Use Default' button clears the per-list override (reverts to global default)",
+        "Changes persist immediately as a per-list override via updateListSortConfig()",
+        "The list re-sorts in real time as levels are added/removed/reordered",
+        "Maximum 3 levels; '+ Add Level' hidden when 3 are set",
+        "Each option can only appear once across all levels",
         "Verify in browser"
       ],
       "priority": 9,
@@ -266,14 +278,18 @@
     },
     {
       "id": "US-010",
-      "title": "Sort Picker in List View (Swift iOS)",
-      "description": "As a user, I want a sort control in the iOS list detail view so I can quickly change how the current list is sorted.",
+      "title": "Sort Picker UI (Swift iOS)",
+      "description": "As a user, I want a sort picker in the iOS list detail view where I can configure the sort levels.",
       "acceptanceCriteria": [
-        "Sort button in the navigation bar or list header",
-        "Tapping presents a menu/sheet with the four sort options and current selection indicated",
-        "Selecting an option applies the sort and persists as a per-list override",
-        "'Use default' option clears the per-list override",
-        "Uses native iOS patterns (e.g., Menu with Picker or action sheet)"
+        "Sort button in the navigation bar or toolbar",
+        "Tapping presents a sheet showing the current sort levels as a reorderable list",
+        "Each level row has drag-to-reorder and a delete action (swipe or button)",
+        "An 'Add Level' button shows remaining unused options",
+        "A 'Use Default' button clears the per-list override",
+        "Changes persist immediately via updateListSortConfig()",
+        "The list re-sorts in real time",
+        "Maximum 3 levels; each option used only once",
+        "Uses native iOS patterns (e.g., EditMode, onMove, onDelete)"
       ],
       "priority": 10,
       "passes": false,
@@ -296,13 +312,14 @@
     },
     {
       "id": "US-011",
-      "title": "Default Sort in Settings (React)",
-      "description": "As a user, I want to set my preferred default sort mode in Settings so all lists use it unless I override one specifically.",
+      "title": "Default Sort Config in Settings (React)",
+      "description": "As a user, I want to configure my default sort levels in Settings so all lists use my preferred sort unless I override one specifically.",
       "acceptanceCriteria": [
-        "New 'Display' section in MobileSettings (and desktop settings area) with a 'Default Sort' picker",
-        "Shows the four sort options with the current global default selected",
-        "Changing the selection updates user_preferences.default_sort_mode in Supabase",
-        "Change takes effect immediately on all lists that don't have a per-list override",
+        "New 'Display' section in MobileSettings (and desktop settings area)",
+        "Shows a 'Default Sort' control with the same level-based UI as the list sort picker (drag to reorder, add/remove levels)",
+        "Current global default is pre-populated",
+        "Changes update user_preferences.default_sort_config in Supabase",
+        "Change takes effect immediately on all lists without a per-list override",
         "Verify in browser"
       ],
       "priority": 11,
@@ -326,13 +343,13 @@
     },
     {
       "id": "US-012",
-      "title": "Default Sort in Settings (Swift iOS)",
-      "description": "As a user, I want to set my preferred default sort mode in the iOS Settings view.",
+      "title": "Default Sort Config in Settings (Swift iOS)",
+      "description": "As a user, I want to configure my default sort levels in the iOS Settings view.",
       "acceptanceCriteria": [
-        "New 'Display' section in SettingsView with a 'Default Sort' picker",
-        "Uses native segmented control or picker with the four sort options",
-        "Current global default is pre-selected",
-        "Changing the selection updates user_preferences.default_sort_mode in Supabase",
+        "New 'Display' section in SettingsView",
+        "Same level-based sort config UI as the list sort picker",
+        "Current global default is pre-populated",
+        "Changes update user_preferences.default_sort_config in Supabase",
         "Change takes effect immediately on all lists without a per-list override"
       ],
       "priority": 12,
@@ -357,10 +374,10 @@
     {
       "id": "US-013",
       "title": "Realtime Sync for Preferences",
-      "description": "As a user, I want my sort preference changes to sync across my devices so I see the same sort mode everywhere.",
+      "description": "As a user, I want my sort preference changes to sync across my devices so I see the same sort configuration everywhere.",
       "acceptanceCriteria": [
         "When the global default is changed on one device, other active sessions pick it up (via Supabase realtime subscription or re-fetch on focus)",
-        "When a per-list override is changed, other devices viewing that list see the updated sort",
+        "When a per-list override is changed, other devices viewing that list see the updated sort (per-list config travels through the existing lists realtime channel)",
         "No full page reload required — sort updates reactively"
       ],
       "priority": 13,
