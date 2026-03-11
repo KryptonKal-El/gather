@@ -16,7 +16,8 @@ struct SettingsView: View {
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
-    @State private var selectedSortMode: SortMode = .storeCategory
+    @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
+    @State private var showSortConfigSheet = false
     @State private var isLoadingPreferences = true
     
     var body: some View {
@@ -79,14 +80,19 @@ struct SettingsView: View {
                     if isLoadingPreferences {
                         ProgressView()
                     } else {
-                        Picker("Default Sort", selection: $selectedSortMode) {
-                            ForEach(SortMode.allCases, id: \.self) { mode in
-                                Text(mode.label).tag(mode)
-                            }
-                        }
-                        .onChange(of: selectedSortMode) { _, newValue in
-                            Task {
-                                try? await PreferenceService.updateDefaultSortMode(newValue)
+                        Button {
+                            showSortConfigSheet = true
+                        } label: {
+                            HStack {
+                                Text("Default Sort")
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                Text(activeSortConfig.map { levelLabel($0) }.joined(separator: " → "))
+                                    .foregroundStyle(.secondary)
+                                    .font(.subheadline)
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
                             }
                         }
                     }
@@ -141,11 +147,23 @@ struct SettingsView: View {
             } message: {
                 Text("Enter your display name")
             }
+            .sheet(isPresented: $showSortConfigSheet) {
+                SortConfigSheet(
+                    activeSortConfig: $activeSortConfig,
+                    hasOverride: false,
+                    onConfigChange: { config in
+                        if let config = config {
+                            try? await PreferenceService.updateDefaultSortConfig(config)
+                        }
+                    }
+                )
+            }
             .task {
                 do {
                     let prefs = try await PreferenceService.fetchUserPreferences()
-                    if let mode = SortMode(rawValue: prefs.defaultSortMode) {
-                        selectedSortMode = mode
+                    let levels = prefs.defaultSortConfig.compactMap { SortLevel(rawValue: $0) }
+                    if !levels.isEmpty {
+                        activeSortConfig = levels
                     }
                 } catch {
                     print("[SettingsView] Failed to load preferences: \(error.localizedDescription)")
@@ -192,6 +210,15 @@ struct SettingsView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
             )
+    }
+    
+    private func levelLabel(_ level: SortLevel) -> String {
+        switch level {
+        case .store: return "Store"
+        case .category: return "Category"
+        case .name: return "Name"
+        case .date: return "Date"
+        }
     }
     
     private func uploadAvatar(imageData: Data) async {

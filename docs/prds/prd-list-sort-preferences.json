@@ -375,8 +375,10 @@
         "Change takes effect immediately on all lists without a per-list override"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T21:15:00Z",
+      "notes": "Replaced v1 SortMode picker with SortConfigSheet presentation. Display section shows current config as Store → Category → Name summary. All v1 references removed.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
