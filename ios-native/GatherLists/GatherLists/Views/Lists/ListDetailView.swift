@@ -290,9 +290,8 @@ struct ListDetailView: View {
     
     // MARK: - Pipeline Groups View
     
-    @ViewBuilder
-    private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int) -> some View {
-        ForEach(Array(groups.enumerated()), id: \.element.key) { _, group in
+    private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int) -> AnyView {
+        AnyView(ForEach(Array(groups.enumerated()), id: \.element.key) { _, group in
             if level == 1 {
                 level1Header(group: group)
                 
@@ -349,7 +348,7 @@ struct ListDetailView: View {
                     }
                 }
             }
-        }
+        })
     }
     
     // MARK: - Level 1 Header
