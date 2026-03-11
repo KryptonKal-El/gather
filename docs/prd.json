@@ -357,9 +357,11 @@
         "Changing the selection updates user_preferences.default_sort_mode in Supabase",
         "Change takes effect immediately on all lists without a per-list override"
       ],
+      "status": "completed",
+      "completedAt": "2026-03-11T18:45:00Z",
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added Display section with Default Sort Picker to SettingsView. Loads preferences on appear, persists changes via PreferenceService.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

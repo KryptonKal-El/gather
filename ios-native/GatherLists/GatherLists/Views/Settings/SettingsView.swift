@@ -16,6 +16,8 @@ struct SettingsView: View {
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
+    @State private var selectedSortMode: SortMode = .storeCategory
+    @State private var isLoadingPreferences = true
     
     var body: some View {
         NavigationStack {
@@ -73,6 +75,23 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("Display") {
+                    if isLoadingPreferences {
+                        ProgressView()
+                    } else {
+                        Picker("Default Sort", selection: $selectedSortMode) {
+                            ForEach(SortMode.allCases, id: \.self) { mode in
+                                Text(mode.label).tag(mode)
+                            }
+                        }
+                        .onChange(of: selectedSortMode) { _, newValue in
+                            Task {
+                                try? await PreferenceService.updateDefaultSortMode(newValue)
+                            }
+                        }
+                    }
+                }
+                
                 Section {
                     Button(role: .destructive) {
                         Task {
@@ -121,6 +140,17 @@ struct SettingsView: View {
                 }
             } message: {
                 Text("Enter your display name")
+            }
+            .task {
+                do {
+                    let prefs = try await PreferenceService.fetchUserPreferences()
+                    if let mode = SortMode(rawValue: prefs.defaultSortMode) {
+                        selectedSortMode = mode
+                    }
+                } catch {
+                    print("[SettingsView] Failed to load preferences: \(error.localizedDescription)")
+                }
+                isLoadingPreferences = false
             }
         }
     }
