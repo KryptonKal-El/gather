@@ -80,8 +80,10 @@ struct SortConfigSheet: View {
                 }
             }
             .environment(\.editMode, .constant(.active))
+            .scrollContentBackground(.visible)
             .navigationTitle("Sort Configuration")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
