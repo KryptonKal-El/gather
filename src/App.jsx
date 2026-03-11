@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
+import { useSortPreferences } from './hooks/useSortPreferences.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { useUndo } from './context/UndoContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
@@ -29,6 +30,7 @@ import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
 import { OnlineRecipeSearch } from './components/OnlineRecipeSearch.jsx';
 import { OnlineRecipePreview } from './components/OnlineRecipePreview.jsx';
 import { SaveRecipeModal } from './components/SaveRecipeModal.jsx';
+import { SortPicker } from './components/SortPicker.jsx';
 import styles from './App.module.css';
 
 /**
@@ -41,6 +43,7 @@ export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
+  const { effectiveSortMode, updateListSort } = useSortPreferences();
   const { pushUndo } = useUndo();
   const [sharingListId, setSharingListId] = useState(null);
   const [sharingCollectionId, setSharingCollectionId] = useState(null);
@@ -321,6 +324,15 @@ export const App = () => {
     }
   };
 
+  const handleSortSelect = async (mode) => {
+    if (!activeList) return;
+    try {
+      await updateListSort(activeList.id, mode);
+    } catch (err) {
+      console.error('Failed to update sort mode:', err);
+    }
+  };
+
   const renderMobileContent = () => {
     if (activeTab === 'lists') {
       const showDetail = openListId && activeList;
@@ -368,6 +380,8 @@ export const App = () => {
                 stores={state.stores}
                 history={state.history}
                 suggestions={suggestions}
+                sortMode={activeList ? effectiveSortMode(activeList) : 'store-category'}
+                listSortMode={activeList?.sortMode ?? null}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
                 onToggle={handleToggleItem}
@@ -377,6 +391,7 @@ export const App = () => {
                 onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
                 onShareClick={(list) => setSharingListId(list.id)}
+                onSortSelect={handleSortSelect}
                 restoredItemIds={restoredItemIds}
                 onRestoreAnimationDone={handleRestoreAnimationDone}
               />
@@ -633,14 +648,22 @@ export const App = () => {
         <section className={styles.content}>
           {activeList ? (
             <>
-              <h2 className={styles.listTitle}>
-                {activeList.emoji && <span>{activeList.emoji} </span>}
-                {activeList.name}
-              </h2>
+              <div className={styles.listHeader}>
+                <h2 className={styles.listTitle}>
+                  {activeList.emoji && <span>{activeList.emoji} </span>}
+                  {activeList.name}
+                </h2>
+                <SortPicker
+                  currentMode={effectiveSortMode(activeList)}
+                  hasOverride={activeList.sortMode != null}
+                  onSelect={handleSortSelect}
+                />
+              </div>
               <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
               <ShoppingList
                 items={activeList.items}
                 stores={state.stores}
+                sortMode={effectiveSortMode(activeList)}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}

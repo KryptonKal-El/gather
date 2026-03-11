@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import { AddItemForm } from './AddItemForm.jsx';
 import { ShoppingList } from './ShoppingList.jsx';
 import { Suggestions } from './Suggestions.jsx';
+import { SortPicker } from './SortPicker.jsx';
 import styles from './MobileListDetail.module.css';
 
 /**
@@ -13,6 +14,8 @@ export const MobileListDetail = ({
   stores,
   history,
   suggestions,
+  sortMode,
+  listSortMode,
   isGuest,
   onBack,
   onAddItem,
@@ -23,6 +26,7 @@ export const MobileListDetail = ({
   onUpdateItem,
   onClearChecked,
   onShareClick,
+  onSortSelect,
   restoredItemIds,
   onRestoreAnimationDone,
 }) => {
@@ -53,6 +57,11 @@ export const MobileListDetail = ({
           {list.emoji && <span>{list.emoji} </span>}
           {list.name}
         </h1>
+        <SortPicker
+          currentMode={sortMode}
+          hasOverride={listSortMode != null}
+          onSelect={onSortSelect}
+        />
         {!isGuest && (
           <button
             type="button"
@@ -85,6 +94,7 @@ export const MobileListDetail = ({
         <ShoppingList
           items={list.items}
           stores={stores}
+          sortMode={sortMode}
           onToggle={onToggle}
           onRemove={onRemove}
           onUpdateCategory={onUpdateCategory}
@@ -110,6 +120,8 @@ MobileListDetail.propTypes = {
   stores: PropTypes.array.isRequired,
   history: PropTypes.array.isRequired,
   suggestions: PropTypes.array.isRequired,
+  sortMode: PropTypes.string,
+  listSortMode: PropTypes.string,
   isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,
@@ -120,11 +132,14 @@ MobileListDetail.propTypes = {
   onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
   onShareClick: PropTypes.func.isRequired,
+  onSortSelect: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,
 };
 
 MobileListDetail.defaultProps = {
+  sortMode: 'store-category',
+  listSortMode: null,
   isGuest: false,
   restoredItemIds: null,
   onRestoreAnimationDone: null,

@@ -155,11 +155,18 @@
   min-width: 0;
 }
 
+.listHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
 .listTitle {
   font-size: 1.3rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .noList {

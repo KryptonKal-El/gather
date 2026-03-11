@@ -1,0 +1,74 @@
+.container {
+  position: relative;
+  display: inline-flex;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.trigger:hover {
+  opacity: 0.8;
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 180px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow: hidden;
+  padding: 0.25rem 0;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.option:hover {
+  background: var(--bg-hover, rgba(0, 0, 0, 0.04));
+}
+
+.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.optionLabel {
+  flex: 1;
+}
+
+.checkmark {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0.25rem 0;
+}

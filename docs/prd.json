@@ -262,8 +262,10 @@
         "Verify in browser"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T13:30:00Z",
+      "passes": true,
+      "notes": "SortPicker component with dropdown, useSortPreferences hook, wired into mobile+desktop layouts. sort_mode mapped in database.js subscriptions.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
