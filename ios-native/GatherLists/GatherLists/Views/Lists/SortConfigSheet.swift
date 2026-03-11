@@ -29,11 +29,7 @@ struct SortConfigSheet: View {
             Form {
                 Section {
                     ForEach(levels, id: \.self) { level in
-                        HStack {
-                            Image(systemName: "line.3.horizontal")
-                                .foregroundStyle(.secondary)
-                            Text(Self.levelLabels[level] ?? level.rawValue)
-                        }
+                        Text(Self.levelLabels[level] ?? level.rawValue)
                     }
                     .onMove(perform: moveLevel)
                     .onDelete(perform: deleteLevel)
