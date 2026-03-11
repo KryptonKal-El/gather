@@ -444,15 +444,16 @@
     {
       "id": "prd-list-sort-preferences",
       "name": "List Item Sort Preferences",
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2026-03-11T15:00:00Z",
-      "currentStory": "US-012",
+      "completedAt": "2026-03-11T22:00:00Z",
+      "currentStory": null,
       "filePath": "docs/prds/prd-list-sort-preferences.md",
       "jsonPath": "docs/prds/prd-list-sort-preferences.json",
       "branchName": "feature/list-sort-preferences",
       "createdAt": "2026-03-11",
       "updatedAt": "2026-03-11",
-      "notes": "v2: Rewritten from fixed 4-mode approach to configurable 3-level sort pipeline (Store, Category, Item Name, Date Added). Drag-to-reorder UI for level configuration. Replaces v1 implementation."
+      "notes": "v2 COMPLETE: All 13 stories done. Configurable 3-level sort pipeline (Store, Category, Name, Date). Drag-to-reorder UI on both React web and Swift iOS. Supabase migrations, sort pipeline utilities, preference services, pipeline rendering, SortConfigSheet/SortLevelEditor components, settings integration, realtime sync across devices."
     }
   ]
 }

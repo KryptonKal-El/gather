@@ -405,8 +405,10 @@
         "No full page reload required — sort updates reactively"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T22:00:00Z",
+      "notes": "React: realtime sync already working via useSortPreferences hook (user_preferences subscription) and subscribeLists (lists table subscription). Swift: ListDetailView and ListViewModel already had realtime subs. Added realtime subscription to SettingsView.swift so global default changes from other devices update the display while Settings is open.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -19,6 +19,7 @@ struct SettingsView: View {
     @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
     @State private var showSortConfigSheet = false
     @State private var isLoadingPreferences = true
+    @State private var preferencesTask: Task<Void, Never>?
     
     var body: some View {
         NavigationStack {
@@ -169,6 +170,39 @@ struct SettingsView: View {
                     print("[SettingsView] Failed to load preferences: \(error.localizedDescription)")
                 }
                 isLoadingPreferences = false
+                await subscribeToPreferences()
+            }
+            .onDisappear {
+                preferencesTask?.cancel()
+            }
+        }
+    }
+    
+    private func subscribeToPreferences() async {
+        guard let userId = try? await SupabaseManager.shared.client.auth.session.user.id else { return }
+        let client = SupabaseManager.shared.client
+        let channel = client.realtimeV2.channel("settings-preferences-\(userId.uuidString)")
+        
+        let changes = channel.postgresChange(
+            AnyAction.self,
+            schema: "public",
+            table: "user_preferences",
+            filter: "user_id=eq.\(userId.uuidString)"
+        )
+        
+        preferencesTask = Task {
+            await channel.subscribe()
+            for await _ in changes {
+                PreferenceService.clearCache()
+                do {
+                    let prefs = try await PreferenceService.fetchUserPreferences()
+                    let levels = prefs.defaultSortConfig.compactMap { SortLevel(rawValue: $0) }
+                    if !levels.isEmpty {
+                        activeSortConfig = levels
+                    }
+                } catch {
+                    print("[SettingsView] Failed to reload preferences: \(error.localizedDescription)")
+                }
             }
         }
     }
