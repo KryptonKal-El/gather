@@ -8,9 +8,10 @@ struct GatherList: Codable, Identifiable, Hashable {
     var itemCount: Int
     var color: String
     var sortOrder: Int
+    var sortMode: String?
     let createdAt: Date
     
-    init(id: UUID = UUID(), ownerId: UUID, name: String, emoji: String? = nil, itemCount: Int = 0, color: String = "#1565c0", sortOrder: Int = 0, createdAt: Date = Date()) {
+    init(id: UUID = UUID(), ownerId: UUID, name: String, emoji: String? = nil, itemCount: Int = 0, color: String = "#1565c0", sortOrder: Int = 0, sortMode: String? = nil, createdAt: Date = Date()) {
         self.id = id
         self.ownerId = ownerId
         self.name = name
@@ -18,6 +19,7 @@ struct GatherList: Codable, Identifiable, Hashable {
         self.itemCount = itemCount
         self.color = color
         self.sortOrder = sortOrder
+        self.sortMode = sortMode
         self.createdAt = createdAt
     }
     
@@ -29,6 +31,7 @@ struct GatherList: Codable, Identifiable, Hashable {
         case itemCount = "item_count"
         case color
         case sortOrder = "sort_order"
+        case sortMode = "sort_mode"
         case createdAt = "created_at"
     }
 }

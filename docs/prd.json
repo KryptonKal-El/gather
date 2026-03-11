@@ -105,8 +105,10 @@
         "Preferences cached locally so repeated reads don't hit the network"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T12:25:00Z",
+      "passes": true,
+      "notes": "PreferenceService.swift with caching, UserPreferences model, SortMode enum, GatherList.sortMode added",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
