@@ -276,3 +276,39 @@
 .uploadError:last-child {
   border-bottom: none;
 }
+
+/* Select row (label + select dropdown) */
+.selectRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.selectRow:last-child {
+  border-bottom: none;
+}
+
+.selectLabel {
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.select {
+  font-size: 0.95rem;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: right;
+  padding: 0.25rem 0;
+  font-weight: 500;
+}
+
+.select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

@@ -325,9 +325,11 @@
         "Change takes effect immediately on all lists that don't have a per-list override",
         "Verify in browser"
       ],
+      "status": "completed",
+      "completedAt": "2026-03-11T18:30:00Z",
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added Display section to MobileSettings with Default Sort select dropdown. Extended useSortPreferences hook with updateDefaultSort function. Build passes.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

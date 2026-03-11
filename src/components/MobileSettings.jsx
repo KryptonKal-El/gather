@@ -7,6 +7,8 @@ import PropTypes from 'prop-types';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
+import { useSortPreferences } from '../hooks/useSortPreferences.js';
+import { SORT_MODES } from '../services/preferences.js';
 import styles from './MobileSettings.module.css';
 
 /**
@@ -18,11 +20,13 @@ import styles from './MobileSettings.module.css';
 export const MobileSettings = ({ user, onSignOut }) => {
   const { theme, toggleTheme } = useTheme();
   const { refreshUser } = useAuth();
+  const { userPreferences, loading: prefsLoading, updateDefaultSort } = useSortPreferences();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
+  const currentDefaultSort = userPreferences?.default_sort_mode ?? 'store-category';
 
   const displayName = user?.user_metadata?.full_name ?? user?.profile?.display_name ?? 'User';
   const email = user?.email ?? '';
@@ -49,6 +53,14 @@ export const MobileSettings = ({ user, onSignOut }) => {
     } finally {
       setIsUploading(false);
       e.target.value = '';
+    }
+  };
+
+  const handleDefaultSortChange = async (e) => {
+    try {
+      await updateDefaultSort(e.target.value);
+    } catch (err) {
+      console.error('Failed to update default sort:', err);
     }
   };
 
@@ -116,6 +128,26 @@ export const MobileSettings = ({ user, onSignOut }) => {
             />
             <span className={styles.toggleTrack} />
           </label>
+        </div>
+      </div>
+
+      <h3 className={styles.sectionHeader}>Display</h3>
+      <div className={styles.section}>
+        <div className={styles.selectRow}>
+          <span className={styles.selectLabel}>Default Sort</span>
+          <select
+            className={styles.select}
+            value={currentDefaultSort}
+            onChange={handleDefaultSortChange}
+            disabled={prefsLoading}
+            aria-label="Default sort mode"
+          >
+            {SORT_MODES.map((mode) => (
+              <option key={mode.key} value={mode.key}>
+                {mode.label}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

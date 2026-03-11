@@ -4,7 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
-import { getUserPreferences, getEffectiveSortMode, updateListSortMode } from '../services/preferences.js';
+import { getUserPreferences, getEffectiveSortMode, updateListSortMode, updateDefaultSortMode } from '../services/preferences.js';
 
 /**
  * Hook that provides sort preference state and actions.
@@ -12,7 +12,8 @@ import { getUserPreferences, getEffectiveSortMode, updateListSortMode } from '..
  *   userPreferences: object|null,
  *   loading: boolean,
  *   effectiveSortMode: (list: object) => string,
- *   updateListSort: (listId: string, mode: string|null) => Promise<void>
+ *   updateListSort: (listId: string, mode: string|null) => Promise<void>,
+ *   updateDefaultSort: (mode: string) => Promise<void>
  * }}
  */
 export const useSortPreferences = () => {
@@ -57,5 +58,14 @@ export const useSortPreferences = () => {
     []
   );
 
-  return { userPreferences, loading, effectiveSortMode, updateListSort };
+  const updateDefaultSort = useCallback(
+    async (mode) => {
+      if (!user) return;
+      await updateDefaultSortMode(user.id, mode);
+      setUserPreferences((prev) => prev ? { ...prev, default_sort_mode: mode } : { user_id: user.id, default_sort_mode: mode });
+    },
+    [user]
+  );
+
+  return { userPreferences, loading, effectiveSortMode, updateListSort, updateDefaultSort };
 };
