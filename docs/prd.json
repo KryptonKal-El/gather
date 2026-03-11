@@ -75,8 +75,10 @@
         "getEffectiveSortMode(listId) — resolves per-list override → global default → system default"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-11T12:15:00Z",
+      "passes": true,
+      "notes": "preferences.js service with SORT_MODES, getUserPreferences, updateDefaultSortMode, updateListSortMode, getEffectiveSortMode",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
