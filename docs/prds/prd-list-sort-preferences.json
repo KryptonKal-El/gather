@@ -274,8 +274,10 @@
         "Verify in browser"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T19:00:00Z",
+      "notes": "Rewrote SortPicker.jsx from v1 dropdown to v2 drag-to-reorder level editor using @dnd-kit/sortable. SortableLevelRow with drag handle + remove button. Add Level sub-menu for unused levels. Use Default button for clearing overrides. Max 3 levels enforced. CSS module rewritten.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
