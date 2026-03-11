@@ -14,8 +14,10 @@
         "Handle missing row gracefully in application logic (no row = system default)"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-11T15:00:00Z",
+      "notes": "Migration 20260311150000 alters default_sort_mode text → default_sort_config jsonb with v1→v2 value conversion. Pushed to Supabase.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
