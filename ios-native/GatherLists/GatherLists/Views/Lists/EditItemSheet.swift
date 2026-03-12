@@ -44,7 +44,7 @@ struct EditItemSheet: View {
     private var availableCategories: [CategoryDef] {
         // Use type-specific categories if available
         if let typeCategories = typeConfig.categories {
-            return typeCategories.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color) }
+            return typeCategories.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
         }
         // Fall back to store categories or defaults
         if let storeId = selectedStoreId,
