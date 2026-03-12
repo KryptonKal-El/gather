@@ -20,44 +20,43 @@ struct ListRowView: View {
                     .foregroundStyle(.secondary)
             }
             
-            Text(list.name)
-                .font(.body)
-                .lineLimit(1)
-            
-            Spacer()
-            
-            if isShared {
-                Text("Shared")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color.blue.opacity(0.15))
-                    .foregroundStyle(.blue)
-                    .clipShape(Capsule())
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(list.name)
+                        .font(.body)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    
+                    if isShared {
+                        Text("Shared")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue.opacity(0.15))
+                            .foregroundStyle(.blue)
+                            .clipShape(Capsule())
+                    }
+                }
+                
+                HStack(spacing: 6) {
+                    Text("\(list.itemCount) items")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Text("·")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    
+                    Text(ListTypes.getConfig(list.type).label)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
-            
-            Text("\(list.itemCount)")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color(.systemGray5))
-                .clipShape(Capsule())
-            
-            Text(ListTypes.getConfig(list.type).label)
-                .font(.caption2)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Color(.systemGray5))
-                .clipShape(Capsule())
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
-        .background(Color(.systemBackground))
         .contentShape(Rectangle())
     }
 }
