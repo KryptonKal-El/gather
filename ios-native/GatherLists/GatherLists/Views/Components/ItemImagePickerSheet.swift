@@ -81,6 +81,11 @@ struct ItemImagePickerSheet: View {
                     }
                 }
             }
+            .task {
+                if !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                    performSearch()
+                }
+            }
         }
     }
     

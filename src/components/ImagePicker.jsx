@@ -30,6 +30,7 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
   const [activeTab, setActiveTab] = useState('search');
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
+  const didAutoSearch = useRef(false);
 
   const handleSearch = useCallback(async () => {
     const q = searchQuery.trim();
@@ -47,6 +48,13 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
       setIsSearching(false);
     }
   }, [searchQuery]);
+
+  useEffect(() => {
+    if (!didAutoSearch.current && searchQuery.trim()) {
+      didAutoSearch.current = true;
+      handleSearch();
+    }
+  }, [handleSearch, searchQuery]);
 
   const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -144,7 +152,7 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
                     <button
                       type="button"
                       className={styles.gridItem}
-                      onClick={() => onSelectUrl(img.url)}
+                      onClick={() => onSelectUrl(img.thumbnail)}
                       title={img.title}
                     >
                       <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />

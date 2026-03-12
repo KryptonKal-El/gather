@@ -41,6 +41,21 @@ function pemToDer(pem: string): Uint8Array {
   return bytes;
 }
 
+let cachedWalmartKey: CryptoKey | null = null;
+
+async function getWalmartKey(privateKeyPem: string): Promise<CryptoKey> {
+  if (cachedWalmartKey) return cachedWalmartKey;
+  const derBytes = pemToDer(privateKeyPem);
+  cachedWalmartKey = await crypto.subtle.importKey(
+    'pkcs8',
+    derBytes,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  return cachedWalmartKey;
+}
+
 async function generateWalmartSignature(
   consumerId: string,
   privateKeyPem: string,
@@ -49,14 +64,7 @@ async function generateWalmartSignature(
 ): Promise<string> {
   const stringToSign = `${consumerId}\n${timestamp}\n${keyVersion}\n`;
   
-  const derBytes = pemToDer(privateKeyPem);
-  const key = await crypto.subtle.importKey(
-    'pkcs8',
-    derBytes,
-    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
+  const key = await getWalmartKey(privateKeyPem);
   
   const signature = await crypto.subtle.sign(
     'RSASSA-PKCS1-v1_5',
@@ -254,19 +262,24 @@ Deno.serve(async (req) => {
   const respond = (body: { results: ProductResult[]; source: string }) =>
     new Response(JSON.stringify(body), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
     });
 
-  const walmartResults = await searchWalmart(query, numItems);
+  // Run Walmart and Open Food Facts in parallel
+  const [walmartResults, offResults] = await Promise.all([
+    searchWalmart(query, numItems),
+    searchOpenFoodFacts(query, numItems),
+  ]);
+
+  // Prefer Walmart results, then OFF
   if (walmartResults.length > 0) {
     return respond({ results: walmartResults, source: 'walmart' });
   }
-
-  const offResults = await searchOpenFoodFacts(query, numItems);
   if (offResults.length > 0) {
     return respond({ results: offResults, source: 'openfoodfacts' });
   }
 
+  // Final fallback: SerpAPI (only called if both above returned empty)
   const serpResults = await searchSerpApi(query, numItems);
   if (serpResults.length > 0) {
     return respond({ results: serpResults, source: 'serpapi' });

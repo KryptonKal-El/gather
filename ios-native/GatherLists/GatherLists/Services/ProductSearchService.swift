@@ -7,12 +7,35 @@ struct ProductSearchResult: Codable {
     let title: String
 }
 
+private actor SearchCache {
+    private var cache: [String: (results: [ProductSearchResult], timestamp: Date)] = [:]
+    private let ttl: TimeInterval = 300 // 5 minutes
+    
+    func get(_ key: String) -> [ProductSearchResult]? {
+        guard let entry = cache[key],
+              Date().timeIntervalSince(entry.timestamp) < ttl else {
+            return nil
+        }
+        return entry.results
+    }
+    
+    func set(_ key: String, results: [ProductSearchResult]) {
+        cache[key] = (results: results, timestamp: Date())
+    }
+}
+
 /// Client for the search-products Supabase edge function.
 struct ProductSearchService {
+    fileprivate static let cache = SearchCache()
     /// Searches for product images online via the edge function.
     /// Returns an empty array on failure (graceful degradation).
     @MainActor
     static func searchProducts(query: String, count: Int = 8) async -> [ProductSearchResult] {
+        let cacheKey = query.trimmingCharacters(in: .whitespaces).lowercased()
+        if let cached = await cache.get(cacheKey) {
+            return cached
+        }
+        
         let manager = SupabaseManager.shared
         let baseURL = manager.supabaseURL.absoluteString
         let anonKey = manager.anonKey
@@ -37,6 +60,7 @@ struct ProductSearchService {
                 return []
             }
             let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
+            await cache.set(cacheKey, results: decoded.results)
             return decoded.results
         } catch {
             print("[ProductSearchService] Search failed: \(error.localizedDescription)")
