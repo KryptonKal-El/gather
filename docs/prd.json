@@ -613,8 +613,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 18,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T22:00:00Z",
+      "notes": "All preference fallback logic already implemented in US-011. React getEffectiveSortConfig (preferences.js) falls back: list.sort_config → userPreferences.default_sort_config → getDefaultSortConfig(listType). Swift PreferenceService.effectiveSortConfig uses same chain via SortPipeline.getDefaultConfig(for:). Build and lint pass.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
