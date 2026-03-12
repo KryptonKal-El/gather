@@ -284,6 +284,7 @@ final class ListDetailViewModel {
                 category: nil,
                 storeId: storeId,
                 stores: stores,
+                listType: listType,
                 rsvpStatus: rsvpDefault
             )
             items.append(newItem)
@@ -309,6 +310,7 @@ final class ListDetailViewModel {
                 category: pastItem?.category,
                 storeId: storeId,
                 stores: stores,
+                listType: listType,
                 quantity: pastItem?.quantity ?? 1,
                 price: pastItem?.price,
                 imageUrl: pastItem?.imageUrl,

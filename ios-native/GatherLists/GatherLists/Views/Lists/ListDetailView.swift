@@ -73,7 +73,8 @@ struct ListDetailView: View {
     private var aiSuggestions: [ItemSuggestion] {
         SuggestionEngine.getSuggestions(
             history: detailViewModel?.historyEntries ?? [],
-            currentItems: detailViewModel?.uncheckedItems ?? []
+            currentItems: detailViewModel?.uncheckedItems ?? [],
+            listType: list.type
         )
     }
     

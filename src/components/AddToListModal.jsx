@@ -66,6 +66,9 @@ export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, o
         existing.map((item) => [item.name.toLowerCase(), item])
       );
 
+      const selectedList = lists.find((l) => l.id === selectedListId);
+      const listType = selectedList?.type ?? 'grocery';
+
       const newList = [];
       const dupList = [];
 
@@ -73,7 +76,7 @@ export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, o
         const name = ing.name;
         const quantity = Math.max(1, Math.round(ing.amount ?? 1));
         const unit = ing.unit ? mapSpoonacularUnit(ing.unit) : 'each';
-        const category = categorizeItem(name);
+        const category = categorizeItem(name, undefined, listType);
         const key = name.toLowerCase();
 
         const existingItem = existingMap.get(key);

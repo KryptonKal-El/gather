@@ -75,9 +75,11 @@ struct RecipeTextParser {
     /// - "2 cups flour"
     /// - "- 1 lb ground beef"
     /// - "3 cloves garlic, minced"
-    /// - Parameter text: Raw recipe text with one ingredient per line
+    /// - Parameters:
+    ///   - text: Raw recipe text with one ingredient per line
+    ///   - listType: The list type for auto-categorization (e.g., 'grocery', 'packing')
     /// - Returns: Array of tuples with (name, category) for each parsed ingredient
-    static func parseRecipeText(_ text: String) -> [(name: String, category: String)] {
+    static func parseRecipeText(_ text: String, listType: String? = nil) -> [(name: String, category: String)] {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return []
         }
@@ -127,7 +129,7 @@ struct RecipeTextParser {
             
             // Capitalize first letter
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
-            let category = CategoryDefinitions.categorizeItem(name)
+            let category = CategoryDefinitions.categorizeItem(name, listType: listType)
             
             items.append((name: capitalizedName, category: category))
         }

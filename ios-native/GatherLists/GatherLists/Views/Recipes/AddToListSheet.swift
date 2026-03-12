@@ -414,7 +414,7 @@ struct AddToListSheet: View {
                             unit: existing.unit
                         ))
                     } else {
-                        let category = CategoryDefinitions.categorizeItem(capitalizedName)
+                        let category = CategoryDefinitions.categorizeItem(capitalizedName, listType: selectedList?.type)
                         newItemsTemp.append(PreviewNewItem(
                             name: capitalizedName,
                             quantity: resolvedQuantity,

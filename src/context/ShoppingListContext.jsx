@@ -264,10 +264,12 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     const name = capitalize(rawName.trim());
+    const listEntry = allLists.find((l) => l.id === listId);
+    const listType = listEntry?.type ?? 'grocery';
     const categories = getCategoriesForStore(storeId);
     const item = {
       name,
-      category: categorizeItem(name, categories),
+      category: categorizeItem(name, categories, listType),
       isChecked: false,
       store: storeId,
       quantity: 1,
@@ -276,18 +278,20 @@ export const ShoppingListProvider = ({ children }) => {
     };
     await dbAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, name);
-  }, [userId, getCategoriesForStore, getListOwnerUid]);
+  }, [userId, allLists, getCategoriesForStore, getListOwnerUid]);
 
   const addItemsAction = useCallback(async (listId, items) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
+    const listEntry = allLists.find((l) => l.id === listId);
+    const listType = listEntry?.type ?? 'grocery';
     const prepared = items.map((item) => {
       const name = capitalize(item.name.trim());
       const storeId = item.store ?? null;
       const categories = getCategoriesForStore(storeId);
       return {
         name,
-        category: item.category ?? categorizeItem(name, categories),
+        category: item.category ?? categorizeItem(name, categories, listType),
         isChecked: false,
         store: storeId,
         quantity: item.quantity ?? 1,
@@ -299,7 +303,7 @@ export const ShoppingListProvider = ({ children }) => {
     await dbAddItems(ownerUid, listId, prepared);
     const itemNames = prepared.map((item) => item.name);
     await addHistoryEntries(userId, itemNames);
-  }, [userId, getCategoriesForStore, getListOwnerUid]);
+  }, [userId, allLists, getCategoriesForStore, getListOwnerUid]);
 
   const toggleItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;

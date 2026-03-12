@@ -57,9 +57,10 @@ const stripQuantity = (line) => {
  * - "- 1 lb ground beef"
  * - "3 cloves garlic, minced"
  * @param {string} recipeText - Raw recipe text with one ingredient per line
+ * @param {string} [listType] - The list type for auto-categorization (e.g., 'grocery', 'packing')
  * @returns {Array<{id: string, name: string, category: string, isChecked: boolean}>}
  */
-export const parseRecipeText = (recipeText) => {
+export const parseRecipeText = (recipeText, listType) => {
   if (!recipeText?.trim()) {
     return [];
   }
@@ -84,7 +85,7 @@ export const parseRecipeText = (recipeText) => {
     items.push({
       id: uuidv4(),
       name: name.charAt(0).toUpperCase() + name.slice(1),
-      category: categorizeItem(name),
+      category: categorizeItem(name, undefined, listType),
       isChecked: false,
     });
   }

@@ -4,6 +4,8 @@
  * Items without a store use DEFAULT_CATEGORIES.
  */
 
+import { PACKING_CATEGORIES } from './listTypes.js';
+
 export const CATEGORIES = {
   PRODUCE: 'produce',
   DAIRY: 'dairy',
@@ -144,9 +146,20 @@ export const DEFAULT_CATEGORIES = [
  * Categorizes an item name by matching against keywords in a categories array.
  * @param {string} itemName - The name of the grocery item
  * @param {Array<{key: string, keywords: string[]}>} [categories] - Categories to match against (defaults to DEFAULT_CATEGORIES)
- * @returns {string} The matched category key, or 'other' if no match
+ * @param {string} [listType] - The list type ('grocery', 'packing', 'basic', 'guest_list', 'project', 'todo')
+ * @returns {string|null} The matched category key, 'other'/'miscellaneous' if no match, or null for types without auto-categorization
  */
-export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES) => {
+export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES, listType) => {
+  // Types without auto-categorization
+  if (listType === 'basic' || listType === 'guest_list' || listType === 'project' || listType === 'todo') {
+    return null;
+  }
+
+  // Packing type uses packing-specific categories
+  if (listType === 'packing') {
+    categories = PACKING_CATEGORIES;
+  }
+
   const normalized = itemName.toLowerCase().trim();
 
   // Exact match against all category keywords
@@ -175,6 +188,8 @@ export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES) => {
     }
   }
 
+  // Default fallback — use packing's fallback category for packing lists
+  if (listType === 'packing') return 'miscellaneous';
   return CATEGORIES.OTHER;
 };
 

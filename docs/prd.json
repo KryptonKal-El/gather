@@ -332,8 +332,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T21:00:00Z",
+      "notes": "React: categorizeItem() accepts listType param — grocery uses existing keywords, packing uses PACKING_CATEGORIES, others return null. Updated callers in ShoppingListContext, AddToListModal, recipes.js, suggestions.js. Swift: Added categorizeItem overload with listType in CategoryDefinitions.swift. Updated ItemService.addItem, SuggestionEngine.getSuggestions, RecipeTextParser.parseRecipeText, ListDetailViewModel, ListDetailView, AddToListSheet. Build passes.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
