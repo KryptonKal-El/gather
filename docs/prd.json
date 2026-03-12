@@ -534,8 +534,10 @@
         "Lint passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T13:00:00Z",
+      "notes": "database.js: createList accepts type, updateList maps type, subscribeLists/subscribeList include type, subscribeItems includes rsvpStatus, addItem/addItems insert rsvp_status, updateItem maps rsvpStatus. ShoppingListContext: createListAction accepts type, updateListDetailsAction allows type, restoreItem/restoreItems pass rsvpStatus. Build passes.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

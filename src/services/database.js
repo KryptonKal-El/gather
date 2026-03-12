@@ -16,9 +16,10 @@ import { supabase } from './supabase.js';
  * @param {string|null} _ownerEmail - Owner's email (unused in Supabase schema, kept for API compat)
  * @param {string|null} emoji - Optional emoji for the list
  * @param {string} color - Hex color for the list (defaults to '#1565c0')
+ * @param {string} type - List type ('grocery', 'event', 'todo', etc.) defaults to 'grocery'
  * @returns {Promise<string>} The new list's ID
  */
-export const createList = async (userId, name, _ownerEmail = null, emoji = null, color = '#1565c0') => {
+export const createList = async (userId, name, _ownerEmail = null, emoji = null, color = '#1565c0', type = 'grocery') => {
   try {
     const { data, error } = await supabase
       .from('lists')
@@ -28,6 +29,7 @@ export const createList = async (userId, name, _ownerEmail = null, emoji = null,
         emoji: emoji ?? null,
         color,
         item_count: 0,
+        type,
       })
       .select('id')
       .single();
@@ -54,6 +56,7 @@ export const updateList = async (userId, listId, updates) => {
     if (updates.itemCount !== undefined) mapped.item_count = updates.itemCount;
     if (updates.item_count !== undefined) mapped.item_count = updates.item_count;
     if (updates.color !== undefined) mapped.color = updates.color;
+    if (updates.type !== undefined) mapped.type = updates.type;
 
     const { error } = await supabase
       .from('lists')
@@ -135,6 +138,7 @@ export const subscribeLists = (userId, callback) => {
           ownerId: row.owner_id,
           createdAt: row.created_at,
           sortConfig: row.sort_config,
+          type: row.type,
         }))
       );
     } catch (error) {
@@ -224,6 +228,7 @@ export const addItem = async (userId, listId, item) => {
         price: item.price ?? null,
         image_url: item.imageUrl ?? null,
         unit: item.unit ?? 'each',
+        rsvp_status: item.rsvpStatus ?? null,
       })
       .select('id')
       .single();
@@ -255,6 +260,7 @@ export const addItems = async (userId, listId, items) => {
       price: item.price ?? null,
       image_url: item.imageUrl ?? null,
       unit: item.unit ?? 'each',
+      rsvp_status: item.rsvpStatus ?? null,
     }));
 
     const { error } = await supabase.from('items').insert(rows);
@@ -288,6 +294,8 @@ export const updateItem = async (userId, listId, itemId, updates) => {
     if (updates.imageUrl !== undefined) mapped.image_url = updates.imageUrl;
     if (updates.image_url !== undefined) mapped.image_url = updates.image_url;
     if (updates.unit !== undefined) mapped.unit = updates.unit;
+    if (updates.rsvpStatus !== undefined) mapped.rsvp_status = updates.rsvpStatus;
+    if (updates.rsvp_status !== undefined) mapped.rsvp_status = updates.rsvp_status;
 
     const { error } = await supabase
       .from('items')
@@ -374,6 +382,7 @@ export const subscribeItems = (userId, listId, callback) => {
           imageUrl: row.image_url,
           unit: row.unit ?? 'each',
           addedAt: row.added_at,
+          rsvpStatus: row.rsvp_status,
         }))
       );
     } catch (error) {
@@ -701,6 +710,7 @@ export const subscribeList = (ownerUid, listId, callback) => {
         ownerId: data.owner_id,
         createdAt: data.created_at,
         sortConfig: data.sort_config,
+        type: data.type,
       });
     } catch (error) {
       console.error('Failed to fetch list:', error);

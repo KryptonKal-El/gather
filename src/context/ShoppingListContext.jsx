@@ -218,10 +218,10 @@ export const ShoppingListProvider = ({ children }) => {
   // Actions
   // -----------------------------------------------------------------------
 
-  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0') => {
+  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery') => {
     if (!userId) return;
-    const newId = await dbCreateList(userId, name, userEmail, emoji, color);
-    setLists(prev => [...prev, { id: newId, name, emoji, color, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
+    const newId = await dbCreateList(userId, name, userEmail, emoji, color, type);
+    setLists(prev => [...prev, { id: newId, name, emoji, color, type, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
     setActiveListId(newId);
   }, [userId, userEmail]);
 
@@ -252,6 +252,7 @@ export const ShoppingListProvider = ({ children }) => {
     if (updates.name !== undefined) allowed.name = updates.name;
     if (updates.emoji !== undefined) allowed.emoji = updates.emoji;
     if (updates.color !== undefined) allowed.color = updates.color;
+    if (updates.type !== undefined) allowed.type = updates.type;
     await dbUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 
@@ -350,6 +351,7 @@ export const ShoppingListProvider = ({ children }) => {
       quantity: itemData.quantity ?? 1,
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
+      rsvpStatus: itemData.rsvpStatus ?? null,
     });
     return newId;
   }, [userId, getListOwnerUid]);
@@ -372,6 +374,7 @@ export const ShoppingListProvider = ({ children }) => {
       quantity: itemData.quantity ?? 1,
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
+      rsvpStatus: itemData.rsvpStatus ?? null,
     })));
   }, [userId, getListOwnerUid]);
 
