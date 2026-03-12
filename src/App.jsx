@@ -659,11 +659,12 @@ export const App = () => {
                   onSelect={handleSortSelect}
                 />
               </div>
-              <AddItemForm stores={state.stores} history={state.history} onAdd={handleAddItem} />
+              <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
               <ShoppingList
                 items={activeList.items}
                 stores={state.stores}
                 sortConfig={effectiveSortConfig(activeList)}
+                listType={activeList.type}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}

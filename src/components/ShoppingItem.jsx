@@ -1,20 +1,32 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
+import { getTypeConfig } from '../utils/listTypes.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
 import { ImagePicker } from './ImagePicker.jsx';
 import { ITEM_UNITS } from '../constants/units.js';
 import styles from './ShoppingItem.module.css';
 
+const RSVP_COLORS = {
+  invited: '#9e9e9e',
+  confirmed: '#4caf50',
+  declined: '#f44336',
+  maybe: '#ff9800',
+};
+
 /**
  * A single shopping list item with a compact row and expandable edit panel.
  * The compact row shows image, name (with qty), store/category badges, price,
  * and a pencil icon to toggle the edit panel. The edit panel contains qty
  * stepper, price input, store/category pickers, and delete button.
+ * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
+export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
   const { user } = useAuth();
+  const typeConfig = getTypeConfig(listType);
+  const { fields } = typeConfig;
+
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -66,10 +78,23 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
   }
   const assignedStore = item.store ? storeMap[item.store] : null;
 
-  const categories = assignedStore?.categories ?? DEFAULT_CATEGORIES;
-  const allLabels = getAllCategoryLabels(categories);
-  const allColors = getAllCategoryColors(categories);
-  const allKeys = getAllCategoryKeys(categories);
+  // For category data, use type-specific categories if available, otherwise store-based
+  const typeCategories = typeConfig.categories;
+  const allLabels = {};
+  const allColors = {};
+  const allKeys = [];
+  if (typeCategories) {
+    for (const cat of typeCategories) {
+      allLabels[cat.key] = cat.name;
+      allColors[cat.key] = cat.color;
+      allKeys.push(cat.key);
+    }
+  } else {
+    const storeCats = assignedStore?.categories ?? DEFAULT_CATEGORIES;
+    Object.assign(allLabels, getAllCategoryLabels(storeCats));
+    Object.assign(allColors, getAllCategoryColors(storeCats));
+    allKeys.push(...getAllCategoryKeys(storeCats));
+  }
 
   useEffect(() => {
     if (!isCategoryPickerOpen) return;
@@ -304,38 +329,41 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         onTouchEnd={handleTouchEnd}
         style={getSwipeStyle()}
       >
-        <button
-          type="button"
-          className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
-          onClick={() => {
-            setUploadError(null);
-            setIsImagePickerOpen(true);
-          }}
-          title="Set item image"
-        >
-          {imageUrl ? (
-            <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
-          ) : (
-            <span className={styles.thumbnailPlaceholder}>+</span>
-          )}
-        </button>
+        {fields.image && (
+          <button
+            type="button"
+            className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
+            onClick={() => {
+              setUploadError(null);
+              setIsImagePickerOpen(true);
+            }}
+            title="Set item image"
+          >
+            {imageUrl ? (
+              <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
+            ) : (
+              <span className={styles.thumbnailPlaceholder}>+</span>
+            )}
+          </button>
+        )}
         <div className={styles.details} onDoubleClick={onToggle}>
           <span className={styles.label}>
             <span className={styles.name}>
               {item.name}
-              {(item.unit && item.unit !== 'each')
-                ? <span className={styles.qty}> ({qty} {item.unit})</span>
-                : qty > 1 && <span className={styles.qty}> ({qty})</span>
-              }
+              {fields.quantity && (
+                (item.unit && item.unit !== 'each')
+                  ? <span className={styles.qty}> ({qty} {item.unit})</span>
+                  : qty > 1 && <span className={styles.qty}> ({qty})</span>
+              )}
             </span>
           </span>
           <div className={styles.badges}>
-            {assignedStore && (
+            {fields.store && assignedStore && (
               <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
                 {assignedStore.name}
               </span>
             )}
-            {item.category && (
+            {fields.category && item.category && (
               <span
                 className={styles.categoryCompact}
                 style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
@@ -343,9 +371,17 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
                 {allLabels[item.category] ?? 'Other'}
               </span>
             )}
+            {fields.rsvpStatus && (
+              <span
+                className={styles.rsvpBadge}
+                style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus] ?? RSVP_COLORS.invited }}
+              >
+                {item.rsvpStatus ?? 'invited'}
+              </span>
+            )}
           </div>
         </div>
-        {lineTotal !== null && (
+        {fields.price && lineTotal !== null && (
           <span className={styles.price} onDoubleClick={onToggle}>
             {`$${lineTotal.toFixed(2)}`}
           </span>
@@ -375,58 +411,64 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
               onKeyDown={handleNameKeyDown}
             />
           </div>
-          <div className={styles.editRow}>
-            <span className={styles.editLabel}>Quantity</span>
-            <div className={styles.qtyStepper}>
-              <button
-                type="button"
-                className={styles.qtyBtn}
-                onClick={() => handleQtyChange(-1)}
-                aria-label="Decrease quantity"
-              >
-                −
-              </button>
-              <span className={styles.qtyValue}>{qty}</span>
-              <button
-                type="button"
-                className={styles.qtyBtn}
-                onClick={() => handleQtyChange(1)}
-                aria-label="Increase quantity"
-              >
-                +
-              </button>
+          {fields.quantity && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>{typeConfig.quantityLabel ?? 'Quantity'}</span>
+              <div className={styles.qtyStepper}>
+                <button
+                  type="button"
+                  className={styles.qtyBtn}
+                  onClick={() => handleQtyChange(-1)}
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span className={styles.qtyValue}>{qty}</span>
+                <button
+                  type="button"
+                  className={styles.qtyBtn}
+                  onClick={() => handleQtyChange(1)}
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
             </div>
-          </div>
-          <div className={styles.editRow}>
-            <span className={styles.editLabel}>Unit</span>
-            <select
-              className={styles.unitSelect}
-              value={unitValue}
-              onChange={handleUnitChange}
-            >
-              {ITEM_UNITS.map((u) => (
-                <option key={u.value} value={u.value}>{u.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.editRow}>
-            <span className={styles.editLabel}>Price</span>
-            <div className={styles.priceEdit}>
-              <span className={styles.priceCurrency}>$</span>
-              <input
-                ref={priceInputRef}
-                className={styles.priceEditInput}
-                type="number"
-                min="0"
-                step="0.01"
-                value={priceValue}
-                onChange={(e) => setPriceValue(e.target.value)}
-                onBlur={commitPrice}
-                onKeyDown={handlePriceKeyDown}
-              />
+          )}
+          {fields.unit && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Unit</span>
+              <select
+                className={styles.unitSelect}
+                value={unitValue}
+                onChange={handleUnitChange}
+              >
+                {ITEM_UNITS.map((u) => (
+                  <option key={u.value} value={u.value}>{u.label}</option>
+                ))}
+              </select>
             </div>
-          </div>
-          {stores.length > 0 && (
+          )}
+          {fields.price && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Price</span>
+              <div className={styles.priceEdit}>
+                <span className={styles.priceCurrency}>$</span>
+                <input
+                  ref={priceInputRef}
+                  className={styles.priceEditInput}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={priceValue}
+                  onChange={(e) => setPriceValue(e.target.value)}
+                  onBlur={commitPrice}
+                  onKeyDown={handlePriceKeyDown}
+                />
+              </div>
+            </div>
+          )}
+          {fields.store && stores.length > 0 && (
             <div className={styles.editRow}>
               <span className={styles.editLabel}>Store</span>
               <div className={styles.storeWrapper} ref={storePickerRef}>
@@ -468,46 +510,63 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
               </div>
             </div>
           )}
-          <div className={styles.editRow}>
-            <span className={styles.editLabel}>Category</span>
-            <div className={styles.categoryWrapper} ref={categoryPickerRef}>
-              <button
-                type="button"
-                className={styles.category}
-                style={{ backgroundColor: item.category ? (allColors[item.category] ?? '#9e9e9e') : '#bbb' }}
-                onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
-                title="Change category"
-              >
-                {item.category ? (allLabels[item.category] ?? 'Other') : 'No category'}
-              </button>
-              {isCategoryPickerOpen && (
-                <div className={styles.picker}>
-                  <button
-                    type="button"
-                    className={`${styles.pickerOption} ${!item.category ? styles.pickerActive : ''}`}
-                    onClick={() => handleSelectCategory(null)}
-                  >
-                    <span className={styles.pickerDot} style={{ backgroundColor: '#bbb' }} />
-                    No category
-                  </button>
-                  {allKeys.map((key) => (
+          {fields.category && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Category</span>
+              <div className={styles.categoryWrapper} ref={categoryPickerRef}>
+                <button
+                  type="button"
+                  className={styles.category}
+                  style={{ backgroundColor: item.category ? (allColors[item.category] ?? '#9e9e9e') : '#bbb' }}
+                  onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
+                  title="Change category"
+                >
+                  {item.category ? (allLabels[item.category] ?? 'Other') : 'No category'}
+                </button>
+                {isCategoryPickerOpen && (
+                  <div className={styles.picker}>
                     <button
-                      key={key}
                       type="button"
-                      className={`${styles.pickerOption} ${key === item.category ? styles.pickerActive : ''}`}
-                      onClick={() => handleSelectCategory(key)}
+                      className={`${styles.pickerOption} ${!item.category ? styles.pickerActive : ''}`}
+                      onClick={() => handleSelectCategory(null)}
                     >
-                      <span
-                        className={styles.pickerDot}
-                        style={{ backgroundColor: allColors[key] ?? '#9e9e9e' }}
-                      />
-                      {allLabels[key] ?? key}
+                      <span className={styles.pickerDot} style={{ backgroundColor: '#bbb' }} />
+                      No category
                     </button>
-                  ))}
-                </div>
-              )}
+                    {allKeys.map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`${styles.pickerOption} ${key === item.category ? styles.pickerActive : ''}`}
+                        onClick={() => handleSelectCategory(key)}
+                      >
+                        <span
+                          className={styles.pickerDot}
+                          style={{ backgroundColor: allColors[key] ?? '#9e9e9e' }}
+                        />
+                        {allLabels[key] ?? key}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+          {fields.rsvpStatus && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>RSVP</span>
+              <select
+                className={styles.rsvpSelect}
+                value={item.rsvpStatus ?? 'invited'}
+                onChange={(e) => onUpdateItem(item.id, { rsvpStatus: e.target.value })}
+              >
+                <option value="invited">Invited</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="declined">Declined</option>
+                <option value="maybe">Maybe</option>
+              </select>
+            </div>
+          )}
           <div className={styles.editFooter}>
             <button
               type="button"
@@ -524,7 +583,7 @@ export const ShoppingItem = ({ item, stores, onToggle, onRemove, onUpdateCategor
         </div>
       )}
 
-      {isImagePickerOpen && (
+      {fields.image && isImagePickerOpen && (
         <ImagePicker
           itemName={item.name}
           currentImageUrl={imageUrl}
@@ -551,8 +610,10 @@ ShoppingItem.propTypes = {
     price: PropTypes.number,
     imageUrl: PropTypes.string,
     unit: PropTypes.string,
+    rsvpStatus: PropTypes.string,
   }).isRequired,
   stores: PropTypes.array,
+  listType: PropTypes.string,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -564,6 +625,7 @@ ShoppingItem.propTypes = {
 
 ShoppingItem.defaultProps = {
   stores: [],
+  listType: 'grocery',
   isRestored: false,
   onRestoreAnimationDone: null,
 };

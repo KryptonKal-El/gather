@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { getTypeConfig } from '../utils/listTypes.js';
 import styles from './AddItemForm.module.css';
 
 /**
@@ -23,9 +24,10 @@ const getUniqueNames = (history) => {
 /**
  * Form for adding new items to the shopping list.
  * Includes an input field with autocomplete from history,
- * optional store selector, and submit button.
+ * optional store selector (when list type supports stores), and submit button.
  */
-export const AddItemForm = ({ stores, history, onAdd }) => {
+export const AddItemForm = ({ stores, history, listType, onAdd }) => {
+  const typeConfig = getTypeConfig(listType);
   const [value, setValue] = useState('');
   const [selectedStore, setSelectedStore] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -138,7 +140,7 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
           </ul>
         )}
       </div>
-      {stores.length > 0 && (
+      {typeConfig.fields.store && stores.length > 0 && (
         <select
           className={styles.storeSelect}
           value={selectedStore}
@@ -163,10 +165,12 @@ export const AddItemForm = ({ stores, history, onAdd }) => {
 AddItemForm.propTypes = {
   stores: PropTypes.array,
   history: PropTypes.array,
+  listType: PropTypes.string,
   onAdd: PropTypes.func.isRequired,
 };
 
 AddItemForm.defaultProps = {
   stores: [],
   history: [],
+  listType: 'grocery',
 };

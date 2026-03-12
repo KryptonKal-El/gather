@@ -30,6 +30,8 @@ export const MobileListDetail = ({
   restoredItemIds,
   onRestoreAnimationDone,
 }) => {
+  const listType = list.type ?? 'grocery';
+
   return (
     <div className={styles.container}>
       <nav className={styles.navBar}>
@@ -90,11 +92,12 @@ export const MobileListDetail = ({
       </nav>
 
       <div className={styles.scrollContent}>
-        <AddItemForm stores={stores} history={history} onAdd={onAddItem} />
+        <AddItemForm stores={stores} history={history} listType={listType} onAdd={onAddItem} />
         <ShoppingList
           items={list.items}
           stores={stores}
           sortConfig={sortConfig}
+          listType={listType}
           onToggle={onToggle}
           onRemove={onRemove}
           onUpdateCategory={onUpdateCategory}
@@ -115,6 +118,7 @@ MobileListDetail.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     emoji: PropTypes.string,
+    type: PropTypes.string,
     items: PropTypes.array.isRequired,
   }).isRequired,
   stores: PropTypes.array.isRequired,

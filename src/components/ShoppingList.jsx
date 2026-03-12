@@ -27,13 +27,14 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
+const ItemList = ({ items, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
         key={item.id}
         item={item}
         stores={stores}
+        listType={listType}
         isRestored={restoredItemIds?.has(item.id)}
         onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
         onToggle={() => onToggle(item.id)}
@@ -47,8 +48,8 @@ const ItemList = ({ items, stores, restoredItemIds, onRestoreAnimationDone, onTo
 );
 
 /** Renders a group recursively — handles store sections (collapsible) and category sub-headers. */
-const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
-  const itemProps = { stores, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+  const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
 
   if (group.type === 'store') {
     const isCollapsed = collapsedStores.has(group.key);
@@ -121,6 +122,7 @@ export const ShoppingList = ({
   items,
   stores,
   sortConfig,
+  listType,
   onToggle,
   onRemove,
   onUpdateCategory,
@@ -161,7 +163,7 @@ export const ShoppingList = ({
   const uncheckedResult = applySortPipeline(unchecked, config, stores);
   const checkedResult = applySortPipeline(checkedItems, config, stores);
 
-  const itemProps = { stores, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+  const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
   const groupProps = { collapsedStores, onToggleStore: handleToggleStore, ...itemProps };
 
   return (
@@ -240,6 +242,7 @@ ShoppingList.propTypes = {
   items: PropTypes.array.isRequired,
   stores: PropTypes.array,
   sortConfig: PropTypes.arrayOf(PropTypes.string),
+  listType: PropTypes.string,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -253,6 +256,7 @@ ShoppingList.propTypes = {
 ShoppingList.defaultProps = {
   stores: [],
   sortConfig: null,
+  listType: 'grocery',
   restoredItemIds: null,
   onRestoreAnimationDone: null,
 };

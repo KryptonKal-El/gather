@@ -125,6 +125,17 @@
   letter-spacing: 0.02em;
 }
 
+.rsvpBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #fff;
+  text-transform: capitalize;
+}
+
 .price {
   font-size: 0.85rem;
   font-weight: 600;
@@ -233,6 +244,23 @@
 }
 
 .unitSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.rsvpSelect {
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  cursor: pointer;
+}
+
+.rsvpSelect:focus {
   outline: none;
   border-color: var(--primary);
 }

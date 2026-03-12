@@ -261,8 +261,10 @@
         "Lint passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T19:20:00Z",
+      "notes": "Conditional field rendering across ShoppingItem, AddItemForm, ShoppingList. Type-specific categories for packing/todo. RSVP badge+dropdown for guest lists. Basic shows name+checkbox only.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
