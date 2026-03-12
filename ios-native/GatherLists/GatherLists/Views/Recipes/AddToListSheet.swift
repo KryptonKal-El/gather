@@ -41,6 +41,7 @@ struct AddToListSheet: View {
     @State private var historyNames: [String] = []
     @State private var remapSourceId: UUID?
     @State private var remapSearchText = ""
+    @State private var showTypeWarning = false
     
     private var ingredientSummary: String {
         let names = ingredients.prefix(5).map { $0.name }
@@ -143,6 +144,14 @@ struct AddToListSheet: View {
         .task {
             await loadLists()
         }
+        .alert("Non-Grocery List", isPresented: $showTypeWarning) {
+            Button("Cancel", role: .cancel) {}
+            Button("Proceed") {
+                loadPreview()
+            }
+        } message: {
+            Text("This list isn't a Grocery list — ingredients will be added as plain items")
+        }
     }
     
     @ViewBuilder
@@ -234,7 +243,11 @@ struct AddToListSheet: View {
             
             VStack {
                 Button {
-                    loadPreview()
+                    if let list = selectedList, list.type != nil && list.type != "grocery" {
+                        showTypeWarning = true
+                    } else {
+                        loadPreview()
+                    }
                 } label: {
                     HStack {
                         if isLoadingPreview {

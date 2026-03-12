@@ -521,8 +521,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 15,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T21:30:00Z",
+      "notes": "React: warning banner in AddToListModal when selected list is non-grocery, with Proceed/Cancel buttons. Swift: native alert in AddToListSheet with same warning. Grocery lists unaffected.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -458,14 +458,16 @@
     {
       "id": "prd-multi-type-lists",
       "name": "Multi-Type Lists",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-multi-type-lists.md",
       "jsonPath": "docs/prds/prd-multi-type-lists.json",
       "branchName": "feature/multi-type-lists",
       "createdAt": "2026-03-12",
       "updatedAt": "2026-03-12",
       "startedAt": "2026-03-12T12:00:00Z",
-      "currentStory": "US-015"
+      "completedAt": "2026-03-12T21:30:00Z",
+      "currentStory": null,
+      "notes": "All 18 stories complete. 6 list types (Grocery, Basic, Guest List, Packing, Project, To-Do) with per-type field visibility, categories, sort options, RSVP tracking for Guest Lists, type selector grid, conditional field rendering, type-specific auto-categorization, sort pipeline adaptation, change type after creation, list type indicator badges, and recipe Add to List warning for non-Grocery lists."
     },
     {
       "id": "prd-list-color-upgrade",

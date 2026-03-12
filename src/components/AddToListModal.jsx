@@ -23,6 +23,7 @@ const MAX_VISIBLE_INGREDIENTS = 5;
 export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, onClose }) => {
   const [selectedListId, setSelectedListId] = useState(lists[0]?.id ?? null);
   const [step, setStep] = useState('select');
+  const [showTypeWarning, setShowTypeWarning] = useState(false);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState(null);
@@ -54,9 +55,7 @@ export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, o
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleReview = async () => {
-    if (!selectedListId) return;
-
+  const doReview = async () => {
     setIsLoadingPreview(true);
     setError(null);
 
@@ -111,6 +110,27 @@ export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, o
     } finally {
       setIsLoadingPreview(false);
     }
+  };
+
+  const handleReview = async () => {
+    if (!selectedListId) return;
+
+    const selectedList = lists.find((l) => l.id === selectedListId);
+    if (selectedList?.type && selectedList.type !== 'grocery') {
+      setShowTypeWarning(true);
+      return;
+    }
+
+    await doReview();
+  };
+
+  const handleWarningProceed = async () => {
+    setShowTypeWarning(false);
+    await doReview();
+  };
+
+  const handleWarningCancel = () => {
+    setShowTypeWarning(false);
   };
 
   const handleBack = () => {
@@ -334,6 +354,22 @@ export const AddToListModal = ({ ingredients, lists, history = [], onAddItems, o
               );
             })}
           </div>
+
+          {showTypeWarning && (
+            <div className={styles.typeWarning}>
+              <p className={styles.typeWarningText}>
+                This list isn't a Grocery list — ingredients will be added as plain items
+              </p>
+              <div className={styles.typeWarningActions}>
+                <button type="button" className={styles.typeWarningCancel} onClick={handleWarningCancel}>
+                  Cancel
+                </button>
+                <button type="button" className={styles.typeWarningProceed} onClick={handleWarningProceed}>
+                  Proceed
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
