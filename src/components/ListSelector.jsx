@@ -224,7 +224,7 @@ export const ListSelector = ({
                 </span>
                 <span className={styles.listMeta}>
                   <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
-                  {list.type && list.type !== 'grocery' && (
+                  {list.type && (
                     <span className={styles.typeBadge}>
                       {LIST_TYPES[list.type]?.label ?? list.type}
                     </span>
