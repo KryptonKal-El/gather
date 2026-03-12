@@ -110,7 +110,7 @@ struct ListBrowserView: View {
             }
             
             if !ownedFiltered.isEmpty {
-                Section("My Lists") {
+                Section {
                     ForEach(ownedFiltered) { list in
                         NavigationLink(value: list) {
                             ListRowView(list: list, isShared: false)
