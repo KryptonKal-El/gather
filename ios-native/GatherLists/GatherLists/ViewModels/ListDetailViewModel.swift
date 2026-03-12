@@ -20,8 +20,11 @@ final class ListDetailViewModel {
     private let listId: UUID
     private let userId: UUID
     private let ownerId: UUID
+    let listType: String
     
     var isSharedList: Bool { ownerId != userId }
+    
+    var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
     
     // Realtime channels and tasks
     nonisolated(unsafe) private var itemsChannel: RealtimeChannelV2?
@@ -73,10 +76,11 @@ final class ListDetailViewModel {
     
     // MARK: - Initialization
     
-    init(listId: UUID, userId: UUID, ownerId: UUID) {
+    init(listId: UUID, userId: UUID, ownerId: UUID, listType: String = "grocery") {
         self.listId = listId
         self.userId = userId
         self.ownerId = ownerId
+        self.listType = listType
         
         Task {
             await loadData()
@@ -273,12 +277,14 @@ final class ListDetailViewModel {
     
     func addItem(name: String, storeId: UUID?) async {
         do {
+            let rsvpDefault: String? = listType == "guest_list" ? "invited" : nil
             let newItem = try await ItemService.addItem(
                 listId: listId,
                 name: name,
                 category: nil,
                 storeId: storeId,
-                stores: stores
+                stores: stores,
+                rsvpStatus: rsvpDefault
             )
             items.append(newItem)
             
@@ -296,6 +302,7 @@ final class ListDetailViewModel {
             let pastItem = try await ItemService.fetchLastItemByName(name, userId: userId)
             
             let storeId = pastItem?.storeId ?? fallbackStoreId
+            let rsvpDefault: String? = pastItem?.rsvpStatus ?? (listType == "guest_list" ? "invited" : nil)
             let newItem = try await ItemService.addItem(
                 listId: listId,
                 name: name,
@@ -305,7 +312,8 @@ final class ListDetailViewModel {
                 quantity: pastItem?.quantity ?? 1,
                 price: pastItem?.price,
                 imageUrl: pastItem?.imageUrl,
-                unit: pastItem?.unit ?? "each"
+                unit: pastItem?.unit ?? "each",
+                rsvpStatus: rsvpDefault
             )
             items.append(newItem)
             
@@ -353,7 +361,9 @@ final class ListDetailViewModel {
         price: Decimal? = nil,
         clearPrice: Bool = false,
         imageUrl: String? = nil,
-        unit: String? = nil
+        unit: String? = nil,
+        rsvpStatus: String? = nil,
+        clearRsvpStatus: Bool = false
     ) async {
         do {
             try await ItemService.updateItem(
@@ -367,7 +377,9 @@ final class ListDetailViewModel {
                 price: price,
                 clearPrice: clearPrice,
                 imageUrl: imageUrl,
-                unit: unit
+                unit: unit,
+                rsvpStatus: rsvpStatus,
+                clearRsvpStatus: clearRsvpStatus
             )
             
             // Update local state for instant feedback
@@ -388,6 +400,11 @@ final class ListDetailViewModel {
                 }
                 if let imageUrl = imageUrl { items[index].imageUrl = imageUrl }
                 if let unit = unit { items[index].unit = unit }
+                if clearRsvpStatus {
+                    items[index].rsvpStatus = nil
+                } else if let rsvpStatus = rsvpStatus {
+                    items[index].rsvpStatus = rsvpStatus
+                }
             }
         } catch {
             self.error = error.localizedDescription
@@ -422,7 +439,8 @@ final class ListDetailViewModel {
                 quantity: item.quantity,
                 isChecked: item.isChecked,
                 price: item.price,
-                imageUrl: item.imageUrl
+                imageUrl: item.imageUrl,
+                rsvpStatus: item.rsvpStatus
             )
             items.append(restoredItem)
         } catch {

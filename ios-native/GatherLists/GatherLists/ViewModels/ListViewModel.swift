@@ -175,10 +175,10 @@ final class ListViewModel {
         await refetchAllData()
     }
     
-    func createList(name: String, emoji: String?, color: String) async {
+    func createList(name: String, emoji: String?, color: String, type: String = "grocery") async {
         error = nil
         do {
-            let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count)
+            let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count, type: type)
             ownedLists.append(newList)
             activeListId = newList.id
         } catch {
@@ -187,10 +187,10 @@ final class ListViewModel {
         }
     }
     
-    func updateList(id: UUID, name: String?, emoji: String?, color: String?) async {
+    func updateList(id: UUID, name: String?, emoji: String?, color: String?, type: String? = nil) async {
         error = nil
         do {
-            try await ListService.updateList(listId: id, name: name, emoji: emoji, color: color)
+            try await ListService.updateList(listId: id, name: name, emoji: emoji, color: color, type: type)
             
             // Update local state
             if let index = ownedLists.firstIndex(where: { $0.id == id }) {
@@ -198,6 +198,7 @@ final class ListViewModel {
                 // Always update emoji (allows clearing by passing empty string)
                 ownedLists[index].emoji = emoji
                 if let color { ownedLists[index].color = color }
+                if let type { ownedLists[index].type = type }
             }
         } catch {
             self.error = error.localizedDescription

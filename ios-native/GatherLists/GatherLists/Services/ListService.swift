@@ -20,8 +20,8 @@ struct ListService {
     }
     
     /// Creates a new list and returns it.
-    static func createList(userId: UUID, name: String, emoji: String?, color: String, sortOrder: Int = 0) async throws -> GatherList {
-        let newList = NewList(ownerId: userId, name: name, emoji: emoji, color: color, sortOrder: sortOrder)
+    static func createList(userId: UUID, name: String, emoji: String?, color: String, sortOrder: Int = 0, type: String = "grocery") async throws -> GatherList {
+        let newList = NewList(ownerId: userId, name: name, emoji: emoji, color: color, sortOrder: sortOrder, type: type)
         let list: GatherList = try await client
             .from("lists")
             .insert(newList)
@@ -33,8 +33,8 @@ struct ListService {
     }
     
     /// Updates a list's name, emoji, and/or color.
-    static func updateList(listId: UUID, name: String?, emoji: String?, color: String?) async throws {
-        let update = ListUpdate(name: name, emoji: emoji, color: color)
+    static func updateList(listId: UUID, name: String?, emoji: String?, color: String?, type: String? = nil) async throws {
+        let update = ListUpdate(name: name, emoji: emoji, color: color, type: type)
         try await client
             .from("lists")
             .update(update)
@@ -62,7 +62,8 @@ struct ListService {
                 itemCount: list.itemCount,
                 color: list.color,
                 sortOrder: index,
-                createdAt: list.createdAt
+                createdAt: list.createdAt,
+                type: list.type
             )
         }
         try await client
@@ -143,12 +144,14 @@ private struct NewList: Encodable {
     let color: String
     let itemCount: Int = 0
     let sortOrder: Int
+    let type: String
     
     enum CodingKeys: String, CodingKey {
         case ownerId = "owner_id"
         case name, emoji, color
         case itemCount = "item_count"
         case sortOrder = "sort_order"
+        case type
     }
 }
 
@@ -157,6 +160,7 @@ private struct ListUpdate: Encodable {
     var name: String?
     var emoji: String?
     var color: String?
+    var type: String?
 }
 
 /// Lightweight struct for inserting a new share.
@@ -180,6 +184,7 @@ private struct ListOrderEntry: Encodable {
     let color: String
     let sortOrder: Int
     let createdAt: Date
+    let type: String
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -190,5 +195,6 @@ private struct ListOrderEntry: Encodable {
         case color
         case sortOrder = "sort_order"
         case createdAt = "created_at"
+        case type
     }
 }

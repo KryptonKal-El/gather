@@ -567,8 +567,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T17:30:00Z",
+      "notes": "ListService: type in createList/updateList/saveListOrder + DTOs. ItemService: rsvpStatus in addItem/updateItem/restoreItem/restoreItems + DTOs with clear pattern. ListViewModel: type param in create/update with local state. ListDetailViewModel: listType stored prop, typeConfig computed, rsvpStatus default 'invited' for guest lists, rsvpStatus in updateItem/restoreItem.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

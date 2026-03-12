@@ -41,7 +41,8 @@ struct ItemService {
         quantity: Int = 1,
         price: Decimal? = nil,
         imageUrl: String? = nil,
-        unit: String = "each"
+        unit: String = "each",
+        rsvpStatus: String? = nil
     ) async throws -> Item {
         let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
         
@@ -67,7 +68,8 @@ struct ItemService {
             isChecked: false,
             price: price,
             imageUrl: imageUrl,
-            unit: unit
+            unit: unit,
+            rsvpStatus: rsvpStatus
         )
         
         let item: Item = try await client
@@ -94,7 +96,9 @@ struct ItemService {
         clearPrice: Bool = false,
         imageUrl: String? = nil,
         clearImageUrl: Bool = false,
-        unit: String? = nil
+        unit: String? = nil,
+        rsvpStatus: String? = nil,
+        clearRsvpStatus: Bool = false
     ) async throws {
         let update = ItemUpdate(
             name: name,
@@ -107,7 +111,9 @@ struct ItemService {
             clearPrice: clearPrice,
             imageUrl: imageUrl,
             clearImageUrl: clearImageUrl,
-            unit: unit
+            unit: unit,
+            rsvpStatus: rsvpStatus,
+            clearRsvpStatus: clearRsvpStatus
         )
         try await client
             .from("items")
@@ -155,7 +161,8 @@ struct ItemService {
         isChecked: Bool,
         price: Decimal?,
         imageUrl: String?,
-        unit: String = "each"
+        unit: String = "each",
+        rsvpStatus: String? = nil
     ) async throws -> Item {
         let restoreData = RestoreItem(
             listId: listId,
@@ -166,7 +173,8 @@ struct ItemService {
             isChecked: isChecked,
             price: price,
             imageUrl: imageUrl,
-            unit: unit
+            unit: unit,
+            rsvpStatus: rsvpStatus
         )
         let item: Item = try await client
             .from("items")
@@ -191,7 +199,8 @@ struct ItemService {
                 isChecked: item.isChecked,
                 price: item.price,
                 imageUrl: item.imageUrl,
-                unit: item.unit
+                unit: item.unit,
+                rsvpStatus: item.rsvpStatus
             )
             restored.append(restoredItem)
         }
@@ -245,6 +254,7 @@ private struct NewItem: Encodable {
     let price: Decimal?
     let imageUrl: String?
     var unit: String = "each"
+    let rsvpStatus: String?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -256,6 +266,7 @@ private struct NewItem: Encodable {
         case price
         case imageUrl = "image_url"
         case unit
+        case rsvpStatus = "rsvp_status"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -269,6 +280,7 @@ private struct NewItem: Encodable {
         if let storeId { try container.encode(storeId, forKey: .storeId) }
         if let price { try container.encode(price, forKey: .price) }
         if let imageUrl { try container.encode(imageUrl, forKey: .imageUrl) }
+        if let rsvpStatus { try container.encode(rsvpStatus, forKey: .rsvpStatus) }
     }
 }
 
@@ -284,6 +296,8 @@ private struct ItemUpdate: Encodable {
     var imageUrl: String?
     var clearImageUrl: Bool = false
     var unit: String?
+    var rsvpStatus: String?
+    var clearRsvpStatus: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -294,6 +308,7 @@ private struct ItemUpdate: Encodable {
         case price
         case imageUrl = "image_url"
         case unit
+        case rsvpStatus = "rsvp_status"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -318,6 +333,11 @@ private struct ItemUpdate: Encodable {
             try container.encode(imageUrl, forKey: .imageUrl)
         }
         if let unit = unit { try container.encode(unit, forKey: .unit) }
+        if clearRsvpStatus {
+            try container.encodeNil(forKey: .rsvpStatus)
+        } else if let rsvpStatus = rsvpStatus {
+            try container.encode(rsvpStatus, forKey: .rsvpStatus)
+        }
     }
 }
 
@@ -339,6 +359,7 @@ private struct RestoreItem: Encodable {
     let price: Decimal?
     let imageUrl: String?
     var unit: String = "each"
+    let rsvpStatus: String?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -350,6 +371,7 @@ private struct RestoreItem: Encodable {
         case price
         case imageUrl = "image_url"
         case unit
+        case rsvpStatus = "rsvp_status"
     }
 }
 

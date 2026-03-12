@@ -465,7 +465,17 @@
       "createdAt": "2026-03-12",
       "updatedAt": "2026-03-12",
       "startedAt": "2026-03-12T12:00:00Z",
-      "currentStory": "US-017"
+      "currentStory": "US-006"
+    },
+    {
+      "id": "prd-list-color-upgrade",
+      "name": "List Color Picker & Display Upgrade",
+      "status": "ready",
+      "filePath": "docs/prds/prd-list-color-upgrade.md",
+      "jsonPath": "docs/prds/prd-list-color-upgrade.json",
+      "branchName": "feature/list-color-upgrade",
+      "createdAt": "2026-03-12",
+      "updatedAt": "2026-03-12"
     }
   ]
 }
