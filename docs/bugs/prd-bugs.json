@@ -359,6 +359,41 @@
       "occurrences": 1,
       "priority": "medium",
       "notes": "The original designer-provided SVG has been split into 4 variants in public/logo/. The source of truth is public/logo/gather-logo-all-variants.svg. Builder should use <img> tags referencing the SVG files rather than inlining SVG markup. Note: the Nunito font used in the text variants requires a Google Fonts import — this is already present in the SVG files via @import in <style>."
+    },
+    {
+      "id": "BUG-011",
+      "title": "iOS: Newly added item not scrolled into view — hidden below visible area on long lists",
+      "description": "On the native Swift iOS app, when a list has many items and the user adds a new one via the add-item bar (pinned at the bottom), the newly added item is appended to the list but the scroll position doesn't change. The item appears just above the toolbar out of sight, and the user has to manually scroll down to see it.",
+      "severity": "medium",
+      "status": "open",
+      "affectedComponents": [
+        "ios-native/GatherLists/GatherLists/Views/Lists/ListDetailView.swift",
+        "ios-native/GatherLists/GatherLists/ViewModels/ListDetailViewModel.swift"
+      ],
+      "affectedPlatforms": ["ios"],
+      "rootCause": "ListDetailView.swift renders item content in a `List` (line 258) inside a ZStack with the add-item toolbar overlay at the bottom (line 101). When `handleAddItem()` calls `detailViewModel.addItem(name:storeId:)`, the ViewModel appends the new item to the `items` array (line 289), causing a re-render — but there is no `ScrollViewReader` wrapping the `List`, so no `proxy.scrollTo()` call can be made. The same issue occurs when adding an item from the autocomplete suggestion overlay (line 956, `addItemFromSuggestion`). The list has `.contentMargins(.bottom, 80)` for the toolbar height (line 268), so items near the bottom are scrollable, but the view simply doesn't scroll there after add.",
+      "reproductionSteps": [
+        "Open the iOS app and navigate to a list with 15+ items (enough to require scrolling)",
+        "Scroll up so the bottom of the list is not visible",
+        "Type an item name in the add-item bar at the bottom and tap the + button",
+        "Observe: the item is added but the list does not scroll — the new item is hidden below the visible area",
+        "Manually scroll down to see the newly added item at the bottom"
+      ],
+      "suggestedFix": "**Wrap the `List` in `ScrollViewReader` and scroll to the new item after add.**\n\n1. In `ListDetailView.swift`, change `addItem` and `addItemFromSuggestion` in the ViewModel to return the new `Item` (they already create it — just return it).\n\n2. Wrap `itemListContent`'s `List` in a `ScrollViewReader`:\n```swift\nprivate var itemListContent: some View {\n    ScrollViewReader { proxy in\n        List {\n            sortedUncheckedSection\n            if let vm = detailViewModel, !vm.checkedItems.isEmpty {\n                sortedCheckedSection\n            }\n        }\n        .listStyle(.plain)\n        .contentMargins(.bottom, 80, for: .scrollContent)\n        .refreshable { await detailViewModel?.refresh() }\n        .onChange(of: scrollTarget) { _, newId in\n            if let id = newId {\n                withAnimation {\n                    proxy.scrollTo(id, anchor: .bottom)\n                }\n                scrollTarget = nil\n            }\n        }\n    }\n}\n```\n\n3. Add a `@State private var scrollTarget: UUID?` to ListDetailView.\n\n4. In `handleAddItem()` and in the suggestion tap handler, after the item is added, set `scrollTarget = newItem.id`.\n\n5. Ensure each item row has `.id(item.id)` so `scrollTo` can find it.\n\n**Alternative (simpler but less precise):** After adding, scroll to a sentinel view at the bottom of the list:\n```swift\n// Add at end of List:\nColor.clear.frame(height: 1).id(\"list-bottom\")\n// After add:\nproxy.scrollTo(\"list-bottom\", anchor: .bottom)\n```\nThis always scrolls to the very bottom, which is correct since new items are appended there.",
+      "acceptanceCriteria": [
+        "After adding an item via the add-item bar, the list auto-scrolls so the new item is visible",
+        "After adding an item via the autocomplete suggestion, the list auto-scrolls so the new item is visible",
+        "The scroll animation is smooth (use withAnimation)",
+        "If the list is short enough that no scrolling is needed, nothing visually breaks",
+        "Pull-to-refresh still works correctly",
+        "Swipe-to-delete on items still works correctly",
+        "Xcode project builds successfully"
+      ],
+      "relatedPrd": null,
+      "reportedAt": "2026-03-12",
+      "occurrences": 1,
+      "priority": "medium",
+      "notes": "iOS-only issue. The React web app may or may not have the same problem — worth checking separately, but this bug is specifically about the Swift iOS app. The fix is a standard SwiftUI pattern (ScrollViewReader + scrollTo). The ViewModel's addItem method already returns the new Item, so the View just needs to capture it and use it as the scroll target."
     }
   ]
 }

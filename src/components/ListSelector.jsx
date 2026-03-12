@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
 import styles from './ListSelector.module.css';
 
 const LIST_PRESET_COLORS = [
@@ -28,6 +29,7 @@ export const ListSelector = ({
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState(null);
   const [newColor, setNewColor] = useState('#1565c0');
+  const [newType, setNewType] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -52,13 +54,14 @@ export const ListSelector = ({
   }, [menuOpenId]);
 
   const handleCreate = (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
-    onCreate(trimmed, newEmoji, newColor);
+    onCreate(trimmed, newEmoji, newColor, newType);
     setNewName('');
     setNewEmoji(null);
     setNewColor('#1565c0');
+    setNewType(null);
     setIsCreating(false);
     setSearchQuery('');
   };
@@ -85,6 +88,26 @@ export const ListSelector = ({
     if (e.key === 'Enter') handleSaveEdit(id);
     if (e.key === 'Escape') setEditingId(null);
   };
+
+  const renderTypeGrid = () => (
+    <div className={styles.typeGrid}>
+      {LIST_TYPE_IDS.map((typeId) => {
+        const cfg = LIST_TYPES[typeId];
+        const isSelected = newType === typeId;
+        return (
+          <button
+            key={typeId}
+            type="button"
+            className={`${styles.typeCell} ${isSelected ? styles.typeCellSelected : ''}`}
+            onClick={() => setNewType(typeId)}
+          >
+            <span className={styles.typeCellIcon}>{cfg.icon}</span>
+            <span className={styles.typeCellLabel}>{cfg.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   const query = searchQuery.toLowerCase().trim();
   const filteredLists = query
@@ -288,7 +311,7 @@ export const ListSelector = ({
           <h2 className={styles.title}>My Lists</h2>
           <button
             className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
-            onClick={() => setIsCreating(!isCreating)}
+            onClick={() => { if (isCreating) setNewType(null); setIsCreating(!isCreating); }}
             aria-label={isCreating ? 'Cancel' : 'New list'}
           >
             {isCreating ? '×' : '+'}
@@ -332,34 +355,44 @@ export const ListSelector = ({
 
       <div className={styles.scrollArea}>
         {isCreating && (
-          <form className={styles.createForm} onSubmit={handleCreate}>
-            <div className={styles.createRow}>
-              <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
-              <input
-                className={styles.createInput}
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="List name..."
-                autoFocus
-              />
-            </div>
-            <div className={styles.colorPicker}>
-              {LIST_PRESET_COLORS.map((c) => (
+          <div className={styles.createForm}>
+            {renderTypeGrid()}
+            {newType !== null && (
+              <>
+                <div className={styles.createRow}>
+                  <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
+                  <input
+                    className={styles.createInput}
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="List name..."
+                    autoFocus
+                  />
+                </div>
+                <div className={styles.colorPicker}>
+                  {LIST_PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                      style={{ backgroundColor: c }}
+                      onClick={() => setNewColor(c)}
+                      aria-label={`Select color ${c}`}
+                    />
+                  ))}
+                </div>
                 <button
-                  key={c}
+                  className={styles.createBtn}
                   type="button"
-                  className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setNewColor(c)}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
-            </div>
-            <button className={styles.createBtn} type="submit" disabled={!newName.trim()}>
-              Create
-            </button>
-          </form>
+                  disabled={!newName.trim()}
+                  onClick={handleCreate}
+                >
+                  Create
+                </button>
+              </>
+            )}
+          </div>
         )}
 
         <div className={styles.lists}>
@@ -389,7 +422,7 @@ export const ListSelector = ({
         <h2 className={styles.title}>My Lists</h2>
         <button
           className={styles.newBtn}
-          onClick={() => setIsCreating(!isCreating)}
+          onClick={() => { if (isCreating) setNewType(null); setIsCreating(!isCreating); }}
         >
           {isCreating ? 'Cancel' : '+ New'}
         </button>
@@ -430,34 +463,44 @@ export const ListSelector = ({
       </div>
 
       {isCreating && (
-        <form className={styles.createForm} onSubmit={handleCreate}>
-          <div className={styles.createRow}>
-            <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
-            <input
-              className={styles.createInput}
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="List name..."
-              autoFocus
-            />
-          </div>
-          <div className={styles.colorPicker}>
-            {LIST_PRESET_COLORS.map((c) => (
+        <div className={styles.createForm}>
+          {renderTypeGrid()}
+          {newType !== null && (
+            <>
+              <div className={styles.createRow}>
+                <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
+                <input
+                  className={styles.createInput}
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="List name..."
+                  autoFocus
+                />
+              </div>
+              <div className={styles.colorPicker}>
+                {LIST_PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setNewColor(c)}
+                    aria-label={`Select color ${c}`}
+                  />
+                ))}
+              </div>
               <button
-                key={c}
+                className={styles.createBtn}
                 type="button"
-                className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
-                style={{ backgroundColor: c }}
-                onClick={() => setNewColor(c)}
-                aria-label={`Select color ${c}`}
-              />
-            ))}
-          </div>
-          <button className={styles.createBtn} type="submit" disabled={!newName.trim()}>
-            Create
-          </button>
-        </form>
+                disabled={!newName.trim()}
+                onClick={handleCreate}
+              >
+                Create
+              </button>
+            </>
+          )}
+        </div>
       )}
 
       <div className={styles.lists}>

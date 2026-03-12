@@ -467,6 +467,49 @@
   margin: 0;
 }
 
+/* Type selector grid */
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.typeCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.65rem 0.25rem;
+  background: var(--bg-input);
+  border: 2px solid var(--border-default);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.typeCell:hover {
+  border-color: var(--primary);
+  background: var(--bg-hover);
+}
+
+.typeCellSelected {
+  border-color: var(--primary);
+  background: var(--primary-tint);
+}
+
+.typeCellIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.typeCellLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
 /* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
@@ -688,6 +731,24 @@
   .colorPicker {
     gap: 0.5rem;
     padding: 0.35rem 0;
+  }
+
+  /* Type grid on mobile */
+  .typeGrid {
+    gap: 0.6rem;
+  }
+
+  .typeCell {
+    padding: 0.75rem 0.25rem;
+    min-height: 44px;
+  }
+
+  .typeCellIcon {
+    font-size: 1.75rem;
+  }
+
+  .typeCellLabel {
+    font-size: 0.8rem;
   }
 }
 
