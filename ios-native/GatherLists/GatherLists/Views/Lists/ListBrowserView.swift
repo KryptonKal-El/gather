@@ -181,7 +181,7 @@ struct ListBrowserView: View {
         .searchable(text: Binding(
             get: { vm.searchQuery },
             set: { vm.searchQuery = $0 }
-        ), placement: .navigationBarDrawer(displayMode: .always), prompt: "Search lists")
+        ), prompt: "Search lists")
         .navigationDestination(for: GatherList.self) { list in
             ListDetailView(
                 list: list,
