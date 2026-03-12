@@ -412,8 +412,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T22:30:00Z",
+      "notes": "React: List Type menu option in ListSelector (desktop dropdown + mobile action sheet), 3x2 change-type grid, confirmation dialog, sort config reset. Swift: ellipsis toolbar menu in ListDetailView, change type sheet with Form grid, confirmation alert, sort config reset.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

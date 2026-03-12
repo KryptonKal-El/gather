@@ -42,6 +42,11 @@ struct ListDetailView: View {
     @State private var preferencesTask: Task<Void, Never>?
     @State private var showSortSheet = false
     
+    // Change type state
+    @State private var showChangeTypeSheet = false
+    @State private var pendingTypeChange: String?
+    @State private var showTypeChangeConfirm = false
+    
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
             return "\(emoji) \(list.name)"
@@ -116,6 +121,9 @@ struct ListDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 sortMenu
+                if isOwned {
+                    listOptionsMenu
+                }
                 shareStatusIndicator
             }
         }
@@ -1034,6 +1042,105 @@ struct ListDetailView: View {
                 },
                 listType: list.type
             )
+        }
+    }
+    
+    // MARK: - List Options Menu
+    
+    private var listOptionsMenu: some View {
+        Menu {
+            Button {
+                showChangeTypeSheet = true
+            } label: {
+                Label("Change List Type", systemImage: "arrow.triangle.swap")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+                .font(.subheadline)
+                .foregroundStyle(.white)
+        }
+        .sheet(isPresented: $showChangeTypeSheet) {
+            changeTypeSheet()
+        }
+        .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
+            Button("Cancel", role: .cancel) {
+                pendingTypeChange = nil
+            }
+            Button("Change") {
+                guard let newType = pendingTypeChange else { return }
+                Task {
+                    await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType)
+                    let newConfig = ListTypes.getConfig(newType)
+                    if let currentSort = list.sortConfig {
+                        let validLevels = Set(newConfig.sortLevels)
+                        let hasInvalid = currentSort.contains { !validLevels.contains($0) }
+                        if hasInvalid {
+                            try? await PreferenceService.updateListSortConfig(listId: list.id, config: nil)
+                            activeSortConfig = SortPipeline.getDefaultConfig(for: newType)
+                        }
+                    }
+                    pendingTypeChange = nil
+                }
+            }
+        } message: {
+            if let newType = pendingTypeChange {
+                let config = ListTypes.getConfig(newType)
+                Text("Change to \(config.label)? Some fields may be hidden but your data will be preserved.")
+            }
+        }
+    }
+    
+    // MARK: - Change Type Sheet
+    
+    private func changeTypeSheet() -> some View {
+        NavigationStack {
+            Form {
+                Section("Select List Type") {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(LIST_TYPE_IDS, id: \.self) { typeId in
+                            let config = ListTypes.getConfig(typeId)
+                            let isCurrent = typeId == list.type
+                            Button {
+                                if !isCurrent {
+                                    pendingTypeChange = typeId
+                                    showChangeTypeSheet = false
+                                    showTypeChangeConfirm = true
+                                }
+                            } label: {
+                                VStack(spacing: 4) {
+                                    Text(config.icon)
+                                        .font(.system(size: 28))
+                                    Text(config.label)
+                                        .font(.caption)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(isCurrent ? Color(hex: "#3D7A63") : .primary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(isCurrent ? Color(hex: "#3D7A63").opacity(0.15) : Color(.systemGray6))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(isCurrent ? Color(hex: "#3D7A63") : Color.clear, lineWidth: 2)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            }
+            .navigationTitle("List Type")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        showChangeTypeSheet = false
+                    }
+                }
+            }
         }
     }
     

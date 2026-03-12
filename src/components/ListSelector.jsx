@@ -4,6 +4,7 @@ import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
+import { updateListSortConfig } from '../services/preferences.js';
 import styles from './ListSelector.module.css';
 
 const LIST_PRESET_COLORS = [
@@ -38,6 +39,8 @@ export const ListSelector = ({
   const [editName, setEditName] = useState('');
   const [editEmoji, setEditEmoji] = useState(null);
   const [editColor, setEditColor] = useState('#1565c0');
+  const [changingTypeForId, setChangingTypeForId] = useState(null);
+  const [pendingTypeChange, setPendingTypeChange] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
@@ -108,6 +111,34 @@ export const ListSelector = ({
       })}
     </div>
   );
+
+  const renderChangeTypeGrid = (list) => {
+    const currentType = list.type ?? 'grocery';
+    return (
+      <div className={styles.typeGrid}>
+        {LIST_TYPE_IDS.map((typeId) => {
+          const cfg = LIST_TYPES[typeId];
+          const isCurrent = currentType === typeId;
+          return (
+            <button
+              key={typeId}
+              type="button"
+              className={`${styles.typeCell} ${isCurrent ? styles.typeCellSelected : ''}`}
+              onClick={() => {
+                if (!isCurrent) {
+                  setPendingTypeChange({ listId: list.id, newType: typeId, newLabel: cfg.label });
+                }
+                setChangingTypeForId(null);
+              }}
+            >
+              <span className={styles.typeCellIcon}>{cfg.icon}</span>
+              <span className={styles.typeCellLabel}>{cfg.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
 
   const query = searchQuery.toLowerCase().trim();
   const filteredLists = query
@@ -215,6 +246,16 @@ export const ListSelector = ({
                     <span className={styles.menuIcon}>✏️</span>
                     Name, Icon &amp; Color
                   </button>
+                  {isOwned && (
+                    <button
+                      type="button"
+                      className={styles.menuItem}
+                      onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
+                    >
+                      <span className={styles.menuIcon}>🔄</span>
+                      List Type
+                    </button>
+                  )}
                   {isOwned && onShareClick && (
                     <button
                       type="button"
@@ -258,6 +299,15 @@ export const ListSelector = ({
                     >
                       Name, Icon &amp; Color
                     </button>
+                    {isOwned && (
+                      <button
+                        type="button"
+                        className={styles.actionSheetItem}
+                        onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
+                      >
+                        List Type
+                      </button>
+                    )}
                     {isOwned && onShareClick && (
                       <button
                         type="button"
@@ -296,6 +346,36 @@ export const ListSelector = ({
                   setConfirmingDeleteId(null);
                 }}
                 onCancel={() => setConfirmingDeleteId(null)}
+              />
+            )}
+
+            {changingTypeForId === list.id && (
+              <div className={styles.changeTypeOverlay}>
+                {renderChangeTypeGrid(list)}
+              </div>
+            )}
+
+            {pendingTypeChange && pendingTypeChange.listId === list.id && (
+              <ConfirmDialog
+                message={`Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
+                confirmLabel="Change"
+                onConfirm={async () => {
+                  const { listId, newType: selectedType } = pendingTypeChange;
+                  onUpdateDetails(listId, { type: selectedType });
+                  const currentList = lists.find((l) => l.id === listId);
+                  if (currentList?.sort_config) {
+                    const newTypeConfig = LIST_TYPES[selectedType];
+                    const hasInvalidLevels = currentList.sort_config.some(
+                      (level) => !newTypeConfig.sortLevels.includes(level)
+                    );
+                    if (hasInvalidLevels) {
+                      await updateListSortConfig(listId, null);
+                    }
+                  }
+                  setPendingTypeChange(null);
+                  setChangingTypeForId(null);
+                }}
+                onCancel={() => setPendingTypeChange(null)}
               />
             )}
           </>

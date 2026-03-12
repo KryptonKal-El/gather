@@ -510,6 +510,13 @@
   text-align: center;
 }
 
+/* Change type overlay (inline type change grid) */
+.changeTypeOverlay {
+  padding: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
 /* ============================================
    MOBILE iOS GROUPED TABLE VIEW STYLES
    ============================================ */
@@ -749,6 +756,11 @@
 
   .typeCellLabel {
     font-size: 0.8rem;
+  }
+
+  /* Change type overlay on mobile */
+  .changeTypeOverlay {
+    padding: 0.75rem;
   }
 }
 
