@@ -52,8 +52,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T22:10:00Z",
+      "notes": "Expanded presetColors to 18 in both CreateListSheet and EditListSheet. Changed from horizontal ScrollView (32pt) to LazyVGrid (36pt). Added ColorPicker with selectedPresetColor/customColor/effectiveColor pattern matching stores. EditListSheet init detects preset vs custom.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
