@@ -88,8 +88,10 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T22:20:00Z",
+      "notes": "Removed getRowTintStyle and border-left bar. Added 12px .listDot circle matching .storeDot. Default color #1565c0.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

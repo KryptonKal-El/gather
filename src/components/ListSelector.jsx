@@ -154,11 +154,6 @@ export const ListSelector = ({
   const ownedLists = filteredLists.filter((l) => !l._isShared);
   const sharedLists = filteredLists.filter((l) => l._isShared);
 
-  const getRowTintStyle = (color) => {
-    if (!color) return undefined;
-    return { borderLeft: '4px solid ' + color };
-  };
-
   const renderListItem = (list) => {
     const isOwned = !list._isShared;
     const isActive = list.id === activeListId;
@@ -168,7 +163,6 @@ export const ListSelector = ({
       <div
         key={list.id}
         className={`${styles.listItem} ${isActive ? styles.active : ''}`}
-        style={getRowTintStyle(list.color)}
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>
@@ -218,6 +212,10 @@ export const ListSelector = ({
               className={styles.listBtn}
               onClick={() => onSelect(list.id)}
             >
+              <span
+                className={styles.listDot}
+                style={{ backgroundColor: list.color || '#1565c0' }}
+              />
               {list.emoji && <span className={styles.listEmoji}>{list.emoji}</span>}
               <span className={styles.listText}>
                 <span className={styles.listName}>
