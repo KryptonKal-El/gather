@@ -46,6 +46,17 @@ struct ListRowView: View {
                     .padding(.vertical, 4)
                     .background(Color(.systemGray5))
                     .clipShape(Capsule())
+                
+                if list.type != "grocery" {
+                    Text(ListTypes.getConfig(list.type).label)
+                        .font(.caption2)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(Color(.systemGray5))
+                        .clipShape(Capsule())
+                }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 12)

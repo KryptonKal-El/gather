@@ -253,10 +253,27 @@
   white-space: nowrap;
 }
 
+.listMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .listCount {
   font-size: 0.72rem;
   color: var(--text-placeholder);
   white-space: nowrap;
+}
+
+.typeBadge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--badge-bg);
+  padding: 0.1rem 0.4rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .sharedBadge {

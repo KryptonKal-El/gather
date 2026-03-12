@@ -487,8 +487,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 14,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T21:00:00Z",
+      "notes": "React: type badge in ListSelector after list count for non-grocery types. Swift: type badge capsule in ListRowView after item count. Both omit badge for grocery (default) type.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

@@ -222,7 +222,14 @@ export const ListSelector = ({
                   {list.name}
                   {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
                 </span>
-                <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
+                <span className={styles.listMeta}>
+                  <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
+                  {list.type && list.type !== 'grocery' && (
+                    <span className={styles.typeBadge}>
+                      {LIST_TYPES[list.type]?.label ?? list.type}
+                    </span>
+                  )}
+                </span>
               </span>
             </button>
 
