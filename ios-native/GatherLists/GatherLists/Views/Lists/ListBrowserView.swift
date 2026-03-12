@@ -116,7 +116,6 @@ struct ListBrowserView: View {
                         NavigationLink(value: list) {
                             ListRowView(list: list, isShared: false)
                         }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10))
                         .contextMenu {
                             Button {
                                 listToEdit = list
@@ -160,7 +159,6 @@ struct ListBrowserView: View {
                         NavigationLink(value: list) {
                             ListRowView(list: list, isShared: true)
                         }
-                        .listRowInsets(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10))
                     }
                 }
             }
