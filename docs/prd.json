@@ -49,8 +49,10 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T12:10:00Z",
+      "notes": "Migration adds nullable rsvp_status column with CHECK constraint for invited/confirmed/declined/maybe/NULL",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
