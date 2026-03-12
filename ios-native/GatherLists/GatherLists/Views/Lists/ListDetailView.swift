@@ -275,13 +275,14 @@ struct ListDetailView: View {
         var confirmed = 0, maybe = 0, declined = 0, invited = 0, totalHeadCount = 0
         for item in items {
             let status = item.rsvpStatus ?? "invited"
+            let count = item.quantity
             switch status {
-            case "confirmed": confirmed += 1
-            case "maybe": maybe += 1
-            case "declined": declined += 1
-            default: invited += 1
+            case "confirmed": confirmed += count
+            case "maybe": maybe += count
+            case "declined": declined += count
+            default: invited += count
             }
-            totalHeadCount += item.quantity
+            totalHeadCount += count
         }
         return (confirmed, maybe, declined, invited, totalHeadCount)
     }
