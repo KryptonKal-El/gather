@@ -160,6 +160,31 @@
   color: var(--bg-card);
 }
 
+.rsvpSummary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.rsvpSummaryTotal {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rsvpSummaryDivider {
+  color: var(--text-ghost);
+}
+
+.rsvpSummaryStat {
+  font-weight: 600;
+}
+
 @media (max-width: 700px) {
   .empty {
     padding: 1.5rem 1rem;

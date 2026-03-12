@@ -125,15 +125,23 @@
   letter-spacing: 0.02em;
 }
 
-.rsvpBadge {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 6px;
-  border-radius: 4px;
-  font-size: 0.65rem;
+.rsvpPickerWrapper {
+  flex-shrink: 0;
+}
+
+.rsvpPickerSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
   text-transform: capitalize;
+  font-family: inherit;
+  outline: none;
 }
 
 .price {

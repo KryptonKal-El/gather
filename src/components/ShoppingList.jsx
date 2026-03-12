@@ -147,6 +147,17 @@ export const ShoppingList = ({
     });
   };
 
+  const rsvpSummary = listType === 'guest_list' ? (() => {
+    const counts = { invited: 0, confirmed: 0, declined: 0, maybe: 0 };
+    let totalHeadCount = 0;
+    for (const item of items) {
+      const status = item.rsvpStatus ?? 'invited';
+      counts[status] = (counts[status] ?? 0) + 1;
+      totalHeadCount += item.quantity ?? 1;
+    }
+    return { counts, totalHeadCount };
+  })() : null;
+
   if (items.length === 0) {
     return (
       <div className={styles.empty}>
@@ -168,6 +179,30 @@ export const ShoppingList = ({
 
   return (
     <div className={styles.list}>
+      {rsvpSummary && (
+        <div className={styles.rsvpSummary}>
+          <span className={styles.rsvpSummaryTotal}>
+            {rsvpSummary.totalHeadCount} Guest{rsvpSummary.totalHeadCount !== 1 ? 's' : ''}
+          </span>
+          <span className={styles.rsvpSummaryDivider}>·</span>
+          <span className={styles.rsvpSummaryStat} style={{ color: '#4caf50' }}>
+            {rsvpSummary.counts.confirmed} Confirmed
+          </span>
+          <span className={styles.rsvpSummaryDivider}>·</span>
+          <span className={styles.rsvpSummaryStat} style={{ color: '#ff9800' }}>
+            {rsvpSummary.counts.maybe} Maybe
+          </span>
+          <span className={styles.rsvpSummaryDivider}>·</span>
+          <span className={styles.rsvpSummaryStat} style={{ color: '#f44336' }}>
+            {rsvpSummary.counts.declined} Declined
+          </span>
+          <span className={styles.rsvpSummaryDivider}>·</span>
+          <span className={styles.rsvpSummaryStat} style={{ color: '#9e9e9e' }}>
+            {rsvpSummary.counts.invited} Invited
+          </span>
+        </div>
+      )}
+
       {/* Grouped items */}
       {uncheckedResult.groups.map((group) => (
         <GroupRenderer key={group.key} group={group} {...groupProps} />

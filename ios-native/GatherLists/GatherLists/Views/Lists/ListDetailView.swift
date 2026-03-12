@@ -266,8 +266,67 @@ struct ListDetailView: View {
     
     // MARK: - Item List Content
     
+    private var rsvpSummary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, totalHeadCount: Int)? {
+        guard detailViewModel?.typeConfig.fields.rsvpStatus == true,
+              let items = detailViewModel?.items else { return nil }
+        var confirmed = 0, maybe = 0, declined = 0, invited = 0, totalHeadCount = 0
+        for item in items {
+            let status = item.rsvpStatus ?? "invited"
+            switch status {
+            case "confirmed": confirmed += 1
+            case "maybe": maybe += 1
+            case "declined": declined += 1
+            default: invited += 1
+            }
+            totalHeadCount += item.quantity
+        }
+        return (confirmed, maybe, declined, invited, totalHeadCount)
+    }
+    
+    @ViewBuilder
+    private func rsvpSummaryView(_ summary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, totalHeadCount: Int)) -> some View {
+        HStack(spacing: 8) {
+            Text("\(summary.totalHeadCount) Guest\(summary.totalHeadCount == 1 ? "" : "s")")
+                .font(.subheadline)
+                .fontWeight(.bold)
+            
+            Text("·").foregroundStyle(.tertiary)
+            
+            Text("\(summary.confirmed) Confirmed")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color(hex: "#4caf50"))
+            
+            Text("·").foregroundStyle(.tertiary)
+            
+            Text("\(summary.maybe) Maybe")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color(hex: "#ff9800"))
+            
+            Text("·").foregroundStyle(.tertiary)
+            
+            Text("\(summary.declined) Declined")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color(hex: "#f44336"))
+            
+            Text("·").foregroundStyle(.tertiary)
+            
+            Text("\(summary.invited) Invited")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundStyle(Color(hex: "#9e9e9e"))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
     private var itemListContent: some View {
         List {
+            if let summary = rsvpSummary {
+                rsvpSummaryView(summary)
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+            }
+            
             sortedUncheckedSection
             
             if let vm = detailViewModel, !vm.checkedItems.isEmpty {

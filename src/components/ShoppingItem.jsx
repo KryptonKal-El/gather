@@ -372,12 +372,23 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
               </span>
             )}
             {fields.rsvpStatus && (
-              <span
-                className={styles.rsvpBadge}
-                style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus] ?? RSVP_COLORS.invited }}
-              >
-                {item.rsvpStatus ?? 'invited'}
-              </span>
+              <div className={styles.rsvpPickerWrapper}>
+                <select
+                  className={styles.rsvpPickerSelect}
+                  value={item.rsvpStatus ?? 'invited'}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onUpdateItem(item.id, { rsvpStatus: e.target.value });
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus] ?? RSVP_COLORS.invited }}
+                >
+                  <option value="invited">Invited</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="declined">Declined</option>
+                  <option value="maybe">Maybe</option>
+                </select>
+              </div>
             )}
           </div>
         </div>
