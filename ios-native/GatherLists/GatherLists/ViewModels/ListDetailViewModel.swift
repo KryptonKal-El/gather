@@ -66,12 +66,12 @@ final class ListDetailViewModel {
     
     /// Applies the sort pipeline to unchecked items with the given effective config.
     func pipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores)
+        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores, listType: listType)
     }
     
     /// Applies the sort pipeline to checked items with the given effective config.
     func checkedPipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: checkedItems, config: config, stores: stores)
+        SortPipeline.apply(items: checkedItems, config: config, stores: stores, listType: listType)
     }
     
     // MARK: - Initialization

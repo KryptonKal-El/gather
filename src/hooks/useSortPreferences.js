@@ -80,7 +80,7 @@ export const useSortPreferences = () => {
   const effectiveSortConfig = useCallback(
     (list) => {
       if (!list) return SYSTEM_DEFAULT_SORT_CONFIG;
-      return getEffectiveSortConfig({ sort_config: list.sortConfig }, userPreferences);
+      return getEffectiveSortConfig({ sort_config: list.sortConfig }, userPreferences, list.type);
     },
     [userPreferences]
   );

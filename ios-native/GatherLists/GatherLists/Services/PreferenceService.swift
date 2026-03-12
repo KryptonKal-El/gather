@@ -70,7 +70,7 @@ struct PreferenceService {
     }
     
     /// Resolves the effective sort config for a list.
-    /// Priority: per-list override → global default → system default.
+    /// Priority: per-list override → global default → type default → system default.
     static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?) -> [SortLevel] {
         let configStrings: [String]
         
@@ -79,7 +79,7 @@ struct PreferenceService {
         } else if let prefs = userPreferences {
             configStrings = prefs.defaultSortConfig
         } else {
-            return SortPipeline.systemDefault
+            return SortPipeline.getDefaultConfig(for: list.type)
         }
         
         let levels = SortPipeline.normalize(configStrings.compactMap { SortLevel(rawValue: $0) })

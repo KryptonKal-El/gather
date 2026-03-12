@@ -5,6 +5,7 @@ struct SortConfigSheet: View {
     @Binding var activeSortConfig: [SortLevel]
     let hasOverride: Bool
     let onConfigChange: ([SortLevel]?) async -> Void
+    var listType: String = "grocery"
     @Environment(\.dismiss) private var dismiss
     
     @State private var levels: [SortLevel] = []
@@ -14,11 +15,14 @@ struct SortConfigSheet: View {
         .store: "Store",
         .category: "Category",
         .name: "Name",
-        .date: "Date Added"
+        .date: "Date Added",
+        .price: "Price"
     ]
     
     private var unusedLevels: [SortLevel] {
-        SortLevel.allCases.filter { !levels.contains($0) }
+        let config = ListTypes.getConfig(listType)
+        let validLevels = config.sortLevels.compactMap { SortLevel(rawValue: $0) }
+        return validLevels.filter { !levels.contains($0) }
     }
     
     private var canAddMore: Bool {

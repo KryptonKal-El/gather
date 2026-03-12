@@ -3,7 +3,7 @@
  * Provides functions for reading/writing user sort preferences (v2 pipeline).
  */
 import { supabase } from './supabase.js';
-import { SYSTEM_DEFAULT_SORT_CONFIG, isValidSortConfig } from '../utils/sortPipeline.js';
+import { SYSTEM_DEFAULT_SORT_CONFIG, isValidSortConfig, getDefaultSortConfig } from '../utils/sortPipeline.js';
 
 export { SYSTEM_DEFAULT_SORT_CONFIG };
 
@@ -134,11 +134,12 @@ export const updateListSortConfig = async (listId, config) => {
 
 /**
  * Pure function that resolves the effective sort config for a list.
- * Returns list.sort_config if set, otherwise falls back to user preference, then system default.
+ * Returns list.sort_config if set, otherwise falls back to user preference, then type default.
  * @param {object} list - List object (may have sort_config property, snake_case)
  * @param {object|null} userPreferences - User preferences object (may have default_sort_config)
+ * @param {string} listType - List type identifier
  * @returns {string[]} The resolved sort config array
  */
-export const getEffectiveSortConfig = (list, userPreferences) => {
-  return list.sort_config ?? userPreferences?.default_sort_config ?? SYSTEM_DEFAULT_SORT_CONFIG;
+export const getEffectiveSortConfig = (list, userPreferences, listType) => {
+  return list.sort_config ?? userPreferences?.default_sort_config ?? getDefaultSortConfig(listType);
 };

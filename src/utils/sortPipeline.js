@@ -10,12 +10,23 @@ import {
   getAllCategoryColors,
   getAllCategoryKeys,
 } from './categories.js';
+import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES } from './listTypes.js';
 
 /** Valid sort level options */
-export const SORT_LEVELS = ['store', 'category', 'name', 'date'];
+export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price'];
 
 /** System default sort configuration */
 export const SYSTEM_DEFAULT_SORT_CONFIG = ['store', 'category', 'name'];
+
+/**
+ * Returns the default sort config for a given list type.
+ * @param {string} [listType='grocery'] - The list type identifier
+ * @returns {string[]} Default sort config for the type
+ */
+export const getDefaultSortConfig = (listType) => {
+  const config = getTypeConfig(listType ?? 'grocery');
+  return config.defaultSort;
+};
 
 /** Levels that create groups (vs just sorting within existing groups) */
 const GROUPING_LEVELS = ['store', 'category'];
@@ -94,15 +105,26 @@ const sortByDate = (items) =>
     return dateB - dateA;
   });
 
+const sortByPrice = (items) =>
+  [...items].sort((a, b) => {
+    const priceA = a.price ?? null;
+    const priceB = b.price ?? null;
+    if (priceA === null && priceB === null) return 0;
+    if (priceA === null) return 1;
+    if (priceB === null) return -1;
+    return priceA - priceB;
+  });
+
 /**
  * Applies a sort-only level to items.
  * @param {Array} items - Items to sort
- * @param {string} level - Sort level ('name' or 'date')
+ * @param {string} level - Sort level ('name', 'date', or 'price')
  * @returns {Array} Sorted items
  */
 const applySortLevel = (items, level) => {
   if (level === 'name') return sortByName(items);
   if (level === 'date') return sortByDate(items);
+  if (level === 'price') return sortByPrice(items);
   return items;
 };
 
@@ -112,9 +134,10 @@ const applySortLevel = (items, level) => {
  * @param {string[]} remainingLevels - Remaining sort levels
  * @param {Array} stores - Store objects
  * @param {string|null} parentStoreId - Store ID if under a store group
+ * @param {string} listType - List type identifier
  * @returns {Object} Result with items or groups
  */
-const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId) => {
+const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, listType) => {
   if (remainingLevels.length === 0) {
     return { items };
   }
@@ -130,11 +153,11 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId) => 
   }
 
   if (currentLevel === 'store') {
-    return groupByStore(items, stores, nextLevels);
+    return groupByStore(items, stores, nextLevels, listType);
   }
 
   if (currentLevel === 'category') {
-    return groupByCategory(items, stores, nextLevels, parentStoreId);
+    return groupByCategory(items, stores, nextLevels, parentStoreId, listType);
   }
 
   return { items };
@@ -145,9 +168,10 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId) => 
  * @param {Array} items - Items to group
  * @param {Array} stores - Store objects
  * @param {string[]} remainingLevels - Remaining sort levels after store
+ * @param {string} listType - List type identifier
  * @returns {Object} Result with groups and ungrouped
  */
-const groupByStore = (items, stores, remainingLevels) => {
+const groupByStore = (items, stores, remainingLevels, listType) => {
   const storeMap = new Map();
   for (const store of stores) {
     storeMap.set(store.id, store);
@@ -180,7 +204,8 @@ const groupByStore = (items, stores, remainingLevels) => {
       storeItems,
       remainingLevels,
       stores,
-      store.id
+      store.id,
+      listType
     );
 
     const group = {
@@ -214,7 +239,8 @@ const groupByStore = (items, stores, remainingLevels) => {
       ungrouped,
       remainingLevels,
       stores,
-      null
+      null,
+      listType
     );
     processedUngrouped = subResult.items ?? ungrouped;
   }
@@ -226,9 +252,25 @@ const groupByStore = (items, stores, remainingLevels) => {
  * Gets category info for grouping.
  * @param {Array} stores - Store objects
  * @param {string|null} parentStoreId - Parent store ID or null
+ * @param {string} listType - List type identifier
  * @returns {Object} Category labels, colors, and ordered keys
  */
-const getCategoryInfo = (stores, parentStoreId) => {
+const getCategoryInfo = (stores, parentStoreId, listType) => {
+  if (listType === 'packing') {
+    return {
+      labels: Object.fromEntries(PACKING_CATEGORIES.map((c) => [c.key, c.name])),
+      colors: Object.fromEntries(PACKING_CATEGORIES.map((c) => [c.key, c.color])),
+      orderedKeys: PACKING_CATEGORIES.map((c) => c.key),
+    };
+  }
+  if (listType === 'todo') {
+    return {
+      labels: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.name])),
+      colors: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.color])),
+      orderedKeys: TODO_CATEGORIES.map((c) => c.key),
+    };
+  }
+
   let categories = DEFAULT_CATEGORIES;
 
   if (parentStoreId) {
@@ -251,10 +293,11 @@ const getCategoryInfo = (stores, parentStoreId) => {
  * @param {Array} stores - Store objects
  * @param {string[]} remainingLevels - Remaining sort levels after category
  * @param {string|null} parentStoreId - Store ID if under a store group
+ * @param {string} listType - List type identifier
  * @returns {Object} Result with groups and ungrouped (items with no/unknown category)
  */
-const groupByCategory = (items, stores, remainingLevels, parentStoreId) => {
-  const { labels, colors, orderedKeys } = getCategoryInfo(stores, parentStoreId);
+const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType) => {
+  const { labels, colors, orderedKeys } = getCategoryInfo(stores, parentStoreId, listType);
   const validCategories = new Set(orderedKeys);
 
   const grouped = new Map();
@@ -280,7 +323,8 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId) => {
       categoryItems,
       remainingLevels,
       stores,
-      parentStoreId
+      parentStoreId,
+      listType
     );
 
     const group = {
@@ -305,7 +349,8 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId) => {
       other,
       remainingLevels,
       stores,
-      parentStoreId
+      parentStoreId,
+      listType
     );
     processedOther = subResult.items ?? other;
   }
@@ -329,6 +374,7 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId) => {
  * @param {Array} items - Array of item objects with at least: { id, name, category, store, added_at, isChecked }
  * @param {Array} sortConfig - Array of 1-3 sort level strings (e.g. ['store', 'category', 'name'])
  * @param {Array} stores - Array of store objects with: { id, name, color, categories, sort_order }
+ * @param {string} listType - List type identifier (e.g. 'grocery', 'packing', 'todo')
  * @returns {Object} Nested structure with groups, subGroups, and items
  *
  * @example
@@ -347,7 +393,7 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId) => {
  *   items: [...]
  * }
  */
-export const applySortPipeline = (items, sortConfig, stores = []) => {
+export const applySortPipeline = (items, sortConfig, stores = [], listType = 'grocery') => {
   const config = normalizeSortConfig(sortConfig);
   const safeStores = Array.isArray(stores) ? stores : [];
 
@@ -367,7 +413,7 @@ export const applySortPipeline = (items, sortConfig, stores = []) => {
     return { groups: [], items: sorted };
   }
 
-  const result = applyRemainingLevels(items, config, safeStores, null);
+  const result = applyRemainingLevels(items, config, safeStores, null, listType);
 
   return {
     groups: result.groups ?? [],

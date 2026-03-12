@@ -18,7 +18,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SORT_LEVELS } from '../utils/sortPipeline.js';
+import { getTypeConfig } from '../utils/listTypes.js';
 import styles from './SortLevelEditor.module.css';
 
 const LEVEL_LABELS = {
@@ -26,6 +26,7 @@ const LEVEL_LABELS = {
   category: 'Category',
   name: 'Name',
   date: 'Date Added',
+  price: 'Price',
 };
 
 const SortableLevelRow = ({ id, onRemove, canRemove, isLast }) => {
@@ -84,8 +85,10 @@ const SortableLevelRow = ({ id, onRemove, canRemove, isLast }) => {
  * Inline drag-to-reorder sort level editor.
  * Allows adding, removing, and reordering up to 3 sort levels.
  */
-export const SortLevelEditor = ({ config, onConfigChange, disabled = false }) => {
+export const SortLevelEditor = ({ config, onConfigChange, disabled = false, listType = 'grocery' }) => {
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const typeConfig = getTypeConfig(listType);
+  const availableLevels = typeConfig.sortLevels;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -117,7 +120,7 @@ export const SortLevelEditor = ({ config, onConfigChange, disabled = false }) =>
     setAddMenuOpen(false);
   };
 
-  const unusedLevels = SORT_LEVELS.filter((l) => !config.includes(l));
+  const unusedLevels = availableLevels.filter((l) => !config.includes(l));
   const canAddMore = config.length < 3 && unusedLevels.length > 0;
   const canRemove = config.length > 1;
 
@@ -179,4 +182,5 @@ SortLevelEditor.propTypes = {
   config: PropTypes.arrayOf(PropTypes.string).isRequired,
   onConfigChange: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  listType: PropTypes.string,
 };

@@ -252,6 +252,7 @@ struct SettingsView: View {
         case .category: return "Category"
         case .name: return "Name"
         case .date: return "Date"
+        case .price: return "Price"
         }
     }
     

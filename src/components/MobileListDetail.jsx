@@ -63,6 +63,7 @@ export const MobileListDetail = ({
           currentConfig={sortConfig}
           hasOverride={listSortConfig != null}
           onSelect={onSortSelect}
+          listType={list.type ?? 'grocery'}
         />
         {!isGuest && (
           <button

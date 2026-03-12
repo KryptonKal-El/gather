@@ -7,7 +7,7 @@ import styles from './SortPicker.module.css';
  * Drag-to-reorder sort level editor with popover UI.
  * Allows adding, removing, and reordering up to 3 sort levels.
  */
-export const SortPicker = ({ currentConfig, hasOverride, onSelect }) => {
+export const SortPicker = ({ currentConfig, hasOverride, onSelect, listType = 'grocery' }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -47,6 +47,7 @@ export const SortPicker = ({ currentConfig, hasOverride, onSelect }) => {
           <SortLevelEditor
             config={currentConfig}
             onConfigChange={onSelect}
+            listType={listType}
           />
 
           {hasOverride && (
@@ -71,4 +72,5 @@ SortPicker.propTypes = {
   currentConfig: PropTypes.arrayOf(PropTypes.string).isRequired,
   hasOverride: PropTypes.bool.isRequired,
   onSelect: PropTypes.func.isRequired,
+  listType: PropTypes.string,
 };

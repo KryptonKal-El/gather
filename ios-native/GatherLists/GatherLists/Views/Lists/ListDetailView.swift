@@ -1031,7 +1031,8 @@ struct ListDetailView: View {
                 hasOverride: list.sortConfig != nil,
                 onConfigChange: { config in
                     await selectSortConfig(config)
-                }
+                },
+                listType: list.type
             )
         }
     }

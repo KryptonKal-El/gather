@@ -657,6 +657,7 @@ export const App = () => {
                   currentConfig={effectiveSortConfig(activeList)}
                   hasOverride={activeList.sortConfig != null}
                   onSelect={handleSortSelect}
+                  listType={activeList.type ?? 'grocery'}
                 />
               </div>
               <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />

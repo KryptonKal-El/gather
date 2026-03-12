@@ -160,8 +160,8 @@ export const ShoppingList = ({
   const checkedItems = items.filter((i) => i.isChecked);
 
   const config = sortConfig ?? SYSTEM_DEFAULT_SORT_CONFIG;
-  const uncheckedResult = applySortPipeline(unchecked, config, stores);
-  const checkedResult = applySortPipeline(checkedItems, config, stores);
+  const uncheckedResult = applySortPipeline(unchecked, config, stores, listType);
+  const checkedResult = applySortPipeline(checkedItems, config, stores, listType);
 
   const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
   const groupProps = { collapsedStores, onToggleStore: handleToggleStore, ...itemProps };

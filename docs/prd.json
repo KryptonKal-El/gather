@@ -372,8 +372,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "status": "completed",
+      "completedAt": "2026-03-12T21:30:00Z",
+      "passes": true,
+      "notes": "Added 'price' sort level. Sort pipeline, SortPicker, SortLevelEditor, SortConfigSheet all type-aware. Per-type sort levels and defaults. React build passes.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
