@@ -120,7 +120,7 @@ struct ListTypeIconView: View {
             
             // Three horizontal lines (white)
             for i in 0..<3 {
-                let y = (12 + i * 7) * scale
+                let y = CGFloat(12 + i * 7) * scale
                 var linePath = Path()
                 linePath.move(to: CGPoint(x: 10 * scale, y: y))
                 linePath.addLine(to: CGPoint(x: 26 * scale, y: y))
@@ -269,7 +269,7 @@ struct ListTypeIconView: View {
             
             // Check marks (two completed tasks)
             for i in 0..<2 {
-                let y = (22 + i * 5) * scale
+                let y = CGFloat(22 + i * 5) * scale
                 var checkPath = Path()
                 checkPath.move(to: CGPoint(x: 10 * scale, y: y))
                 checkPath.addLine(to: CGPoint(x: 12 * scale, y: (y + 2 * scale)))
