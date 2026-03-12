@@ -73,6 +73,8 @@ struct PreferenceService {
     /// Priority: per-list override → global default → type default → system default.
     static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?) -> [SortLevel] {
         let configStrings: [String]
+        let typeConfig = ListTypes.getConfig(list.type)
+        let validLevels = Set(typeConfig.sortLevels.compactMap { SortLevel(rawValue: $0) })
         
         if let listConfig = list.sortConfig {
             configStrings = listConfig
@@ -83,7 +85,8 @@ struct PreferenceService {
         }
         
         let levels = SortPipeline.normalize(configStrings.compactMap { SortLevel(rawValue: $0) })
-        return levels
+        let filtered = levels.filter { validLevels.contains($0) }
+        return filtered.isEmpty ? SortPipeline.getDefaultConfig(for: list.type) : filtered
     }
 }
 
