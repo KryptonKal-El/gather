@@ -50,8 +50,11 @@ export const searchImages = async (query, count = 8) => {
     }
 
     const data = await res.json();
-    searchCache.set(cacheKey, { results: data.results ?? [], timestamp: Date.now() });
-    return data.results ?? [];
+    const results = data.results ?? [];
+    if (results.length > 0) {
+      searchCache.set(cacheKey, { results, timestamp: Date.now() });
+    }
+    return results;
   } catch (err) {
     console.error('Image search error:', err);
     return [];

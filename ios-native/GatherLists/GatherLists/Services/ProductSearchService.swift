@@ -60,7 +60,9 @@ struct ProductSearchService {
                 return []
             }
             let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
-            await cache.set(cacheKey, results: decoded.results)
+            if !decoded.results.isEmpty {
+                await cache.set(cacheKey, results: decoded.results)
+            }
             return decoded.results
         } catch {
             print("[ProductSearchService] Search failed: \(error.localizedDescription)")
