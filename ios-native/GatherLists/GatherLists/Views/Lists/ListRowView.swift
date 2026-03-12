@@ -22,7 +22,7 @@ struct ListRowView: View {
                     .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
             }
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 HStack {
                     Text(list.name)
                         .font(.body)
