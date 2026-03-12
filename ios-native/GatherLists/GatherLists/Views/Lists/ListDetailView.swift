@@ -191,7 +191,8 @@ struct ListDetailView: View {
             EditItemSheet(
                 item: item,
                 stores: detailViewModel?.stores ?? [],
-                onSave: { name, quantity, price, storeId, clearStoreId, category, unit in
+                listType: detailViewModel?.listType ?? "grocery",
+                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus in
                     Task {
                         await detailViewModel?.updateItem(
                             item.id,
@@ -202,7 +203,9 @@ struct ListDetailView: View {
                             quantity: quantity,
                             price: price,
                             clearPrice: item.price != nil && price == nil,
-                            unit: unit
+                            unit: unit,
+                            rsvpStatus: rsvpStatus,
+                            clearRsvpStatus: clearRsvpStatus
                         )
                     }
                 },
@@ -501,42 +504,84 @@ struct ListDetailView: View {
                 }
                 .buttonStyle(.plain)
                 
-                itemThumbnail(item: item)
+                if detailViewModel?.typeConfig.fields.image == true {
+                    itemThumbnail(item: item)
+                }
                 
                 Text(item.name)
                     .strikethrough(isChecked)
                     .foregroundStyle(isChecked ? .secondary : .primary)
                 
-                if item.unit != "each" {
-                    Text("\(item.quantity) \(item.unit)")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            Capsule()
-                                .fill(Color(.systemGray))
-                        )
-                } else if item.quantity > 1 {
-                    Text("×\(item.quantity)")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            Capsule()
-                                .fill(Color(.systemGray))
-                        )
+                if detailViewModel?.typeConfig.fields.quantity == true {
+                    if item.unit != "each" {
+                        Text("\(item.quantity) \(item.unit)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(Color(.systemGray))
+                            )
+                    } else if item.quantity > 1 {
+                        Text("×\(item.quantity)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(Color(.systemGray))
+                            )
+                    }
                 }
                 
                 Spacer()
                 
-                if let price = item.price {
-                    Text(formatPrice(price))
-                        .font(.subheadline)
-                        .foregroundStyle(isChecked ? .tertiary : .secondary)
+                if detailViewModel?.typeConfig.fields.price == true {
+                    if let price = item.price {
+                        Text(formatPrice(price))
+                            .font(.subheadline)
+                            .foregroundStyle(isChecked ? .tertiary : .secondary)
+                    }
+                }
+                
+                if detailViewModel?.typeConfig.fields.rsvpStatus == true {
+                    if !isChecked {
+                        Menu {
+                            ForEach(["invited", "confirmed", "declined", "maybe"], id: \.self) { status in
+                                Button {
+                                    Task {
+                                        await detailViewModel?.updateItem(item.id, rsvpStatus: status)
+                                    }
+                                } label: {
+                                    HStack {
+                                        Text(status.capitalized)
+                                        if item.rsvpStatus == status {
+                                            Image(systemName: "checkmark")
+                                        }
+                                    }
+                                }
+                            }
+                        } label: {
+                            Text(item.rsvpStatus?.capitalized ?? "Invited")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(
+                                    Capsule()
+                                        .fill(rsvpColor(for: item.rsvpStatus))
+                                )
+                        }
+                    } else {
+                        Text(item.rsvpStatus?.capitalized ?? "Invited")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             .padding(.leading, 28)
@@ -634,7 +679,7 @@ struct ListDetailView: View {
     
     @ViewBuilder
     private func itemContextMenu(item: Item) -> some View {
-        // Edit Name
+        // Edit Name — always shown
         Button {
             editingItem = item
             editNameText = item.name
@@ -644,167 +689,200 @@ struct ListDetailView: View {
         }
         
         // Quantity submenu
-        Menu {
-            ForEach(1...10, id: \.self) { qty in
-                Button {
-                    Task {
-                        await detailViewModel?.updateItem(item.id, quantity: qty)
-                    }
-                } label: {
-                    HStack {
-                        Text("\(qty)")
-                        if item.quantity == qty {
-                            Image(systemName: "checkmark")
+        if detailViewModel?.typeConfig.fields.quantity == true {
+            Menu {
+                ForEach(1...10, id: \.self) { qty in
+                    Button {
+                        Task {
+                            await detailViewModel?.updateItem(item.id, quantity: qty)
+                        }
+                    } label: {
+                        HStack {
+                            Text("\(qty)")
+                            if item.quantity == qty {
+                                Image(systemName: "checkmark")
+                            }
                         }
                     }
                 }
-            }
-            
-            Divider()
-            
-            Button {
-                editingItem = item
-                customQuantityText = "\(item.quantity)"
-                showCustomQuantityAlert = true
+                
+                Divider()
+                
+                Button {
+                    editingItem = item
+                    customQuantityText = "\(item.quantity)"
+                    showCustomQuantityAlert = true
+                } label: {
+                    Label("Custom...", systemImage: "number")
+                }
             } label: {
-                Label("Custom...", systemImage: "number")
+                Label("\(detailViewModel?.typeConfig.quantityLabel ?? "Quantity"): \(item.quantity)", systemImage: "number.circle")
             }
-        } label: {
-            Label("Quantity: \(item.quantity)", systemImage: "number.circle")
         }
         
         // Price submenu
-        Menu {
-            Button {
-                editingItem = item
-                editPriceText = item.price.map { "\($0)" } ?? ""
-                showEditPriceAlert = true
-            } label: {
-                Label("Set Price...", systemImage: "dollarsign.circle")
-            }
-            
-            if item.price != nil {
-                Button(role: .destructive) {
-                    Task {
-                        await detailViewModel?.updateItem(item.id, clearPrice: true)
-                    }
+        if detailViewModel?.typeConfig.fields.price == true {
+            Menu {
+                Button {
+                    editingItem = item
+                    editPriceText = item.price.map { "\($0)" } ?? ""
+                    showEditPriceAlert = true
                 } label: {
-                    Label("Remove Price", systemImage: "xmark.circle")
+                    Label("Set Price...", systemImage: "dollarsign.circle")
                 }
+                
+                if item.price != nil {
+                    Button(role: .destructive) {
+                        Task {
+                            await detailViewModel?.updateItem(item.id, clearPrice: true)
+                        }
+                    } label: {
+                        Label("Remove Price", systemImage: "xmark.circle")
+                    }
+                }
+            } label: {
+                let priceLabel = item.price.map { formatPrice($0) } ?? "None"
+                Label("Price: \(priceLabel)", systemImage: "dollarsign.circle")
             }
-        } label: {
-            let priceLabel = item.price.map { formatPrice($0) } ?? "None"
-            Label("Price: \(priceLabel)", systemImage: "dollarsign.circle")
         }
         
         // Store submenu
-        Menu {
-            Button {
-                Task {
-                    await detailViewModel?.updateItem(item.id, clearStoreId: true)
-                }
-            } label: {
-                HStack {
-                    Text("No store")
-                    if item.storeId == nil {
-                        Image(systemName: "checkmark")
-                    }
-                }
-            }
-            
-            Divider()
-            
-            ForEach(detailViewModel?.stores ?? []) { store in
+        if detailViewModel?.typeConfig.fields.store == true {
+            Menu {
                 Button {
                     Task {
-                        await detailViewModel?.updateItem(item.id, storeId: store.id)
+                        await detailViewModel?.updateItem(item.id, clearStoreId: true)
                     }
                 } label: {
                     HStack {
-                        Text(store.name)
-                        if item.storeId == store.id {
+                        Text("No store")
+                        if item.storeId == nil {
                             Image(systemName: "checkmark")
                         }
                     }
                 }
-            }
-        } label: {
-            let storeName: String = {
-                if let storeId = item.storeId,
-                   let store = detailViewModel?.stores.first(where: { $0.id == storeId }) {
-                    return store.name
+                
+                Divider()
+                
+                ForEach(detailViewModel?.stores ?? []) { store in
+                    Button {
+                        Task {
+                            await detailViewModel?.updateItem(item.id, storeId: store.id)
+                        }
+                    } label: {
+                        HStack {
+                            Text(store.name)
+                            if item.storeId == store.id {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
                 }
-                return "None"
-            }()
-            Label("Store: \(storeName)", systemImage: "storefront")
+            } label: {
+                let storeName: String = {
+                    if let storeId = item.storeId,
+                       let store = detailViewModel?.stores.first(where: { $0.id == storeId }) {
+                        return store.name
+                    }
+                    return "None"
+                }()
+                Label("Store: \(storeName)", systemImage: "storefront")
+            }
         }
         
         // Category submenu
-        Menu {
-            let categories = categoriesForItem(item)
-            
-            Button {
-                Task {
-                    await detailViewModel?.updateItem(item.id, category: "other")
-                }
-            } label: {
-                HStack {
-                    Text("No category")
-                    if item.category == nil || item.category == "other" {
-                        Image(systemName: "checkmark")
-                    }
-                }
-            }
-            
-            Divider()
-            
-            ForEach(categories.filter { $0.key != "other" }, id: \.key) { cat in
+        if detailViewModel?.typeConfig.fields.category == true {
+            Menu {
+                let categories = categoriesForItem(item)
+                
                 Button {
                     Task {
-                        await detailViewModel?.updateItem(item.id, category: cat.key)
+                        await detailViewModel?.updateItem(item.id, category: "other")
                     }
                 } label: {
                     HStack {
-                        Text(cat.name)
-                        if item.category == cat.key {
+                        Text("No category")
+                        if item.category == nil || item.category == "other" {
                             Image(systemName: "checkmark")
                         }
                     }
                 }
-            }
-        } label: {
-            let categoryName = categoryNameForItem(item)
-            Label("Category: \(categoryName)", systemImage: "tag")
-        }
-        
-        // Image actions
-        Button {
-            imagePickerItem = item
-        } label: {
-            if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
-                Label("Change Image", systemImage: "photo")
-            } else {
-                Label("Set Image", systemImage: "photo")
-            }
-        }
-        
-        if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
-            Button(role: .destructive) {
-                Task {
-                    guard let userId = authViewModel.currentUser?.id else { return }
-                    try? await StorageService.deleteItemImage(userId: userId, itemId: item.id)
-                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
-                        detailViewModel?.items[index].imageUrl = nil
+                
+                Divider()
+                
+                ForEach(categories.filter { $0.key != "other" }, id: \.key) { cat in
+                    Button {
+                        Task {
+                            await detailViewModel?.updateItem(item.id, category: cat.key)
+                        }
+                    } label: {
+                        HStack {
+                            Text(cat.name)
+                            if item.category == cat.key {
+                                Image(systemName: "checkmark")
+                            }
+                        }
                     }
                 }
             } label: {
-                Label("Remove Image", systemImage: "xmark.circle")
+                let categoryName = categoryNameForItem(item)
+                Label("Category: \(categoryName)", systemImage: "tag")
+            }
+        }
+        
+        // RSVP submenu (guest list only)
+        if detailViewModel?.typeConfig.fields.rsvpStatus == true {
+            Menu {
+                ForEach(["invited", "confirmed", "declined", "maybe"], id: \.self) { status in
+                    Button {
+                        Task {
+                            await detailViewModel?.updateItem(item.id, rsvpStatus: status)
+                        }
+                    } label: {
+                        HStack {
+                            Text(status.capitalized)
+                            if item.rsvpStatus == status {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                }
+            } label: {
+                let rsvpLabel = item.rsvpStatus?.capitalized ?? "Invited"
+                Label("RSVP: \(rsvpLabel)", systemImage: "person.crop.circle.badge.questionmark")
+            }
+        }
+        
+        // Image actions
+        if detailViewModel?.typeConfig.fields.image == true {
+            Button {
+                imagePickerItem = item
+            } label: {
+                if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
+                    Label("Change Image", systemImage: "photo")
+                } else {
+                    Label("Set Image", systemImage: "photo")
+                }
+            }
+            
+            if item.imageUrl != nil && !(item.imageUrl?.isEmpty ?? true) {
+                Button(role: .destructive) {
+                    Task {
+                        guard let userId = authViewModel.currentUser?.id else { return }
+                        try? await StorageService.deleteItemImage(userId: userId, itemId: item.id)
+                        if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                            detailViewModel?.items[index].imageUrl = nil
+                        }
+                    }
+                } label: {
+                    Label("Remove Image", systemImage: "xmark.circle")
+                }
             }
         }
         
         Divider()
         
-        // Delete
+        // Delete — always shown
         Button(role: .destructive) {
             Task {
                 if await detailViewModel?.deleteItem(item) != nil {
@@ -819,6 +897,11 @@ struct ListDetailView: View {
     // MARK: - Context Menu Helpers
     
     private func categoriesForItem(_ item: Item) -> [CategoryDef] {
+        // Use type-specific categories if available
+        if let typeCategories = detailViewModel?.typeConfig.categories {
+            return typeCategories.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color) }
+        }
+        // Fall back to store categories or defaults
         if let storeId = item.storeId,
            let store = detailViewModel?.stores.first(where: { $0.id == storeId }),
            !store.categories.isEmpty {
@@ -892,6 +975,15 @@ struct ListDetailView: View {
         formatter.numberStyle = .currency
         formatter.currencyCode = "USD"
         return formatter.string(from: price as NSDecimalNumber) ?? "$\(price)"
+    }
+    
+    private func rsvpColor(for status: String?) -> Color {
+        switch status {
+        case "confirmed": return Color(hex: "#4caf50")
+        case "declined": return Color(hex: "#f44336")
+        case "maybe": return Color(hex: "#ff9800")
+        default: return Color(hex: "#9e9e9e")
+        }
     }
     
     // MARK: - Share Status Indicator
@@ -986,8 +1078,10 @@ struct ListDetailView: View {
     
     private var addItemToolbar: some View {
         HStack(spacing: 12) {
-            if let vm = detailViewModel, !vm.stores.isEmpty {
-                storePicker(stores: vm.stores)
+            if detailViewModel?.typeConfig.fields.store == true {
+                if let vm = detailViewModel, !vm.stores.isEmpty {
+                    storePicker(stores: vm.stores)
+                }
             }
             
             TextField("Add an item...", text: $itemName)
@@ -1102,7 +1196,7 @@ struct ListDetailView: View {
             print("[ListDetailView] No authenticated user, cannot create detail view model")
             return
         }
-        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId, ownerId: list.ownerId)
+        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId, ownerId: list.ownerId, listType: list.type)
     }
     
     private func loadShareInfo() async {

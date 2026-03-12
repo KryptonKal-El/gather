@@ -296,8 +296,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T19:00:00Z",
+      "notes": "Conditional field rendering in ListDetailView and EditItemSheet based on typeConfig.fields. Item rows: image/quantity/price conditionally shown, RSVP picker for guest lists. Context menu: all submenus gated by field visibility. Add-item toolbar: store picker conditional. EditItemSheet: accepts listType, conditionally renders qty/unit/price/store/category/RSVP/image sections. Type-specific categories for packing/todo.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
