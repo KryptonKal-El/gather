@@ -365,10 +365,10 @@
       "title": "iOS: Newly added item not scrolled into view — hidden below visible area on long lists",
       "description": "On the native Swift iOS app, when a list has many items and the user adds a new one via the add-item bar (pinned at the bottom), the newly added item is appended to the list but the scroll position doesn't change. The item appears just above the toolbar out of sight, and the user has to manually scroll down to see it.",
       "severity": "medium",
-      "status": "open",
+      "status": "resolved",
+      "resolvedAt": "2026-03-12",
       "affectedComponents": [
-        "ios-native/GatherLists/GatherLists/Views/Lists/ListDetailView.swift",
-        "ios-native/GatherLists/GatherLists/ViewModels/ListDetailViewModel.swift"
+        "ios-native/GatherLists/GatherLists/Views/Lists/ListDetailView.swift"
       ],
       "affectedPlatforms": ["ios"],
       "rootCause": "ListDetailView.swift renders item content in a `List` (line 258) inside a ZStack with the add-item toolbar overlay at the bottom (line 101). When `handleAddItem()` calls `detailViewModel.addItem(name:storeId:)`, the ViewModel appends the new item to the `items` array (line 289), causing a re-render — but there is no `ScrollViewReader` wrapping the `List`, so no `proxy.scrollTo()` call can be made. The same issue occurs when adding an item from the autocomplete suggestion overlay (line 956, `addItemFromSuggestion`). The list has `.contentMargins(.bottom, 80)` for the toolbar height (line 268), so items near the bottom are scrollable, but the view simply doesn't scroll there after add.",
@@ -393,7 +393,7 @@
       "reportedAt": "2026-03-12",
       "occurrences": 1,
       "priority": "medium",
-      "notes": "iOS-only issue. The React web app may or may not have the same problem — worth checking separately, but this bug is specifically about the Swift iOS app. The fix is a standard SwiftUI pattern (ScrollViewReader + scrollTo). The ViewModel's addItem method already returns the new Item, so the View just needs to capture it and use it as the scroll target."
+      "notes": "iOS-only issue. Fixed by wrapping itemListContent List in ScrollViewReader, adding invisible Color.clear sentinel at list bottom, and setting scrollTarget = UUID() after addItem and addItemFromSuggestion. Uses .onChange(of: scrollTarget) to trigger proxy.scrollTo with animation."
     }
   ]
 }

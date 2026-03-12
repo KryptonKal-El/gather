@@ -16,12 +16,11 @@
     {
       "id": "prd-bugs",
       "name": "Bug Fixes",
-      "status": "completed",
+      "status": "ready",
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
-      "updatedAt": "2026-03-04",
-      "completedAt": "2026-03-04T18:00:00Z",
-      "notes": "All 9 bugs resolved (BUG-001\u2013009). BUG-008: storage bucket constraints via migration. BUG-009: drag-to-reorder via @dnd-kit/sortable."
+      "updatedAt": "2026-03-12",
+      "notes": "BUG-001\u2013011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
     },
     {
       "id": "prd-native-emoji-picker",

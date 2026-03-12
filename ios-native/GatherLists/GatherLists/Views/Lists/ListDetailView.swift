@@ -47,6 +47,9 @@ struct ListDetailView: View {
     @State private var pendingTypeChange: String?
     @State private var showTypeChangeConfirm = false
     
+    // Auto-scroll target after adding item
+    @State private var scrollTarget: UUID?
+    
     private var navigationTitle: String {
         if let emoji = list.emoji, !emoji.isEmpty {
             return "\(emoji) \(list.name)"
@@ -320,23 +323,37 @@ struct ListDetailView: View {
     }
     
     private var itemListContent: some View {
-        List {
-            if let summary = rsvpSummary {
-                rsvpSummaryView(summary)
-                    .listRowInsets(EdgeInsets())
+        ScrollViewReader { proxy in
+            List {
+                if let summary = rsvpSummary {
+                    rsvpSummaryView(summary)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                }
+                
+                sortedUncheckedSection
+                
+                if let vm = detailViewModel, !vm.checkedItems.isEmpty {
+                    sortedCheckedSection
+                }
+                
+                Color.clear.frame(height: 1).id("list-bottom")
                     .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets())
             }
-            
-            sortedUncheckedSection
-            
-            if let vm = detailViewModel, !vm.checkedItems.isEmpty {
-                sortedCheckedSection
+            .listStyle(.plain)
+            .contentMargins(.bottom, 80, for: .scrollContent)
+            .refreshable {
+                await detailViewModel?.refresh()
             }
-        }
-        .listStyle(.plain)
-        .contentMargins(.bottom, 80, for: .scrollContent)
-        .refreshable {
-            await detailViewModel?.refresh()
+            .onChange(of: scrollTarget) { _, newId in
+                if newId != nil {
+                    withAnimation {
+                        proxy.scrollTo("list-bottom", anchor: .bottom)
+                    }
+                    scrollTarget = nil
+                }
+            }
         }
     }
     
@@ -1214,6 +1231,7 @@ struct ListDetailView: View {
                     isInputFocused = true
                     Task {
                         await detailViewModel?.addItemFromSuggestion(name: suggestion, fallbackStoreId: storeId)
+                        scrollTarget = UUID()
                     }
                 } label: {
                     HStack {
@@ -1354,6 +1372,7 @@ struct ListDetailView: View {
             await detailViewModel?.addItem(name: trimmedName, storeId: selectedStoreId)
             itemName = ""
             isInputFocused = true
+            scrollTarget = UUID()
         }
     }
     
