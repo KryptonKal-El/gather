@@ -53,14 +53,16 @@ struct EditStoreSheet: View {
                 }
                 
                 Section("Color") {
-                    presetColorGrid
-                    
-                    Divider()
-                    
-                    ColorPicker("Custom Color", selection: $customColor)
-                        .onChange(of: customColor) {
-                            selectedPresetColor = nil
-                        }
+                    VStack(spacing: 12) {
+                        presetColorGrid
+                        
+                        Divider()
+                        
+                        ColorPicker("Custom Color", selection: $customColor)
+                            .onChange(of: customColor) {
+                                selectedPresetColor = nil
+                            }
+                    }
                 }
             }
             .navigationTitle("Edit Store")

@@ -61,36 +61,38 @@ struct CategoryDetailView: View {
             }
             
             Section("Color") {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 12) {
-                    ForEach(categoryPresetColors, id: \.self) { hex in
-                        Button {
-                            selectedPresetColor = hex
-                            customColor = Color(hex: hex)
-                            persistChanges()
-                        } label: {
-                            Circle()
-                                .fill(Color(hex: hex))
-                                .frame(width: 36, height: 36)
-                                .overlay {
-                                    if selectedPresetColor == hex {
-                                        Image(systemName: "checkmark")
-                                            .font(.system(size: 16, weight: .bold))
-                                            .foregroundStyle(Color(hex: "#2C3E35"))
+                VStack(spacing: 12) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 12) {
+                        ForEach(categoryPresetColors, id: \.self) { hex in
+                            Button {
+                                selectedPresetColor = hex
+                                customColor = Color(hex: hex)
+                                persistChanges()
+                            } label: {
+                                Circle()
+                                    .fill(Color(hex: hex))
+                                    .frame(width: 36, height: 36)
+                                    .overlay {
+                                        if selectedPresetColor == hex {
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundStyle(Color(hex: "#2C3E35"))
+                                        }
                                     }
-                                }
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.vertical, 8)
+                    
+                    Divider()
+                    
+                    ColorPicker("Custom Color", selection: $customColor)
+                        .onChange(of: customColor) {
+                            selectedPresetColor = nil
+                            persistChanges()
+                        }
                 }
-                .padding(.vertical, 8)
-                
-                Divider()
-                
-                ColorPicker("Custom Color", selection: $customColor)
-                    .onChange(of: customColor) {
-                        selectedPresetColor = nil
-                        persistChanges()
-                    }
             }
             
             Section("Keywords (\(currentCategory.keywords.count))") {
