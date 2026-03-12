@@ -1269,7 +1269,7 @@ struct ListDetailView: View {
                 }
             }
             
-            TextField("Add an item...", text: $itemName)
+            TextField(list.type == "guest_list" ? "Add guest..." : "Add an item...", text: $itemName)
                 .textFieldStyle(.plain)
                 .focused($isInputFocused)
                 .submitLabel(.done)
