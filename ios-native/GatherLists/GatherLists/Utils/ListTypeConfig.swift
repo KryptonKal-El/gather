@@ -32,7 +32,7 @@ struct ListTypeConfig {
 }
 
 /// All list type IDs in display order.
-let LIST_TYPE_IDS: [String] = ["grocery", "basic", "guest_list", "packing", "project", "todo"]
+let LIST_TYPE_IDS: [String] = ["grocery", "todo", "basic", "packing", "guest_list", "project"]
 
 /// Category definitions for non-grocery list types.
 enum ListTypeCategories {

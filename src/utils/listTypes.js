@@ -112,7 +112,7 @@ export const LIST_TYPES = {
   grocery: {
     id: 'grocery',
     label: 'Grocery',
-    icon: '🛒',
+    icon: 'grocery',
     fields: {
       store: true,
       category: true,
@@ -130,7 +130,7 @@ export const LIST_TYPES = {
   basic: {
     id: 'basic',
     label: 'Basic',
-    icon: '📋',
+    icon: 'basic',
     fields: {
       store: false,
       category: false,
@@ -148,7 +148,7 @@ export const LIST_TYPES = {
   guest_list: {
     id: 'guest_list',
     label: 'Guest List',
-    icon: '🎉',
+    icon: 'guest_list',
     fields: {
       store: false,
       category: false,
@@ -166,7 +166,7 @@ export const LIST_TYPES = {
   packing: {
     id: 'packing',
     label: 'Packing',
-    icon: '🧳',
+    icon: 'packing',
     fields: {
       store: false,
       category: true,
@@ -184,7 +184,7 @@ export const LIST_TYPES = {
   project: {
     id: 'project',
     label: 'Project',
-    icon: '🏗️',
+    icon: 'project',
     fields: {
       store: false,
       category: false,
@@ -202,7 +202,7 @@ export const LIST_TYPES = {
   todo: {
     id: 'todo',
     label: 'To-Do',
-    icon: '📝',
+    icon: 'todo',
     fields: {
       store: false,
       category: true,
@@ -225,11 +225,11 @@ export const LIST_TYPES = {
  */
 export const LIST_TYPE_IDS = [
   'grocery',
-  'basic',
-  'guest_list',
-  'packing',
-  'project',
   'todo',
+  'basic',
+  'packing',
+  'guest_list',
+  'project',
 ];
 
 /**

@@ -1184,8 +1184,7 @@ struct ListDetailView: View {
                                 }
                             } label: {
                                 VStack(spacing: 4) {
-                                    Text(config.icon)
-                                        .font(.system(size: 28))
+                                    ListTypeIconView(typeId: typeId, size: 28)
                                     Text(config.label)
                                         .font(.caption)
                                         .fontWeight(.semibold)

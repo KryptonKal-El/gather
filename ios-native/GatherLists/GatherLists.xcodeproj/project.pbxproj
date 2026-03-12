@@ -89,6 +89,7 @@
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2D3 /* ListTypeIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D2 /* ListTypeIconView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -176,6 +177,7 @@
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortPipeline.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTypeConfig.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2D2 /* ListTypeIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTypeIconView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -379,6 +381,7 @@
 				A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2D2 /* ListTypeIconView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A6 /* SuggestionsView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */,
@@ -572,6 +575,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C4 /* SortConfigSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2D3 /* ListTypeIconView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

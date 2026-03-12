@@ -13,7 +13,7 @@ struct CreateListSheet: View {
     @State private var customColor: Color = .blue
     @State private var showEmojiPicker = false
     @State private var isCreating = false
-    @State private var selectedType: String? = nil
+    @State private var selectedType: String? = "grocery"
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
@@ -55,9 +55,8 @@ struct CreateListSheet: View {
                             Button {
                                 selectedType = typeId
                             } label: {
-                                VStack(spacing: 6) {
-                                    Text(config.icon)
-                                        .font(.system(size: 28))
+                                    VStack(spacing: 6) {
+                                    ListTypeIconView(typeId: typeId, size: 28)
                                     Text(config.label)
                                         .font(.caption)
                                         .fontWeight(.medium)

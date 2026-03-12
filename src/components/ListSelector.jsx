@@ -5,6 +5,14 @@ import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
 import { updateListSortConfig } from '../services/preferences.js';
+import {
+  GroceryIcon,
+  TodoIcon,
+  BasicIcon,
+  PackingIcon,
+  GuestListIcon,
+  ProjectIcon,
+} from './ListTypeIcons.jsx';
 import styles from './ListSelector.module.css';
 
 const LIST_PRESET_COLORS = [
@@ -13,6 +21,15 @@ const LIST_PRESET_COLORS = [
   '#f9a825', '#4e342e', '#1b5e20', '#283593', '#bf360c',
   '#0277bd', '#558b2f', '#7b1fa2',
 ];
+
+const TYPE_ICON_MAP = {
+  grocery: GroceryIcon,
+  todo: TodoIcon,
+  basic: BasicIcon,
+  packing: PackingIcon,
+  guest_list: GuestListIcon,
+  project: ProjectIcon,
+};
 
 /**
  * Sidebar/dropdown for managing multiple shopping lists.
@@ -32,7 +49,7 @@ export const ListSelector = ({
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState(null);
   const [newColor, setNewColor] = useState('#1565c0');
-  const [newType, setNewType] = useState(null);
+  const [newType, setNewType] = useState('grocery');
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -66,7 +83,7 @@ export const ListSelector = ({
     setNewName('');
     setNewEmoji(null);
     setNewColor('#1565c0');
-    setNewType(null);
+    setNewType('grocery');
     setIsCreating(false);
     setSearchQuery('');
   };
@@ -99,6 +116,7 @@ export const ListSelector = ({
       {LIST_TYPE_IDS.map((typeId) => {
         const cfg = LIST_TYPES[typeId];
         const isSelected = newType === typeId;
+        const IconComponent = TYPE_ICON_MAP[typeId];
         return (
           <button
             key={typeId}
@@ -106,7 +124,7 @@ export const ListSelector = ({
             className={`${styles.typeCell} ${isSelected ? styles.typeCellSelected : ''}`}
             onClick={() => setNewType(typeId)}
           >
-            <span className={styles.typeCellIcon}>{cfg.icon}</span>
+            <span className={styles.typeCellIcon}><IconComponent size={28} /></span>
             <span className={styles.typeCellLabel}>{cfg.label}</span>
           </button>
         );
@@ -121,6 +139,7 @@ export const ListSelector = ({
         {LIST_TYPE_IDS.map((typeId) => {
           const cfg = LIST_TYPES[typeId];
           const isCurrent = currentType === typeId;
+          const IconComponent = TYPE_ICON_MAP[typeId];
           return (
             <button
               key={typeId}
@@ -133,7 +152,7 @@ export const ListSelector = ({
                 setChangingTypeForId(null);
               }}
             >
-              <span className={styles.typeCellIcon}>{cfg.icon}</span>
+              <span className={styles.typeCellIcon}><IconComponent size={28} /></span>
               <span className={styles.typeCellLabel}>{cfg.label}</span>
             </button>
           );
@@ -398,7 +417,7 @@ export const ListSelector = ({
           <h2 className={styles.title}>My Lists</h2>
           <button
             className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
-            onClick={() => { if (isCreating) setNewType(null); setIsCreating(!isCreating); }}
+            onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
             aria-label={isCreating ? 'Cancel' : 'New list'}
           >
             {isCreating ? '×' : '+'}
@@ -509,7 +528,7 @@ export const ListSelector = ({
         <h2 className={styles.title}>My Lists</h2>
         <button
           className={styles.newBtn}
-          onClick={() => { if (isCreating) setNewType(null); setIsCreating(!isCreating); }}
+          onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
         >
           {isCreating ? 'Cancel' : '+ New'}
         </button>
