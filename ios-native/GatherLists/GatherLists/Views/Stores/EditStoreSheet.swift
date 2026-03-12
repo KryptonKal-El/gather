@@ -13,10 +13,8 @@ struct EditStoreSheet: View {
     @State private var isSaving = false
     
     private let presetColors = [
-        "#1565c0", "#6a1b9a", "#00838f", "#2e7d32", "#ef6c00",
-        "#c62828", "#4527a0", "#00695c", "#ad1457", "#37474f",
-        "#f9a825", "#4e342e", "#1b5e20", "#283593", "#bf360c",
-        "#0277bd", "#558b2f", "#7b1fa2"
+        "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
+        "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
     
     init(store: Store, viewModel: StoreViewModel) {
@@ -57,6 +55,8 @@ struct EditStoreSheet: View {
                 Section("Color") {
                     presetColorGrid
                     
+                    Divider()
+                    
                     ColorPicker("Custom Color", selection: $customColor)
                         .onChange(of: customColor) {
                             selectedPresetColor = nil
@@ -85,7 +85,7 @@ struct EditStoreSheet: View {
     }
     
     private var presetColorGrid: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: 36))], spacing: 12) {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 12) {
             ForEach(presetColors, id: \.self) { colorHex in
                 Button {
                     selectedPresetColor = colorHex
@@ -97,7 +97,7 @@ struct EditStoreSheet: View {
                             if selectedPresetColor == colorHex {
                                 Image(systemName: "checkmark")
                                     .font(.system(size: 14, weight: .bold))
-                                    .foregroundStyle(.white)
+                                    .foregroundStyle(Color(hex: "#2C3E35"))
                             }
                         }
                 }

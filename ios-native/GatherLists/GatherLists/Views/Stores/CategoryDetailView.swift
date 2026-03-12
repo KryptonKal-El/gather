@@ -13,10 +13,8 @@ struct CategoryDetailView: View {
     @State private var newKeyword = ""
     
     private let categoryPresetColors = [
-        "#4caf50", "#2196f3", "#e53935", "#ff9800", "#00bcd4",
-        "#795548", "#9c27b0", "#ffc107", "#ff5722", "#607d8b",
-        "#e91e63", "#9e9e9e", "#1565c0", "#6a1b9a", "#00838f",
-        "#2e7d32", "#ef6c00", "#4527a0"
+        "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
+        "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
     
     init(categoryIndex: Int, categories: Binding<[CategoryDef]>, storeId: UUID, viewModel: StoreViewModel) {
@@ -29,10 +27,8 @@ struct CategoryDetailView: View {
         _editedName = State(initialValue: cat.name)
         
         let presetColors = [
-            "#4caf50", "#2196f3", "#e53935", "#ff9800", "#00bcd4",
-            "#795548", "#9c27b0", "#ffc107", "#ff5722", "#607d8b",
-            "#e91e63", "#9e9e9e", "#1565c0", "#6a1b9a", "#00838f",
-            "#2e7d32", "#ef6c00", "#4527a0"
+            "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
+            "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
         ]
         if presetColors.contains(cat.color) {
             _selectedPresetColor = State(initialValue: cat.color)
@@ -65,7 +61,7 @@ struct CategoryDetailView: View {
             }
             
             Section("Color") {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 12) {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 7), spacing: 12) {
                     ForEach(categoryPresetColors, id: \.self) { hex in
                         Button {
                             selectedPresetColor = hex
@@ -79,7 +75,7 @@ struct CategoryDetailView: View {
                                     if selectedPresetColor == hex {
                                         Image(systemName: "checkmark")
                                             .font(.system(size: 16, weight: .bold))
-                                            .foregroundStyle(.white)
+                                            .foregroundStyle(Color(hex: "#2C3E35"))
                                     }
                                 }
                         }
@@ -87,6 +83,8 @@ struct CategoryDetailView: View {
                     }
                 }
                 .padding(.vertical, 8)
+                
+                Divider()
                 
                 ColorPicker("Custom Color", selection: $customColor)
                     .onChange(of: customColor) {
