@@ -11,54 +11,101 @@ struct CreateListSheet: View {
     @State private var selectedColor = "#1565c0"
     @State private var showEmojiPicker = false
     @State private var isCreating = false
+    @State private var selectedType: String? = nil
+    
+    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private let presetColors = [
         "#1565c0", "#2e7d32", "#c62828", "#ef6c00", "#6a1b9a",
         "#00838f", "#ad1457", "#f9a825", "#37474f", "#4e342e"
     ]
     
+    private let typeGridColumns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+    
     private var canCreate: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isCreating
+        selectedType != nil &&
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !isCreating
     }
     
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    TextField("List name", text: $name)
-                        .textInputAutocapitalization(.words)
-                }
-                
-                Section("Emoji") {
-                    Button {
-                        showEmojiPicker = true
-                    } label: {
-                        HStack {
-                            if let emoji = selectedEmoji {
-                                Text(emoji)
-                                    .font(.system(size: 32))
-                            } else {
-                                Image(systemName: "face.smiling")
-                                    .font(.title2)
-                                    .foregroundStyle(.secondary)
+                Section("List Type") {
+                    LazyVGrid(columns: typeGridColumns, spacing: 12) {
+                        ForEach(LIST_TYPE_IDS, id: \.self) { typeId in
+                            let config = ListTypes.getConfig(typeId)
+                            let isSelected = selectedType == typeId
+                            
+                            Button {
+                                selectedType = typeId
+                            } label: {
+                                VStack(spacing: 6) {
+                                    Text(config.icon)
+                                        .font(.system(size: 28))
+                                    Text(config.label)
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(.primary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 72)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(isSelected ? brandGreen.opacity(0.1) : Color.clear)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(isSelected ? brandGreen : Color.secondary.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                                )
                             }
-                            
-                            Spacer()
-                            
-                            Text(selectedEmoji == nil ? "Choose emoji" : "Change")
-                                .foregroundStyle(.secondary)
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                            .buttonStyle(.plain)
                         }
-                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .padding(.vertical, 4)
                 }
                 
-                Section("Color") {
-                    colorPickerRow
+                if selectedType != nil {
+                    Section {
+                        TextField("List name", text: $name)
+                            .textInputAutocapitalization(.words)
+                    }
+                    
+                    Section("Emoji") {
+                        Button {
+                            showEmojiPicker = true
+                        } label: {
+                            HStack {
+                                if let emoji = selectedEmoji {
+                                    Text(emoji)
+                                        .font(.system(size: 32))
+                                } else {
+                                    Image(systemName: "face.smiling")
+                                        .font(.title2)
+                                        .foregroundStyle(.secondary)
+                                }
+                                
+                                Spacer()
+                                
+                                Text(selectedEmoji == nil ? "Choose emoji" : "Change")
+                                    .foregroundStyle(.secondary)
+                                
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+                    Section("Color") {
+                        colorPickerRow
+                    }
                 }
             }
             .navigationTitle("New List")
@@ -75,6 +122,7 @@ struct CreateListSheet: View {
                         createList()
                     }
                     .fontWeight(.semibold)
+                    .foregroundStyle(brandGreen)
                     .disabled(!canCreate)
                 }
             }
@@ -116,7 +164,7 @@ struct CreateListSheet: View {
         
         isCreating = true
         Task {
-            await viewModel.createList(name: trimmedName, emoji: selectedEmoji, color: selectedColor)
+            await viewModel.createList(name: trimmedName, emoji: selectedEmoji, color: selectedColor, type: selectedType ?? "grocery")
             dismiss()
         }
     }

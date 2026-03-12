@@ -224,8 +224,10 @@
         "Xcode project builds successfully"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "status": "completed",
+      "completedAt": "2026-03-12T19:00:00Z",
+      "notes": "3x2 LazyVGrid type selector in CreateListSheet. No default selection — name/emoji/color sections hidden until type chosen. brandGreen selected state. Passes type to viewModel.createList().",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
