@@ -8,8 +8,10 @@ import { updateListSortConfig } from '../services/preferences.js';
 import styles from './ListSelector.module.css';
 
 const LIST_PRESET_COLORS = [
-  '#1565c0', '#2e7d32', '#c62828', '#ef6c00', '#6a1b9a',
-  '#00838f', '#ad1457', '#f9a825', '#37474f', '#4e342e',
+  '#1565c0', '#6a1b9a', '#00838f', '#2e7d32', '#ef6c00',
+  '#c62828', '#4527a0', '#00695c', '#ad1457', '#37474f',
+  '#f9a825', '#4e342e', '#1b5e20', '#283593', '#bf360c',
+  '#0277bd', '#558b2f', '#7b1fa2',
 ];
 
 /**

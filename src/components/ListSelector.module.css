@@ -400,8 +400,8 @@
 }
 
 .colorSwatch {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
