@@ -1,0 +1,176 @@
+import Foundation
+
+/// Field visibility configuration for a list type.
+struct ListTypeFields {
+    let store: Bool
+    let category: Bool
+    let price: Bool
+    let quantity: Bool
+    let unit: Bool
+    let image: Bool
+    let rsvpStatus: Bool
+}
+
+/// Category definition for non-grocery list types.
+struct ListCategory {
+    let key: String
+    let name: String
+    let color: String
+    let keywords: [String]
+}
+
+/// Configuration for a list type.
+struct ListTypeConfig {
+    let id: String
+    let label: String
+    let icon: String
+    let fields: ListTypeFields
+    let quantityLabel: String?
+    let categories: [ListCategory]?
+    let sortLevels: [String]
+    let defaultSort: [String]
+}
+
+/// All list type IDs in display order.
+let LIST_TYPE_IDS: [String] = ["grocery", "basic", "guest_list", "packing", "project", "todo"]
+
+/// Category definitions for non-grocery list types.
+enum ListTypeCategories {
+    static let packing: [ListCategory] = [
+        ListCategory(
+            key: "clothes",
+            name: "Clothes",
+            color: "#5C6BC0",
+            keywords: ["shirt", "shirts", "pants", "shorts", "jacket", "coat", "dress", "socks", "underwear", "sweater", "hoodie", "jeans", "t-shirt", "blouse", "skirt"]
+        ),
+        ListCategory(
+            key: "toiletries",
+            name: "Toiletries",
+            color: "#26A69A",
+            keywords: ["toothbrush", "toothpaste", "shampoo", "conditioner", "soap", "deodorant", "razor", "sunscreen", "lotion", "floss", "mouthwash"]
+        ),
+        ListCategory(
+            key: "electronics",
+            name: "Electronics",
+            color: "#42A5F5",
+            keywords: ["charger", "laptop", "phone", "tablet", "headphones", "earbuds", "camera", "adapter", "cable", "power bank", "kindle"]
+        ),
+        ListCategory(
+            key: "documents",
+            name: "Documents",
+            color: "#78909C",
+            keywords: ["passport", "tickets", "boarding pass", "id", "insurance", "itinerary", "visa", "license", "reservation"]
+        ),
+        ListCategory(
+            key: "accessories",
+            name: "Accessories",
+            color: "#AB47BC",
+            keywords: ["hat", "sunglasses", "belt", "watch", "jewelry", "wallet", "umbrella", "scarf", "gloves"]
+        ),
+        ListCategory(
+            key: "medications",
+            name: "Medications",
+            color: "#EF5350",
+            keywords: ["medicine", "pills", "vitamins", "inhaler", "prescription", "band-aids", "first aid", "allergy", "ibuprofen", "tylenol"]
+        ),
+        ListCategory(
+            key: "snacks_food",
+            name: "Snacks & Food",
+            color: "#FFA726",
+            keywords: ["snacks", "granola bars", "trail mix", "nuts", "crackers", "water bottle", "gum", "candy"]
+        ),
+        ListCategory(
+            key: "entertainment",
+            name: "Entertainment",
+            color: "#66BB6A",
+            keywords: ["book", "books", "cards", "games", "puzzle", "magazine", "notebook", "journal", "pen", "pencil"]
+        ),
+        ListCategory(
+            key: "miscellaneous",
+            name: "Miscellaneous",
+            color: "#9E9E9E",
+            keywords: []
+        )
+    ]
+    
+    static let todo: [ListCategory] = [
+        ListCategory(key: "work", name: "Work", color: "#42A5F5", keywords: []),
+        ListCategory(key: "personal", name: "Personal", color: "#66BB6A", keywords: []),
+        ListCategory(key: "errands", name: "Errands", color: "#FFA726", keywords: []),
+        ListCategory(key: "finance", name: "Finance", color: "#26A69A", keywords: []),
+        ListCategory(key: "health", name: "Health", color: "#EF5350", keywords: []),
+        ListCategory(key: "home", name: "Home", color: "#AB47BC", keywords: []),
+        ListCategory(key: "other", name: "Other", color: "#9E9E9E", keywords: [])
+    ]
+}
+
+/// List type configurations and lookup.
+enum ListTypes {
+    private static let configs: [String: ListTypeConfig] = [
+        "grocery": ListTypeConfig(
+            id: "grocery",
+            label: "Grocery",
+            icon: "🛒",
+            fields: ListTypeFields(store: true, category: true, price: true, quantity: true, unit: true, image: true, rsvpStatus: false),
+            quantityLabel: "Qty",
+            categories: nil,
+            sortLevels: ["store", "category", "name", "date"],
+            defaultSort: ["store", "category", "name"]
+        ),
+        "basic": ListTypeConfig(
+            id: "basic",
+            label: "Basic",
+            icon: "📋",
+            fields: ListTypeFields(store: false, category: false, price: false, quantity: false, unit: false, image: false, rsvpStatus: false),
+            quantityLabel: nil,
+            categories: nil,
+            sortLevels: ["name", "date"],
+            defaultSort: ["name"]
+        ),
+        "guest_list": ListTypeConfig(
+            id: "guest_list",
+            label: "Guest List",
+            icon: "🎉",
+            fields: ListTypeFields(store: false, category: false, price: false, quantity: true, unit: false, image: false, rsvpStatus: true),
+            quantityLabel: "Head Count",
+            categories: nil,
+            sortLevels: ["name", "date"],
+            defaultSort: ["name"]
+        ),
+        "packing": ListTypeConfig(
+            id: "packing",
+            label: "Packing",
+            icon: "🧳",
+            fields: ListTypeFields(store: false, category: true, price: false, quantity: true, unit: false, image: false, rsvpStatus: false),
+            quantityLabel: "Qty",
+            categories: ListTypeCategories.packing,
+            sortLevels: ["category", "name", "date"],
+            defaultSort: ["category", "name"]
+        ),
+        "project": ListTypeConfig(
+            id: "project",
+            label: "Project",
+            icon: "🏗️",
+            fields: ListTypeFields(store: false, category: false, price: true, quantity: true, unit: false, image: false, rsvpStatus: false),
+            quantityLabel: "Qty",
+            categories: nil,
+            sortLevels: ["name", "date", "price"],
+            defaultSort: ["name"]
+        ),
+        "todo": ListTypeConfig(
+            id: "todo",
+            label: "To-Do",
+            icon: "📝",
+            fields: ListTypeFields(store: false, category: true, price: false, quantity: false, unit: false, image: false, rsvpStatus: false),
+            quantityLabel: nil,
+            categories: ListTypeCategories.todo,
+            sortLevels: ["category", "name", "date"],
+            defaultSort: ["category", "name"]
+        )
+    ]
+    
+    /// Returns the configuration for a given list type ID.
+    static func getConfig(_ typeId: String) -> ListTypeConfig {
+        configs[typeId] ?? configs["grocery"]!
+    }
+}

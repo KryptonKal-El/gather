@@ -88,6 +88,7 @@
 		E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */; };
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -174,6 +175,7 @@
 		E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortPipeline.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTypeConfig.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -389,8 +391,9 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */,
-				A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */,
+				A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */,
 			);
 			path = Utils;
@@ -568,6 +571,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2C0 /* PreferenceService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C4 /* SortConfigSheet.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
