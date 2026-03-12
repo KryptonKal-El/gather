@@ -51,6 +51,7 @@ struct ListBrowserView: View {
                 }
             }
             .navigationTitle("Lists")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if let vm = viewModel, !vm.ownedLists.isEmpty {
@@ -180,7 +181,7 @@ struct ListBrowserView: View {
         .searchable(text: Binding(
             get: { vm.searchQuery },
             set: { vm.searchQuery = $0 }
-        ), prompt: "Search lists")
+        ), placement: .navigationBarDrawer(displayMode: .always), prompt: "Search lists")
         .navigationDestination(for: GatherList.self) { list in
             ListDetailView(
                 list: list,

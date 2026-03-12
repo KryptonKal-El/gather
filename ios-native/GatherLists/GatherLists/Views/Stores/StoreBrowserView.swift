@@ -34,6 +34,7 @@ struct StoreBrowserView: View {
                 }
             }
             .navigationTitle("Stores")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if let vm = viewModel, !vm.stores.isEmpty {
@@ -120,7 +121,7 @@ struct StoreBrowserView: View {
         .refreshable {
             await vm.refresh()
         }
-        .searchable(text: $searchQuery, prompt: "Search stores")
+        .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search stores")
         .navigationDestination(for: Store.self) { store in
             if let vm = viewModel {
                 CategoryEditorView(store: store, viewModel: vm)
