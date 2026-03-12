@@ -54,6 +54,7 @@ struct ListRowView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
