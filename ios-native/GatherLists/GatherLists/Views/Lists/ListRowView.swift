@@ -14,10 +14,12 @@ struct ListRowView: View {
             if let emoji = list.emoji, !emoji.isEmpty {
                 Text(emoji)
                     .font(.title2)
+                    .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
             } else {
                 Image(systemName: "list.bullet")
                     .font(.title3)
                     .foregroundStyle(.secondary)
+                    .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -54,7 +56,6 @@ struct ListRowView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 12)
