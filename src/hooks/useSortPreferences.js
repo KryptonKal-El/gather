@@ -9,6 +9,7 @@ import {
   getUserPreferences,
   getEffectiveSortConfig,
   updateListSortConfig,
+  updateShareSortConfig,
   updateDefaultSortConfig,
   SYSTEM_DEFAULT_SORT_CONFIG,
 } from '../services/preferences.js';
@@ -19,7 +20,7 @@ import {
  *   userPreferences: object|null,
  *   loading: boolean,
  *   effectiveSortConfig: (list: object) => string[],
- *   updateListSort: (listId: string, config: string[]|null) => Promise<void>,
+ *   updateListSort: (list: object, config: string[]|null) => Promise<void>,
  *   updateDefaultSort: (config: string[]) => Promise<void>
  * }}
  */
@@ -80,16 +81,25 @@ export const useSortPreferences = () => {
   const effectiveSortConfig = useCallback(
     (list) => {
       if (!list) return SYSTEM_DEFAULT_SORT_CONFIG;
-      return getEffectiveSortConfig({ sort_config: list.sortConfig }, userPreferences, list.type);
+      return getEffectiveSortConfig(
+        { sort_config: list.sortConfig },
+        userPreferences,
+        list.type,
+        list.shareSortConfig ?? null
+      );
     },
     [userPreferences]
   );
 
   const updateListSort = useCallback(
-    async (listId, config) => {
-      await updateListSortConfig(listId, config);
+    async (list, config) => {
+      if (list._isShared) {
+        await updateShareSortConfig(list.id, user?.email, config);
+      } else {
+        await updateListSortConfig(list.id, config);
+      }
     },
-    []
+    [user]
   );
 
   const updateDefaultSort = useCallback(

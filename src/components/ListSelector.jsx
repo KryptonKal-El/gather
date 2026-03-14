@@ -387,9 +387,9 @@ export const ListSelector = ({
                   const { listId, newType: selectedType } = pendingTypeChange;
                   onUpdateDetails(listId, { type: selectedType });
                   const currentList = lists.find((l) => l.id === listId);
-                  if (currentList?.sort_config) {
+                  if (currentList?.sortConfig) {
                     const newTypeConfig = LIST_TYPES[selectedType];
-                    const hasInvalidLevels = currentList.sort_config.some(
+                    const hasInvalidLevels = currentList.sortConfig.some(
                       (level) => !newTypeConfig.sortLevels.includes(level)
                     );
                     if (hasInvalidLevels) {

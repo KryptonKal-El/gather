@@ -145,6 +145,7 @@ struct ListBrowserView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
+                            .tint(.red)
                         }
                     }
                     .onMove { source, destination in
@@ -184,7 +185,8 @@ struct ListBrowserView: View {
             ListDetailView(
                 list: list,
                 viewModel: vm,
-                isOwned: vm.ownedLists.contains { $0.id == list.id }
+                isOwned: vm.ownedLists.contains { $0.id == list.id },
+                shareSortConfig: vm.shareSortConfigs[list.id]
             )
         }
     }

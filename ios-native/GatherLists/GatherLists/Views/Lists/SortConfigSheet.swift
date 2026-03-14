@@ -14,6 +14,7 @@ struct SortConfigSheet: View {
     private static let levelLabels: [SortLevel: String] = [
         .store: "Store",
         .category: "Category",
+        .rsvp: "RSVP Status",
         .name: "Name",
         .date: "Date Added",
         .price: "Price"

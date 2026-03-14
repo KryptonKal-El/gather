@@ -101,6 +101,7 @@ export const ShoppingListProvider = ({ children }) => {
               ...listData,
               _ownerUid: ref.ownerUid,
               _isShared: true,
+              shareSortConfig: ref.shareSortConfig ?? null,
             },
           }));
         } else {
@@ -412,14 +413,14 @@ export const ShoppingListProvider = ({ children }) => {
   // Sharing actions
   // -----------------------------------------------------------------------
 
-  const shareListAction = useCallback(async (listId, email) => {
+  const shareListAction = useCallback(async (listId, email, sortConfig = null) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     // Only owners can share
     if (ownerUid !== userId) return;
     const listEntry = allLists.find((l) => l.id === listId);
     const listName = listEntry?.name ?? 'Shared List';
-    await dbShareList(userId, listId, listName, email);
+    await dbShareList(userId, listId, listName, email, sortConfig);
   }, [userId, allLists, getListOwnerUid]);
 
   const unshareListAction = useCallback(async (listId, email) => {

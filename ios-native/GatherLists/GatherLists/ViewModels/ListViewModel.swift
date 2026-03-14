@@ -9,6 +9,7 @@ import Realtime
 final class ListViewModel {
     var ownedLists: [GatherList] = []
     var sharedLists: [GatherList] = []
+    var shareSortConfigs: [UUID: [String]] = [:]
     var activeListId: UUID?
     var isLoading = false
     var error: String?
@@ -73,11 +74,15 @@ final class ListViewModel {
         // Fetch fresh data from Supabase
         do {
             async let owned = ListService.fetchOwnedLists(userId: userId)
-            async let shared = ListService.fetchSharedWithMe(email: userEmail)
+            async let shared = ListService.fetchSharedWithMeRefs(email: userEmail)
             
-            let (ownedResult, sharedResult) = try await (owned, shared)
+            let (ownedResult, sharedRefs) = try await (owned, shared)
             ownedLists = ownedResult
-            sharedLists = sharedResult
+            sharedLists = sharedRefs.map { $0.list }
+            shareSortConfigs = Dictionary(uniqueKeysWithValues: sharedRefs.compactMap { ref in
+                guard let config = ref.shareSortConfig else { return nil }
+                return (ref.list.id, config)
+            })
             isShowingCachedData = false
             cachedAt = nil
             
@@ -87,7 +92,7 @@ final class ListViewModel {
             
             // Cache the fresh data
             await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
-            await OfflineCache.shared.save(sharedResult, forKey: "lists-shared-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedLists, forKey: "lists-shared-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !ownedLists.isEmpty || !sharedLists.isEmpty
@@ -146,11 +151,15 @@ final class ListViewModel {
     private func refetchAllData() async {
         do {
             async let owned = ListService.fetchOwnedLists(userId: userId)
-            async let shared = ListService.fetchSharedWithMe(email: userEmail)
+            async let shared = ListService.fetchSharedWithMeRefs(email: userEmail)
             
-            let (ownedResult, sharedResult) = try await (owned, shared)
+            let (ownedResult, sharedRefs) = try await (owned, shared)
             ownedLists = ownedResult
-            sharedLists = sharedResult
+            sharedLists = sharedRefs.map { $0.list }
+            shareSortConfigs = Dictionary(uniqueKeysWithValues: sharedRefs.compactMap { ref in
+                guard let config = ref.shareSortConfig else { return nil }
+                return (ref.list.id, config)
+            })
             isShowingCachedData = false
             cachedAt = nil
             
@@ -161,7 +170,7 @@ final class ListViewModel {
             
             // Update cache
             await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
-            await OfflineCache.shared.save(sharedResult, forKey: "lists-shared-\(userId.uuidString)")
+            await OfflineCache.shared.save(sharedLists, forKey: "lists-shared-\(userId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to refetch data: \(error.localizedDescription)")
@@ -251,8 +260,8 @@ final class ListViewModel {
     
     // MARK: - Share Actions
     
-    func shareList(id: UUID, email: String) async throws {
-        try await ListService.shareList(listId: id, email: email)
+    func shareList(id: UUID, email: String, sortConfig: [String]? = nil) async throws {
+        try await ListService.shareList(listId: id, email: email, sortConfig: sortConfig)
     }
     
     func unshareList(id: UUID, email: String) async throws {

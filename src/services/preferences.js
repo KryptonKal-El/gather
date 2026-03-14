@@ -128,18 +128,44 @@ export const updateListSortConfig = async (listId, config) => {
   }
 };
 
+/**
+ * Updates the sort_config column on a list_shares row. Pass null to clear (reset to default).
+ * @param {string} listId - The shared list ID
+ * @param {string} email - The shared user's email (identifies their row)
+ * @param {string[]|null} config - Sort config array, or null to clear
+ */
+export const updateShareSortConfig = async (listId, email, config) => {
+  if (config !== null && !isValidSortConfig(config)) {
+    throw new Error(`Invalid sort config: ${JSON.stringify(config)}`);
+  }
+
+  try {
+    const { error } = await supabase
+      .from('list_shares')
+      .update({ sort_config: config })
+      .eq('list_id', listId)
+      .eq('shared_with_email', email.toLowerCase().trim());
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to update share sort config: listId=${listId}`, { cause: error });
+  }
+};
+
 // ---------------------------------------------------------------------------
 // Sort Config Resolution
 // ---------------------------------------------------------------------------
 
 /**
  * Pure function that resolves the effective sort config for a list.
- * Returns list.sort_config if set, otherwise falls back to user preference, then type default.
+ * For shared lists, shareSortConfig (from list_shares) takes highest priority.
+ * Falls back to list.sort_config, then user preference, then type default.
  * @param {object} list - List object (may have sort_config property, snake_case)
  * @param {object|null} userPreferences - User preferences object (may have default_sort_config)
  * @param {string} listType - List type identifier
+ * @param {string[]|null} [shareSortConfig=null] - Sort config from list_shares (for shared lists)
  * @returns {string[]} The resolved sort config array
  */
-export const getEffectiveSortConfig = (list, userPreferences, listType) => {
-  return list.sort_config ?? userPreferences?.default_sort_config ?? getDefaultSortConfig(listType);
+export const getEffectiveSortConfig = (list, userPreferences, listType, shareSortConfig = null) => {
+  return shareSortConfig ?? list.sort_config ?? userPreferences?.default_sort_config ?? getDefaultSortConfig(listType);
 };

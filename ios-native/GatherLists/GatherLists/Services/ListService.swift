@@ -1,6 +1,12 @@
 import Foundation
 import Supabase
 
+/// Pairs a GatherList with the share-level sort config for shared users.
+struct SharedListRef {
+    let list: GatherList
+    let shareSortConfig: [String]?
+}
+
 /// Service layer wrapping Supabase queries for list and share operations.
 struct ListService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
@@ -75,9 +81,9 @@ struct ListService {
     // MARK: - Share Operations
     
     /// Shares a list with a user by email (lowercased, trimmed).
-    static func shareList(listId: UUID, email: String) async throws {
+    static func shareList(listId: UUID, email: String, sortConfig: [String]? = nil) async throws {
         let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let newShare = NewListShare(listId: listId, sharedWithEmail: normalizedEmail)
+        let newShare = NewListShare(listId: listId, sharedWithEmail: normalizedEmail, sortConfig: sortConfig)
         try await client
             .from("list_shares")
             .insert(newShare)
@@ -132,6 +138,35 @@ struct ListService {
         
         return lists
     }
+    
+    /// Fetches lists shared with the user, paired with their share-level sort_config.
+    static func fetchSharedWithMeRefs(email: String) async throws -> [SharedListRef] {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        let shares: [ListShare] = try await client
+            .from("list_shares")
+            .select()
+            .eq("shared_with_email", value: normalizedEmail)
+            .execute()
+            .value
+        
+        guard !shares.isEmpty else { return [] }
+        
+        let listIds = shares.map { $0.listId }
+        let lists: [GatherList] = try await client
+            .from("lists")
+            .select()
+            .in("id", values: listIds)
+            .execute()
+            .value
+        
+        let listMap = Dictionary(uniqueKeysWithValues: lists.map { ($0.id, $0) })
+        
+        return shares.compactMap { share in
+            guard let list = listMap[share.listId] else { return nil }
+            return SharedListRef(list: list, shareSortConfig: share.sortConfig)
+        }
+    }
 }
 
 // MARK: - DTOs for Insert/Update
@@ -167,10 +202,12 @@ private struct ListUpdate: Encodable {
 private struct NewListShare: Encodable {
     let listId: UUID
     let sharedWithEmail: String
+    let sortConfig: [String]?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
         case sharedWithEmail = "shared_with_email"
+        case sortConfig = "sort_config"
     }
 }
 

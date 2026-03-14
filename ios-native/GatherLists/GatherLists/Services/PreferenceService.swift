@@ -69,14 +69,36 @@ struct PreferenceService {
             .execute()
     }
     
+    /// Updates sort config on a share row. Pass nil to clear the override (fall back to user preferences).
+    static func updateShareSortConfig(listId: UUID, email: String, config: [SortLevel]?) async throws {
+        if let config = config {
+            guard SortPipeline.isValid(config) else {
+                throw NSError(domain: "PreferenceService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid sort config"])
+            }
+        }
+        
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        let configStrings = config?.map { $0.rawValue }
+        let update = ListSortConfigUpdate(sortConfig: configStrings)
+        
+        try await client
+            .from("list_shares")
+            .update(update)
+            .eq("list_id", value: listId)
+            .eq("shared_with_email", value: normalizedEmail)
+            .execute()
+    }
+    
     /// Resolves the effective sort config for a list.
-    /// Priority: per-list override → global default → type default → system default.
-    static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?) -> [SortLevel] {
+    /// Priority: share sort config (for shared users) → per-list override → global default → type default → system default.
+    static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?, shareSortConfig: [String]? = nil) -> [SortLevel] {
         let configStrings: [String]
         let typeConfig = ListTypes.getConfig(list.type)
         let validLevels = Set(typeConfig.sortLevels.compactMap { SortLevel(rawValue: $0) })
         
-        if let listConfig = list.sortConfig {
+        if let shareConfig = shareSortConfig {
+            configStrings = shareConfig
+        } else if let listConfig = list.sortConfig {
             configStrings = listConfig
         } else if let prefs = userPreferences {
             configStrings = prefs.defaultSortConfig

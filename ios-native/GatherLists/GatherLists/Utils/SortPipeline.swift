@@ -7,6 +7,7 @@ enum SortLevel: String, Codable, CaseIterable {
     case name
     case date
     case price
+    case rsvp
 }
 
 /// Sort pipeline engine for shopping list items.
@@ -22,7 +23,7 @@ enum SortPipeline {
     }
     
     /// Levels that create groups (vs just sorting within existing groups).
-    private static let groupingLevels: Set<SortLevel> = [.store, .category]
+    private static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp]
     
     /// A group of items created by store or category grouping.
     struct SortGroup {
@@ -196,6 +197,8 @@ enum SortPipeline {
             return groupByStore(items: items, stores: stores, remainingLevels: nextLevels, listType: listType)
         case .category:
             return groupByCategory(items: items, stores: stores, remainingLevels: nextLevels, parentStoreId: parentStoreId, listType: listType)
+        case .rsvp:
+            return groupByRsvp(items: items, stores: stores, remainingLevels: nextLevels, listType: listType)
         default:
             return IntermediateResult(items: items)
         }
@@ -263,8 +266,7 @@ enum SortPipeline {
             groups.append(group)
         }
         
-        var processedUngrouped = ungrouped
-        if !ungrouped.isEmpty && !remainingLevels.isEmpty {
+        if !ungrouped.isEmpty {
             let subResult = applyRemainingLevels(
                 items: ungrouped,
                 remainingLevels: remainingLevels,
@@ -272,10 +274,37 @@ enum SortPipeline {
                 parentStoreId: nil,
                 listType: listType
             )
-            processedUngrouped = subResult.items ?? ungrouped
+            
+            var unassignedGroup = SortGroup(
+                key: "store-unassigned",
+                label: "Unassigned",
+                color: nil,
+                type: .store,
+                items: nil,
+                subGroups: nil
+            )
+            
+            if let subGroups = subResult.groups {
+                var finalSubGroups = subGroups
+                if let subUngrouped = subResult.ungrouped, !subUngrouped.isEmpty {
+                    finalSubGroups.append(SortGroup(
+                        key: "store-unassigned-other",
+                        label: "Other",
+                        color: "#9e9e9e",
+                        type: .category,
+                        items: subUngrouped,
+                        subGroups: nil
+                    ))
+                }
+                unassignedGroup.subGroups = finalSubGroups
+            } else {
+                unassignedGroup.items = subResult.items ?? ungrouped
+            }
+            
+            groups.append(unassignedGroup)
         }
         
-        return IntermediateResult(groups: groups, ungrouped: processedUngrouped)
+        return IntermediateResult(groups: groups, ungrouped: [])
     }
     
     private static func groupByCategory(
@@ -350,6 +379,59 @@ enum SortPipeline {
                 items: processedOther,
                 subGroups: nil
             ))
+        }
+        
+        return IntermediateResult(groups: groups, ungrouped: [])
+    }
+    
+    private static func groupByRsvp(
+        items: [Item],
+        stores: [Store],
+        remainingLevels: [SortLevel],
+        listType: String
+    ) -> IntermediateResult {
+        let rsvpOrder: [(status: String, label: String, color: String)] = [
+            ("confirmed", "Confirmed", "#4caf50"),
+            ("maybe", "Maybe", "#ff9800"),
+            ("invited", "Invited", "#9e9e9e"),
+            ("declined", "Declined", "#f44336")
+        ]
+        
+        var grouped: [String: [Item]] = [:]
+        
+        for item in items {
+            let status = item.rsvpStatus ?? "invited"
+            grouped[status, default: []].append(item)
+        }
+        
+        var groups: [SortGroup] = []
+        for rsvp in rsvpOrder {
+            guard let rsvpItems = grouped[rsvp.status], !rsvpItems.isEmpty else { continue }
+            
+            let subResult = applyRemainingLevels(
+                items: rsvpItems,
+                remainingLevels: remainingLevels,
+                stores: stores,
+                parentStoreId: nil,
+                listType: listType
+            )
+            
+            var group = SortGroup(
+                key: "rsvp-\(rsvp.status)",
+                label: rsvp.label,
+                color: rsvp.color,
+                type: .rsvp,
+                items: nil,
+                subGroups: nil
+            )
+            
+            if let subGroups = subResult.groups {
+                group.subGroups = subGroups
+            } else {
+                group.items = subResult.items
+            }
+            
+            groups.append(group)
         }
         
         return IntermediateResult(groups: groups, ungrouped: [])

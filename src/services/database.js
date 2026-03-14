@@ -538,15 +538,21 @@ export const subscribeHistory = (userId, callback) => {
  * @param {string} listId - List ID to share
  * @param {string} listName - List name (unused in Supabase, kept for API compat)
  * @param {string} email - Email of the user to share with
+ * @param {string[]|null} sortConfig - Sort config to snapshot at share time
  */
-export const shareList = async (ownerUid, listId, listName, email) => {
+export const shareList = async (ownerUid, listId, listName, email, sortConfig = null) => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
 
-    const { error } = await supabase.from('list_shares').insert({
+    const row = {
       list_id: listId,
       shared_with_email: normalizedEmail,
-    });
+    };
+    if (sortConfig) {
+      row.sort_config = sortConfig;
+    }
+
+    const { error } = await supabase.from('list_shares').insert(row);
 
     if (error) throw error;
   } catch (error) {
@@ -596,7 +602,7 @@ export const subscribeSharedListRefs = (email, callback) => {
     try {
       const { data: shares, error: sharesError } = await supabase
         .from('list_shares')
-        .select('id, list_id, added_at')
+        .select('id, list_id, added_at, sort_config')
         .eq('shared_with_email', normalizedEmail);
 
       if (sharesError) {
@@ -636,6 +642,7 @@ export const subscribeSharedListRefs = (email, callback) => {
             listName: list.name,
             ownerUid: list.owner_id,
             addedAt: s.added_at,
+            shareSortConfig: s.sort_config ?? null,
           };
         });
 

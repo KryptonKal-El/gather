@@ -14,6 +14,7 @@ struct ShareListSheet: View {
     @State private var isAddingCollaborator = false
     @State private var removingEmail: String?
     @State private var errorMessage: String?
+    @State private var userPreferences: UserPreferences?
     
     var body: some View {
         NavigationStack {
@@ -37,6 +38,11 @@ struct ShareListSheet: View {
             }
             .task {
                 await loadCollaborators()
+                do {
+                    userPreferences = try await PreferenceService.fetchUserPreferences()
+                } catch {
+                    print("[ShareListSheet] Failed to load preferences: \(error.localizedDescription)")
+                }
             }
         }
     }
@@ -192,7 +198,9 @@ struct ShareListSheet: View {
         isAddingCollaborator = true
         
         do {
-            try await viewModel.shareList(id: list.id, email: email)
+            let effectiveConfig = PreferenceService.effectiveSortConfig(for: list, userPreferences: userPreferences)
+            let configStrings = effectiveConfig.map { $0.rawValue }
+            try await viewModel.shareList(id: list.id, email: email, sortConfig: configStrings)
             emailInput = ""
             await loadCollaborators()
         } catch let error as NSError {

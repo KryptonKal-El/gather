@@ -327,7 +327,7 @@ export const App = () => {
   const handleSortSelect = async (config) => {
     if (!activeList) return;
     try {
-      await updateListSort(activeList.id, config);
+      await updateListSort(activeList, config);
     } catch (err) {
       console.error('Failed to update sort config:', err);
     }
@@ -885,10 +885,11 @@ export const App = () => {
       {sharingListId && (() => {
         const listToShare = state.lists.find((l) => l.id === sharingListId);
         if (!listToShare) return null;
+        const sortConfig = effectiveSortConfig(listToShare);
         return (
           <ShareListModal
             list={listToShare}
-            onShare={actions.shareList}
+            onShare={(listId, email) => actions.shareList(listId, email, sortConfig)}
             onUnshare={handleUnshareList}
             onClose={() => setSharingListId(null)}
           />

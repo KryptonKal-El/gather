@@ -7,6 +7,7 @@ struct ListDetailView: View {
     let list: GatherList
     let viewModel: ListViewModel
     let isOwned: Bool
+    let shareSortConfig: [String]?
     
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.undoManager) private var undoManager
@@ -252,9 +253,8 @@ struct ListDetailView: View {
     
     private var emptyState: some View {
         VStack(spacing: 12) {
-            Image(systemName: "cart")
-                .font(.system(size: 48))
-                .foregroundStyle(.secondary)
+            ListTypeIconView(typeId: list.type, size: 56)
+                .opacity(0.5)
             
             Text("Your list is empty")
                 .font(.title2)
@@ -334,13 +334,14 @@ struct ListDetailView: View {
                 
                 sortedUncheckedSection
                 
-                if let vm = detailViewModel, !vm.checkedItems.isEmpty {
+                if let vm = detailViewModel, !vm.checkedItems.isEmpty, detailViewModel?.typeConfig.fields.rsvpStatus != true {
                     sortedCheckedSection
                 }
                 
                 Color.clear.frame(height: 1).id("list-bottom")
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
             .contentMargins(.bottom, 80, for: .scrollContent)
@@ -382,32 +383,34 @@ struct ListDetailView: View {
     private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int) -> AnyView {
         AnyView(ForEach(Array(groups.enumerated()), id: \.element.key) { _, group in
             if level == 1 {
-                level1Header(group: group)
-                
-                let groupKey = group.key
-                let isCollapsed = collapsedStores.contains(groupKey)
-                if !isCollapsed {
-                    if let subGroups = group.subGroups {
-                        pipelineGroupsView(groups: subGroups, level: level + 1)
-                    } else if let items = group.items {
-                        ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
-                            itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button(role: .destructive) {
-                                        Task {
-                                            if await detailViewModel?.deleteItem(item) != nil {
-                                                registerDeleteUndo(for: item)
+                Section {
+                    let groupKey = group.key
+                    let isCollapsed = collapsedStores.contains(groupKey)
+                    if !isCollapsed {
+                        if let subGroups = group.subGroups {
+                            pipelineGroupsView(groups: subGroups, level: level + 1)
+                        } else if let items = group.items {
+                            ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
+                                itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                        Button(role: .destructive) {
+                                            Task {
+                                                if await detailViewModel?.deleteItem(item) != nil {
+                                                    registerDeleteUndo(for: item)
+                                                }
                                             }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
                                         }
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
                                     }
-                                }
-                                .listRowInsets(EdgeInsets())
-                                .listRowSeparator(.hidden)
-                                .listRowBackground(Color.clear)
+                                    .listRowInsets(EdgeInsets())
+                                    .listRowSeparator(.hidden)
+                                    .listRowBackground(Color.clear)
+                            }
                         }
                     }
+                } header: {
+                    level1Header(group: group)
                 }
             } else {
                 categoryHeader(label: group.label, color: group.color ?? "#9e9e9e", itemCount: (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0))
@@ -446,7 +449,7 @@ struct ListDetailView: View {
     private func level1Header(group: SortPipeline.SortGroup) -> some View {
         let groupKey = group.key
         let isCollapsed = collapsedStores.contains(groupKey)
-        let itemCount = countItems(in: group)
+        let itemCount = group.type == .rsvp ? countHeadCount(in: group) : countItems(in: group)
         let total = totalPrice(in: group)
         
         Button {
@@ -487,13 +490,13 @@ struct ListDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .textCase(nil)
         .listRowInsets(EdgeInsets())
-        .listRowSeparator(.hidden)
-        .listRowBackground(Color.clear)
     }
     
     // MARK: - Group Helpers
@@ -504,6 +507,16 @@ struct ListDetailView: View {
         }
         if let subGroups = group.subGroups {
             return subGroups.reduce(0) { $0 + countItems(in: $1) }
+        }
+        return 0
+    }
+    
+    private func countHeadCount(in group: SortPipeline.SortGroup) -> Int {
+        if let items = group.items {
+            return items.reduce(0) { $0 + $1.quantity }
+        }
+        if let subGroups = group.subGroups {
+            return subGroups.reduce(0) { $0 + countHeadCount(in: $1) }
         }
         return 0
     }
@@ -577,25 +590,27 @@ struct ListDetailView: View {
         HStack(spacing: 0) {
             // Main row content
             HStack(spacing: 12) {
-                Button {
-                    Task {
-                        await detailViewModel?.toggleItem(item)
+                if detailViewModel?.typeConfig.fields.rsvpStatus != true {
+                    Button {
+                        Task {
+                            await detailViewModel?.toggleItem(item)
+                        }
+                    } label: {
+                        Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
+                            .font(.title3)
+                            .foregroundStyle(isChecked ? .secondary : listColor)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Rectangle())
                     }
-                } label: {
-                    Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
-                        .font(.title3)
-                        .foregroundStyle(isChecked ? .secondary : listColor)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Rectangle())
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
                 
                 if detailViewModel?.typeConfig.fields.image == true {
                     itemThumbnail(item: item)
                 }
                 
                 Text(item.name)
-                    .strikethrough(isChecked)
+                    .strikethrough(isChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
                     .foregroundStyle(isChecked ? .secondary : .primary)
                 
                 if detailViewModel?.typeConfig.fields.quantity == true {
@@ -670,7 +685,7 @@ struct ListDetailView: View {
                     }
                 }
             }
-            .padding(.leading, 28)
+            .padding(.leading, detailViewModel?.typeConfig.fields.rsvpStatus == true ? 12 : 28)
             .padding(.trailing, 12)
             .padding(.vertical, 10)
             
@@ -705,6 +720,7 @@ struct ListDetailView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
+            guard detailViewModel?.typeConfig.fields.rsvpStatus != true else { return }
             Task {
                 await detailViewModel?.toggleItem(item)
             }
@@ -1113,7 +1129,7 @@ struct ListDetailView: View {
         .sheet(isPresented: $showSortSheet) {
             SortConfigSheet(
                 activeSortConfig: $activeSortConfig,
-                hasOverride: list.sortConfig != nil,
+                hasOverride: isOwned ? list.sortConfig != nil : shareSortConfig != nil,
                 onConfigChange: { config in
                     await selectSortConfig(config)
                 },
@@ -1350,13 +1366,19 @@ struct ListDetailView: View {
     
     private func selectSortConfig(_ config: [SortLevel]?) async {
         do {
-            try await PreferenceService.updateListSortConfig(listId: list.id, config: config)
+            if isOwned {
+                try await PreferenceService.updateListSortConfig(listId: list.id, config: config)
+            } else {
+                let email = authViewModel.currentUser?.email ?? ""
+                try await PreferenceService.updateShareSortConfig(listId: list.id, email: email, config: config)
+            }
             if let config = config {
                 activeSortConfig = config
             } else {
                 activeSortConfig = PreferenceService.effectiveSortConfig(
                     for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortConfig: nil, createdAt: list.createdAt),
-                    userPreferences: userPreferences
+                    userPreferences: userPreferences,
+                    shareSortConfig: nil
                 )
             }
         } catch {
@@ -1402,7 +1424,11 @@ struct ListDetailView: View {
         do {
             let prefs = try await PreferenceService.fetchUserPreferences()
             userPreferences = prefs
-            activeSortConfig = PreferenceService.effectiveSortConfig(for: list, userPreferences: prefs)
+            activeSortConfig = PreferenceService.effectiveSortConfig(
+                for: list,
+                userPreferences: prefs,
+                shareSortConfig: isOwned ? nil : shareSortConfig
+            )
         } catch {
             print("[ListDetailView] Failed to load sort preferences: \(error.localizedDescription)")
         }

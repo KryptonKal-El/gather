@@ -16,10 +16,6 @@ struct SettingsView: View {
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
-    @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
-    @State private var showSortConfigSheet = false
-    @State private var isLoadingPreferences = true
-    @State private var preferencesTask: Task<Void, Never>?
     
     var body: some View {
         NavigationStack {
@@ -77,28 +73,6 @@ struct SettingsView: View {
                     }
                 }
                 
-                Section("Display") {
-                    if isLoadingPreferences {
-                        ProgressView()
-                    } else {
-                        Button {
-                            showSortConfigSheet = true
-                        } label: {
-                            HStack {
-                                Text("Default Sort")
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                Text(activeSortConfig.map { levelLabel($0) }.joined(separator: " → "))
-                                    .foregroundStyle(.secondary)
-                                    .font(.subheadline)
-                                Image(systemName: "chevron.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                    }
-                }
-                
                 Section {
                     Button(role: .destructive) {
                         Task {
@@ -148,62 +122,6 @@ struct SettingsView: View {
             } message: {
                 Text("Enter your display name")
             }
-            .sheet(isPresented: $showSortConfigSheet) {
-                SortConfigSheet(
-                    activeSortConfig: $activeSortConfig,
-                    hasOverride: false,
-                    onConfigChange: { config in
-                        if let config = config {
-                            try? await PreferenceService.updateDefaultSortConfig(config)
-                        }
-                    }
-                )
-            }
-            .task {
-                do {
-                    let prefs = try await PreferenceService.fetchUserPreferences()
-                    let levels = prefs.defaultSortConfig.compactMap { SortLevel(rawValue: $0) }
-                    if !levels.isEmpty {
-                        activeSortConfig = levels
-                    }
-                } catch {
-                    print("[SettingsView] Failed to load preferences: \(error.localizedDescription)")
-                }
-                isLoadingPreferences = false
-                await subscribeToPreferences()
-            }
-            .onDisappear {
-                preferencesTask?.cancel()
-            }
-        }
-    }
-    
-    private func subscribeToPreferences() async {
-        guard let userId = try? await SupabaseManager.shared.client.auth.session.user.id else { return }
-        let client = SupabaseManager.shared.client
-        let channel = client.realtimeV2.channel("settings-preferences-\(userId.uuidString)")
-        
-        let changes = channel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "user_preferences",
-            filter: "user_id=eq.\(userId.uuidString)"
-        )
-        
-        preferencesTask = Task {
-            await channel.subscribe()
-            for await _ in changes {
-                PreferenceService.clearCache()
-                do {
-                    let prefs = try await PreferenceService.fetchUserPreferences()
-                    let levels = prefs.defaultSortConfig.compactMap { SortLevel(rawValue: $0) }
-                    if !levels.isEmpty {
-                        activeSortConfig = levels
-                    }
-                } catch {
-                    print("[SettingsView] Failed to reload preferences: \(error.localizedDescription)")
-                }
-            }
         }
     }
     
@@ -244,16 +162,6 @@ struct SettingsView: View {
                     .fontWeight(.semibold)
                     .foregroundStyle(.white)
             )
-    }
-    
-    private func levelLabel(_ level: SortLevel) -> String {
-        switch level {
-        case .store: return "Store"
-        case .category: return "Category"
-        case .name: return "Name"
-        case .date: return "Date"
-        case .price: return "Price"
-        }
     }
     
     private func uploadAvatar(imageData: Data) async {

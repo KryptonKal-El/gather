@@ -134,8 +134,8 @@ enum ListTypes {
             fields: ListTypeFields(store: false, category: false, price: false, quantity: true, unit: false, image: false, rsvpStatus: true),
             quantityLabel: "Head Count",
             categories: nil,
-            sortLevels: ["name", "date"],
-            defaultSort: ["name"]
+            sortLevels: ["rsvp", "name", "date"],
+            defaultSort: ["rsvp", "name"]
         ),
         "packing": ListTypeConfig(
             id: "packing",

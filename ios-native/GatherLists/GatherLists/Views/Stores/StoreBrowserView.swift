@@ -111,6 +111,7 @@ struct StoreBrowserView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
+                    .tint(.red)
                 }
             }
             .onMove { source, destination in
