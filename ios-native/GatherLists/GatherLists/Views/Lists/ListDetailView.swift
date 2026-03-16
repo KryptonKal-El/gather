@@ -269,10 +269,10 @@ struct ListDetailView: View {
     
     // MARK: - Item List Content
     
-    private var rsvpSummary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, totalHeadCount: Int)? {
+    private var rsvpSummary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, notInvited: Int, totalHeadCount: Int)? {
         guard detailViewModel?.typeConfig.fields.rsvpStatus == true,
               let items = detailViewModel?.items else { return nil }
-        var confirmed = 0, maybe = 0, declined = 0, invited = 0, totalHeadCount = 0
+        var confirmed = 0, maybe = 0, declined = 0, invited = 0, notInvited = 0, totalHeadCount = 0
         for item in items {
             let status = item.rsvpStatus ?? "invited"
             let count = item.quantity
@@ -280,47 +280,46 @@ struct ListDetailView: View {
             case "confirmed": confirmed += count
             case "maybe": maybe += count
             case "declined": declined += count
+            case "not_invited": notInvited += count
             default: invited += count
             }
             totalHeadCount += count
         }
-        return (confirmed, maybe, declined, invited, totalHeadCount)
+        return (confirmed, maybe, declined, invited, notInvited, totalHeadCount)
     }
     
     @ViewBuilder
-    private func rsvpSummaryView(_ summary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, totalHeadCount: Int)) -> some View {
-        HStack(spacing: 8) {
-            Text("\(summary.totalHeadCount) Guest\(summary.totalHeadCount == 1 ? "" : "s")")
+    private func rsvpSummaryView(_ summary: (confirmed: Int, maybe: Int, declined: Int, invited: Int, notInvited: Int, totalHeadCount: Int)) -> some View {
+        VStack(spacing: 6) {
+            HStack {
+                rsvpStatLabel("\(summary.confirmed)", "Confirmed", Color(hex: "#4caf50"))
+                Spacer()
+                rsvpStatLabel("\(summary.maybe)", "Maybe", Color(hex: "#ff9800"))
+                Spacer()
+                rsvpStatLabel("\(summary.declined)", "Declined", Color(hex: "#f44336"))
+                Spacer()
+                rsvpStatLabel("\(summary.invited)", "Invited", Color(hex: "#42a5f5"))
+                Spacer()
+                rsvpStatLabel("\(summary.notInvited)", "Not Invited", Color(hex: "#9e9e9e"))
+            }
+            Text("Total Guests: \(summary.totalHeadCount)")
                 .font(.subheadline)
                 .fontWeight(.bold)
-            
-            Text("·").foregroundStyle(.tertiary)
-            
-            Text("\(summary.confirmed) Confirmed")
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(Color(hex: "#4caf50"))
-            
-            Text("·").foregroundStyle(.tertiary)
-            
-            Text("\(summary.maybe) Maybe")
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(Color(hex: "#ff9800"))
-            
-            Text("·").foregroundStyle(.tertiary)
-            
-            Text("\(summary.declined) Declined")
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(Color(hex: "#f44336"))
-            
-            Text("·").foregroundStyle(.tertiary)
-            
-            Text("\(summary.invited) Invited")
-                .font(.subheadline).fontWeight(.semibold)
-                .foregroundStyle(Color(hex: "#9e9e9e"))
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func rsvpStatLabel(_ count: String, _ label: String, _ color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(count)
+                .font(.title3).fontWeight(.bold)
+                .foregroundStyle(color)
+            Text(label)
+                .font(.caption).fontWeight(.medium)
+                .foregroundStyle(color)
+        }
     }
     
     private var itemListContent: some View {
@@ -652,14 +651,14 @@ struct ListDetailView: View {
                 if detailViewModel?.typeConfig.fields.rsvpStatus == true {
                     if !isChecked {
                         Menu {
-                            ForEach(["invited", "confirmed", "declined", "maybe"], id: \.self) { status in
+                            ForEach(["invited", "confirmed", "declined", "maybe", "not_invited"], id: \.self) { status in
                                 Button {
                                     Task {
                                         await detailViewModel?.updateItem(item.id, rsvpStatus: status)
                                     }
                                 } label: {
                                     HStack {
-                                        Text(status.capitalized)
+                                        Text(rsvpDisplayName(for: status))
                                         if item.rsvpStatus == status {
                                             Image(systemName: "checkmark")
                                         }
@@ -667,7 +666,7 @@ struct ListDetailView: View {
                                 }
                             }
                         } label: {
-                            Text(item.rsvpStatus?.capitalized ?? "Invited")
+                            Text(rsvpDisplayName(for: item.rsvpStatus ?? "invited"))
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundStyle(.white)
@@ -679,7 +678,7 @@ struct ListDetailView: View {
                                 )
                         }
                     } else {
-                        Text(item.rsvpStatus?.capitalized ?? "Invited")
+                        Text(rsvpDisplayName(for: item.rsvpStatus ?? "invited"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -935,14 +934,14 @@ struct ListDetailView: View {
         // RSVP submenu (guest list only)
         if detailViewModel?.typeConfig.fields.rsvpStatus == true {
             Menu {
-                ForEach(["invited", "confirmed", "declined", "maybe"], id: \.self) { status in
+                ForEach(["invited", "confirmed", "declined", "maybe", "not_invited"], id: \.self) { status in
                     Button {
                         Task {
                             await detailViewModel?.updateItem(item.id, rsvpStatus: status)
                         }
                     } label: {
                         HStack {
-                            Text(status.capitalized)
+                            Text(rsvpDisplayName(for: status))
                             if item.rsvpStatus == status {
                                 Image(systemName: "checkmark")
                             }
@@ -950,7 +949,7 @@ struct ListDetailView: View {
                     }
                 }
             } label: {
-                let rsvpLabel = item.rsvpStatus?.capitalized ?? "Invited"
+                let rsvpLabel = rsvpDisplayName(for: item.rsvpStatus ?? "invited")
                 Label("RSVP: \(rsvpLabel)", systemImage: "person.crop.circle.badge.questionmark")
             }
         }
@@ -1084,7 +1083,15 @@ struct ListDetailView: View {
         case "confirmed": return Color(hex: "#4caf50")
         case "declined": return Color(hex: "#f44336")
         case "maybe": return Color(hex: "#ff9800")
-        default: return Color(hex: "#9e9e9e")
+        case "not_invited": return Color(hex: "#9e9e9e")
+        default: return Color(hex: "#42a5f5")   // "invited" or nil
+        }
+    }
+    
+    private func rsvpDisplayName(for status: String) -> String {
+        switch status {
+        case "not_invited": return "Not Yet Invited"
+        default: return status.capitalized
         }
     }
     

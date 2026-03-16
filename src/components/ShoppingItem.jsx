@@ -9,10 +9,11 @@ import { ITEM_UNITS } from '../constants/units.js';
 import styles from './ShoppingItem.module.css';
 
 const RSVP_COLORS = {
-  invited: '#9e9e9e',
+  invited: '#42a5f5',
   confirmed: '#4caf50',
   declined: '#f44336',
   maybe: '#ff9800',
+  not_invited: '#9e9e9e',
 };
 
 /**
@@ -387,6 +388,7 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
                   <option value="confirmed">Confirmed</option>
                   <option value="declined">Declined</option>
                   <option value="maybe">Maybe</option>
+                  <option value="not_invited">Not Yet Invited</option>
                 </select>
               </div>
             )}
@@ -575,6 +577,7 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
                 <option value="confirmed">Confirmed</option>
                 <option value="declined">Declined</option>
                 <option value="maybe">Maybe</option>
+                <option value="not_invited">Not Yet Invited</option>
               </select>
             </div>
           )}

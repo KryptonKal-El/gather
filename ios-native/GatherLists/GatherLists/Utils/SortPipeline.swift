@@ -393,8 +393,9 @@ enum SortPipeline {
         let rsvpOrder: [(status: String, label: String, color: String)] = [
             ("confirmed", "Confirmed", "#4caf50"),
             ("maybe", "Maybe", "#ff9800"),
-            ("invited", "Invited", "#9e9e9e"),
-            ("declined", "Declined", "#f44336")
+            ("invited", "Invited", "#42a5f5"),
+            ("declined", "Declined", "#f44336"),
+            ("not_invited", "Not Yet Invited", "#9e9e9e")
         ]
         
         var grouped: [String: [Item]] = [:]

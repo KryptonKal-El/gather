@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "applied": [
+    {
+      "id": "2026-03-04-migrate-git-config",
+      "appliedAt": "2026-03-16T12:00:00Z",
+      "appliedBy": "planner",
+      "updateType": "migration"
+    },
+    {
+      "id": "2026-03-05-deprecate-multi-session",
+      "appliedAt": "2026-03-16T12:00:00Z",
+      "appliedBy": "planner",
+      "updateType": "schema",
+      "notes": "Field absent — nothing to remove"
+    },
+    {
+      "id": "2026-03-05-architecture-aware-verification",
+      "appliedAt": "2026-03-16T12:01:00Z",
+      "appliedBy": "planner",
+      "updateType": "schema"
+    },
+    {
+      "id": "2026-03-07-configure-test-verify-settings",
+      "appliedAt": "2026-03-16T12:02:00Z",
+      "appliedBy": "planner",
+      "updateType": "schema"
+    },
+    {
+      "id": "2026-03-08-migrate-to-post-change-actions",
+      "appliedAt": "2026-03-16T12:03:00Z",
+      "appliedBy": "planner",
+      "updateType": "schema",
+      "notes": "No postChangeActions needed — no supportDocs, ai, marketing, or relatedProjects configured"
+    }
+  ]
+}

@@ -73,8 +73,51 @@
   "git": {
     "defaultBranch": "main",
     "branchPattern": "gh/{ticket}/short-summary",
+    "agentWorkflow": {
+      "workBranch": "main",
+      "pushTo": "main",
+      "createPrTo": "main",
+      "requiresHumanApproval": []
+    },
     "teamSync": {
       "enabled": false
+    }
+  },
+  "authentication": {
+    "provider": "supabase",
+    "method": "email-password",
+    "acquisition": {
+      "description": "Sign in with email/password via Supabase Auth",
+      "steps": [
+        "Navigate to the login page",
+        "Enter test email and password",
+        "Click Sign In",
+        "Wait for redirect to main app view"
+      ],
+      "fallbackToUI": true
+    }
+  },
+  "apps": [
+    {
+      "name": "web",
+      "type": "web",
+      "framework": "react-vite",
+      "port": 4000
+    },
+    {
+      "name": "ios-native",
+      "type": "mobile",
+      "framework": "swiftui"
+    }
+  ],
+  "testing": {
+    "testVerifySettings": {
+      "adHocUIVerify_Analysis": true,
+      "adHocUIVerify_StoryTest": true,
+      "adHocUIVerify_CompletionTest": true,
+      "prdUIVerify_Analysis": true,
+      "prdUIVerify_StoryTest": true,
+      "prdUIVerify_PRDCompletionTest": true
     }
   },
   "planning": {

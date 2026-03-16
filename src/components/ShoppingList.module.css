@@ -162,13 +162,19 @@
 
 .rsvpSummary {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.35rem;
   padding: 0.75rem 1rem;
   background: var(--bg-raised);
   border: 1px solid var(--border-default);
   border-radius: 10px;
   font-size: 0.85rem;
+}
+
+.rsvpSummaryStats {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
@@ -183,6 +189,7 @@
 
 .rsvpSummaryStat {
   font-weight: 600;
+  font-size: 0.75rem;
 }
 
 @media (max-width: 700px) {

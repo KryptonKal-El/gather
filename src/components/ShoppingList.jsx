@@ -148,7 +148,7 @@ export const ShoppingList = ({
   };
 
   const rsvpSummary = listType === 'guest_list' ? (() => {
-    const counts = { invited: 0, confirmed: 0, declined: 0, maybe: 0 };
+    const counts = { invited: 0, confirmed: 0, declined: 0, maybe: 0, not_invited: 0 };
     let totalHeadCount = 0;
     for (const item of items) {
       const status = item.rsvpStatus ?? 'invited';
@@ -181,25 +181,30 @@ export const ShoppingList = ({
     <div className={styles.list}>
       {rsvpSummary && (
         <div className={styles.rsvpSummary}>
-          <span className={styles.rsvpSummaryTotal}>
-            {rsvpSummary.totalHeadCount} Guest{rsvpSummary.totalHeadCount !== 1 ? 's' : ''}
-          </span>
-          <span className={styles.rsvpSummaryDivider}>·</span>
-          <span className={styles.rsvpSummaryStat} style={{ color: '#4caf50' }}>
-            {rsvpSummary.counts.confirmed} Confirmed
-          </span>
-          <span className={styles.rsvpSummaryDivider}>·</span>
-          <span className={styles.rsvpSummaryStat} style={{ color: '#ff9800' }}>
-            {rsvpSummary.counts.maybe} Maybe
-          </span>
-          <span className={styles.rsvpSummaryDivider}>·</span>
-          <span className={styles.rsvpSummaryStat} style={{ color: '#f44336' }}>
-            {rsvpSummary.counts.declined} Declined
-          </span>
-          <span className={styles.rsvpSummaryDivider}>·</span>
-          <span className={styles.rsvpSummaryStat} style={{ color: '#9e9e9e' }}>
-            {rsvpSummary.counts.invited} Invited
-          </span>
+          <div className={styles.rsvpSummaryStats}>
+            <span className={styles.rsvpSummaryStat} style={{ color: '#4caf50' }}>
+              {rsvpSummary.counts.confirmed} Confirmed
+            </span>
+            <span className={styles.rsvpSummaryDivider}>·</span>
+            <span className={styles.rsvpSummaryStat} style={{ color: '#ff9800' }}>
+              {rsvpSummary.counts.maybe} Maybe
+            </span>
+            <span className={styles.rsvpSummaryDivider}>·</span>
+            <span className={styles.rsvpSummaryStat} style={{ color: '#f44336' }}>
+              {rsvpSummary.counts.declined} Declined
+            </span>
+            <span className={styles.rsvpSummaryDivider}>·</span>
+            <span className={styles.rsvpSummaryStat} style={{ color: '#42a5f5' }}>
+              {rsvpSummary.counts.invited} Invited
+            </span>
+            <span className={styles.rsvpSummaryDivider}>·</span>
+            <span className={styles.rsvpSummaryStat} style={{ color: '#9e9e9e' }}>
+              {rsvpSummary.counts.not_invited} Not Yet Invited
+            </span>
+          </div>
+          <div className={styles.rsvpSummaryTotal}>
+            Total Guests: {rsvpSummary.totalHeadCount}
+          </div>
         </div>
       )}
 

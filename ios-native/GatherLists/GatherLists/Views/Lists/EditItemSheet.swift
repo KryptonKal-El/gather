@@ -119,8 +119,8 @@ struct EditItemSheet: View {
                     Section {
                         Picker("RSVP Status", selection: $selectedRsvpStatus) {
                             Text("None").tag(String?.none)
-                            ForEach(["invited", "confirmed", "declined", "maybe"], id: \.self) { status in
-                                Text(status.capitalized).tag(String?.some(status))
+                            ForEach(["invited", "confirmed", "declined", "maybe", "not_invited"], id: \.self) { status in
+                                Text(status == "not_invited" ? "Not Yet Invited" : status.capitalized).tag(String?.some(status))
                             }
                         }
                     }
