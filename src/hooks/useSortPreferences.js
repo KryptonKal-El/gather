@@ -61,7 +61,6 @@ export const useSortPreferences = () => {
           event: '*',
           schema: 'public',
           table: 'user_preferences',
-          filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
           if (payload.eventType === 'DELETE') {

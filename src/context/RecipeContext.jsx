@@ -156,7 +156,6 @@ export const RecipeProvider = ({ children }) => {
           event: '*',
           schema: 'public',
           table: 'recipes',
-          filter: `collection_id=eq.${activeCollectionId}`,
         },
         () => {
           fetchRecipes();

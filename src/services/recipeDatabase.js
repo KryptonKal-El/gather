@@ -301,7 +301,6 @@ export const subscribeRecipes = (userId, callback) => {
         event: '*',
         schema: 'public',
         table: 'recipes',
-        filter: `owner_id=eq.${userId}`,
       },
       () => {
         fetchRecipes();
@@ -417,7 +416,6 @@ export const subscribeRecipeDetail = (recipeId, callback) => {
         event: '*',
         schema: 'public',
         table: 'recipe_ingredients',
-        filter: `recipe_id=eq.${recipeId}`,
       },
       () => {
         fetchRecipeDetail();
@@ -429,7 +427,6 @@ export const subscribeRecipeDetail = (recipeId, callback) => {
         event: '*',
         schema: 'public',
         table: 'recipe_steps',
-        filter: `recipe_id=eq.${recipeId}`,
       },
       () => {
         fetchRecipeDetail();
@@ -616,7 +613,6 @@ export const subscribeCollections = (userId, callback) => {
         event: '*',
         schema: 'public',
         table: 'collections',
-        filter: `owner_id=eq.${userId}`,
       },
       () => {
         fetchCollections();
@@ -883,7 +879,6 @@ export const subscribeSharedCollections = (email, callback) => {
         event: '*',
         schema: 'public',
         table: 'collection_shares',
-        filter: `shared_with_email=eq.${normalizedEmail}`,
       },
       () => {
         fetchSharedCollections();

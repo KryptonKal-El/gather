@@ -158,7 +158,6 @@ export const subscribeLists = (userId, callback) => {
         event: '*',
         schema: 'public',
         table: 'lists',
-        filter: `owner_id=eq.${userId}`,
       },
       () => {
         fetchLists();
@@ -402,7 +401,6 @@ export const subscribeItems = (userId, listId, callback) => {
         event: '*',
         schema: 'public',
         table: 'items',
-        filter: `list_id=eq.${listId}`,
       },
       () => {
         fetchItems();
@@ -511,7 +509,6 @@ export const subscribeHistory = (userId, callback) => {
         event: '*',
         schema: 'public',
         table: 'history',
-        filter: `user_id=eq.${userId}`,
       },
       () => {
         fetchHistory();
@@ -664,7 +661,6 @@ export const subscribeSharedListRefs = (email, callback) => {
         event: '*',
         schema: 'public',
         table: 'list_shares',
-        filter: `shared_with_email=eq.${normalizedEmail}`,
       },
       () => {
         fetchSharedRefs();
@@ -914,7 +910,6 @@ export const subscribeStores = (userId, callback) => {
         event: '*',
         schema: 'public',
         table: 'stores',
-        filter: `user_id=eq.${userId}`,
       },
       () => {
         fetchStores();
@@ -990,7 +985,6 @@ export const subscribeSharedStores = (ownerUid, storeIds, callback) => {
         event: '*',
         schema: 'public',
         table: 'stores',
-        filter: `user_id=eq.${ownerUid}`,
       },
       () => {
         fetchShared();
