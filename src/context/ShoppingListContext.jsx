@@ -172,7 +172,6 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userEmail) {
       setSharedListRefs([]);
       setSharedListMetas({});
-      hasLoadedSharedLists.current = true;
       return;
     }
     return subscribeSharedListRefs(userEmail, (refs) => {
@@ -238,7 +237,7 @@ export const ShoppingListProvider = ({ children }) => {
 
   // Validate and auto-select list once owned and shared lists have loaded
   useEffect(() => {
-    if (!hasLoadedOwnedLists.current || !hasLoadedSharedLists.current || hasAutoSelected.current) return;
+    if (!hasLoadedOwnedLists.current || (userEmail && !hasLoadedSharedLists.current) || hasAutoSelected.current) return;
     if (lists.length === 0 && Object.keys(sharedListMetas).length === 0) return;
 
     const cachedListId = activeListId;
@@ -272,7 +271,7 @@ export const ShoppingListProvider = ({ children }) => {
       setActiveListId(allLists[0].id);
       hasAutoSelected.current = true;
     }
-  }, [lists, sharedListMetas, activeListId, allLists, userId]);
+  }, [lists, sharedListMetas, activeListId, allLists, userId, userEmail]);
 
   // Determine the owner UID for the active list (needed for cross-user item access)
   const activeListEntry = allLists.find((l) => l.id === activeListId) ?? null;
