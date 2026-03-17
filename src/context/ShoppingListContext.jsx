@@ -74,6 +74,8 @@ export const ShoppingListProvider = ({ children }) => {
   const hasValidatedFromServer = useRef(false);
   // Track if owned lists have loaded at least once
   const hasLoadedOwnedLists = useRef(false);
+  // Track if shared lists have loaded at least once
+  const hasLoadedSharedLists = useRef(false);
 
   // Subscribe to owned lists
   useEffect(() => {
@@ -83,6 +85,7 @@ export const ShoppingListProvider = ({ children }) => {
       hasAutoSelected.current = false;
       hasValidatedFromServer.current = false;
       hasLoadedOwnedLists.current = false;
+      hasLoadedSharedLists.current = false;
       return;
     }
     return subscribeLists(userId, (newLists) => {
@@ -164,18 +167,35 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userEmail) {
       setSharedListRefs([]);
       setSharedListMetas({});
+      hasLoadedSharedLists.current = true;
       return;
     }
-    return subscribeSharedListRefs(userEmail, setSharedListRefs);
+    return subscribeSharedListRefs(userEmail, (refs) => {
+      setSharedListRefs(refs);
+      if (refs.length === 0) {
+        hasLoadedSharedLists.current = true;
+      }
+    });
   }, [userEmail]);
 
   // Subscribe to metadata for each shared list
   useEffect(() => {
+    if (sharedListRefs.length === 0) {
+      return;
+    }
+
     const unsubs = {};
+    let loadedCount = 0;
+    const totalCount = sharedListRefs.length;
 
     for (const ref of sharedListRefs) {
       const key = `${ref.ownerUid}_${ref.listId}`;
       unsubs[key] = subscribeList(ref.ownerUid, ref.listId, (listData) => {
+        loadedCount++;
+        if (loadedCount >= totalCount) {
+          hasLoadedSharedLists.current = true;
+        }
+
         if (listData) {
           setSharedListMetas((prev) => ({
             ...prev,
@@ -211,9 +231,9 @@ export const ShoppingListProvider = ({ children }) => {
     ...Object.values(sharedListMetas),
   ];
 
-  // Validate and auto-select list once owned lists have loaded
+  // Validate and auto-select list once owned and shared lists have loaded
   useEffect(() => {
-    if (!hasLoadedOwnedLists.current || hasAutoSelected.current) return;
+    if (!hasLoadedOwnedLists.current || !hasLoadedSharedLists.current || hasAutoSelected.current) return;
     if (lists.length === 0 && Object.keys(sharedListMetas).length === 0) return;
 
     const cachedListId = activeListId;
