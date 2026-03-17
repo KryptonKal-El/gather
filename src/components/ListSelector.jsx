@@ -1,10 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
 import { updateListSortConfig } from '../services/preferences.js';
+import { saveListOrder } from '../services/database.js';
 import {
   GroceryIcon,
   TodoIcon,
@@ -29,6 +46,20 @@ const TYPE_ICON_MAP = {
   project: ProjectIcon,
 };
 
+const SortableListItem = ({ id, children, isMobile }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <div ref={setNodeRef} style={style} className={isDragging ? styles.dragging : ''}>
+      {typeof children === 'function' ? children({ attributes, listeners, isDragging, isMobile }) : children}
+    </div>
+  );
+};
+
 /**
  * Sidebar/dropdown for managing multiple shopping lists.
  * Shows all lists (owned + shared) with emoji icons, allows creating new ones,
@@ -37,7 +68,7 @@ const TYPE_ICON_MAP = {
 export const ListSelector = ({
   lists,
   activeListId,
-  currentUserId: _currentUserId,
+  currentUserId,
   onSelect,
   onCreate,
   onUpdateDetails,
@@ -60,6 +91,34 @@ export const ListSelector = ({
   const [pendingTypeChange, setPendingTypeChange] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
+
+  // Separate owned and shared lists for drag context
+  const ownedLists = lists.filter((l) => !l._isShared);
+  const sharedLists = lists.filter((l) => l._isShared);
+
+  // Sensors for drag-and-drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = ownedLists.findIndex((l) => l.id === active.id);
+    const newIndex = ownedLists.findIndex((l) => l.id === over.id);
+    const reorderedLists = arrayMove(ownedLists, oldIndex, newIndex);
+
+    // Persist the new order
+    if (currentUserId) {
+      try {
+        await saveListOrder(currentUserId, reorderedLists);
+      } catch (error) {
+        console.error('Failed to save list order:', error);
+      }
+    }
+  };
 
   // Close menu on outside click
   useEffect(() => {
@@ -168,7 +227,7 @@ export const ListSelector = ({
       })
     : lists;
 
-  const renderListItem = (list) => {
+  const renderListItem = (list, dragProps = null) => {
     const isOwned = !list._isShared;
     const isActive = list.id === activeListId;
     const isMenuOpen = menuOpenId === list.id;
@@ -177,6 +236,7 @@ export const ListSelector = ({
       <div
         key={list.id}
         className={`${styles.listItem} ${isActive ? styles.active : ''}`}
+        {...(dragProps && isMobile && isOwned ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>
@@ -222,6 +282,22 @@ export const ListSelector = ({
           </div>
         ) : (
           <>
+            {!isMobile && dragProps && isOwned && (
+              <button
+                type="button"
+                className={styles.dragHandle}
+                {...dragProps.attributes}
+                {...dragProps.listeners}
+                onClick={(e) => e.stopPropagation()}
+                aria-label="Drag to reorder"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+                  <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+                  <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+                </svg>
+              </button>
+            )}
             <button
               className={styles.listBtn}
               onClick={() => onSelect(list.id)}
@@ -500,7 +576,34 @@ export const ListSelector = ({
           {filteredLists.length === 0 && (
             <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
           )}
-          {filteredLists.map(renderListItem)}
+          {!query ? (
+            <>
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                modifiers={[restrictToVerticalAxis]}
+              >
+                <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                  {ownedLists.map((list) => (
+                    <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
+                      {(dragProps) => renderListItem(list, dragProps)}
+                    </SortableListItem>
+                  ))}
+                </SortableContext>
+              </DndContext>
+              {sharedLists.length > 0 && (
+                <>
+                  <div className={styles.sectionHeader}>
+                    <h4 className={styles.sectionTitle}>Shared with you</h4>
+                  </div>
+                  {sharedLists.map((list) => renderListItem(list, null))}
+                </>
+              )}
+            </>
+          ) : (
+            filteredLists.map((list) => renderListItem(list, null))
+          )}
         </div>
       </div>
     </div>
@@ -597,7 +700,34 @@ export const ListSelector = ({
         {filteredLists.length === 0 && (
           <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
         )}
-        {filteredLists.map(renderListItem)}
+        {!query ? (
+          <>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                {ownedLists.map((list) => (
+                  <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
+                    {(dragProps) => renderListItem(list, dragProps)}
+                  </SortableListItem>
+                ))}
+              </SortableContext>
+            </DndContext>
+            {sharedLists.length > 0 && (
+              <>
+                <div className={styles.sectionHeader}>
+                  <h4 className={styles.sectionTitle}>Shared with you</h4>
+                </div>
+                {sharedLists.map((list) => renderListItem(list, null))}
+              </>
+            )}
+          </>
+        ) : (
+          filteredLists.map((list) => renderListItem(list, null))
+        )}
       </div>
     </div>
   );
