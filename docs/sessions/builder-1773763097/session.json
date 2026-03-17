@@ -6,14 +6,14 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-007",
+  "currentChunk": "US-008",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
-    "description": "Committing US-006, advancing to US-007",
+    "description": "US-007 completed, advancing to US-008",
     "contextAnchor": "ios-native/GatherLists",
-    "lastAction": "US-006 build passed, committing",
-    "updatedAt": "2026-03-17T18:30:00Z"
+    "lastAction": "US-007 build passed, committing",
+    "updatedAt": "2026-03-17T18:35:00Z"
   },
   "chunks": [
     {
@@ -64,8 +64,10 @@
       "id": "US-007",
       "slug": "ios-restore-last-list",
       "title": "iOS — Restore last-selected list on launch & auto-navigate",
-      "status": "pending",
-      "priority": 7
+      "status": "completed",
+      "priority": 7,
+      "committedAt": "2026-03-17T18:35:00Z",
+      "testFlowResult": "pass"
     },
     {
       "id": "US-008",

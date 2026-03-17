@@ -9,6 +9,7 @@ struct ListBrowserView: View {
     @State private var listToDelete: GatherList?
     @State private var listToShare: GatherList?
     @State private var showDeleteConfirm = false
+    @State private var navigationPath = NavigationPath()
     
     private var ownedFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -36,7 +37,7 @@ struct ListBrowserView: View {
     }
     
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if let vm = viewModel {
                     if vm.isLoading && hasNoLists {
@@ -98,6 +99,12 @@ struct ListBrowserView: View {
         }
         .onAppear {
             initializeViewModelIfNeeded()
+        }
+        .onChange(of: viewModel?.pendingAutoNavigateList) { _, newValue in
+            if let list = newValue {
+                navigationPath.append(list)
+                viewModel?.pendingAutoNavigateList = nil
+            }
         }
     }
     

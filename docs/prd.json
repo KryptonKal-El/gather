@@ -218,8 +218,8 @@
         "Build succeeds"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added UserDefaults cache read/write in PreferenceService, launch restore logic in ListViewModel, NavigationStack path manipulation in ListBrowserView. Build succeeded.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -234,7 +234,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "NavigationStack path manipulation on launch with cache-then-server reconciliation"
+      "testIntensityReason": "NavigationStack path manipulation on launch with cache-then-server reconciliation",
+      "status": "completed",
+      "completedAt": "2026-03-17T18:35:00Z"
     },
     {
       "id": "US-008",

@@ -17,8 +17,12 @@ final class ListViewModel {
     var isShowingCachedData = false
     var cachedAt: Date?
     
+    /// Set on launch if a valid cached last list should auto-navigate. Cleared after use.
+    var pendingAutoNavigateList: GatherList?
+    
     private let userId: UUID
     private let userEmail: String
+    private var hasAttemptedLaunchRestore = false
     
     nonisolated(unsafe) private var ownedListsChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var sharedListsChannel: RealtimeChannelV2?
@@ -57,6 +61,9 @@ final class ListViewModel {
         isLoading = true
         error = nil
         
+        // Read cached last list ID from UserDefaults for instant restore
+        let cachedLastListId = PreferenceService.getCachedLastListId()
+        
         // Load cached data first for instant display
         let cachedOwned: CachedEntry<[GatherList]>? = await OfflineCache.shared.load(forKey: "lists-owned-\(userId.uuidString)")
         let cachedShared: CachedEntry<[GatherList]>? = await OfflineCache.shared.load(forKey: "lists-shared-\(userId.uuidString)")
@@ -68,7 +75,18 @@ final class ListViewModel {
             sharedLists = cachedShared.data
         }
         cachedAt = cachedOwned?.cachedAt ?? cachedShared?.cachedAt
-        if activeListId == nil, let firstList = allLists.first {
+        
+        // Attempt launch restore from UserDefaults cached last list ID
+        if !hasAttemptedLaunchRestore && !allLists.isEmpty {
+            hasAttemptedLaunchRestore = true
+            if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
+                activeListId = cachedId
+                pendingAutoNavigateList = targetList
+            } else if activeListId == nil, let firstList = allLists.first {
+                activeListId = firstList.id
+                persistLastListIdDebounced(firstList.id)
+            }
+        } else if activeListId == nil, let firstList = allLists.first {
             activeListId = firstList.id
             persistLastListIdDebounced(firstList.id)
         }
@@ -88,10 +106,23 @@ final class ListViewModel {
             isShowingCachedData = false
             cachedAt = nil
             
-            if activeListId == nil, let firstList = allLists.first {
+            // Attempt launch restore after network data if not already done
+            if !hasAttemptedLaunchRestore && !allLists.isEmpty {
+                hasAttemptedLaunchRestore = true
+                if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
+                    activeListId = cachedId
+                    pendingAutoNavigateList = targetList
+                } else if activeListId == nil, let firstList = allLists.first {
+                    activeListId = firstList.id
+                    persistLastListIdDebounced(firstList.id)
+                }
+            } else if activeListId == nil, let firstList = allLists.first {
                 activeListId = firstList.id
                 persistLastListIdDebounced(firstList.id)
             }
+            
+            // Reconcile server preferences with UserDefaults cache
+            await reconcileServerPreferences()
             
             // Cache the fresh data
             await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
@@ -103,6 +134,22 @@ final class ListViewModel {
         }
         
         isLoading = false
+    }
+    
+    /// Fetches server preferences and updates UserDefaults cache if different.
+    private func reconcileServerPreferences() async {
+        do {
+            let serverPrefs = try await PreferenceService.fetchUserPreferences()
+            let serverLastListId = serverPrefs.lastListId
+            let cachedLastListId = PreferenceService.getCachedLastListId()
+            
+            // Update UserDefaults cache with server value (for next launch)
+            if serverLastListId != cachedLastListId {
+                PreferenceService.setCachedLastListId(serverLastListId)
+            }
+        } catch {
+            print("[ListViewModel] Failed to reconcile server preferences: \(error.localizedDescription)")
+        }
     }
     
     // MARK: - Realtime Subscriptions
@@ -251,6 +298,9 @@ final class ListViewModel {
     }
     
     private func persistLastListIdDebounced(_ listId: UUID?) {
+        // Update UserDefaults cache immediately for fast launch restore
+        PreferenceService.setCachedLastListId(listId)
+        
         persistListIdTask?.cancel()
         persistListIdTask = Task {
             try? await Task.sleep(for: .milliseconds(500))

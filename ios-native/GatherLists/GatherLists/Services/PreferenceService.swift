@@ -5,6 +5,25 @@ struct PreferenceService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
     private static var cachedPreferences: UserPreferences?
     
+    private static let lastListIdKey = "last-list-id"
+    
+    // MARK: - UserDefaults Cache for Last List ID
+    
+    /// Reads cached last list ID from UserDefaults (instant read for launch restore).
+    static func getCachedLastListId() -> UUID? {
+        guard let string = UserDefaults.standard.string(forKey: lastListIdKey) else { return nil }
+        return UUID(uuidString: string)
+    }
+    
+    /// Writes last list ID to UserDefaults cache.
+    static func setCachedLastListId(_ listId: UUID?) {
+        if let listId {
+            UserDefaults.standard.set(listId.uuidString, forKey: lastListIdKey)
+        } else {
+            UserDefaults.standard.removeObject(forKey: lastListIdKey)
+        }
+    }
+    
     /// Fetches user preferences. Returns cached version if available.
     /// Falls back to system default config if no row exists.
     static func fetchUserPreferences() async throws -> UserPreferences {
