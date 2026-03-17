@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-003",
+  "currentChunk": "US-004",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -34,7 +34,7 @@
       "id": "US-003",
       "slug": "react-restore-last-list",
       "title": "React — Restore last-selected list on startup",
-      "status": "pending",
+      "status": "completed",
       "priority": 3
     },
     {

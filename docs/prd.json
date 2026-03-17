@@ -86,8 +86,8 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "localStorage cache for instant startup, server-wins reconciliation, hasAutoSelected updated",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -102,7 +102,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Startup flow with cache-then-server reconciliation"
+      "testIntensityReason": "Startup flow with cache-then-server reconciliation",
+      "status": "completed",
+      "completedAt": "2026-03-17T16:07:39Z"
     },
     {
       "id": "US-004",

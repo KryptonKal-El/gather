@@ -32,7 +32,9 @@ import {
   unshareList as dbUnshareList,
   subscribeSharedStores,
 } from '../services/database.js';
-import { updateLastListId } from '../services/preferences.js';
+import { updateLastListId, getUserPreferences } from '../services/preferences.js';
+
+const LAST_LIST_ID_KEY = 'gather_last_list_id';
 
 /** Capitalizes the first letter of a string. */
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -52,7 +54,14 @@ export const ShoppingListProvider = ({ children }) => {
   const [lists, setLists] = useState([]);
   const [sharedListRefs, setSharedListRefs] = useState([]);
   const [sharedListMetas, setSharedListMetas] = useState({});
-  const [activeListId, setActiveListId] = useState(null);
+  const [activeListId, setActiveListId] = useState(() => {
+    // Read from localStorage for instant startup (before Supabase call)
+    try {
+      return localStorage.getItem(LAST_LIST_ID_KEY);
+    } catch {
+      return null;
+    }
+  });
   const [activeItems, setActiveItems] = useState([]);
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
@@ -60,6 +69,10 @@ export const ShoppingListProvider = ({ children }) => {
 
   // Track whether we've auto-selected a list on initial load
   const hasAutoSelected = useRef(false);
+  // Track whether we've loaded and validated preferences from server
+  const hasValidatedFromServer = useRef(false);
+  // Track if owned lists have loaded at least once
+  const hasLoadedOwnedLists = useRef(false);
 
   // Subscribe to owned lists
   useEffect(() => {
@@ -67,15 +80,47 @@ export const ShoppingListProvider = ({ children }) => {
       setLists([]);
       setActiveListId(null);
       hasAutoSelected.current = false;
+      hasValidatedFromServer.current = false;
+      hasLoadedOwnedLists.current = false;
       return;
     }
     return subscribeLists(userId, (newLists) => {
       setLists(newLists);
-      if (!hasAutoSelected.current && newLists.length > 0) {
-        setActiveListId(newLists[0].id);
-        hasAutoSelected.current = true;
-      }
+      hasLoadedOwnedLists.current = true;
     });
+  }, [userId]);
+
+  // Load preferences from Supabase and sync localStorage (server wins)
+  useEffect(() => {
+    if (!userId || hasValidatedFromServer.current) return;
+
+    const loadServerPreferences = async () => {
+      try {
+        const prefs = await getUserPreferences(userId);
+        const serverListId = prefs.last_list_id;
+
+        if (serverListId) {
+          // Update localStorage with server value (server wins)
+          try {
+            localStorage.setItem(LAST_LIST_ID_KEY, serverListId);
+          } catch {
+            // Ignore localStorage errors
+          }
+
+          // If we haven't auto-selected yet, use server value as activeListId
+          // (validation will happen in the allLists effect below)
+          if (!hasAutoSelected.current) {
+            setActiveListId(serverListId);
+          }
+        }
+        hasValidatedFromServer.current = true;
+      } catch {
+        // Silent failure — preference loading is non-critical
+        hasValidatedFromServer.current = true;
+      }
+    };
+
+    loadServerPreferences();
   }, [userId]);
 
   // Subscribe to shared list refs (lists others shared with me)
@@ -129,6 +174,30 @@ export const ShoppingListProvider = ({ children }) => {
     ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false })),
     ...Object.values(sharedListMetas),
   ];
+
+  // Validate and auto-select list once owned lists have loaded
+  useEffect(() => {
+    if (!hasLoadedOwnedLists.current || hasAutoSelected.current) return;
+    if (lists.length === 0 && Object.keys(sharedListMetas).length === 0) return;
+
+    const cachedListId = activeListId;
+    if (cachedListId) {
+      // Validate the cached ID exists in all available lists
+      const isValid = allLists.some((l) => l.id === cachedListId);
+      if (isValid) {
+        // Cached list is valid, keep it selected
+        hasAutoSelected.current = true;
+      } else {
+        // Cached list doesn't exist (deleted/unshared) — show list browser
+        setActiveListId(null);
+        hasAutoSelected.current = true;
+      }
+    } else if (allLists.length > 0) {
+      // No cached list ID — fall back to first list
+      setActiveListId(allLists[0].id);
+      hasAutoSelected.current = true;
+    }
+  }, [lists, sharedListMetas, activeListId, allLists]);
 
   // Determine the owner UID for the active list (needed for cross-user item access)
   const activeListEntry = allLists.find((l) => l.id === activeListId) ?? null;
@@ -188,7 +257,7 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeSharedStores(activeListOwnerUid, missingStoreIds, setSharedStores);
   }, [isActiveListShared, activeListOwnerUid, activeItems, stores]);
 
-  // Debounced persistence of activeListId to user_preferences
+  // Debounced persistence of activeListId to user_preferences and localStorage
   const lastListIdTimeoutRef = useRef(null);
   useEffect(() => {
     if (!userId || !activeListId) return;
@@ -200,6 +269,13 @@ export const ShoppingListProvider = ({ children }) => {
 
     // Schedule new write after 500ms debounce
     lastListIdTimeoutRef.current = setTimeout(() => {
+      // Update localStorage immediately for next startup
+      try {
+        localStorage.setItem(LAST_LIST_ID_KEY, activeListId);
+      } catch {
+        // Ignore localStorage errors
+      }
+      // Persist to Supabase
       updateLastListId(userId, activeListId).catch(() => {
         // Silent failure — background write, no user-facing error
       });
