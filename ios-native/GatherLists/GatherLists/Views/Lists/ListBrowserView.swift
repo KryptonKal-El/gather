@@ -151,8 +151,12 @@ struct ListBrowserView: View {
                         }
                     }
                     .onMove { source, destination in
-                        viewModel?.moveList(from: source, to: destination)
+                        // Only allow moves when not searching (indices must match allLists)
+                        if vm.searchQuery.isEmpty {
+                            viewModel?.moveList(from: source, to: destination)
+                        }
                     }
+                    .moveDisabled(!vm.searchQuery.isEmpty)
                 }
             }
             

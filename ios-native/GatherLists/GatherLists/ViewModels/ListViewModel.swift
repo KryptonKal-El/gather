@@ -7,8 +7,8 @@ import Realtime
 @Observable
 @MainActor
 final class ListViewModel {
-    var ownedLists: [GatherList] = []
-    var sharedLists: [GatherList] = []
+    private(set) var ownedLists: [GatherList] = []
+    private(set) var sharedLists: [GatherList] = []
     var shareSortConfigs: [UUID: [String]] = [:]
     var activeListId: UUID?
     var isLoading = false
@@ -20,20 +20,20 @@ final class ListViewModel {
     /// Set on launch if a valid cached last list should auto-navigate. Cleared after use.
     var pendingAutoNavigateList: GatherList?
     
+    /// Unified list ordering (owned + shared), with order stored in UserDefaults.
+    private(set) var allLists: [GatherList] = []
+    
     private let userId: UUID
     private let userEmail: String
     private var hasAttemptedLaunchRestore = false
+    
+    private static let listOrderKey = "gather_list_order"
     
     nonisolated(unsafe) private var ownedListsChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var sharedListsChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var ownedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
-    
-    /// All lists merged: owned first, then shared.
-    var allLists: [GatherList] {
-        ownedLists + sharedLists
-    }
     
     /// Filtered lists based on search query matching name or emoji.
     var filteredLists: [GatherList] {
@@ -43,6 +43,50 @@ final class ListViewModel {
             list.name.lowercased().contains(query) ||
             (list.emoji?.lowercased().contains(query) ?? false)
         }
+    }
+    
+    // MARK: - Unified List Ordering
+    
+    /// Rebuilds `allLists` by merging owned and shared lists, then sorting
+    /// according to the cached order stored in UserDefaults.
+    private func rebuildAllLists() {
+        let merged = ownedLists + sharedLists
+        let cachedOrder = UserDefaults.standard.stringArray(forKey: Self.listOrderKey) ?? []
+        
+        // Build a lookup from ID string to position in cached order
+        var orderMap: [String: Int] = [:]
+        for (index, idString) in cachedOrder.enumerated() {
+            orderMap[idString] = index
+        }
+        
+        // Sort: items in cache come first (by their cached position), others appended at end
+        let sorted = merged.sorted { a, b in
+            let aIndex = orderMap[a.id.uuidString] ?? Int.max
+            let bIndex = orderMap[b.id.uuidString] ?? Int.max
+            if aIndex != bIndex {
+                return aIndex < bIndex
+            }
+            // Fallback: maintain relative order (owned before shared if both are new)
+            let aIsOwned = ownedLists.contains { $0.id == a.id }
+            let bIsOwned = ownedLists.contains { $0.id == b.id }
+            if aIsOwned != bIsOwned {
+                return aIsOwned
+            }
+            return false
+        }
+        
+        allLists = sorted
+    }
+    
+    /// Saves the current allLists order to UserDefaults.
+    private func saveListOrderToCache() {
+        let idStrings = allLists.map { $0.id.uuidString }
+        UserDefaults.standard.set(idStrings, forKey: Self.listOrderKey)
+    }
+    
+    /// Clears the cached list order (call on sign out).
+    static func clearCachedListOrder() {
+        UserDefaults.standard.removeObject(forKey: listOrderKey)
     }
     
     init(userId: UUID, userEmail: String) {
@@ -75,6 +119,7 @@ final class ListViewModel {
         if let cachedShared {
             sharedLists = cachedShared.data
         }
+        rebuildAllLists()
         cachedAt = cachedOwned?.cachedAt ?? cachedShared?.cachedAt
         
         // Attempt launch restore from UserDefaults cached last list ID
@@ -111,6 +156,7 @@ final class ListViewModel {
                 guard let config = ref.shareSortConfig else { return nil }
                 return (ref.list.id, config)
             })
+            rebuildAllLists()
             isShowingCachedData = false
             cachedAt = nil
             
@@ -230,6 +276,7 @@ final class ListViewModel {
                 guard let config = ref.shareSortConfig else { return nil }
                 return (ref.list.id, config)
             })
+            rebuildAllLists()
             isShowingCachedData = false
             cachedAt = nil
             
@@ -261,6 +308,8 @@ final class ListViewModel {
         do {
             let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count, type: type)
             ownedLists.append(newList)
+            rebuildAllLists()
+            saveListOrderToCache()
             activeListId = newList.id
             persistLastListIdDebounced(newList.id)
         } catch {
@@ -281,6 +330,7 @@ final class ListViewModel {
                 ownedLists[index].emoji = emoji
                 if let color { ownedLists[index].color = color }
                 if let type { ownedLists[index].type = type }
+                rebuildAllLists()
             }
         } catch {
             self.error = error.localizedDescription
@@ -299,6 +349,8 @@ final class ListViewModel {
         do {
             try await ListService.deleteList(listId: id)
             ownedLists.removeAll { $0.id == id }
+            rebuildAllLists()
+            saveListOrderToCache()
             
             // Auto-select next available if deleted list was active
             if activeListId == id {
@@ -338,13 +390,21 @@ final class ListViewModel {
     }
     
     func moveList(from source: IndexSet, to destination: Int) {
-        ownedLists.move(fromOffsets: source, toOffset: destination)
+        // Operate on the unified allLists array
+        allLists.move(fromOffsets: source, toOffset: destination)
+        
+        // Save the unified order to UserDefaults
+        saveListOrderToCache()
+        
+        // Extract owned lists in their new order and sync to Supabase
+        let reorderedOwned = allLists.filter { list in
+            ownedLists.contains { $0.id == list.id }
+        }
         
         let userId = self.userId
-        let currentLists = self.ownedLists
         Task {
             do {
-                try await ListService.saveListOrder(userId: userId, lists: currentLists)
+                try await ListService.saveListOrder(userId: userId, lists: reorderedOwned)
             } catch {
                 await MainActor.run {
                     self.error = error.localizedDescription
