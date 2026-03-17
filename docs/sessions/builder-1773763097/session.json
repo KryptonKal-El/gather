@@ -1,0 +1,84 @@
+{
+  "id": "builder-1773763097",
+  "mode": "prd",
+  "prdId": "prd-last-selected-list",
+  "branch": "main",
+  "status": "in_progress",
+  "startedAt": "2026-03-17T15:58:17Z",
+  "lastHeartbeat": "2026-03-17T15:58:17Z",
+  "currentChunk": "US-002",
+  "analysisCompleted": true,
+  "probeStatus": "confirmed",
+  "currentAction": {
+    "description": "Starting PRD execution: Remember Last Selected List",
+    "contextAnchor": "docs/prd.json",
+    "lastAction": "Session initialized",
+    "updatedAt": "2026-03-17T15:58:17Z"
+  },
+  "chunks": [
+    {
+      "id": "US-001",
+      "slug": "add-last-list-id-column",
+      "title": "Add last_list_id column to user_preferences",
+      "status": "completed",
+      "priority": 1
+    },
+    {
+      "id": "US-002",
+      "slug": "react-persist-last-list",
+      "title": "React — Persist last-selected list to Supabase",
+      "status": "pending",
+      "priority": 2
+    },
+    {
+      "id": "US-003",
+      "slug": "react-restore-last-list",
+      "title": "React — Restore last-selected list on startup",
+      "status": "pending",
+      "priority": 3
+    },
+    {
+      "id": "US-004",
+      "slug": "react-handle-invalid-list",
+      "title": "React — Handle invalid last-selected list",
+      "status": "pending",
+      "priority": 4
+    },
+    {
+      "id": "US-005",
+      "slug": "react-sync-realtime",
+      "title": "React — Sync last-selected list via realtime",
+      "status": "pending",
+      "priority": 5
+    },
+    {
+      "id": "US-006",
+      "slug": "ios-persist-last-list",
+      "title": "iOS — Persist last-selected list to Supabase",
+      "status": "pending",
+      "priority": 6
+    },
+    {
+      "id": "US-007",
+      "slug": "ios-restore-last-list",
+      "title": "iOS — Restore last-selected list on launch & auto-navigate",
+      "status": "pending",
+      "priority": 7
+    },
+    {
+      "id": "US-008",
+      "slug": "ios-handle-invalid-list",
+      "title": "iOS — Handle invalid last-selected list",
+      "status": "pending",
+      "priority": 8
+    },
+    {
+      "id": "US-009",
+      "slug": "ios-sync-realtime",
+      "title": "iOS — Sync last-selected list via realtime",
+      "status": "pending",
+      "priority": 9
+    }
+  ],
+  "decisions": []
+}

@@ -20,7 +20,7 @@
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
       "updatedAt": "2026-03-12",
-      "notes": "BUG-001\u2013011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
+      "notes": "BUG-001–011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
     },
     {
       "id": "prd-native-emoji-picker",
@@ -69,7 +69,7 @@
       "updatedAt": "2026-02-27",
       "startedAt": "2026-02-27T12:00:00Z",
       "completedAt": "2026-02-27T23:45:00Z",
-      "notes": "Google and Apple OAuth deferred \u2014 email/password auth active. Configure providers in Supabase dashboard when ready."
+      "notes": "Google and Apple OAuth deferred — email/password auth active. Configure providers in Supabase dashboard when ready."
     },
     {
       "id": "prd-apple-auth",
@@ -94,7 +94,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
       "completedAt": "2026-03-03T12:30:00Z",
-      "notes": "US-001\u2013004 all complete. US-004 went through 3 iterations: opacity tint \u2192 full-color backgrounds \u2192 4px left border accent (final)."
+      "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
     },
     {
       "id": "prd-desktop-avatar-upload",
@@ -120,7 +120,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-03T22:00:00Z",
       "completedAt": "2026-03-03T23:30:00Z",
-      "notes": "All 6 stories complete. Walmart \u2192 Open Food Facts \u2192 SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
+      "notes": "All 6 stories complete. Walmart → Open Food Facts → SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     },
     {
       "id": "prd-ios-app-store",
@@ -273,7 +273,7 @@
     },
     {
       "id": "prd-swift-ios-setup",
-      "name": "Native Swift iOS App \u2014 Phase 1: Project Setup & Auth",
+      "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
@@ -287,7 +287,7 @@
     },
     {
       "id": "prd-swift-lists-core",
-      "name": "Native Swift iOS App \u2014 Phase 2: Lists Core",
+      "name": "Native Swift iOS App — Phase 2: Lists Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-lists-core.md",
       "jsonPath": "docs/prds/prd-swift-lists-core.json",
@@ -301,7 +301,7 @@
     },
     {
       "id": "prd-swift-shopping-list",
-      "name": "Native Swift iOS App \u2014 Phase 3: Shopping List Items",
+      "name": "Native Swift iOS App — Phase 3: Shopping List Items",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-shopping-list.md",
       "jsonPath": "docs/prds/prd-swift-shopping-list.json",
@@ -315,7 +315,7 @@
     },
     {
       "id": "prd-swift-stores",
-      "name": "Native Swift iOS App \u2014 Phase 4: Store Management",
+      "name": "Native Swift iOS App — Phase 4: Store Management",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
@@ -329,7 +329,7 @@
     },
     {
       "id": "prd-swift-recipes-core",
-      "name": "Native Swift iOS App \u2014 Phase 5: Recipes & Collections Core",
+      "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
@@ -371,7 +371,7 @@
     },
     {
       "id": "prd-swift-final-polish",
-      "name": "Native Swift iOS App \u2014 Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
+      "name": "Native Swift iOS App — Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-final-polish.md",
       "jsonPath": "docs/prds/prd-swift-final-polish.json",
@@ -437,7 +437,9 @@
       "startedAt": "2026-03-10T23:45:00Z",
       "completedAt": "2026-03-11T01:00:00Z",
       "currentStory": null,
-      "dependsOn": ["prd-item-units"],
+      "dependsOn": [
+        "prd-item-units"
+      ],
       "notes": "All 10 stories complete. Spoonacular search-recipes edge function, React+Swift search UI with list/grid toggle, recipe preview with detail fetch, save-to-collection with collection picker, add-ingredients-to-list with quantity+unit mapping, Spoonacular attribution. Both web and iOS platforms."
     },
     {
@@ -481,6 +483,16 @@
       "completedAt": "2026-03-12T22:30:00Z",
       "currentStory": null,
       "notes": "All 4 stories complete. React: 18 preset colors, 1.75rem swatches, 12px color circle replacing 4px border. Swift: 18 presets + custom ColorPicker in create/edit sheets, 12pt color circle replacing flush-left bar in ListRowView."
+    },
+    {
+      "id": "prd-last-selected-list",
+      "name": "Remember Last Selected List",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-last-selected-list.md",
+      "jsonPath": "docs/prds/prd-last-selected-list.json",
+      "createdAt": "2026-03-17",
+      "updatedAt": "2026-03-17",
+      "startedAt": "2026-03-17T15:58:02Z"
     }
   ]
 }

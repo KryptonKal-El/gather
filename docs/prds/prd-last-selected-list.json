@@ -17,8 +17,8 @@
         "Lint passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Migration file created: 20260317120000_add_last_list_id.sql",
+      "passes": false,
+      "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -33,9 +33,7 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Single column addition with foreign key constraint",
-      "status": "completed",
-      "completedAt": "2026-03-17T16:03:14Z"
+      "testIntensityReason": "Single column addition with foreign key constraint"
     },
     {
       "id": "US-002",
