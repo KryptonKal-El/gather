@@ -82,6 +82,13 @@ final class ListViewModel {
             if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
                 activeListId = cachedId
                 pendingAutoNavigateList = targetList
+            } else if let cachedId = cachedLastListId {
+                // Invalid cached list ID — clear it silently
+                clearInvalidLastListId()
+                if activeListId == nil, let firstList = allLists.first {
+                    activeListId = firstList.id
+                    persistLastListIdDebounced(firstList.id)
+                }
             } else if activeListId == nil, let firstList = allLists.first {
                 activeListId = firstList.id
                 persistLastListIdDebounced(firstList.id)
@@ -112,6 +119,13 @@ final class ListViewModel {
                 if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
                     activeListId = cachedId
                     pendingAutoNavigateList = targetList
+                } else if let cachedId = cachedLastListId {
+                    // Invalid cached list ID — clear it silently
+                    clearInvalidLastListId()
+                    if activeListId == nil, let firstList = allLists.first {
+                        activeListId = firstList.id
+                        persistLastListIdDebounced(firstList.id)
+                    }
                 } else if activeListId == nil, let firstList = allLists.first {
                     activeListId = firstList.id
                     persistLastListIdDebounced(firstList.id)
@@ -137,14 +151,19 @@ final class ListViewModel {
     }
     
     /// Fetches server preferences and updates UserDefaults cache if different.
+    /// Clears invalid last list IDs that don't exist in current lists.
     private func reconcileServerPreferences() async {
         do {
             let serverPrefs = try await PreferenceService.fetchUserPreferences()
             let serverLastListId = serverPrefs.lastListId
             let cachedLastListId = PreferenceService.getCachedLastListId()
             
-            // Update UserDefaults cache with server value (for next launch)
-            if serverLastListId != cachedLastListId {
+            // Check if server's last list ID is invalid (doesn't exist in current lists)
+            if let serverId = serverLastListId, !allLists.contains(where: { $0.id == serverId }) {
+                // Clear invalid ID from both UserDefaults and Supabase
+                clearInvalidLastListId()
+            } else if serverLastListId != cachedLastListId {
+                // Update UserDefaults cache with server value (for next launch)
                 PreferenceService.setCachedLastListId(serverLastListId)
             }
         } catch {
@@ -306,6 +325,14 @@ final class ListViewModel {
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
             try? await PreferenceService.updateLastListId(listId)
+        }
+    }
+    
+    /// Clears an invalid last list ID from UserDefaults and Supabase (fire-and-forget).
+    private func clearInvalidLastListId() {
+        PreferenceService.setCachedLastListId(nil)
+        Task {
+            try? await PreferenceService.updateLastListId(nil)
         }
     }
     

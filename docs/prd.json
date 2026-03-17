@@ -250,8 +250,8 @@
         "Build succeeds"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added clearInvalidLastListId() helper, invalid list detection in loadData() for both cached and network paths, and in reconcileServerPreferences(). Silent cleanup. Build succeeded.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -266,7 +266,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Edge case handling with cross-platform cache cleanup"
+      "testIntensityReason": "Edge case handling with cross-platform cache cleanup",
+      "status": "completed",
+      "completedAt": "2026-03-17T18:42:00Z"
     },
     {
       "id": "US-009",

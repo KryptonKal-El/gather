@@ -6,14 +6,14 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-008",
+  "currentChunk": "US-009",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
-    "description": "US-007 completed, advancing to US-008",
+    "description": "US-008 completed, advancing to US-009",
     "contextAnchor": "ios-native/GatherLists",
-    "lastAction": "US-007 build passed, committing",
-    "updatedAt": "2026-03-17T18:35:00Z"
+    "lastAction": "US-008 build passed, committing",
+    "updatedAt": "2026-03-17T18:42:00Z"
   },
   "chunks": [
     {
@@ -73,8 +73,10 @@
       "id": "US-008",
       "slug": "ios-handle-invalid-list",
       "title": "iOS — Handle invalid last-selected list",
-      "status": "pending",
-      "priority": 8
+      "status": "completed",
+      "priority": 8,
+      "committedAt": "2026-03-17T18:42:00Z",
+      "testFlowResult": "pass"
     },
     {
       "id": "US-009",
