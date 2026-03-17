@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-004",
+  "currentChunk": "US-005",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -41,7 +41,7 @@
       "id": "US-004",
       "slug": "react-handle-invalid-list",
       "title": "React — Handle invalid last-selected list",
-      "status": "pending",
+      "status": "completed",
       "priority": 4
     },
     {

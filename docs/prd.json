@@ -121,8 +121,8 @@
         "Lint passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Invalid list clears localStorage + Supabase, shows list browser silently",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -137,7 +137,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Edge case handling with cross-platform cache cleanup"
+      "testIntensityReason": "Edge case handling with cross-platform cache cleanup",
+      "status": "completed",
+      "completedAt": "2026-03-17T16:09:14Z"
     },
     {
       "id": "US-005",

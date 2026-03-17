@@ -188,16 +188,30 @@ export const ShoppingListProvider = ({ children }) => {
         // Cached list is valid, keep it selected
         hasAutoSelected.current = true;
       } else {
-        // Cached list doesn't exist (deleted/unshared) — show list browser
+        // Cached list doesn't exist (deleted/unshared) — clear and show list browser
         setActiveListId(null);
         hasAutoSelected.current = true;
+
+        // Clear invalid ID from localStorage
+        try {
+          localStorage.removeItem(LAST_LIST_ID_KEY);
+        } catch {
+          // Ignore localStorage errors
+        }
+
+        // Clear invalid ID from Supabase (so other devices also reset)
+        if (userId) {
+          updateLastListId(userId, null).catch(() => {
+            // Silent failure — background write
+          });
+        }
       }
     } else if (allLists.length > 0) {
       // No cached list ID — fall back to first list
       setActiveListId(allLists[0].id);
       hasAutoSelected.current = true;
     }
-  }, [lists, sharedListMetas, activeListId, allLists]);
+  }, [lists, sharedListMetas, activeListId, allLists, userId]);
 
   // Determine the owner UID for the active list (needed for cross-user item access)
   const activeListEntry = allLists.find((l) => l.id === activeListId) ?? null;
