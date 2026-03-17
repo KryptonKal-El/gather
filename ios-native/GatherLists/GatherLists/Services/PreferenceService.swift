@@ -1,6 +1,8 @@
 import Foundation
 import Supabase
+import Realtime
 
+/// Service for managing user preferences with realtime sync for last selected list.
 struct PreferenceService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
     private static var cachedPreferences: UserPreferences?
@@ -141,6 +143,84 @@ struct PreferenceService {
         let levels = SortPipeline.normalize(configStrings.compactMap { SortLevel(rawValue: $0) })
         let filtered = levels.filter { validLevels.contains($0) }
         return filtered.isEmpty ? SortPipeline.getDefaultConfig(for: list.type) : filtered
+    }
+}
+
+// MARK: - Realtime Subscription Manager
+
+/// Manages realtime subscription for user preferences (last_list_id sync).
+@MainActor
+final class PreferenceRealtimeManager {
+    static let shared = PreferenceRealtimeManager()
+    
+    private var client: SupabaseClient { SupabaseManager.shared.client }
+    
+    nonisolated(unsafe) private var preferencesChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var preferencesTask: Task<Void, Never>?
+    private var subscribedUserId: UUID?
+    
+    private init() {}
+    
+    /// Starts realtime subscription for user_preferences changes.
+    /// Updates UserDefaults cache when last_list_id changes from another device.
+    func startSubscription(userId: UUID) async {
+        guard preferencesChannel == nil else { return }
+        subscribedUserId = userId
+        
+        let channel = client.realtimeV2.channel("user-preferences-realtime-\(userId.uuidString)")
+        preferencesChannel = channel
+        
+        let changes = channel.postgresChange(
+            AnyAction.self,
+            schema: "public",
+            table: "user_preferences",
+            filter: "user_id=eq.\(userId.uuidString)"
+        )
+        
+        preferencesTask = Task {
+            await channel.subscribe()
+            for await _ in changes {
+                await handlePreferenceChange()
+            }
+        }
+    }
+    
+    /// Stops the realtime subscription (call on sign-out).
+    func stopSubscription() {
+        preferencesTask?.cancel()
+        preferencesTask = nil
+        
+        let channel = preferencesChannel
+        preferencesChannel = nil
+        subscribedUserId = nil
+        
+        Task {
+            await channel?.unsubscribe()
+        }
+    }
+    
+    private func handlePreferenceChange() async {
+        guard let userId = subscribedUserId else { return }
+        
+        // Fetch latest preferences from server
+        do {
+            let client = SupabaseManager.shared.client
+            let rows: [UserPreferences] = try await client
+                .from("user_preferences")
+                .select()
+                .eq("user_id", value: userId)
+                .limit(1)
+                .execute()
+                .value
+            
+            if let prefs = rows.first {
+                // Update UserDefaults cache with server value — no navigation change
+                PreferenceService.setCachedLastListId(prefs.lastListId)
+                PreferenceService.clearCache()
+            }
+        } catch {
+            print("[PreferenceRealtimeManager] Failed to fetch preferences: \(error.localizedDescription)")
+        }
     }
 }
 

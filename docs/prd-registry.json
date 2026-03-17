@@ -487,12 +487,14 @@
     {
       "id": "prd-last-selected-list",
       "name": "Remember Last Selected List",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-last-selected-list.md",
       "jsonPath": "docs/prds/prd-last-selected-list.json",
       "createdAt": "2026-03-17",
       "updatedAt": "2026-03-17",
-      "startedAt": "2026-03-17T15:58:02Z"
+      "startedAt": "2026-03-17T15:58:02Z",
+      "completedAt": "2026-03-17T18:48:00Z",
+      "storiesCompleted": 9
     }
   ]
 }

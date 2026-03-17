@@ -52,6 +52,7 @@ final class ListViewModel {
         Task {
             await loadData()
             await setupRealtimeSubscriptions()
+            await PreferenceRealtimeManager.shared.startSubscription(userId: userId)
         }
     }
     
@@ -374,6 +375,7 @@ final class ListViewModel {
         Task {
             await ownedChannel?.unsubscribe()
             await sharedChannel?.unsubscribe()
+            await PreferenceRealtimeManager.shared.stopSubscription()
         }
     }
 }
