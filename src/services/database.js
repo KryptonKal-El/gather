@@ -21,6 +21,17 @@ import { supabase } from './supabase.js';
  */
 export const createList = async (userId, name, _ownerEmail = null, emoji = null, color = '#1565c0', type = 'grocery') => {
   try {
+    // Get the next sort_order value (max + 1, or 0 if no lists exist)
+    const { data: maxRow } = await supabase
+      .from('lists')
+      .select('sort_order')
+      .eq('owner_id', userId)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const nextSortOrder = maxRow?.sort_order != null ? maxRow.sort_order + 1 : 0;
+
     const { data, error } = await supabase
       .from('lists')
       .insert({
@@ -30,6 +41,7 @@ export const createList = async (userId, name, _ownerEmail = null, emoji = null,
         color,
         item_count: 0,
         type,
+        sort_order: nextSortOrder,
       })
       .select('id')
       .single();
@@ -121,7 +133,7 @@ export const subscribeLists = (userId, callback) => {
         .from('lists')
         .select('*')
         .eq('owner_id', userId)
-        .order('created_at', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (error) {
         console.error('Failed to fetch lists:', error);
@@ -138,6 +150,7 @@ export const subscribeLists = (userId, callback) => {
           ownerId: row.owner_id,
           createdAt: row.created_at,
           sortConfig: row.sort_config,
+          sortOrder: row.sort_order,
           type: row.type,
         }))
       );
@@ -859,6 +872,28 @@ export const saveStoreOrder = async (userId, stores) => {
 
   if (error) {
     throw new Error('Failed to save store order', { cause: error });
+  }
+};
+
+/**
+ * Saves the full ordered array of lists (for reordering).
+ * Uses a single upsert for efficiency.
+ * @param {string} userId - User ID
+ * @param {Array<object>} lists - Array of list objects with id
+ */
+export const saveListOrder = async (userId, lists) => {
+  const updates = lists.map((list, i) => ({
+    id: list.id,
+    owner_id: userId,
+    sort_order: i,
+  }));
+
+  const { error } = await supabase
+    .from('lists')
+    .upsert(updates, { onConflict: 'id' });
+
+  if (error) {
+    throw new Error('Failed to save list order', { cause: error });
   }
 };
 
