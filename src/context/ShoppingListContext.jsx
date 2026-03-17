@@ -33,6 +33,7 @@ import {
   subscribeSharedStores,
 } from '../services/database.js';
 import { updateLastListId, getUserPreferences } from '../services/preferences.js';
+import { supabase } from '../services/supabase.js';
 
 const LAST_LIST_ID_KEY = 'gather_last_list_id';
 
@@ -121,6 +122,41 @@ export const ShoppingListProvider = ({ children }) => {
     };
 
     loadServerPreferences();
+  }, [userId]);
+
+  // Subscribe to realtime changes on user_preferences (for cross-device sync)
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`last-list-sync-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_preferences',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const newLastListId = payload.new?.last_list_id ?? null;
+          // Update localStorage cache for next app launch (do NOT change activeListId mid-session)
+          try {
+            if (newLastListId) {
+              localStorage.setItem(LAST_LIST_ID_KEY, newLastListId);
+            } else {
+              localStorage.removeItem(LAST_LIST_ID_KEY);
+            }
+          } catch {
+            // Ignore localStorage errors
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userId]);
 
   // Subscribe to shared list refs (lists others shared with me)

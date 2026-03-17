@@ -152,8 +152,8 @@
         "Lint passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Realtime subscription syncs last_list_id to localStorage for next launch",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -168,7 +168,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "low",
-      "testIntensityReason": "Realtime subscription following established pattern, cache update only"
+      "testIntensityReason": "Realtime subscription following established pattern, cache update only",
+      "status": "completed",
+      "completedAt": "2026-03-17T16:10:36Z"
     },
     {
       "id": "US-006",

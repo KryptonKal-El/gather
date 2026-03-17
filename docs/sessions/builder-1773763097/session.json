@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-005",
+  "currentChunk": "US-006",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -48,7 +48,7 @@
       "id": "US-005",
       "slug": "react-sync-realtime",
       "title": "React — Sync last-selected list via realtime",
-      "status": "pending",
+      "status": "completed",
       "priority": 5
     },
     {
