@@ -24,6 +24,7 @@ final class ListViewModel {
     nonisolated(unsafe) private var sharedListsChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var ownedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
+    nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
     
     /// All lists merged: owned first, then shared.
     var allLists: [GatherList] {
@@ -69,6 +70,7 @@ final class ListViewModel {
         cachedAt = cachedOwned?.cachedAt ?? cachedShared?.cachedAt
         if activeListId == nil, let firstList = allLists.first {
             activeListId = firstList.id
+            persistLastListIdDebounced(firstList.id)
         }
         
         // Fetch fresh data from Supabase
@@ -88,6 +90,7 @@ final class ListViewModel {
             
             if activeListId == nil, let firstList = allLists.first {
                 activeListId = firstList.id
+                persistLastListIdDebounced(firstList.id)
             }
             
             // Cache the fresh data
@@ -165,7 +168,9 @@ final class ListViewModel {
             
             // Verify active list still exists
             if let activeId = activeListId, !allLists.contains(where: { $0.id == activeId }) {
-                activeListId = allLists.first?.id
+                let newActiveId = allLists.first?.id
+                activeListId = newActiveId
+                persistLastListIdDebounced(newActiveId)
             }
             
             // Update cache
@@ -190,6 +195,7 @@ final class ListViewModel {
             let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count, type: type)
             ownedLists.append(newList)
             activeListId = newList.id
+            persistLastListIdDebounced(newList.id)
         } catch {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to create list: \(error.localizedDescription)")
@@ -229,7 +235,9 @@ final class ListViewModel {
             
             // Auto-select next available if deleted list was active
             if activeListId == id {
-                activeListId = allLists.first?.id
+                let newActiveId = allLists.first?.id
+                activeListId = newActiveId
+                persistLastListIdDebounced(newActiveId)
             }
         } catch {
             self.error = error.localizedDescription
@@ -239,6 +247,16 @@ final class ListViewModel {
     
     func selectList(id: UUID) {
         activeListId = id
+        persistLastListIdDebounced(id)
+    }
+    
+    private func persistLastListIdDebounced(_ listId: UUID?) {
+        persistListIdTask?.cancel()
+        persistListIdTask = Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            try? await PreferenceService.updateLastListId(listId)
+        }
     }
     
     func moveList(from source: IndexSet, to destination: Int) {
@@ -271,6 +289,7 @@ final class ListViewModel {
     deinit {
         ownedListsTask?.cancel()
         sharedListsTask?.cancel()
+        persistListIdTask?.cancel()
         
         let ownedChannel = ownedListsChannel
         let sharedChannel = sharedListsChannel

@@ -69,6 +69,19 @@ struct PreferenceService {
             .execute()
     }
     
+    /// Upserts the user's last selected list ID.
+    static func updateLastListId(_ listId: UUID?) async throws {
+        let userId = try await client.auth.session.user.id
+        let upsertData = LastListIdUpsert(userId: userId, lastListId: listId)
+        
+        try await client
+            .from("user_preferences")
+            .upsert(upsertData)
+            .execute()
+        
+        cachedPreferences?.lastListId = listId
+    }
+    
     /// Updates sort config on a share row. Pass nil to clear the override (fall back to user preferences).
     static func updateShareSortConfig(listId: UUID, email: String, config: [SortLevel]?) async throws {
         if let config = config {
@@ -121,6 +134,16 @@ private struct UserPreferencesUpsert: Encodable {
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case defaultSortConfig = "default_sort_config"
+    }
+}
+
+private struct LastListIdUpsert: Encodable {
+    let userId: UUID
+    let lastListId: UUID?
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case lastListId = "last_list_id"
     }
 }
 

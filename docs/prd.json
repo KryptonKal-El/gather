@@ -184,8 +184,8 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added PreferenceService.updateLastListId(), UserPreferences.lastListId property, debounced persistence in ListViewModel. Xcode build succeeded.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -200,7 +200,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Debounced background write with upsert pattern on iOS"
+      "testIntensityReason": "Debounced background write with upsert pattern on iOS",
+      "status": "completed",
+      "completedAt": "2026-03-17T18:30:00Z"
     },
     {
       "id": "US-007",
