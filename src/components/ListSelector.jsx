@@ -19,6 +19,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { useShoppingList } from '../hooks/useShoppingList.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
 import { updateListSortConfig } from '../services/preferences.js';
 import { saveListOrder } from '../services/database.js';
@@ -91,9 +92,8 @@ export const ListSelector = ({
   const [pendingTypeChange, setPendingTypeChange] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
-
-  // Owned lists for drag context (shared items are not draggable)
-  const ownedLists = lists.filter((l) => !l._isShared);
+  const { actions } = useShoppingList();
+  const reorderLists = actions.reorderLists;
 
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -105,16 +105,25 @@ export const ListSelector = ({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = ownedLists.findIndex((l) => l.id === active.id);
-    const newIndex = ownedLists.findIndex((l) => l.id === over.id);
-    const reorderedLists = arrayMove(ownedLists, oldIndex, newIndex);
+    const oldIndex = filteredLists.findIndex((l) => l.id === active.id);
+    const newIndex = filteredLists.findIndex((l) => l.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
 
-    // Persist the new order
-    if (currentUserId) {
+    const reordered = arrayMove(filteredLists, oldIndex, newIndex);
+    const orderedIds = reordered.map((l) => l.id);
+
+    // Save unified order via context (updates localStorage + triggers re-render)
+    if (reorderLists) {
+      await reorderLists(orderedIds);
+    }
+
+    // Also sync owned-list order to server
+    const ownedInOrder = reordered.filter((l) => !l._isShared);
+    if (currentUserId && ownedInOrder.length > 0) {
       try {
-        await saveListOrder(currentUserId, reorderedLists);
+        await saveListOrder(currentUserId, ownedInOrder);
       } catch (error) {
-        console.error('Failed to save list order:', error);
+        console.error('Failed to save list order to server:', error);
       }
     }
   };
@@ -235,7 +244,7 @@ export const ListSelector = ({
       <div
         key={list.id}
         className={`${styles.listItem} ${isActive ? styles.active : ''}`}
-        {...(dragProps && isMobile && isOwned ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
+        {...(dragProps && isMobile ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
       >
         {editingId === list.id ? (
           <div className={styles.editRow}>
@@ -281,7 +290,7 @@ export const ListSelector = ({
           </div>
         ) : (
           <>
-            {!isMobile && dragProps && isOwned && (
+            {!isMobile && dragProps && (
               <button
                 type="button"
                 className={styles.dragHandle}
@@ -582,18 +591,12 @@ export const ListSelector = ({
               onDragEnd={handleDragEnd}
               modifiers={[restrictToVerticalAxis]}
             >
-              <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-                {filteredLists.map((list) =>
-                  !list._isShared ? (
-                    <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
-                      {(dragProps) => renderListItem(list, dragProps)}
-                    </SortableListItem>
-                  ) : (
-                    <div key={list.id}>
-                      {renderListItem(list, null)}
-                    </div>
-                  )
-                )}
+              <SortableContext items={filteredLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                {filteredLists.map((list) => (
+                  <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
+                    {(dragProps) => renderListItem(list, dragProps)}
+                  </SortableListItem>
+                ))}
               </SortableContext>
             </DndContext>
           ) : (
@@ -702,18 +705,12 @@ export const ListSelector = ({
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis]}
           >
-            <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-              {filteredLists.map((list) =>
-                !list._isShared ? (
-                  <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
-                    {(dragProps) => renderListItem(list, dragProps)}
-                  </SortableListItem>
-                ) : (
-                  <div key={list.id}>
-                    {renderListItem(list, null)}
-                  </div>
-                )
-              )}
+            <SortableContext items={filteredLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+              {filteredLists.map((list) => (
+                <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
+                  {(dragProps) => renderListItem(list, dragProps)}
+                </SortableListItem>
+              ))}
             </SortableContext>
           </DndContext>
         ) : (

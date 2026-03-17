@@ -67,6 +67,7 @@ export const ShoppingListProvider = ({ children }) => {
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
   const [sharedStores, setSharedStores] = useState([]);
+  const [listOrderVersion, setListOrderVersion] = useState(0);
 
   // Track whether we've auto-selected a list on initial load
   const hasAutoSelected = useRef(false);
@@ -229,11 +230,27 @@ export const ShoppingListProvider = ({ children }) => {
     };
   }, [sharedListRefs]);
 
-  // Build merged list of owned + shared lists
-  const allLists = [
-    ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false })),
-    ...Object.values(sharedListMetas),
-  ];
+  // Build merged list of owned + shared lists, sorted by cached localStorage order
+  const allLists = useMemo(() => {
+    const unordered = [
+      ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false })),
+      ...Object.values(sharedListMetas),
+    ];
+
+    try {
+      const cached = JSON.parse(localStorage.getItem('gather_list_order') || '[]');
+      if (!cached.length) return unordered;
+      const orderMap = new Map(cached.map((id, i) => [id, i]));
+      return [...unordered].sort((a, b) => {
+        const aIdx = orderMap.has(a.id) ? orderMap.get(a.id) : Infinity;
+        const bIdx = orderMap.has(b.id) ? orderMap.get(b.id) : Infinity;
+        return aIdx - bIdx;
+      });
+    } catch {
+      return unordered;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lists, sharedListMetas, userId, listOrderVersion]);
 
   // Validate and auto-select list once owned and shared lists have loaded
   useEffect(() => {
@@ -584,6 +601,11 @@ export const ShoppingListProvider = ({ children }) => {
     await saveStoreOrder(userId, reorderedStores);
   }, [userId]);
 
+  const reorderListsAction = useCallback(async (orderedIds) => {
+    localStorage.setItem('gather_list_order', JSON.stringify(orderedIds));
+    setListOrderVersion((v) => v + 1);
+  }, []);
+
   // -----------------------------------------------------------------------
   // Sharing actions
   // -----------------------------------------------------------------------
@@ -634,6 +656,7 @@ export const ShoppingListProvider = ({ children }) => {
     updateStore: updateStoreAction,
     deleteStore: deleteStoreAction,
     reorderStores: reorderStoresAction,
+    reorderLists: reorderListsAction,
     shareList: shareListAction,
     unshareList: unshareListAction,
   };
