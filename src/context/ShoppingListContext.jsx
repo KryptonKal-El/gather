@@ -32,6 +32,7 @@ import {
   unshareList as dbUnshareList,
   subscribeSharedStores,
 } from '../services/database.js';
+import { updateLastListId } from '../services/preferences.js';
 
 /** Capitalizes the first letter of a string. */
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
@@ -186,6 +187,30 @@ export const ShoppingListProvider = ({ children }) => {
 
     return subscribeSharedStores(activeListOwnerUid, missingStoreIds, setSharedStores);
   }, [isActiveListShared, activeListOwnerUid, activeItems, stores]);
+
+  // Debounced persistence of activeListId to user_preferences
+  const lastListIdTimeoutRef = useRef(null);
+  useEffect(() => {
+    if (!userId || !activeListId) return;
+
+    // Clear any pending write
+    if (lastListIdTimeoutRef.current) {
+      clearTimeout(lastListIdTimeoutRef.current);
+    }
+
+    // Schedule new write after 500ms debounce
+    lastListIdTimeoutRef.current = setTimeout(() => {
+      updateLastListId(userId, activeListId).catch(() => {
+        // Silent failure — background write, no user-facing error
+      });
+    }, 500);
+
+    return () => {
+      if (lastListIdTimeoutRef.current) {
+        clearTimeout(lastListIdTimeoutRef.current);
+      }
+    };
+  }, [userId, activeListId]);
 
   const allStores = useMemo(() => {
     if (!isActiveListShared) return stores;

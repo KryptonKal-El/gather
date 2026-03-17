@@ -55,7 +55,7 @@ export const configToModeKey = (config) => {
  * Fetches the user's preferences row. If no row exists, returns a default object.
  * Does NOT auto-insert a row.
  * @param {string} userId - User ID
- * @returns {Promise<{user_id: string, default_sort_config: string[]}>}
+ * @returns {Promise<{user_id: string, default_sort_config: string[], last_list_id: string|null}>}
  */
 export const getUserPreferences = async (userId) => {
   try {
@@ -68,10 +68,13 @@ export const getUserPreferences = async (userId) => {
     if (error) throw error;
 
     if (!data) {
-      return { user_id: userId, default_sort_config: SYSTEM_DEFAULT_SORT_CONFIG };
+      return { user_id: userId, default_sort_config: SYSTEM_DEFAULT_SORT_CONFIG, last_list_id: null };
     }
 
-    return data;
+    return {
+      ...data,
+      last_list_id: data.last_list_id ?? null,
+    };
   } catch (error) {
     throw new Error(`Failed to fetch user preferences: userId=${userId}`, { cause: error });
   }
@@ -99,6 +102,26 @@ export const updateDefaultSortConfig = async (userId, config) => {
     if (error) throw error;
   } catch (error) {
     throw new Error(`Failed to update default sort config: userId=${userId}`, { cause: error });
+  }
+};
+
+/**
+ * Upserts the user's last-selected list ID in user_preferences.
+ * @param {string} userId - User ID
+ * @param {string} listId - The list ID to persist
+ */
+export const updateLastListId = async (userId, listId) => {
+  try {
+    const { error } = await supabase
+      .from('user_preferences')
+      .upsert(
+        { user_id: userId, last_list_id: listId },
+        { onConflict: 'user_id' }
+      );
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to update last list ID: userId=${userId}`, { cause: error });
   }
 };
 

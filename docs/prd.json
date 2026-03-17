@@ -49,8 +49,8 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added updateLastListId to preferences.js, debounced effect in ShoppingListContext",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -65,7 +65,9 @@
       "considerations": [],
       "requiredCredentials": [],
       "testIntensity": "medium",
-      "testIntensityReason": "Debounced background write with upsert pattern"
+      "testIntensityReason": "Debounced background write with upsert pattern",
+      "status": "completed",
+      "completedAt": "2026-03-17T16:05:08Z"
     },
     {
       "id": "US-003",

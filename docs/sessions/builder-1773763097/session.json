@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-17T15:58:17Z",
   "lastHeartbeat": "2026-03-17T15:58:17Z",
-  "currentChunk": "US-002",
+  "currentChunk": "US-003",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -27,7 +27,7 @@
       "id": "US-002",
       "slug": "react-persist-last-list",
       "title": "React — Persist last-selected list to Supabase",
-      "status": "pending",
+      "status": "completed",
       "priority": 2
     },
     {
