@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Browse owned and shared lists with search, grouped into sections.
+/// Browse all lists (owned and shared) in a unified list with search.
 struct ListBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var viewModel: ListViewModel?
@@ -11,21 +11,11 @@ struct ListBrowserView: View {
     @State private var showDeleteConfirm = false
     @State private var navigationPath = NavigationPath()
     
-    private var ownedFiltered: [GatherList] {
+    private var allFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
-        guard !vm.searchQuery.isEmpty else { return vm.ownedLists }
+        guard !vm.searchQuery.isEmpty else { return vm.allLists }
         let query = vm.searchQuery.lowercased()
-        return vm.ownedLists.filter { list in
-            list.name.lowercased().contains(query) ||
-            (list.emoji?.lowercased().contains(query) ?? false)
-        }
-    }
-    
-    private var sharedFiltered: [GatherList] {
-        guard let vm = viewModel else { return [] }
-        guard !vm.searchQuery.isEmpty else { return vm.sharedLists }
-        let query = vm.searchQuery.lowercased()
-        return vm.sharedLists.filter { list in
+        return vm.allLists.filter { list in
             list.name.lowercased().contains(query) ||
             (list.emoji?.lowercased().contains(query) ?? false)
         }
@@ -33,7 +23,7 @@ struct ListBrowserView: View {
     
     private var hasNoLists: Bool {
         guard let vm = viewModel else { return true }
-        return vm.ownedLists.isEmpty && vm.sharedLists.isEmpty
+        return vm.allLists.isEmpty
     }
     
     var body: some View {
@@ -55,7 +45,7 @@ struct ListBrowserView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if let vm = viewModel, !vm.ownedLists.isEmpty {
+                    if let vm = viewModel, !vm.allLists.isEmpty {
                         EditButton()
                     }
                 }
@@ -117,42 +107,47 @@ struct ListBrowserView: View {
                     .listRowSeparator(.hidden)
             }
             
-            if !ownedFiltered.isEmpty {
+            if !allFiltered.isEmpty {
                 Section {
-                    ForEach(ownedFiltered) { list in
+                    ForEach(allFiltered) { list in
+                        let isOwned = vm.ownedLists.contains { $0.id == list.id }
                         NavigationLink(value: list) {
-                            ListRowView(list: list, isShared: false)
+                            ListRowView(list: list, isShared: !isOwned)
                         }
                         .contextMenu {
-                            Button {
-                                listToEdit = list
-                            } label: {
-                                Label("Name & Icon", systemImage: "pencil")
-                            }
-                            
-                            Button {
-                                listToShare = list
-                            } label: {
-                                Label("Share Settings", systemImage: "person.badge.plus")
-                            }
-                            
-                            Divider()
-                            
-                            Button(role: .destructive) {
-                                listToDelete = list
-                                showDeleteConfirm = true
-                            } label: {
-                                Label("Delete List", systemImage: "trash")
+                            if isOwned {
+                                Button {
+                                    listToEdit = list
+                                } label: {
+                                    Label("Name & Icon", systemImage: "pencil")
+                                }
+                                
+                                Button {
+                                    listToShare = list
+                                } label: {
+                                    Label("Share Settings", systemImage: "person.badge.plus")
+                                }
+                                
+                                Divider()
+                                
+                                Button(role: .destructive) {
+                                    listToDelete = list
+                                    showDeleteConfirm = true
+                                } label: {
+                                    Label("Delete List", systemImage: "trash")
+                                }
                             }
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                            Button(role: .destructive) {
-                                listToDelete = list
-                                showDeleteConfirm = true
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            if isOwned {
+                                Button(role: .destructive) {
+                                    listToDelete = list
+                                    showDeleteConfirm = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                                .tint(.red)
                             }
-                            .tint(.red)
                         }
                     }
                     .onMove { source, destination in
@@ -161,17 +156,7 @@ struct ListBrowserView: View {
                 }
             }
             
-            if !sharedFiltered.isEmpty {
-                Section("Shared with me") {
-                    ForEach(sharedFiltered) { list in
-                        NavigationLink(value: list) {
-                            ListRowView(list: list, isShared: true)
-                        }
-                    }
-                }
-            }
-            
-            if ownedFiltered.isEmpty && sharedFiltered.isEmpty && !vm.searchQuery.isEmpty {
+            if allFiltered.isEmpty && !vm.searchQuery.isEmpty {
                 Section {
                     Text("No lists match your search")
                         .foregroundStyle(.secondary)
