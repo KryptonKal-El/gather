@@ -168,9 +168,6 @@ export const ListSelector = ({
       })
     : lists;
 
-  const ownedLists = filteredLists.filter((l) => !l._isShared);
-  const sharedLists = filteredLists.filter((l) => l._isShared);
-
   const renderListItem = (list) => {
     const isOwned = !list._isShared;
     const isActive = list.id === activeListId;
@@ -412,7 +409,7 @@ export const ListSelector = ({
     <div className={styles.mobileLayout}>
       <div className={styles.mobileHeader}>
         <div className={styles.header}>
-          <h2 className={styles.title}>My Lists</h2>
+          <h2 className={styles.title}>Lists</h2>
           <button
             className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
             onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
@@ -500,22 +497,11 @@ export const ListSelector = ({
         )}
 
         <div className={styles.lists}>
-          {ownedLists.length === 0 && sharedLists.length === 0 && (
+          {filteredLists.length === 0 && (
             <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
           )}
-          {ownedLists.map(renderListItem)}
+          {filteredLists.map(renderListItem)}
         </div>
-
-        {sharedLists.length > 0 && (
-          <>
-            <div className={styles.sectionHeader}>
-              <h3 className={styles.sectionTitle}>Shared with me</h3>
-            </div>
-            <div className={styles.lists}>
-              {sharedLists.map(renderListItem)}
-            </div>
-          </>
-        )}
       </div>
     </div>
   );
@@ -523,7 +509,7 @@ export const ListSelector = ({
   const renderDesktopLayout = () => (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}>My Lists</h2>
+        <h2 className={styles.title}>Lists</h2>
         <button
           className={styles.newBtn}
           onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
@@ -608,22 +594,11 @@ export const ListSelector = ({
       )}
 
       <div className={styles.lists}>
-        {ownedLists.length === 0 && sharedLists.length === 0 && (
+        {filteredLists.length === 0 && (
           <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
         )}
-        {ownedLists.map(renderListItem)}
+        {filteredLists.map(renderListItem)}
       </div>
-
-      {sharedLists.length > 0 && (
-        <>
-          <div className={styles.sectionHeader}>
-            <h3 className={styles.sectionTitle}>Shared with me</h3>
-          </div>
-          <div className={styles.lists}>
-            {sharedLists.map(renderListItem)}
-          </div>
-        </>
-      )}
     </div>
   );
 
