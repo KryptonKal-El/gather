@@ -522,22 +522,6 @@
   border-color: var(--border-medium);
 }
 
-.sectionHeader {
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-default);
-}
-
-.sectionTitle {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-placeholder);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin: 0;
-}
-
 /* Type selector grid */
 .typeGrid {
   display: grid;
@@ -744,21 +728,6 @@
 
   .menuWrap {
     margin-right: 0.25rem;
-  }
-
-  /* Section header for shared lists */
-  .sectionHeader {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    padding-top: 0;
-    border-top: none;
-    padding-left: 1rem;
-  }
-
-  .sectionTitle {
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
   }
 
   /* Empty state styling */

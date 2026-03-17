@@ -92,9 +92,8 @@ export const ListSelector = ({
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
-  // Separate owned and shared lists for drag context
+  // Owned lists for drag context (shared items are not draggable)
   const ownedLists = lists.filter((l) => !l._isShared);
-  const sharedLists = lists.filter((l) => l._isShared);
 
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -577,30 +576,26 @@ export const ListSelector = ({
             <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
           )}
           {!query ? (
-            <>
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-                modifiers={[restrictToVerticalAxis]}
-              >
-                <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-                  {ownedLists.map((list) => (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+                {filteredLists.map((list) =>
+                  !list._isShared ? (
                     <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
                       {(dragProps) => renderListItem(list, dragProps)}
                     </SortableListItem>
-                  ))}
-                </SortableContext>
-              </DndContext>
-              {sharedLists.length > 0 && (
-                <>
-                  <div className={styles.sectionHeader}>
-                    <h4 className={styles.sectionTitle}>Shared with you</h4>
-                  </div>
-                  {sharedLists.map((list) => renderListItem(list, null))}
-                </>
-              )}
-            </>
+                  ) : (
+                    <div key={list.id}>
+                      {renderListItem(list, null)}
+                    </div>
+                  )
+                )}
+              </SortableContext>
+            </DndContext>
           ) : (
             filteredLists.map((list) => renderListItem(list, null))
           )}
@@ -701,30 +696,26 @@ export const ListSelector = ({
           <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
         )}
         {!query ? (
-          <>
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-              modifiers={[restrictToVerticalAxis]}
-            >
-              <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
-                {ownedLists.map((list) => (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis]}
+          >
+            <SortableContext items={ownedLists.map((l) => l.id)} strategy={verticalListSortingStrategy}>
+              {filteredLists.map((list) =>
+                !list._isShared ? (
                   <SortableListItem key={list.id} id={list.id} isMobile={isMobile}>
                     {(dragProps) => renderListItem(list, dragProps)}
                   </SortableListItem>
-                ))}
-              </SortableContext>
-            </DndContext>
-            {sharedLists.length > 0 && (
-              <>
-                <div className={styles.sectionHeader}>
-                  <h4 className={styles.sectionTitle}>Shared with you</h4>
-                </div>
-                {sharedLists.map((list) => renderListItem(list, null))}
-              </>
-            )}
-          </>
+                ) : (
+                  <div key={list.id}>
+                    {renderListItem(list, null)}
+                  </div>
+                )
+              )}
+            </SortableContext>
+          </DndContext>
         ) : (
           filteredLists.map((list) => renderListItem(list, null))
         )}
