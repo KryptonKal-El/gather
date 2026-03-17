@@ -76,18 +76,23 @@ export const ShoppingListProvider = ({ children }) => {
   const hasLoadedOwnedLists = useRef(false);
   // Track if shared lists have loaded at least once
   const hasLoadedSharedLists = useRef(false);
+  // Track if user was previously signed in (to distinguish initial mount from sign-out)
+  const wasPreviouslySignedIn = useRef(false);
 
   // Subscribe to owned lists
   useEffect(() => {
     if (!userId) {
       setLists([]);
-      setActiveListId(null);
+      if (wasPreviouslySignedIn.current) {
+        setActiveListId(null);
+      }
       hasAutoSelected.current = false;
       hasValidatedFromServer.current = false;
       hasLoadedOwnedLists.current = false;
       hasLoadedSharedLists.current = false;
       return;
     }
+    wasPreviouslySignedIn.current = true;
     return subscribeLists(userId, (newLists) => {
       setLists(newLists);
       hasLoadedOwnedLists.current = true;
