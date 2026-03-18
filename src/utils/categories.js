@@ -4,7 +4,7 @@
  * Items without a store use DEFAULT_CATEGORIES.
  */
 
-import { PACKING_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
+import { PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
 
 export const CATEGORIES = {
   PRODUCE: 'produce',
@@ -150,19 +150,8 @@ export const DEFAULT_CATEGORIES = [
  * @returns {string|null} The matched category key, 'other'/'miscellaneous' if no match, or null for types without auto-categorization
  */
 export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES, listType) => {
-  // Types without auto-categorization
   if (listType === 'basic' || listType === 'guest_list' || listType === 'todo') {
     return null;
-  }
-
-  // Packing type uses packing-specific categories
-  if (listType === 'packing') {
-    categories = PACKING_CATEGORIES;
-  }
-
-  // Project type uses project-specific categories
-  if (listType === 'project') {
-    categories = PROJECT_CATEGORIES;
   }
 
   const normalized = itemName.toLowerCase().trim();
@@ -231,3 +220,33 @@ export const getAllCategoryColors = (categories = DEFAULT_CATEGORIES) => {
  */
 export const getAllCategoryKeys = (categories = DEFAULT_CATEGORIES) =>
   categories.map((cat) => cat.key);
+
+/**
+ * Returns the system default categories for a given list type.
+ * @param {string} listType - The list type identifier
+ * @returns {Array|null} Category array or null if type doesn't have categories
+ */
+export const getSystemDefaultCategories = (listType) => {
+  switch (listType) {
+    case 'grocery': return DEFAULT_CATEGORIES;
+    case 'packing': return PACKING_CATEGORIES;
+    case 'todo': return TODO_CATEGORIES;
+    case 'project': return PROJECT_CATEGORIES;
+    default: return null;
+  }
+};
+
+/**
+ * Returns the effective categories for a list using the resolution chain:
+ * list.categories -> user_category_defaults for list type -> system defaults.
+ * @param {Object} list - List object with type and optional categories
+ * @param {Array} [userCategoryDefaults=[]] - User's category defaults by list type
+ * @returns {Array|null} Categories array or null if type doesn't use categories
+ */
+export const getEffectiveCategories = (list, userCategoryDefaults = []) => {
+  if (!list?.type || list.type === 'basic' || list.type === 'guest_list') return null;
+  if (list.categories?.length > 0) return list.categories;
+  const userDefault = userCategoryDefaults.find(d => d.listType === list.type);
+  if (userDefault?.categories?.length > 0) return userDefault.categories;
+  return getSystemDefaultCategories(list.type);
+};

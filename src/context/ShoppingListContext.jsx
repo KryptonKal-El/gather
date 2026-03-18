@@ -4,7 +4,8 @@
  * Supports both owned lists and lists shared by other users.
  */
 import { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { categorizeItem, DEFAULT_CATEGORIES } from '../utils/categories.js';
+import { categorizeItem } from '../utils/categories.js';
+import { getEffectiveCategories } from '../utils/categories.js';
 import { useAuth } from './AuthContext.jsx';
 import {
   subscribeLists,
@@ -14,6 +15,7 @@ import {
   subscribeSharedListRefs,
   subscribeList,
   subscribeSharedItems,
+  subscribeUserCategoryDefaults,
   createList as dbCreateList,
   updateList as dbUpdateList,
   deleteList as dbDeleteList,
@@ -67,6 +69,7 @@ export const ShoppingListProvider = ({ children }) => {
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
   const [sharedStores, setSharedStores] = useState([]);
+  const [userCategoryDefaults, setUserCategoryDefaults] = useState([]);
   const [listOrderVersion, setListOrderVersion] = useState(0);
 
   // Track whether we've auto-selected a list on initial load
@@ -334,6 +337,15 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeStores(userId, setStores);
   }, [userId]);
 
+  // Subscribe to user category defaults
+  useEffect(() => {
+    if (!userId) {
+      setUserCategoryDefaults([]);
+      return;
+    }
+    return subscribeUserCategoryDefaults(userId, setUserCategoryDefaults);
+  }, [userId]);
+
   // Subscribe to shared stores when viewing a shared list
   useEffect(() => {
     if (!isActiveListShared || !activeListOwnerUid || activeItems.length === 0) {
@@ -398,16 +410,6 @@ export const ShoppingListProvider = ({ children }) => {
   // -----------------------------------------------------------------------
 
   /**
-   * Returns the categories array for a given store, or DEFAULT_CATEGORIES
-   * if no store is specified or the store is not found.
-   */
-  const getCategoriesForStore = useCallback((storeId) => {
-    if (!storeId) return DEFAULT_CATEGORIES;
-    const store = allStores.find((s) => s.id === storeId);
-    return store?.categories ?? DEFAULT_CATEGORIES;
-  }, [allStores]);
-
-  /**
    * Returns the ownerUid for a given list ID (could be the current user
    * or another user if the list is shared).
    */
@@ -434,7 +436,7 @@ export const ShoppingListProvider = ({ children }) => {
     if (ownerUid !== userId) return;
     await dbDeleteList(userId, id);
     if (activeListId === id) {
-      setActiveListId((prev) => {
+      setActiveListId((_prev) => {
         const remaining = allLists.filter((l) => l.id !== id);
         return remaining[0]?.id ?? null;
       });
@@ -468,10 +470,11 @@ export const ShoppingListProvider = ({ children }) => {
     const name = capitalize(rawName.trim());
     const listEntry = allLists.find((l) => l.id === listId);
     const listType = listEntry?.type ?? 'grocery';
-    const categories = getCategoriesForStore(storeId);
+    const categories = getEffectiveCategories(listEntry, userCategoryDefaults);
+    const category = categories ? categorizeItem(name, categories, listType) : null;
     const item = {
       name,
-      category: categorizeItem(name, categories, listType),
+      category,
       isChecked: false,
       store: storeId,
       quantity: 1,
@@ -480,20 +483,20 @@ export const ShoppingListProvider = ({ children }) => {
     };
     await dbAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, name);
-  }, [userId, allLists, getCategoriesForStore, getListOwnerUid]);
+  }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
   const addItemsAction = useCallback(async (listId, items) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     const listEntry = allLists.find((l) => l.id === listId);
     const listType = listEntry?.type ?? 'grocery';
+    const categories = getEffectiveCategories(listEntry, userCategoryDefaults);
     const prepared = items.map((item) => {
       const name = capitalize(item.name.trim());
       const storeId = item.store ?? null;
-      const categories = getCategoriesForStore(storeId);
       return {
         name,
-        category: item.category ?? categorizeItem(name, categories, listType),
+        category: item.category ?? (categories ? categorizeItem(name, categories, listType) : null),
         isChecked: false,
         store: storeId,
         quantity: item.quantity ?? 1,
@@ -505,7 +508,7 @@ export const ShoppingListProvider = ({ children }) => {
     await dbAddItems(ownerUid, listId, prepared);
     const itemNames = prepared.map((item) => item.name);
     await addHistoryEntries(userId, itemNames);
-  }, [userId, allLists, getCategoriesForStore, getListOwnerUid]);
+  }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
   const toggleItemAction = useCallback(async (listId, itemId) => {
     if (!userId) return;
@@ -589,7 +592,6 @@ export const ShoppingListProvider = ({ children }) => {
     await dbCreateStore(userId, {
       name,
       color,
-      categories: [],
       order: stores.length,
     });
   }, [userId, stores.length]);
@@ -660,6 +662,7 @@ export const ShoppingListProvider = ({ children }) => {
     activeListId,
     history,
     stores: allStores,
+    userCategoryDefaults,
   };
 
   const actions = {

@@ -28,7 +28,7 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
+const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
@@ -36,6 +36,7 @@ const ItemList = ({ items, stores, listType, restoredItemIds, onRestoreAnimation
         item={item}
         stores={stores}
         listType={listType}
+        listCategories={listCategories}
         isRestored={restoredItemIds?.has(item.id)}
         onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
         onToggle={() => onToggle(item.id)}
@@ -49,8 +50,8 @@ const ItemList = ({ items, stores, listType, restoredItemIds, onRestoreAnimation
 );
 
 /** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
-const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
-  const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
 
   const allItems = collectGroupItems(group);
 
@@ -117,6 +118,7 @@ export const ShoppingList = ({
   stores,
   sortConfig,
   listType,
+  listCategories,
   onToggle,
   onRemove,
   onUpdateCategory,
@@ -165,10 +167,10 @@ export const ShoppingList = ({
   const checkedItems = items.filter((i) => i.isChecked);
 
   const config = sortConfig ?? SYSTEM_DEFAULT_SORT_CONFIG;
-  const uncheckedResult = applySortPipeline(unchecked, config, stores, listType);
-  const checkedResult = applySortPipeline(checkedItems, config, stores, listType);
+  const uncheckedResult = applySortPipeline(unchecked, config, stores, listType, listCategories);
+  const checkedResult = applySortPipeline(checkedItems, config, stores, listType, listCategories);
 
-  const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
@@ -277,6 +279,7 @@ ShoppingList.propTypes = {
   stores: PropTypes.array,
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listType: PropTypes.string,
+  listCategories: PropTypes.array,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -291,6 +294,7 @@ ShoppingList.defaultProps = {
   stores: [],
   sortConfig: null,
   listType: 'grocery',
+  listCategories: null,
   restoredItemIds: null,
   onRestoreAnimationDone: null,
 };

@@ -152,6 +152,7 @@ export const subscribeLists = (userId, callback) => {
           sortConfig: row.sort_config,
           sortOrder: row.sort_order,
           type: row.type,
+          categories: row.categories,
         }))
       );
     } catch (error) {
@@ -727,6 +728,7 @@ export const subscribeList = (ownerUid, listId, callback) => {
         createdAt: data.created_at,
         sortConfig: data.sort_config,
         type: data.type,
+        categories: data.categories,
       });
     } catch (error) {
       console.error('Failed to fetch list:', error);
@@ -792,7 +794,6 @@ export const createStore = async (userId, store) => {
         user_id: userId,
         name: store.name,
         color: store.color ?? null,
-        categories: store.categories ?? [],
         sort_order: store.order ?? 0,
       })
       .select('id')
@@ -813,11 +814,9 @@ export const createStore = async (userId, store) => {
  */
 export const updateStore = async (userId, storeId, updates) => {
   try {
-    // Map camelCase to snake_case
     const mapped = {};
     if (updates.name !== undefined) mapped.name = updates.name;
     if (updates.color !== undefined) mapped.color = updates.color;
-    if (updates.categories !== undefined) mapped.categories = updates.categories;
     if (updates.order !== undefined) mapped.sort_order = updates.order;
     if (updates.sort_order !== undefined) mapped.sort_order = updates.sort_order;
 
@@ -862,7 +861,6 @@ export const saveStoreOrder = async (userId, stores) => {
     user_id: userId,
     name: store.name,
     color: store.color,
-    categories: store.categories ?? [],
     sort_order: i,
   }));
 
@@ -923,7 +921,6 @@ export const subscribeStores = (userId, callback) => {
           id: row.id,
           name: row.name,
           color: row.color,
-          categories: row.categories,
           order: row.sort_order,
           createdAt: row.created_at,
         }))
@@ -984,7 +981,6 @@ export const fetchStoresByIds = async (storeIds) => {
     id: row.id,
     name: row.name,
     color: row.color,
-    categories: row.categories,
     order: row.sort_order,
     createdAt: row.created_at,
     _isShared: true,
@@ -1034,4 +1030,60 @@ export const subscribeSharedStores = (ownerUid, storeIds, callback) => {
   return () => {
     supabase.removeChannel(channel);
   };
+};
+
+// ---------------------------------------------------------------------------
+// User Category Defaults
+// ---------------------------------------------------------------------------
+
+const mapUserCategoryDefaults = (rows) =>
+  rows.map((row) => ({
+    id: row.id,
+    userId: row.user_id,
+    listType: row.list_type,
+    categories: row.categories,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+
+/**
+ * Subscribes to user category defaults for all list types.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * @param {string} userId - User ID
+ * @param {function} callback - Called with array of category default objects
+ * @returns {function} Unsubscribe function that removes the channel
+ */
+export const subscribeUserCategoryDefaults = (userId, callback) => {
+  supabase
+    .from('user_category_defaults')
+    .select('*')
+    .eq('user_id', userId)
+    .then(({ data, error }) => {
+      if (error) {
+        console.error('Error fetching user category defaults:', error);
+        callback([]);
+        return;
+      }
+      callback(mapUserCategoryDefaults(data ?? []));
+    });
+
+  const channel = supabase
+    .channel(`user-category-defaults-${userId}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'user_category_defaults',
+      filter: `user_id=eq.${userId}`,
+    }, () => {
+      supabase
+        .from('user_category_defaults')
+        .select('*')
+        .eq('user_id', userId)
+        .then(({ data, error }) => {
+          if (!error) callback(mapUserCategoryDefaults(data ?? []));
+        });
+    })
+    .subscribe();
+
+  return () => supabase.removeChannel(channel);
 };

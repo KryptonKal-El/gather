@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-18T20:00:00Z",
   "lastHeartbeat": "2026-03-18T20:00:00Z",
-  "currentChunk": "US-005",
+  "currentChunk": "US-006",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -49,8 +49,9 @@
       "id": "US-005",
       "slug": "react-category-resolution",
       "title": "Service layer — Category resolution logic (React)",
-      "status": "pending",
-      "priority": 5
+      "status": "completed",
+      "priority": 5,
+      "committedAt": "2026-03-18T20:30:00Z"
     },
     {
       "id": "US-006",

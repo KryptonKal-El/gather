@@ -16,6 +16,7 @@ export const MobileListDetail = ({
   suggestions,
   sortConfig,
   listSortConfig,
+  listCategories,
   isGuest,
   onBack,
   onAddItem,
@@ -99,6 +100,7 @@ export const MobileListDetail = ({
           stores={stores}
           sortConfig={sortConfig}
           listType={listType}
+          listCategories={listCategories}
           onToggle={onToggle}
           onRemove={onRemove}
           onUpdateCategory={onUpdateCategory}
@@ -127,6 +129,7 @@ MobileListDetail.propTypes = {
   suggestions: PropTypes.array.isRequired,
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listSortConfig: PropTypes.arrayOf(PropTypes.string),
+  listCategories: PropTypes.array,
   isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,
@@ -145,6 +148,7 @@ MobileListDetail.propTypes = {
 MobileListDetail.defaultProps = {
   sortConfig: null,
   listSortConfig: null,
+  listCategories: null,
   isGuest: false,
   restoredItemIds: null,
   onRestoreAnimationDone: null,

@@ -138,8 +138,8 @@
         "Lint passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Rewired category resolution from store-level to list-level. New chain: list.categories → user defaults → system defaults. Updated sort pipeline, item display, and context.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -150,7 +150,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-18T20:30:00Z"
     },
     {
       "id": "US-006",

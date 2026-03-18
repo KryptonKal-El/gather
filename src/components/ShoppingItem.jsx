@@ -24,7 +24,7 @@ const RSVP_COLORS = {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
+export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
   const { user } = useAuth();
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
@@ -80,22 +80,28 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
   }
   const assignedStore = item.store ? storeMap[item.store] : null;
 
-  // For category data, use type-specific categories if available, otherwise store-based
+  // For category data, use listCategories if provided, otherwise fall back to type-specific or defaults
   const typeCategories = typeConfig.categories;
   const allLabels = {};
   const allColors = {};
   const allKeys = [];
-  if (typeCategories) {
+  if (listCategories?.length > 0) {
+    for (const cat of listCategories) {
+      allLabels[cat.key] = cat.name;
+      allColors[cat.key] = cat.color;
+      allKeys.push(cat.key);
+    }
+  } else if (typeCategories) {
     for (const cat of typeCategories) {
       allLabels[cat.key] = cat.name;
       allColors[cat.key] = cat.color;
       allKeys.push(cat.key);
     }
   } else {
-    const storeCats = assignedStore?.categories ?? DEFAULT_CATEGORIES;
-    Object.assign(allLabels, getAllCategoryLabels(storeCats));
-    Object.assign(allColors, getAllCategoryColors(storeCats));
-    allKeys.push(...getAllCategoryKeys(storeCats));
+    const fallbackCats = DEFAULT_CATEGORIES;
+    Object.assign(allLabels, getAllCategoryLabels(fallbackCats));
+    Object.assign(allColors, getAllCategoryColors(fallbackCats));
+    allKeys.push(...getAllCategoryKeys(fallbackCats));
   }
 
   useEffect(() => {
@@ -629,6 +635,7 @@ ShoppingItem.propTypes = {
   }).isRequired,
   stores: PropTypes.array,
   listType: PropTypes.string,
+  listCategories: PropTypes.array,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -641,6 +648,7 @@ ShoppingItem.propTypes = {
 ShoppingItem.defaultProps = {
   stores: [],
   listType: 'grocery',
+  listCategories: null,
   isRestored: false,
   onRestoreAnimationDone: null,
 };

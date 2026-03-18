@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
 import { useSortPreferences } from './hooks/useSortPreferences.js';
@@ -9,6 +9,7 @@ import { useMobileNav } from './hooks/useMobileNav.js';
 import { usePWAInstall } from './hooks/usePWAInstall.js';
 import { getSuggestions } from './services/suggestions.js';
 import { uploadProfileImage } from './services/imageStorage.js';
+import { getEffectiveCategories } from './utils/categories.js';
 import { Login } from './components/Login.jsx';
 import { ListSelector } from './components/ListSelector.jsx';
 import { AddItemForm } from './components/AddItemForm.jsx';
@@ -95,6 +96,11 @@ export const App = () => {
     state.history,
     activeList?.items ?? [],
   );
+
+  const listCategories = useMemo(() => {
+    if (!activeList) return null;
+    return getEffectiveCategories(activeList, state.userCategoryDefaults);
+  }, [activeList, state.userCategoryDefaults]);
 
   const handleAddItem = (name, storeId = null) => {
     if (!activeList) return;
@@ -382,6 +388,7 @@ export const App = () => {
                 suggestions={suggestions}
                 sortConfig={activeList ? effectiveSortConfig(activeList) : null}
                 listSortConfig={activeList?.sortConfig ?? null}
+                listCategories={listCategories}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
                 onToggle={handleToggleItem}
@@ -666,6 +673,7 @@ export const App = () => {
                 stores={state.stores}
                 sortConfig={effectiveSortConfig(activeList)}
                 listType={activeList.type}
+                listCategories={listCategories}
                 onToggle={handleToggleItem}
                 onRemove={handleRemoveItem}
                 onUpdateCategory={handleUpdateCategory}

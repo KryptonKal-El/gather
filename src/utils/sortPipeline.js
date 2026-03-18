@@ -151,9 +151,10 @@ const applySortLevel = (items, level) => {
  * @param {Array} stores - Store objects
  * @param {string|null} parentStoreId - Store ID if under a store group
  * @param {string} listType - List type identifier
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @returns {Object} Result with items or groups
  */
-const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, listType) => {
+const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, listType, listCategories) => {
   if (remainingLevels.length === 0) {
     return { items };
   }
@@ -169,15 +170,15 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, lis
   }
 
   if (currentLevel === 'store') {
-    return groupByStore(items, stores, nextLevels, listType);
+    return groupByStore(items, stores, nextLevels, listType, listCategories);
   }
 
   if (currentLevel === 'category') {
-    return groupByCategory(items, stores, nextLevels, parentStoreId, listType);
+    return groupByCategory(items, stores, nextLevels, parentStoreId, listType, listCategories);
   }
 
   if (currentLevel === 'rsvp') {
-    return groupByRsvp(items, stores, nextLevels, listType);
+    return groupByRsvp(items, stores, nextLevels, listType, listCategories);
   }
 
   return { items };
@@ -189,9 +190,10 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, lis
  * @param {Array} stores - Store objects
  * @param {string[]} remainingLevels - Remaining sort levels after store
  * @param {string} listType - List type identifier
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @returns {Object} Result with groups and ungrouped
  */
-const groupByStore = (items, stores, remainingLevels, listType) => {
+const groupByStore = (items, stores, remainingLevels, listType, listCategories) => {
   const storeMap = new Map();
   for (const store of stores) {
     storeMap.set(store.id, store);
@@ -225,7 +227,8 @@ const groupByStore = (items, stores, remainingLevels, listType) => {
       remainingLevels,
       stores,
       store.id,
-      listType
+      listType,
+      listCategories
     );
 
     const group = {
@@ -260,7 +263,8 @@ const groupByStore = (items, stores, remainingLevels, listType) => {
       remainingLevels,
       stores,
       null,
-      listType
+      listType,
+      listCategories
     );
     processedUngrouped = subResult.items ?? ungrouped;
   }
@@ -270,12 +274,11 @@ const groupByStore = (items, stores, remainingLevels, listType) => {
 
 /**
  * Gets category info for grouping.
- * @param {Array} stores - Store objects
- * @param {string|null} parentStoreId - Parent store ID or null
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @param {string} listType - List type identifier
  * @returns {Object} Category labels, colors, and ordered keys
  */
-const getCategoryInfo = (stores, parentStoreId, listType) => {
+const getCategoryInfo = (listCategories, listType) => {
   if (listType === 'packing') {
     return {
       labels: Object.fromEntries(PACKING_CATEGORIES.map((c) => [c.key, c.name])),
@@ -298,14 +301,7 @@ const getCategoryInfo = (stores, parentStoreId, listType) => {
     };
   }
 
-  let categories = DEFAULT_CATEGORIES;
-
-  if (parentStoreId) {
-    const store = stores.find((s) => s.id === parentStoreId);
-    if (store?.categories?.length > 0) {
-      categories = store.categories;
-    }
-  }
+  const categories = listCategories?.length > 0 ? listCategories : DEFAULT_CATEGORIES;
 
   return {
     labels: getAllCategoryLabels(categories),
@@ -321,10 +317,11 @@ const getCategoryInfo = (stores, parentStoreId, listType) => {
  * @param {string[]} remainingLevels - Remaining sort levels after category
  * @param {string|null} parentStoreId - Store ID if under a store group
  * @param {string} listType - List type identifier
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @returns {Object} Result with groups and ungrouped (items with no/unknown category)
  */
-const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType) => {
-  const { labels, colors, orderedKeys } = getCategoryInfo(stores, parentStoreId, listType);
+const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType, listCategories) => {
+  const { labels, colors, orderedKeys } = getCategoryInfo(listCategories, listType);
   const validCategories = new Set(orderedKeys);
 
   const grouped = new Map();
@@ -351,7 +348,8 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType
       remainingLevels,
       stores,
       parentStoreId,
-      listType
+      listType,
+      listCategories
     );
 
     const group = {
@@ -377,7 +375,8 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType
       remainingLevels,
       stores,
       parentStoreId,
-      listType
+      listType,
+      listCategories
     );
     processedOther = subResult.items ?? other;
   }
@@ -410,9 +409,10 @@ const RSVP_ORDER = [
  * @param {Array} stores - Store objects
  * @param {string[]} remainingLevels - Remaining sort levels after rsvp
  * @param {string} listType - List type identifier
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @returns {Object} Result with groups
  */
-const groupByRsvp = (items, stores, remainingLevels, listType) => {
+const groupByRsvp = (items, stores, remainingLevels, listType, listCategories) => {
   const grouped = new Map();
 
   for (const item of items) {
@@ -433,7 +433,8 @@ const groupByRsvp = (items, stores, remainingLevels, listType) => {
       remainingLevels,
       stores,
       null,
-      listType
+      listType,
+      listCategories
     );
 
     const group = {
@@ -483,8 +484,9 @@ export function combineSortConfig(groupLevels, sortOnlyLevels) {
  *
  * @param {Array} items - Array of item objects with at least: { id, name, category, store, added_at, isChecked }
  * @param {Array} sortConfig - Array of 1-4 sort level strings (e.g. ['store', 'category', 'name', 'date'])
- * @param {Array} stores - Array of store objects with: { id, name, color, categories, sort_order }
+ * @param {Array} stores - Array of store objects with: { id, name, color, sort_order }
  * @param {string} listType - List type identifier (e.g. 'grocery', 'packing', 'todo')
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
  * @returns {Object} Nested structure with groups, subGroups, and items
  *
  * @example
@@ -503,7 +505,7 @@ export function combineSortConfig(groupLevels, sortOnlyLevels) {
  *   items: [...]
  * }
  */
-export const applySortPipeline = (items, sortConfig, stores = [], listType = 'grocery') => {
+export const applySortPipeline = (items, sortConfig, stores = [], listType = 'grocery', listCategories = null) => {
   const config = normalizeSortConfig(sortConfig);
   const safeStores = Array.isArray(stores) ? stores : [];
 
@@ -523,7 +525,7 @@ export const applySortPipeline = (items, sortConfig, stores = [], listType = 'gr
     return { groups: [], items: sorted };
   }
 
-  const result = applyRemainingLevels(items, config, safeStores, null, listType);
+  const result = applyRemainingLevels(items, config, safeStores, null, listType, listCategories);
 
   return {
     groups: result.groups ?? [],
