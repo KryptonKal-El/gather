@@ -85,7 +85,7 @@ struct SortConfigSheet: View {
             }
             .id(formId)
             .environment(\.editMode, .constant(.active))
-            .navigationTitle("Sort Configuration")
+            .navigationTitle("Organize")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
