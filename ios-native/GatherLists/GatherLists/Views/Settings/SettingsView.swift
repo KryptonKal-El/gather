@@ -16,6 +16,14 @@ struct SettingsView: View {
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
+    @State private var categoryCounts: [String: Int] = [:]
+    
+    private let listTypes: [(id: String, name: String)] = [
+        ("grocery", "Grocery"),
+        ("todo", "To-Do"),
+        ("packing", "Packing"),
+        ("project", "Project")
+    ]
     
     var body: some View {
         NavigationStack {
@@ -74,18 +82,22 @@ struct SettingsView: View {
                 }
                 
                 Section("Category Defaults") {
-                    NavigationLink(destination: DefaultCategoryEditorView(listType: "grocery")) {
-                        Label("Grocery", systemImage: "cart")
+                    ForEach(listTypes, id: \.id) { type in
+                        NavigationLink(destination: DefaultCategoryEditorView(listType: type.id)) {
+                            HStack(spacing: 12) {
+                                ListTypeIconView(typeId: type.id, size: 24)
+                                Text(type.name)
+                                Spacer()
+                                if let count = categoryCounts[type.id] {
+                                    Text("\(count)")
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                        }
                     }
-                    NavigationLink(destination: DefaultCategoryEditorView(listType: "todo")) {
-                        Label("To-Do", systemImage: "checklist")
-                    }
-                    NavigationLink(destination: DefaultCategoryEditorView(listType: "packing")) {
-                        Label("Packing", systemImage: "suitcase")
-                    }
-                    NavigationLink(destination: DefaultCategoryEditorView(listType: "project")) {
-                        Label("Project", systemImage: "list.clipboard")
-                    }
+                }
+                .onAppear {
+                    Task { await loadCategoryCounts() }
                 }
                 
                 Section {
@@ -206,5 +218,24 @@ struct SettingsView: View {
             print("[SettingsView] Failed to update display name: \(error.localizedDescription)")
         }
         isSavingName = false
+    }
+    
+    private func loadCategoryCounts() async {
+        guard let userId = authViewModel.currentUser?.id else { return }
+        let types = listTypes.map { $0.id }
+        do {
+            let defaults = try await UserCategoryDefaultService.fetchDefaults(userId: userId)
+            for type in types {
+                if let match = defaults.first(where: { $0.listType == type }) {
+                    categoryCounts[type] = match.categories.count
+                } else {
+                    categoryCounts[type] = CategoryService.getSystemDefaults(for: type)?.count ?? 0
+                }
+            }
+        } catch {
+            for type in types {
+                categoryCounts[type] = CategoryService.getSystemDefaults(for: type)?.count ?? 0
+            }
+        }
     }
 }
