@@ -7,10 +7,13 @@ struct CategoryEditorSheet: View {
     let onSave: ([CategoryDef]) -> Void
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthViewModel.self) private var authViewModel
     @State private var categories: [CategoryDef]
     @State private var showDeleteConfirm = false
     @State private var categoryToDelete: CategoryDef?
     @State private var selectedCategory: CategoryDef?
+    @State private var showSaveDefaultConfirm = false
+    @State private var showSaveDefaultSuccess = false
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     private let presetColors = [
@@ -59,6 +62,14 @@ struct CategoryEditorSheet: View {
                     }
                     .buttonStyle(.plain)
                 }
+                
+                Section {
+                    Button {
+                        showSaveDefaultConfirm = true
+                    } label: {
+                        Label("Save as Default for \(listType.capitalized)", systemImage: "square.and.arrow.down")
+                    }
+                }
             }
             .environment(\.editMode, .constant(.active))
             .navigationTitle("Edit Categories")
@@ -104,6 +115,19 @@ struct CategoryEditorSheet: View {
                 if let cat = categoryToDelete {
                     Text("Delete \"\(cat.name)\"? Items in this category will become uncategorized.")
                 }
+            }
+            .alert("Save as Default", isPresented: $showSaveDefaultConfirm) {
+                Button("Cancel", role: .cancel) { }
+                Button("Save") {
+                    saveAsDefault()
+                }
+            } message: {
+                Text("This will replace your default \(listType.capitalized) categories with this list's categories. Continue?")
+            }
+            .alert("Saved", isPresented: $showSaveDefaultSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Default \(listType.capitalized) categories updated.")
             }
         }
     }
@@ -182,6 +206,22 @@ struct CategoryEditorSheet: View {
             suffix += 1
         }
         return "\(baseKey)_\(suffix)"
+    }
+    
+    private func saveAsDefault() {
+        Task {
+            guard let userId = authViewModel.currentUser?.id else { return }
+            do {
+                try await UserCategoryDefaultService.upsertDefault(
+                    userId: userId,
+                    listType: listType,
+                    categories: categories
+                )
+                showSaveDefaultSuccess = true
+            } catch {
+                print("Failed to save default categories: \(error)")
+            }
+        }
     }
 }
 
