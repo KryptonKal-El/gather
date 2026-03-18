@@ -13,6 +13,7 @@ struct CategoryEditorSheet: View {
     @State private var showDeleteConfirm = false
     @State private var categoryToDelete: CategoryDef?
     @State private var selectedCategory: CategoryDef?
+    @State private var pendingNewCategory: CategoryDef?
     @State private var showSaveDefaultConfirm = false
     @State private var showSaveDefaultSuccess = false
     @State private var searchText = ""
@@ -113,6 +114,16 @@ struct CategoryEditorSheet: View {
                     }
                 )
             }
+            .sheet(item: $pendingNewCategory) { category in
+                CategoryDetailEditor(
+                    category: category,
+                    presetColors: presetColors,
+                    existingKeys: Set(categories.map(\.key)),
+                    onSave: { updated in
+                        categories.append(updated)
+                    }
+                )
+            }
             .alert("Delete Category?", isPresented: $showDeleteConfirm) {
                 Button("Cancel", role: .cancel) {
                     categoryToDelete = nil
@@ -206,8 +217,7 @@ struct CategoryEditorSheet: View {
             color: nextColor,
             keywords: []
         )
-        categories.append(newCategory)
-        selectedCategory = newCategory
+        pendingNewCategory = newCategory
     }
     
     private func generateUniqueKey(_ baseName: String) -> String {

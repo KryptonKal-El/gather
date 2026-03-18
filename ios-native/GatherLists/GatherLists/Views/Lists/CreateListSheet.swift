@@ -19,6 +19,7 @@ struct CreateListSheet: View {
     @State private var customCategories: [CategoryDef]? = nil
     @State private var isLoadingCategories = false
     @State private var selectedCategoryForEdit: CategoryDef? = nil
+    @State private var pendingNewCategory: CategoryDef?
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
@@ -249,6 +250,18 @@ struct CreateListSheet: View {
                     }
                 )
             }
+            .sheet(item: $pendingNewCategory) { category in
+                CategoryDetailEditor(
+                    category: category,
+                    presetColors: presetColors,
+                    existingKeys: Set(displayCategories.map(\.key)),
+                    onSave: { updated in
+                        var cats = customCategories ?? previewCategories ?? []
+                        cats.append(updated)
+                        customCategories = cats
+                    }
+                )
+            }
         }
         .interactiveDismissDisabled(isCreating)
     }
@@ -323,13 +336,11 @@ struct CreateListSheet: View {
         
         let newCategory = CategoryDef(
             key: newKey,
-            name: "New Category",
+            name: "",
             color: nextColor,
             keywords: []
         )
-        cats.append(newCategory)
-        customCategories = cats
-        selectedCategoryForEdit = newCategory
+        pendingNewCategory = newCategory
     }
     
     private func createList() {
