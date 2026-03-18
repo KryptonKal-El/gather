@@ -223,7 +223,8 @@
 }
 
 .storesViewWrap {
-  max-width: 480px;
+  width: 360px;
+  flex-shrink: 0;
 }
 
 .mobileFullScreen {
