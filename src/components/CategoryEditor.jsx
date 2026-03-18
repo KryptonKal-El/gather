@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -64,12 +64,16 @@ const SortableCategoryRow = ({
   const [keywordInput, setKeywordInput] = useState(
     (category.keywords ?? []).join(', ')
   );
+  const customColorRef = useRef(null);
 
   const [swipeX, setSwipeX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
-  const [isExiting, setIsExiting] = useState(false);
   const touchStartRef = useRef(null);
   const swipeDirectionRef = useRef(null);
+  const swipeContentRef = useRef(null);
+  const dragHandleRef = useRef(null);
+  const swipeXRef = useRef(0);
+  const isSwipingRef = useRef(false);
 
   const [isMobile] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -106,61 +110,81 @@ const SortableCategoryRow = ({
     onKeywordsChange(category.key, keywords);
   };
 
-  const handleTouchStart = (e) => {
+  useEffect(() => {
     if (!isMobile) return;
-    const touch = e.touches[0];
-    const EDGE_THRESHOLD = 20;
-    if (touch.clientX <= EDGE_THRESHOLD || touch.clientX >= window.innerWidth - EDGE_THRESHOLD) return;
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    swipeDirectionRef.current = null;
-  };
+    const el = swipeContentRef.current;
+    if (!el) return;
 
-  const handleTouchMove = (e) => {
-    if (!touchStartRef.current) return;
-    const touch = e.touches[0];
-    const deltaX = touch.clientX - touchStartRef.current.x;
-    const deltaY = touch.clientY - touchStartRef.current.y;
+    const handleTouchStart = (e) => {
+      if (dragHandleRef.current?.contains(e.target)) return;
+      const touch = e.touches[0];
+      const EDGE_THRESHOLD = 20;
+      if (touch.clientX <= EDGE_THRESHOLD || touch.clientX >= window.innerWidth - EDGE_THRESHOLD) return;
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+      swipeDirectionRef.current = null;
+    };
 
-    if (swipeDirectionRef.current === null) {
-      if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
-      if (Math.abs(deltaY) > Math.abs(deltaX)) {
-        swipeDirectionRef.current = 'vertical';
+    const handleTouchMove = (e) => {
+      if (!touchStartRef.current) return;
+      const touch = e.touches[0];
+      const deltaX = touch.clientX - touchStartRef.current.x;
+      const deltaY = touch.clientY - touchStartRef.current.y;
+
+      if (swipeDirectionRef.current === null) {
+        if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          swipeDirectionRef.current = 'vertical';
+          return;
+        }
+        swipeDirectionRef.current = 'horizontal';
+      }
+
+      if (swipeDirectionRef.current === 'vertical') return;
+
+      const clampedDeltaX = Math.min(0, deltaX);
+      swipeXRef.current = clampedDeltaX;
+      setSwipeX(clampedDeltaX);
+      isSwipingRef.current = true;
+      setIsSwiping(true);
+      e.preventDefault();
+    };
+
+    const handleTouchEnd = () => {
+      if (!isSwipingRef.current || !touchStartRef.current) {
+        touchStartRef.current = null;
+        swipeDirectionRef.current = null;
         return;
       }
-      swipeDirectionRef.current = 'horizontal';
-    }
 
-    if (swipeDirectionRef.current === 'vertical') return;
-
-    const clampedDeltaX = Math.min(0, deltaX);
-    setSwipeX(clampedDeltaX);
-    setIsSwiping(true);
-    e.preventDefault();
-  };
-
-  const handleTouchEnd = () => {
-    if (!isSwiping || !touchStartRef.current) {
+      const SWIPE_THRESHOLD = 80;
+      if (Math.abs(swipeXRef.current) >= SWIPE_THRESHOLD) {
+        swipeXRef.current = 0;
+        setSwipeX(0);
+        isSwipingRef.current = false;
+        setIsSwiping(false);
+        onDelete(category.key);
+      } else {
+        swipeXRef.current = 0;
+        setSwipeX(0);
+        isSwipingRef.current = false;
+        setIsSwiping(false);
+      }
       touchStartRef.current = null;
       swipeDirectionRef.current = null;
-      return;
-    }
+    };
 
-    const SWIPE_THRESHOLD = 80;
-    if (Math.abs(swipeX) >= SWIPE_THRESHOLD) {
-      setIsExiting(true);
-      setSwipeX(0);
-      setIsSwiping(false);
-      onDelete(category.key);
-    } else {
-      setSwipeX(0);
-      setIsSwiping(false);
-    }
-    touchStartRef.current = null;
-    swipeDirectionRef.current = null;
-  };
+    el.addEventListener('touchstart', handleTouchStart, { passive: false });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
+    el.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
+      el.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile, category.key, onDelete]);
 
   const getSwipeStyle = () => {
-    if (isExiting) return undefined;
     if (isSwiping || swipeX !== 0) {
       return {
         transform: `translateX(${swipeX}px)`,
@@ -175,21 +199,20 @@ const SortableCategoryRow = ({
   return (
     <div ref={setNodeRef} style={style} className={styles.categoryItem}>
       <div className={styles.swipeContainer}>
-        {isMobile && !isExiting && (isSwiping || swipeX !== 0) && (
+        {isMobile && (isSwiping || swipeX !== 0) && (
           <div className={`${styles.swipeBehind} ${Math.abs(swipeX) >= 80 ? styles.swipeBehindActive : ''}`}>
             <span className={styles.swipeDeleteText}>Delete</span>
           </div>
         )}
         <div
+          ref={swipeContentRef}
           className={`${styles.swipeContent} ${isSwiping ? styles.swipeSwiping : ''}`}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
           style={getSwipeStyle()}
         >
           <div className={styles.categoryRow}>
             {!disableDrag && (
               <button
+                ref={dragHandleRef}
                 type="button"
                 className={styles.dragHandle}
                 {...attributes}
@@ -269,6 +292,30 @@ const SortableCategoryRow = ({
               aria-label={`Select color ${c}`}
             />
           ))}
+          <div className={styles.customColorWrapper}>
+            <input
+              ref={customColorRef}
+              type="color"
+              value={category.color}
+              onChange={(e) => {
+                onColorChange(category.key, e.target.value);
+                setShowColorPicker(false);
+              }}
+              className={styles.customColorInput}
+            />
+            <button
+              type="button"
+              className={styles.customColorBtn}
+              onClick={() => customColorRef.current?.click()}
+              aria-label="Choose custom color"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
@@ -292,12 +339,13 @@ const SortableCategoryRow = ({
 /**
  * Category editor for managing list categories.
  * Supports adding, removing, renaming, reordering, color changing, and keyword editing.
+ * Uses deferred saves - changes are only persisted when user clicks Save.
  * @param {Object} props
  * @param {Array} props.categories - Array of category objects
  * @param {string} [props.listType] - List type for "Save as Default" feature
- * @param {Function} props.onSave - Called when categories change
+ * @param {Function} props.onSave - Called when user explicitly saves changes
  * @param {Function} [props.onSaveAsDefault] - Called when "Save as Default" is clicked
- * @param {Function} [props.onClose] - Called when close button is clicked
+ * @param {Function} [props.onClose] - Called when close/cancel button is clicked
  * @param {boolean} [props.showHeader=true] - Whether to show the header bar
  */
 export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true }) => {
@@ -310,6 +358,22 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const [saveDefaultSuccess, setSaveDefaultSuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [showNewColorPicker, setShowNewColorPicker] = useState(false);
+  const newCustomColorRef = useRef(null);
+  const [baselineCategories, setBaselineCategories] = useState(categories);
+
+  const hasChanges = useMemo(
+    () => JSON.stringify(localCategories) !== JSON.stringify(baselineCategories),
+    [localCategories, baselineCategories]
+  );
+
+  const categoriesJson = JSON.stringify(categories);
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
+    setLocalCategories(categories);
+    setBaselineCategories(categories);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [categoriesJson]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!saveDefaultSuccess) return;
@@ -319,13 +383,23 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 10 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const saveCategories = (updated) => {
+  const updateLocal = (updated) => {
     setLocalCategories(updated);
-    onSave(updated);
+  };
+
+  const handleSave = () => {
+    onSave(localCategories);
+    setBaselineCategories(localCategories);
+    if (onClose) onClose();
+  };
+
+  const handleCancel = () => {
+    setLocalCategories(baselineCategories);
+    if (onClose) onClose();
   };
 
   const handleDragEnd = (event) => {
@@ -335,7 +409,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
     const oldIndex = localCategories.findIndex((c) => c.key === active.id);
     const newIndex = localCategories.findIndex((c) => c.key === over.id);
     const reordered = arrayMove(localCategories, oldIndex, newIndex);
-    saveCategories(reordered);
+    updateLocal(reordered);
   };
 
   const handleAdd = () => {
@@ -350,31 +424,32 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       color: newColor,
       keywords: [],
     };
-    saveCategories([...localCategories, newCategory]);
+    updateLocal([...localCategories, newCategory]);
     setNewName('');
     setNewColor(CATEGORY_COLORS[0]);
     setSearchQuery('');
+    setShowNewColorPicker(false);
   };
 
   const handleRename = (key, newNameValue) => {
     const updated = localCategories.map((c) =>
       c.key === key ? { ...c, name: newNameValue } : c
     );
-    saveCategories(updated);
+    updateLocal(updated);
   };
 
   const handleColorChange = (key, color) => {
     const updated = localCategories.map((c) =>
       c.key === key ? { ...c, color } : c
     );
-    saveCategories(updated);
+    updateLocal(updated);
   };
 
   const handleKeywordsChange = (key, keywords) => {
     const updated = localCategories.map((c) =>
       c.key === key ? { ...c, keywords } : c
     );
-    saveCategories(updated);
+    updateLocal(updated);
   };
 
   const handleDelete = (key) => {
@@ -383,7 +458,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
 
   const confirmDelete = () => {
     const updated = localCategories.filter((c) => c.key !== confirmingDeleteKey);
-    saveCategories(updated);
+    updateLocal(updated);
     setConfirmingDeleteKey(null);
     if (expandedKey === confirmingDeleteKey) setExpandedKey(null);
   };
@@ -397,6 +472,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       await onSaveAsDefault(listType, localCategories);
       setShowSaveDefaultConfirm(false);
       setSaveDefaultSuccess(true);
+      setBaselineCategories(localCategories);
     }
   };
 
@@ -409,7 +485,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const isSearching = searchQuery.trim() !== '';
 
   const handleDeleteAll = () => {
-    saveCategories([]);
+    updateLocal([]);
     setShowDeleteAllConfirm(false);
     setExpandedKey(null);
   };
@@ -419,16 +495,25 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       {showHeader && (
         <div className={styles.header}>
           <h3 className={styles.title}>Edit Categories</h3>
-          {onClose && (
+          <div className={styles.headerActions}>
+            {onClose && (
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+            )}
             <button
               type="button"
-              className={styles.closeBtn}
-              onClick={onClose}
-              aria-label="Close editor"
+              className={styles.saveBtn}
+              onClick={handleSave}
+              disabled={!hasChanges}
             >
-              ×
+              Save
             </button>
-          )}
+          </div>
         </div>
       )}
 
@@ -471,17 +556,56 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       </div>
 
       <div className={styles.addRow}>
-        <button
-          type="button"
-          className={styles.addColorBtn}
-          style={{ backgroundColor: newColor }}
-          onClick={() => {
-            const currentIndex = CATEGORY_COLORS.indexOf(newColor);
-            const nextIndex = (currentIndex + 1) % CATEGORY_COLORS.length;
-            setNewColor(CATEGORY_COLORS[nextIndex]);
-          }}
-          aria-label="Cycle color"
-        />
+        <div className={styles.addColorWrapper}>
+          <button
+            type="button"
+            className={styles.addColorBtn}
+            style={{ backgroundColor: newColor }}
+            onClick={() => setShowNewColorPicker(!showNewColorPicker)}
+            aria-label="Choose color for new category"
+          />
+          {showNewColorPicker && (
+            <div className={styles.addColorDropdown}>
+              {CATEGORY_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                  style={{ backgroundColor: c }}
+                  onClick={() => {
+                    setNewColor(c);
+                    setShowNewColorPicker(false);
+                  }}
+                  aria-label={`Select color ${c}`}
+                />
+              ))}
+              <div className={styles.customColorWrapper}>
+                <input
+                  ref={newCustomColorRef}
+                  type="color"
+                  value={newColor}
+                  onChange={(e) => {
+                    setNewColor(e.target.value);
+                    setShowNewColorPicker(false);
+                  }}
+                  className={styles.customColorInput}
+                />
+                <button
+                  type="button"
+                  className={styles.customColorBtn}
+                  onClick={() => newCustomColorRef.current?.click()}
+                  aria-label="Choose custom color"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="16" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         <input
           type="text"
           className={styles.addInput}
@@ -524,6 +648,19 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
           {saveDefaultSuccess && (
             <div className={styles.saveDefaultSuccess}>Saved as default!</div>
           )}
+        </div>
+      )}
+
+      {!showHeader && (
+        <div className={styles.footerActions}>
+          <button
+            type="button"
+            className={styles.saveBtn}
+            onClick={handleSave}
+            disabled={!hasChanges}
+          >
+            Save Changes
+          </button>
         </div>
       )}
 

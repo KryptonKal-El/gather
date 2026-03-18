@@ -22,6 +22,50 @@
   margin: 0;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cancelBtn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.cancelBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.saveBtn {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .closeBtn {
   display: flex;
   align-items: center;
@@ -263,6 +307,42 @@
   transform: scale(1.15);
 }
 
+.customColorWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customColorInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.customColorBtn {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  border: 2px dashed var(--border-default);
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: border-color 0.15s, color 0.15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.customColorBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .keywordEditor {
   padding: 0.5rem 0 0.75rem 2rem;
 }
@@ -302,6 +382,27 @@
   padding-top: 0.75rem;
   margin-top: 0.5rem;
   border-top: 1px solid var(--border-subtle);
+}
+
+.addColorWrapper {
+  position: relative;
+}
+
+.addColorDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 200px;
 }
 
 .addColorBtn {
@@ -551,5 +652,55 @@
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     min-height: 44px;
+  }
+}
+
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.footerActions .saveBtn {
+  padding: 0.45rem 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  .headerActions {
+    gap: 0.5rem;
+  }
+
+  .cancelBtn,
+  .saveBtn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.9rem;
+    min-height: 36px;
+  }
+
+  .footerActions {
+    padding-top: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .footerActions .saveBtn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.95rem;
+    min-height: 44px;
+  }
+
+  .addColorDropdown {
+    width: 240px;
+    gap: 0.5rem;
+    padding: 0.6rem;
+  }
+
+  .customColorBtn {
+    width: 2rem;
+    height: 2rem;
+    min-width: 36px;
+    min-height: 36px;
   }
 }

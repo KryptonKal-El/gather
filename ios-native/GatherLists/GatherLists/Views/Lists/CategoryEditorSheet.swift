@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CategoryEditorSheet: View {
     let listId: UUID
@@ -264,6 +265,7 @@ struct CategoryDetailEditor: View {
     @State private var name: String
     @State private var selectedColor: String
     @State private var keywordsText: String
+    @State private var customColor: Color
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
@@ -275,6 +277,7 @@ struct CategoryDetailEditor: View {
         _name = State(initialValue: category.name)
         _selectedColor = State(initialValue: category.color)
         _keywordsText = State(initialValue: category.keywords.joined(separator: ", "))
+        _customColor = State(initialValue: Color(hex: category.color))
     }
     
     private var parsedKeywords: [String] {
@@ -337,6 +340,13 @@ struct CategoryDetailEditor: View {
                         }
                     }
                     .padding(.vertical, 8)
+                    
+                    Divider()
+                    
+                    ColorPicker("Custom Color", selection: $customColor)
+                        .onChange(of: customColor) { _, newValue in
+                            selectedColor = colorToHex(newValue)
+                        }
                 }
                 
                 Section {
@@ -374,5 +384,12 @@ struct CategoryDetailEditor: View {
                 }
             }
         }
+    }
+    
+    private func colorToHex(_ color: Color) -> String {
+        let uiColor = UIColor(color)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        return String(format: "#%02x%02x%02x", Int(r * 255), Int(g * 255), Int(b * 255))
     }
 }
