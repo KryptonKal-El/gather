@@ -92,6 +92,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -182,6 +183,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefault.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefaultService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCategoryEditorView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -376,6 +378,7 @@
 			isa = PBXGroup;
 			children = (
 				F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -584,6 +587,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

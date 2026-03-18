@@ -73,6 +73,18 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("Category Defaults") {
+                    NavigationLink(destination: DefaultCategoryEditorView(listType: "grocery")) {
+                        Label("Grocery", systemImage: "cart")
+                    }
+                    NavigationLink(destination: DefaultCategoryEditorView(listType: "packing")) {
+                        Label("Packing", systemImage: "suitcase")
+                    }
+                    NavigationLink(destination: DefaultCategoryEditorView(listType: "todo")) {
+                        Label("To-Do", systemImage: "checklist")
+                    }
+                }
+                
                 Section {
                     Button(role: .destructive) {
                         Task {
