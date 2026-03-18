@@ -50,9 +50,6 @@ struct ListDetailView: View {
     @State private var showTypeChangeConfirm = false
     @State private var typeChangeMessage: String = ""
     
-    // Category editor state
-    @State private var showCategoryEditor = false
-    
     // Auto-scroll target after adding item
     @State private var scrollTarget: UUID?
     
@@ -1149,14 +1146,6 @@ struct ListDetailView: View {
     
     private var listOptionsMenu: some View {
         Menu {
-            if detailViewModel?.typeConfig.fields.category == true && list.type != "project" {
-                Button {
-                    showCategoryEditor = true
-                } label: {
-                    Label("Edit Categories", systemImage: "tag")
-                }
-            }
-            
             Button {
                 showChangeTypeSheet = true
             } label: {
@@ -1166,19 +1155,6 @@ struct ListDetailView: View {
             Image(systemName: "ellipsis.circle")
                 .font(.subheadline)
                 .foregroundStyle(.white)
-        }
-        .sheet(isPresented: $showCategoryEditor) {
-            CategoryEditorSheet(
-                listId: list.id,
-                listType: list.type,
-                initialCategories: detailViewModel?.listCategories ?? [],
-                onSave: { newCategories in
-                    Task {
-                        await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, categories: newCategories)
-                        detailViewModel?.updateCategories(newCategories)
-                    }
-                }
-            )
         }
         .sheet(isPresented: $showChangeTypeSheet) {
             changeTypeSheet()
