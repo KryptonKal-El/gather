@@ -221,7 +221,7 @@ struct DefaultCategoryEditorView: View {
         let newKey = generateUniqueKey("new_category")
         let newCategory = CategoryDef(
             key: newKey,
-            name: "New Category",
+            name: "",
             color: nextColor,
             keywords: []
         )

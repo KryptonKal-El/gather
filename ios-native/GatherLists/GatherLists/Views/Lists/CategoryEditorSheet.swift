@@ -202,7 +202,7 @@ struct CategoryEditorSheet: View {
         
         let newCategory = CategoryDef(
             key: newKey,
-            name: "New Category",
+            name: "",
             color: nextColor,
             keywords: []
         )
