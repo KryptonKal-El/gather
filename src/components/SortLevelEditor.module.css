@@ -36,6 +36,7 @@
   border: none;
   cursor: grab;
   flex-shrink: 0;
+  touch-action: none;
 }
 
 .dragHandle:active {

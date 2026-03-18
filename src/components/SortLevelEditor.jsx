@@ -73,6 +73,7 @@ const SortableLevelRow = ({ id, onRemove, canRemove, isLast }) => {
         type="button"
         className={styles.removeBtn}
         onClick={() => onRemove(id)}
+        onPointerDown={(e) => e.stopPropagation()}
         disabled={!canRemove}
         aria-label={`Remove ${LEVEL_LABELS[id]}`}
       >
