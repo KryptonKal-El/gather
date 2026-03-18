@@ -160,8 +160,8 @@ export const LIST_TYPES = {
     },
     quantityLabel: 'Head Count',
     categories: null,
-    sortLevels: ['name', 'date'],
-    defaultSort: ['name'],
+    sortLevels: ['rsvp', 'name', 'date'],
+    defaultSort: ['rsvp', 'name'],
   },
   packing: {
     id: 'packing',

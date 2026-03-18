@@ -13,7 +13,7 @@ import {
 import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES } from './listTypes.js';
 
 /** Valid sort level options */
-export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price'];
+export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp'];
 
 /** System default sort configuration */
 export const SYSTEM_DEFAULT_SORT_CONFIG = ['store', 'category', 'name'];
@@ -29,7 +29,7 @@ export const getDefaultSortConfig = (listType) => {
 };
 
 /** Levels that create groups (vs just sorting within existing groups) */
-const GROUPING_LEVELS = ['store', 'category'];
+const GROUPING_LEVELS = ['store', 'category', 'rsvp'];
 
 /**
  * Validates a sort configuration.
@@ -158,6 +158,10 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, lis
 
   if (currentLevel === 'category') {
     return groupByCategory(items, stores, nextLevels, parentStoreId, listType);
+  }
+
+  if (currentLevel === 'rsvp') {
+    return groupByRsvp(items, stores, nextLevels, listType);
   }
 
   return { items };
@@ -363,6 +367,66 @@ const groupByCategory = (items, stores, remainingLevels, parentStoreId, listType
       type: 'category',
       items: processedOther,
     });
+  }
+
+  return { groups, ungrouped: [] };
+};
+
+/** RSVP status order and display configuration */
+const RSVP_ORDER = [
+  { status: 'confirmed', label: 'Confirmed', color: '#4caf50' },
+  { status: 'maybe', label: 'Maybe', color: '#ff9800' },
+  { status: 'invited', label: 'Invited', color: '#42a5f5' },
+  { status: 'declined', label: 'Declined', color: '#f44336' },
+  { status: 'not_invited', label: 'Not Yet Invited', color: '#9e9e9e' },
+];
+
+/**
+ * Groups items by RSVP status.
+ * @param {Array} items - Items to group
+ * @param {Array} stores - Store objects
+ * @param {string[]} remainingLevels - Remaining sort levels after rsvp
+ * @param {string} listType - List type identifier
+ * @returns {Object} Result with groups
+ */
+const groupByRsvp = (items, stores, remainingLevels, listType) => {
+  const grouped = new Map();
+
+  for (const item of items) {
+    const status = item.rsvpStatus ?? 'invited';
+    if (!grouped.has(status)) {
+      grouped.set(status, []);
+    }
+    grouped.get(status).push(item);
+  }
+
+  const groups = [];
+  for (const rsvp of RSVP_ORDER) {
+    const rsvpItems = grouped.get(rsvp.status);
+    if (!rsvpItems || rsvpItems.length === 0) continue;
+
+    const subResult = applyRemainingLevels(
+      rsvpItems,
+      remainingLevels,
+      stores,
+      null,
+      listType
+    );
+
+    const group = {
+      key: `rsvp-${rsvp.status}`,
+      label: rsvp.label,
+      color: rsvp.color,
+      type: 'rsvp',
+    };
+
+    if (subResult.groups) {
+      group.subGroups = subResult.groups;
+    } else {
+      group.items = subResult.items;
+    }
+
+    groups.push(group);
   }
 
   return { groups, ungrouped: [] };

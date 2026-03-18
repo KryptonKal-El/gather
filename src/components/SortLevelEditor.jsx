@@ -27,6 +27,7 @@ const LEVEL_LABELS = {
   name: 'Name',
   date: 'Date Added',
   price: 'Price',
+  rsvp: 'RSVP Status',
 };
 
 const SortableLevelRow = ({ id, onRemove, canRemove, isLast }) => {
