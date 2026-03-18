@@ -14,11 +14,19 @@ struct EditListSheet: View {
     @State private var customColor: Color
     @State private var showEmojiPicker = false
     @State private var isSaving = false
+    @State private var showCategoryPreview = false
+    @State private var categories: [CategoryDef] = []
+    @State private var selectedCategoryForEdit: CategoryDef?
+    @State private var pendingNewCategory: CategoryDef?
+    @State private var showDeleteConfirm = false
+    @State private var categoryToDelete: CategoryDef?
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
+    
+    private let categoryTypes = ["grocery", "todo", "packing", "project"]
     
     init(list: GatherList, viewModel: ListViewModel) {
         self.list = list
@@ -34,6 +42,8 @@ struct EditListSheet: View {
             _selectedPresetColor = State(initialValue: nil)
             _customColor = State(initialValue: Color(hex: listColor))
         }
+        
+        _categories = State(initialValue: list.categories ?? CategoryService.getSystemDefaults(for: list.type) ?? [])
     }
     
     private var effectiveColor: String {
@@ -92,6 +102,63 @@ struct EditListSheet: View {
                 Section("Color") {
                     colorPickerRow
                 }
+                
+                if categoryTypes.contains(list.type) {
+                    Section {
+                        DisclosureGroup(isExpanded: $showCategoryPreview) {
+                            ForEach(categories, id: \.key) { category in
+                                Button {
+                                    selectedCategoryForEdit = category
+                                } label: {
+                                    HStack {
+                                        Circle()
+                                            .fill(Color(hex: category.color))
+                                            .frame(width: 12, height: 12)
+                                        Text(category.name)
+                                            .foregroundStyle(.primary)
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                            }
+                            .onMove { from, to in
+                                categories.move(fromOffsets: from, toOffset: to)
+                            }
+                            .onDelete { offsets in
+                                if let index = offsets.first {
+                                    categoryToDelete = categories[index]
+                                    showDeleteConfirm = true
+                                }
+                            }
+                            
+                            Button {
+                                addNewCategory()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundStyle(.green)
+                                    Text("Add Category")
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        } label: {
+                            HStack {
+                                Text("Customize Categories")
+                                Spacer()
+                                if !showCategoryPreview {
+                                    Text("\(categories.count) \(categories.count == 1 ? "category" : "categories")")
+                                        .foregroundStyle(.secondary)
+                                        .font(.subheadline)
+                                }
+                            }
+                        }
+                        .environment(\.editMode, showCategoryPreview ? .constant(.active) : .constant(.inactive))
+                    } footer: {
+                        Text("Edit categories for this list.")
+                    }
+                }
             }
             .navigationTitle("Edit List")
             .navigationBarTitleDisplayMode(.inline)
@@ -112,6 +179,43 @@ struct EditListSheet: View {
             }
             .sheet(isPresented: $showEmojiPicker) {
                 EmojiPickerView(selectedEmoji: $selectedEmoji)
+            }
+            .sheet(item: $selectedCategoryForEdit) { category in
+                CategoryDetailEditor(
+                    category: category,
+                    presetColors: presetColors,
+                    existingKeys: Set(categories.map(\.key)),
+                    onSave: { updated in
+                        if let index = categories.firstIndex(where: { $0.key == category.key }) {
+                            categories[index] = updated
+                        }
+                    }
+                )
+            }
+            .sheet(item: $pendingNewCategory) { category in
+                CategoryDetailEditor(
+                    category: category,
+                    presetColors: presetColors,
+                    existingKeys: Set(categories.map(\.key)),
+                    onSave: { updated in
+                        categories.append(updated)
+                    }
+                )
+            }
+            .alert("Delete Category?", isPresented: $showDeleteConfirm) {
+                Button("Cancel", role: .cancel) {
+                    categoryToDelete = nil
+                }
+                Button("Delete", role: .destructive) {
+                    if let cat = categoryToDelete {
+                        categories.removeAll { $0.key == cat.key }
+                    }
+                    categoryToDelete = nil
+                }
+            } message: {
+                if let cat = categoryToDelete {
+                    Text("Delete \"\(cat.name)\"?")
+                }
             }
         }
         .interactiveDismissDisabled(isSaving)
@@ -156,9 +260,31 @@ struct EditListSheet: View {
         isSaving = true
         Task {
             let emojiValue = selectedEmoji?.isEmpty == false ? selectedEmoji : ""
-            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor)
+            let categoriesToSave = categoryTypes.contains(list.type) ? categories : nil
+            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, categories: categoriesToSave)
             dismiss()
         }
+    }
+    
+    private func addNewCategory() {
+        let usedColors = Set(categories.map(\.color))
+        let nextColor = presetColors.first { !usedColors.contains($0) } ?? presetColors[categories.count % presetColors.count]
+        
+        let existingKeys = Set(categories.map(\.key))
+        var newKey = "new_category"
+        var suffix = 2
+        while existingKeys.contains(newKey) {
+            newKey = "new_category_\(suffix)"
+            suffix += 1
+        }
+        
+        let newCategory = CategoryDef(
+            key: newKey,
+            name: "",
+            color: nextColor,
+            keywords: []
+        )
+        pendingNewCategory = newCategory
     }
     
     private func colorToHex(_ color: Color) -> String {

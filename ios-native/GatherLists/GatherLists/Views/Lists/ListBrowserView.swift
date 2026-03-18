@@ -113,7 +113,7 @@ struct ListBrowserView: View {
                                 Button {
                                     listToEdit = list
                                 } label: {
-                                    Label("Name & Icon", systemImage: "pencil")
+                                    Label("Edit", systemImage: "pencil")
                                 }
                                 
                                 Button {
