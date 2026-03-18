@@ -7,13 +7,10 @@ import PropTypes from 'prop-types';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
-import { useSortPreferences } from '../hooks/useSortPreferences.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
-import { SortLevelEditor } from './SortLevelEditor.jsx';
 import { CategoryEditor } from './CategoryEditor.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
-import { SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import styles from './MobileSettings.module.css';
 
@@ -26,7 +23,6 @@ import styles from './MobileSettings.module.css';
 export const MobileSettings = ({ user, onSignOut }) => {
   const { theme, toggleTheme } = useTheme();
   const { refreshUser } = useAuth();
-  const { userPreferences, loading: prefsLoading, updateDefaultSort } = useSortPreferences();
   const { state, actions } = useShoppingList();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -35,7 +31,6 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
-  const currentDefaultSort = userPreferences?.default_sort_config ?? SYSTEM_DEFAULT_SORT_CONFIG;
 
   const categoryTypes = [
     { value: 'grocery', label: 'Grocery' },
@@ -81,14 +76,6 @@ export const MobileSettings = ({ user, onSignOut }) => {
     } finally {
       setIsUploading(false);
       e.target.value = '';
-    }
-  };
-
-  const handleDefaultSortChange = async (config) => {
-    try {
-      await updateDefaultSort(config);
-    } catch (err) {
-      console.error('Failed to update default sort:', err);
     }
   };
 
@@ -157,18 +144,6 @@ export const MobileSettings = ({ user, onSignOut }) => {
             <span className={styles.toggleTrack} />
           </label>
         </div>
-      </div>
-
-      <h3 className={styles.sectionHeader}>Display</h3>
-      <div className={styles.section}>
-        <div className={styles.sortHeader}>
-          <span className={styles.sortLabel}>Default Sort</span>
-        </div>
-        <SortLevelEditor
-          config={currentDefaultSort}
-          onConfigChange={handleDefaultSortChange}
-          disabled={prefsLoading}
-        />
       </div>
 
       <h3 className={styles.sectionHeader}>Category Defaults</h3>

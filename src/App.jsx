@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
 import { useSortPreferences } from './hooks/useSortPreferences.js';
@@ -17,7 +18,6 @@ import { ShoppingList } from './components/ShoppingList.jsx';
 import { Suggestions } from './components/Suggestions.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
-import { ThemeToggle } from './components/ThemeToggle.jsx';
 import { PWAPrompt } from './components/PWAPrompt.jsx';
 import { PWAInstallBanner } from './components/PWAInstallBanner.jsx';
 import { BottomTabBar } from './components/BottomTabBar.jsx';
@@ -77,6 +77,7 @@ export const App = () => {
   const [showOnlineSearch, setShowOnlineSearch] = useState(false);
   const [onlinePreviewRecipe, setOnlinePreviewRecipe] = useState(null);
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
+  const [showDesktopSettings, setShowDesktopSettings] = useState(false);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -877,7 +878,18 @@ export const App = () => {
               <span className={styles.userName}>
                 {displayName}
               </span>
-              <ThemeToggle />
+              <button
+                type="button"
+                className={styles.settingsBtn}
+                onClick={() => setShowDesktopSettings(true)}
+                aria-label="Settings"
+                title="Settings"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M16.167 12.5a1.375 1.375 0 00.275 1.517l.05.05a1.667 1.667 0 11-2.359 2.358l-.05-.05a1.375 1.375 0 00-1.516-.275 1.375 1.375 0 00-.834 1.258v.142a1.667 1.667 0 11-3.333 0v-.075a1.375 1.375 0 00-.9-1.258 1.375 1.375 0 00-1.517.275l-.05.05a1.667 1.667 0 11-2.358-2.359l.05-.05a1.375 1.375 0 00.275-1.516 1.375 1.375 0 00-1.258-.834h-.142a1.667 1.667 0 010-3.333h.075a1.375 1.375 0 001.258-.9 1.375 1.375 0 00-.275-1.517l-.05-.05A1.667 1.667 0 115.892 3.5l.05.05a1.375 1.375 0 001.516.275h.067a1.375 1.375 0 00.833-1.258v-.142a1.667 1.667 0 013.334 0v.075a1.375 1.375 0 00.833 1.258 1.375 1.375 0 001.517-.275l.05-.05a1.667 1.667 0 112.358 2.358l-.05.05a1.375 1.375 0 00-.275 1.517v.067a1.375 1.375 0 001.258.833h.142a1.667 1.667 0 010 3.334h-.075a1.375 1.375 0 00-1.258.833z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
               <button className={styles.signOutBtn} onClick={signOut} type="button">
                 Sign out
               </button>
@@ -937,6 +949,33 @@ export const App = () => {
           onSave={handleSaveOnlineRecipe}
           onClose={() => setSaveRecipeDetail(null)}
         />
+      )}
+
+      {showDesktopSettings && createPortal(
+        <div
+          className={styles.settingsBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowDesktopSettings(false); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowDesktopSettings(false); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Settings"
+        >
+          <div className={styles.settingsModal}>
+            <div className={styles.settingsModalHeader}>
+              <h2 className={styles.settingsModalTitle}>Settings</h2>
+              <button
+                type="button"
+                className={styles.settingsModalCloseBtn}
+                onClick={() => setShowDesktopSettings(false)}
+                aria-label="Close"
+              >&times;</button>
+            </div>
+            <div className={styles.settingsModalBody}>
+              <MobileSettings user={user} onSignOut={signOut} />
+            </div>
+          </div>
+        </div>,
+        document.body,
       )}
 
       {isMobile && <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />}

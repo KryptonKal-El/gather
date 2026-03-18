@@ -277,21 +277,6 @@
   border-bottom: none;
 }
 
-/* Sort header row */
-.sortHeader {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-
-.sortLabel {
-  font-size: 1rem;
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
 /* Category type tabs */
 .categoryTypeTabs {
   display: flex;
