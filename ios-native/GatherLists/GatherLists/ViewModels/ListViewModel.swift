@@ -17,15 +17,11 @@ final class ListViewModel {
     var isShowingCachedData = false
     var cachedAt: Date?
     
-    /// Set on launch if a valid cached last list should auto-navigate. Cleared after use.
-    var pendingAutoNavigateList: GatherList?
-    
     /// Unified list ordering (owned + shared), with order stored in UserDefaults.
     private(set) var allLists: [GatherList] = []
     
     private let userId: UUID
     private let userEmail: String
-    private var hasAttemptedLaunchRestore = false
     
     private static let listOrderKey = "gather_list_order"
     
@@ -129,26 +125,20 @@ final class ListViewModel {
         rebuildAllLists()
         cachedAt = cachedOwned?.cachedAt ?? cachedShared?.cachedAt
         
-        // Attempt launch restore from UserDefaults cached last list ID
-        if !hasAttemptedLaunchRestore && !allLists.isEmpty {
-            hasAttemptedLaunchRestore = true
-            if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
+        // Set activeListId from cached preference (no auto-navigation)
+        if activeListId == nil && !allLists.isEmpty {
+            if let cachedId = cachedLastListId, allLists.contains(where: { $0.id == cachedId }) {
                 activeListId = cachedId
-                pendingAutoNavigateList = targetList
             } else if let cachedId = cachedLastListId {
-                // Invalid cached list ID — clear it silently
                 clearInvalidLastListId()
-                if activeListId == nil, let firstList = allLists.first {
+                if let firstList = allLists.first {
                     activeListId = firstList.id
                     persistLastListIdDebounced(firstList.id)
                 }
-            } else if activeListId == nil, let firstList = allLists.first {
+            } else if let firstList = allLists.first {
                 activeListId = firstList.id
                 persistLastListIdDebounced(firstList.id)
             }
-        } else if activeListId == nil, let firstList = allLists.first {
-            activeListId = firstList.id
-            persistLastListIdDebounced(firstList.id)
         }
         
         // Fetch fresh data from Supabase
@@ -167,26 +157,20 @@ final class ListViewModel {
             isShowingCachedData = false
             cachedAt = nil
             
-            // Attempt launch restore after network data if not already done
-            if !hasAttemptedLaunchRestore && !allLists.isEmpty {
-                hasAttemptedLaunchRestore = true
-                if let cachedId = cachedLastListId, let targetList = allLists.first(where: { $0.id == cachedId }) {
+            // Set activeListId from cached preference if not already set (no auto-navigation)
+            if activeListId == nil && !allLists.isEmpty {
+                if let cachedId = cachedLastListId, allLists.contains(where: { $0.id == cachedId }) {
                     activeListId = cachedId
-                    pendingAutoNavigateList = targetList
                 } else if let cachedId = cachedLastListId {
-                    // Invalid cached list ID — clear it silently
                     clearInvalidLastListId()
-                    if activeListId == nil, let firstList = allLists.first {
+                    if let firstList = allLists.first {
                         activeListId = firstList.id
                         persistLastListIdDebounced(firstList.id)
                     }
-                } else if activeListId == nil, let firstList = allLists.first {
+                } else if let firstList = allLists.first {
                     activeListId = firstList.id
                     persistLastListIdDebounced(firstList.id)
                 }
-            } else if activeListId == nil, let firstList = allLists.first {
-                activeListId = firstList.id
-                persistLastListIdDebounced(firstList.id)
             }
             
             // Reconcile server preferences with UserDefaults cache

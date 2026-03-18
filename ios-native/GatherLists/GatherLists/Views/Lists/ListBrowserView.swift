@@ -90,12 +90,6 @@ struct ListBrowserView: View {
         .onAppear {
             initializeViewModelIfNeeded()
         }
-        .onChange(of: viewModel?.pendingAutoNavigateList) { _, newValue in
-            if let list = newValue {
-                navigationPath.append(list)
-                viewModel?.pendingAutoNavigateList = nil
-            }
-        }
     }
     
     @ViewBuilder
