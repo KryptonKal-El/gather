@@ -106,6 +106,37 @@ const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, listType
     );
   }
 
+  // RSVP group (collapsible like store, with colored status indicator)
+  if (group.type === 'rsvp') {
+    const isCollapsed = collapsedStores.has(group.key);
+    const allItems = collectGroupItems(group);
+
+    return (
+      <div className={styles.rsvpSection}>
+        <h3
+          className={`${styles.rsvpTitle} ${isCollapsed ? styles.rsvpTitleCollapsed : ''}`}
+          onClick={() => onToggleStore(group.key)}
+        >
+          <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronExpanded}`} />
+          <span className={styles.rsvpDot} style={{ backgroundColor: group.color }} />
+          {group.label}
+          <span className={styles.count}>{allItems.length}</span>
+        </h3>
+        {!isCollapsed && (
+          <div className={styles.rsvpBody}>
+            {group.subGroups ? (
+              group.subGroups.map((subGroup) => (
+                <GroupRenderer key={subGroup.key} group={subGroup} collapsedStores={collapsedStores} onToggleStore={onToggleStore} {...itemProps} />
+              ))
+            ) : group.items ? (
+              <ItemList items={group.items} {...itemProps} />
+            ) : null}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Fallback for unknown types
   if (group.items) {
     return <ItemList items={group.items} {...itemProps} />;

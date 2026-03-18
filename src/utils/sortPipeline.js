@@ -100,8 +100,8 @@ const sortByName = (items) =>
  */
 const sortByDate = (items) =>
   [...items].sort((a, b) => {
-    const dateA = a.added_at ? new Date(a.added_at).getTime() : 0;
-    const dateB = b.added_at ? new Date(b.added_at).getTime() : 0;
+    const dateA = a.addedAt ? new Date(a.addedAt).getTime() : 0;
+    const dateB = b.addedAt ? new Date(b.addedAt).getTime() : 0;
     return dateB - dateA;
   });
 

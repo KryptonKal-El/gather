@@ -9,7 +9,20 @@ import styles from './SortPicker.module.css';
  */
 export const SortPicker = ({ currentConfig, hasOverride, onSelect, listType = 'grocery' }) => {
   const [open, setOpen] = useState(false);
+  const [optimisticConfig, setOptimisticConfig] = useState(null);
   const containerRef = useRef(null);
+
+  // Clear optimistic state when real config arrives from server
+  useEffect(() => {
+    setOptimisticConfig(null);
+  }, [currentConfig]);
+
+  const displayConfig = optimisticConfig ?? currentConfig;
+
+  const handleConfigChange = (newConfig) => {
+    setOptimisticConfig(newConfig);
+    onSelect(newConfig);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -45,8 +58,8 @@ export const SortPicker = ({ currentConfig, hasOverride, onSelect, listType = 'g
         <div className={styles.popover}>
           <div className={styles.header}>Sort Levels</div>
           <SortLevelEditor
-            config={currentConfig}
-            onConfigChange={onSelect}
+            config={displayConfig}
+            onConfigChange={handleConfigChange}
             listType={listType}
           />
 

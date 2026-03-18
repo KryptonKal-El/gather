@@ -9,6 +9,7 @@ struct SortConfigSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var levels: [SortLevel] = []
+    @State private var editMode: EditMode = .active
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private static let levelLabels: [SortLevel: String] = [
@@ -80,7 +81,7 @@ struct SortConfigSheet: View {
                     }
                 }
             }
-            .environment(\.editMode, .constant(.active))
+            .environment(\.editMode, $editMode)
             .navigationTitle("Sort Configuration")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
