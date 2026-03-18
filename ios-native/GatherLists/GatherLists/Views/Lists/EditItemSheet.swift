@@ -3,6 +3,7 @@ import SwiftUI
 struct EditItemSheet: View {
     let item: Item
     let stores: [Store]
+    let listCategories: [CategoryDef]
     let listType: String
     let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool) -> Void
     let onImageTap: () -> Void
@@ -22,12 +23,14 @@ struct EditItemSheet: View {
     init(
         item: Item,
         stores: [Store],
+        listCategories: [CategoryDef],
         listType: String = "grocery",
         onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
         self.stores = stores
+        self.listCategories = listCategories
         self.listType = listType
         self.onSave = onSave
         self.onImageTap = onImageTap
@@ -42,15 +45,8 @@ struct EditItemSheet: View {
     }
     
     private var availableCategories: [CategoryDef] {
-        // Use type-specific categories if available
-        if let typeCategories = typeConfig.categories {
-            return typeCategories.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
-        }
-        // Fall back to store categories or defaults
-        if let storeId = selectedStoreId,
-           let store = stores.first(where: { $0.id == storeId }),
-           !store.categories.isEmpty {
-            return store.categories
+        if !listCategories.isEmpty {
+            return listCategories
         }
         return CategoryDefinitions.defaults
     }

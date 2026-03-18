@@ -83,7 +83,8 @@ struct ListDetailView: View {
         SuggestionEngine.getSuggestions(
             history: detailViewModel?.historyEntries ?? [],
             currentItems: detailViewModel?.uncheckedItems ?? [],
-            listType: list.type
+            listType: list.type,
+            listCategories: detailViewModel?.listCategories
         )
     }
     
@@ -204,6 +205,7 @@ struct ListDetailView: View {
             EditItemSheet(
                 item: item,
                 stores: detailViewModel?.stores ?? [],
+                listCategories: detailViewModel?.listCategories ?? [],
                 listType: detailViewModel?.listType ?? "grocery",
                 onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus in
                     Task {
@@ -998,15 +1000,8 @@ struct ListDetailView: View {
     // MARK: - Context Menu Helpers
     
     private func categoriesForItem(_ item: Item) -> [CategoryDef] {
-        // Use type-specific categories if available
-        if let typeCategories = detailViewModel?.typeConfig.categories {
-            return typeCategories.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
-        }
-        // Fall back to store categories or defaults
-        if let storeId = item.storeId,
-           let store = detailViewModel?.stores.first(where: { $0.id == storeId }),
-           !store.categories.isEmpty {
-            return store.categories
+        if let vm = detailViewModel, !vm.listCategories.isEmpty {
+            return vm.listCategories
         }
         return CategoryDefinitions.defaults
     }
@@ -1412,7 +1407,7 @@ struct ListDetailView: View {
             print("[ListDetailView] No authenticated user, cannot create detail view model")
             return
         }
-        detailViewModel = ListDetailViewModel(listId: list.id, userId: userId, ownerId: list.ownerId, listType: list.type)
+        detailViewModel = ListDetailViewModel(list: list, userId: userId)
     }
     
     private func loadShareInfo() async {

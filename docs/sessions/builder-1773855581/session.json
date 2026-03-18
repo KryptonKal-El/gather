@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-18T20:00:00Z",
   "lastHeartbeat": "2026-03-18T20:00:00Z",
-  "currentChunk": "US-006",
+  "currentChunk": "US-007",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -57,8 +57,9 @@
       "id": "US-006",
       "slug": "swift-category-resolution",
       "title": "Service layer — Category resolution logic (Swift)",
-      "status": "pending",
-      "priority": 6
+      "status": "completed",
+      "priority": 6,
+      "committedAt": "2026-03-18T20:50:00Z"
     },
     {
       "id": "US-007",

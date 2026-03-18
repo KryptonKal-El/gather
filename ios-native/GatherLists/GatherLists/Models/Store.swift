@@ -14,7 +14,6 @@ struct Store: Codable, Identifiable, Hashable {
     let userId: UUID
     var name: String
     var color: String?
-    var categories: [CategoryDef]
     var sortOrder: Int
     let createdAt: Date
     
@@ -23,7 +22,6 @@ struct Store: Codable, Identifiable, Hashable {
         userId: UUID,
         name: String,
         color: String? = nil,
-        categories: [CategoryDef] = [],
         sortOrder: Int = 0,
         createdAt: Date = Date()
     ) {
@@ -31,7 +29,6 @@ struct Store: Codable, Identifiable, Hashable {
         self.userId = userId
         self.name = name
         self.color = color
-        self.categories = categories
         self.sortOrder = sortOrder
         self.createdAt = createdAt
     }
@@ -41,7 +38,6 @@ struct Store: Codable, Identifiable, Hashable {
         case userId = "user_id"
         case name
         case color
-        case categories
         case sortOrder = "sort_order"
         case createdAt = "created_at"
     }

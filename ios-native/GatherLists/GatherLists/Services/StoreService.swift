@@ -34,8 +34,7 @@ struct StoreService {
     static func createStore(
         userId: UUID,
         name: String,
-        color: String?,
-        categories: [CategoryDef]
+        color: String?
     ) async throws -> Store {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
@@ -49,7 +48,6 @@ struct StoreService {
             userId: userId,
             name: trimmedName,
             color: color,
-            categories: categories,
             sortOrder: sortOrder
         )
         
@@ -67,13 +65,11 @@ struct StoreService {
     static func updateStore(
         storeId: UUID,
         name: String? = nil,
-        color: String? = nil,
-        categories: [CategoryDef]? = nil
+        color: String? = nil
     ) async throws {
         let update = StoreUpdate(
             name: name,
-            color: color,
-            categories: categories
+            color: color
         )
         try await client
             .from("stores")
@@ -99,7 +95,6 @@ struct StoreService {
                 userId: userId,
                 name: store.name,
                 color: store.color,
-                categories: store.categories,
                 sortOrder: index,
                 createdAt: store.createdAt
             )
@@ -130,14 +125,12 @@ private struct NewStore: Encodable {
     let userId: UUID
     let name: String
     let color: String?
-    let categories: [CategoryDef]
     let sortOrder: Int
     
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case name
         case color
-        case categories
         case sortOrder = "sort_order"
     }
 }
@@ -145,19 +138,16 @@ private struct NewStore: Encodable {
 private struct StoreUpdate: Encodable {
     var name: String?
     var color: String?
-    var categories: [CategoryDef]?
     
     enum CodingKeys: String, CodingKey {
         case name
         case color
-        case categories
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         if let name = name { try container.encode(name, forKey: .name) }
         if let color = color { try container.encode(color, forKey: .color) }
-        if let categories = categories { try container.encode(categories, forKey: .categories) }
     }
 }
 
@@ -166,7 +156,6 @@ private struct StoreOrderEntry: Encodable {
     let userId: UUID
     let name: String
     let color: String?
-    let categories: [CategoryDef]
     let sortOrder: Int
     let createdAt: Date
     
@@ -175,7 +164,6 @@ private struct StoreOrderEntry: Encodable {
         case userId = "user_id"
         case name
         case color
-        case categories
         case sortOrder = "sort_order"
         case createdAt = "created_at"
     }

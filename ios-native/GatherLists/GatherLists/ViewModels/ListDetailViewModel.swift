@@ -16,11 +16,15 @@ final class ListDetailViewModel {
     var isShowingCachedData = false
     var cachedAt: Date?
     
+    // List categories (resolved via CategoryService)
+    private(set) var listCategories: [CategoryDef] = []
+    
     // Identifiers
     private let listId: UUID
     private let userId: UUID
     private let ownerId: UUID
     let listType: String
+    private var list: GatherList?
     
     var isSharedList: Bool { ownerId != userId }
     
@@ -66,21 +70,23 @@ final class ListDetailViewModel {
     
     /// Applies the sort pipeline to unchecked items with the given effective config.
     func pipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores, listType: listType)
+        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores, listCategories: listCategories, listType: listType)
     }
     
     /// Applies the sort pipeline to checked items with the given effective config.
     func checkedPipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: checkedItems, config: config, stores: stores, listType: listType)
+        SortPipeline.apply(items: checkedItems, config: config, stores: stores, listCategories: listCategories, listType: listType)
     }
     
     // MARK: - Initialization
     
-    init(listId: UUID, userId: UUID, ownerId: UUID, listType: String = "grocery") {
-        self.listId = listId
+    init(list: GatherList, userId: UUID) {
+        self.listId = list.id
         self.userId = userId
-        self.ownerId = ownerId
-        self.listType = listType
+        self.ownerId = list.ownerId
+        self.listType = list.type
+        self.list = list
+        self.listCategories = CategoryService.getEffectiveCategories(list: list) ?? []
         
         Task {
             await loadData()
@@ -283,7 +289,7 @@ final class ListDetailViewModel {
                 name: name,
                 category: nil,
                 storeId: storeId,
-                stores: stores,
+                listCategories: listCategories,
                 listType: listType,
                 rsvpStatus: rsvpDefault
             )
@@ -309,7 +315,7 @@ final class ListDetailViewModel {
                 name: name,
                 category: pastItem?.category,
                 storeId: storeId,
-                stores: stores,
+                listCategories: listCategories,
                 listType: listType,
                 quantity: pastItem?.quantity ?? 1,
                 price: pastItem?.price,

@@ -85,9 +85,7 @@ struct StoreBrowserView: View {
             }
             
             ForEach(filteredStores) { store in
-                NavigationLink(value: store) {
-                    storeRow(store)
-                }
+                storeRow(store)
                 .contextMenu {
                     Button {
                         storeToEdit = store
@@ -123,11 +121,6 @@ struct StoreBrowserView: View {
             await vm.refresh()
         }
         .searchable(text: $searchQuery, prompt: "Search stores")
-        .navigationDestination(for: Store.self) { store in
-            if let vm = viewModel {
-                CategoryEditorView(store: store, viewModel: vm)
-            }
-        }
     }
     
     private func storeRow(_ store: Store) -> some View {
@@ -136,14 +129,8 @@ struct StoreBrowserView: View {
                 .fill(Color(hex: store.color ?? "#1565c0"))
                 .frame(width: 12, height: 12)
             
-            VStack(alignment: .leading, spacing: 2) {
-                Text(store.name)
-                    .font(.body)
-                
-                Text("\(store.categories.count) categories")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Text(store.name)
+                .font(.body)
             
             Spacer()
         }

@@ -170,8 +170,8 @@
         "Lint passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Mirrored React category resolution on iOS. New CategoryService, UserCategoryDefault model, updated sort pipeline, item service, views. Removed store.categories from Store model.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -182,7 +182,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-18T20:50:00Z"
     },
     {
       "id": "US-007",

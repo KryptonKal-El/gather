@@ -90,6 +90,9 @@
 		A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D3 /* ListTypeIconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D2 /* ListTypeIconView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -178,6 +181,9 @@
 		A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortPipeline.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTypeConfig.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D2 /* ListTypeIconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListTypeIconView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefault.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefaultService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -262,6 +268,7 @@
 				A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2BD /* UserPreferences.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -282,6 +289,8 @@
 				A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2BF /* PreferenceService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -576,6 +585,9 @@
 				A1B2C3D4E5F6A7B8C9D0E2C4 /* SortConfigSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D1 /* ListTypeConfig.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D3 /* ListTypeIconView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -30,12 +30,14 @@ enum SuggestionEngine {
     ///   - currentItems: Items currently in the list
     ///   - maxSuggestions: Maximum number of suggestions to return (default 8)
     ///   - listType: The list type for auto-categorization (e.g., 'grocery', 'packing')
+    ///   - listCategories: Categories for the list (from list.categories → user defaults → system defaults)
     /// - Returns: Array of item suggestions
     static func getSuggestions(
         history: [HistoryEntry],
         currentItems: [Item],
         maxSuggestions: Int = 8,
-        listType: String? = nil
+        listType: String? = nil,
+        listCategories: [CategoryDef]? = nil
     ) -> [ItemSuggestion] {
         let currentNames = Set(currentItems.map { $0.name.lowercased() })
         var suggestions: [ItemSuggestion] = []
@@ -48,7 +50,7 @@ enum SuggestionEngine {
             suggestions.append(ItemSuggestion(
                 name: name,
                 reason: reason,
-                category: CategoryDefinitions.categorizeItem(name, listType: listType)
+                category: CategoryDefinitions.categorizeItem(name, listType: listType, categories: listCategories)
             ))
         }
         

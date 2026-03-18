@@ -131,10 +131,11 @@ enum SortPipeline {
     /// - Parameters:
     ///   - items: Array of items to sort/group.
     ///   - config: Array of 1-4 sort levels.
-    ///   - stores: Array of store objects for store grouping and category lookup.
+    ///   - stores: Array of store objects for store grouping.
+    ///   - listCategories: Categories for the current list (list.categories → user defaults → system defaults).
     ///   - listType: The list type (for type-specific category lookup).
     /// - Returns: Nested structure with groups, subGroups, and items.
-    static func apply(items: [Item], config: [SortLevel], stores: [Store], listType: String = "grocery") -> PipelineResult {
+    static func apply(items: [Item], config: [SortLevel], stores: [Store], listCategories: [CategoryDef], listType: String = "grocery") -> PipelineResult {
         let normalizedConfig = normalize(config)
         let safeStores = stores
         
@@ -156,7 +157,7 @@ enum SortPipeline {
             items: items,
             remainingLevels: normalizedConfig,
             stores: safeStores,
-            parentStoreId: nil,
+            listCategories: listCategories,
             listType: listType
         )
         
@@ -210,7 +211,7 @@ enum SortPipeline {
         items: [Item],
         remainingLevels: [SortLevel],
         stores: [Store],
-        parentStoreId: UUID?,
+        listCategories: [CategoryDef],
         listType: String
     ) -> IntermediateResult {
         guard !remainingLevels.isEmpty else {
@@ -230,11 +231,11 @@ enum SortPipeline {
         
         switch currentLevel {
         case .store:
-            return groupByStore(items: items, stores: stores, remainingLevels: nextLevels, listType: listType)
+            return groupByStore(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
         case .category:
-            return groupByCategory(items: items, stores: stores, remainingLevels: nextLevels, parentStoreId: parentStoreId, listType: listType)
+            return groupByCategory(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
         case .rsvp:
-            return groupByRsvp(items: items, stores: stores, remainingLevels: nextLevels, listType: listType)
+            return groupByRsvp(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
         default:
             return IntermediateResult(items: items)
         }
@@ -244,6 +245,7 @@ enum SortPipeline {
         items: [Item],
         stores: [Store],
         remainingLevels: [SortLevel],
+        listCategories: [CategoryDef],
         listType: String
     ) -> IntermediateResult {
         let storeMap = Dictionary(uniqueKeysWithValues: stores.map { ($0.id, $0) })
@@ -269,7 +271,7 @@ enum SortPipeline {
                 items: storeItems,
                 remainingLevels: remainingLevels,
                 stores: stores,
-                parentStoreId: store.id,
+                listCategories: listCategories,
                 listType: listType
             )
             
@@ -307,7 +309,7 @@ enum SortPipeline {
                 items: ungrouped,
                 remainingLevels: remainingLevels,
                 stores: stores,
-                parentStoreId: nil,
+                listCategories: listCategories,
                 listType: listType
             )
             
@@ -347,10 +349,10 @@ enum SortPipeline {
         items: [Item],
         stores: [Store],
         remainingLevels: [SortLevel],
-        parentStoreId: UUID?,
+        listCategories: [CategoryDef],
         listType: String
     ) -> IntermediateResult {
-        let categoryInfo = getCategoryInfo(stores: stores, parentStoreId: parentStoreId, listType: listType)
+        let categoryInfo = getCategoryInfo(listCategories: listCategories, listType: listType)
         let validCategories = Set(categoryInfo.orderedKeys)
         
         var grouped: [String: [Item]] = [:]
@@ -372,7 +374,7 @@ enum SortPipeline {
                 items: categoryItems,
                 remainingLevels: remainingLevels,
                 stores: stores,
-                parentStoreId: parentStoreId,
+                listCategories: listCategories,
                 listType: listType
             )
             
@@ -400,7 +402,7 @@ enum SortPipeline {
                 items: other,
                 remainingLevels: remainingLevels,
                 stores: stores,
-                parentStoreId: parentStoreId,
+                listCategories: listCategories,
                 listType: listType
             )
             processedOther = subResult.items ?? other
@@ -424,6 +426,7 @@ enum SortPipeline {
         items: [Item],
         stores: [Store],
         remainingLevels: [SortLevel],
+        listCategories: [CategoryDef],
         listType: String
     ) -> IntermediateResult {
         let rsvpOrder: [(status: String, label: String, color: String)] = [
@@ -449,7 +452,7 @@ enum SortPipeline {
                 items: rsvpItems,
                 remainingLevels: remainingLevels,
                 stores: stores,
-                parentStoreId: nil,
+                listCategories: listCategories,
                 listType: listType
             )
             
@@ -480,53 +483,8 @@ enum SortPipeline {
         var orderedKeys: [String]
     }
     
-    private static func getCategoryInfo(stores: [Store], parentStoreId: UUID?, listType: String) -> CategoryInfo {
-        // Packing/todo types use their own categories
-        if listType == "packing" {
-            let cats = ListTypeCategories.packing
-            var labels: [String: String] = [:]
-            var colors: [String: String] = [:]
-            var orderedKeys: [String] = []
-            for cat in cats {
-                labels[cat.key] = cat.name
-                colors[cat.key] = cat.color
-                orderedKeys.append(cat.key)
-            }
-            return CategoryInfo(labels: labels, colors: colors, orderedKeys: orderedKeys)
-        }
-        if listType == "todo" {
-            let cats = ListTypeCategories.todo
-            var labels: [String: String] = [:]
-            var colors: [String: String] = [:]
-            var orderedKeys: [String] = []
-            for cat in cats {
-                labels[cat.key] = cat.name
-                colors[cat.key] = cat.color
-                orderedKeys.append(cat.key)
-            }
-            return CategoryInfo(labels: labels, colors: colors, orderedKeys: orderedKeys)
-        }
-        if listType == "project" {
-            let cats = ListTypeCategories.project
-            var labels: [String: String] = [:]
-            var colors: [String: String] = [:]
-            var orderedKeys: [String] = []
-            for cat in cats {
-                labels[cat.key] = cat.name
-                colors[cat.key] = cat.color
-                orderedKeys.append(cat.key)
-            }
-            return CategoryInfo(labels: labels, colors: colors, orderedKeys: orderedKeys)
-        }
-        
-        // Grocery (existing behavior)
-        var categories = CategoryDefinitions.defaults
-        
-        if let storeId = parentStoreId,
-           let store = stores.first(where: { $0.id == storeId }),
-           !store.categories.isEmpty {
-            categories = store.categories
-        }
+    private static func getCategoryInfo(listCategories: [CategoryDef], listType: String) -> CategoryInfo {
+        let categories = listCategories.isEmpty ? CategoryDefinitions.defaults : listCategories
         
         var labels: [String: String] = [:]
         var colors: [String: String] = [:]

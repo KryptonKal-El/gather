@@ -103,8 +103,7 @@ final class StoreViewModel {
             let newStore = try await StoreService.createStore(
                 userId: userId,
                 name: name,
-                color: color,
-                categories: []
+                color: color
             )
             stores.append(newStore)
         } catch {
@@ -154,20 +153,6 @@ final class StoreViewModel {
                 }
                 print("[StoreViewModel] Failed to save store order: \(error.localizedDescription)")
             }
-        }
-    }
-    
-    func updateCategories(_ storeId: UUID, categories: [CategoryDef]) async {
-        error = nil
-        do {
-            try await StoreService.updateStore(storeId: storeId, categories: categories)
-            
-            if let index = stores.firstIndex(where: { $0.id == storeId }) {
-                stores[index].categories = categories
-            }
-        } catch {
-            self.error = error.localizedDescription
-            print("[StoreViewModel] Failed to update categories: \(error.localizedDescription)")
         }
     }
     

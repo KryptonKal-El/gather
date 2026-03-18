@@ -37,7 +37,7 @@ struct ItemService {
         name: String,
         category: String?,
         storeId: UUID?,
-        stores: [Store],
+        listCategories: [CategoryDef],
         listType: String? = nil,
         quantity: Int = 1,
         price: Decimal? = nil,
@@ -51,13 +51,7 @@ struct ItemService {
         if let explicitCategory = category {
             resolvedCategory = explicitCategory
         } else {
-            var storeCategories: [CategoryDef] = []
-            if let storeId = storeId,
-               let store = stores.first(where: { $0.id == storeId }),
-               !store.categories.isEmpty {
-                storeCategories = store.categories
-            }
-            resolvedCategory = CategoryDefinitions.categorizeItem(capitalizedName, listType: listType, categories: storeCategories.isEmpty ? nil : storeCategories)
+            resolvedCategory = CategoryDefinitions.categorizeItem(capitalizedName, listType: listType, categories: listCategories.isEmpty ? nil : listCategories)
         }
         
         let newItem = NewItem(
