@@ -4,6 +4,7 @@ import UIKit
 /// Bottom sheet for editing an existing list's name, emoji, and color.
 struct EditListSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthViewModel.self) private var authViewModel
     
     let list: GatherList
     let viewModel: ListViewModel
@@ -20,6 +21,8 @@ struct EditListSheet: View {
     @State private var pendingNewCategory: CategoryDef?
     @State private var showDeleteConfirm = false
     @State private var categoryToDelete: CategoryDef?
+    @State private var showSaveDefaultConfirm = false
+    @State private var showSaveDefaultSuccess = false
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
@@ -143,6 +146,12 @@ struct EditListSheet: View {
                                 }
                             }
                             .buttonStyle(.plain)
+                            
+                            Button {
+                                showSaveDefaultConfirm = true
+                            } label: {
+                                Label("Set as Default for \(list.type.capitalized)", systemImage: "square.and.arrow.down")
+                            }
                         } label: {
                             HStack {
                                 Text("Customize Categories")
@@ -217,6 +226,19 @@ struct EditListSheet: View {
                     Text("Delete \"\(cat.name)\"?")
                 }
             }
+            .alert("Set as Default", isPresented: $showSaveDefaultConfirm) {
+                Button("Cancel", role: .cancel) { }
+                Button("Save") {
+                    saveAsDefault()
+                }
+            } message: {
+                Text("This will replace your default \(list.type.capitalized) categories with this list's categories. Continue?")
+            }
+            .alert("Saved", isPresented: $showSaveDefaultSuccess) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Default \(list.type.capitalized) categories updated.")
+            }
         }
         .interactiveDismissDisabled(isSaving)
     }
@@ -285,6 +307,22 @@ struct EditListSheet: View {
             keywords: []
         )
         pendingNewCategory = newCategory
+    }
+    
+    private func saveAsDefault() {
+        Task {
+            guard let userId = authViewModel.currentUser?.id else { return }
+            do {
+                try await UserCategoryDefaultService.upsertDefault(
+                    userId: userId,
+                    listType: list.type,
+                    categories: categories
+                )
+                showSaveDefaultSuccess = true
+            } catch {
+                print("Failed to save default categories: \(error)")
+            }
+        }
     }
     
     private func colorToHex(_ color: Color) -> String {
