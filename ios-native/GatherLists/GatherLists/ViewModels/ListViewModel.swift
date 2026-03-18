@@ -325,10 +325,10 @@ final class ListViewModel {
         }
     }
     
-    func updateList(id: UUID, name: String?, emoji: String?, color: String?, type: String? = nil) async {
+    func updateList(id: UUID, name: String?, emoji: String?, color: String?, type: String? = nil, categories: [CategoryDef]? = nil) async {
         error = nil
         do {
-            try await ListService.updateList(listId: id, name: name, emoji: emoji, color: color, type: type)
+            try await ListService.updateList(listId: id, name: name, emoji: emoji, color: color, type: type, categories: categories)
             
             // Update local state
             if let index = ownedLists.firstIndex(where: { $0.id == id }) {
@@ -337,6 +337,7 @@ final class ListViewModel {
                 ownedLists[index].emoji = emoji
                 if let color { ownedLists[index].color = color }
                 if let type { ownedLists[index].type = type }
+                if let categories { ownedLists[index].categories = categories }
                 rebuildAllLists()
             }
         } catch {

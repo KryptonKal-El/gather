@@ -94,6 +94,10 @@ final class ListDetailViewModel {
         }
     }
     
+    func updateCategories(_ categories: [CategoryDef]) {
+        self.listCategories = categories
+    }
+    
     // MARK: - Data Loading
     
     private func loadData() async {

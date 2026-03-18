@@ -38,9 +38,9 @@ struct ListService {
         return list
     }
     
-    /// Updates a list's name, emoji, and/or color.
-    static func updateList(listId: UUID, name: String?, emoji: String?, color: String?, type: String? = nil) async throws {
-        let update = ListUpdate(name: name, emoji: emoji, color: color, type: type)
+    /// Updates a list's name, emoji, color, type, and/or categories.
+    static func updateList(listId: UUID, name: String?, emoji: String?, color: String?, type: String? = nil, categories: [CategoryDef]? = nil) async throws {
+        let update = ListUpdate(name: name, emoji: emoji, color: color, type: type, categories: categories)
         try await client
             .from("lists")
             .update(update)
@@ -196,6 +196,7 @@ private struct ListUpdate: Encodable {
     var emoji: String?
     var color: String?
     var type: String?
+    var categories: [CategoryDef]?
 }
 
 /// Lightweight struct for inserting a new share.
