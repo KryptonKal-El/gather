@@ -7,12 +7,14 @@ struct DefaultCategoryEditorView: View {
     @State private var categories: [CategoryDef] = []
     @State private var isLoading = true
     @State private var editingCategory: CategoryDef?
+    @State private var pendingNewCategory: CategoryDef?
     @State private var showResetConfirm = false
     @State private var showDeleteConfirm = false
     @State private var categoryToDelete: CategoryDef?
     @State private var searchText = ""
     @State private var showDeleteAllConfirm = false
     
+    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
@@ -47,7 +49,7 @@ struct DefaultCategoryEditorView: View {
                 } header: {
                     Text("Categories")
                 } footer: {
-                    Text("Swipe to delete. Drag to reorder.")
+                    Text("Swipe to delete. Tap Edit to reorder.")
                 }
                 
                 Section {
@@ -69,10 +71,13 @@ struct DefaultCategoryEditorView: View {
             }
         }
         .searchable(text: $searchText, prompt: "Search categories")
-        .environment(\.editMode, .constant(.active))
+        .tint(brandGreen)
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                EditButton()
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     addNewCategory()
@@ -90,6 +95,17 @@ struct DefaultCategoryEditorView: View {
                 onSave: { updated in updateCategory(original: category, updated: updated) }
             )
         }
+        .sheet(item: $pendingNewCategory) { category in
+            CategoryDetailEditor(
+                category: category,
+                presetColors: presetColors,
+                existingKeys: Set(categories.map(\.key)),
+                onSave: { updated in
+                    categories.append(updated)
+                    saveCategories()
+                }
+            )
+        }
         .alert("Delete Category?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {
                 categoryToDelete = nil
@@ -103,7 +119,7 @@ struct DefaultCategoryEditorView: View {
             }
         } message: {
             if let cat = categoryToDelete {
-                Text("Delete \"\(cat.name)\"? Items using this category will become uncategorized.")
+                Text("Delete \"\(cat.name)\" from \(listType) defaults? Existing lists will not be affected.")
             }
         }
         .alert("Delete All Categories?", isPresented: $showDeleteAllConfirm) {
@@ -113,7 +129,7 @@ struct DefaultCategoryEditorView: View {
                 saveCategories()
             }
         } message: {
-            Text("This will remove all categories. Items will become uncategorized.")
+            Text("This will remove all default \(listType.capitalized) categories. Existing lists will not be affected.")
         }
         .alert("Reset to System Defaults?", isPresented: $showResetConfirm) {
             Button("Cancel", role: .cancel) {}
@@ -177,7 +193,11 @@ struct DefaultCategoryEditorView: View {
     private func saveCategories() {
         guard let userId = authViewModel.currentUser?.id else { return }
         Task {
-            try? await UserCategoryDefaultService.upsertDefault(userId: userId, listType: listType, categories: categories)
+            do {
+                try await UserCategoryDefaultService.upsertDefault(userId: userId, listType: listType, categories: categories)
+            } catch {
+                print("Failed to save category defaults: \(error)")
+            }
         }
     }
     
@@ -204,9 +224,7 @@ struct DefaultCategoryEditorView: View {
             color: nextColor,
             keywords: []
         )
-        categories.append(newCategory)
-        saveCategories()
-        editingCategory = newCategory
+        pendingNewCategory = newCategory
     }
     
     private func generateUniqueKey(_ baseName: String) -> String {

@@ -335,8 +335,6 @@ struct CategoryDetailEditor: View {
                     }
                     .padding(.vertical, 8)
                     
-                    Divider()
-                    
                     ColorPicker("Custom Color", selection: $customColor)
                         .onChange(of: customColor) { _, newValue in
                             selectedColor = colorToHex(newValue)
@@ -344,7 +342,8 @@ struct CategoryDetailEditor: View {
                 }
                 
                 Section {
-                    TextField("milk, bread, eggs, ...", text: $keywordsText)
+                    TextField("milk, bread, eggs, ...", text: $keywordsText, axis: .vertical)
+                        .lineLimit(1...6)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                 } header: {
