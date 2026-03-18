@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -22,7 +22,7 @@ import { CategoryEditor } from './CategoryEditor.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
-import { getEffectiveCategories } from '../utils/categories.js';
+import { getEffectiveCategories, getSystemDefaultCategories } from '../utils/categories.js';
 import { updateListSortConfig } from '../services/preferences.js';
 import { saveListOrder } from '../services/database.js';
 import {
@@ -63,6 +63,8 @@ const SortableListItem = ({ id, children, isMobile }) => {
   );
 };
 
+const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo'];
+
 /**
  * Sidebar/dropdown for managing multiple shopping lists.
  * Shows all lists (owned + shared) with emoji icons, allows creating new ones,
@@ -93,13 +95,22 @@ export const ListSelector = ({
   const [changingTypeForId, setChangingTypeForId] = useState(null);
   const [pendingTypeChange, setPendingTypeChange] = useState(null);
   const [editingCategoriesForId, setEditingCategoriesForId] = useState(null);
+  const [showCategoryPreview, setShowCategoryPreview] = useState(false);
+  const [customCategories, setCustomCategories] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
   const { state, actions } = useShoppingList();
   const reorderLists = actions.reorderLists;
-  const userCategoryDefaults = state.userCategoryDefaults ?? [];
+  const userCategoryDefaults = useMemo(() => state.userCategoryDefaults ?? [], [state.userCategoryDefaults]);
 
-  const CATEGORY_EDITABLE_TYPES = ['grocery', 'packing', 'todo'];
+
+  const resolvedPreviewCategories = useMemo(() => {
+    if (!CATEGORY_SUPPORTED_TYPES.includes(newType)) return null;
+    if (customCategories) return customCategories;
+    const userDefault = userCategoryDefaults.find(d => d.listType === newType);
+    if (userDefault?.categories?.length > 0) return userDefault.categories;
+    return getSystemDefaultCategories(newType);
+  }, [newType, customCategories, userCategoryDefaults]);
 
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -150,13 +161,16 @@ export const ListSelector = ({
     if (e?.preventDefault) e.preventDefault();
     const trimmed = newName.trim();
     if (!trimmed) return;
-    onCreate(trimmed, newEmoji, newColor, newType);
+    const categoriesToPass = showCategoryPreview ? customCategories : null;
+    onCreate(trimmed, newEmoji, newColor, newType, categoriesToPass);
     setNewName('');
     setNewEmoji(null);
     setNewColor('#1565c0');
     setNewType('grocery');
     setIsCreating(false);
     setSearchQuery('');
+    setShowCategoryPreview(false);
+    setCustomCategories(null);
   };
 
   const handleStartEdit = (list) => {
@@ -193,7 +207,11 @@ export const ListSelector = ({
             key={typeId}
             type="button"
             className={`${styles.typeCell} ${isSelected ? styles.typeCellSelected : ''}`}
-            onClick={() => setNewType(typeId)}
+            onClick={() => {
+              setNewType(typeId);
+              setCustomCategories(null);
+              setShowCategoryPreview(false);
+            }}
           >
             <span className={styles.typeCellIcon}><IconComponent size={28} /></span>
             <span className={styles.typeCellLabel}>{cfg.label}</span>
@@ -367,7 +385,7 @@ export const ListSelector = ({
                       List Type
                     </button>
                   )}
-                  {isOwned && CATEGORY_EDITABLE_TYPES.includes(list.type) && (
+                  {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
                     <button
                       type="button"
                       className={styles.menuItem}
@@ -429,7 +447,7 @@ export const ListSelector = ({
                         List Type
                       </button>
                     )}
-                    {isOwned && CATEGORY_EDITABLE_TYPES.includes(list.type) && (
+                    {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
                       <button
                         type="button"
                         className={styles.actionSheetItem}
@@ -602,6 +620,30 @@ export const ListSelector = ({
                     />
                   ))}
                 </div>
+                {CATEGORY_SUPPORTED_TYPES.includes(newType) && (
+                  <div className={styles.categoryPreviewSection}>
+                    <button
+                      type="button"
+                      className={styles.categoryPreviewToggle}
+                      onClick={() => setShowCategoryPreview(!showCategoryPreview)}
+                    >
+                      <span className={styles.categoryPreviewLabel}>Customize Categories</span>
+                      <span className={`${styles.categoryPreviewChevron} ${showCategoryPreview ? styles.categoryPreviewChevronOpen : ''}`}>
+                        &#x276F;
+                      </span>
+                    </button>
+                    {showCategoryPreview && resolvedPreviewCategories && (
+                      <div className={styles.categoryPreviewEditor}>
+                        <CategoryEditor
+                          categories={customCategories ?? resolvedPreviewCategories}
+                          listType={newType}
+                          onSave={setCustomCategories}
+                          showHeader={false}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
                 <button
                   className={styles.createBtn}
                   type="button"
@@ -716,6 +758,30 @@ export const ListSelector = ({
                   />
                 ))}
               </div>
+              {CATEGORY_SUPPORTED_TYPES.includes(newType) && (
+                <div className={styles.categoryPreviewSection}>
+                  <button
+                    type="button"
+                    className={styles.categoryPreviewToggle}
+                    onClick={() => setShowCategoryPreview(!showCategoryPreview)}
+                  >
+                    <span className={styles.categoryPreviewLabel}>Customize Categories</span>
+                    <span className={`${styles.categoryPreviewChevron} ${showCategoryPreview ? styles.categoryPreviewChevronOpen : ''}`}>
+                      &#x276F;
+                    </span>
+                  </button>
+                  {showCategoryPreview && resolvedPreviewCategories && (
+                    <div className={styles.categoryPreviewEditor}>
+                      <CategoryEditor
+                        categories={customCategories ?? resolvedPreviewCategories}
+                        listType={newType}
+                        onSave={setCustomCategories}
+                        showHeader={false}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
               <button
                 className={styles.createBtn}
                 type="button"

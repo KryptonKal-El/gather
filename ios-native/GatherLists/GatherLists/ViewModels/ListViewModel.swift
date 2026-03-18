@@ -310,13 +310,19 @@ final class ListViewModel {
         await refetchAllData()
     }
     
-    func createList(name: String, emoji: String?, color: String, type: String = "grocery") async {
+    func createList(name: String, emoji: String?, color: String, type: String = "grocery", customCategories: [CategoryDef]? = nil) async {
         error = nil
         do {
             let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count, type: type)
             
-            let seedCategories = await getSeedCategories(for: type, userId: userId)
-            if let categories = seedCategories {
+            var categoriesToSeed: [CategoryDef]?
+            if let custom = customCategories {
+                categoriesToSeed = custom
+            } else {
+                categoriesToSeed = await getSeedCategories(for: type, userId: userId)
+            }
+            
+            if let categories = categoriesToSeed {
                 try await ListService.updateList(listId: newList.id, name: nil, emoji: nil, color: nil, categories: categories)
                 var seededList = newList
                 seededList.categories = categories
@@ -345,6 +351,18 @@ final class ListViewModel {
         }
         
         return CategoryService.getSystemDefaults(for: type)
+    }
+    
+    func getPreviewCategories(for type: String) async -> [CategoryDef] {
+        guard !["basic", "guest_list"].contains(type) else { return [] }
+        
+        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
+           let match = defaults.first(where: { $0.listType == type }),
+           !match.categories.isEmpty {
+            return match.categories
+        }
+        
+        return CategoryService.getSystemDefaults(for: type) ?? []
     }
     
     func updateList(id: UUID, name: String?, emoji: String?, color: String?, type: String? = nil, categories: [CategoryDef]? = nil) async {

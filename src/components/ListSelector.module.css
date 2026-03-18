@@ -902,3 +902,66 @@
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+/* Category Preview Section */
+.categoryPreviewSection {
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.categoryPreviewToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-input);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.categoryPreviewToggle:hover {
+  background: var(--bg-hover);
+}
+
+.categoryPreviewLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.categoryPreviewChevron {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  transform: rotate(90deg);
+}
+
+.categoryPreviewChevronOpen {
+  transform: rotate(-90deg);
+}
+
+.categoryPreviewEditor {
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-card);
+  padding: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+@media (max-width: 700px) {
+  .categoryPreviewEditor {
+    max-height: 250px;
+  }
+  
+  .categoryPreviewToggle {
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .categoryPreviewLabel {
+    font-size: 0.9rem;
+  }
+}

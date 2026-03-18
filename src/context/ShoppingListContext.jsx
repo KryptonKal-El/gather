@@ -442,18 +442,18 @@ export const ShoppingListProvider = ({ children }) => {
   // Actions
   // -----------------------------------------------------------------------
 
-  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery') => {
+  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery', customCategories = null) => {
     if (!userId) return;
     const newId = await dbCreateList(userId, name, userEmail, emoji, color, type);
     
-    const seedCategories = getSeedCategoriesForType(type, userCategoryDefaults);
-    if (seedCategories) {
-      await dbUpdateList(userId, newId, { categories: seedCategories });
+    const categoriesToUse = customCategories ?? getSeedCategoriesForType(type, userCategoryDefaults);
+    if (categoriesToUse) {
+      await dbUpdateList(userId, newId, { categories: categoriesToUse });
     }
     
     setLists(prev => [...prev, { 
       id: newId, name, emoji, color, type, 
-      categories: seedCategories || null,
+      categories: categoriesToUse || null,
       itemCount: 0, ownerId: userId, 
       createdAt: new Date().toISOString() 
     }]);

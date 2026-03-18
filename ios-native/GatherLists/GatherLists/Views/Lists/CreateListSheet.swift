@@ -14,6 +14,11 @@ struct CreateListSheet: View {
     @State private var showEmojiPicker = false
     @State private var isCreating = false
     @State private var selectedType: String? = "grocery"
+    @State private var showCategoryPreview = false
+    @State private var previewCategories: [CategoryDef]? = nil
+    @State private var customCategories: [CategoryDef]? = nil
+    @State private var isLoadingCategories = false
+    @State private var selectedCategoryForEdit: CategoryDef? = nil
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
@@ -21,6 +26,8 @@ struct CreateListSheet: View {
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
+    
+    private let categoryPreviewTypes = ["grocery", "packing", "todo"]
     
     private let typeGridColumns = [
         GridItem(.flexible()),
@@ -41,6 +48,15 @@ struct CreateListSheet: View {
         !isCreating
     }
     
+    private var showsCategoryPreviewOption: Bool {
+        guard let type = selectedType else { return false }
+        return categoryPreviewTypes.contains(type)
+    }
+    
+    private var displayCategories: [CategoryDef] {
+        customCategories ?? previewCategories ?? []
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -52,6 +68,9 @@ struct CreateListSheet: View {
                             
                             Button {
                                 selectedType = typeId
+                                showCategoryPreview = false
+                                customCategories = nil
+                                previewCategories = nil
                             } label: {
                                     VStack(spacing: 6) {
                                     ListTypeIconView(typeId: typeId, size: 28)
@@ -114,6 +133,75 @@ struct CreateListSheet: View {
                     Section("Color") {
                         colorPickerRow
                     }
+                    
+                    if showsCategoryPreviewOption {
+                        Section {
+                            DisclosureGroup(isExpanded: $showCategoryPreview) {
+                                if isLoadingCategories {
+                                    HStack {
+                                        Spacer()
+                                        ProgressView()
+                                        Spacer()
+                                    }
+                                    .padding(.vertical, 8)
+                                } else if displayCategories.isEmpty {
+                                    Text("No categories available")
+                                        .foregroundStyle(.secondary)
+                                        .italic()
+                                } else {
+                                    ForEach(displayCategories, id: \.key) { category in
+                                        Button {
+                                            selectedCategoryForEdit = category
+                                        } label: {
+                                            HStack(spacing: 12) {
+                                                Circle()
+                                                    .fill(Color(hex: category.color))
+                                                    .frame(width: 20, height: 20)
+                                                Text(category.name)
+                                                    .foregroundStyle(.primary)
+                                                Spacer()
+                                                Image(systemName: "chevron.right")
+                                                    .font(.caption)
+                                                    .foregroundStyle(.tertiary)
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    .onMove(perform: movePreviewCategory)
+                                    .onDelete(perform: deletePreviewCategory)
+                                    
+                                    Button {
+                                        addPreviewCategory()
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundStyle(.green)
+                                            Text("Add Category")
+                                        }
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            } label: {
+                                HStack {
+                                    Text("Customize Categories")
+                                    Spacer()
+                                    if !showCategoryPreview {
+                                        Text("\(displayCategories.count) default")
+                                            .foregroundStyle(.secondary)
+                                            .font(.subheadline)
+                                    }
+                                }
+                            }
+                            .onChange(of: showCategoryPreview) { _, expanded in
+                                if expanded && previewCategories == nil {
+                                    loadPreviewCategories()
+                                }
+                            }
+                        } footer: {
+                            Text("Optional. Edit categories before creating, or use defaults.")
+                        }
+                        .environment(\.editMode, showCategoryPreview && !displayCategories.isEmpty ? .constant(.active) : .constant(.inactive))
+                    }
                 }
             }
             .navigationTitle("New List")
@@ -136,6 +224,20 @@ struct CreateListSheet: View {
             }
             .sheet(isPresented: $showEmojiPicker) {
                 EmojiPickerView(selectedEmoji: $selectedEmoji)
+            }
+            .sheet(item: $selectedCategoryForEdit) { category in
+                CategoryDetailEditor(
+                    category: category,
+                    presetColors: presetColors,
+                    existingKeys: Set(displayCategories.map(\.key)),
+                    onSave: { updated in
+                        var cats = customCategories ?? previewCategories ?? []
+                        if let index = cats.firstIndex(where: { $0.key == category.key }) {
+                            cats[index] = updated
+                            customCategories = cats
+                        }
+                    }
+                )
             }
         }
         .interactiveDismissDisabled(isCreating)
@@ -173,13 +275,66 @@ struct CreateListSheet: View {
         }
     }
     
+    private func loadPreviewCategories() {
+        isLoadingCategories = true
+        Task {
+            let type = selectedType ?? "grocery"
+            let categories = await viewModel.getPreviewCategories(for: type)
+            previewCategories = categories
+            isLoadingCategories = false
+        }
+    }
+    
+    private func movePreviewCategory(from source: IndexSet, to destination: Int) {
+        var cats = customCategories ?? previewCategories ?? []
+        cats.move(fromOffsets: source, toOffset: destination)
+        customCategories = cats
+    }
+    
+    private func deletePreviewCategory(at offsets: IndexSet) {
+        var cats = customCategories ?? previewCategories ?? []
+        cats.remove(atOffsets: offsets)
+        customCategories = cats
+    }
+    
+    private func addPreviewCategory() {
+        var cats = customCategories ?? previewCategories ?? []
+        let usedColors = Set(cats.map(\.color))
+        let nextColor = presetColors.first { !usedColors.contains($0) } ?? presetColors[cats.count % presetColors.count]
+        
+        let existingKeys = Set(cats.map(\.key))
+        var newKey = "new_category"
+        var suffix = 2
+        while existingKeys.contains(newKey) {
+            newKey = "new_category_\(suffix)"
+            suffix += 1
+        }
+        
+        let newCategory = CategoryDef(
+            key: newKey,
+            name: "New Category",
+            color: nextColor,
+            keywords: []
+        )
+        cats.append(newCategory)
+        customCategories = cats
+        selectedCategoryForEdit = newCategory
+    }
+    
     private func createList() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
         
         isCreating = true
         Task {
-            await viewModel.createList(name: trimmedName, emoji: selectedEmoji, color: effectiveColor, type: selectedType ?? "grocery")
+            let categoriesToUse = showCategoryPreview ? customCategories : nil
+            await viewModel.createList(
+                name: trimmedName,
+                emoji: selectedEmoji,
+                color: effectiveColor,
+                type: selectedType ?? "grocery",
+                customCategories: categoriesToUse
+            )
             dismiss()
         }
     }

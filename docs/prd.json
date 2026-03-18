@@ -486,8 +486,8 @@
         "Lint passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Collapsible category preview in create-list flow for both React and Swift. Collapsed by default, shows resolved categories (user defaults → system defaults), supports inline editing. Only for grocery/packing/todo.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
