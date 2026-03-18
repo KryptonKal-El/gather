@@ -13,6 +13,15 @@ enum SortLevel: String, Codable, CaseIterable {
 /// Sort pipeline engine for shopping list items.
 /// Provides flexible, composable sorting and grouping of items based on a configurable sort pipeline.
 enum SortPipeline {
+    /// Maximum levels for grouping (Group By section).
+    static let maxGroupLevels = 2
+    
+    /// Maximum levels for sort-only (Sort By section).
+    static let maxSortOnlyLevels = 2
+    
+    /// Maximum total sort levels.
+    static let maxSortLevels = maxGroupLevels + maxSortOnlyLevels
+    
     /// System default sort configuration.
     static let systemDefault: [SortLevel] = [.store, .category, .name]
     
@@ -23,7 +32,24 @@ enum SortPipeline {
     }
     
     /// Levels that create groups (vs just sorting within existing groups).
-    private static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp]
+    static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp]
+    
+    /// Check if a level is a grouping level.
+    static func isGroupingLevel(_ level: SortLevel) -> Bool {
+        groupingLevels.contains(level)
+    }
+    
+    /// Partition a sort config into group levels and sort-only levels.
+    static func partitionConfig(_ config: [SortLevel]) -> (groupLevels: [SortLevel], sortOnlyLevels: [SortLevel]) {
+        let groupLevels = config.filter { groupingLevels.contains($0) }
+        let sortOnlyLevels = config.filter { !groupingLevels.contains($0) }
+        return (groupLevels, sortOnlyLevels)
+    }
+    
+    /// Combine group levels and sort-only levels into a single config array.
+    static func combineConfig(groupLevels: [SortLevel], sortOnlyLevels: [SortLevel]) -> [SortLevel] {
+        return groupLevels + sortOnlyLevels
+    }
     
     /// A group of items created by store or category grouping.
     struct SortGroup {
@@ -46,7 +72,7 @@ enum SortPipeline {
     
     /// Validates a sort configuration.
     static func isValid(_ config: [SortLevel]) -> Bool {
-        guard !config.isEmpty, config.count <= 3 else { return false }
+        guard !config.isEmpty, config.count <= maxSortLevels else { return false }
         var seen = Set<SortLevel>()
         for level in config {
             if seen.contains(level) { return false }
@@ -66,10 +92,15 @@ enum SortPipeline {
             guard !seen.contains(level) else { continue }
             seen.insert(level)
             normalized.append(level)
-            if normalized.count == 3 { break }
+            if normalized.count == maxSortLevels { break }
         }
         
-        return normalized.isEmpty ? systemDefault : normalized
+        if normalized.isEmpty { return systemDefault }
+        
+        // Safety: ensure grouping levels come before sort-only levels
+        let groups = normalized.filter { Self.groupingLevels.contains($0) }
+        let sorts = normalized.filter { !Self.groupingLevels.contains($0) }
+        return groups + sorts
     }
     
     /// Normalizes from string array (for Supabase JSON decoding).
@@ -83,10 +114,15 @@ enum SortPipeline {
             guard let level = SortLevel(rawValue: str), !seen.contains(level) else { continue }
             seen.insert(level)
             normalized.append(level)
-            if normalized.count == 3 { break }
+            if normalized.count == maxSortLevels { break }
         }
         
-        return normalized.isEmpty ? systemDefault : normalized
+        if normalized.isEmpty { return systemDefault }
+        
+        // Safety: ensure grouping levels come before sort-only levels
+        let groups = normalized.filter { Self.groupingLevels.contains($0) }
+        let sorts = normalized.filter { !Self.groupingLevels.contains($0) }
+        return groups + sorts
     }
     
     // MARK: - Core Function
@@ -94,7 +130,7 @@ enum SortPipeline {
     /// Applies the sort pipeline to items, returning a nested group structure.
     /// - Parameters:
     ///   - items: Array of items to sort/group.
-    ///   - config: Array of 1-3 sort levels.
+    ///   - config: Array of 1-4 sort levels.
     ///   - stores: Array of store objects for store grouping and category lookup.
     ///   - listType: The list type (for type-specific category lookup).
     /// - Returns: Nested structure with groups, subGroups, and items.

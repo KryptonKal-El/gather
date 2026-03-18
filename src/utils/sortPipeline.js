@@ -15,6 +15,15 @@ import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES } from './listTypes.
 /** Valid sort level options */
 export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp'];
 
+/** Maximum levels for grouping (Group By section) */
+export const MAX_GROUP_LEVELS = 2;
+
+/** Maximum levels for sort-only (Sort By section) */
+export const MAX_SORT_ONLY_LEVELS = 2;
+
+/** Maximum total sort levels */
+export const MAX_SORT_LEVELS = MAX_GROUP_LEVELS + MAX_SORT_ONLY_LEVELS;
+
 /** System default sort configuration */
 export const SYSTEM_DEFAULT_SORT_CONFIG = ['store', 'category', 'name'];
 
@@ -29,7 +38,7 @@ export const getDefaultSortConfig = (listType) => {
 };
 
 /** Levels that create groups (vs just sorting within existing groups) */
-const GROUPING_LEVELS = ['store', 'category', 'rsvp'];
+export const GROUPING_LEVELS = ['store', 'category', 'rsvp'];
 
 /**
  * Validates a sort configuration.
@@ -37,7 +46,7 @@ const GROUPING_LEVELS = ['store', 'category', 'rsvp'];
  * @returns {boolean} True if config is a valid sort configuration
  */
 export const isValidSortConfig = (config) => {
-  if (!Array.isArray(config) || config.length === 0 || config.length > 3) {
+  if (!Array.isArray(config) || config.length === 0 || config.length > MAX_SORT_LEVELS) {
     return false;
   }
   const seen = new Set();
@@ -55,7 +64,7 @@ export const isValidSortConfig = (config) => {
 
 /**
  * Normalizes any input into a valid sort configuration.
- * Filters invalid values, removes duplicates, truncates to 3,
+ * Filters invalid values, removes duplicates, truncates to MAX_SORT_LEVELS,
  * and falls back to system default if empty.
  * @param {unknown} config - The configuration to normalize
  * @returns {string[]} A valid sort configuration array
@@ -76,11 +85,18 @@ export const normalizeSortConfig = (config) => {
     ) {
       seen.add(level);
       normalized.push(level);
-      if (normalized.length === 3) break;
+      if (normalized.length === MAX_SORT_LEVELS) break;
     }
   }
 
-  return normalized.length > 0 ? normalized : [...SYSTEM_DEFAULT_SORT_CONFIG];
+  if (normalized.length === 0) {
+    return [...SYSTEM_DEFAULT_SORT_CONFIG];
+  }
+
+  // Safety: ensure grouping levels come before sort-only levels
+  const groups = normalized.filter(l => GROUPING_LEVELS.includes(l));
+  const sorts = normalized.filter(l => !GROUPING_LEVELS.includes(l));
+  return [...groups, ...sorts];
 };
 
 /**
@@ -433,10 +449,33 @@ const groupByRsvp = (items, stores, remainingLevels, listType) => {
 };
 
 /**
+ * Partition a sort config into group levels and sort-only levels.
+ * Maintains the relative order within each partition.
+ * @param {string[]} config - Sort configuration array
+ * @returns {{groupLevels: string[], sortOnlyLevels: string[]}} Partitioned levels
+ */
+export function partitionSortConfig(config) {
+  const groupLevels = config.filter(l => GROUPING_LEVELS.includes(l));
+  const sortOnlyLevels = config.filter(l => !GROUPING_LEVELS.includes(l));
+  return { groupLevels, sortOnlyLevels };
+}
+
+/**
+ * Combine group levels and sort-only levels into a single config array.
+ * Groups always come before sort-only levels.
+ * @param {string[]} groupLevels - Grouping levels
+ * @param {string[]} sortOnlyLevels - Sort-only levels
+ * @returns {string[]} Combined sort configuration
+ */
+export function combineSortConfig(groupLevels, sortOnlyLevels) {
+  return [...groupLevels, ...sortOnlyLevels];
+}
+
+/**
  * Applies a sort pipeline to items, returning a nested group structure.
  *
  * @param {Array} items - Array of item objects with at least: { id, name, category, store, added_at, isChecked }
- * @param {Array} sortConfig - Array of 1-3 sort level strings (e.g. ['store', 'category', 'name'])
+ * @param {Array} sortConfig - Array of 1-4 sort level strings (e.g. ['store', 'category', 'name', 'date'])
  * @param {Array} stores - Array of store objects with: { id, name, color, categories, sort_order }
  * @param {string} listType - List type identifier (e.g. 'grocery', 'packing', 'todo')
  * @returns {Object} Nested structure with groups, subGroups, and items
