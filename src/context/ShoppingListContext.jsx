@@ -249,7 +249,7 @@ export const ShoppingListProvider = ({ children }) => {
     try {
       const cached = JSON.parse(localStorage.getItem('gather_list_order') || '[]');
       if (!cached.length) return unordered;
-      const orderMap = new Map(cached.map((id, i) => [id, i]));
+      const orderMap = new Map(cached.map((id, i) => [id.toLowerCase(), i]));
       return [...unordered].sort((a, b) => {
         const aIdx = orderMap.has(a.id) ? orderMap.get(a.id) : Infinity;
         const bIdx = orderMap.has(b.id) ? orderMap.get(b.id) : Infinity;

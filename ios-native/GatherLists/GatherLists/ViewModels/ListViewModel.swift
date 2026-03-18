@@ -62,8 +62,8 @@ final class ListViewModel {
         
         // Sort: items in cache come first (by their cached position), others appended at end
         let sorted = merged.sorted { a, b in
-            let aIndex = orderMap[a.id.uuidString] ?? Int.max
-            let bIndex = orderMap[b.id.uuidString] ?? Int.max
+            let aIndex = orderMap[a.id.uuidString.lowercased()] ?? Int.max
+            let bIndex = orderMap[b.id.uuidString.lowercased()] ?? Int.max
             if aIndex != bIndex {
                 return aIndex < bIndex
             }
@@ -81,7 +81,7 @@ final class ListViewModel {
     
     /// Saves the current allLists order to UserDefaults.
     private func saveListOrderToCache() {
-        let idStrings = allLists.map { $0.id.uuidString }
+        let idStrings = allLists.map { $0.id.uuidString.lowercased() }
         UserDefaults.standard.set(idStrings, forKey: Self.listOrderKey)
     }
     
@@ -404,7 +404,7 @@ final class ListViewModel {
         saveListOrderToCache()
         
         // Debounced sync to Supabase (list order in user_preferences)
-        let idStrings = allLists.map { $0.id.uuidString }
+        let idStrings = allLists.map { $0.id.uuidString.lowercased() }
         listOrderSyncTask?.cancel()
         listOrderSyncTask = Task {
             try? await Task.sleep(nanoseconds: 300_000_000) // 300ms debounce
