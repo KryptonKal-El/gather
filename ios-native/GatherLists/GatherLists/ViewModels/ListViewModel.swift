@@ -34,6 +34,7 @@ final class ListViewModel {
     nonisolated(unsafe) private var ownedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
+    nonisolated(unsafe) private var listOrderSyncTask: Task<Void, Never>?
     
     /// Filtered lists based on search query matching name or emoji.
     var filteredLists: [GatherList] {
@@ -92,6 +93,12 @@ final class ListViewModel {
     init(userId: UUID, userEmail: String) {
         self.userId = userId
         self.userEmail = userEmail
+        
+        NotificationCenter.default.addObserver(forName: .listOrderDidChange, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                self?.rebuildAllLists()
+            }
+        }
         
         Task {
             await loadData()
@@ -396,6 +403,15 @@ final class ListViewModel {
         // Save the unified order to UserDefaults
         saveListOrderToCache()
         
+        // Debounced sync to Supabase (list order in user_preferences)
+        let idStrings = allLists.map { $0.id.uuidString }
+        listOrderSyncTask?.cancel()
+        listOrderSyncTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000) // 300ms debounce
+            guard !Task.isCancelled else { return }
+            try? await PreferenceService.updateListOrder(idStrings)
+        }
+        
         // Extract owned lists in their new order and sync to Supabase
         let reorderedOwned = allLists.filter { list in
             ownedLists.contains { $0.id == list.id }
@@ -428,6 +444,7 @@ final class ListViewModel {
         ownedListsTask?.cancel()
         sharedListsTask?.cancel()
         persistListIdTask?.cancel()
+        listOrderSyncTask?.cancel()
         
         let ownedChannel = ownedListsChannel
         let sharedChannel = sharedListsChannel

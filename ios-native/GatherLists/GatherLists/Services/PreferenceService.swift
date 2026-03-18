@@ -103,6 +103,17 @@ struct PreferenceService {
         cachedPreferences?.lastListId = listId
     }
     
+    /// Upserts the user's list order.
+    static func updateListOrder(_ order: [String]) async throws {
+        let userId = try await client.auth.session.user.id
+        let upsertData = ListOrderUpsert(userId: userId, listOrder: order)
+        
+        try await client
+            .from("user_preferences")
+            .upsert(upsertData, onConflict: "user_id")
+            .execute()
+    }
+    
     /// Updates sort config on a share row. Pass nil to clear the override (fall back to user preferences).
     static func updateShareSortConfig(listId: UUID, email: String, config: [SortLevel]?) async throws {
         if let config = config {
@@ -217,11 +228,25 @@ final class PreferenceRealtimeManager {
                 // Update UserDefaults cache with server value — no navigation change
                 PreferenceService.setCachedLastListId(prefs.lastListId)
                 PreferenceService.clearCache()
+                
+                // Sync list order from server
+                if let listOrder = prefs.listOrder {
+                    UserDefaults.standard.set(listOrder, forKey: "gather_list_order")
+                } else {
+                    UserDefaults.standard.removeObject(forKey: "gather_list_order")
+                }
+                
+                // Notify ListViewModel to rebuild
+                NotificationCenter.default.post(name: .listOrderDidChange, object: nil)
             }
         } catch {
             print("[PreferenceRealtimeManager] Failed to fetch preferences: \(error.localizedDescription)")
         }
     }
+}
+
+extension Notification.Name {
+    static let listOrderDidChange = Notification.Name("listOrderDidChange")
 }
 
 // MARK: - DTOs
@@ -251,5 +276,15 @@ private struct ListSortConfigUpdate: Encodable {
     
     enum CodingKeys: String, CodingKey {
         case sortConfig = "sort_config"
+    }
+}
+
+private struct ListOrderUpsert: Encodable {
+    let userId: UUID
+    let listOrder: [String]
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case listOrder = "list_order"
     }
 }

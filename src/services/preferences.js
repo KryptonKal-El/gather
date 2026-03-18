@@ -125,6 +125,27 @@ export const updateLastListId = async (userId, listId) => {
   }
 };
 
+/**
+ * Upserts the user's list order in user_preferences.
+ * @param {string} userId - User ID
+ * @param {string[]} orderedIds - Array of list IDs in desired order
+ */
+export const updateListOrder = async (userId, orderedIds) => {
+  if (!userId) return;
+  
+  const { error } = await supabase
+    .from('user_preferences')
+    .upsert(
+      { user_id: userId, list_order: orderedIds },
+      { onConflict: 'user_id' }
+    );
+    
+  if (error) {
+    console.error('Error updating list order:', error);
+    throw error;
+  }
+};
+
 // ---------------------------------------------------------------------------
 // List Sort Config
 // ---------------------------------------------------------------------------

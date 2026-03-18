@@ -32,7 +32,7 @@ import {
   unshareList as dbUnshareList,
   subscribeSharedStores,
 } from '../services/database.js';
-import { updateLastListId, getUserPreferences } from '../services/preferences.js';
+import { updateLastListId, updateListOrder, getUserPreferences } from '../services/preferences.js';
 import { supabase } from '../services/supabase.js';
 
 const LAST_LIST_ID_KEY = 'gather_last_list_id';
@@ -79,6 +79,8 @@ export const ShoppingListProvider = ({ children }) => {
   const hasLoadedSharedLists = useRef(false);
   // Track if user was previously signed in (to distinguish initial mount from sign-out)
   const wasPreviouslySignedIn = useRef(false);
+  // Debounce timer for syncing list order to Supabase
+  const listOrderDebounceRef = useRef(null);
 
   // Subscribe to owned lists
   useEffect(() => {
@@ -158,6 +160,13 @@ export const ShoppingListProvider = ({ children }) => {
             }
           } catch {
             // Ignore localStorage errors
+          }
+          
+          // Sync list_order from other devices
+          const incomingListOrder = payload.new?.list_order;
+          if (incomingListOrder && Array.isArray(incomingListOrder)) {
+            localStorage.setItem('gather_list_order', JSON.stringify(incomingListOrder));
+            setListOrderVersion(v => v + 1);
           }
         }
       )
@@ -602,9 +611,24 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId]);
 
   const reorderListsAction = useCallback(async (orderedIds) => {
+    // Immediate: update localStorage + trigger re-render
     localStorage.setItem('gather_list_order', JSON.stringify(orderedIds));
     setListOrderVersion((v) => v + 1);
-  }, []);
+    
+    // Debounced: sync to Supabase (300ms debounce to avoid rapid writes during drag)
+    if (listOrderDebounceRef.current) {
+      clearTimeout(listOrderDebounceRef.current);
+    }
+    listOrderDebounceRef.current = setTimeout(async () => {
+      if (userId) {
+        try {
+          await updateListOrder(userId, orderedIds);
+        } catch (error) {
+          console.error('Failed to sync list order to server:', error);
+        }
+      }
+    }, 300);
+  }, [userId]);
 
   // -----------------------------------------------------------------------
   // Sharing actions
