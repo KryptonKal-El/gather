@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-18T20:00:00Z",
   "lastHeartbeat": "2026-03-18T20:00:00Z",
-  "currentChunk": "US-007",
+  "currentChunk": "US-008",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -65,8 +65,9 @@
       "id": "US-007",
       "slug": "react-remove-store-category-editor",
       "title": "Remove store category editor — React web",
-      "status": "pending",
-      "priority": 7
+      "status": "completed",
+      "priority": 7,
+      "committedAt": "2026-03-18T21:05:00Z"
     },
     {
       "id": "US-008",
