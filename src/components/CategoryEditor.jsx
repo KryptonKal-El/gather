@@ -208,8 +208,15 @@ const SortableCategoryRow = ({
 /**
  * Category editor for managing list categories.
  * Supports adding, removing, renaming, reordering, color changing, and keyword editing.
+ * @param {Object} props
+ * @param {Array} props.categories - Array of category objects
+ * @param {string} [props.listType] - List type for "Save as Default" feature
+ * @param {Function} props.onSave - Called when categories change
+ * @param {Function} [props.onSaveAsDefault] - Called when "Save as Default" is clicked
+ * @param {Function} [props.onClose] - Called when close button is clicked
+ * @param {boolean} [props.showHeader=true] - Whether to show the header bar
  */
-export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose }) => {
+export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true }) => {
   const [localCategories, setLocalCategories] = useState(categories);
   const [expandedKey, setExpandedKey] = useState(null);
   const [newName, setNewName] = useState('');
@@ -311,17 +318,21 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
 
   return (
     <div className={styles.editor}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>Edit Categories</h3>
-        <button
-          type="button"
-          className={styles.closeBtn}
-          onClick={onClose}
-          aria-label="Close editor"
-        >
-          ×
-        </button>
-      </div>
+      {showHeader && (
+        <div className={styles.header}>
+          <h3 className={styles.title}>Edit Categories</h3>
+          {onClose && (
+            <button
+              type="button"
+              className={styles.closeBtn}
+              onClick={onClose}
+              aria-label="Close editor"
+            >
+              ×
+            </button>
+          )}
+        </div>
+      )}
 
       <div className={styles.categoryList}>
         <DndContext
@@ -426,5 +437,6 @@ CategoryEditor.propTypes = {
   listType: PropTypes.string,
   onSave: PropTypes.func.isRequired,
   onSaveAsDefault: PropTypes.func,
-  onClose: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
+  showHeader: PropTypes.bool,
 };

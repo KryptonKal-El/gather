@@ -8,8 +8,12 @@ import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
 import { useSortPreferences } from '../hooks/useSortPreferences.js';
+import { useShoppingList } from '../hooks/useShoppingList.js';
 import { SortLevelEditor } from './SortLevelEditor.jsx';
+import { CategoryEditor } from './CategoryEditor.jsx';
+import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
+import { getSystemDefaultCategories } from '../utils/categories.js';
 import styles from './MobileSettings.module.css';
 
 /**
@@ -22,12 +26,26 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const { theme, toggleTheme } = useTheme();
   const { refreshUser } = useAuth();
   const { userPreferences, loading: prefsLoading, updateDefaultSort } = useSortPreferences();
+  const { state, actions } = useShoppingList();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [selectedCategoryType, setSelectedCategoryType] = useState('grocery');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
   const currentDefaultSort = userPreferences?.default_sort_config ?? SYSTEM_DEFAULT_SORT_CONFIG;
+
+  const categoryTypes = [
+    { value: 'grocery', label: 'Grocery' },
+    { value: 'packing', label: 'Packing' },
+    { value: 'todo', label: 'To-Do' },
+  ];
+
+  const getCurrentDefaults = (listType) => {
+    const userDefault = state.userCategoryDefaults.find(d => d.listType === listType);
+    return userDefault?.categories ?? getSystemDefaultCategories(listType) ?? [];
+  };
 
   const displayName = user?.user_metadata?.full_name ?? user?.profile?.display_name ?? 'User';
   const email = user?.email ?? '';
@@ -143,6 +161,58 @@ export const MobileSettings = ({ user, onSignOut }) => {
           disabled={prefsLoading}
         />
       </div>
+
+      <h3 className={styles.sectionHeader}>Category Defaults</h3>
+      <div className={styles.section}>
+        <div className={styles.row}>
+          <div className={styles.categoryTypeTabs}>
+            {categoryTypes.map(type => (
+              <button
+                key={type.value}
+                type="button"
+                className={`${styles.categoryTypeTab} ${selectedCategoryType === type.value ? styles.categoryTypeTabActive : ''}`}
+                onClick={() => setSelectedCategoryType(type.value)}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.categoryEditorWrapper}>
+          <CategoryEditor
+            categories={getCurrentDefaults(selectedCategoryType)}
+            listType={selectedCategoryType}
+            onSave={(cats) => actions.saveUserCategoryDefault(selectedCategoryType, cats)}
+            showHeader={false}
+          />
+        </div>
+
+        <div className={styles.row}>
+          <button
+            type="button"
+            className={styles.resetDefaultsButton}
+            onClick={() => setShowResetConfirm(true)}
+          >
+            Reset to System Defaults
+          </button>
+        </div>
+      </div>
+
+      {showResetConfirm && (
+        <ConfirmDialog
+          message={`This will replace your ${categoryTypes.find(t => t.value === selectedCategoryType)?.label} category defaults with the system defaults. Continue?`}
+          confirmLabel="Reset"
+          onConfirm={() => {
+            const systemDefaults = getSystemDefaultCategories(selectedCategoryType);
+            if (systemDefaults) {
+              actions.saveUserCategoryDefault(selectedCategoryType, systemDefaults);
+            }
+            setShowResetConfirm(false);
+          }}
+          onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
 
       <h3 className={styles.sectionHeader}>Account Actions</h3>
       <div className={styles.section}>

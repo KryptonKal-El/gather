@@ -291,3 +291,67 @@
   color: var(--text-primary);
   font-weight: 500;
 }
+
+/* Category type tabs */
+.categoryTypeTabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.categoryTypeTab {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.categoryTypeTab:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.categoryTypeTabActive {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.categoryTypeTabActive:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+/* Category editor wrapper */
+.categoryEditorWrapper {
+  padding: 0.5rem 0;
+}
+
+.categoryEditorWrapper > div {
+  border: none;
+  margin-bottom: 0;
+  padding: 0.5rem 1rem;
+}
+
+/* Reset defaults button */
+.resetDefaultsButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: none;
+  color: var(--text-secondary);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-align: center;
+}
+
+.resetDefaultsButton:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
