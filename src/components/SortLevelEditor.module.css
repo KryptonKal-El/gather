@@ -7,6 +7,31 @@
   pointer-events: none;
 }
 
+.section {
+  padding-bottom: 0.25rem;
+}
+
+.section + .section {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.25rem;
+}
+
+.sectionLabel {
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.emptyState {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .levelRow {
   display: flex;
   align-items: center;
@@ -82,8 +107,8 @@
 .addBtn {
   display: block;
   width: 100%;
-  padding: 0.65rem 1rem;
-  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   color: var(--primary);
   background: none;

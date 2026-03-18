@@ -19,6 +19,13 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { getTypeConfig } from '../utils/listTypes.js';
+import {
+  GROUPING_LEVELS,
+  MAX_GROUP_LEVELS,
+  MAX_SORT_ONLY_LEVELS,
+  partitionSortConfig,
+  combineSortConfig,
+} from '../utils/sortPipeline.js';
 import styles from './SortLevelEditor.module.css';
 
 const LEVEL_LABELS = {
@@ -84,13 +91,22 @@ const SortableLevelRow = ({ id, onRemove, canRemove, isLast }) => {
 };
 
 /**
- * Inline drag-to-reorder sort level editor.
- * Allows adding, removing, and reordering up to 3 sort levels.
+ * Section component for either Group By or Sort By.
+ * Contains its own DndContext for isolated drag-and-drop.
  */
-export const SortLevelEditor = ({ config, onConfigChange, disabled = false, listType = 'grocery' }) => {
+const SortSection = ({
+  label,
+  levels,
+  availableLevels,
+  maxLevels,
+  canRemove,
+  disabled,
+  onReorder,
+  onAdd,
+  onRemove,
+  emptyText,
+}) => {
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const typeConfig = getTypeConfig(listType);
-  const availableLevels = typeConfig.sortLevels;
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -103,52 +119,54 @@ export const SortLevelEditor = ({ config, onConfigChange, disabled = false, list
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = config.indexOf(active.id);
-    const newIndex = config.indexOf(over.id);
-    const newConfig = arrayMove(config, oldIndex, newIndex);
-    onConfigChange(newConfig);
+    const oldIndex = levels.indexOf(active.id);
+    const newIndex = levels.indexOf(over.id);
+    const newLevels = arrayMove(levels, oldIndex, newIndex);
+    onReorder(newLevels);
   };
 
   const handleRemove = (level) => {
-    if (disabled || config.length <= 1) return;
-    const newConfig = config.filter((l) => l !== level);
-    onConfigChange(newConfig);
+    if (disabled) return;
+    onRemove(level);
   };
 
   const handleAdd = (level) => {
     if (disabled) return;
-    const newConfig = [...config, level];
-    onConfigChange(newConfig);
+    onAdd(level);
     setAddMenuOpen(false);
   };
 
-  const unusedLevels = availableLevels.filter((l) => !config.includes(l));
-  const canAddMore = config.length < 3 && unusedLevels.length > 0;
-  const canRemove = config.length > 1;
+  const unusedLevels = availableLevels.filter((l) => !levels.includes(l));
+  const canAddMore = levels.length < maxLevels && unusedLevels.length > 0;
 
   return (
-    <div className={`${styles.editor} ${disabled ? styles.disabled : ''}`}>
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-        modifiers={[restrictToVerticalAxis]}
-      >
-        <SortableContext
-          items={config}
-          strategy={verticalListSortingStrategy}
+    <div className={styles.section}>
+      <div className={styles.sectionLabel}>{label}</div>
+      {levels.length === 0 && emptyText ? (
+        <div className={styles.emptyState}>{emptyText}</div>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          modifiers={[restrictToVerticalAxis]}
         >
-          {config.map((level, index) => (
-            <SortableLevelRow
-              key={level}
-              id={level}
-              onRemove={handleRemove}
-              canRemove={canRemove && !disabled}
-              isLast={!canAddMore && index === config.length - 1}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={levels}
+            strategy={verticalListSortingStrategy}
+          >
+            {levels.map((level, index) => (
+              <SortableLevelRow
+                key={level}
+                id={level}
+                onRemove={handleRemove}
+                canRemove={canRemove && !disabled}
+                isLast={!canAddMore && index === levels.length - 1}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      )}
 
       {canAddMore && (
         <div className={styles.addSection}>
@@ -158,7 +176,7 @@ export const SortLevelEditor = ({ config, onConfigChange, disabled = false, list
             onClick={() => setAddMenuOpen((o) => !o)}
             disabled={disabled}
           >
-            + Add Level
+            + Add
           </button>
           {addMenuOpen && !disabled && (
             <div className={styles.addMenu}>
@@ -176,6 +194,82 @@ export const SortLevelEditor = ({ config, onConfigChange, disabled = false, list
           )}
         </div>
       )}
+    </div>
+  );
+};
+
+/**
+ * Two-section sort level editor with "Group By" and "Sort By" sections.
+ * Groups create visual headers; sort-only levels order items within groups.
+ */
+export const SortLevelEditor = ({ config, onConfigChange, disabled = false, listType = 'grocery' }) => {
+  const typeConfig = getTypeConfig(listType);
+  const availableLevels = typeConfig.sortLevels;
+
+  const availableGroupLevels = availableLevels.filter((l) => GROUPING_LEVELS.includes(l));
+  const availableSortOnlyLevels = availableLevels.filter((l) => !GROUPING_LEVELS.includes(l));
+
+  const { groupLevels, sortOnlyLevels } = partitionSortConfig(config);
+
+  const hasGroupableOptions = availableGroupLevels.length > 0;
+
+  const handleGroupReorder = (newGroupLevels) => {
+    onConfigChange(combineSortConfig(newGroupLevels, sortOnlyLevels));
+  };
+
+  const handleSortReorder = (newSortOnlyLevels) => {
+    onConfigChange(combineSortConfig(groupLevels, newSortOnlyLevels));
+  };
+
+  const handleGroupAdd = (level) => {
+    const newGroupLevels = [...groupLevels, level];
+    onConfigChange(combineSortConfig(newGroupLevels, sortOnlyLevels));
+  };
+
+  const handleSortAdd = (level) => {
+    const newSortOnlyLevels = [...sortOnlyLevels, level];
+    onConfigChange(combineSortConfig(groupLevels, newSortOnlyLevels));
+  };
+
+  const handleGroupRemove = (level) => {
+    const newGroupLevels = groupLevels.filter((l) => l !== level);
+    onConfigChange(combineSortConfig(newGroupLevels, sortOnlyLevels));
+  };
+
+  const handleSortRemove = (level) => {
+    if (sortOnlyLevels.length <= 1) return;
+    const newSortOnlyLevels = sortOnlyLevels.filter((l) => l !== level);
+    onConfigChange(combineSortConfig(groupLevels, newSortOnlyLevels));
+  };
+
+  return (
+    <div className={`${styles.editor} ${disabled ? styles.disabled : ''}`}>
+      {hasGroupableOptions && (
+        <SortSection
+          label="Group By"
+          levels={groupLevels}
+          availableLevels={availableGroupLevels}
+          maxLevels={MAX_GROUP_LEVELS}
+          canRemove={true}
+          disabled={disabled}
+          onReorder={handleGroupReorder}
+          onAdd={handleGroupAdd}
+          onRemove={handleGroupRemove}
+          emptyText="No grouping"
+        />
+      )}
+
+      <SortSection
+        label="Sort By"
+        levels={sortOnlyLevels}
+        availableLevels={availableSortOnlyLevels}
+        maxLevels={MAX_SORT_ONLY_LEVELS}
+        canRemove={sortOnlyLevels.length > 1}
+        disabled={disabled}
+        onReorder={handleSortReorder}
+        onAdd={handleSortAdd}
+        onRemove={handleSortRemove}
+      />
     </div>
   );
 };
