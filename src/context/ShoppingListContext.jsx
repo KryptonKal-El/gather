@@ -414,7 +414,7 @@ export const ShoppingListProvider = ({ children }) => {
    * Returns null for list types that don't support categories.
    */
   const getSeedCategoriesForType = (type, defaults) => {
-    if (['basic', 'guest_list', 'project'].includes(type)) return null;
+    if (['basic', 'guest_list'].includes(type)) return null;
     
     const userDefault = defaults.find(d => d.listType === type);
     if (userDefault?.categories?.length > 0) {

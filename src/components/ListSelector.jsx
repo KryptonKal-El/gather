@@ -63,7 +63,7 @@ const SortableListItem = ({ id, children, isMobile }) => {
   );
 };
 
-const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo'];
+const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo', 'project'];
 
 /**
  * Sidebar/dropdown for managing multiple shopping lists.

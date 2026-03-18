@@ -300,6 +300,9 @@
 }
 
 .categoryTypeTab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;

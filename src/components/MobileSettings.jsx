@@ -12,6 +12,7 @@ import { useShoppingList } from '../hooks/useShoppingList.js';
 import { SortLevelEditor } from './SortLevelEditor.jsx';
 import { CategoryEditor } from './CategoryEditor.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
 import { SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import styles from './MobileSettings.module.css';
@@ -38,9 +39,17 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
   const categoryTypes = [
     { value: 'grocery', label: 'Grocery' },
-    { value: 'packing', label: 'Packing' },
     { value: 'todo', label: 'To-Do' },
+    { value: 'packing', label: 'Packing' },
+    { value: 'project', label: 'Project' },
   ];
+
+  const CATEGORY_TYPE_ICONS = {
+    grocery: GroceryIcon,
+    todo: TodoIcon,
+    packing: PackingIcon,
+    project: ProjectIcon,
+  };
 
   const getCurrentDefaults = (listType) => {
     const userDefault = state.userCategoryDefaults.find(d => d.listType === listType);
@@ -166,16 +175,20 @@ export const MobileSettings = ({ user, onSignOut }) => {
       <div className={styles.section}>
         <div className={styles.row}>
           <div className={styles.categoryTypeTabs}>
-            {categoryTypes.map(type => (
-              <button
-                key={type.value}
-                type="button"
-                className={`${styles.categoryTypeTab} ${selectedCategoryType === type.value ? styles.categoryTypeTabActive : ''}`}
-                onClick={() => setSelectedCategoryType(type.value)}
-              >
-                {type.label}
-              </button>
-            ))}
+            {categoryTypes.map(type => {
+              const IconComponent = CATEGORY_TYPE_ICONS[type.value];
+              return (
+                <button
+                  key={type.value}
+                  type="button"
+                  className={`${styles.categoryTypeTab} ${selectedCategoryType === type.value ? styles.categoryTypeTabActive : ''}`}
+                  onClick={() => setSelectedCategoryType(type.value)}
+                >
+                  {IconComponent && <IconComponent size={18} />}
+                  {type.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 

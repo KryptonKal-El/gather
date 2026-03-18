@@ -77,11 +77,14 @@ struct SettingsView: View {
                     NavigationLink(destination: DefaultCategoryEditorView(listType: "grocery")) {
                         Label("Grocery", systemImage: "cart")
                     }
+                    NavigationLink(destination: DefaultCategoryEditorView(listType: "todo")) {
+                        Label("To-Do", systemImage: "checklist")
+                    }
                     NavigationLink(destination: DefaultCategoryEditorView(listType: "packing")) {
                         Label("Packing", systemImage: "suitcase")
                     }
-                    NavigationLink(destination: DefaultCategoryEditorView(listType: "todo")) {
-                        Label("To-Do", systemImage: "checklist")
+                    NavigationLink(destination: DefaultCategoryEditorView(listType: "project")) {
+                        Label("Project", systemImage: "list.clipboard")
                     }
                 }
                 
