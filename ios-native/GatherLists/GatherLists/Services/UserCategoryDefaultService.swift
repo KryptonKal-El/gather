@@ -28,7 +28,7 @@ enum UserCategoryDefaultService {
         
         try await client
             .from("user_category_defaults")
-            .upsert(UpsertPayload(userId: userId, listType: listType, categories: categories))
+            .upsert(UpsertPayload(userId: userId, listType: listType, categories: categories), onConflict: "user_id,list_type")
             .execute()
     }
 }

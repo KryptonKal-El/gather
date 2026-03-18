@@ -202,6 +202,7 @@ struct DefaultCategoryEditorView: View {
     }
     
     private func moveCategory(from source: IndexSet, to destination: Int) {
+        guard searchText.isEmpty else { return }
         categories.move(fromOffsets: source, toOffset: destination)
         saveCategories()
     }
