@@ -47,23 +47,25 @@ const ItemList = ({ items, stores, listType, restoredItemIds, onRestoreAnimation
   </>
 );
 
-/** Renders a group recursively — handles store sections (collapsible) and category sub-headers. */
-const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+/** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
   const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
 
-  if (group.type === 'store') {
-    const isCollapsed = collapsedStores.has(group.key);
-    const allItems = collectGroupItems(group);
+  const allItems = collectGroupItems(group);
+
+  // Depth 0: Prominent collapsible card (for ANY group type at top level)
+  if (depth === 0) {
+    const isCollapsed = collapsedGroups.has(group.key);
     const subtotal = computeSubtotal(allItems);
 
     return (
-      <div className={styles.storeSection}>
+      <div className={styles.topLevelSection}>
         <h3
-          className={`${styles.storeTitle} ${isCollapsed ? styles.storeTitleCollapsed : ''}`}
-          onClick={() => onToggleStore(group.key)}
+          className={`${styles.topLevelTitle} ${isCollapsed ? styles.topLevelTitleCollapsed : ''}`}
+          onClick={() => onToggleGroup(group.key)}
         >
           <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronExpanded}`} />
-          <span className={styles.storeDot} style={{ backgroundColor: group.color }} />
+          <span className={styles.topLevelDot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
           {group.label}
           <span className={styles.count}>{allItems.length}</span>
           {subtotal !== null && (
@@ -71,10 +73,10 @@ const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, listType
           )}
         </h3>
         {!isCollapsed && (
-          <div className={styles.storeBody}>
+          <div className={styles.topLevelBody}>
             {group.subGroups ? (
               group.subGroups.map((subGroup) => (
-                <GroupRenderer key={subGroup.key} group={subGroup} collapsedStores={collapsedStores} onToggleStore={onToggleStore} {...itemProps} />
+                <GroupRenderer key={subGroup.key} group={subGroup} depth={depth + 1} collapsedGroups={collapsedGroups} onToggleGroup={onToggleGroup} {...itemProps} />
               ))
             ) : group.items ? (
               <ItemList items={group.items} {...itemProps} />
@@ -85,63 +87,23 @@ const GroupRenderer = ({ group, collapsedStores, onToggleStore, stores, listType
     );
   }
 
-  // Category group (rendered as sub-header with dot)
-  if (group.type === 'category') {
-    const items = group.items ?? (group.subGroups ? group.subGroups.flatMap(collectGroupItems) : []);
-    return (
-      <div className={styles.group}>
-        <h4 className={styles.categoryTitle}>
-          <span className={styles.dot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
-          {group.label}
-          <span className={styles.count}>{items.length}</span>
-        </h4>
-        {group.subGroups ? (
-          group.subGroups.map((subGroup) => (
-            <GroupRenderer key={subGroup.key} group={subGroup} collapsedStores={collapsedStores} onToggleStore={onToggleStore} {...itemProps} />
-          ))
-        ) : group.items ? (
-          <ItemList items={group.items} {...itemProps} />
-        ) : null}
-      </div>
-    );
-  }
-
-  // RSVP group (collapsible like store, with colored status indicator)
-  if (group.type === 'rsvp') {
-    const isCollapsed = collapsedStores.has(group.key);
-    const allItems = collectGroupItems(group);
-
-    return (
-      <div className={styles.rsvpSection}>
-        <h3
-          className={`${styles.rsvpTitle} ${isCollapsed ? styles.rsvpTitleCollapsed : ''}`}
-          onClick={() => onToggleStore(group.key)}
-        >
-          <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronExpanded}`} />
-          <span className={styles.rsvpDot} style={{ backgroundColor: group.color }} />
-          {group.label}
-          <span className={styles.count}>{allItems.length}</span>
-        </h3>
-        {!isCollapsed && (
-          <div className={styles.rsvpBody}>
-            {group.subGroups ? (
-              group.subGroups.map((subGroup) => (
-                <GroupRenderer key={subGroup.key} group={subGroup} collapsedStores={collapsedStores} onToggleStore={onToggleStore} {...itemProps} />
-              ))
-            ) : group.items ? (
-              <ItemList items={group.items} {...itemProps} />
-            ) : null}
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // Fallback for unknown types
-  if (group.items) {
-    return <ItemList items={group.items} {...itemProps} />;
-  }
-  return null;
+  // Depth 1+: Small sub-header (for ANY group type at nested level)
+  return (
+    <div className={styles.nestedGroup}>
+      <h4 className={styles.nestedGroupTitle}>
+        <span className={styles.nestedGroupDot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
+        {group.label}
+        <span className={styles.count}>{allItems.length}</span>
+      </h4>
+      {group.subGroups ? (
+        group.subGroups.map((subGroup) => (
+          <GroupRenderer key={subGroup.key} group={subGroup} depth={depth + 1} collapsedGroups={collapsedGroups} onToggleGroup={onToggleGroup} {...itemProps} />
+        ))
+      ) : group.items ? (
+        <ItemList items={group.items} {...itemProps} />
+      ) : null}
+    </div>
+  );
 };
 
 /**
@@ -164,15 +126,15 @@ export const ShoppingList = ({
   onRestoreAnimationDone,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
-  const [collapsedStores, setCollapsedStores] = useState(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState(new Set());
 
-  const handleToggleStore = (storeKey) => {
-    setCollapsedStores((prev) => {
+  const handleToggleGroup = (groupKey) => {
+    setCollapsedGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(storeKey)) {
-        next.delete(storeKey);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
       } else {
-        next.add(storeKey);
+        next.add(groupKey);
       }
       return next;
     });
@@ -206,7 +168,7 @@ export const ShoppingList = ({
   const checkedResult = applySortPipeline(checkedItems, config, stores, listType);
 
   const itemProps = { stores, listType, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
-  const groupProps = { collapsedStores, onToggleStore: handleToggleStore, ...itemProps };
+  const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
     <div className={styles.list}>
@@ -241,25 +203,25 @@ export const ShoppingList = ({
 
       {/* Grouped items */}
       {uncheckedResult.groups.map((group) => (
-        <GroupRenderer key={group.key} group={group} {...groupProps} />
+        <GroupRenderer key={group.key} group={group} depth={0} {...groupProps} />
       ))}
 
-      {/* Ungrouped items (items not assigned to any store when store is a grouping level) */}
+      {/* Ungrouped items (items not assigned to any group when grouping is active) */}
       {uncheckedResult.ungrouped?.length > 0 && (
-        <div className={stores.length > 0 ? styles.storeSection : undefined}>
-          {stores.length > 0 && (
+        <div className={uncheckedResult.groups.length > 0 ? styles.topLevelSection : undefined}>
+          {uncheckedResult.groups.length > 0 && (
             <h3
-              className={`${styles.storeTitle} ${collapsedStores.has('__ungrouped__') ? styles.storeTitleCollapsed : ''}`}
-              onClick={() => handleToggleStore('__ungrouped__')}
+              className={`${styles.topLevelTitle} ${collapsedGroups.has('__ungrouped__') ? styles.topLevelTitleCollapsed : ''}`}
+              onClick={() => handleToggleGroup('__ungrouped__')}
             >
-              <span className={`${styles.chevron} ${collapsedStores.has('__ungrouped__') ? '' : styles.chevronExpanded}`} />
-              <span className={styles.storeDot} style={{ backgroundColor: '#bbb' }} />
+              <span className={`${styles.chevron} ${collapsedGroups.has('__ungrouped__') ? '' : styles.chevronExpanded}`} />
+              <span className={styles.topLevelDot} style={{ backgroundColor: '#bbb' }} />
               Unassigned
               <span className={styles.count}>{uncheckedResult.ungrouped.length}</span>
             </h3>
           )}
-          {(!stores.length || !collapsedStores.has('__ungrouped__')) && (
-            <div className={stores.length > 0 ? styles.storeBody : undefined}>
+          {(!uncheckedResult.groups.length || !collapsedGroups.has('__ungrouped__')) && (
+            <div className={uncheckedResult.groups.length > 0 ? styles.topLevelBody : undefined}>
               <ItemList items={uncheckedResult.ungrouped} {...itemProps} />
             </div>
           )}
@@ -295,7 +257,7 @@ export const ShoppingList = ({
           </div>
           {/* Checked items use the same pipeline */}
           {checkedResult.groups.map((group) => (
-            <GroupRenderer key={group.key} group={group} {...groupProps} />
+            <GroupRenderer key={group.key} group={group} depth={0} {...groupProps} />
           ))}
           {checkedResult.ungrouped?.length > 0 && (
             <ItemList items={checkedResult.ungrouped} {...itemProps} />
