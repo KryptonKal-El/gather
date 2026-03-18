@@ -27,7 +27,7 @@ struct CreateListSheet: View {
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
     
-    private let categoryPreviewTypes = ["grocery", "packing", "todo"]
+    private let categoryPreviewTypes = ["grocery", "packing", "todo", "project"]
     
     private let typeGridColumns = [
         GridItem(.flexible()),
@@ -70,7 +70,6 @@ struct CreateListSheet: View {
                                 selectedType = typeId
                                 showCategoryPreview = false
                                 customCategories = nil
-                                previewCategories = nil
                             } label: {
                                     VStack(spacing: 6) {
                                     ListTypeIconView(typeId: typeId, size: 28)
@@ -186,7 +185,7 @@ struct CreateListSheet: View {
                                     Text("Customize Categories")
                                     Spacer()
                                     if !showCategoryPreview {
-                                        Text("\(displayCategories.count) default")
+                                        Text("\(displayCategories.count) \(displayCategories.count == 1 ? "default" : "defaults")")
                                             .foregroundStyle(.secondary)
                                             .font(.subheadline)
                                     }
@@ -194,6 +193,17 @@ struct CreateListSheet: View {
                             }
                             .onChange(of: showCategoryPreview) { _, expanded in
                                 if expanded && previewCategories == nil {
+                                    loadPreviewCategories()
+                                }
+                            }
+                            .onChange(of: selectedType) { _, newType in
+                                guard let type = newType else { return }
+                                if categoryPreviewTypes.contains(type) {
+                                    loadPreviewCategories()
+                                }
+                            }
+                            .task {
+                                if previewCategories == nil, let type = selectedType, categoryPreviewTypes.contains(type) {
                                     loadPreviewCategories()
                                 }
                             }
@@ -276,10 +286,11 @@ struct CreateListSheet: View {
     }
     
     private func loadPreviewCategories() {
+        let type = selectedType ?? "grocery"
         isLoadingCategories = true
         Task {
-            let type = selectedType ?? "grocery"
             let categories = await viewModel.getPreviewCategories(for: type)
+            guard selectedType == type else { return }
             previewCategories = categories
             isLoadingCategories = false
         }
