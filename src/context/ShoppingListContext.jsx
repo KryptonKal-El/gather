@@ -33,6 +33,7 @@ import {
   shareList as dbShareList,
   unshareList as dbUnshareList,
   subscribeSharedStores,
+  upsertUserCategoryDefault,
 } from '../services/database.js';
 import { updateLastListId, updateListOrder, getUserPreferences } from '../services/preferences.js';
 import { supabase } from '../services/supabase.js';
@@ -654,6 +655,11 @@ export const ShoppingListProvider = ({ children }) => {
     await dbUnshareList(userId, listId, email);
   }, [userId, getListOwnerUid]);
 
+  const saveUserCategoryDefaultAction = useCallback(async (listType, categories) => {
+    if (!userId) return;
+    await upsertUserCategoryDefault(userId, listType, categories);
+  }, [userId]);
+
   // -----------------------------------------------------------------------
   // Build the context value
   // -----------------------------------------------------------------------
@@ -687,6 +693,7 @@ export const ShoppingListProvider = ({ children }) => {
     reorderLists: reorderListsAction,
     shareList: shareListAction,
     unshareList: unshareListAction,
+    saveUserCategoryDefault: saveUserCategoryDefaultAction,
   };
 
   const activeListMeta = allLists.find((l) => l.id === activeListId) ?? null;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -209,12 +209,20 @@ const SortableCategoryRow = ({
  * Category editor for managing list categories.
  * Supports adding, removing, renaming, reordering, color changing, and keyword editing.
  */
-export const CategoryEditor = ({ categories, onSave, onClose }) => {
+export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose }) => {
   const [localCategories, setLocalCategories] = useState(categories);
   const [expandedKey, setExpandedKey] = useState(null);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(CATEGORY_COLORS[0]);
   const [confirmingDeleteKey, setConfirmingDeleteKey] = useState(null);
+  const [showSaveDefaultConfirm, setShowSaveDefaultConfirm] = useState(false);
+  const [saveDefaultSuccess, setSaveDefaultSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!saveDefaultSuccess) return;
+    const timeout = setTimeout(() => setSaveDefaultSuccess(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [saveDefaultSuccess]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -290,7 +298,16 @@ export const CategoryEditor = ({ categories, onSave, onClose }) => {
     setExpandedKey(expandedKey === key ? null : key);
   };
 
+  const handleSaveAsDefault = async () => {
+    if (onSaveAsDefault && listType) {
+      await onSaveAsDefault(listType, localCategories);
+      setShowSaveDefaultConfirm(false);
+      setSaveDefaultSuccess(true);
+    }
+  };
+
   const categoryToDelete = localCategories.find((c) => c.key === confirmingDeleteKey);
+  const listTypeDisplay = listType ? listType.charAt(0).toUpperCase() + listType.slice(1) : '';
 
   return (
     <div className={styles.editor}>
@@ -363,6 +380,29 @@ export const CategoryEditor = ({ categories, onSave, onClose }) => {
         </button>
       </div>
 
+      {listType && onSaveAsDefault && (
+        <div className={styles.saveDefaultSection}>
+          <button
+            type="button"
+            className={styles.saveDefaultButton}
+            onClick={() => setShowSaveDefaultConfirm(true)}
+          >
+            Save as Default for {listTypeDisplay}
+          </button>
+          {saveDefaultSuccess && (
+            <div className={styles.saveDefaultSuccess}>Saved as default!</div>
+          )}
+        </div>
+      )}
+
+      {showSaveDefaultConfirm && (
+        <ConfirmDialog
+          message={`This will replace your default ${listTypeDisplay} categories with this list's categories. Continue?`}
+          onConfirm={handleSaveAsDefault}
+          onCancel={() => setShowSaveDefaultConfirm(false)}
+        />
+      )}
+
       {confirmingDeleteKey && categoryToDelete && (
         <ConfirmDialog
           message={`Delete "${categoryToDelete.name}" category?`}
@@ -383,6 +423,8 @@ CategoryEditor.propTypes = {
       keywords: PropTypes.arrayOf(PropTypes.string),
     })
   ).isRequired,
+  listType: PropTypes.string,
   onSave: PropTypes.func.isRequired,
+  onSaveAsDefault: PropTypes.func,
   onClose: PropTypes.func.isRequired,
 };

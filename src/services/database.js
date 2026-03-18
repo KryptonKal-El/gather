@@ -897,6 +897,30 @@ export const saveListOrder = async (userId, lists) => {
 };
 
 /**
+ * Upserts user category defaults for a given list type.
+ * @param {string} userId - User ID
+ * @param {string} listType - List type (e.g., 'grocery', 'packing', 'todo')
+ * @param {Array<object>} categories - Array of category objects
+ */
+export const upsertUserCategoryDefault = async (userId, listType, categories) => {
+  const { error } = await supabase
+    .from('user_category_defaults')
+    .upsert(
+      {
+        user_id: userId,
+        list_type: listType,
+        categories,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id,list_type' }
+    );
+
+  if (error) {
+    throw new Error('Failed to save category defaults', { cause: error });
+  }
+};
+
+/**
  * Subscribes to stores.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID

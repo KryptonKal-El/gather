@@ -330,8 +330,8 @@
         "Lint passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Save as Default button with confirmation dialog and success feedback. Upserts to user_category_defaults table.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -342,7 +342,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-18T20:30:00Z"
     },
     {
       "id": "US-012",

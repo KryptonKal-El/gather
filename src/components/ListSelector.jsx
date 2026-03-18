@@ -512,7 +512,9 @@ export const ListSelector = ({
             {editingCategoriesForId === list.id && (
               <CategoryEditor
                 categories={getEffectiveCategories(list, userCategoryDefaults) ?? []}
+                listType={list.type}
                 onSave={(cats) => onUpdateDetails(list.id, { categories: cats })}
+                onSaveAsDefault={(listType, cats) => actions.saveUserCategoryDefault(listType, cats)}
                 onClose={() => setEditingCategoriesForId(null)}
               />
             )}
