@@ -41,16 +41,9 @@ struct DefaultCategoryEditorView: View {
                 Section {
                     ForEach(filteredCategories, id: \.key) { category in
                         categoryRow(category)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    categoryToDelete = category
-                                    showDeleteConfirm = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
                     }
                     .onMove(perform: moveCategory)
+                    .onDelete(perform: deleteCategory)
                 } header: {
                     Text("Categories")
                 } footer: {
@@ -195,6 +188,13 @@ struct DefaultCategoryEditorView: View {
     private func moveCategory(from source: IndexSet, to destination: Int) {
         categories.move(fromOffsets: source, toOffset: destination)
         saveCategories()
+    }
+    
+    private func deleteCategory(at offsets: IndexSet) {
+        if let index = offsets.first {
+            categoryToDelete = filteredCategories[index]
+            showDeleteConfirm = true
+        }
     }
     
     private func addNewCategory() {
