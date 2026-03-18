@@ -221,14 +221,24 @@ export const ListSelector = ({
     </div>
   );
 
+  const resolveNewCategories = (newType) => {
+    const userDefault = userCategoryDefaults.find(d => d.listType === newType);
+    if (userDefault?.categories?.length > 0) return userDefault.categories;
+    return getSystemDefaultCategories(newType);
+  };
+
   const renderChangeTypeGrid = (list) => {
     const currentType = list.type ?? 'grocery';
+    const fromCategoryType = CATEGORY_SUPPORTED_TYPES.includes(currentType);
+
     return (
       <div className={styles.typeGrid}>
         {LIST_TYPE_IDS.map((typeId) => {
           const cfg = LIST_TYPES[typeId];
           const isCurrent = currentType === typeId;
           const IconComponent = TYPE_ICON_MAP[typeId];
+          const toCategoryType = CATEGORY_SUPPORTED_TYPES.includes(typeId);
+
           return (
             <button
               key={typeId}
@@ -236,7 +246,27 @@ export const ListSelector = ({
               className={`${styles.typeCell} ${isCurrent ? styles.typeCellSelected : ''}`}
               onClick={() => {
                 if (!isCurrent) {
-                  setPendingTypeChange({ listId: list.id, newType: typeId, newLabel: cfg.label });
+                  if (fromCategoryType && toCategoryType) {
+                    setPendingTypeChange({
+                      listId: list.id,
+                      newType: typeId,
+                      newLabel: cfg.label,
+                      categoryMessage: `Changing to ${cfg.label} will reset this list's categories to your ${cfg.label} defaults. Continue?`,
+                      newCategories: resolveNewCategories(typeId),
+                    });
+                  } else if (fromCategoryType && !toCategoryType) {
+                    onUpdateDetails(list.id, { type: typeId, categories: null });
+                    setChangingTypeForId(null);
+                    return;
+                  } else if (!fromCategoryType && toCategoryType) {
+                    onUpdateDetails(list.id, { type: typeId, categories: resolveNewCategories(typeId) });
+                    setChangingTypeForId(null);
+                    return;
+                  } else {
+                    onUpdateDetails(list.id, { type: typeId });
+                    setChangingTypeForId(null);
+                    return;
+                  }
                 }
                 setChangingTypeForId(null);
               }}
@@ -505,11 +535,15 @@ export const ListSelector = ({
 
             {pendingTypeChange && pendingTypeChange.listId === list.id && (
               <ConfirmDialog
-                message={`Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
+                message={pendingTypeChange.categoryMessage || `Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
                 confirmLabel="Change"
                 onConfirm={async () => {
-                  const { listId, newType: selectedType } = pendingTypeChange;
-                  onUpdateDetails(listId, { type: selectedType });
+                  const { listId, newType: selectedType, newCategories } = pendingTypeChange;
+                  const updates = { type: selectedType };
+                  if (newCategories !== undefined) {
+                    updates.categories = newCategories;
+                  }
+                  onUpdateDetails(listId, updates);
                   const currentList = lists.find((l) => l.id === listId);
                   if (currentList?.sortConfig) {
                     const newTypeConfig = LIST_TYPES[selectedType];

@@ -514,8 +514,8 @@
         "Lint passes"
       ],
       "priority": 17,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Type change handles all 4 transition cases: category→category (confirm dialog), category→non-category (clear, no confirm), non-category→category (populate defaults, no confirm), non-category→non-category (no changes). Both React and Swift.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

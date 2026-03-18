@@ -46,7 +46,9 @@ struct ListDetailView: View {
     // Change type state
     @State private var showChangeTypeSheet = false
     @State private var pendingTypeChange: String?
+    @State private var pendingCategories: [CategoryDef]?
     @State private var showTypeChangeConfirm = false
+    @State private var typeChangeMessage: String = ""
     
     // Category editor state
     @State private var showCategoryEditor = false
@@ -1184,11 +1186,15 @@ struct ListDetailView: View {
         .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
             Button("Cancel", role: .cancel) {
                 pendingTypeChange = nil
+                pendingCategories = nil
             }
             Button("Change") {
                 guard let newType = pendingTypeChange else { return }
                 Task {
-                    await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType)
+                    await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: pendingCategories)
+                    if let newCats = pendingCategories {
+                        detailViewModel?.updateCategories(newCats)
+                    }
                     let newConfig = ListTypes.getConfig(newType)
                     if let currentSort = list.sortConfig {
                         let validLevels = Set(newConfig.sortLevels)
@@ -1199,17 +1205,29 @@ struct ListDetailView: View {
                         }
                     }
                     pendingTypeChange = nil
+                    pendingCategories = nil
                 }
             }
         } message: {
-            if let newType = pendingTypeChange {
-                let config = ListTypes.getConfig(newType)
-                Text("Change to \(config.label)? Some fields may be hidden but your data will be preserved.")
-            }
+            Text(typeChangeMessage)
         }
     }
     
     // MARK: - Change Type Sheet
+    
+    private static let categorySupportedTypes: Set<String> = ["grocery", "packing", "todo"]
+    
+    private func resolveNewCategories(for newType: String) async -> [CategoryDef]? {
+        guard let userId = authViewModel.currentUser?.id else {
+            return CategoryService.getSystemDefaults(for: newType)
+        }
+        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
+           let match = defaults.first(where: { $0.listType == newType }),
+           !match.categories.isEmpty {
+            return match.categories
+        }
+        return CategoryService.getSystemDefaults(for: newType)
+    }
     
     private func changeTypeSheet() -> some View {
         NavigationStack {
@@ -1221,9 +1239,7 @@ struct ListDetailView: View {
                             let isCurrent = typeId == list.type
                             Button {
                                 if !isCurrent {
-                                    pendingTypeChange = typeId
-                                    showChangeTypeSheet = false
-                                    showTypeChangeConfirm = true
+                                    handleTypeSelection(newType: typeId, newLabel: config.label)
                                 }
                             } label: {
                                 VStack(spacing: 4) {
@@ -1258,6 +1274,41 @@ struct ListDetailView: View {
                         showChangeTypeSheet = false
                     }
                 }
+            }
+        }
+    }
+    
+    private func handleTypeSelection(newType: String, newLabel: String) {
+        let currentType = list.type
+        let fromCategoryType = Self.categorySupportedTypes.contains(currentType)
+        let toCategoryType = Self.categorySupportedTypes.contains(newType)
+        
+        showChangeTypeSheet = false
+        
+        if fromCategoryType && toCategoryType {
+            Task {
+                let newCats = await resolveNewCategories(for: newType)
+                pendingTypeChange = newType
+                pendingCategories = newCats
+                typeChangeMessage = "Changing to \(newLabel) will reset this list's categories to your \(newLabel) defaults. Continue?"
+                showTypeChangeConfirm = true
+            }
+        } else if fromCategoryType && !toCategoryType {
+            Task {
+                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: [])
+                detailViewModel?.updateCategories([])
+            }
+        } else if !fromCategoryType && toCategoryType {
+            Task {
+                let newCats = await resolveNewCategories(for: newType)
+                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: newCats)
+                if let cats = newCats {
+                    detailViewModel?.updateCategories(cats)
+                }
+            }
+        } else {
+            Task {
+                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType)
             }
         }
     }
