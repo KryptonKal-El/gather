@@ -10,6 +10,8 @@ struct DefaultCategoryEditorView: View {
     @State private var showResetConfirm = false
     @State private var showDeleteConfirm = false
     @State private var categoryToDelete: CategoryDef?
+    @State private var searchText = ""
+    @State private var showDeleteAllConfirm = false
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
@@ -25,6 +27,11 @@ struct DefaultCategoryEditorView: View {
         }
     }
     
+    private var filteredCategories: [CategoryDef] {
+        if searchText.isEmpty { return categories }
+        return categories.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+    }
+    
     var body: some View {
         List {
             if isLoading {
@@ -32,15 +39,22 @@ struct DefaultCategoryEditorView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
             } else {
                 Section {
-                    ForEach(categories, id: \.key) { category in
+                    ForEach(filteredCategories, id: \.key) { category in
                         categoryRow(category)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    categoryToDelete = category
+                                    showDeleteConfirm = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                     }
                     .onMove(perform: moveCategory)
-                    .onDelete(perform: confirmDelete)
                 } header: {
                     Text("Categories")
                 } footer: {
-                    Text("Drag to reorder. Swipe to delete.")
+                    Text("Swipe to delete. Drag to reorder.")
                 }
                 
                 Section {
@@ -58,6 +72,15 @@ struct DefaultCategoryEditorView: View {
                 
                 Section {
                     Button(role: .destructive) {
+                        showDeleteAllConfirm = true
+                    } label: {
+                        Label("Delete All", systemImage: "trash")
+                    }
+                    .disabled(categories.isEmpty)
+                }
+                
+                Section {
+                    Button(role: .destructive) {
                         showResetConfirm = true
                     } label: {
                         Label("Reset to System Defaults", systemImage: "arrow.counterclockwise")
@@ -65,6 +88,7 @@ struct DefaultCategoryEditorView: View {
                 }
             }
         }
+        .searchable(text: $searchText, prompt: "Search categories")
         .environment(\.editMode, .constant(.active))
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)
@@ -92,6 +116,15 @@ struct DefaultCategoryEditorView: View {
             if let cat = categoryToDelete {
                 Text("Delete \"\(cat.name)\"? Items using this category will become uncategorized.")
             }
+        }
+        .alert("Delete All Categories?", isPresented: $showDeleteAllConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete All", role: .destructive) {
+                categories.removeAll()
+                saveCategories()
+            }
+        } message: {
+            Text("This will remove all categories. Items will become uncategorized.")
         }
         .alert("Reset to System Defaults?", isPresented: $showResetConfirm) {
             Button("Cancel", role: .cancel) {}
@@ -162,13 +195,6 @@ struct DefaultCategoryEditorView: View {
     private func moveCategory(from source: IndexSet, to destination: Int) {
         categories.move(fromOffsets: source, toOffset: destination)
         saveCategories()
-    }
-    
-    private func confirmDelete(at offsets: IndexSet) {
-        if let first = offsets.first {
-            categoryToDelete = categories[first]
-            showDeleteConfirm = true
-        }
     }
     
     private func addNewCategory() {

@@ -44,6 +44,30 @@
   background: var(--bg-hover);
 }
 
+.searchBarWrapper {
+  padding: 0 0 0.75rem 0;
+}
+
+.searchBar {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.searchBar::placeholder {
+  color: var(--text-placeholder);
+}
+
 .categoryList {
   display: flex;
   flex-direction: column;
@@ -55,6 +79,48 @@
 
 .categoryItem:last-child {
   border-bottom: none;
+}
+
+.swipeContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+.swipeContent {
+  position: relative;
+  background: var(--bg-card);
+  z-index: 1;
+  will-change: transform;
+  touch-action: pan-y;
+}
+
+.swipeSwiping {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.swipeBehind {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  background: #E74C3C;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 1.5rem;
+  z-index: 0;
+}
+
+.swipeBehindActive {
+  background: #C0392B;
+}
+
+.swipeDeleteText {
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
 }
 
 .categoryRow {
@@ -168,27 +234,6 @@
 .expandBtn:hover {
   color: var(--text-primary);
   background: var(--bg-hover);
-}
-
-.deleteBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  background: none;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.deleteBtn:hover {
-  color: var(--danger);
-  background: rgba(229, 57, 53, 0.1);
 }
 
 .colorPickerDropdown {
@@ -348,8 +393,7 @@
     padding: 0.35rem 0.5rem;
   }
 
-  .expandBtn,
-  .deleteBtn {
+  .expandBtn {
     width: 32px;
     height: 32px;
     min-width: 32px;
@@ -461,6 +505,49 @@
   }
 
   .saveDefaultButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+}
+
+.deleteAllSection {
+  display: flex;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.deleteAllButton {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--danger);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.deleteAllButton:hover {
+  background: rgba(229, 57, 53, 0.1);
+  border-color: var(--danger);
+}
+
+@media (max-width: 700px) {
+  .searchBar {
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+
+  .deleteAllSection {
+    padding-top: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .deleteAllButton {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     min-height: 44px;

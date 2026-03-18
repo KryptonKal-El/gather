@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -47,6 +47,7 @@ const SortableCategoryRow = ({
   onColorChange,
   onKeywordsChange,
   onDelete,
+  disableDrag,
 }) => {
   const {
     attributes,
@@ -63,6 +64,17 @@ const SortableCategoryRow = ({
   const [keywordInput, setKeywordInput] = useState(
     (category.keywords ?? []).join(', ')
   );
+
+  const [swipeX, setSwipeX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const touchStartRef = useRef(null);
+  const swipeDirectionRef = useRef(null);
+
+  const [isMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(pointer: coarse)').matches;
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -94,80 +106,152 @@ const SortableCategoryRow = ({
     onKeywordsChange(category.key, keywords);
   };
 
+  const handleTouchStart = (e) => {
+    if (!isMobile) return;
+    const touch = e.touches[0];
+    const EDGE_THRESHOLD = 20;
+    if (touch.clientX <= EDGE_THRESHOLD || touch.clientX >= window.innerWidth - EDGE_THRESHOLD) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    swipeDirectionRef.current = null;
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+
+    if (swipeDirectionRef.current === null) {
+      if (Math.abs(deltaX) < 10 && Math.abs(deltaY) < 10) return;
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        swipeDirectionRef.current = 'vertical';
+        return;
+      }
+      swipeDirectionRef.current = 'horizontal';
+    }
+
+    if (swipeDirectionRef.current === 'vertical') return;
+
+    const clampedDeltaX = Math.min(0, deltaX);
+    setSwipeX(clampedDeltaX);
+    setIsSwiping(true);
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping || !touchStartRef.current) {
+      touchStartRef.current = null;
+      swipeDirectionRef.current = null;
+      return;
+    }
+
+    const SWIPE_THRESHOLD = 80;
+    if (Math.abs(swipeX) >= SWIPE_THRESHOLD) {
+      setIsExiting(true);
+      setSwipeX(0);
+      setIsSwiping(false);
+      onDelete(category.key);
+    } else {
+      setSwipeX(0);
+      setIsSwiping(false);
+    }
+    touchStartRef.current = null;
+    swipeDirectionRef.current = null;
+  };
+
+  const getSwipeStyle = () => {
+    if (isExiting) return undefined;
+    if (isSwiping || swipeX !== 0) {
+      return {
+        transform: `translateX(${swipeX}px)`,
+        transition: isSwiping ? 'none' : 'transform 0.2s ease-out',
+      };
+    }
+    return undefined;
+  };
+
   const keywordCount = (category.keywords ?? []).length;
 
   return (
     <div ref={setNodeRef} style={style} className={styles.categoryItem}>
-      <div className={styles.categoryRow}>
-        <button
-          type="button"
-          className={styles.dragHandle}
-          {...attributes}
-          {...listeners}
-          aria-label="Drag to reorder"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <circle cx="9" cy="5" r="1.5" />
-            <circle cx="15" cy="5" r="1.5" />
-            <circle cx="9" cy="12" r="1.5" />
-            <circle cx="15" cy="12" r="1.5" />
-            <circle cx="9" cy="19" r="1.5" />
-            <circle cx="15" cy="19" r="1.5" />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          className={styles.colorDot}
-          style={{ backgroundColor: category.color }}
-          onClick={() => setShowColorPicker(!showColorPicker)}
-          aria-label="Change color"
-        />
-
-        {isEditing ? (
-          <input
-            type="text"
-            className={styles.nameInput}
-            value={editName}
-            onChange={(e) => setEditName(e.target.value)}
-            onBlur={handleNameSave}
-            onKeyDown={handleNameKeyDown}
-            autoFocus
-          />
-        ) : (
-          <button
-            type="button"
-            className={styles.categoryName}
-            onClick={() => {
-              setEditName(category.name);
-              setIsEditing(true);
-            }}
-          >
-            {category.name}
-          </button>
+      <div className={styles.swipeContainer}>
+        {isMobile && !isExiting && (isSwiping || swipeX !== 0) && (
+          <div className={`${styles.swipeBehind} ${Math.abs(swipeX) >= 80 ? styles.swipeBehindActive : ''}`}>
+            <span className={styles.swipeDeleteText}>Delete</span>
+          </div>
         )}
-
-        {keywordCount > 0 && (
-          <span className={styles.keywordCount}>{keywordCount}</span>
-        )}
-
-        <button
-          type="button"
-          className={styles.expandBtn}
-          onClick={() => onToggleExpand(category.key)}
-          aria-label={isExpanded ? 'Collapse keywords' : 'Expand keywords'}
+        <div
+          className={`${styles.swipeContent} ${isSwiping ? styles.swipeSwiping : ''}`}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={getSwipeStyle()}
         >
-          {isExpanded ? '▲' : '▼'}
-        </button>
+          <div className={styles.categoryRow}>
+            {!disableDrag && (
+              <button
+                type="button"
+                className={styles.dragHandle}
+                {...attributes}
+                {...listeners}
+                aria-label="Drag to reorder"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="9" cy="5" r="1.5" />
+                  <circle cx="15" cy="5" r="1.5" />
+                  <circle cx="9" cy="12" r="1.5" />
+                  <circle cx="15" cy="12" r="1.5" />
+                  <circle cx="9" cy="19" r="1.5" />
+                  <circle cx="15" cy="19" r="1.5" />
+                </svg>
+              </button>
+            )}
 
-        <button
-          type="button"
-          className={styles.deleteBtn}
-          onClick={() => onDelete(category.key)}
-          aria-label={`Delete ${category.name}`}
-        >
-          ×
-        </button>
+            <button
+              type="button"
+              className={styles.colorDot}
+              style={{ backgroundColor: category.color }}
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              aria-label="Change color"
+            />
+
+            {isEditing ? (
+              <input
+                type="text"
+                className={styles.nameInput}
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onBlur={handleNameSave}
+                onKeyDown={handleNameKeyDown}
+                autoFocus
+              />
+            ) : (
+              <button
+                type="button"
+                className={styles.categoryName}
+                onClick={() => {
+                  setEditName(category.name);
+                  setIsEditing(true);
+                }}
+              >
+                {category.name}
+              </button>
+            )}
+
+            {keywordCount > 0 && (
+              <span className={styles.keywordCount}>{keywordCount}</span>
+            )}
+
+            <button
+              type="button"
+              className={styles.expandBtn}
+              onClick={() => onToggleExpand(category.key)}
+              aria-label={isExpanded ? 'Collapse keywords' : 'Expand keywords'}
+            >
+              {isExpanded ? '▲' : '▼'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {showColorPicker && (
@@ -224,6 +308,8 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const [confirmingDeleteKey, setConfirmingDeleteKey] = useState(null);
   const [showSaveDefaultConfirm, setShowSaveDefaultConfirm] = useState(false);
   const [saveDefaultSuccess, setSaveDefaultSuccess] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
 
   useEffect(() => {
     if (!saveDefaultSuccess) return;
@@ -267,6 +353,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
     saveCategories([...localCategories, newCategory]);
     setNewName('');
     setNewColor(CATEGORY_COLORS[0]);
+    setSearchQuery('');
   };
 
   const handleRename = (key, newNameValue) => {
@@ -316,6 +403,17 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const categoryToDelete = localCategories.find((c) => c.key === confirmingDeleteKey);
   const listTypeDisplay = listType ? listType.charAt(0).toUpperCase() + listType.slice(1) : '';
 
+  const filteredCategories = localCategories.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const isSearching = searchQuery.trim() !== '';
+
+  const handleDeleteAll = () => {
+    saveCategories([]);
+    setShowDeleteAllConfirm(false);
+    setExpandedKey(null);
+  };
+
   return (
     <div className={styles.editor}>
       {showHeader && (
@@ -334,6 +432,16 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
         </div>
       )}
 
+      <div className={styles.searchBarWrapper}>
+        <input
+          type="text"
+          className={styles.searchBar}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search categories..."
+        />
+      </div>
+
       <div className={styles.categoryList}>
         <DndContext
           sensors={sensors}
@@ -342,10 +450,10 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
           modifiers={[restrictToVerticalAxis]}
         >
           <SortableContext
-            items={localCategories.map((c) => c.key)}
+            items={filteredCategories.map((c) => c.key)}
             strategy={verticalListSortingStrategy}
           >
-            {localCategories.map((cat) => (
+            {filteredCategories.map((cat) => (
               <SortableCategoryRow
                 key={cat.key}
                 category={cat}
@@ -355,6 +463,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
                 onColorChange={handleColorChange}
                 onKeywordsChange={handleKeywordsChange}
                 onDelete={handleDelete}
+                disableDrag={isSearching}
               />
             ))}
           </SortableContext>
@@ -391,6 +500,18 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
         </button>
       </div>
 
+      {localCategories.length > 0 && (
+        <div className={styles.deleteAllSection}>
+          <button
+            type="button"
+            className={styles.deleteAllButton}
+            onClick={() => setShowDeleteAllConfirm(true)}
+          >
+            Delete All
+          </button>
+        </div>
+      )}
+
       {listType && onSaveAsDefault && (
         <div className={styles.saveDefaultSection}>
           <button
@@ -419,6 +540,14 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
           message={`Delete "${categoryToDelete.name}" category?`}
           onConfirm={confirmDelete}
           onCancel={() => setConfirmingDeleteKey(null)}
+        />
+      )}
+
+      {showDeleteAllConfirm && (
+        <ConfirmDialog
+          message="Delete all categories? This will remove all categories from this list."
+          onConfirm={handleDeleteAll}
+          onCancel={() => setShowDeleteAllConfirm(false)}
         />
       )}
     </div>
