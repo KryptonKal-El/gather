@@ -1074,8 +1074,8 @@ struct ListDetailView: View {
     private func formatPrice(_ price: Decimal) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        formatter.currencyCode = "USD"
-        return formatter.string(from: price as NSDecimalNumber) ?? "$\(price)"
+        formatter.locale = Locale.current
+        return formatter.string(from: price as NSDecimalNumber) ?? "\(price)"
     }
     
     private func rsvpColor(for status: String?) -> Color {

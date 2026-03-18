@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
 import { getTypeConfig } from '../utils/listTypes.js';
+import { formatPrice, getCurrencySymbol } from '../utils/formatPrice.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
 import { ImagePicker } from './ImagePicker.jsx';
@@ -396,7 +397,7 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
         </div>
         {fields.price && lineTotal !== null && (
           <span className={styles.price} onDoubleClick={onToggle}>
-            {`$${lineTotal.toFixed(2)}`}
+            {formatPrice(lineTotal)}
           </span>
         )}
         <button
@@ -466,7 +467,7 @@ export const ShoppingItem = ({ item, stores, listType, onToggle, onRemove, onUpd
             <div className={styles.editRow}>
               <span className={styles.editLabel}>Price</span>
               <div className={styles.priceEdit}>
-                <span className={styles.priceCurrency}>$</span>
+                <span className={styles.priceCurrency}>{getCurrencySymbol()}</span>
                 <input
                   ref={priceInputRef}
                   className={styles.priceEditInput}

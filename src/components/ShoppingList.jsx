@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { applySortPipeline, SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
+import { formatPrice } from '../utils/formatPrice.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ShoppingItem } from './ShoppingItem.jsx';
 import styles from './ShoppingList.module.css';
@@ -69,7 +70,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
           {group.label}
           <span className={styles.count}>{allItems.length}</span>
           {subtotal !== null && (
-            <span className={styles.subtotal}>{`$${subtotal.toFixed(2)}`}</span>
+            <span className={styles.subtotal}>{formatPrice(subtotal)}</span>
           )}
         </h3>
         {!isCollapsed && (
