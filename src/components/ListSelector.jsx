@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -300,277 +301,215 @@ export const ListSelector = ({
         className={`${styles.listItem} ${isActive ? styles.active : ''}`}
         {...(dragProps && isMobile ? { ...dragProps.attributes, ...dragProps.listeners, style: { touchAction: 'none' } } : {})}
       >
-        {editingId === list.id ? (
-          <div className={styles.editRow}>
-            <div className={styles.editTop}>
-              <EmojiPicker value={editEmoji} onSelect={setEditEmoji} />
-              <input
-                className={styles.editInput}
-                type="text"
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onKeyDown={(e) => handleEditKeyDown(e, list.id)}
-                autoFocus
-              />
-            </div>
-            <div className={styles.colorPicker}>
-              {LIST_PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => setEditColor(c)}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
-            </div>
-            <div className={styles.editActions}>
+        {!isMobile && dragProps && (
+          <button
+            type="button"
+            className={styles.dragHandle}
+            {...dragProps.attributes}
+            {...dragProps.listeners}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Drag to reorder"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
+              <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+              <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
+            </svg>
+          </button>
+        )}
+        <button
+          className={styles.listBtn}
+          onClick={() => onSelect(list.id)}
+        >
+          <span
+            className={styles.listDot}
+            style={{ backgroundColor: list.color || '#1565c0' }}
+          />
+          {list.emoji && <span className={styles.listEmoji}>{list.emoji}</span>}
+          <span className={styles.listText}>
+            <span className={styles.listName}>
+              {list.name}
+              {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
+            </span>
+            <span className={styles.listMeta}>
+              <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
+              {list.type && (
+                <span className={styles.typeBadge}>
+                  {LIST_TYPES[list.type]?.label ?? list.type}
+                </span>
+              )}
+            </span>
+          </span>
+        </button>
+
+        <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
+          <button
+            type="button"
+            className={styles.menuBtn}
+            onClick={() => setMenuOpenId(isMenuOpen ? null : list.id)}
+            aria-label={`Options for ${list.name}`}
+          >
+            &#x22EE;
+          </button>
+
+          {isMenuOpen && !isMobile && (
+            <div className={styles.menuDropdown}>
               <button
                 type="button"
-                className={styles.saveBtn}
-                onClick={() => handleSaveEdit(list.id)}
+                className={styles.menuItem}
+                onClick={() => handleStartEdit(list)}
               >
-                Save
+                <span className={styles.menuIcon}>✏️</span>
+                Name, Icon &amp; Color
               </button>
+              {isOwned && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
+                >
+                  <span className={styles.menuIcon}>🔄</span>
+                  List Type
+                </button>
+              )}
+              {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                >
+                  <span className={styles.menuIcon}>🏷️</span>
+                  Edit Categories
+                </button>
+              )}
+              {isOwned && onShareClick && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { onShareClick(list); setMenuOpenId(null); }}
+                >
+                  <span className={styles.menuIcon}>🔗</span>
+                  Share Settings
+                </button>
+              )}
+              {isOwned && (
+                <button
+                  type="button"
+                  className={`${styles.menuItem} ${styles.menuDanger}`}
+                  onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
+                >
+                  <span className={styles.menuIcon}>🗑️</span>
+                  Delete List
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {isMenuOpen && isMobile && (
+          <>
+            <div
+              className={styles.actionSheetBackdrop}
+              onClick={() => setMenuOpenId(null)}
+            />
+            <div className={styles.actionSheet}>
+              <div className={styles.actionSheetGroup}>
+                <div className={styles.actionSheetTitle}>
+                  {list.emoji && <span>{list.emoji} </span>}
+                  {list.name}
+                </div>
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => handleStartEdit(list)}
+                >
+                  Name, Icon &amp; Color
+                </button>
+                {isOwned && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
+                  >
+                    List Type
+                  </button>
+                )}
+                {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                  >
+                    Edit Categories
+                  </button>
+                )}
+                {isOwned && onShareClick && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => { onShareClick(list); setMenuOpenId(null); }}
+                  >
+                    Share Settings
+                  </button>
+                )}
+                {isOwned && (
+                  <button
+                    type="button"
+                    className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
+                    onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
+                  >
+                    Delete List
+                  </button>
+                )}
+              </div>
               <button
                 type="button"
-                className={styles.cancelBtn}
-                onClick={() => setEditingId(null)}
+                className={styles.actionSheetCancel}
+                onClick={() => setMenuOpenId(null)}
               >
                 Cancel
               </button>
             </div>
-          </div>
-        ) : (
-          <>
-            {!isMobile && dragProps && (
-              <button
-                type="button"
-                className={styles.dragHandle}
-                {...dragProps.attributes}
-                {...dragProps.listeners}
-                onClick={(e) => e.stopPropagation()}
-                aria-label="Drag to reorder"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <circle cx="9" cy="5" r="1.5"/><circle cx="15" cy="5" r="1.5"/>
-                  <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
-                  <circle cx="9" cy="19" r="1.5"/><circle cx="15" cy="19" r="1.5"/>
-                </svg>
-              </button>
-            )}
-            <button
-              className={styles.listBtn}
-              onClick={() => onSelect(list.id)}
-            >
-              <span
-                className={styles.listDot}
-                style={{ backgroundColor: list.color || '#1565c0' }}
-              />
-              {list.emoji && <span className={styles.listEmoji}>{list.emoji}</span>}
-              <span className={styles.listText}>
-                <span className={styles.listName}>
-                  {list.name}
-                  {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
-                </span>
-                <span className={styles.listMeta}>
-                  <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
-                  {list.type && (
-                    <span className={styles.typeBadge}>
-                      {LIST_TYPES[list.type]?.label ?? list.type}
-                    </span>
-                  )}
-                </span>
-              </span>
-            </button>
-
-            <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
-              <button
-                type="button"
-                className={styles.menuBtn}
-                onClick={() => setMenuOpenId(isMenuOpen ? null : list.id)}
-                aria-label={`Options for ${list.name}`}
-              >
-                &#x22EE;
-              </button>
-
-              {isMenuOpen && !isMobile && (
-                <div className={styles.menuDropdown}>
-                  <button
-                    type="button"
-                    className={styles.menuItem}
-                    onClick={() => handleStartEdit(list)}
-                  >
-                    <span className={styles.menuIcon}>✏️</span>
-                    Name, Icon &amp; Color
-                  </button>
-                  {isOwned && (
-                    <button
-                      type="button"
-                      className={styles.menuItem}
-                      onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
-                    >
-                      <span className={styles.menuIcon}>🔄</span>
-                      List Type
-                    </button>
-                  )}
-                  {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                    <button
-                      type="button"
-                      className={styles.menuItem}
-                      onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                    >
-                      <span className={styles.menuIcon}>🏷️</span>
-                      Edit Categories
-                    </button>
-                  )}
-                  {isOwned && onShareClick && (
-                    <button
-                      type="button"
-                      className={styles.menuItem}
-                      onClick={() => { onShareClick(list); setMenuOpenId(null); }}
-                    >
-                      <span className={styles.menuIcon}>🔗</span>
-                      Share Settings
-                    </button>
-                  )}
-                  {isOwned && (
-                    <button
-                      type="button"
-                      className={`${styles.menuItem} ${styles.menuDanger}`}
-                      onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
-                    >
-                      <span className={styles.menuIcon}>🗑️</span>
-                      Delete List
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {isMenuOpen && isMobile && (
-              <>
-                <div
-                  className={styles.actionSheetBackdrop}
-                  onClick={() => setMenuOpenId(null)}
-                />
-                <div className={styles.actionSheet}>
-                  <div className={styles.actionSheetGroup}>
-                    <div className={styles.actionSheetTitle}>
-                      {list.emoji && <span>{list.emoji} </span>}
-                      {list.name}
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.actionSheetItem}
-                      onClick={() => handleStartEdit(list)}
-                    >
-                      Name, Icon &amp; Color
-                    </button>
-                    {isOwned && (
-                      <button
-                        type="button"
-                        className={styles.actionSheetItem}
-                        onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
-                      >
-                        List Type
-                      </button>
-                    )}
-                    {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                      <button
-                        type="button"
-                        className={styles.actionSheetItem}
-                        onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                      >
-                        Edit Categories
-                      </button>
-                    )}
-                    {isOwned && onShareClick && (
-                      <button
-                        type="button"
-                        className={styles.actionSheetItem}
-                        onClick={() => { onShareClick(list); setMenuOpenId(null); }}
-                      >
-                        Share Settings
-                      </button>
-                    )}
-                    {isOwned && (
-                      <button
-                        type="button"
-                        className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
-                        onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
-                      >
-                        Delete List
-                      </button>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.actionSheetCancel}
-                    onClick={() => setMenuOpenId(null)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </>
-            )}
-
-            {confirmingDeleteId === list.id && (
-              <ConfirmDialog
-                message={`Delete "${list.name}" and all its items?`}
-                onConfirm={() => {
-                  onDelete(list.id);
-                  setConfirmingDeleteId(null);
-                }}
-                onCancel={() => setConfirmingDeleteId(null)}
-              />
-            )}
-
-            {changingTypeForId === list.id && (
-              <div className={styles.changeTypeOverlay}>
-                {renderChangeTypeGrid(list)}
-              </div>
-            )}
-
-            {pendingTypeChange && pendingTypeChange.listId === list.id && (
-              <ConfirmDialog
-                message={pendingTypeChange.categoryMessage || `Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
-                confirmLabel="Change"
-                onConfirm={async () => {
-                  const { listId, newType: selectedType, newCategories } = pendingTypeChange;
-                  const updates = { type: selectedType };
-                  if (newCategories !== undefined) {
-                    updates.categories = newCategories;
-                  }
-                  onUpdateDetails(listId, updates);
-                  const currentList = lists.find((l) => l.id === listId);
-                  if (currentList?.sortConfig) {
-                    const newTypeConfig = LIST_TYPES[selectedType];
-                    const hasInvalidLevels = currentList.sortConfig.some(
-                      (level) => !newTypeConfig.sortLevels.includes(level)
-                    );
-                    if (hasInvalidLevels) {
-                      await updateListSortConfig(listId, null);
-                    }
-                  }
-                  setPendingTypeChange(null);
-                  setChangingTypeForId(null);
-                }}
-                onCancel={() => setPendingTypeChange(null)}
-              />
-            )}
-
-            {editingCategoriesForId === list.id && (
-              <CategoryEditor
-                categories={getEffectiveCategories(list, userCategoryDefaults) ?? []}
-                listType={list.type}
-                onSave={(cats) => onUpdateDetails(list.id, { categories: cats })}
-                onSaveAsDefault={(listType, cats) => actions.saveUserCategoryDefault(listType, cats)}
-                onClose={() => setEditingCategoriesForId(null)}
-              />
-            )}
           </>
+        )}
+
+        {confirmingDeleteId === list.id && (
+          <ConfirmDialog
+            message={`Delete "${list.name}" and all its items?`}
+            onConfirm={() => {
+              onDelete(list.id);
+              setConfirmingDeleteId(null);
+            }}
+            onCancel={() => setConfirmingDeleteId(null)}
+          />
+        )}
+
+        {pendingTypeChange && pendingTypeChange.listId === list.id && (
+          <ConfirmDialog
+            message={pendingTypeChange.categoryMessage || `Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
+            confirmLabel="Change"
+            onConfirm={async () => {
+              const { listId, newType: selectedType, newCategories } = pendingTypeChange;
+              const updates = { type: selectedType };
+              if (newCategories !== undefined) {
+                updates.categories = newCategories;
+              }
+              onUpdateDetails(listId, updates);
+              const currentList = lists.find((l) => l.id === listId);
+              if (currentList?.sortConfig) {
+                const newTypeConfig = LIST_TYPES[selectedType];
+                const hasInvalidLevels = currentList.sortConfig.some(
+                  (level) => !newTypeConfig.sortLevels.includes(level)
+                );
+                if (hasInvalidLevels) {
+                  await updateListSortConfig(listId, null);
+                }
+              }
+              setPendingTypeChange(null);
+              setChangingTypeForId(null);
+            }}
+            onCancel={() => setPendingTypeChange(null)}
+          />
         )}
       </div>
     );
@@ -855,7 +794,145 @@ export const ListSelector = ({
     </div>
   );
 
-  return isMobile ? renderMobileLayout() : renderDesktopLayout();
+  const handleEditModalKeyDown = (e) => {
+    if (e.key === 'Escape') setEditingId(null);
+  };
+
+  const handleEditModalBackdropClick = (e) => {
+    if (e.target === e.currentTarget) setEditingId(null);
+  };
+
+  const handleTypeModalKeyDown = (e) => {
+    if (e.key === 'Escape') setChangingTypeForId(null);
+  };
+
+  const handleTypeModalBackdropClick = (e) => {
+    if (e.target === e.currentTarget) setChangingTypeForId(null);
+  };
+
+  const editingList = editingId ? lists.find((l) => l.id === editingId) : null;
+  const changingTypeList = changingTypeForId ? lists.find((l) => l.id === changingTypeForId) : null;
+  const editingCategoriesList = editingCategoriesForId ? lists.find((l) => l.id === editingCategoriesForId) : null;
+
+  return (
+    <>
+      {isMobile ? renderMobileLayout() : renderDesktopLayout()}
+
+      {editingId && editingList && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          onClick={handleEditModalBackdropClick}
+          onKeyDown={handleEditModalKeyDown}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit List"
+        >
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Edit List</h3>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setEditingId(null)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.editTop}>
+                <EmojiPicker value={editEmoji} onSelect={setEditEmoji} />
+                <input
+                  className={styles.editInput}
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  onKeyDown={(e) => handleEditKeyDown(e, editingId)}
+                  autoFocus
+                />
+              </div>
+              <div className={styles.colorPicker}>
+                {LIST_PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setEditColor(c)}
+                    aria-label={`Select color ${c}`}
+                  />
+                ))}
+              </div>
+              <div className={styles.editActions}>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={() => handleSaveEdit(editingId)}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setEditingId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {changingTypeForId && changingTypeList && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          onClick={handleTypeModalBackdropClick}
+          onKeyDown={handleTypeModalKeyDown}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Change List Type"
+        >
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Change List Type</h3>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setChangingTypeForId(null)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              {renderChangeTypeGrid(changingTypeList)}
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+      {editingCategoriesForId && editingCategoriesList && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Edit Categories"
+        >
+          <div className={styles.modalCardTransparent}>
+            <CategoryEditor
+              categories={getEffectiveCategories(editingCategoriesList, userCategoryDefaults) ?? []}
+              listType={editingCategoriesList.type}
+              onSave={(cats) => onUpdateDetails(editingCategoriesList.id, { categories: cats })}
+              onSaveAsDefault={(listType, cats) => actions.saveUserCategoryDefault(listType, cats)}
+              onClose={() => setEditingCategoriesForId(null)}
+            />
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
 };
 
 ListSelector.propTypes = {
