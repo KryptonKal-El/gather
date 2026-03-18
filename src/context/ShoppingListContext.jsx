@@ -4,8 +4,7 @@
  * Supports both owned lists and lists shared by other users.
  */
 import { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { categorizeItem } from '../utils/categories.js';
-import { getEffectiveCategories } from '../utils/categories.js';
+import { categorizeItem, getEffectiveCategories, getSystemDefaultCategories } from '../utils/categories.js';
 import { useAuth } from './AuthContext.jsx';
 import {
   subscribeLists,
@@ -411,6 +410,26 @@ export const ShoppingListProvider = ({ children }) => {
   // -----------------------------------------------------------------------
 
   /**
+   * Returns seed categories for a new list based on user defaults or system defaults.
+   * Returns null for list types that don't support categories.
+   */
+  const getSeedCategoriesForType = (type, defaults) => {
+    if (['basic', 'guest_list', 'project'].includes(type)) return null;
+    
+    const userDefault = defaults.find(d => d.listType === type);
+    if (userDefault?.categories?.length > 0) {
+      return JSON.parse(JSON.stringify(userDefault.categories));
+    }
+    
+    const systemDefaults = getSystemDefaultCategories(type);
+    if (systemDefaults) {
+      return JSON.parse(JSON.stringify(systemDefaults));
+    }
+    
+    return null;
+  };
+
+  /**
    * Returns the ownerUid for a given list ID (could be the current user
    * or another user if the list is shared).
    */
@@ -426,9 +445,20 @@ export const ShoppingListProvider = ({ children }) => {
   const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery') => {
     if (!userId) return;
     const newId = await dbCreateList(userId, name, userEmail, emoji, color, type);
-    setLists(prev => [...prev, { id: newId, name, emoji, color, type, itemCount: 0, ownerId: userId, createdAt: new Date().toISOString() }]);
+    
+    const seedCategories = getSeedCategoriesForType(type, userCategoryDefaults);
+    if (seedCategories) {
+      await dbUpdateList(userId, newId, { categories: seedCategories });
+    }
+    
+    setLists(prev => [...prev, { 
+      id: newId, name, emoji, color, type, 
+      categories: seedCategories || null,
+      itemCount: 0, ownerId: userId, 
+      createdAt: new Date().toISOString() 
+    }]);
     setActiveListId(newId);
-  }, [userId, userEmail]);
+  }, [userId, userEmail, userCategoryDefaults]);
 
   const deleteListAction = useCallback(async (id) => {
     if (!userId) return;

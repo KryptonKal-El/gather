@@ -314,7 +314,17 @@ final class ListViewModel {
         error = nil
         do {
             let newList = try await ListService.createList(userId: userId, name: name, emoji: emoji, color: color, sortOrder: ownedLists.count, type: type)
-            ownedLists.append(newList)
+            
+            let seedCategories = await getSeedCategories(for: type, userId: userId)
+            if let categories = seedCategories {
+                try await ListService.updateList(listId: newList.id, name: nil, emoji: nil, color: nil, categories: categories)
+                var seededList = newList
+                seededList.categories = categories
+                ownedLists.append(seededList)
+            } else {
+                ownedLists.append(newList)
+            }
+            
             rebuildAllLists()
             saveListOrderToCache()
             activeListId = newList.id
@@ -323,6 +333,18 @@ final class ListViewModel {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to create list: \(error.localizedDescription)")
         }
+    }
+    
+    private func getSeedCategories(for type: String, userId: UUID) async -> [CategoryDef]? {
+        guard !["basic", "guest_list"].contains(type) else { return nil }
+        
+        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
+           let match = defaults.first(where: { $0.listType == type }),
+           !match.categories.isEmpty {
+            return match.categories
+        }
+        
+        return CategoryService.getSystemDefaults(for: type)
     }
     
     func updateList(id: UUID, name: String?, emoji: String?, color: String?, type: String? = nil, categories: [CategoryDef]? = nil) async {
