@@ -59,19 +59,6 @@ struct CategoryEditorSheet: View {
                 }
                 
                 Section {
-                    Button {
-                        addNewCategory()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(.green)
-                            Text("Add Category")
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                Section {
                     Button(role: .destructive) {
                         showDeleteAllConfirm = true
                     } label: {
@@ -96,6 +83,13 @@ struct CategoryEditorSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        addNewCategory()
+                    } label: {
+                        Image(systemName: "plus")
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {

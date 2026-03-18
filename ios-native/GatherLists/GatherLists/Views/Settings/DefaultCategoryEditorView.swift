@@ -51,19 +51,6 @@ struct DefaultCategoryEditorView: View {
                 }
                 
                 Section {
-                    Button {
-                        addNewCategory()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(.green)
-                            Text("Add Category")
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-                
-                Section {
                     Button(role: .destructive) {
                         showDeleteAllConfirm = true
                     } label: {
@@ -85,6 +72,15 @@ struct DefaultCategoryEditorView: View {
         .environment(\.editMode, .constant(.active))
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    addNewCategory()
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
         .task { await loadCategories() }
         .sheet(item: $editingCategory) { category in
             CategoryDetailEditor(
