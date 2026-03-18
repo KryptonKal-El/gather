@@ -4,7 +4,7 @@
  * Items without a store use DEFAULT_CATEGORIES.
  */
 
-import { PACKING_CATEGORIES } from './listTypes.js';
+import { PACKING_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
 
 export const CATEGORIES = {
   PRODUCE: 'produce',
@@ -151,13 +151,18 @@ export const DEFAULT_CATEGORIES = [
  */
 export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES, listType) => {
   // Types without auto-categorization
-  if (listType === 'basic' || listType === 'guest_list' || listType === 'project' || listType === 'todo') {
+  if (listType === 'basic' || listType === 'guest_list' || listType === 'todo') {
     return null;
   }
 
   // Packing type uses packing-specific categories
   if (listType === 'packing') {
     categories = PACKING_CATEGORIES;
+  }
+
+  // Project type uses project-specific categories
+  if (listType === 'project') {
+    categories = PROJECT_CATEGORIES;
   }
 
   const normalized = itemName.toLowerCase().trim();

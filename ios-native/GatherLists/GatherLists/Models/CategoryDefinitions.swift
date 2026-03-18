@@ -167,10 +167,11 @@ enum CategoryDefinitions {
     /// Categorizes an item based on the list type.
     /// - Grocery or nil: uses grocery keyword matching (existing behavior)
     /// - Packing: uses packing category keywords
-    /// - Basic, Guest List, Project, To-Do: returns "other" (no auto-categorization)
+    /// - Project: uses project category keywords
+    /// - Basic, Guest List, To-Do: returns "other" (no auto-categorization)
     static func categorizeItem(_ name: String, listType: String?, categories: [CategoryDef]? = nil) -> String {
         switch listType {
-        case "basic", "guest_list", "project", "todo":
+        case "basic", "guest_list", "todo":
             return "other"
         case "packing":
             let packingDefs = ListTypeCategories.packing.map { cat in
@@ -178,6 +179,11 @@ enum CategoryDefinitions {
             }
             let result = categorizeItem(name, categories: packingDefs)
             return result == "other" ? "miscellaneous" : result
+        case "project":
+            let projectDefs = ListTypeCategories.project.map { cat in
+                CategoryDef(key: cat.key, name: cat.name, color: cat.color, keywords: cat.keywords)
+            }
+            return categorizeItem(name, categories: projectDefs)
         default:
             return categorizeItem(name, categories: categories)
         }

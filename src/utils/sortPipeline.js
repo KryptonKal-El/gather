@@ -10,7 +10,7 @@ import {
   getAllCategoryColors,
   getAllCategoryKeys,
 } from './categories.js';
-import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES } from './listTypes.js';
+import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
 
 /** Valid sort level options */
 export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp'];
@@ -288,6 +288,13 @@ const getCategoryInfo = (stores, parentStoreId, listType) => {
       labels: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.name])),
       colors: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.color])),
       orderedKeys: TODO_CATEGORIES.map((c) => c.key),
+    };
+  }
+  if (listType === 'project') {
+    return {
+      labels: Object.fromEntries(PROJECT_CATEGORIES.map((c) => [c.key, c.name])),
+      colors: Object.fromEntries(PROJECT_CATEGORIES.map((c) => [c.key, c.color])),
+      orderedKeys: PROJECT_CATEGORIES.map((c) => c.key),
     };
   }
 

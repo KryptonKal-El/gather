@@ -104,6 +104,64 @@ export const TODO_CATEGORIES = [
 ];
 
 /**
+ * Category definitions for project lists.
+ * @type {Array<{key: string, name: string, color: string, keywords: string[]}>}
+ */
+export const PROJECT_CATEGORIES = [
+  {
+    key: 'research',
+    name: 'Research',
+    color: '#5C6BC0',
+    keywords: [
+      'research', 'investigate', 'analyze', 'analysis', 'discovery', 'explore',
+      'study', 'review', 'audit', 'evaluate', 'assess',
+    ],
+  },
+  {
+    key: 'design',
+    name: 'Design',
+    color: '#AB47BC',
+    keywords: [
+      'design', 'mockup', 'wireframe', 'prototype', 'ux', 'ui', 'layout',
+      'sketch', 'figma', 'visual',
+    ],
+  },
+  {
+    key: 'development',
+    name: 'Development',
+    color: '#26A69A',
+    keywords: [
+      'develop', 'code', 'implement', 'build', 'feature', 'refactor', 'api',
+      'backend', 'frontend', 'deploy', 'fix', 'bug',
+    ],
+  },
+  {
+    key: 'testing',
+    name: 'Testing',
+    color: '#FFA726',
+    keywords: [
+      'test', 'qa', 'verify', 'validate', 'check', 'regression', 'integration',
+      'e2e', 'unit test', 'coverage',
+    ],
+  },
+  {
+    key: 'admin',
+    name: 'Admin',
+    color: '#78909C',
+    keywords: [
+      'meeting', 'document', 'docs', 'plan', 'coordinate', 'schedule', 'budget',
+      'report', 'email', 'organize', 'presentation',
+    ],
+  },
+  {
+    key: 'other',
+    name: 'Other',
+    color: '#9e9e9e',
+    keywords: [],
+  },
+];
+
+/**
  * List type configuration registry.
  * Each type defines which fields are visible, available categories, and sorting options.
  * @type {Object<string, {id: string, label: string, icon: string, fields: Object, quantityLabel: string|null, categories: Array|null, sortLevels: string[], defaultSort: string[]}>}
@@ -187,7 +245,7 @@ export const LIST_TYPES = {
     icon: 'project',
     fields: {
       store: false,
-      category: false,
+      category: true,
       price: true,
       quantity: true,
       unit: false,
@@ -195,9 +253,9 @@ export const LIST_TYPES = {
       rsvpStatus: false,
     },
     quantityLabel: 'Qty',
-    categories: null,
-    sortLevels: ['name', 'date', 'price'],
-    defaultSort: ['name'],
+    categories: PROJECT_CATEGORIES,
+    sortLevels: ['category', 'name', 'date', 'price'],
+    defaultSort: ['category', 'name'],
   },
   todo: {
     id: 'todo',

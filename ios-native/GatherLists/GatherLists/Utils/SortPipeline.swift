@@ -506,6 +506,18 @@ enum SortPipeline {
             }
             return CategoryInfo(labels: labels, colors: colors, orderedKeys: orderedKeys)
         }
+        if listType == "project" {
+            let cats = ListTypeCategories.project
+            var labels: [String: String] = [:]
+            var colors: [String: String] = [:]
+            var orderedKeys: [String] = []
+            for cat in cats {
+                labels[cat.key] = cat.name
+                colors[cat.key] = cat.color
+                orderedKeys.append(cat.key)
+            }
+            return CategoryInfo(labels: labels, colors: colors, orderedKeys: orderedKeys)
+        }
         
         // Grocery (existing behavior)
         var categories = CategoryDefinitions.defaults

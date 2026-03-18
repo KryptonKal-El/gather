@@ -102,6 +102,45 @@ enum ListTypeCategories {
         ListCategory(key: "home", name: "Home", color: "#AB47BC", keywords: []),
         ListCategory(key: "other", name: "Other", color: "#9E9E9E", keywords: [])
     ]
+    
+    static let project: [ListCategory] = [
+        ListCategory(
+            key: "research",
+            name: "Research",
+            color: "#5C6BC0",
+            keywords: ["research", "investigate", "analyze", "analysis", "discovery", "explore", "study", "review", "audit", "evaluate", "assess"]
+        ),
+        ListCategory(
+            key: "design",
+            name: "Design",
+            color: "#AB47BC",
+            keywords: ["design", "mockup", "wireframe", "prototype", "ux", "ui", "layout", "sketch", "figma", "visual"]
+        ),
+        ListCategory(
+            key: "development",
+            name: "Development",
+            color: "#26A69A",
+            keywords: ["develop", "code", "implement", "build", "feature", "refactor", "api", "backend", "frontend", "deploy", "fix", "bug"]
+        ),
+        ListCategory(
+            key: "testing",
+            name: "Testing",
+            color: "#FFA726",
+            keywords: ["test", "qa", "verify", "validate", "check", "regression", "integration", "e2e", "unit test", "coverage"]
+        ),
+        ListCategory(
+            key: "admin",
+            name: "Admin",
+            color: "#78909C",
+            keywords: ["meeting", "document", "docs", "plan", "coordinate", "schedule", "budget", "report", "email", "organize", "presentation"]
+        ),
+        ListCategory(
+            key: "other",
+            name: "Other",
+            color: "#9e9e9e",
+            keywords: []
+        )
+    ]
 }
 
 /// List type configurations and lookup.
@@ -151,11 +190,11 @@ enum ListTypes {
             id: "project",
             label: "Project",
             icon: "🏗️",
-            fields: ListTypeFields(store: false, category: false, price: true, quantity: true, unit: false, image: false, rsvpStatus: false),
+            fields: ListTypeFields(store: false, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false),
             quantityLabel: "Qty",
-            categories: nil,
-            sortLevels: ["name", "date", "price"],
-            defaultSort: ["name"]
+            categories: ListTypeCategories.project,
+            sortLevels: ["category", "name", "date", "price"],
+            defaultSort: ["category", "name"]
         ),
         "todo": ListTypeConfig(
             id: "todo",
