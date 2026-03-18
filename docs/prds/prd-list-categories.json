@@ -16,8 +16,8 @@
         "Lint passes"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Added categories JSONB column to lists table with NULL default",
+      "passes": false,
+      "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -28,9 +28,7 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-18T20:05:00Z"
+      "requiredCredentials": []
     },
     {
       "id": "US-002",

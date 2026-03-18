@@ -495,6 +495,19 @@
       "startedAt": "2026-03-17T15:58:02Z",
       "completedAt": "2026-03-17T18:48:00Z",
       "storiesCompleted": 9
+    },
+    {
+      "id": "prd-list-categories",
+      "name": "List Category Management",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-list-categories.md",
+      "jsonPath": "docs/prds/prd-list-categories.json",
+      "branchName": "feature/list-categories",
+      "createdAt": "2026-03-18",
+      "updatedAt": "2026-03-18",
+      "notes": "Unifies categories onto lists, removes from stores. 17 stories across 4 DB migrations, service layer updates, store editor removal, per-list editor, Save as Default, Settings management, list creation seeding, and type change handling. Both React web and Swift iOS.",
+      "startedAt": "2026-03-18T20:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }

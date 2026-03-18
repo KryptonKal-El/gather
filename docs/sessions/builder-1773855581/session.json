@@ -1,0 +1,38 @@
+{
+  "id": "builder-1773855581",
+  "mode": "prd",
+  "prdId": "prd-list-categories",
+  "branch": "main",
+  "status": "in_progress",
+  "startedAt": "2026-03-18T20:00:00Z",
+  "lastHeartbeat": "2026-03-18T20:00:00Z",
+  "currentChunk": "US-001",
+  "analysisCompleted": true,
+  "probeStatus": "confirmed",
+  "currentAction": {
+    "description": "Starting PRD execution — List Category Management",
+    "contextAnchor": "docs/prd.json",
+    "lastAction": "Session initialized, showing story list",
+    "updatedAt": "2026-03-18T20:00:00Z"
+  },
+  "chunks": [
+    { "id": "US-001", "slug": "db-add-categories-column", "title": "Database — Add categories column to lists table", "status": "pending", "priority": 1 },
+    { "id": "US-002", "slug": "db-create-user-category-defaults", "title": "Database — Create user_category_defaults table", "status": "pending", "priority": 2 },
+    { "id": "US-003", "slug": "db-migrate-store-categories", "title": "Database — Migrate store categories to lists and user defaults", "status": "pending", "priority": 3 },
+    { "id": "US-004", "slug": "db-remove-store-categories", "title": "Database — Remove categories column from stores", "status": "pending", "priority": 4 },
+    { "id": "US-005", "slug": "react-category-resolution", "title": "Service layer — Category resolution logic (React)", "status": "pending", "priority": 5 },
+    { "id": "US-006", "slug": "swift-category-resolution", "title": "Service layer — Category resolution logic (Swift)", "status": "pending", "priority": 6 },
+    { "id": "US-007", "slug": "react-remove-store-category-editor", "title": "Remove store category editor — React web", "status": "pending", "priority": 7 },
+    { "id": "US-008", "slug": "swift-remove-store-category-editor", "title": "Remove store category editor — Swift iOS", "status": "pending", "priority": 8 },
+    { "id": "US-009", "slug": "react-per-list-category-editor", "title": "Per-list category editor — React web", "status": "pending", "priority": 9 },
+    { "id": "US-010", "slug": "swift-per-list-category-editor", "title": "Per-list category editor — Swift iOS", "status": "pending", "priority": 10 },
+    { "id": "US-011", "slug": "react-save-as-default", "title": "\"Save as Default\" button — React web", "status": "pending", "priority": 11 },
+    { "id": "US-012", "slug": "swift-save-as-default", "title": "\"Save as Default\" button — Swift iOS", "status": "pending", "priority": 12 },
+    { "id": "US-013", "slug": "react-settings-category-defaults", "title": "Manage default categories in Settings — React web", "status": "pending", "priority": 13 },
+    { "id": "US-014", "slug": "swift-settings-category-defaults", "title": "Manage default categories in Settings — Swift iOS", "status": "pending", "priority": 14 },
+    { "id": "US-015", "slug": "list-creation-seed-categories", "title": "List creation — seed categories from user defaults", "status": "pending", "priority": 15 },
+    { "id": "US-016", "slug": "list-creation-category-preview", "title": "List creation — optional category preview (collapsed)", "status": "pending", "priority": 16 },
+    { "id": "US-017", "slug": "list-type-change-reset-categories", "title": "List type change resets categories with confirmation", "status": "pending", "priority": 17 }
+  ],
+  "decisions": []
+}
