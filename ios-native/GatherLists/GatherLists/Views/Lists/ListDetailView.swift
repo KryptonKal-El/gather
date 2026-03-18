@@ -1383,7 +1383,7 @@ struct ListDetailView: View {
                 activeSortConfig = config
             } else {
                 activeSortConfig = PreferenceService.effectiveSortConfig(
-                    for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortConfig: nil, createdAt: list.createdAt),
+                    for: GatherList(id: list.id, ownerId: list.ownerId, name: list.name, sortConfig: nil, type: list.type, createdAt: list.createdAt),
                     userPreferences: userPreferences,
                     shareSortConfig: nil
                 )

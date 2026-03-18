@@ -69,7 +69,8 @@ struct SortConfigSheet: View {
                     Section {
                         Button {
                             Task {
-                                await onConfigChange(nil)
+                                let typeDefault = SortPipeline.getDefaultConfig(for: listType)
+                                await onConfigChange(typeDefault)
                                 dismiss()
                             }
                         } label: {

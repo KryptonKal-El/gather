@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { SortLevelEditor } from './SortLevelEditor.jsx';
+import { getDefaultSortConfig } from '../utils/sortPipeline.js';
 import styles from './SortPicker.module.css';
 
 /**
@@ -36,7 +37,9 @@ export const SortPicker = ({ currentConfig, hasOverride, onSelect, listType = 'g
   }, [open]);
 
   const handleUseDefault = () => {
-    onSelect(null);
+    const typeDefault = getDefaultSortConfig(listType);
+    setOptimisticConfig(typeDefault);
+    onSelect(typeDefault);
     setOpen(false);
   };
 
