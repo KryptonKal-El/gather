@@ -69,6 +69,7 @@ export const updateList = async (userId, listId, updates) => {
     if (updates.item_count !== undefined) mapped.item_count = updates.item_count;
     if (updates.color !== undefined) mapped.color = updates.color;
     if (updates.type !== undefined) mapped.type = updates.type;
+    if (updates.categories !== undefined) mapped.categories = updates.categories;
 
     const { error } = await supabase
       .from('lists')

@@ -267,8 +267,8 @@
         "Lint passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Per-list category editor with dnd-kit drag reorder, add/remove/rename/reorder/color/keyword editing. Integrated into ListSelector menu for grocery/packing/todo lists.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -279,7 +279,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-18T20:00:00Z"
     },
     {
       "id": "US-010",

@@ -18,9 +18,11 @@ import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
+import { CategoryEditor } from './CategoryEditor.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
+import { getEffectiveCategories } from '../utils/categories.js';
 import { updateListSortConfig } from '../services/preferences.js';
 import { saveListOrder } from '../services/database.js';
 import {
@@ -90,10 +92,14 @@ export const ListSelector = ({
   const [editColor, setEditColor] = useState('#1565c0');
   const [changingTypeForId, setChangingTypeForId] = useState(null);
   const [pendingTypeChange, setPendingTypeChange] = useState(null);
+  const [editingCategoriesForId, setEditingCategoriesForId] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
-  const { actions } = useShoppingList();
+  const { state, actions } = useShoppingList();
   const reorderLists = actions.reorderLists;
+  const userCategoryDefaults = state.userCategoryDefaults ?? [];
+
+  const CATEGORY_EDITABLE_TYPES = ['grocery', 'packing', 'todo'];
 
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -361,6 +367,16 @@ export const ListSelector = ({
                       List Type
                     </button>
                   )}
+                  {isOwned && CATEGORY_EDITABLE_TYPES.includes(list.type) && (
+                    <button
+                      type="button"
+                      className={styles.menuItem}
+                      onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                    >
+                      <span className={styles.menuIcon}>🏷️</span>
+                      Edit Categories
+                    </button>
+                  )}
                   {isOwned && onShareClick && (
                     <button
                       type="button"
@@ -411,6 +427,15 @@ export const ListSelector = ({
                         onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
                       >
                         List Type
+                      </button>
+                    )}
+                    {isOwned && CATEGORY_EDITABLE_TYPES.includes(list.type) && (
+                      <button
+                        type="button"
+                        className={styles.actionSheetItem}
+                        onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                      >
+                        Edit Categories
                       </button>
                     )}
                     {isOwned && onShareClick && (
@@ -481,6 +506,14 @@ export const ListSelector = ({
                   setChangingTypeForId(null);
                 }}
                 onCancel={() => setPendingTypeChange(null)}
+              />
+            )}
+
+            {editingCategoriesForId === list.id && (
+              <CategoryEditor
+                categories={getEffectiveCategories(list, userCategoryDefaults) ?? []}
+                onSave={(cats) => onUpdateDetails(list.id, { categories: cats })}
+                onClose={() => setEditingCategoriesForId(null)}
               />
             )}
           </>

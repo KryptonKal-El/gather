@@ -457,6 +457,7 @@ export const ShoppingListProvider = ({ children }) => {
     if (updates.emoji !== undefined) allowed.emoji = updates.emoji;
     if (updates.color !== undefined) allowed.color = updates.color;
     if (updates.type !== undefined) allowed.type = updates.type;
+    if (updates.categories !== undefined) allowed.categories = updates.categories;
     await dbUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 
