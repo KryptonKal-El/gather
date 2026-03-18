@@ -233,8 +233,8 @@
         "Lint passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Deleted deprecated CategoryEditorView and CategoryDetailView stubs. Store category removal was completed in US-006.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -245,7 +245,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-18T21:15:00Z"
     },
     {
       "id": "US-009",

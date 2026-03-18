@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-18T20:00:00Z",
   "lastHeartbeat": "2026-03-18T20:00:00Z",
-  "currentChunk": "US-008",
+  "currentChunk": "US-009",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
@@ -73,8 +73,9 @@
       "id": "US-008",
       "slug": "swift-remove-store-category-editor",
       "title": "Remove store category editor — Swift iOS",
-      "status": "pending",
-      "priority": 8
+      "status": "completed",
+      "priority": 8,
+      "committedAt": "2026-03-18T21:15:00Z"
     },
     {
       "id": "US-009",
