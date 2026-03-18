@@ -143,7 +143,7 @@ struct DefaultCategoryEditorView: View {
             HStack(spacing: 12) {
                 Circle()
                     .fill(Color(hex: category.color))
-                    .frame(width: 24, height: 24)
+                    .frame(width: 12, height: 12)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(category.name)
