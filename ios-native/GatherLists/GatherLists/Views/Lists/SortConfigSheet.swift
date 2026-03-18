@@ -9,6 +9,7 @@ struct SortConfigSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var levels: [SortLevel] = []
+    @State private var formId = UUID()
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private static let levelLabels: [SortLevel: String] = [
@@ -35,10 +36,24 @@ struct SortConfigSheet: View {
             Form {
                 Section {
                     ForEach(levels, id: \.self) { level in
-                        Text(Self.levelLabels[level] ?? level.rawValue)
+                        HStack {
+                            if levels.count > 1 {
+                                Button {
+                                    removeLevel(level)
+                                } label: {
+                                    Image(systemName: "minus.circle.fill")
+                                        .foregroundStyle(.red)
+                                        .font(.title3)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                            
+                            Text(Self.levelLabels[level] ?? level.rawValue)
+                            
+                            Spacer()
+                        }
                     }
                     .onMove(perform: moveLevel)
-                    .onDelete(perform: deleteLevel)
                 } header: {
                     Text("Sort Levels")
                 } footer: {
@@ -80,7 +95,8 @@ struct SortConfigSheet: View {
                     }
                 }
             }
-            .environment(\.editMode, Binding(get: { .active }, set: { _ in }))
+            .id(formId)
+            .environment(\.editMode, .constant(.active))
             .navigationTitle("Sort Configuration")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -101,15 +117,17 @@ struct SortConfigSheet: View {
         persistChange()
     }
     
-    private func deleteLevel(at offsets: IndexSet) {
+    private func removeLevel(_ level: SortLevel) {
         guard levels.count > 1 else { return }
-        levels.remove(atOffsets: offsets)
+        levels.removeAll { $0 == level }
+        formId = UUID()
         persistChange()
     }
     
     private func addLevel(_ level: SortLevel) {
         guard levels.count < 3 && !levels.contains(level) else { return }
         levels.append(level)
+        formId = UUID()
         persistChange()
     }
     
