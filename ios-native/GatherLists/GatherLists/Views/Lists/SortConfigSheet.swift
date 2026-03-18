@@ -1,6 +1,7 @@
 import SwiftUI
 
 /// Sheet for configuring sort levels with drag-to-reorder, add, and remove.
+/// Split into "Group By" and "Sort By" sections.
 struct SortConfigSheet: View {
     @Binding var activeSortConfig: [SortLevel]
     let hasOverride: Bool
@@ -8,7 +9,8 @@ struct SortConfigSheet: View {
     var listType: String = "grocery"
     @Environment(\.dismiss) private var dismiss
     
-    @State private var levels: [SortLevel] = []
+    @State private var groupLevels: [SortLevel] = []
+    @State private var sortOnlyLevels: [SortLevel] = []
     @State private var formId = UUID()
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
@@ -21,61 +23,47 @@ struct SortConfigSheet: View {
         .price: "Price"
     ]
     
-    private var unusedLevels: [SortLevel] {
+    private var validLevels: [SortLevel] {
         let config = ListTypes.getConfig(listType)
-        let validLevels = config.sortLevels.compactMap { SortLevel(rawValue: $0) }
-        return validLevels.filter { !levels.contains($0) }
+        return config.sortLevels.compactMap { SortLevel(rawValue: $0) }
     }
     
-    private var canAddMore: Bool {
-        levels.count < 3 && !unusedLevels.isEmpty
+    private var validGroupLevels: [SortLevel] {
+        validLevels.filter { SortPipeline.isGroupingLevel($0) }
+    }
+    
+    private var validSortOnlyLevels: [SortLevel] {
+        validLevels.filter { !SortPipeline.isGroupingLevel($0) }
+    }
+    
+    private var unusedGroupLevels: [SortLevel] {
+        validGroupLevels.filter { !groupLevels.contains($0) }
+    }
+    
+    private var unusedSortOnlyLevels: [SortLevel] {
+        validSortOnlyLevels.filter { !sortOnlyLevels.contains($0) }
+    }
+    
+    private var canAddMoreGroupLevels: Bool {
+        groupLevels.count < SortPipeline.maxGroupLevels && !unusedGroupLevels.isEmpty
+    }
+    
+    private var canAddMoreSortOnlyLevels: Bool {
+        sortOnlyLevels.count < SortPipeline.maxSortOnlyLevels && !unusedSortOnlyLevels.isEmpty
+    }
+    
+    private var hasGroupingLevelsAvailable: Bool {
+        !validGroupLevels.isEmpty
     }
     
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    ForEach(levels, id: \.self) { level in
-                        HStack {
-                            if levels.count > 1 {
-                                Button {
-                                    removeLevel(level)
-                                } label: {
-                                    Image(systemName: "minus.circle.fill")
-                                        .foregroundStyle(.red)
-                                        .font(.title3)
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            
-                            Text(Self.levelLabels[level] ?? level.rawValue)
-                            
-                            Spacer()
-                        }
-                    }
-                    .onMove(perform: moveLevel)
-                } header: {
-                    Text("Sort Levels")
-                } footer: {
-                    Text("Drag to reorder. The first level creates top-level groups.")
+                if hasGroupingLevelsAvailable {
+                    groupBySection
                 }
                 
-                if canAddMore {
-                    Section("Add Level") {
-                        ForEach(unusedLevels, id: \.self) { level in
-                            Button {
-                                addLevel(level)
-                            } label: {
-                                HStack {
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundStyle(.green)
-                                    Text(Self.levelLabels[level] ?? level.rawValue)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
+                sortBySection
                 
                 if hasOverride {
                     Section {
@@ -107,34 +95,160 @@ struct SortConfigSheet: View {
                 }
             }
             .onAppear {
-                levels = activeSortConfig
+                let partitioned = SortPipeline.partitionConfig(activeSortConfig)
+                groupLevels = partitioned.groupLevels
+                sortOnlyLevels = partitioned.sortOnlyLevels
             }
         }
     }
     
-    private func moveLevel(from source: IndexSet, to destination: Int) {
-        levels.move(fromOffsets: source, toOffset: destination)
+    // MARK: - Group By Section
+    
+    private var groupBySection: some View {
+        Section {
+            if groupLevels.isEmpty {
+                Text("No grouping — items shown in a flat list")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .italic()
+            } else {
+                ForEach(groupLevels, id: \.self) { level in
+                    HStack {
+                        Button {
+                            removeGroupLevel(level)
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.red)
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                        
+                        Text(Self.levelLabels[level] ?? level.rawValue)
+                        
+                        Spacer()
+                    }
+                }
+                .onMove(perform: moveGroupLevel)
+            }
+            
+            if canAddMoreGroupLevels {
+                ForEach(unusedGroupLevels, id: \.self) { level in
+                    Button {
+                        addGroupLevel(level)
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(.green)
+                            Text(Self.levelLabels[level] ?? level.rawValue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("Group By")
+        } footer: {
+            Text("Items are grouped under these headings.")
+        }
+    }
+    
+    // MARK: - Sort By Section
+    
+    private var sortBySection: some View {
+        Section {
+            ForEach(sortOnlyLevels, id: \.self) { level in
+                HStack {
+                    if sortOnlyLevels.count > 1 {
+                        Button {
+                            removeSortOnlyLevel(level)
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.red)
+                                .font(.title3)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+                    Text(Self.levelLabels[level] ?? level.rawValue)
+                    
+                    Spacer()
+                }
+            }
+            .onMove(perform: moveSortOnlyLevel)
+            
+            if canAddMoreSortOnlyLevels {
+                ForEach(unusedSortOnlyLevels, id: \.self) { level in
+                    Button {
+                        addSortOnlyLevel(level)
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(.green)
+                            Text(Self.levelLabels[level] ?? level.rawValue)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        } header: {
+            Text("Sort By")
+        } footer: {
+            if groupLevels.isEmpty {
+                Text("Items are sorted by these fields.")
+            } else {
+                Text("Items are sorted within groups by these fields.")
+            }
+        }
+    }
+    
+    // MARK: - Group Level Actions
+    
+    private func moveGroupLevel(from source: IndexSet, to destination: Int) {
+        groupLevels.move(fromOffsets: source, toOffset: destination)
         persistChange()
     }
     
-    private func removeLevel(_ level: SortLevel) {
-        guard levels.count > 1 else { return }
-        levels.removeAll { $0 == level }
+    private func removeGroupLevel(_ level: SortLevel) {
+        groupLevels.removeAll { $0 == level }
         formId = UUID()
         persistChange()
     }
     
-    private func addLevel(_ level: SortLevel) {
-        guard levels.count < 3 && !levels.contains(level) else { return }
-        levels.append(level)
+    private func addGroupLevel(_ level: SortLevel) {
+        guard groupLevels.count < SortPipeline.maxGroupLevels && !groupLevels.contains(level) else { return }
+        groupLevels.append(level)
         formId = UUID()
         persistChange()
     }
+    
+    // MARK: - Sort Only Level Actions
+    
+    private func moveSortOnlyLevel(from source: IndexSet, to destination: Int) {
+        sortOnlyLevels.move(fromOffsets: source, toOffset: destination)
+        persistChange()
+    }
+    
+    private func removeSortOnlyLevel(_ level: SortLevel) {
+        guard sortOnlyLevels.count > 1 else { return }
+        sortOnlyLevels.removeAll { $0 == level }
+        formId = UUID()
+        persistChange()
+    }
+    
+    private func addSortOnlyLevel(_ level: SortLevel) {
+        guard sortOnlyLevels.count < SortPipeline.maxSortOnlyLevels && !sortOnlyLevels.contains(level) else { return }
+        sortOnlyLevels.append(level)
+        formId = UUID()
+        persistChange()
+    }
+    
+    // MARK: - Persistence
     
     private func persistChange() {
-        activeSortConfig = levels
+        let combined = SortPipeline.combineConfig(groupLevels: groupLevels, sortOnlyLevels: sortOnlyLevels)
+        activeSortConfig = combined
         Task {
-            await onConfigChange(levels)
+            await onConfigChange(combined)
         }
     }
 }
