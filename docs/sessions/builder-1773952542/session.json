@@ -1,0 +1,77 @@
+{
+  "sessionId": "builder-1773952542",
+  "mode": "prd",
+  "prdId": "prd-shared-list-avatars",
+  "branch": "main",
+  "status": "in_progress",
+  "startedAt": "2026-03-19T21:00:00Z",
+  "lastHeartbeat": "2026-03-19T23:30:00Z",
+  "currentChunk": "US-005",
+  "analysisCompleted": true,
+  "probeStatus": null,
+  "currentAction": {
+    "description": "Resuming PRD — starting US-005: Swift AvatarView component",
+    "contextAnchor": "ios-native/GatherLists/GatherLists/Views/Components/AvatarView.swift",
+    "lastAction": "Updated session state, advancing to US-005",
+    "updatedAt": "2026-03-19T23:30:00Z"
+  },
+  "chunks": [
+    {
+      "id": "US-001",
+      "slug": "supabase-rpc-get-list-collaborators",
+      "title": "Supabase RPC to fetch collaborator profiles",
+      "status": "completed",
+      "order": 1,
+      "committedAt": "2026-03-19T21:15:00Z",
+      "commitHash": "7f3b087"
+    },
+    {
+      "id": "US-002",
+      "slug": "react-avatar-component",
+      "title": "React — Reusable Avatar component",
+      "status": "completed",
+      "order": 2,
+      "committedAt": "2026-03-19T22:00:00Z",
+      "commitHash": "8544427"
+    },
+    {
+      "id": "US-003",
+      "slug": "react-avatar-group-component",
+      "title": "React — AvatarGroup component for stacked display",
+      "status": "completed",
+      "order": 3,
+      "committedAt": "2026-03-19T22:00:00Z",
+      "commitHash": "8544427"
+    },
+    {
+      "id": "US-004",
+      "slug": "react-collaborator-avatars-list-rows",
+      "title": "React — Fetch and display collaborator avatars on list rows",
+      "status": "completed",
+      "order": 4,
+      "committedAt": "2026-03-19T22:30:00Z",
+      "commitHash": "704fc36"
+    },
+    {
+      "id": "US-005",
+      "slug": "swift-avatar-view",
+      "title": "Swift — Reusable AvatarView component",
+      "status": "pending",
+      "order": 5
+    },
+    {
+      "id": "US-006",
+      "slug": "swift-avatar-group-view",
+      "title": "Swift — AvatarGroupView for stacked display",
+      "status": "pending",
+      "order": 6
+    },
+    {
+      "id": "US-007",
+      "slug": "swift-collaborator-avatars-list-rows",
+      "title": "Swift — Fetch and display collaborator avatars on list rows",
+      "status": "pending",
+      "order": 7
+    }
+  ]
+}
