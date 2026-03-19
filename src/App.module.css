@@ -111,23 +111,6 @@
   max-width: 160px;
 }
 
-.signOutBtn {
-  font-size: 0.8rem;
-  color: var(--danger);
-  background: none;
-  border: 1px solid var(--danger);
-  border-radius: 6px;
-  padding: 0.45rem 0.85rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  white-space: nowrap;
-}
-
-.signOutBtn:hover {
-  background: var(--danger);
-  color: var(--bg-card);
-}
-
 .loading {
   display: flex;
   align-items: center;
