@@ -3,39 +3,43 @@
   "mode": "prd",
   "prdId": "prd-list-categories",
   "branch": "main",
-  "status": "in_progress",
+  "status": "completed",
   "startedAt": "2026-03-18T20:00:00Z",
-  "lastHeartbeat": "2026-03-18T20:00:00Z",
-  "currentChunk": "US-016",
+  "lastHeartbeat": "2026-03-19T12:00:00Z",
+  "completedAt": "2026-03-19T12:00:00Z",
+  "currentChunk": null,
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "currentAction": {
-    "description": "US-015 committed, advancing to US-016",
+    "description": "All stories verified and marked complete",
     "contextAnchor": "docs/prd.json",
-    "lastAction": "Committed US-015 seed categories on list creation",
-    "updatedAt": "2026-03-18T21:15:00Z"
+    "lastAction": "Marked all 17 stories as completed after codebase verification",
+    "updatedAt": "2026-03-19T12:00:00Z"
   },
   "chunks": [
     {
       "id": "US-001",
       "slug": "db-add-categories-column",
       "title": "Database — Add categories column to lists table",
-      "status": "pending",
-      "priority": 1
+      "status": "completed",
+      "priority": 1,
+      "committedAt": "2026-03-18T20:05:00Z"
     },
     {
       "id": "US-002",
       "slug": "db-create-user-category-defaults",
       "title": "Database — Create user_category_defaults table",
-      "status": "pending",
-      "priority": 2
+      "status": "completed",
+      "priority": 2,
+      "committedAt": "2026-03-18T20:10:00Z"
     },
     {
       "id": "US-003",
       "slug": "db-migrate-store-categories",
       "title": "Database — Migrate store categories to lists and user defaults",
-      "status": "pending",
-      "priority": 3
+      "status": "completed",
+      "priority": 3,
+      "committedAt": "2026-03-18T20:18:00Z"
     },
     {
       "id": "US-004",
@@ -81,64 +85,73 @@
       "id": "US-009",
       "slug": "react-per-list-category-editor",
       "title": "Per-list category editor — React web",
-      "status": "pending",
-      "priority": 9
+      "status": "completed",
+      "priority": 9,
+      "committedAt": "2026-03-18T20:00:00Z"
     },
     {
       "id": "US-010",
       "slug": "swift-per-list-category-editor",
       "title": "Per-list category editor — Swift iOS",
-      "status": "pending",
-      "priority": 10
+      "status": "completed",
+      "priority": 10,
+      "committedAt": "2026-03-18T20:15:00Z"
     },
     {
       "id": "US-011",
       "slug": "react-save-as-default",
       "title": "\"Save as Default\" button — React web",
-      "status": "pending",
-      "priority": 11
+      "status": "completed",
+      "priority": 11,
+      "committedAt": "2026-03-18T20:30:00Z"
     },
     {
       "id": "US-012",
       "slug": "swift-save-as-default",
       "title": "\"Save as Default\" button — Swift iOS",
-      "status": "pending",
-      "priority": 12
+      "status": "completed",
+      "priority": 12,
+      "committedAt": "2026-03-18T20:40:00Z"
     },
     {
       "id": "US-013",
       "slug": "react-settings-category-defaults",
       "title": "Manage default categories in Settings — React web",
-      "status": "pending",
-      "priority": 13
+      "status": "completed",
+      "priority": 13,
+      "committedAt": "2026-03-18T20:50:00Z"
     },
     {
       "id": "US-014",
       "slug": "swift-settings-category-defaults",
       "title": "Manage default categories in Settings — Swift iOS",
-      "status": "pending",
-      "priority": 14
+      "status": "completed",
+      "priority": 14,
+      "committedAt": "2026-03-18T21:00:00Z"
     },
     {
       "id": "US-015",
       "slug": "list-creation-seed-categories",
       "title": "List creation — seed categories from user defaults",
-      "status": "pending",
-      "priority": 15
+      "status": "completed",
+      "priority": 15,
+      "committedAt": "2026-03-18T21:15:00Z"
     },
     {
       "id": "US-016",
       "slug": "list-creation-category-preview",
       "title": "List creation — optional category preview (collapsed)",
-      "status": "pending",
-      "priority": 16
+      "status": "completed",
+      "priority": 16,
+      "committedAt": "2026-03-19T12:00:00Z"
     },
     {
       "id": "US-017",
       "slug": "list-type-change-reset-categories",
       "title": "List type change resets categories with confirmation",
-      "status": "pending",
-      "priority": 17
+      "status": "completed",
+      "priority": 17,
+      "committedAt": "2026-03-19T12:00:00Z"
     }
   ],
   "decisions": []
