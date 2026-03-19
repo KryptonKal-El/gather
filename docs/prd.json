@@ -170,8 +170,8 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "AvatarGroupView created with ZStack overlap, border ring, +N overflow. Build succeeded.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -182,7 +182,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-19T23:45:00Z"
     },
     {
       "id": "US-007",
