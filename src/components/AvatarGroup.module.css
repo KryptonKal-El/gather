@@ -1,0 +1,25 @@
+.group {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.avatarWrapper {
+  border-radius: 50%;
+  line-height: 0;
+  flex-shrink: 0;
+}
+
+.overflow {
+  border-radius: 50%;
+  background: var(--badge-bg);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  line-height: 1;
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+}
