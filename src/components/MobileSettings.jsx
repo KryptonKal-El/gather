@@ -26,7 +26,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const { state, actions } = useShoppingList();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
-  const [selectedCategoryType, setSelectedCategoryType] = useState('grocery');
+  const [expandedCategoryType, setExpandedCategoryType] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -148,53 +148,60 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
       <h3 className={styles.sectionHeader}>Category Defaults</h3>
       <div className={styles.section}>
-        <div className={styles.row}>
-          <div className={styles.categoryTypeTabs}>
-            {categoryTypes.map(type => {
-              const IconComponent = CATEGORY_TYPE_ICONS[type.value];
-              return (
-                <button
-                  key={type.value}
-                  type="button"
-                  className={`${styles.categoryTypeTab} ${selectedCategoryType === type.value ? styles.categoryTypeTabActive : ''}`}
-                  onClick={() => setSelectedCategoryType(type.value)}
-                >
-                  {IconComponent && <IconComponent size={18} />}
-                  {type.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className={styles.categoryEditorWrapper}>
-          <CategoryEditor
-            categories={getCurrentDefaults(selectedCategoryType)}
-            listType={selectedCategoryType}
-            onSave={(cats) => actions.saveUserCategoryDefault(selectedCategoryType, cats)}
-            showHeader={false}
-          />
-        </div>
-
-        <div className={styles.row}>
-          <button
-            type="button"
-            className={styles.resetDefaultsButton}
-            onClick={() => setShowResetConfirm(true)}
-          >
-            Reset to System Defaults
-          </button>
-        </div>
+        {categoryTypes.map(type => {
+          const IconComponent = CATEGORY_TYPE_ICONS[type.value];
+          const cats = getCurrentDefaults(type.value);
+          const isExpanded = expandedCategoryType === type.value;
+          return (
+            <div key={type.value}>
+              <button
+                type="button"
+                className={styles.categoryDefaultRow}
+                onClick={() => setExpandedCategoryType(isExpanded ? null : type.value)}
+              >
+                <span className={styles.categoryDefaultRowLeft}>
+                  {IconComponent && <IconComponent size={20} />}
+                  <span className={styles.categoryDefaultLabel}>{type.label}</span>
+                </span>
+                <span className={styles.categoryDefaultRowRight}>
+                  <span className={styles.categoryDefaultCount}>{cats.length}</span>
+                  <span className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}>
+                    ›
+                  </span>
+                </span>
+              </button>
+              {isExpanded && (
+                <div className={styles.categoryEditorWrapper}>
+                  <CategoryEditor
+                    categories={cats}
+                    listType={type.value}
+                    onSave={(updatedCats) => actions.saveUserCategoryDefault(type.value, updatedCats)}
+                    showHeader={false}
+                  />
+                  <div className={styles.resetRow}>
+                    <button
+                      type="button"
+                      className={styles.resetDefaultsButton}
+                      onClick={() => setShowResetConfirm(true)}
+                    >
+                      Reset to System Defaults
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {showResetConfirm && (
         <ConfirmDialog
-          message={`This will replace your ${categoryTypes.find(t => t.value === selectedCategoryType)?.label} category defaults with the system defaults. Continue?`}
+          message={`This will replace your ${categoryTypes.find(t => t.value === expandedCategoryType)?.label} category defaults with the system defaults. Continue?`}
           confirmLabel="Reset"
           onConfirm={() => {
-            const systemDefaults = getSystemDefaultCategories(selectedCategoryType);
+            const systemDefaults = getSystemDefaultCategories(expandedCategoryType);
             if (systemDefaults) {
-              actions.saveUserCategoryDefault(selectedCategoryType, systemDefaults);
+              actions.saveUserCategoryDefault(expandedCategoryType, systemDefaults);
             }
             setShowResetConfirm(false);
           }}
