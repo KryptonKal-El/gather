@@ -54,6 +54,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
   const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
 
   const allItems = collectGroupItems(group);
+  const count = group.type === 'rsvp' ? allItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0) : allItems.length;
 
   // Depth 0: Prominent collapsible card (for ANY group type at top level)
   if (depth === 0) {
@@ -69,7 +70,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
           <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronExpanded}`} />
           <span className={styles.topLevelDot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
           {group.label}
-          <span className={styles.count}>{allItems.length}</span>
+          <span className={styles.count}>{count}</span>
           {subtotal !== null && (
             <span className={styles.subtotal}>{formatPrice(subtotal)}</span>
           )}
@@ -95,7 +96,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
       <h4 className={styles.nestedGroupTitle}>
         <span className={styles.nestedGroupDot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
         {group.label}
-        <span className={styles.count}>{allItems.length}</span>
+        <span className={styles.count}>{count}</span>
       </h4>
       {group.subGroups ? (
         group.subGroups.map((subGroup) => (
