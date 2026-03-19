@@ -149,7 +149,7 @@ export const ShoppingList = ({
     let totalHeadCount = 0;
     for (const item of items) {
       const status = item.rsvpStatus ?? 'invited';
-      counts[status] = (counts[status] ?? 0) + 1;
+      counts[status] = (counts[status] ?? 0) + (item.quantity ?? 1);
       totalHeadCount += item.quantity ?? 1;
     }
     return { counts, totalHeadCount };
