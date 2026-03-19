@@ -33,6 +33,7 @@ import {
   unshareList as dbUnshareList,
   subscribeSharedStores,
   upsertUserCategoryDefault,
+  fetchListCollaborators,
 } from '../services/database.js';
 import { updateLastListId, updateListOrder, getUserPreferences } from '../services/preferences.js';
 import { supabase } from '../services/supabase.js';
@@ -242,11 +243,44 @@ export const ShoppingListProvider = ({ children }) => {
     };
   }, [sharedListRefs]);
 
+  // Fetch collaborators for all lists
+  const [collaboratorsByListId, setCollaboratorsByListId] = useState({});
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const ownedIds = lists.map((l) => l.id);
+    const sharedIds = Object.values(sharedListMetas).map((l) => l.id);
+    const allIds = [...new Set([...ownedIds, ...sharedIds])];
+
+    if (allIds.length === 0) return;
+
+    let cancelled = false;
+
+    const fetchAll = async () => {
+      const results = {};
+      await Promise.all(
+        allIds.map(async (listId) => {
+          try {
+            const collabs = await fetchListCollaborators(listId);
+            results[listId] = collabs;
+          } catch {
+            results[listId] = [];
+          }
+        })
+      );
+      if (!cancelled) setCollaboratorsByListId(results);
+    };
+
+    fetchAll();
+    return () => { cancelled = true; };
+  }, [userId, lists, sharedListMetas]);
+
   // Build merged list of owned + shared lists, sorted by cached localStorage order
   const allLists = useMemo(() => {
     const unordered = [
-      ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false })),
-      ...Object.values(sharedListMetas),
+      ...lists.map((l) => ({ ...l, _ownerUid: userId, _isShared: false, _collaborators: collaboratorsByListId[l.id] ?? [] })),
+      ...Object.values(sharedListMetas).map((l) => ({ ...l, _collaborators: collaboratorsByListId[l.id] ?? [] })),
     ];
 
     try {
@@ -262,7 +296,7 @@ export const ShoppingListProvider = ({ children }) => {
       return unordered;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lists, sharedListMetas, userId, listOrderVersion]);
+  }, [lists, sharedListMetas, userId, listOrderVersion, collaboratorsByListId]);
 
   // Validate and auto-select list once owned and shared lists have loaded
   useEffect(() => {

@@ -121,6 +121,19 @@ export const adjustItemCount = async (listId, amount) => {
 };
 
 /**
+ * Fetch collaborator profiles for a list via the get_list_collaborators RPC.
+ * @param {string} listId - List ID
+ * @returns {Promise<Array<{user_id: string, display_name: string, avatar_url: string}>>}
+ */
+export const fetchListCollaborators = async (listId) => {
+  const { data, error } = await supabase.rpc('get_list_collaborators', {
+    p_list_id: listId,
+  });
+  if (error) throw new Error(`Failed to fetch collaborators: listId=${listId}`, { cause: error });
+  return data;
+};
+
+/**
  * Subscribes to all lists for a user.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * @param {string} userId - User ID

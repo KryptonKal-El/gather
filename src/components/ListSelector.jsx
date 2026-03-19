@@ -20,6 +20,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { CategoryEditor } from './CategoryEditor.jsx';
+import { AvatarGroup } from './AvatarGroup.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { LIST_TYPES, LIST_TYPE_IDS } from '../utils/listTypes.js';
@@ -329,7 +330,13 @@ export const ListSelector = ({
           <span className={styles.listText}>
             <span className={styles.listName}>
               {list.name}
-              {!isOwned && <span className={styles.sharedBadge}>Shared</span>}
+              {list._collaborators?.length > 0 && (
+                <AvatarGroup
+                  collaborators={list._collaborators}
+                  size={20}
+                  color={list.color || '#1565c0'}
+                />
+              )}
             </span>
             <span className={styles.listMeta}>
               <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
