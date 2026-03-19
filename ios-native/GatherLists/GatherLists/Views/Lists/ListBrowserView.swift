@@ -105,8 +105,9 @@ struct ListBrowserView: View {
                 Section {
                     ForEach(allFiltered) { list in
                         let isOwned = vm.ownedLists.contains { $0.id == list.id }
+                        let collaborators = vm.collaboratorsByListId[list.id] ?? []
                         NavigationLink(value: list) {
-                            ListRowView(list: list, isShared: !isOwned)
+                            ListRowView(list: list, isShared: !isOwned, collaborators: collaborators)
                         }
                         .contextMenu {
                             if isOwned {

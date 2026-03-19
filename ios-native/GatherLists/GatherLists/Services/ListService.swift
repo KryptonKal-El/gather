@@ -167,6 +167,37 @@ struct ListService {
             return SharedListRef(list: list, shareSortConfig: share.sortConfig)
         }
     }
+    
+    // MARK: - Collaborator Operations
+    
+    /// Fetches collaborator profiles for a list using the `get_list_collaborators` RPC.
+    static func fetchListCollaborators(listId: UUID) async throws -> [Profile] {
+        let response: [ListCollaboratorResponse] = try await client
+            .rpc("get_list_collaborators", params: ["p_list_id": listId])
+            .execute()
+            .value
+        
+        return response.map { collaborator in
+            Profile(
+                id: collaborator.userId,
+                avatarUrl: collaborator.avatarUrl,
+                displayName: collaborator.displayName
+            )
+        }
+    }
+}
+
+/// Response struct for the `get_list_collaborators` RPC.
+private struct ListCollaboratorResponse: Decodable {
+    let userId: UUID
+    let displayName: String?
+    let avatarUrl: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case displayName = "display_name"
+        case avatarUrl = "avatar_url"
+    }
 }
 
 // MARK: - DTOs for Insert/Update

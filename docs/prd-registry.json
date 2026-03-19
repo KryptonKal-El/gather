@@ -507,8 +507,29 @@
       "updatedAt": "2026-03-19",
       "notes": "Unifies categories onto lists, removes from stores. 17 stories across 4 DB migrations, service layer updates, store editor removal, per-list editor, Save as Default, Settings management, list creation seeding, and type change handling. Both React web and Swift iOS.",
       "startedAt": "2026-03-18T20:00:00Z",
-      "completedAt": "2026-03-19T12:00:00Z",
-      "storiesCompleted": 17
+      "currentStory": "US-001"
+    },
+    {
+      "id": "prd-shared-list-avatars",
+      "name": "Shared List Avatars",
+      "status": "completed",
+      "filePath": "docs/prds/prd-shared-list-avatars.md",
+      "jsonPath": "docs/prds/prd-shared-list-avatars.json",
+      "createdAt": "2026-03-19",
+      "updatedAt": "2026-03-19",
+      "startedAt": "2026-03-19T21:00:00Z",
+      "currentStory": "US-001",
+      "storiesCompleted": 7,
+      "estimatedStories": 7,
+      "completedAt": "2026-03-19T23:55:00Z"
+    },
+    {
+      "id": "prd-ios-notifications",
+      "name": "iOS Push Notifications for Shared Lists",
+      "status": "draft",
+      "filePath": "docs/drafts/prd-ios-notifications.md",
+      "createdAt": "2026-03-19",
+      "updatedAt": "2026-03-19"
     }
   ]
 }

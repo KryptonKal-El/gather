@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// A row displaying a single list with emoji, name, item count, and optional shared badge.
+/// A row displaying a single list with emoji, name, item count, and collaborator avatars.
 struct ListRowView: View {
     let list: GatherList
     let isShared: Bool
+    var collaborators: [Profile] = []
     
     var body: some View {
         HStack(spacing: 12) {
@@ -30,15 +31,12 @@ struct ListRowView: View {
                     
                     Spacer()
                     
-                    if isShared {
-                        Text("Shared")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.15))
-                            .foregroundStyle(.blue)
-                            .clipShape(Capsule())
+                    if !collaborators.isEmpty {
+                        AvatarGroupView(
+                            collaborators: collaborators,
+                            size: 20,
+                            color: Color(hex: list.color)
+                        )
                     }
                 }
                 

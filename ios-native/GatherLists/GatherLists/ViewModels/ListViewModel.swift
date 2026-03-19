@@ -10,6 +10,7 @@ final class ListViewModel {
     private(set) var ownedLists: [GatherList] = []
     private(set) var sharedLists: [GatherList] = []
     var shareSortConfigs: [UUID: [String]] = [:]
+    private(set) var collaboratorsByListId: [UUID: [Profile]] = [:]
     var activeListId: UUID?
     var isLoading = false
     var error: String?
@@ -176,6 +177,9 @@ final class ListViewModel {
             // Reconcile server preferences with UserDefaults cache
             await reconcileServerPreferences()
             
+            // Load collaborators for shared lists
+            await loadCollaborators()
+            
             // Cache the fresh data
             await OfflineCache.shared.save(ownedResult, forKey: "lists-owned-\(userId.uuidString)")
             await OfflineCache.shared.save(sharedLists, forKey: "lists-shared-\(userId.uuidString)")
@@ -270,6 +274,9 @@ final class ListViewModel {
             rebuildAllLists()
             isShowingCachedData = false
             cachedAt = nil
+            
+            // Refresh collaborators
+            await loadCollaborators()
             
             // Verify active list still exists
             if let activeId = activeListId, !allLists.contains(where: { $0.id == activeId }) {
@@ -463,6 +470,36 @@ final class ListViewModel {
     
     func unshareList(id: UUID, email: String) async throws {
         try await ListService.unshareList(listId: id, email: email)
+    }
+    
+    // MARK: - Collaborator Loading
+    
+    /// Batch-fetches collaborators for all shared lists.
+    private func loadCollaborators() async {
+        let allSharedListIds = Set(sharedLists.map(\.id))
+        let ownedListIds = ownedLists.map(\.id)
+        let listsToFetch = ownedListIds + Array(allSharedListIds)
+        
+        guard !listsToFetch.isEmpty else { return }
+        
+        await withTaskGroup(of: (UUID, [Profile]?).self) { group in
+            for listId in listsToFetch {
+                group.addTask {
+                    do {
+                        let collaborators = try await ListService.fetchListCollaborators(listId: listId)
+                        return (listId, collaborators)
+                    } catch {
+                        return (listId, nil)
+                    }
+                }
+            }
+            
+            for await (listId, collaborators) in group {
+                if let collaborators {
+                    collaboratorsByListId[listId] = collaborators
+                }
+            }
+        }
     }
     
     deinit {
