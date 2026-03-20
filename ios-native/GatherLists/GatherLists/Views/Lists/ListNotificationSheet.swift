@@ -18,12 +18,30 @@ struct ListNotificationSheet: View {
         itemAdded || itemChecked || rsvpChanged || collaboratorJoined
     }
     
+    private var addedLabel: String {
+        switch list.type {
+        case "guest_list": return "Guest Added"
+        case "todo": return "Task Added"
+        default: return "Item Added"
+        }
+    }
+    
+    private var showCheckedToggle: Bool {
+        list.type != "guest_list"
+    }
+    
+    private var checkedLabel: String {
+        list.type == "todo" ? "Task Completed" : "Item Checked Off"
+    }
+    
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    Toggle("Item Added", isOn: $itemAdded)
-                    Toggle("Item Checked Off", isOn: $itemChecked)
+                    Toggle(addedLabel, isOn: $itemAdded)
+                    if showCheckedToggle {
+                        Toggle(checkedLabel, isOn: $itemChecked)
+                    }
                     if isGuestList {
                         Toggle("RSVP Changed", isOn: $rsvpChanged)
                     }
