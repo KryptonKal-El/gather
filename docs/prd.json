@@ -219,8 +219,8 @@
         "Migration runs successfully"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "cleanup_notification_prefs_on_unshare trigger on list_shares DELETE, looks up user by email from profiles, deletes matching preferences. List deletion already handled by ON DELETE CASCADE.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -231,7 +231,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-20T15:50:00Z"
     }
   ]
 }

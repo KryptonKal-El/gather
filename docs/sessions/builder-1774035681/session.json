@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-20T12:00:00Z",
   "lastHeartbeat": "2026-03-20T12:00:00Z",
-  "currentChunk": "US-007",
+  "currentChunk": null,
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "credentials": {
@@ -77,8 +77,9 @@
       "id": "US-007",
       "slug": "notification-pref-cleanup-on-unshare",
       "title": "Notification preference cleanup on unshare",
-      "status": "pending",
-      "order": 7
+      "status": "completed",
+      "order": 7,
+      "committedAt": "2026-03-20T15:50:00Z"
     }
   ]
 }
