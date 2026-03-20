@@ -106,11 +106,11 @@ struct CollaboratorsInfoSheet: View {
         errorMessage = nil
         
         do {
-            async let ownerResult = ProfileService.fetchProfile(userId: list.ownerId)
-            async let collaboratorsResult = ListService.fetchListCollaborators(listId: list.id)
+            let allPeople = try await ListService.fetchListCollaborators(listId: list.id)
             
-            ownerProfile = try await ownerResult
-            collaborators = try await collaboratorsResult
+            // RPC returns owner in results for non-owners, but not for owners viewing their own list
+            ownerProfile = allPeople.first { $0.id == list.ownerId }
+            collaborators = allPeople.filter { $0.id != list.ownerId }
         } catch {
             errorMessage = "Failed to load people"
             print("[CollaboratorsInfoSheet] Error: \(error.localizedDescription)")
