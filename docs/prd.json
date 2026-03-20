@@ -7,7 +7,9 @@
       "service": "apple-apns",
       "credentialType": "authKey",
       "requestTiming": "upfront",
-      "requiredForStories": ["US-004"],
+      "requiredForStories": [
+        "US-004"
+      ],
       "fallbackPlan": "Can build DB, UI, and triggers without the key — only actual push delivery is blocked",
       "status": "provided"
     }
@@ -30,7 +32,6 @@
       "status": "completed",
       "completedAt": "2026-03-20T12:15:00Z",
       "passes": true,
-      "notes": "Created migration with device_tokens and list_notification_preferences tables, RLS policies, unique constraints, and indexes. Migration applied via supabase db push.",
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -93,8 +94,8 @@
         "Build succeeds"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "NotificationPreferenceService, ListNotificationSheet with toggles, bell icon in ListDetailView toolbar",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -105,7 +106,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-20T14:30:00Z"
     },
     {
       "id": "US-004",
@@ -138,7 +141,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": ["apple-apns"]
+      "requiredCredentials": [
+        "apple-apns"
+      ]
     },
     {
       "id": "US-005",

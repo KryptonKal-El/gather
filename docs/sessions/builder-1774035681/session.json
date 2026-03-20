@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-20T12:00:00Z",
   "lastHeartbeat": "2026-03-20T12:00:00Z",
-  "currentChunk": "US-003",
+  "currentChunk": "US-004",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "credentials": {
@@ -45,8 +45,9 @@
       "id": "US-003",
       "slug": "ios-per-list-notification-prefs-ui",
       "title": "iOS — Per-list notification preferences UI",
-      "status": "pending",
-      "order": 3
+      "status": "completed",
+      "order": 3,
+      "committedAt": "2026-03-20T14:30:00Z"
     },
     {
       "id": "US-004",

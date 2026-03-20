@@ -22,6 +22,10 @@ struct ListDetailView: View {
     @State private var collapsedStores: Set<String> = []
     @State private var showClearCheckedAlert = false
     
+    // Notification sheet state
+    @State private var showNotificationSheet = false
+    @State private var hasNotificationsEnabled = false
+    
     // Context menu edit states
     @State private var editingItem: Item?
     @State private var showEditNameAlert = false
@@ -62,6 +66,10 @@ struct ListDetailView: View {
     
     private var listColor: Color {
         Color(hex: list.color)
+    }
+    
+    private var isSharedList: Bool {
+        !isOwned || shareCount > 0
     }
     
     private var isItemNameEmpty: Bool {
@@ -127,6 +135,13 @@ struct ListDetailView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
+                if isSharedList {
+                    Button {
+                        showNotificationSheet = true
+                    } label: {
+                        Image(systemName: hasNotificationsEnabled ? "bell.fill" : "bell")
+                    }
+                }
                 sortMenu
                 if isOwned {
                     listOptionsMenu
@@ -231,11 +246,22 @@ struct ListDetailView: View {
                 }
             )
         }
+        .sheet(isPresented: $showNotificationSheet) {
+            ListNotificationSheet(list: list)
+        }
         .task {
             await initializeDetailViewModel()
             await loadShareInfo()
             await loadSortPreferences()
             await subscribeToPreferences()
+            await loadNotificationStatus()
+        }
+        .onChange(of: showNotificationSheet) { _, isShowing in
+            if !isShowing {
+                Task {
+                    await loadNotificationStatus()
+                }
+            }
         }
         .onDisappear {
             preferencesTask?.cancel()
@@ -1471,6 +1497,14 @@ struct ListDetailView: View {
             print("[ListDetailView] Failed to load shares: \(error.localizedDescription)")
         }
         isLoadingShares = false
+    }
+    
+    private func loadNotificationStatus() async {
+        if let prefs = try? await NotificationPreferenceService.fetchPreferences(listId: list.id) {
+            hasNotificationsEnabled = prefs.itemAdded || prefs.itemChecked || prefs.rsvpChanged || prefs.collaboratorJoined
+        } else {
+            hasNotificationsEnabled = false
+        }
     }
     
     private func loadSortPreferences() async {
