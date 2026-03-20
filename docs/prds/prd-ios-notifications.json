@@ -9,7 +9,7 @@
       "requestTiming": "upfront",
       "requiredForStories": ["US-004"],
       "fallbackPlan": "Can build DB, UI, and triggers without the key — only actual push delivery is blocked",
-      "status": "provided"
+      "status": "pending"
     }
   ],
   "userStories": [
@@ -27,10 +27,7 @@
         "Migration runs successfully"
       ],
       "priority": 1,
-      "status": "completed",
-      "completedAt": "2026-03-20T12:15:00Z",
-      "passes": true,
-      "notes": "Created migration with device_tokens and list_notification_preferences tables, RLS policies, unique constraints, and indexes. Migration applied via supabase db push.",
+      "passes": false,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,

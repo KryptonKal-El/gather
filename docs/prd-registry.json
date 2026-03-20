@@ -526,10 +526,15 @@
     {
       "id": "prd-ios-notifications",
       "name": "iOS Push Notifications for Shared Lists",
-      "status": "draft",
-      "filePath": "docs/drafts/prd-ios-notifications.md",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-ios-notifications.md",
+      "jsonPath": "docs/prds/prd-ios-notifications.json",
       "createdAt": "2026-03-19",
-      "updatedAt": "2026-03-19"
+      "updatedAt": "2026-03-19",
+      "estimatedStories": 7,
+      "startedAt": "2026-03-20T12:00:00Z",
+      "currentStory": "US-002",
+      "storiesCompleted": 1
     }
   ]
 }
