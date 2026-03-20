@@ -3,6 +3,7 @@ import SwiftUI
 /// Read-only sheet showing who has access to a shared list (for non-owners).
 struct CollaboratorsInfoSheet: View {
     let list: GatherList
+    let currentUserId: UUID?
     
     @Environment(\.dismiss) private var dismiss
     
@@ -88,8 +89,15 @@ struct CollaboratorsInfoSheet: View {
                 size: 36
             )
             
-            Text(profile.displayName ?? "Unknown")
-                .font(.body)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(profile.displayName ?? "Unknown")
+                    .font(.body)
+                if profile.id == currentUserId {
+                    Text("You")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             
             Spacer()
             

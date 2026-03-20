@@ -260,7 +260,7 @@ struct ListDetailView: View {
                     ownerEmail: authViewModel.currentUser?.email ?? ""
                 )
             } else {
-                CollaboratorsInfoSheet(list: list)
+                CollaboratorsInfoSheet(list: list, currentUserId: authViewModel.currentUser?.id)
             }
         }
         .task {
