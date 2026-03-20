@@ -179,7 +179,10 @@
 
 .rsvpSummaryTotal {
   font-weight: 700;
+  font-size: 0.85rem;
   color: var(--text-primary);
+  text-align: center;
+  margin-top: 0.15rem;
 }
 
 .rsvpSummaryStat {
