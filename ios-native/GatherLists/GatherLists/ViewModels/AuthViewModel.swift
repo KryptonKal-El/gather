@@ -116,6 +116,9 @@ final class AuthViewModel {
                     try await SupabaseManager.shared.client.auth.update(
                         user: UserAttributes(data: ["full_name": .string(name)])
                     )
+                    if let userId = try? await SupabaseManager.shared.client.auth.session.user.id {
+                        try? await ProfileService.updateDisplayName(userId: userId, name: name)
+                    }
                 }
             }
             
