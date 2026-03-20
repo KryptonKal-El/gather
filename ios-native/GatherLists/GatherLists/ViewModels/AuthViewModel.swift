@@ -12,6 +12,7 @@ final class AuthViewModel {
     var currentUser: User?
     var profile: Profile?
     var error: String?
+    var notificationService: NotificationService?
     
     var displayName: String {
         profile?.displayName
@@ -84,6 +85,7 @@ final class AuthViewModel {
     
     func signOut() async {
         do {
+            await notificationService?.cleanupOnSignOut()
             try await SupabaseManager.shared.client.auth.signOut()
             isAuthenticated = false
             currentUser = nil
