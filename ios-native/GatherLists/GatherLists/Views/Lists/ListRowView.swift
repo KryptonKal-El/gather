@@ -24,21 +24,9 @@ struct ListRowView: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    Text(list.name)
-                        .font(.body)
-                        .lineLimit(1)
-                    
-                    Spacer()
-                    
-                    if !collaborators.isEmpty {
-                        AvatarGroupView(
-                            collaborators: collaborators,
-                            size: 20,
-                            color: Color(hex: list.color)
-                        )
-                    }
-                }
+                Text(list.name)
+                    .font(.body)
+                    .lineLimit(1)
                 
                 HStack(spacing: 6) {
                     Text("\(list.itemCount) items")
@@ -53,6 +41,16 @@ struct ListRowView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+            }
+            
+            Spacer()
+            
+            if !collaborators.isEmpty {
+                AvatarGroupView(
+                    collaborators: collaborators,
+                    size: 20,
+                    color: Color(hex: list.color)
+                )
             }
         }
         .contentShape(Rectangle())

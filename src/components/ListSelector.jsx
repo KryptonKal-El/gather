@@ -330,13 +330,6 @@ export const ListSelector = ({
           <span className={styles.listText}>
             <span className={styles.listName}>
               {list.name}
-              {list._collaborators?.length > 0 && (
-                <AvatarGroup
-                  collaborators={list._collaborators}
-                  size={20}
-                  color={list.color || '#1565c0'}
-                />
-              )}
             </span>
             <span className={styles.listMeta}>
               <span className={styles.listCount}>{list.itemCount ?? 0} items</span>
@@ -347,6 +340,13 @@ export const ListSelector = ({
               )}
             </span>
           </span>
+          {list._collaborators?.length > 0 && (
+            <AvatarGroup
+              collaborators={list._collaborators}
+              size={20}
+              color={list.color || '#1565c0'}
+            />
+          )}
         </button>
 
         <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
