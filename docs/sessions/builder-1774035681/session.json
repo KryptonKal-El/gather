@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-20T12:00:00Z",
   "lastHeartbeat": "2026-03-20T12:00:00Z",
-  "currentChunk": "US-005",
+  "currentChunk": "US-006",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "credentials": {
@@ -61,8 +61,9 @@
       "id": "US-005",
       "slug": "db-webhooks-notifiable-events",
       "title": "Database webhooks for notifiable events",
-      "status": "pending",
-      "order": 5
+      "status": "completed",
+      "order": 5,
+      "committedAt": "2026-03-20T15:20:00Z"
     },
     {
       "id": "US-006",

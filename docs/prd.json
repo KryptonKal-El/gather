@@ -162,8 +162,8 @@
         "Migration runs successfully"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "pg_net extension, 4 trigger functions with has_notification_subscribers guard, auth.uid() actor tracking, applied via db push.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -174,7 +174,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-20T15:20:00Z"
     },
     {
       "id": "US-006",
