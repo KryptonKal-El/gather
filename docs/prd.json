@@ -129,8 +129,8 @@
         "Secrets required: APNS_KEY_ID, APNS_TEAM_ID, APNS_PRIVATE_KEY (base64-encoded .p8), APNS_BUNDLE_ID, WEBHOOK_SECRET"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "send-notification edge function with APNs HTTP/2, JWT caching, event detection, preference queries, token cleanup. Deployed with --no-verify-jwt.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -143,7 +143,9 @@
       "considerations": [],
       "requiredCredentials": [
         "apple-apns"
-      ]
+      ],
+      "status": "completed",
+      "completedAt": "2026-03-20T15:05:00Z"
     },
     {
       "id": "US-005",

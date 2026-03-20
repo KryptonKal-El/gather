@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-20T12:00:00Z",
   "lastHeartbeat": "2026-03-20T12:00:00Z",
-  "currentChunk": "US-004",
+  "currentChunk": "US-005",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "credentials": {
@@ -53,8 +53,9 @@
       "id": "US-004",
       "slug": "edge-function-send-notification-apns",
       "title": "Supabase Edge Function for sending push notifications via APNs",
-      "status": "pending",
-      "order": 4
+      "status": "completed",
+      "order": 4,
+      "committedAt": "2026-03-20T15:05:00Z"
     },
     {
       "id": "US-005",
