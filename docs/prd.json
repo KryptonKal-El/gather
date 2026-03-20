@@ -192,8 +192,8 @@
         "Build succeeds"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "UNUserNotificationCenterDelegate on NotificationService, pendingListId deep link state, tab selection binding, ListBrowserView deep link navigation with deferred handling, badge clearing on app active.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -204,7 +204,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-20T15:40:00Z"
     },
     {
       "id": "US-007",

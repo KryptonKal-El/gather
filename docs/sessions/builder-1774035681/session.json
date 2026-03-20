@@ -6,7 +6,7 @@
   "status": "in_progress",
   "startedAt": "2026-03-20T12:00:00Z",
   "lastHeartbeat": "2026-03-20T12:00:00Z",
-  "currentChunk": "US-006",
+  "currentChunk": "US-007",
   "analysisCompleted": true,
   "probeStatus": "confirmed",
   "credentials": {
@@ -69,8 +69,9 @@
       "id": "US-006",
       "slug": "ios-incoming-notifications-deep-linking",
       "title": "iOS — Handle incoming notifications and deep linking",
-      "status": "pending",
-      "order": 6
+      "status": "completed",
+      "order": 6,
+      "committedAt": "2026-03-20T15:40:00Z"
     },
     {
       "id": "US-007",

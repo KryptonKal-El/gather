@@ -5,9 +5,12 @@ import Supabase
 
 @Observable
 @MainActor
-final class NotificationService {
+final class NotificationService: NSObject {
     var permissionGranted = false
     var deviceToken: String?
+    
+    /// List ID from a tapped notification, consumed by ListBrowserView for deep linking.
+    var pendingListId: UUID?
     
     private var client: SupabaseClient { SupabaseManager.shared.client }
     
@@ -84,6 +87,11 @@ final class NotificationService {
         }
     }
     
+    /// Clear badge count when app becomes active.
+    func clearBadge() {
+        UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
+    }
+    
     // MARK: - DTO
     
     private struct DeviceTokenUpsert: Encodable {
@@ -96,5 +104,34 @@ final class NotificationService {
             case token
             case platform
         }
+    }
+}
+
+// MARK: - UNUserNotificationCenterDelegate
+
+extension NotificationService: UNUserNotificationCenterDelegate {
+    /// Display notifications as banners when app is in foreground.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification,
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([.banner, .sound, .badge])
+    }
+    
+    /// Handle notification tap — extract listId for deep linking.
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        if let listIdString = userInfo["listId"] as? String,
+           let listId = UUID(uuidString: listIdString) {
+            Task { @MainActor in
+                self.pendingListId = listId
+            }
+        }
+        completionHandler()
     }
 }

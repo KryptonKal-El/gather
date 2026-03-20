@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C6 /* ListNotificationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */; };
 		A1B2C3D4E5F6A7B8C9D0E1F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */; };
@@ -98,6 +101,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferenceService.swift; sourceTree = "<group>"; };
+		D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNotificationSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -295,6 +301,8 @@
 				A1B2C3D4E5F6A7B8C9D0E2BF /* PreferenceService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -346,6 +354,7 @@
 				A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C3 /* SortConfigSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C5 /* CategoryEditorSheet.swift */,
+				D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */,
 			);
 			path = Lists;
 			sourceTree = "<group>";
@@ -593,6 +602,9 @@
 				A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C6 /* ListNotificationSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */,
@@ -831,3 +843,4 @@
 	};
 	rootObject = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
 }
+

@@ -3,6 +3,7 @@ import SwiftUI
 /// Browse all lists (owned and shared) in a unified list with search.
 struct ListBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(NotificationService.self) private var notificationService
     @State private var viewModel: ListViewModel?
     @State private var showCreateSheet = false
     @State private var listToEdit: GatherList?
@@ -10,6 +11,7 @@ struct ListBrowserView: View {
     @State private var listToShare: GatherList?
     @State private var showDeleteConfirm = false
     @State private var navigationPath = NavigationPath()
+    @State private var pendingDeepLinkId: UUID?
     
     private var allFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -89,6 +91,17 @@ struct ListBrowserView: View {
         }
         .onAppear {
             initializeViewModelIfNeeded()
+            handlePendingDeepLinkOnAppear()
+        }
+        .onChange(of: notificationService.pendingListId) { _, listId in
+            guard let listId else { return }
+            navigateToList(id: listId)
+            notificationService.pendingListId = nil
+        }
+        .onChange(of: viewModel?.allLists.count) { _, _ in
+            if let deferredId = pendingDeepLinkId {
+                navigateToList(id: deferredId)
+            }
         }
     }
     
@@ -222,5 +235,27 @@ struct ListBrowserView: View {
         guard viewModel == nil else { return }
         guard let user = authViewModel.currentUser else { return }
         viewModel = ListViewModel(userId: user.id, userEmail: user.email ?? "")
+    }
+    
+    private func handlePendingDeepLinkOnAppear() {
+        if let listId = notificationService.pendingListId {
+            navigateToList(id: listId)
+            notificationService.pendingListId = nil
+        } else if let deferredId = pendingDeepLinkId {
+            navigateToList(id: deferredId)
+        }
+    }
+    
+    private func navigateToList(id: UUID) {
+        guard let vm = viewModel,
+              let list = vm.allLists.first(where: { $0.id == id }) else {
+            pendingDeepLinkId = id
+            return
+        }
+        pendingDeepLinkId = nil
+        navigationPath = NavigationPath()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            navigationPath.append(list)
+        }
     }
 }

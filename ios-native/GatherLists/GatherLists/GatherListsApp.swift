@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     var notificationService: NotificationService?
@@ -21,6 +22,7 @@ struct GatherListsApp: App {
     @State private var authViewModel = AuthViewModel()
     @State private var networkMonitor = NetworkMonitor()
     @State private var notificationService = NotificationService()
+    @Environment(\.scenePhase) private var scenePhase
     private var appearanceManager = AppearanceManager.shared
     
     var body: some Scene {
@@ -46,6 +48,12 @@ struct GatherListsApp: App {
             .onAppear {
                 appDelegate.notificationService = notificationService
                 authViewModel.notificationService = notificationService
+                UNUserNotificationCenter.current().delegate = notificationService
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    notificationService.clearBadge()
+                }
             }
             .onOpenURL { url in
                 Task {
