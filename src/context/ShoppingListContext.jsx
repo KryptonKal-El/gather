@@ -264,7 +264,8 @@ export const ShoppingListProvider = ({ children }) => {
           try {
             const collabs = await fetchListCollaborators(listId);
             results[listId] = collabs;
-          } catch {
+          } catch (err) {
+            console.error(`Failed to fetch collaborators for list ${listId}:`, err.message);
             results[listId] = [];
           }
         })
