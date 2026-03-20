@@ -180,23 +180,24 @@ export const ShoppingList = ({
         <div className={styles.rsvpSummary}>
           <div className={styles.rsvpSummaryStats}>
             <span className={styles.rsvpSummaryStat} style={{ color: '#4caf50' }}>
-              {rsvpSummary.counts.confirmed} Confirmed
+              <span className={styles.rsvpStatCount}>{rsvpSummary.counts.confirmed}</span>
+              <span className={styles.rsvpStatLabel}>Confirmed</span>
             </span>
-            <span className={styles.rsvpSummaryDivider}>·</span>
             <span className={styles.rsvpSummaryStat} style={{ color: '#ff9800' }}>
-              {rsvpSummary.counts.maybe} Maybe
+              <span className={styles.rsvpStatCount}>{rsvpSummary.counts.maybe}</span>
+              <span className={styles.rsvpStatLabel}>Maybe</span>
             </span>
-            <span className={styles.rsvpSummaryDivider}>·</span>
             <span className={styles.rsvpSummaryStat} style={{ color: '#f44336' }}>
-              {rsvpSummary.counts.declined} Declined
+              <span className={styles.rsvpStatCount}>{rsvpSummary.counts.declined}</span>
+              <span className={styles.rsvpStatLabel}>Declined</span>
             </span>
-            <span className={styles.rsvpSummaryDivider}>·</span>
             <span className={styles.rsvpSummaryStat} style={{ color: '#42a5f5' }}>
-              {rsvpSummary.counts.invited} Invited
+              <span className={styles.rsvpStatCount}>{rsvpSummary.counts.invited}</span>
+              <span className={styles.rsvpStatLabel}>Invited</span>
             </span>
-            <span className={styles.rsvpSummaryDivider}>·</span>
             <span className={styles.rsvpSummaryStat} style={{ color: '#9e9e9e' }}>
-              {rsvpSummary.counts.not_invited} Not Yet Invited
+              <span className={styles.rsvpStatCount}>{rsvpSummary.counts.not_invited}</span>
+              <span className={styles.rsvpStatLabel}>Not Yet Invited</span>
             </span>
           </div>
           <div className={styles.rsvpSummaryTotal}>

@@ -174,8 +174,7 @@
 .rsvpSummaryStats {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
 .rsvpSummaryTotal {
@@ -183,13 +182,24 @@
   color: var(--text-primary);
 }
 
-.rsvpSummaryDivider {
-  color: var(--text-ghost);
+.rsvpSummaryStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
 }
 
-.rsvpSummaryStat {
-  font-weight: 600;
-  font-size: 0.75rem;
+.rsvpStatCount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rsvpStatLabel {
+  font-size: 0.65rem;
+  font-weight: 500;
+  line-height: 1.2;
+  text-transform: capitalize;
 }
 
 @media (max-width: 700px) {
