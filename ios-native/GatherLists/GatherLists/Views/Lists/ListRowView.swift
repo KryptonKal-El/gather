@@ -42,6 +42,7 @@ struct ListRowView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .layoutPriority(1)
             
             Spacer()
             

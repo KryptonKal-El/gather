@@ -25,21 +25,18 @@ struct AvatarGroupView: View {
     }
     
     var body: some View {
-        HStack {
-            Spacer(minLength: 0)
-            ZStack(alignment: .leading) {
-                ForEach(Array(displayedProfiles.enumerated()), id: \.element.id) { index, profile in
-                    avatarWithRing(for: profile)
-                        .offset(x: CGFloat(index) * overlapOffset)
-                }
-                
-                if overflowCount > 0 {
-                    overflowCircle
-                        .offset(x: CGFloat(displayedProfiles.count) * overlapOffset)
-                }
+        ZStack(alignment: .leading) {
+            ForEach(Array(displayedProfiles.enumerated()), id: \.element.id) { index, profile in
+                avatarWithRing(for: profile)
+                    .offset(x: CGFloat(index) * overlapOffset)
             }
-            .frame(width: totalWidth, height: size)
+            
+            if overflowCount > 0 {
+                overflowCircle
+                    .offset(x: CGFloat(displayedProfiles.count) * overlapOffset)
+            }
         }
+        .frame(width: totalWidth, height: size)
     }
     
     private func avatarWithRing(for profile: Profile) -> some View {
