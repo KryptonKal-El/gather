@@ -26,6 +26,9 @@ struct ListDetailView: View {
     @State private var showNotificationSheet = false
     @State private var hasNotificationsEnabled = false
     
+    // Share sheet state
+    @State private var showShareSheet = false
+    
     // Context menu edit states
     @State private var editingItem: Item?
     @State private var showEditNameAlert = false
@@ -248,6 +251,17 @@ struct ListDetailView: View {
         }
         .sheet(isPresented: $showNotificationSheet) {
             ListNotificationSheet(list: list)
+        }
+        .sheet(isPresented: $showShareSheet) {
+            if isOwned {
+                ShareListSheet(
+                    list: list,
+                    viewModel: viewModel,
+                    ownerEmail: authViewModel.currentUser?.email ?? ""
+                )
+            } else {
+                CollaboratorsInfoSheet(list: list)
+            }
         }
         .task {
             await initializeDetailViewModel()
@@ -1127,22 +1141,30 @@ struct ListDetailView: View {
                 .tint(.white)
         } else if isOwned {
             if shareCount > 0 {
+                Button {
+                    showShareSheet = true
+                } label: {
+                    Label {
+                        Text("\(shareCount)")
+                    } icon: {
+                        Image(systemName: "person.2.fill")
+                    }
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                }
+            }
+        } else {
+            Button {
+                showShareSheet = true
+            } label: {
                 Label {
-                    Text("\(shareCount)")
+                    Text("Shared")
                 } icon: {
-                    Image(systemName: "person.2.fill")
+                    Image(systemName: "person.fill")
                 }
                 .font(.subheadline)
                 .foregroundStyle(.white)
             }
-        } else {
-            Label {
-                Text("Shared")
-            } icon: {
-                Image(systemName: "person.fill")
-            }
-            .font(.subheadline)
-            .foregroundStyle(.white)
         }
     }
     

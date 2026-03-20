@@ -26,6 +26,7 @@
 		A1B2C3D4E5F6A7B8C9D0E243 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */; };
+		C0FFEE00DEADBEEF12345679 /* CollaboratorsInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E24B /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2B4 /* ItemUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */; };
@@ -123,6 +124,7 @@
 		A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareListSheet.swift; sourceTree = "<group>"; };
+		C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaboratorsInfoSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemUnit.swift; sourceTree = "<group>"; };
@@ -352,6 +354,7 @@
 				A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */,
+				C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C3 /* SortConfigSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C5 /* CategoryEditorSheet.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */,
@@ -534,6 +537,7 @@
 				A1B2C3D4E5F6A7B8C9D0E251 /* CategoryDefinitions.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */,
+				C0FFEE00DEADBEEF12345679 /* CollaboratorsInfoSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E237 /* ListViewModel.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E259 /* ListDetailViewModel.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E25B /* StoreViewModel.swift in Sources */,
