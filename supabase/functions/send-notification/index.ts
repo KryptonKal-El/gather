@@ -289,8 +289,8 @@ function buildNotificationContent(
       break
     case 'rsvp_changed':
       body = actorName
-        ? `${actorName} RSVP'd ${rsvpStatus}`
-        : `${itemName} RSVP updated`
+        ? `${actorName} RSVP'd ${rsvpStatus} for ${itemName}`
+        : `${itemName} RSVP updated to ${rsvpStatus}`
       break
     case 'collaborator_joined':
       body = `${actorName} joined the list`
