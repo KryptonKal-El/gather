@@ -9,12 +9,12 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-002",
+  "currentChunk": "US-003",
   "currentAction": {
-    "description": "Completed US-013, advancing to US-002",
-    "contextAnchor": "recurrence engine",
-    "lastAction": "Committed US-013",
-    "updatedAt": "2026-03-23T16:05:00Z"
+    "description": "Completed US-002, advancing to US-003",
+    "contextAnchor": "auto-generate trigger",
+    "lastAction": "Committed US-002",
+    "updatedAt": "2026-03-23T16:15:00Z"
   },
   "chunks": [
     {
@@ -27,7 +27,8 @@
     {
       "id": "US-002",
       "title": "Recurrence rule engine — next occurrence calculation",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T16:15:00Z"
     },
     {
       "id": "US-003",
