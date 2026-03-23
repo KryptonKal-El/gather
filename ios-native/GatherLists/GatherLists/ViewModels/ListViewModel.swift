@@ -74,6 +74,9 @@ final class ListViewModel {
         }
         
         allLists = sorted
+        
+        // Sync to shared container for widget access
+        Task { await SharedDataStore.shared.saveLists(sorted) }
     }
     
     /// Saves the current allLists order to UserDefaults.

@@ -20,7 +20,7 @@
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
       "updatedAt": "2026-03-12",
-      "notes": "BUG-001\u2013011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
+      "notes": "BUG-001–011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
     },
     {
       "id": "prd-native-emoji-picker",
@@ -69,7 +69,7 @@
       "updatedAt": "2026-02-27",
       "startedAt": "2026-02-27T12:00:00Z",
       "completedAt": "2026-02-27T23:45:00Z",
-      "notes": "Google and Apple OAuth deferred \u2014 email/password auth active. Configure providers in Supabase dashboard when ready."
+      "notes": "Google and Apple OAuth deferred — email/password auth active. Configure providers in Supabase dashboard when ready."
     },
     {
       "id": "prd-apple-auth",
@@ -94,7 +94,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
       "completedAt": "2026-03-03T12:30:00Z",
-      "notes": "US-001\u2013004 all complete. US-004 went through 3 iterations: opacity tint \u2192 full-color backgrounds \u2192 4px left border accent (final)."
+      "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
     },
     {
       "id": "prd-desktop-avatar-upload",
@@ -120,7 +120,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-03T22:00:00Z",
       "completedAt": "2026-03-03T23:30:00Z",
-      "notes": "All 6 stories complete. Walmart \u2192 Open Food Facts \u2192 SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
+      "notes": "All 6 stories complete. Walmart → Open Food Facts → SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     },
     {
       "id": "prd-ios-app-store",
@@ -273,7 +273,7 @@
     },
     {
       "id": "prd-swift-ios-setup",
-      "name": "Native Swift iOS App \u2014 Phase 1: Project Setup & Auth",
+      "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
@@ -287,7 +287,7 @@
     },
     {
       "id": "prd-swift-lists-core",
-      "name": "Native Swift iOS App \u2014 Phase 2: Lists Core",
+      "name": "Native Swift iOS App — Phase 2: Lists Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-lists-core.md",
       "jsonPath": "docs/prds/prd-swift-lists-core.json",
@@ -301,7 +301,7 @@
     },
     {
       "id": "prd-swift-shopping-list",
-      "name": "Native Swift iOS App \u2014 Phase 3: Shopping List Items",
+      "name": "Native Swift iOS App — Phase 3: Shopping List Items",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-shopping-list.md",
       "jsonPath": "docs/prds/prd-swift-shopping-list.json",
@@ -315,7 +315,7 @@
     },
     {
       "id": "prd-swift-stores",
-      "name": "Native Swift iOS App \u2014 Phase 4: Store Management",
+      "name": "Native Swift iOS App — Phase 4: Store Management",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
@@ -329,7 +329,7 @@
     },
     {
       "id": "prd-swift-recipes-core",
-      "name": "Native Swift iOS App \u2014 Phase 5: Recipes & Collections Core",
+      "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
@@ -343,7 +343,7 @@
     },
     {
       "id": "prd-swift-recipes-advanced",
-      "name": "Native Swift iOS App \u2014 Phase 6: Recipes Advanced",
+      "name": "Native Swift iOS App — Phase 6: Recipes Advanced",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-advanced.md",
       "jsonPath": "docs/prds/prd-swift-recipes-advanced.json",
@@ -357,7 +357,7 @@
     },
     {
       "id": "prd-swift-settings-images",
-      "name": "Native Swift iOS App \u2014 Phase 7: Settings, Profile & Item Images",
+      "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-settings-images.md",
       "jsonPath": "docs/prds/prd-swift-settings-images.json",
@@ -371,7 +371,7 @@
     },
     {
       "id": "prd-swift-final-polish",
-      "name": "Native Swift iOS App \u2014 Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
+      "name": "Native Swift iOS App — Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-final-polish.md",
       "jsonPath": "docs/prds/prd-swift-final-polish.json",
@@ -395,11 +395,11 @@
       "startedAt": "2026-03-10T14:00:00Z",
       "completedAt": "2026-03-10T17:00:00Z",
       "currentStory": null,
-      "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items\u2192list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
+      "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items→list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
     },
     {
       "id": "prd-ios-item-edit-row",
-      "name": "iOS Item Row \u2014 Edit Button, Tap Behavior & Store Indicator",
+      "name": "iOS Item Row — Edit Button, Tap Behavior & Store Indicator",
       "status": "completed",
       "filePath": "docs/prds/prd-ios-item-edit-row.md",
       "jsonPath": "docs/prds/prd-ios-item-edit-row.json",
@@ -556,7 +556,7 @@
     {
       "id": "prd-ios-widgets",
       "name": "iOS Home Screen & Lock Screen Widgets",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-ios-widgets.md",
       "jsonPath": "docs/prds/prd-ios-widgets.json",
       "createdAt": "2026-03-23",
@@ -564,13 +564,16 @@
       "estimatedStories": 18,
       "dependsOn": [
         "prd-recurring-items"
-      ]
+      ],
+      "currentStory": "US-002",
+      "storiesCompleted": 1
     },
     {
       "id": "prd-spoonacular-product-search",
       "name": "Spoonacular Grocery Product Image Search",
-      "status": "draft",
-      "filePath": "docs/drafts/prd-spoonacular-product-search.md",
+      "status": "ready",
+      "filePath": "docs/prds/prd-spoonacular-product-search.md",
+      "jsonPath": "docs/prds/prd-spoonacular-product-search.json",
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-23",
       "estimatedStories": 3

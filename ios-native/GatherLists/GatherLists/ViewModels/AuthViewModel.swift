@@ -90,6 +90,11 @@ final class AuthViewModel {
             isAuthenticated = false
             currentUser = nil
             profile = nil
+            
+            // Clear shared container data for widgets
+            SharedDefaults.clearAuthSession()
+            await SharedDataStore.shared.clearAll()
+            
             print("[AuthViewModel] User signed out successfully")
         } catch {
             self.error = error.localizedDescription

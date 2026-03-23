@@ -10,6 +10,8 @@ final class SupabaseManager {
     let supabaseURL: URL
     let anonKey: String
     
+    nonisolated(unsafe) private var authSyncTask: Task<Void, Never>?
+    
     private init() {
         guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
               let dict = NSDictionary(contentsOfFile: path),
@@ -22,5 +24,30 @@ final class SupabaseManager {
         supabaseURL = url
         self.anonKey = anonKey
         client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
+        
+        startAuthSessionSync()
+    }
+    
+    /// Listens to auth state changes and syncs tokens to the shared App Group container.
+    private func startAuthSessionSync() {
+        authSyncTask = Task {
+            for await (event, session) in client.auth.authStateChanges {
+                switch event {
+                case .signedIn, .tokenRefreshed, .initialSession:
+                    if let session {
+                        SharedDefaults.saveAuthSession(
+                            accessToken: session.accessToken,
+                            refreshToken: session.refreshToken,
+                            userId: session.user.id.uuidString
+                        )
+                    }
+                case .signedOut:
+                    SharedDefaults.clearAuthSession()
+                    Task { await SharedDataStore.shared.clearAll() }
+                default:
+                    break
+                }
+            }
+        }
     }
 }

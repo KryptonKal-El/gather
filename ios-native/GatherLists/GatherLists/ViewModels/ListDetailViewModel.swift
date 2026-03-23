@@ -144,6 +144,9 @@ final class ListDetailViewModel {
             await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
             await OfflineCache.shared.save(storesResult, forKey: "stores-\(userId.uuidString)")
             await OfflineCache.shared.save(historyResult, forKey: "history-\(userId.uuidString)")
+            
+            // Sync items to shared container for widget access
+            await SharedDataStore.shared.saveItems(itemsResult, for: listId)
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !items.isEmpty
@@ -243,6 +246,9 @@ final class ListDetailViewModel {
             isShowingCachedData = false
             cachedAt = nil
             await OfflineCache.shared.save(items, forKey: "items-\(listId.uuidString)")
+            
+            // Sync to shared container for widget access
+            await SharedDataStore.shared.saveItems(items, for: listId)
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch items: \(error.localizedDescription)")

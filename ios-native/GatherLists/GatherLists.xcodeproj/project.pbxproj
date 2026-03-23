@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
+		SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
@@ -198,6 +200,8 @@
 		A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarGroupView.swift; sourceTree = "<group>"; };
 		COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionHistorySheet.swift; sourceTree = "<group>"; };
+		SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
+		SHAREDDATASTORE000000001 /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -427,6 +431,8 @@
 				A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */,
 				A1B2C3D4E5F6A7B8C9D0E290 /* RecipeTextParser.swift */,
+				SHAREDDATASTORE000000001 /* SharedDataStore.swift */,
+				SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */,
 			);
 			path = Utils;
@@ -616,6 +622,8 @@
 				A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */,
+				SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */,
+				SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
