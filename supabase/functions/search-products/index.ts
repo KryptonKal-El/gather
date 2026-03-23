@@ -227,10 +227,10 @@ async function searchSpoonacularProducts(query: string, numItems: string): Promi
     const products = data.products ?? [];
 
     return products
-      .filter((product: { image?: string }) => product.image)
+      .filter((product: { imageType?: string }) => product.imageType)
       .map((product: { id: number; title?: string; imageType?: string }) => ({
         url: `https://img.spoonacular.com/products/${product.id}-312x231.${product.imageType}`,
-        thumbnail: `https://img.spoonacular.com/products/${product.id}-100x100.${product.imageType}`,
+        thumbnail: `https://img.spoonacular.com/products/${product.id}-90x90.${product.imageType}`,
         title: product.title ?? '',
       }));
   } catch (err) {
