@@ -565,6 +565,15 @@
       "dependsOn": [
         "prd-recurring-items"
       ]
+    },
+    {
+      "id": "prd-spoonacular-product-search",
+      "name": "Spoonacular Grocery Product Image Search",
+      "status": "draft",
+      "filePath": "docs/drafts/prd-spoonacular-product-search.md",
+      "createdAt": "2026-03-23",
+      "updatedAt": "2026-03-23",
+      "estimatedStories": 3
     }
   ]
 }
