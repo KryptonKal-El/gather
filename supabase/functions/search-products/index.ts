@@ -184,6 +184,56 @@ async function searchOpenFoodFacts(query: string, numItems: string): Promise<Pro
   }
 }
 
+async function searchSpoonacularProducts(query: string, numItems: string): Promise<ProductResult[]> {
+  const apiKey = Deno.env.get('SPOONACULAR_API_KEY') ?? '';
+
+  if (!apiKey) {
+    console.error('Missing SPOONACULAR_API_KEY');
+    return [];
+  }
+
+  try {
+    const spoonacularUrl = new URL('https://api.spoonacular.com/food/products/search');
+    spoonacularUrl.searchParams.set('query', query);
+    spoonacularUrl.searchParams.set('number', numItems);
+    spoonacularUrl.searchParams.set('apiKey', apiKey);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    const response = await fetch(spoonacularUrl.toString(), {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      console.error(`Spoonacular API error: ${response.status}`);
+      return [];
+    }
+
+    const data = await response.json();
+    const products = data.products ?? [];
+
+    return products
+      .filter((product: { image?: string }) => product.image)
+      .map((product: { id: number; title?: string; imageType?: string }) => ({
+        url: `https://img.spoonacular.com/products/${product.id}-312x231.${product.imageType}`,
+        thumbnail: `https://img.spoonacular.com/products/${product.id}-100x100.${product.imageType}`,
+        title: product.title ?? '',
+      }));
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      console.error('Spoonacular API request timed out');
+    } else {
+      console.error('Spoonacular search error:', err);
+    }
+    return [];
+  }
+}
+
 async function searchSerpApi(query: string, numItems: string): Promise<ProductResult[]> {
   const apiKey = Deno.env.get('SERPAPI_KEY') ?? '';
 

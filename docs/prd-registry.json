@@ -572,12 +572,14 @@
     {
       "id": "prd-spoonacular-product-search",
       "name": "Spoonacular Grocery Product Image Search",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-spoonacular-product-search.md",
       "jsonPath": "docs/prds/prd-spoonacular-product-search.json",
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-23",
-      "estimatedStories": 3
+      "estimatedStories": 3,
+      "currentStory": "US-002",
+      "storiesCompleted": 1
     },
     {
       "id": "prd-image-viewer-simplification",

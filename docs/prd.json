@@ -1,21 +1,22 @@
 {
   "project": "Gather",
-  "branchName": "feature/image-viewer-simplification",
-  "description": "Simplify the image picker flow: view-only modal when image exists (no auto-search), full picker when no image, transition to picker after removal",
+  "branchName": "feature/spoonacular-product-search",
+  "description": "Add Spoonacular grocery product search to the search-products edge function, merge results from all three primary sources (Walmart, Spoonacular, Open Food Facts) into a single uncapped response, bump the per-source request count from 8 to 25, and update both clients to match. SerpAPI remains a sequential last-resort fallback.",
   "credentialRequirements": [],
   "userStories": [
     {
       "id": "US-001",
-      "title": "React Web — View-Only Modal When Image Exists",
-      "description": "As a web user, I want clicking an item's image thumbnail to show only a large preview and remove button, so I can view or remove my image without triggering a search.",
+      "title": "Add Spoonacular Grocery Product Search to Edge Function",
+      "description": "As a developer, I need a searchSpoonacularProducts function in search-products/index.ts that calls Spoonacular's /food/products/search endpoint and returns results in the existing ProductResult shape.",
       "acceptanceCriteria": [
-        "When currentImageUrl is non-null, the ImagePicker modal renders the header (\"Item Image\" + close button), a large image preview, and a \"Remove image\" button — nothing else",
-        "The search/upload tabs, search input, search results grid, and upload pane are all hidden",
-        "No API search is fired on open (the useEffect auto-search does not execute)",
-        "The existing header style (title + close button + bottom border) is preserved",
-        "The image preview fills the available width (existing .preview style: max-width 400px, square aspect ratio, object-fit contain)",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "New searchSpoonacularProducts(query, numItems) function added to search-products/index.ts",
+        "Calls https://api.spoonacular.com/food/products/search with query and number params",
+        "Uses SPOONACULAR_API_KEY from Deno.env (same key as search-recipes)",
+        "Maps response products[].image to ProductResult.url (312x231 size) and ProductResult.thumbnail (100x100 size)",
+        "Maps response products[].title to ProductResult.title",
+        "5-second timeout with AbortController (matching existing pattern)",
+        "Returns empty array on error (graceful degradation, matching existing pattern)",
+        "Filters out products with no image"
       ],
       "priority": 1,
       "passes": true,
@@ -32,23 +33,28 @@
       "considerations": [],
       "requiredCredentials": [],
       "status": "completed",
-      "completedAt": "2026-03-23T23:30:00Z"
+      "completedAt": "2026-03-23T20:00:00Z"
     },
     {
       "id": "US-002",
-      "title": "React Web — Transition to Search/Upload After Remove",
-      "description": "As a web user, after removing an image I want the modal to switch to the search/upload view so I can immediately pick a new image without re-opening the picker.",
+      "title": "Merge Results from All Three Sources",
+      "description": "As a user, I want to see product images from Walmart, Spoonacular, and Open Food Facts combined into one set of results, so I have more options to choose from when picking an image for my item.",
       "acceptanceCriteria": [
-        "After clicking \"Remove image\" and the removal succeeds, the modal stays open",
-        "The view-only section (large preview + remove button) is replaced by the search/upload tabs UI",
-        "An auto-search fires using the item name as the query (same behavior as today's initial open for items without images)",
-        "The search tab is active by default after transition",
-        "If the user selects a new image or closes the modal, it behaves the same as today",
-        "Works in both light and dark mode",
-        "Lint passes"
+        "Edge function num query param default changes from '8' to '25' (each source is asked for up to num items)",
+        "Walmart, Spoonacular, and Open Food Facts run in parallel via 3-way Promise.all, each requesting num items",
+        "Results from all three sources are concatenated into a single results array (Walmart first, then Spoonacular, then Open Food Facts)",
+        "Duplicate images are removed (deduplicate by thumbnail URL)",
+        "No cap on the merged results — all deduplicated results are returned to the client",
+        "Response source is 'merged' when results came from multiple sources, or the single source name if only one returned results",
+        "SerpAPI is called sequentially only if all three parallel sources returned empty — its results are NOT merged",
+        "If SerpAPI is used, source is 'serpapi'",
+        "React web client default count updated from 8 to 25 in searchImages() (src/services/imageSearch.js)",
+        "Swift iOS client default count updated from 8 to 25 in ProductSearchService.searchProducts() (ProductSearchService.swift)",
+        "No increase in latency compared to current behavior (all three sources already ran in parallel — now adding Spoonacular to the same batch)",
+        "Edge function deploys successfully"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -60,21 +66,19 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T23:30:00Z"
+      "requiredCredentials": []
     },
     {
       "id": "US-003",
-      "title": "React Web — No-Image Path Unchanged",
-      "description": "As a web user, I want the existing search/upload picker to open as-is when an item has no image, so nothing breaks for the common add-image flow.",
+      "title": "Spoonacular Product Image Attribution",
+      "description": "As a developer, I need to ensure we comply with Spoonacular's API terms by passing proper attribution when their images are used.",
       "acceptanceCriteria": [
-        "When currentImageUrl is null, the full picker opens with header, search/upload tabs, and auto-search on mount — identical to current behavior",
-        "No regressions in search, upload, or image selection flows",
-        "Lint passes"
+        "Spoonacular product image URLs use their CDN format (https://img.spoonacular.com/products/...) — no proxying/rehosting",
+        "Response source field correctly identifies Spoonacular's contribution — returns 'spoonacular' when it's the sole source, or 'merged' when combined with other sources",
+        "Review Spoonacular ToS for product search API image usage requirements (note any attribution needs in a code comment)"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -86,91 +90,7 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T23:30:00Z"
-    },
-    {
-      "id": "US-004",
-      "title": "iOS — View-Only Sheet When Image Exists",
-      "description": "As an iOS user, I want tapping an item's image to show a large image preview filling most of the sheet, with only a remove button, so I can view my image clearly without a search firing.",
-      "acceptanceCriteria": [
-        "When item.imageUrl is non-nil and non-empty, the sheet renders the navigation bar (\"Item Image\" + Close), a large AsyncImage filling most of the sheet height, and a \"Remove image\" button",
-        "The image uses scaledToFit to fill available width while maintaining aspect ratio, significantly larger than the current 120×120 preview",
-        "The segmented tab picker, search field, search results grid, and upload buttons are all hidden",
-        "The .task { performSearch() } auto-search does not execute",
-        "The sheet remains scrollable if the image is taller than the visible area",
-        "Works in both light and dark mode (if applicable to the sheet)"
-      ],
-      "priority": 4,
-      "passes": true,
-      "notes": "",
-      "supportArticleRequired": false,
-      "documentationType": null,
-      "relatedArticleSlugs": [],
-      "marketingRequired": false,
-      "marketingType": null,
-      "relatedMarketingPages": [],
-      "toolsRequired": false,
-      "toolsType": null,
-      "relatedToolNames": [],
-      "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T23:45:00Z"
-    },
-    {
-      "id": "US-005",
-      "title": "iOS — Transition to Search/Upload After Remove",
-      "description": "As an iOS user, after removing an image I want the sheet to switch to the full search/upload view so I can immediately pick a new image.",
-      "acceptanceCriteria": [
-        "After tapping \"Remove image\" and the removal succeeds, the sheet stays open",
-        "The view-only section (large image + remove button) is replaced by the segmented tabs, search field, search results grid, and upload options",
-        "An auto-search fires using the item name as the query (same as today's .task behavior)",
-        "The \"Search online\" tab is selected by default after transition",
-        "If the user selects a new image or taps Close, it behaves the same as today"
-      ],
-      "priority": 5,
-      "passes": true,
-      "notes": "",
-      "supportArticleRequired": false,
-      "documentationType": null,
-      "relatedArticleSlugs": [],
-      "marketingRequired": false,
-      "marketingType": null,
-      "relatedMarketingPages": [],
-      "toolsRequired": false,
-      "toolsType": null,
-      "relatedToolNames": [],
-      "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T23:45:00Z"
-    },
-    {
-      "id": "US-006",
-      "title": "iOS — No-Image Path Unchanged",
-      "description": "As an iOS user, I want the existing search/upload sheet to open as-is when an item has no image, so nothing breaks for the add-image flow.",
-      "acceptanceCriteria": [
-        "When item.imageUrl is nil or empty, the full picker sheet opens with segmented tabs, search field, auto-search on appear, and upload options — identical to current behavior",
-        "No regressions in search, upload, camera, or photo library flows"
-      ],
-      "priority": 6,
-      "passes": true,
-      "notes": "",
-      "supportArticleRequired": false,
-      "documentationType": null,
-      "relatedArticleSlugs": [],
-      "marketingRequired": false,
-      "marketingType": null,
-      "relatedMarketingPages": [],
-      "toolsRequired": false,
-      "toolsType": null,
-      "relatedToolNames": [],
-      "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T23:45:00Z"
+      "requiredCredentials": []
     }
   ]
 }
