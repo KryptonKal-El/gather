@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C6 /* ListNotificationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */; };
@@ -196,6 +197,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCategoryEditorView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarGroupView.swift; sourceTree = "<group>"; };
+		COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionHistorySheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -353,6 +355,7 @@
 				A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */,
+				COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */,
 				C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C3 /* SortConfigSheet.swift */,
@@ -589,6 +592,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2BC /* SaveRecipeSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2B2 /* EditItemSheet.swift in Sources */,
+				COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A3 /* ItemSuggestion.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2A5 /* SuggestionEngine.swift in Sources */,
@@ -749,7 +753,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -780,7 +784,7 @@
 				CODE_SIGN_ENTITLEMENTS = GatherLists/GatherLists.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEVELOPMENT_ASSET_PATHS = "\"GatherLists/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

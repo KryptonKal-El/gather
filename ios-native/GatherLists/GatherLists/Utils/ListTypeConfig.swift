@@ -10,6 +10,7 @@ struct ListTypeFields {
     let image: Bool
     let rsvpStatus: Bool
     let dueDate: Bool
+    let recurrence: Bool
 }
 
 /// Category definition for non-grocery list types.
@@ -151,7 +152,7 @@ enum ListTypes {
             id: "grocery",
             label: "Grocery",
             icon: "🛒",
-            fields: ListTypeFields(store: true, category: true, price: true, quantity: true, unit: true, image: true, rsvpStatus: false, dueDate: false),
+            fields: ListTypeFields(store: true, category: true, price: true, quantity: true, unit: true, image: true, rsvpStatus: false, dueDate: false, recurrence: false),
             quantityLabel: "Qty",
             categories: nil,
             sortLevels: ["store", "category", "name", "date"],
@@ -161,7 +162,7 @@ enum ListTypes {
             id: "basic",
             label: "Basic",
             icon: "📋",
-            fields: ListTypeFields(store: false, category: false, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true),
+            fields: ListTypeFields(store: false, category: false, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true),
             quantityLabel: nil,
             categories: nil,
             sortLevels: ["name", "date"],
@@ -171,7 +172,7 @@ enum ListTypes {
             id: "guest_list",
             label: "Guest List",
             icon: "🎉",
-            fields: ListTypeFields(store: false, category: false, price: false, quantity: true, unit: false, image: false, rsvpStatus: true, dueDate: false),
+            fields: ListTypeFields(store: false, category: false, price: false, quantity: true, unit: false, image: false, rsvpStatus: true, dueDate: false, recurrence: false),
             quantityLabel: "Head Count",
             categories: nil,
             sortLevels: ["rsvp", "name", "date"],
@@ -181,7 +182,7 @@ enum ListTypes {
             id: "packing",
             label: "Packing",
             icon: "🧳",
-            fields: ListTypeFields(store: false, category: true, price: false, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: false),
+            fields: ListTypeFields(store: false, category: true, price: false, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: false, recurrence: false),
             quantityLabel: "Qty",
             categories: ListTypeCategories.packing,
             sortLevels: ["category", "name", "date"],
@@ -191,7 +192,7 @@ enum ListTypes {
             id: "project",
             label: "Project",
             icon: "🏗️",
-            fields: ListTypeFields(store: false, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: true),
+            fields: ListTypeFields(store: false, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true),
             quantityLabel: "Qty",
             categories: ListTypeCategories.project,
             sortLevels: ["category", "name", "date", "price"],
@@ -201,7 +202,7 @@ enum ListTypes {
             id: "todo",
             label: "To-Do",
             icon: "📝",
-            fields: ListTypeFields(store: false, category: true, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true),
+            fields: ListTypeFields(store: false, category: true, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true),
             quantityLabel: nil,
             categories: ListTypeCategories.todo,
             sortLevels: ["category", "name", "date"],

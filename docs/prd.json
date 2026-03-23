@@ -17,14 +17,14 @@
   "userStories": [
     {
       "id": "US-001",
-      "title": "Database migration — add recurrence and due date columns to items",
+      "title": "Database migration \u2014 add recurrence and due date columns to items",
       "description": "As a developer, I need new columns on the items table to store due dates, recurrence rules, reminder preferences, completion timestamps, and lineage tracking so the recurrence feature has the data it needs.",
       "acceptanceCriteria": [
         "Add `due_date` column (date, nullable) to `items` table",
-        "Add `recurrence_rule` column (jsonb, nullable) to `items` table — stores a structured recurrence object",
-        "Add `reminder_days_before` column (integer, nullable) to `items` table — number of days before due date to send a reminder",
-        "Add `checked_at` column (timestamptz, nullable) to `items` table — populated when is_checked is set to true",
-        "Add `parent_item_id` column (uuid, nullable, FK → items ON DELETE SET NULL) to `items` table — links a new recurrence instance to its predecessor",
+        "Add `recurrence_rule` column (jsonb, nullable) to `items` table \u2014 stores a structured recurrence object",
+        "Add `reminder_days_before` column (integer, nullable) to `items` table \u2014 number of days before due date to send a reminder",
+        "Add `checked_at` column (timestamptz, nullable) to `items` table \u2014 populated when is_checked is set to true",
+        "Add `parent_item_id` column (uuid, nullable, FK \u2192 items ON DELETE SET NULL) to `items` table \u2014 links a new recurrence instance to its predecessor",
         "Add index on `due_date` for efficient sorting and querying",
         "Add index on `parent_item_id` for completion history lookups",
         "Existing items remain unaffected (all new columns nullable with no defaults except null)",
@@ -50,14 +50,14 @@
     },
     {
       "id": "US-002",
-      "title": "Recurrence rule engine — next occurrence calculation",
+      "title": "Recurrence rule engine \u2014 next occurrence calculation",
       "description": "As a developer, I need a shared utility that computes the next due date from a recurrence rule so both platforms can display upcoming dates and the backend can generate new instances.",
       "acceptanceCriteria": [
         "Create `src/utils/recurrence.js` with a `getNextOccurrence(rule, fromDate)` function",
         "Create `ios-native/.../Utils/RecurrenceEngine.swift` with equivalent logic",
         "Support recurrence types: daily, weekly, biweekly, monthly, yearly, custom",
         "Custom type supports: interval (every N), frequency (day/week/month/year), and optional daysOfWeek array (e.g. every 2nd Tuesday = { type: \"custom\", frequency: \"week\", interval: 2, daysOfWeek: [2] })",
-        "Handle edge cases: month-end dates (Jan 31 → Feb 28), leap years",
+        "Handle edge cases: month-end dates (Jan 31 \u2192 Feb 28), leap years",
         "Return null if the rule is null or invalid",
         "Both implementations produce identical results for the same inputs"
       ],
@@ -83,7 +83,7 @@
       "title": "Auto-generate next occurrence on check-off",
       "description": "As a user, I want checking off a recurring item to automatically create a new unchecked copy with the next due date, so I don't have to manually re-create repeating tasks.",
       "acceptanceCriteria": [
-        "When an item with a recurrence_rule is checked off (is_checked → true), create a new item in the same list with: same name, category, recurrence_rule, reminder_days_before; due_date set to the next occurrence; is_checked = false; parent_item_id = the checked item's id; checked_at = null",
+        "When an item with a recurrence_rule is checked off (is_checked \u2192 true), create a new item in the same list with: same name, category, recurrence_rule, reminder_days_before; due_date set to the next occurrence; is_checked = false; parent_item_id = the checked item's id; checked_at = null",
         "The checked item gets checked_at set to the current timestamp",
         "Implement this as a Postgres trigger function (AFTER UPDATE OF is_checked ON items) that fires when is_checked changes from false to true AND recurrence_rule is not null",
         "The new item appears in the list immediately via existing realtime subscriptions",
@@ -148,7 +148,7 @@
         "Add dueDate to ListTypeFields for project, todo, and basic list types (both React and Swift)",
         "React (ShoppingItem.jsx edit panel): Add a date picker field for due date, shown only for list types that support it",
         "Swift (EditItemSheet.swift): Add a DatePicker for due date, shown only for list types that support it",
-        "Due date is nullable — users can set it or leave it blank",
+        "Due date is nullable \u2014 users can set it or leave it blank",
         "Due date is saved to the due_date column on the items table",
         "Clearing the date picker removes the due date (sets to null)",
         "Works in both light and dark mode",
@@ -177,8 +177,8 @@
       "description": "As a user, I want to set a repeat schedule on an item so it automatically recurs on my chosen cadence.",
       "acceptanceCriteria": [
         "Add recurrence to ListTypeFields for project, todo, and basic list types (both React and Swift)",
-        "React: Add a recurrence picker below the due date field in the edit panel — shown only when a due date is set",
-        "Swift: Add a recurrence picker below the date picker in EditItemSheet — shown only when a due date is set",
+        "React: Add a recurrence picker below the due date field in the edit panel \u2014 shown only when a due date is set",
+        "Swift: Add a recurrence picker below the date picker in EditItemSheet \u2014 shown only when a due date is set",
         "Recurrence picker offers preset options: None, Daily, Weekly, Biweekly, Monthly, Yearly, Custom",
         "Selecting \"Custom\" reveals additional inputs: interval number, frequency (day/week/month/year), and day-of-week checkboxes (for weekly/biweekly frequency)",
         "Recurrence rule is stored as JSONB in the recurrence_rule column",
@@ -188,8 +188,8 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Recurrence picker added to React edit panel and Swift EditItemSheet. Preset + custom modes. Auto-clears on due date removal.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -200,7 +200,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T14:58:58Z"
     },
     {
       "id": "US-007",
@@ -208,8 +210,8 @@
       "description": "As a user, I want to set a \"remind me N days before\" preference on an item so I get notified before it's due.",
       "acceptanceCriteria": [
         "Add reminder to ListTypeFields for project, todo, and basic list types (both React and Swift)",
-        "React: Add a reminder picker below recurrence in the edit panel — shown only when a due date is set",
-        "Swift: Add a reminder picker below recurrence in EditItemSheet — shown only when a due date is set",
+        "React: Add a reminder picker below recurrence in the edit panel \u2014 shown only when a due date is set",
+        "Swift: Add a reminder picker below recurrence in EditItemSheet \u2014 shown only when a due date is set",
         "Reminder options: None, Same day, 1 day before, 2 days before, 3 days before, 1 week before",
         "Selected value is stored as an integer in reminder_days_before (0 = same day, 1 = 1 day before, etc., null = no reminder)",
         "Reminder picker is disabled/hidden when no due date is set",
@@ -236,9 +238,9 @@
       "title": "Due date display on item rows",
       "description": "As a user, I want to see the due date on items that have one, so I can quickly assess what's coming up without opening the edit form.",
       "acceptanceCriteria": [
-        "React (ShoppingItem.jsx): Display due date as a small label below or beside the item name (e.g. \"Due Mar 25\") — only on items with a non-null due_date",
-        "Swift (item row view): Display due date as a compact label — only on items with a non-null due_date",
-        "If the item has a recurrence rule, show a small repeat icon (↻) next to the due date",
+        "React (ShoppingItem.jsx): Display due date as a small label below or beside the item name (e.g. \"Due Mar 25\") \u2014 only on items with a non-null due_date",
+        "Swift (item row view): Display due date as a compact label \u2014 only on items with a non-null due_date",
+        "If the item has a recurrence rule, show a small repeat icon (\u21bb) next to the due date",
         "Date format: abbreviated month + day (e.g. \"Mar 25\"), omit year if same as current year",
         "Due date label does not appear on list types that don't support dueDate",
         "Works in both light and dark mode",
@@ -265,10 +267,10 @@
       "description": "As a user, I want items that are past due to stand out subtly so I notice them without the UI feeling alarming.",
       "acceptanceCriteria": [
         "React: When an unchecked item's due_date is in the past, the due date label text turns red/orange (use existing error/warning color from the design system)",
-        "Swift: Same treatment — overdue date label text turns .red or .orange",
+        "Swift: Same treatment \u2014 overdue date label text turns .red or .orange",
         "Overdue styling applies ONLY to unchecked items (checked items are completed, not overdue)",
-        "Items due today are NOT styled as overdue — only strictly past dates",
-        "The treatment is subtle — text color change only, no background color, no badges, no pulsing",
+        "Items due today are NOT styled as overdue \u2014 only strictly past dates",
+        "The treatment is subtle \u2014 text color change only, no background color, no badges, no pulsing",
         "Works in both light and dark mode",
         "Build succeeds (both platforms)"
       ],
@@ -293,12 +295,12 @@
       "description": "As a user, I want to sort my list by due date so I can see what's most urgent at the top.",
       "acceptanceCriteria": [
         "Add dueDate as a new sort level in SORT_LEVELS (React sortPipeline.js) and SortLevel enum (Swift SortPipeline.swift)",
-        "dueDate is a sort-only level (not a grouping level) — items are sorted ascending (soonest first), with null due dates sorted to the bottom",
+        "dueDate is a sort-only level (not a grouping level) \u2014 items are sorted ascending (soonest first), with null due dates sorted to the bottom",
         "dueDate sort level is available only for list types that support the dueDate field (project, todo, basic)",
         "Add dueDate to the sortLevels array for project, todo, and basic in listTypes.js (React) and ListTypeConfig.swift (Swift)",
         "React SortLevelEditor.jsx: Show \"Due Date\" as a selectable option for eligible list types",
         "Swift SortConfigSheet.swift: Show \"Due Date\" as a selectable option for eligible list types",
-        "Existing sort preferences are not affected — dueDate is an opt-in addition",
+        "Existing sort preferences are not affected \u2014 dueDate is an opt-in addition",
         "Build succeeds (both platforms)"
       ],
       "priority": 10,

@@ -9,24 +9,23 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-006",
+  "currentChunk": "US-007",
   "currentAction": {
-    "description": "Completed US-005, advancing to US-006",
-    "contextAnchor": "recurrence rule field in edit forms",
-    "lastAction": "Committed US-005",
-    "updatedAt": "2026-03-23T16:40:00Z"
+    "description": "US-006 committed, advancing to US-007",
+    "lastAction": "Commit US-006",
+    "updatedAt": "2026-03-23T14:59:04Z"
   },
   "chunks": [
     {
       "id": "US-001",
-      "title": "Database migration — recurrence and due date columns",
+      "title": "Database migration \u2014 recurrence and due date columns",
       "status": "completed",
       "committedAt": "2026-03-23T10:05:00Z",
       "commitHash": "6bdc9b5"
     },
     {
       "id": "US-002",
-      "title": "Recurrence rule engine — next occurrence calculation",
+      "title": "Recurrence rule engine \u2014 next occurrence calculation",
       "status": "completed",
       "committedAt": "2026-03-23T16:15:00Z"
     },
@@ -51,7 +50,8 @@
     {
       "id": "US-006",
       "title": "Recurrence rule field in edit item forms",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T14:59:04Z"
     },
     {
       "id": "US-007",

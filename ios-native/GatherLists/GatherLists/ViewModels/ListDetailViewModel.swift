@@ -377,7 +377,9 @@ final class ListDetailViewModel {
         rsvpStatus: String? = nil,
         clearRsvpStatus: Bool = false,
         dueDate: Date? = nil,
-        clearDueDate: Bool = false
+        clearDueDate: Bool = false,
+        recurrenceRule: RecurrenceRule? = nil,
+        clearRecurrenceRule: Bool = false
     ) async {
         do {
             try await ItemService.updateItem(
@@ -395,7 +397,9 @@ final class ListDetailViewModel {
                 rsvpStatus: rsvpStatus,
                 clearRsvpStatus: clearRsvpStatus,
                 dueDate: dueDate,
-                clearDueDate: clearDueDate
+                clearDueDate: clearDueDate,
+                recurrenceRule: recurrenceRule,
+                clearRecurrenceRule: clearRecurrenceRule
             )
             
             // Update local state for instant feedback
@@ -425,6 +429,11 @@ final class ListDetailViewModel {
                     items[index].dueDate = nil
                 } else if let dueDate = dueDate {
                     items[index].dueDate = dueDate
+                }
+                if clearRecurrenceRule {
+                    items[index].recurrenceRule = nil
+                } else if let recurrenceRule = recurrenceRule {
+                    items[index].recurrenceRule = recurrenceRule
                 }
             }
         } catch {

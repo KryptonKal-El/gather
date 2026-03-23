@@ -5,7 +5,7 @@ struct EditItemSheet: View {
     let stores: [Store]
     let listCategories: [CategoryDef]
     let listType: String
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -20,15 +20,46 @@ struct EditItemSheet: View {
     @State private var selectedDueDate: Date?
     @State private var hasDueDate: Bool
     @State private var showingHistory = false
+    @State private var selectedRecurrenceType: String
+    @State private var customInterval: Int
+    @State private var customFrequency: String
+    @State private var selectedDaysOfWeek: Set<Int>
     
     private var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
+    
+    private let recurrenceTypes = [
+        ("none", "None"),
+        ("daily", "Daily"),
+        ("weekly", "Weekly"),
+        ("biweekly", "Biweekly"),
+        ("monthly", "Monthly"),
+        ("yearly", "Yearly"),
+        ("custom", "Custom")
+    ]
+    
+    private let frequencyOptions = [
+        ("day", "Day"),
+        ("week", "Week"),
+        ("month", "Month"),
+        ("year", "Year")
+    ]
+    
+    private let daysOfWeek = [
+        (0, "S", "Sunday"),
+        (1, "M", "Monday"),
+        (2, "T", "Tuesday"),
+        (3, "W", "Wednesday"),
+        (4, "T", "Thursday"),
+        (5, "F", "Friday"),
+        (6, "S", "Saturday")
+    ]
     
     init(
         item: Item,
         stores: [Store],
         listCategories: [CategoryDef],
         listType: String = "grocery",
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -47,6 +78,19 @@ struct EditItemSheet: View {
         _selectedRsvpStatus = State(initialValue: item.rsvpStatus)
         _selectedDueDate = State(initialValue: item.dueDate)
         _hasDueDate = State(initialValue: item.dueDate != nil)
+        
+        // Initialize recurrence state from existing rule
+        if let rule = item.recurrenceRule {
+            _selectedRecurrenceType = State(initialValue: rule.type)
+            _customInterval = State(initialValue: rule.interval ?? 1)
+            _customFrequency = State(initialValue: rule.frequency ?? "week")
+            _selectedDaysOfWeek = State(initialValue: Set(rule.daysOfWeek ?? []))
+        } else {
+            _selectedRecurrenceType = State(initialValue: "none")
+            _customInterval = State(initialValue: 1)
+            _customFrequency = State(initialValue: "week")
+            _selectedDaysOfWeek = State(initialValue: [])
+        }
     }
     
     private var availableCategories: [CategoryDef] {
@@ -58,6 +102,24 @@ struct EditItemSheet: View {
     
     private var isSaveDisabled: Bool {
         name.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+    
+    private func buildRecurrenceRule() -> RecurrenceRule? {
+        guard hasDueDate else { return nil }
+        
+        switch selectedRecurrenceType {
+        case "none":
+            return nil
+        case "custom":
+            return RecurrenceRule(
+                type: "custom",
+                interval: customInterval,
+                frequency: customFrequency,
+                daysOfWeek: customFrequency == "week" ? Array(selectedDaysOfWeek).sorted() : nil
+            )
+        default:
+            return RecurrenceRule(type: selectedRecurrenceType, interval: nil, frequency: nil, daysOfWeek: nil)
+        }
     }
     
     var body: some View {
@@ -136,6 +198,7 @@ struct EditItemSheet: View {
                                     selectedDueDate = Date()
                                 } else if !newValue {
                                     selectedDueDate = nil
+                                    selectedRecurrenceType = "none"
                                 }
                             }
                         if hasDueDate {
@@ -147,6 +210,55 @@ struct EditItemSheet: View {
                                 ),
                                 displayedComponents: .date
                             )
+                        }
+                    }
+                }
+                
+                // Recurrence — conditional (shown only when due date is set and recurrence is supported)
+                if typeConfig.fields.dueDate && typeConfig.fields.recurrence && hasDueDate {
+                    Section("Repeat") {
+                        Picker("Recurrence", selection: $selectedRecurrenceType) {
+                            ForEach(recurrenceTypes, id: \.0) { type in
+                                Text(type.1).tag(type.0)
+                            }
+                        }
+                        
+                        if selectedRecurrenceType == "custom" {
+                            Stepper("Every \(customInterval) \(customFrequency)\(customInterval > 1 ? "s" : "")", value: $customInterval, in: 1...99)
+                            
+                            Picker("Frequency", selection: $customFrequency) {
+                                ForEach(frequencyOptions, id: \.0) { option in
+                                    Text(option.1).tag(option.0)
+                                }
+                            }
+                            
+                            if customFrequency == "week" {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("On days")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    HStack(spacing: 8) {
+                                        ForEach(daysOfWeek, id: \.0) { day in
+                                            Button {
+                                                if selectedDaysOfWeek.contains(day.0) {
+                                                    selectedDaysOfWeek.remove(day.0)
+                                                } else {
+                                                    selectedDaysOfWeek.insert(day.0)
+                                                }
+                                            } label: {
+                                                Text(day.1)
+                                                    .font(.caption.bold())
+                                                    .frame(width: 32, height: 32)
+                                                    .background(selectedDaysOfWeek.contains(day.0) ? Color.accentColor : Color(.systemGray5))
+                                                    .foregroundStyle(selectedDaysOfWeek.contains(day.0) ? .white : .primary)
+                                                    .clipShape(Circle())
+                                            }
+                                            .buttonStyle(.plain)
+                                            .accessibilityLabel(day.2)
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -221,7 +333,8 @@ struct EditItemSheet: View {
                         let price = Decimal(string: priceText)
                         let clearStoreId = item.storeId != nil && selectedStoreId == nil
                         let clearRsvp = item.rsvpStatus != nil && selectedRsvpStatus == nil
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate)
+                        let recurrenceRule = buildRecurrenceRule()
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule)
                         dismiss()
                     }
                     .disabled(isSaveDisabled)

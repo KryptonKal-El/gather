@@ -227,9 +227,10 @@ struct ListDetailView: View {
                 stores: detailViewModel?.stores ?? [],
                 listCategories: detailViewModel?.listCategories ?? [],
                 listType: detailViewModel?.listType ?? "grocery",
-                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate in
+                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule in
                     Task {
                         let clearDueDate = item.dueDate != nil && dueDate == nil
+                        let clearRecurrenceRule = item.recurrenceRule != nil && recurrenceRule == nil
                         await detailViewModel?.updateItem(
                             item.id,
                             name: name,
@@ -243,7 +244,9 @@ struct ListDetailView: View {
                             rsvpStatus: rsvpStatus,
                             clearRsvpStatus: clearRsvpStatus,
                             dueDate: dueDate,
-                            clearDueDate: clearDueDate
+                            clearDueDate: clearDueDate,
+                            recurrenceRule: recurrenceRule,
+                            clearRecurrenceRule: clearRecurrenceRule
                         )
                     }
                 },

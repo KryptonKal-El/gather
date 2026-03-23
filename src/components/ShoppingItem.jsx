@@ -42,6 +42,9 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
   const [historyItems, setHistoryItems] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [customInterval, setCustomInterval] = useState(1);
+  const [customFrequency, setCustomFrequency] = useState('week');
+  const [customDaysOfWeek, setCustomDaysOfWeek] = useState([]);
   const categoryPickerRef = useRef(null);
   const storePickerRef = useRef(null);
   const priceInputRef = useRef(null);
@@ -199,6 +202,16 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
       setNameValue(item.name);
       setPriceValue(price !== null ? price.toFixed(2) : '');
       setUnitValue(item.unit ?? 'each');
+      // Initialize custom recurrence state from existing rule
+      if (item.recurrenceRule?.type === 'custom') {
+        setCustomInterval(item.recurrenceRule.interval ?? 1);
+        setCustomFrequency(item.recurrenceRule.frequency ?? 'week');
+        setCustomDaysOfWeek(item.recurrenceRule.daysOfWeek ?? []);
+      } else {
+        setCustomInterval(1);
+        setCustomFrequency('week');
+        setCustomDaysOfWeek([]);
+      }
       setIsEditOpen(true);
     }
   };
@@ -246,6 +259,65 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
     } finally {
       setHistoryLoading(false);
     }
+  };
+
+  const currentRecurrenceType = item.recurrenceRule?.type ?? 'none';
+
+  const handleRecurrenceTypeChange = (newType) => {
+    if (newType === 'none') {
+      onUpdateItem(item.id, { recurrenceRule: null });
+    } else if (newType === 'custom') {
+      const rule = {
+        type: 'custom',
+        interval: customInterval,
+        frequency: customFrequency,
+        daysOfWeek: (customFrequency === 'week') ? customDaysOfWeek : undefined,
+      };
+      onUpdateItem(item.id, { recurrenceRule: rule });
+    } else {
+      onUpdateItem(item.id, { recurrenceRule: { type: newType } });
+    }
+  };
+
+  const handleCustomIntervalChange = (val) => {
+    const newInterval = Math.max(1, parseInt(val, 10) || 1);
+    setCustomInterval(newInterval);
+    const rule = {
+      type: 'custom',
+      interval: newInterval,
+      frequency: customFrequency,
+      daysOfWeek: (customFrequency === 'week') ? customDaysOfWeek : undefined,
+    };
+    onUpdateItem(item.id, { recurrenceRule: rule });
+  };
+
+  const handleCustomFrequencyChange = (newFreq) => {
+    setCustomFrequency(newFreq);
+    const rule = {
+      type: 'custom',
+      interval: customInterval,
+      frequency: newFreq,
+      daysOfWeek: (newFreq === 'week') ? customDaysOfWeek : undefined,
+    };
+    onUpdateItem(item.id, { recurrenceRule: rule });
+  };
+
+  const handleDayOfWeekToggle = (dayIndex) => {
+    const newDays = customDaysOfWeek.includes(dayIndex)
+      ? customDaysOfWeek.filter((d) => d !== dayIndex)
+      : [...customDaysOfWeek, dayIndex].sort((a, b) => a - b);
+    setCustomDaysOfWeek(newDays);
+    const rule = {
+      type: 'custom',
+      interval: customInterval,
+      frequency: customFrequency,
+      daysOfWeek: newDays,
+    };
+    onUpdateItem(item.id, { recurrenceRule: rule });
+  };
+
+  const handleClearDueDate = () => {
+    onUpdateItem(item.id, { dueDate: null, recurrenceRule: null });
   };
 
   // Swipe gesture handlers (mobile only)
@@ -626,7 +698,7 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
                   <button
                     type="button"
                     className={styles.dueDateClear}
-                    onClick={() => onUpdateItem(item.id, { dueDate: null })}
+                    onClick={handleClearDueDate}
                     aria-label="Clear due date"
                   >
                     ✕
@@ -634,6 +706,70 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
                 )}
               </div>
             </div>
+          )}
+          {fields.dueDate && fields.recurrence && item.dueDate && (
+            <>
+              <div className={styles.editRow}>
+                <span className={styles.editLabel}>Repeat</span>
+                <select
+                  className={styles.recurrenceSelect}
+                  value={currentRecurrenceType}
+                  onChange={(e) => handleRecurrenceTypeChange(e.target.value)}
+                >
+                  <option value="none">None</option>
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="biweekly">Biweekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                  <option value="custom">Custom</option>
+                </select>
+              </div>
+              {currentRecurrenceType === 'custom' && (
+                <div className={styles.customRecurrence}>
+                  <div className={styles.editRow}>
+                    <span className={styles.editLabel}>Every</span>
+                    <div className={styles.customRecurrenceInputs}>
+                      <input
+                        type="number"
+                        min="1"
+                        className={styles.recurrenceIntervalInput}
+                        value={customInterval}
+                        onChange={(e) => handleCustomIntervalChange(e.target.value)}
+                      />
+                      <select
+                        className={styles.recurrenceFrequencySelect}
+                        value={customFrequency}
+                        onChange={(e) => handleCustomFrequencyChange(e.target.value)}
+                      >
+                        <option value="day">{customInterval === 1 ? 'day' : 'days'}</option>
+                        <option value="week">{customInterval === 1 ? 'week' : 'weeks'}</option>
+                        <option value="month">{customInterval === 1 ? 'month' : 'months'}</option>
+                        <option value="year">{customInterval === 1 ? 'year' : 'years'}</option>
+                      </select>
+                    </div>
+                  </div>
+                  {customFrequency === 'week' && (
+                    <div className={styles.editRow}>
+                      <span className={styles.editLabel}>On</span>
+                      <div className={styles.daysOfWeekPicker}>
+                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((label, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className={`${styles.dayOfWeekBtn} ${customDaysOfWeek.includes(idx) ? styles.dayOfWeekBtnActive : ''}`}
+                            onClick={() => handleDayOfWeekToggle(idx)}
+                            title={['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][idx]}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
           {(item.recurrenceRule || item.parentItemId) && (
             <div className={styles.editRow}>
@@ -715,7 +851,12 @@ ShoppingItem.propTypes = {
     rsvpStatus: PropTypes.string,
     dueDate: PropTypes.string,
     listId: PropTypes.string,
-    recurrenceRule: PropTypes.string,
+    recurrenceRule: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+      interval: PropTypes.number,
+      frequency: PropTypes.string,
+      daysOfWeek: PropTypes.arrayOf(PropTypes.number),
+    }),
     parentItemId: PropTypes.string,
   }).isRequired,
   stores: PropTypes.array,

@@ -701,3 +701,115 @@
   color: var(--danger);
   background: var(--danger-tint);
 }
+
+/* Recurrence picker */
+.recurrenceSelect {
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.recurrenceSelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.customRecurrence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.customRecurrenceInputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.recurrenceIntervalInput {
+  width: 4rem;
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.recurrenceIntervalInput::-webkit-inner-spin-button,
+.recurrenceIntervalInput::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.recurrenceIntervalInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.recurrenceFrequencySelect {
+  height: 2.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  padding: 0 0.5rem;
+  cursor: pointer;
+  flex: 1;
+}
+
+.recurrenceFrequencySelect:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.daysOfWeekPicker {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.dayOfWeekBtn {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.dayOfWeekBtn:hover {
+  border-color: var(--primary);
+}
+
+.dayOfWeekBtnActive {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.dayOfWeekBtnActive:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
