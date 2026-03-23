@@ -375,7 +375,9 @@ final class ListDetailViewModel {
         imageUrl: String? = nil,
         unit: String? = nil,
         rsvpStatus: String? = nil,
-        clearRsvpStatus: Bool = false
+        clearRsvpStatus: Bool = false,
+        dueDate: Date? = nil,
+        clearDueDate: Bool = false
     ) async {
         do {
             try await ItemService.updateItem(
@@ -391,7 +393,9 @@ final class ListDetailViewModel {
                 imageUrl: imageUrl,
                 unit: unit,
                 rsvpStatus: rsvpStatus,
-                clearRsvpStatus: clearRsvpStatus
+                clearRsvpStatus: clearRsvpStatus,
+                dueDate: dueDate,
+                clearDueDate: clearDueDate
             )
             
             // Update local state for instant feedback
@@ -416,6 +420,11 @@ final class ListDetailViewModel {
                     items[index].rsvpStatus = nil
                 } else if let rsvpStatus = rsvpStatus {
                     items[index].rsvpStatus = rsvpStatus
+                }
+                if clearDueDate {
+                    items[index].dueDate = nil
+                } else if let dueDate = dueDate {
+                    items[index].dueDate = dueDate
                 }
             }
         } catch {

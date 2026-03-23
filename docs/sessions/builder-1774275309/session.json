@@ -9,12 +9,12 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-005",
+  "currentChunk": "US-006",
   "currentAction": {
-    "description": "Completed US-004, advancing to US-005",
-    "contextAnchor": "due date field in edit forms",
-    "lastAction": "Committed US-004",
-    "updatedAt": "2026-03-23T16:30:00Z"
+    "description": "Completed US-005, advancing to US-006",
+    "contextAnchor": "recurrence rule field in edit forms",
+    "lastAction": "Committed US-005",
+    "updatedAt": "2026-03-23T16:40:00Z"
   },
   "chunks": [
     {
@@ -45,7 +45,8 @@
     {
       "id": "US-005",
       "title": "Due date field in edit item forms",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T16:40:00Z"
     },
     {
       "id": "US-006",

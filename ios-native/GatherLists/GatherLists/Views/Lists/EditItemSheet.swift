@@ -5,7 +5,7 @@ struct EditItemSheet: View {
     let stores: [Store]
     let listCategories: [CategoryDef]
     let listType: String
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -17,6 +17,8 @@ struct EditItemSheet: View {
     @State private var selectedCategory: String?
     @State private var selectedUnit: String
     @State private var selectedRsvpStatus: String?
+    @State private var selectedDueDate: Date?
+    @State private var hasDueDate: Bool
     @State private var showingHistory = false
     
     private var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
@@ -26,7 +28,7 @@ struct EditItemSheet: View {
         stores: [Store],
         listCategories: [CategoryDef],
         listType: String = "grocery",
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -43,6 +45,8 @@ struct EditItemSheet: View {
         _selectedCategory = State(initialValue: item.category)
         _selectedUnit = State(initialValue: item.unit)
         _selectedRsvpStatus = State(initialValue: item.rsvpStatus)
+        _selectedDueDate = State(initialValue: item.dueDate)
+        _hasDueDate = State(initialValue: item.dueDate != nil)
     }
     
     private var availableCategories: [CategoryDef] {
@@ -123,6 +127,30 @@ struct EditItemSheet: View {
                     }
                 }
                 
+                // Due Date — conditional
+                if typeConfig.fields.dueDate {
+                    Section("Due Date") {
+                        Toggle("Has Due Date", isOn: $hasDueDate)
+                            .onChange(of: hasDueDate) { _, newValue in
+                                if newValue && selectedDueDate == nil {
+                                    selectedDueDate = Date()
+                                } else if !newValue {
+                                    selectedDueDate = nil
+                                }
+                            }
+                        if hasDueDate {
+                            DatePicker(
+                                "Date",
+                                selection: Binding(
+                                    get: { selectedDueDate ?? Date() },
+                                    set: { selectedDueDate = $0 }
+                                ),
+                                displayedComponents: .date
+                            )
+                        }
+                    }
+                }
+                
                 // Image — conditional
                 if typeConfig.fields.image {
                     Section {
@@ -193,7 +221,7 @@ struct EditItemSheet: View {
                         let price = Decimal(string: priceText)
                         let clearStoreId = item.storeId != nil && selectedStoreId == nil
                         let clearRsvp = item.rsvpStatus != nil && selectedRsvpStatus == nil
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp)
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate)
                         dismiss()
                     }
                     .disabled(isSaveDisabled)

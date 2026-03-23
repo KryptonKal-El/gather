@@ -609,6 +609,32 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
               </select>
             </div>
           )}
+          {fields.dueDate && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Due Date</span>
+              <div className={styles.dueDateRow}>
+                <input
+                  type="date"
+                  className={styles.dueDateInput}
+                  value={item.dueDate ? new Date(item.dueDate).toISOString().split('T')[0] : ''}
+                  onChange={(e) => {
+                    const val = e.target.value || null;
+                    onUpdateItem(item.id, { dueDate: val });
+                  }}
+                />
+                {item.dueDate && (
+                  <button
+                    type="button"
+                    className={styles.dueDateClear}
+                    onClick={() => onUpdateItem(item.id, { dueDate: null })}
+                    aria-label="Clear due date"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           {(item.recurrenceRule || item.parentItemId) && (
             <div className={styles.editRow}>
               <button
@@ -687,6 +713,7 @@ ShoppingItem.propTypes = {
     imageUrl: PropTypes.string,
     unit: PropTypes.string,
     rsvpStatus: PropTypes.string,
+    dueDate: PropTypes.string,
     listId: PropTypes.string,
     recurrenceRule: PropTypes.string,
     parentItemId: PropTypes.string,

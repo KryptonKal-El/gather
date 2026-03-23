@@ -227,8 +227,9 @@ struct ListDetailView: View {
                 stores: detailViewModel?.stores ?? [],
                 listCategories: detailViewModel?.listCategories ?? [],
                 listType: detailViewModel?.listType ?? "grocery",
-                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus in
+                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate in
                     Task {
+                        let clearDueDate = item.dueDate != nil && dueDate == nil
                         await detailViewModel?.updateItem(
                             item.id,
                             name: name,
@@ -240,7 +241,9 @@ struct ListDetailView: View {
                             clearPrice: item.price != nil && price == nil,
                             unit: unit,
                             rsvpStatus: rsvpStatus,
-                            clearRsvpStatus: clearRsvpStatus
+                            clearRsvpStatus: clearRsvpStatus,
+                            dueDate: dueDate,
+                            clearDueDate: clearDueDate
                         )
                     }
                 },

@@ -93,7 +93,9 @@ struct ItemService {
         clearImageUrl: Bool = false,
         unit: String? = nil,
         rsvpStatus: String? = nil,
-        clearRsvpStatus: Bool = false
+        clearRsvpStatus: Bool = false,
+        dueDate: Date? = nil,
+        clearDueDate: Bool = false
     ) async throws {
         let update = ItemUpdate(
             name: name,
@@ -108,7 +110,9 @@ struct ItemService {
             clearImageUrl: clearImageUrl,
             unit: unit,
             rsvpStatus: rsvpStatus,
-            clearRsvpStatus: clearRsvpStatus
+            clearRsvpStatus: clearRsvpStatus,
+            dueDate: dueDate,
+            clearDueDate: clearDueDate
         )
         try await client
             .from("items")
@@ -310,6 +314,8 @@ private struct ItemUpdate: Encodable {
     var unit: String?
     var rsvpStatus: String?
     var clearRsvpStatus: Bool = false
+    var dueDate: Date?
+    var clearDueDate: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -321,6 +327,7 @@ private struct ItemUpdate: Encodable {
         case imageUrl = "image_url"
         case unit
         case rsvpStatus = "rsvp_status"
+        case dueDate = "due_date"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -349,6 +356,11 @@ private struct ItemUpdate: Encodable {
             try container.encodeNil(forKey: .rsvpStatus)
         } else if let rsvpStatus = rsvpStatus {
             try container.encode(rsvpStatus, forKey: .rsvpStatus)
+        }
+        if clearDueDate {
+            try container.encodeNil(forKey: .dueDate)
+        } else if let dueDate = dueDate {
+            try container.encode(dueDate, forKey: .dueDate)
         }
     }
 }

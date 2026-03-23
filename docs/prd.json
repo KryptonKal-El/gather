@@ -155,8 +155,10 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added dueDate to ListTypeFields for project/todo/basic. React: native date picker in edit panel with clear button. Swift: Toggle + DatePicker in EditItemSheet.",
+      "status": "completed",
+      "completedAt": "2026-03-23T16:40:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
