@@ -20,7 +20,8 @@ struct SortConfigSheet: View {
         .rsvp: "RSVP Status",
         .name: "Name",
         .date: "Date Added",
-        .price: "Price"
+        .price: "Price",
+        .dueDate: "Due Date"
     ]
     
     private var validLevels: [SortLevel] {

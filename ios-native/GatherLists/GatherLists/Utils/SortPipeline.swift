@@ -8,6 +8,7 @@ enum SortLevel: String, Codable, CaseIterable {
     case date
     case price
     case rsvp
+    case dueDate
 }
 
 /// Sort pipeline engine for shopping list items.
@@ -183,6 +184,8 @@ enum SortPipeline {
             return sortByDate(items)
         case .price:
             return sortByPrice(items)
+        case .dueDate:
+            return sortByDueDate(items)
         default:
             return items
         }
@@ -204,6 +207,17 @@ enum SortPipeline {
             if priceA == nil { return false }
             if priceB == nil { return true }
             return priceA! < priceB!
+        }
+    }
+    
+    private static func sortByDueDate(_ items: [Item]) -> [Item] {
+        items.sorted { a, b in
+            let dateA = a.dueDate
+            let dateB = b.dueDate
+            if dateA == nil && dateB == nil { return false }
+            if dateA == nil { return false }
+            if dateB == nil { return true }
+            return dateA! < dateB!
         }
     }
     

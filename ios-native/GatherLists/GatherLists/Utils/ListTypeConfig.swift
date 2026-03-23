@@ -166,7 +166,7 @@ enum ListTypes {
             fields: ListTypeFields(store: false, category: false, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true, reminder: true),
             quantityLabel: nil,
             categories: nil,
-            sortLevels: ["name", "date"],
+            sortLevels: ["name", "date", "dueDate"],
             defaultSort: ["name"]
         ),
         "guest_list": ListTypeConfig(
@@ -196,7 +196,7 @@ enum ListTypes {
             fields: ListTypeFields(store: false, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true, reminder: true),
             quantityLabel: "Qty",
             categories: ListTypeCategories.project,
-            sortLevels: ["category", "name", "date", "price"],
+            sortLevels: ["category", "name", "date", "price", "dueDate"],
             defaultSort: ["category", "name"]
         ),
         "todo": ListTypeConfig(
@@ -206,7 +206,7 @@ enum ListTypes {
             fields: ListTypeFields(store: false, category: true, price: false, quantity: false, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true, reminder: true),
             quantityLabel: nil,
             categories: ListTypeCategories.todo,
-            sortLevels: ["category", "name", "date"],
+            sortLevels: ["category", "name", "date", "dueDate"],
             defaultSort: ["category", "name"]
         )
     ]

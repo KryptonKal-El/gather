@@ -9,11 +9,11 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-010",
+  "currentChunk": "US-011",
   "currentAction": {
-    "description": "US-009 committed, advancing to US-010",
-    "lastAction": "Commit US-009",
-    "updatedAt": "2026-03-23T15:09:16Z"
+    "description": "US-010 committed, advancing to US-011",
+    "lastAction": "Commit US-010",
+    "updatedAt": "2026-03-23T15:11:58Z"
   },
   "chunks": [
     {
@@ -74,7 +74,8 @@
     {
       "id": "US-010",
       "title": "Due Date sort level",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T15:11:58Z"
     },
     {
       "id": "US-011",

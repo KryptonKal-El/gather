@@ -13,7 +13,7 @@ import {
 import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
 
 /** Valid sort level options */
-export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp'];
+export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp', 'dueDate'];
 
 /** Maximum levels for grouping (Group By section) */
 export const MAX_GROUP_LEVELS = 2;
@@ -132,15 +132,29 @@ const sortByPrice = (items) =>
   });
 
 /**
+ * Sorts items by due date (soonest first, nulls at bottom).
+ * @param {Array<{dueDate: string|null}>} items - Items to sort
+ * @returns {Array} Sorted items (new array)
+ */
+const sortByDueDate = (items) =>
+  [...items].sort((a, b) => {
+    if (!a.dueDate && !b.dueDate) return 0;
+    if (!a.dueDate) return 1;
+    if (!b.dueDate) return -1;
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+
+/**
  * Applies a sort-only level to items.
  * @param {Array} items - Items to sort
- * @param {string} level - Sort level ('name', 'date', or 'price')
+ * @param {string} level - Sort level ('name', 'date', 'price', or 'dueDate')
  * @returns {Array} Sorted items
  */
 const applySortLevel = (items, level) => {
   if (level === 'name') return sortByName(items);
   if (level === 'date') return sortByDate(items);
   if (level === 'price') return sortByPrice(items);
+  if (level === 'dueDate') return sortByDueDate(items);
   return items;
 };
 

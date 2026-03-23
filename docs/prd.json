@@ -310,8 +310,8 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Due Date sort level added to sort pipeline. Sort-only, ascending, nulls at bottom. Available for project/todo/basic.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -322,7 +322,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T15:11:58Z"
     },
     {
       "id": "US-011",

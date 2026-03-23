@@ -206,7 +206,7 @@ export const LIST_TYPES = {
     },
     quantityLabel: null,
     categories: null,
-    sortLevels: ['name', 'date'],
+    sortLevels: ['name', 'date', 'dueDate'],
     defaultSort: ['name'],
   },
   guest_list: {
@@ -269,7 +269,7 @@ export const LIST_TYPES = {
     },
     quantityLabel: 'Qty',
     categories: PROJECT_CATEGORIES,
-    sortLevels: ['category', 'name', 'date', 'price'],
+    sortLevels: ['category', 'name', 'date', 'price', 'dueDate'],
     defaultSort: ['category', 'name'],
   },
   todo: {
@@ -290,7 +290,7 @@ export const LIST_TYPES = {
     },
     quantityLabel: null,
     categories: TODO_CATEGORIES,
-    sortLevels: ['category', 'name', 'date'],
+    sortLevels: ['category', 'name', 'date', 'dueDate'],
     defaultSort: ['category', 'name'],
   },
 };
