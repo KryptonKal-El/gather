@@ -49,8 +49,8 @@
         "Build succeeds (both main app and widget extension)"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Widget extension target with shared models, WidgetDataProvider, placeholder widget, build succeeds",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -61,7 +61,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T22:15:00Z"
     },
     {
       "id": "US-003",

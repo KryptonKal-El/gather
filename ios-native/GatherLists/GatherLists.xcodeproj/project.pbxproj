@@ -9,6 +9,15 @@
 /* Begin PBXBuildFile section */
 		SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
 		SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
+		WIDGETBUNDLE0000000000002 /* GatherListsWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */; };
+		WIDGETPLACEHOLDER000000002 /* PlaceholderWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */; };
+		WIDGETDATAPROV0000000002 /* WidgetDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */; };
+		WIDGETITEM0000000000000002 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */; };
+		WIDGETGATHERLIST000000002 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
+		WIDGETSHAREDDEF0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
+		WIDGETSHAREDDATA000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
+		WIDGETSTORE0000000000002 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
+		WIDGETEXTENSION0000000002 /* GatherListsWidgetsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
@@ -103,6 +112,30 @@
 		A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WIDGETTARGET0000000000001;
+			remoteInfo = GatherListsWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		WIDGETCOPYFILES0000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				WIDGETEXTENSION0000000002 /* GatherListsWidgetsExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -202,6 +235,11 @@
 		COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionHistorySheet.swift; sourceTree = "<group>"; };
 		SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		SHAREDDATASTORE000000001 /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
+		WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = GatherListsWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsWidgetsBundle.swift; sourceTree = "<group>"; };
+		WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderWidget.swift; sourceTree = "<group>"; };
+		WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataProvider.swift; sourceTree = "<group>"; };
+		WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GatherListsWidgets.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +251,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		WIDGETFRAMEWORKS0000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -220,6 +265,7 @@
 			isa = PBXGroup;
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E202 /* GatherLists */,
+				WIDGETGROUP0000000000001 /* GatherListsWidgets */,
 				A1B2C3D4E5F6A7B8C9D0E203 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -248,6 +294,7 @@
 			isa = PBXGroup;
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E1F8 /* GatherLists.app */,
+				WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -438,6 +485,17 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
+		WIDGETGROUP0000000000001 /* GatherListsWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */,
+				WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */,
+				WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */,
+				WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */,
+			);
+			path = GatherListsWidgets;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -449,10 +507,12 @@
 				A1B2C3D4E5F6A7B8C9D0E200 /* Frameworks */,
 				A1B2C3D4E5F6A7B8C9D0E208 /* Resources */,
 				A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */,
+				WIDGETCOPYFILES0000000001 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				WIDGETTARGETDEP0000000001 /* PBXTargetDependency */,
 			);
 			name = GatherLists;
 			packageProductDependencies = (
@@ -461,6 +521,23 @@
 			productName = GatherLists;
 			productReference = A1B2C3D4E5F6A7B8C9D0E1F8 /* GatherLists.app */;
 			productType = "com.apple.product-type.application";
+		};
+		WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */;
+			buildPhases = (
+				WIDGETSOURCES0000000000001 /* Sources */,
+				WIDGETFRAMEWORKS0000000001 /* Frameworks */,
+				WIDGETRESOURCES0000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GatherListsWidgetsExtension;
+			productName = GatherListsWidgetsExtension;
+			productReference = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -473,6 +550,9 @@
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					A1B2C3D4E5F6A7B8C9D0E205 = {
+						CreatedOnToolsVersion = 15.4;
+					};
+					WIDGETTARGET0000000000001 = {
 						CreatedOnToolsVersion = 15.4;
 					};
 				};
@@ -494,6 +574,7 @@
 			projectRoot = "";
 			targets = (
 				A1B2C3D4E5F6A7B8C9D0E205 /* GatherLists */,
+				WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -508,6 +589,13 @@
 				A1B2C3D4E5F6A7B8C9D0E221 /* PrivacyInfo.xcprivacy in Resources */,
 				A1B2C3D4E5F6A7B8C9D0E2AF /* LaunchScreen.storyboard in Resources */,
 				B1C2D3E4F5A6B7C8D9E0F1A2 /* Secrets.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		WIDGETRESOURCES0000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -627,7 +715,30 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		WIDGETSOURCES0000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				WIDGETBUNDLE0000000000002 /* GatherListsWidgetsBundle.swift in Sources */,
+				WIDGETPLACEHOLDER000000002 /* PlaceholderWidget.swift in Sources */,
+				WIDGETDATAPROV0000000002 /* WidgetDataProvider.swift in Sources */,
+				WIDGETITEM0000000000000002 /* Item.swift in Sources */,
+				WIDGETGATHERLIST000000002 /* GatherList.swift in Sources */,
+				WIDGETSHAREDDEF0000000002 /* SharedDefaults.swift in Sources */,
+				WIDGETSHAREDDATA000000002 /* SharedDataStore.swift in Sources */,
+				WIDGETSTORE0000000000002 /* Store.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		WIDGETTARGETDEP0000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */;
+			targetProxy = WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A1B2C3D4E5F6A7B8C9D0E20B /* Debug */ = {
@@ -815,6 +926,60 @@
 			};
 			name = Release;
 		};
+		WIDGETCONFIG0000000DEBUG /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = GatherListsWidgets/GatherListsWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GatherListsWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		WIDGETCONFIG000000RELEASE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = GatherListsWidgets/GatherListsWidgets.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GatherListsWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -832,6 +997,15 @@
 			buildConfigurations = (
 				A1B2C3D4E5F6A7B8C9D0E20B /* Debug */,
 				A1B2C3D4E5F6A7B8C9D0E20C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WIDGETCONFIG0000000DEBUG /* Debug */,
+				WIDGETCONFIG000000RELEASE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -859,4 +1033,3 @@
 	};
 	rootObject = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
 }
-

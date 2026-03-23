@@ -1,7 +1,7 @@
 {
   "project": "Gather",
   "branchName": "feature/spoonacular-product-search",
-  "description": "Add Spoonacular grocery product search as a second-tier image source in the search-products edge function, slotting between Walmart and Open Food Facts in the parallel fallback chain.",
+  "description": "Add Spoonacular grocery product search to the search-products edge function and merge results from all three primary sources (Walmart, Spoonacular, Open Food Facts) into a single combined response, with SerpAPI as a sequential last-resort fallback.",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -35,14 +35,17 @@
     },
     {
       "id": "US-002",
-      "title": "Wire Spoonacular into the Fallback Chain",
-      "description": "As a user, I want the image search to check Spoonacular's grocery database when Walmart returns no results, so I get more product matches without waiting longer.",
+      "title": "Merge Results from All Three Sources",
+      "description": "As a user, I want to see product images from Walmart, Spoonacular, and Open Food Facts combined into one set of results, so I have more options to choose from when picking an image for my item.",
       "acceptanceCriteria": [
-        "Spoonacular product search runs in parallel with Walmart and Open Food Facts (3-way Promise.all)",
-        "Priority order: Walmart → Spoonacular → Open Food Facts → SerpAPI",
-        "SerpAPI remains the final sequential fallback (only called if all three parallel sources return empty)",
-        "Response includes source: 'spoonacular' when Spoonacular results are used",
-        "No increase in latency for the Walmart-hit case (parallel execution)",
+        "Walmart, Spoonacular, and Open Food Facts run in parallel via 3-way Promise.all",
+        "Results from all three sources are concatenated into a single results array (Walmart first, then Spoonacular, then Open Food Facts)",
+        "Duplicate images are removed (deduplicate by thumbnail URL)",
+        "The combined array is capped at numItems total results (requested count, default 8)",
+        "Response source is 'merged' when results came from multiple sources, or the single source name if only one returned results",
+        "SerpAPI is called sequentially only if all three parallel sources returned empty — its results are NOT merged",
+        "If SerpAPI is used, source is 'serpapi'",
+        "No increase in latency compared to current behavior (all three already ran, just Walmart + OFF — now adding Spoonacular to the same parallel batch)",
         "Edge function deploys successfully"
       ],
       "priority": 2,
@@ -66,7 +69,7 @@
       "description": "As a developer, I need to ensure we comply with Spoonacular's API terms by passing proper attribution when their images are used.",
       "acceptanceCriteria": [
         "Spoonacular product image URLs use their CDN format (https://img.spoonacular.com/products/...) — no proxying/rehosting",
-        "Response source field correctly identifies 'spoonacular' so clients can attribute if needed",
+        "Response source field correctly identifies Spoonacular's contribution — returns 'spoonacular' when it's the sole source, or 'merged' when combined with other sources",
         "Review Spoonacular ToS for product search API image usage requirements (note any attribution needs in a code comment)"
       ],
       "priority": 3,
