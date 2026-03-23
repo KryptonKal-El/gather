@@ -9,6 +9,7 @@ struct ListQuickViewEntry: TimelineEntry {
     var listEmoji: String?
     var listColor: String?
     var uncheckedCount: Int
+    var uncheckedItems: [Item]
     var isPlaceholder: Bool
     
     static var placeholder: ListQuickViewEntry {
@@ -19,8 +20,19 @@ struct ListQuickViewEntry: TimelineEntry {
             listEmoji: "🛒",
             listColor: nil,
             uncheckedCount: 5,
+            uncheckedItems: ListQuickViewEntry.placeholderItems,
             isPlaceholder: true
         )
+    }
+    
+    private static var placeholderItems: [Item] {
+        [
+            Item(listId: UUID(), name: "Milk", quantity: 2),
+            Item(listId: UUID(), name: "Bread"),
+            Item(listId: UUID(), name: "Eggs", quantity: 12, unit: "ct"),
+            Item(listId: UUID(), name: "Butter"),
+            Item(listId: UUID(), name: "Cheese"),
+        ]
     }
 }
 
@@ -53,7 +65,7 @@ struct ListQuickViewProvider: AppIntentTimelineProvider {
             return .placeholder
         }
         
-        let uncheckedCount = await WidgetDataProvider.shared.fetchUncheckedCount(listId: list.id)
+        let uncheckedItems = await WidgetDataProvider.shared.fetchUncheckedItems(listId: list.id)
         
         return ListQuickViewEntry(
             date: Date(),
@@ -61,9 +73,29 @@ struct ListQuickViewProvider: AppIntentTimelineProvider {
             listName: list.name,
             listEmoji: list.emoji,
             listColor: list.color,
-            uncheckedCount: uncheckedCount,
+            uncheckedCount: uncheckedItems.count,
+            uncheckedItems: uncheckedItems,
             isPlaceholder: false
         )
+    }
+}
+
+/// Entry view that switches based on widget family.
+struct ListQuickViewWidgetEntryView: View {
+    @Environment(\.widgetFamily) var family
+    var entry: ListQuickViewEntry
+    
+    var body: some View {
+        switch family {
+        case .systemSmall:
+            ListQuickViewSmall(entry: entry)
+        case .systemMedium:
+            ListQuickViewMedium(entry: entry)
+        case .systemLarge:
+            ListQuickViewLarge(entry: entry)
+        default:
+            ListQuickViewSmall(entry: entry)
+        }
     }
 }
 
@@ -77,10 +109,10 @@ struct ListQuickViewWidget: Widget {
             intent: SelectListIntent.self,
             provider: ListQuickViewProvider()
         ) { entry in
-            ListQuickViewSmall(entry: entry)
+            ListQuickViewWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("List Quick View")
         .description("See items remaining in a list at a glance.")
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }

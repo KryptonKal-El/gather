@@ -21,6 +21,8 @@
 		SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTINTENT00000001 /* SelectListIntent.swift */; };
 		LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */; };
 		LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */; };
+		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
+		LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */; };
 		WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
@@ -247,6 +249,8 @@
 		SELECTLISTINTENT00000001 /* SelectListIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListIntent.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewWidget.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewSmall.swift; sourceTree = "<group>"; };
+		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
+		LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewLarge.swift; sourceTree = "<group>"; };
 		WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -520,6 +524,8 @@
 			children = (
 				LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */,
 				LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */,
+				LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */,
+				LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */,
 			);
 			path = ListQuickView;
 			sourceTree = "<group>";
@@ -758,6 +764,8 @@
 				SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */,
 				LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */,
 				LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */,
+				LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */,
+				LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */,
 				WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
