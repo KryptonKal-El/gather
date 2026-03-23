@@ -125,6 +125,19 @@
   letter-spacing: 0.02em;
 }
 
+.dueDateLabel {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.repeatIcon {
+  font-size: 0.75rem;
+}
+
 .rsvpPickerWrapper {
   flex-shrink: 0;
 }

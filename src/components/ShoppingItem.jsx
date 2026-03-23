@@ -19,6 +19,23 @@ const RSVP_COLORS = {
 };
 
 /**
+ * Formats a due date string as "Mar 25" or "Mar 25, 2027" if different year.
+ * @param {string} dateStr - ISO date string (e.g. "2026-03-25")
+ * @returns {string} Formatted date label
+ */
+const formatDueDateLabel = (dateStr) => {
+  const date = new Date(dateStr + 'T00:00:00');
+  const currentYear = new Date().getFullYear();
+  const dateYear = date.getFullYear();
+  const month = date.toLocaleDateString('en-US', { month: 'short' });
+  const day = date.getDate();
+  if (dateYear === currentYear) {
+    return `${month} ${day}`;
+  }
+  return `${month} ${day}, ${dateYear}`;
+};
+
+/**
  * A single shopping list item with a compact row and expandable edit panel.
  * The compact row shows image, name (with qty), store/category badges, price,
  * and a pencil icon to toggle the edit panel. The edit panel contains qty
@@ -479,6 +496,12 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
                 style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
               >
                 {allLabels[item.category] ?? 'Other'}
+              </span>
+            )}
+            {fields.dueDate && item.dueDate && (
+              <span className={styles.dueDateLabel}>
+                {item.recurrenceRule && <span className={styles.repeatIcon}>↻</span>}
+                Due {formatDueDateLabel(item.dueDate)}
               </span>
             )}
             {fields.rsvpStatus && (

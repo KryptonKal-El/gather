@@ -249,8 +249,8 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Due date label shown on item rows for project/todo/basic lists. Format: Due Mar 25 with recurrence icon when applicable.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -261,7 +261,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T15:07:01Z"
     },
     {
       "id": "US-009",

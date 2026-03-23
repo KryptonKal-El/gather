@@ -691,6 +691,18 @@ struct ListDetailView: View {
                     }
                 }
                 
+                if detailViewModel?.typeConfig.fields.dueDate == true, let dueDate = item.dueDate {
+                    HStack(spacing: 2) {
+                        if item.recurrenceRule != nil {
+                            Text("↻")
+                                .font(.caption)
+                        }
+                        Text("Due \(formatDueDateLabel(dueDate))")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                
                 Spacer()
                 
                 if detailViewModel?.typeConfig.fields.price == true {
@@ -1122,6 +1134,18 @@ struct ListDetailView: View {
         formatter.numberStyle = .currency
         formatter.locale = Locale.current
         return formatter.string(from: price as NSDecimalNumber) ?? "\(price)"
+    }
+    
+    private func formatDueDateLabel(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        let currentYear = Calendar.current.component(.year, from: Date())
+        let dateYear = Calendar.current.component(.year, from: date)
+        if dateYear == currentYear {
+            formatter.dateFormat = "MMM d"
+        } else {
+            formatter.dateFormat = "MMM d, yyyy"
+        }
+        return formatter.string(from: date)
     }
     
     private func rsvpColor(for status: String?) -> Color {
