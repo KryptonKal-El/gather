@@ -565,8 +565,8 @@
       "dependsOn": [
         "prd-recurring-items"
       ],
-      "currentStory": "US-006",
-      "storiesCompleted": 5
+      "currentStory": "US-009",
+      "storiesCompleted": 8
     },
     {
       "id": "prd-spoonacular-product-search",

@@ -6,5 +6,6 @@ struct GatherListsWidgetsBundle: WidgetBundle {
     var body: some Widget {
         PlaceholderWidget()
         ListQuickViewWidget()
+        DueItemsWidget()
     }
 }

@@ -19,6 +19,11 @@
 		WIDGETSTORE0000000000002 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
 		WIDGETEXTENSION0000000002 /* GatherListsWidgetsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTINTENT00000001 /* SelectListIntent.swift */; };
+		SELECTLISTORALL000000002 /* SelectListOrAllIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */; };
+		DUEITEMSWIDGET0000000002 /* DueItemsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */; };
+		DUEITEMSSMALL00000000002 /* DueItemsSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSSMALL00000000001 /* DueItemsSmall.swift */; };
+		DUEITEMSMEDIUM0000000002 /* DueItemsMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSMEDIUM0000000001 /* DueItemsMedium.swift */; };
+		DUEITEMSLARGE00000000002 /* DueItemsLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */; };
 		LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */; };
 		LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */; };
 		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
@@ -247,6 +252,11 @@
 		WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataProvider.swift; sourceTree = "<group>"; };
 		WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GatherListsWidgets.entitlements; sourceTree = "<group>"; };
 		SELECTLISTINTENT00000001 /* SelectListIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListIntent.swift; sourceTree = "<group>"; };
+		SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListOrAllIntent.swift; sourceTree = "<group>"; };
+		DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsWidget.swift; sourceTree = "<group>"; };
+		DUEITEMSSMALL00000000001 /* DueItemsSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsSmall.swift; sourceTree = "<group>"; };
+		DUEITEMSMEDIUM0000000001 /* DueItemsMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsMedium.swift; sourceTree = "<group>"; };
+		DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsLarge.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewWidget.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewSmall.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
@@ -507,6 +517,7 @@
 				WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */,
 				WIDGETINTENTSGROUP000001 /* Intents */,
 				WIDGETLISTQVGROUP0000001 /* ListQuickView */,
+				WIDGETDUEITEMSGROUP00001 /* DueItems */,
 			);
 			path = GatherListsWidgets;
 			sourceTree = "<group>";
@@ -515,6 +526,7 @@
 			isa = PBXGroup;
 			children = (
 				SELECTLISTINTENT00000001 /* SelectListIntent.swift */,
+				SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */,
 			);
 			path = Intents;
 			sourceTree = "<group>";
@@ -528,6 +540,17 @@
 				LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */,
 			);
 			path = ListQuickView;
+			sourceTree = "<group>";
+		};
+		WIDGETDUEITEMSGROUP00001 /* DueItems */ = {
+			isa = PBXGroup;
+			children = (
+				DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */,
+				DUEITEMSSMALL00000000001 /* DueItemsSmall.swift */,
+				DUEITEMSMEDIUM0000000001 /* DueItemsMedium.swift */,
+				DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */,
+			);
+			path = DueItems;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -762,11 +785,16 @@
 				WIDGETSHAREDDATA000000002 /* SharedDataStore.swift in Sources */,
 				WIDGETSTORE0000000000002 /* Store.swift in Sources */,
 				SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */,
+				SELECTLISTORALL000000002 /* SelectListOrAllIntent.swift in Sources */,
 				LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */,
 				LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */,
 				LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */,
 				LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */,
 				WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */,
+				DUEITEMSWIDGET0000000002 /* DueItemsWidget.swift in Sources */,
+				DUEITEMSSMALL00000000002 /* DueItemsSmall.swift in Sources */,
+				DUEITEMSMEDIUM0000000002 /* DueItemsMedium.swift in Sources */,
+				DUEITEMSLARGE00000000002 /* DueItemsLarge.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
