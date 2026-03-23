@@ -11,10 +11,10 @@ const searchCache = new Map();
  * Uses the Supabase Edge Function endpoint with a Walmart → Open Food Facts → SerpAPI fallback chain.
  * Results are cached client-side for 5 minutes.
  * @param {string} query - The search term
- * @param {number} [count=8] - Number of results to return
+ * @param {number} [count=25] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
  */
-export const searchImages = async (query, count = 8) => {
+export const searchImages = async (query, count = 25) => {
   const cacheKey = query.trim().toLowerCase();
   const cached = searchCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {

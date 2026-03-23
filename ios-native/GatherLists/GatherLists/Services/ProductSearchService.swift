@@ -30,7 +30,7 @@ struct ProductSearchService {
     /// Searches for product images online via the edge function.
     /// Returns an empty array on failure (graceful degradation).
     @MainActor
-    static func searchProducts(query: String, count: Int = 8) async -> [ProductSearchResult] {
+    static func searchProducts(query: String, count: Int = 25) async -> [ProductSearchResult] {
         let cacheKey = query.trimmingCharacters(in: .whitespaces).lowercased()
         if let cached = await cache.get(cacheKey) {
             return cached

@@ -578,8 +578,8 @@
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-23",
       "estimatedStories": 3,
-      "currentStory": "US-002",
-      "storiesCompleted": 1
+      "currentStory": "US-003",
+      "storiesCompleted": 2
     },
     {
       "id": "prd-image-viewer-simplification",

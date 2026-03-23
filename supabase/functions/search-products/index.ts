@@ -300,7 +300,7 @@ Deno.serve(async (req) => {
 
   const url = new URL(req.url);
   const query = url.searchParams.get('q');
-  const numItems = url.searchParams.get('num') ?? '8';
+  const numItems = url.searchParams.get('num') ?? '25';
 
   if (!query) {
     return new Response(
@@ -315,21 +315,40 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
     });
 
-  // Run Walmart and Open Food Facts in parallel
-  const [walmartResults, offResults] = await Promise.all([
+  // Run Walmart, Spoonacular, and Open Food Facts in parallel
+  const [walmartResults, spoonacularResults, offResults] = await Promise.all([
     searchWalmart(query, numItems),
+    searchSpoonacularProducts(query, numItems),
     searchOpenFoodFacts(query, numItems),
   ]);
 
-  // Prefer Walmart results, then OFF
-  if (walmartResults.length > 0) {
-    return respond({ results: walmartResults, source: 'walmart' });
-  }
-  if (offResults.length > 0) {
-    return respond({ results: offResults, source: 'openfoodfacts' });
+  // Concatenate results: Walmart first, then Spoonacular, then Open Food Facts
+  const combined = [...walmartResults, ...spoonacularResults, ...offResults];
+
+  // Deduplicate by thumbnail URL
+  const seen = new Set<string>();
+  const merged: ProductResult[] = [];
+  for (const r of combined) {
+    if (r.thumbnail && !seen.has(r.thumbnail)) {
+      seen.add(r.thumbnail);
+      merged.push(r);
+    }
   }
 
-  // Final fallback: SerpAPI (only called if both above returned empty)
+  // Determine source based on which APIs returned results
+  const sources: string[] = [];
+  if (walmartResults.length > 0) sources.push('walmart');
+  if (spoonacularResults.length > 0) sources.push('spoonacular');
+  if (offResults.length > 0) sources.push('openfoodfacts');
+
+  const source = sources.length > 1 ? 'merged' : sources.length === 1 ? sources[0] : 'none';
+
+  // Return merged results if any source returned data
+  if (merged.length > 0) {
+    return respond({ results: merged, source });
+  }
+
+  // Final fallback: SerpAPI (only called if all three returned empty)
   const serpResults = await searchSerpApi(query, numItems);
   if (serpResults.length > 0) {
     return respond({ results: serpResults, source: 'serpapi' });
