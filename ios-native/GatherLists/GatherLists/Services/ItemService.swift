@@ -97,7 +97,9 @@ struct ItemService {
         dueDate: Date? = nil,
         clearDueDate: Bool = false,
         recurrenceRule: RecurrenceRule? = nil,
-        clearRecurrenceRule: Bool = false
+        clearRecurrenceRule: Bool = false,
+        reminderDaysBefore: Int? = nil,
+        clearReminderDaysBefore: Bool = false
     ) async throws {
         let update = ItemUpdate(
             name: name,
@@ -116,7 +118,9 @@ struct ItemService {
             dueDate: dueDate,
             clearDueDate: clearDueDate,
             recurrenceRule: recurrenceRule,
-            clearRecurrenceRule: clearRecurrenceRule
+            clearRecurrenceRule: clearRecurrenceRule,
+            reminderDaysBefore: reminderDaysBefore,
+            clearReminderDaysBefore: clearReminderDaysBefore
         )
         try await client
             .from("items")
@@ -322,6 +326,8 @@ private struct ItemUpdate: Encodable {
     var clearDueDate: Bool = false
     var recurrenceRule: RecurrenceRule?
     var clearRecurrenceRule: Bool = false
+    var reminderDaysBefore: Int?
+    var clearReminderDaysBefore: Bool = false
     
     enum CodingKeys: String, CodingKey {
         case name
@@ -335,6 +341,7 @@ private struct ItemUpdate: Encodable {
         case rsvpStatus = "rsvp_status"
         case dueDate = "due_date"
         case recurrenceRule = "recurrence_rule"
+        case reminderDaysBefore = "reminder_days_before"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -373,6 +380,11 @@ private struct ItemUpdate: Encodable {
             try container.encodeNil(forKey: .recurrenceRule)
         } else if let recurrenceRule = recurrenceRule {
             try container.encode(recurrenceRule, forKey: .recurrenceRule)
+        }
+        if clearReminderDaysBefore {
+            try container.encodeNil(forKey: .reminderDaysBefore)
+        } else if let reminderDaysBefore = reminderDaysBefore {
+            try container.encode(reminderDaysBefore, forKey: .reminderDaysBefore)
         }
     }
 }

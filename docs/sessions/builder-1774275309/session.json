@@ -9,11 +9,11 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-007",
+  "currentChunk": "US-008",
   "currentAction": {
-    "description": "US-006 committed, advancing to US-007",
-    "lastAction": "Commit US-006",
-    "updatedAt": "2026-03-23T14:59:04Z"
+    "description": "US-007 committed, advancing to US-008",
+    "lastAction": "Commit US-007",
+    "updatedAt": "2026-03-23T15:04:22Z"
   },
   "chunks": [
     {
@@ -56,7 +56,8 @@
     {
       "id": "US-007",
       "title": "Reminder setting field in edit item forms",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T15:04:22Z"
     },
     {
       "id": "US-008",

@@ -219,8 +219,8 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Reminder days-before picker added to React edit panel and Swift EditItemSheet. Options: None/Same day/1-3 days/1 week. Clears on due date removal.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -231,7 +231,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T15:04:22Z"
     },
     {
       "id": "US-008",

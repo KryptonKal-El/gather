@@ -5,7 +5,7 @@ struct EditItemSheet: View {
     let stores: [Store]
     let listCategories: [CategoryDef]
     let listType: String
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -24,6 +24,7 @@ struct EditItemSheet: View {
     @State private var customInterval: Int
     @State private var customFrequency: String
     @State private var selectedDaysOfWeek: Set<Int>
+    @State private var selectedReminderDays: Int?
     
     private var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
     
@@ -54,12 +55,21 @@ struct EditItemSheet: View {
         (6, "S", "Saturday")
     ]
     
+    private let reminderOptions: [(Int?, String)] = [
+        (nil, "No reminder"),
+        (0, "Same day"),
+        (1, "1 day before"),
+        (2, "2 days before"),
+        (3, "3 days before"),
+        (7, "1 week before")
+    ]
+    
     init(
         item: Item,
         stores: [Store],
         listCategories: [CategoryDef],
         listType: String = "grocery",
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -78,6 +88,7 @@ struct EditItemSheet: View {
         _selectedRsvpStatus = State(initialValue: item.rsvpStatus)
         _selectedDueDate = State(initialValue: item.dueDate)
         _hasDueDate = State(initialValue: item.dueDate != nil)
+        _selectedReminderDays = State(initialValue: item.reminderDaysBefore)
         
         // Initialize recurrence state from existing rule
         if let rule = item.recurrenceRule {
@@ -199,6 +210,7 @@ struct EditItemSheet: View {
                                 } else if !newValue {
                                     selectedDueDate = nil
                                     selectedRecurrenceType = "none"
+                                    selectedReminderDays = nil
                                 }
                             }
                         if hasDueDate {
@@ -258,6 +270,17 @@ struct EditItemSheet: View {
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+                
+                // Reminder — conditional (shown only when due date is set and reminder is supported)
+                if typeConfig.fields.dueDate && typeConfig.fields.reminder && hasDueDate {
+                    Section("Reminder") {
+                        Picker("Remind me", selection: $selectedReminderDays) {
+                            ForEach(reminderOptions, id: \.0) { option in
+                                Text(option.1).tag(option.0)
                             }
                         }
                     }
@@ -334,7 +357,8 @@ struct EditItemSheet: View {
                         let clearStoreId = item.storeId != nil && selectedStoreId == nil
                         let clearRsvp = item.rsvpStatus != nil && selectedRsvpStatus == nil
                         let recurrenceRule = buildRecurrenceRule()
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule)
+                        let reminderDays = hasDueDate ? selectedReminderDays : nil
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule, reminderDays)
                         dismiss()
                     }
                     .disabled(isSaveDisabled)

@@ -317,7 +317,16 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
   };
 
   const handleClearDueDate = () => {
-    onUpdateItem(item.id, { dueDate: null, recurrenceRule: null });
+    onUpdateItem(item.id, { dueDate: null, recurrenceRule: null, reminderDaysBefore: null });
+  };
+
+  const handleReminderChange = (e) => {
+    const value = e.target.value;
+    if (value === '') {
+      onUpdateItem(item.id, { reminderDaysBefore: null });
+    } else {
+      onUpdateItem(item.id, { reminderDaysBefore: parseInt(value, 10) });
+    }
   };
 
   // Swipe gesture handlers (mobile only)
@@ -771,6 +780,23 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
               )}
             </>
           )}
+          {fields.dueDate && fields.reminder && item.dueDate && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Reminder</span>
+              <select
+                className={styles.recurrenceSelect}
+                value={item.reminderDaysBefore ?? ''}
+                onChange={handleReminderChange}
+              >
+                <option value="">No reminder</option>
+                <option value="0">Same day</option>
+                <option value="1">1 day before</option>
+                <option value="2">2 days before</option>
+                <option value="3">3 days before</option>
+                <option value="7">1 week before</option>
+              </select>
+            </div>
+          )}
           {(item.recurrenceRule || item.parentItemId) && (
             <div className={styles.editRow}>
               <button
@@ -858,6 +884,7 @@ ShoppingItem.propTypes = {
       daysOfWeek: PropTypes.arrayOf(PropTypes.number),
     }),
     parentItemId: PropTypes.string,
+    reminderDaysBefore: PropTypes.number,
   }).isRequired,
   stores: PropTypes.array,
   listType: PropTypes.string,
