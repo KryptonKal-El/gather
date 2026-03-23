@@ -1,7 +1,7 @@
 {
   "project": "Gather",
   "branchName": "feature/spoonacular-product-search",
-  "description": "Add Spoonacular grocery product search to the search-products edge function and merge results from all three primary sources (Walmart, Spoonacular, Open Food Facts) into a single combined response, with SerpAPI as a sequential last-resort fallback.",
+  "description": "Add Spoonacular grocery product search to the search-products edge function, merge results from all three primary sources (Walmart, Spoonacular, Open Food Facts) into a single uncapped response, bump the per-source request count from 8 to 25, and update both clients to match. SerpAPI remains a sequential last-resort fallback.",
   "credentialRequirements": [],
   "userStories": [
     {
@@ -38,14 +38,17 @@
       "title": "Merge Results from All Three Sources",
       "description": "As a user, I want to see product images from Walmart, Spoonacular, and Open Food Facts combined into one set of results, so I have more options to choose from when picking an image for my item.",
       "acceptanceCriteria": [
-        "Walmart, Spoonacular, and Open Food Facts run in parallel via 3-way Promise.all",
+        "Edge function num query param default changes from '8' to '25' (each source is asked for up to num items)",
+        "Walmart, Spoonacular, and Open Food Facts run in parallel via 3-way Promise.all, each requesting num items",
         "Results from all three sources are concatenated into a single results array (Walmart first, then Spoonacular, then Open Food Facts)",
         "Duplicate images are removed (deduplicate by thumbnail URL)",
-        "The combined array is capped at numItems total results (requested count, default 8)",
+        "No cap on the merged results — all deduplicated results are returned to the client",
         "Response source is 'merged' when results came from multiple sources, or the single source name if only one returned results",
         "SerpAPI is called sequentially only if all three parallel sources returned empty — its results are NOT merged",
         "If SerpAPI is used, source is 'serpapi'",
-        "No increase in latency compared to current behavior (all three already ran, just Walmart + OFF — now adding Spoonacular to the same parallel batch)",
+        "React web client default count updated from 8 to 25 in searchImages() (src/services/imageSearch.js)",
+        "Swift iOS client default count updated from 8 to 25 in ProductSearchService.searchProducts() (ProductSearchService.swift)",
+        "No increase in latency compared to current behavior (all three sources already ran in parallel — now adding Spoonacular to the same batch)",
         "Edge function deploys successfully"
       ],
       "priority": 2,

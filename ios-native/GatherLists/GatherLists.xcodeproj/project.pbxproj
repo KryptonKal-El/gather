@@ -18,6 +18,10 @@
 		WIDGETSHAREDDATA000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
 		WIDGETSTORE0000000000002 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
 		WIDGETEXTENSION0000000002 /* GatherListsWidgetsExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTINTENT00000001 /* SelectListIntent.swift */; };
+		LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */; };
+		LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */; };
+		WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
@@ -240,6 +244,10 @@
 		WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderWidget.swift; sourceTree = "<group>"; };
 		WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataProvider.swift; sourceTree = "<group>"; };
 		WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GatherListsWidgets.entitlements; sourceTree = "<group>"; };
+		SELECTLISTINTENT00000001 /* SelectListIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListIntent.swift; sourceTree = "<group>"; };
+		LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewWidget.swift; sourceTree = "<group>"; };
+		LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewSmall.swift; sourceTree = "<group>"; };
+		WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -491,9 +499,29 @@
 				WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */,
 				WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */,
 				WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */,
+				WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */,
 				WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */,
+				WIDGETINTENTSGROUP000001 /* Intents */,
+				WIDGETLISTQVGROUP0000001 /* ListQuickView */,
 			);
 			path = GatherListsWidgets;
+			sourceTree = "<group>";
+		};
+		WIDGETINTENTSGROUP000001 /* Intents */ = {
+			isa = PBXGroup;
+			children = (
+				SELECTLISTINTENT00000001 /* SelectListIntent.swift */,
+			);
+			path = Intents;
+			sourceTree = "<group>";
+		};
+		WIDGETLISTQVGROUP0000001 /* ListQuickView */ = {
+			isa = PBXGroup;
+			children = (
+				LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */,
+				LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */,
+			);
+			path = ListQuickView;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -727,6 +755,10 @@
 				WIDGETSHAREDDEF0000000002 /* SharedDefaults.swift in Sources */,
 				WIDGETSHAREDDATA000000002 /* SharedDataStore.swift in Sources */,
 				WIDGETSTORE0000000000002 /* Store.swift in Sources */,
+				SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */,
+				LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */,
+				LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */,
+				WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
