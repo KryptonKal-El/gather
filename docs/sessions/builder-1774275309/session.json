@@ -9,11 +9,11 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-011",
+  "currentChunk": "US-012",
   "currentAction": {
-    "description": "US-010 committed, advancing to US-011",
-    "lastAction": "Commit US-010",
-    "updatedAt": "2026-03-23T15:11:58Z"
+    "description": "US-011 committed, advancing to US-012",
+    "lastAction": "Commit US-011",
+    "updatedAt": "2026-03-23T15:19:21Z"
   },
   "chunks": [
     {
@@ -80,7 +80,8 @@
     {
       "id": "US-011",
       "title": "Reminder notification cron job",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T15:19:21Z"
     },
     {
       "id": "US-012",
