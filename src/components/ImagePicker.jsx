@@ -1,6 +1,7 @@
 /**
  * ImagePicker — modal for selecting an item image via upload or web search.
- * The search query is independent of the item name and can be freely edited.
+ * When an image exists, shows view-only mode (large preview + remove).
+ * When no image exists (or after removal), shows full picker with search/upload tabs.
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
@@ -22,6 +23,7 @@ import styles from './ImagePicker.module.css';
  * @param {string|null} props.uploadError - Error message from failed upload
  */
 export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose, isUploading, uploadError }) => {
+  const [viewMode, setViewMode] = useState(!!currentImageUrl);
   const [searchQuery, setSearchQuery] = useState(itemName);
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -50,11 +52,19 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
   }, [searchQuery]);
 
   useEffect(() => {
+    if (viewMode) return;
     if (!didAutoSearch.current && searchQuery.trim()) {
       didAutoSearch.current = true;
       handleSearch();
     }
-  }, [handleSearch, searchQuery]);
+  }, [handleSearch, searchQuery, viewMode]);
+
+  const handleRemove = async () => {
+    await onRemove();
+    setViewMode(false);
+    setActiveTab('search');
+    handleSearch();
+  };
 
   const handleSearchKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -95,100 +105,102 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
           </button>
         </div>
 
-        {currentImageUrl && (
+        {viewMode && currentImageUrl ? (
           <div className={styles.currentImage}>
             <img src={currentImageUrl} alt="Current item" className={styles.preview} />
-            <button type="button" className={styles.removeBtn} onClick={onRemove}>
+            <button type="button" className={styles.removeBtn} onClick={handleRemove}>
               Remove image
             </button>
           </div>
-        )}
-
-        <div className={styles.tabs}>
-          <button
-            type="button"
-            className={`${styles.tab} ${activeTab === 'search' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('search')}
-          >
-            Search online
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${activeTab === 'upload' ? styles.tabActive : ''}`}
-            onClick={() => setActiveTab('upload')}
-          >
-            Upload
-          </button>
-        </div>
-
-        {activeTab === 'search' && (
-          <div className={styles.searchPane}>
-            <div className={styles.searchRow}>
-              <input
-                className={styles.searchInput}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-                placeholder="Search for images..."
-                aria-label="Image search query"
-              />
+        ) : (
+          <>
+            <div className={styles.tabs}>
               <button
                 type="button"
-                className={styles.searchBtn}
-                onClick={handleSearch}
-                disabled={isSearching || !searchQuery.trim()}
+                className={`${styles.tab} ${activeTab === 'search' ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab('search')}
               >
-                {isSearching ? 'Searching...' : 'Search'}
+                Search online
+              </button>
+              <button
+                type="button"
+                className={`${styles.tab} ${activeTab === 'upload' ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab('upload')}
+              >
+                Upload
               </button>
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {activeTab === 'search' && (
+              <div className={styles.searchPane}>
+                <div className={styles.searchRow}>
+                  <input
+                    className={styles.searchInput}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    placeholder="Search for images..."
+                    aria-label="Image search query"
+                  />
+                  <button
+                    type="button"
+                    className={styles.searchBtn}
+                    onClick={handleSearch}
+                    disabled={isSearching || !searchQuery.trim()}
+                  >
+                    {isSearching ? 'Searching...' : 'Search'}
+                  </button>
+                </div>
 
-            {results.length > 0 && (
-              <div className={styles.grid}>
-                {results.map((img, index) => (
-                  <div key={`${img.url}-${index}`} className={styles.gridCell}>
-                    <button
-                      type="button"
-                      className={styles.gridItem}
-                      onClick={() => onSelectUrl(img.thumbnail)}
-                      title={img.title}
-                    >
-                      <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />
-                    </button>
+                {error && <p className={styles.error}>{error}</p>}
+
+                {results.length > 0 && (
+                  <div className={styles.grid}>
+                    {results.map((img, index) => (
+                      <div key={`${img.url}-${index}`} className={styles.gridCell}>
+                        <button
+                          type="button"
+                          className={styles.gridItem}
+                          onClick={() => onSelectUrl(img.thumbnail)}
+                          title={img.title}
+                        >
+                          <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
+
+                {hasSearched && results.length === 0 && !isSearching && !error && (
+                  <p className={styles.noResults}>No images found. Try a different search term.</p>
+                )}
               </div>
             )}
 
-            {hasSearched && results.length === 0 && !isSearching && !error && (
-              <p className={styles.noResults}>No images found. Try a different search term.</p>
+            {activeTab === 'upload' && (
+              <div className={styles.uploadPane}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className={styles.fileInput}
+                  disabled={isUploading}
+                />
+                <button
+                  type="button"
+                  className={styles.uploadBtn}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  {isUploading ? 'Uploading...' : 'Choose an image file'}
+                </button>
+                {uploadError && <p className={styles.error}>{uploadError}</p>}
+                <p className={styles.uploadHint}>Supports JPG, PNG, GIF, WebP</p>
+              </div>
             )}
-          </div>
-        )}
-
-        {activeTab === 'upload' && (
-          <div className={styles.uploadPane}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className={styles.fileInput}
-              disabled={isUploading}
-            />
-            <button
-              type="button"
-              className={styles.uploadBtn}
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-            >
-              {isUploading ? 'Uploading...' : 'Choose an image file'}
-            </button>
-            {uploadError && <p className={styles.error}>{uploadError}</p>}
-            <p className={styles.uploadHint}>Supports JPG, PNG, GIF, WebP</p>
-          </div>
+          </>
         )}
       </div>
     </div>,

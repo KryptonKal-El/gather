@@ -582,12 +582,14 @@
     {
       "id": "prd-image-viewer-simplification",
       "name": "Image Viewer Simplification",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-image-viewer-simplification.md",
       "jsonPath": "docs/prds/prd-image-viewer-simplification.json",
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-23",
-      "estimatedStories": 6
+      "estimatedStories": 6,
+      "currentStory": "US-001",
+      "storiesCompleted": 0
     }
   ]
 }
