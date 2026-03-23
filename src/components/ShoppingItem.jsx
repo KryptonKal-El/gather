@@ -498,12 +498,16 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
                 {allLabels[item.category] ?? 'Other'}
               </span>
             )}
-            {fields.dueDate && item.dueDate && (
-              <span className={styles.dueDateLabel}>
-                {item.recurrenceRule && <span className={styles.repeatIcon}>↻</span>}
-                Due {formatDueDateLabel(item.dueDate)}
-              </span>
-            )}
+            {fields.dueDate && item.dueDate && (() => {
+              const isOverdue = !item.isChecked &&
+                new Date(item.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
+              return (
+                <span className={`${styles.dueDateLabel} ${isOverdue ? styles.overdue : ''}`}>
+                  {item.recurrenceRule && <span className={styles.repeatIcon}>↻</span>}
+                  Due {formatDueDateLabel(item.dueDate)}
+                </span>
+              );
+            })()}
             {fields.rsvpStatus && (
               <div className={styles.rsvpPickerWrapper}>
                 <select

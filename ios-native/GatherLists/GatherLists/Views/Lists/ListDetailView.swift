@@ -692,6 +692,8 @@ struct ListDetailView: View {
                 }
                 
                 if detailViewModel?.typeConfig.fields.dueDate == true, let dueDate = item.dueDate {
+                    let isOverdue = !isChecked &&
+                        Calendar.current.startOfDay(for: dueDate) < Calendar.current.startOfDay(for: Date())
                     HStack(spacing: 2) {
                         if item.recurrenceRule != nil {
                             Text("↻")
@@ -700,7 +702,7 @@ struct ListDetailView: View {
                         Text("Due \(formatDueDateLabel(dueDate))")
                             .font(.caption)
                     }
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(isOverdue ? .red : .secondary)
                 }
                 
                 Spacer()

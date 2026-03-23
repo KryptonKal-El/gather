@@ -138,6 +138,10 @@
   font-size: 0.75rem;
 }
 
+.overdue {
+  color: #e74c3c;
+}
+
 .rsvpPickerWrapper {
   flex-shrink: 0;
 }

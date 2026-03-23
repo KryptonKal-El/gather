@@ -279,8 +279,8 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Overdue items show red due date label. Unchecked only, strictly past dates only, text color change only.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -291,7 +291,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T15:09:16Z"
     },
     {
       "id": "US-010",

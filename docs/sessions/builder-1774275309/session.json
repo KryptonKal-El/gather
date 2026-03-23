@@ -9,11 +9,11 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-009",
+  "currentChunk": "US-010",
   "currentAction": {
-    "description": "US-008 committed, advancing to US-009",
-    "lastAction": "Commit US-008",
-    "updatedAt": "2026-03-23T15:07:01Z"
+    "description": "US-009 committed, advancing to US-010",
+    "lastAction": "Commit US-009",
+    "updatedAt": "2026-03-23T15:09:16Z"
   },
   "chunks": [
     {
@@ -68,7 +68,8 @@
     {
       "id": "US-009",
       "title": "Overdue visual indicator",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T15:09:16Z"
     },
     {
       "id": "US-010",
