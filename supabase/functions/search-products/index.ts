@@ -184,6 +184,15 @@ async function searchOpenFoodFacts(query: string, numItems: string): Promise<Pro
   }
 }
 
+/**
+ * Spoonacular Grocery Product Search.
+ * Images are served directly from Spoonacular's CDN (img.spoonacular.com) — no proxying/rehosting.
+ * ToS (https://spoonacular.com/food-api/terms) key points:
+ * - Client-side caching allowed up to 1 hour (we cache 5 min — compliant)
+ * - Must credit original source for recipes; no specific product image attribution required
+ * - Cannot scrape/store data beyond caching; images referenced by URL only
+ * - Source field in response identifies Spoonacular's contribution ('spoonacular' or 'merged')
+ */
 async function searchSpoonacularProducts(query: string, numItems: string): Promise<ProductResult[]> {
   const apiKey = Deno.env.get('SPOONACULAR_API_KEY') ?? '';
 

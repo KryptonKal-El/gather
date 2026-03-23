@@ -80,7 +80,7 @@
         "Review Spoonacular ToS for product search API image usage requirements (note any attribution needs in a code comment)"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -92,7 +92,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T20:10:00Z"
     }
   ]
 }
