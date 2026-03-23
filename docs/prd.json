@@ -372,8 +372,8 @@
         "Migration runs successfully (if any additional changes needed beyond US-011)"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "No code change needed. US-003 trigger already sets reminder_sent_at=NULL on new instances and preserves parent value. Verified by code inspection.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -384,7 +384,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T15:20:35Z"
     },
     {
       "id": "US-013",
