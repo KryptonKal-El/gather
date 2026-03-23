@@ -7,5 +7,8 @@ struct GatherListsWidgetsBundle: WidgetBundle {
         PlaceholderWidget()
         ListQuickViewWidget()
         DueItemsWidget()
+        QuickAddWidget()
+        ItemCountLockScreenWidget()
+        NextDueLockScreenWidget()
     }
 }

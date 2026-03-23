@@ -24,6 +24,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>gather</string>
+				<string>gatherlists</string>
 			</array>
 		</dict>
 	</array>

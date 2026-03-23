@@ -556,17 +556,18 @@
     {
       "id": "prd-ios-widgets",
       "name": "iOS Home Screen & Lock Screen Widgets",
-      "status": "in_progress",
+      "status": "completed",
       "filePath": "docs/prds/prd-ios-widgets.md",
       "jsonPath": "docs/prds/prd-ios-widgets.json",
       "createdAt": "2026-03-23",
-      "updatedAt": "2026-03-23",
+      "updatedAt": "2026-03-24",
       "estimatedStories": 18,
       "dependsOn": [
         "prd-recurring-items"
       ],
-      "currentStory": "US-009",
-      "storiesCompleted": 8
+      "currentStory": null,
+      "storiesCompleted": 18,
+      "completedAt": "2026-03-24T00:20:00Z"
     },
     {
       "id": "prd-spoonacular-product-search",
@@ -577,6 +578,16 @@
       "createdAt": "2026-03-23",
       "updatedAt": "2026-03-23",
       "estimatedStories": 3
+    },
+    {
+      "id": "prd-image-viewer-simplification",
+      "name": "Image Viewer Simplification",
+      "status": "ready",
+      "filePath": "docs/prds/prd-image-viewer-simplification.md",
+      "jsonPath": "docs/prds/prd-image-viewer-simplification.json",
+      "createdAt": "2026-03-23",
+      "updatedAt": "2026-03-23",
+      "estimatedStories": 6
     }
   ]
 }

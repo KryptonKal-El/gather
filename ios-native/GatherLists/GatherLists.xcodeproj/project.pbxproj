@@ -29,6 +29,14 @@
 		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
 		LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */; };
 		WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */; };
+		WIDGETSUPABASECLIENT0002 /* WidgetSupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */; };
+		ADDITEMINTENT0000000002 /* AddItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDITEMINTENT0000000001 /* AddItemIntent.swift */; };
+		QUICKADDWIDGET0000000002 /* QuickAddWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDWIDGET0000000001 /* QuickAddWidget.swift */; };
+		QUICKADDSMALL00000000002 /* QuickAddSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDSMALL00000000001 /* QuickAddSmall.swift */; };
+		QUICKADDMEDIUM0000000002 /* QuickAddMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDMEDIUM0000000001 /* QuickAddMedium.swift */; };
+		QUICKADDLARGE00000000002 /* QuickAddLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDLARGE00000000001 /* QuickAddLarge.swift */; };
+		ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */; };
+		NEXTDUELOCKSCREEN000002 /* NextDueLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
@@ -262,6 +270,14 @@
 		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewLarge.swift; sourceTree = "<group>"; };
 		WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorExtension.swift; sourceTree = "<group>"; };
+		WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSupabaseClient.swift; sourceTree = "<group>"; };
+		ADDITEMINTENT0000000001 /* AddItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemIntent.swift; sourceTree = "<group>"; };
+		QUICKADDWIDGET0000000001 /* QuickAddWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddWidget.swift; sourceTree = "<group>"; };
+		QUICKADDSMALL00000000001 /* QuickAddSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddSmall.swift; sourceTree = "<group>"; };
+		QUICKADDMEDIUM0000000001 /* QuickAddMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddMedium.swift; sourceTree = "<group>"; };
+		QUICKADDLARGE00000000001 /* QuickAddLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddLarge.swift; sourceTree = "<group>"; };
+		ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCountLockScreenWidget.swift; sourceTree = "<group>"; };
+		NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextDueLockScreenWidget.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -514,10 +530,13 @@
 				WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */,
 				WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */,
 				WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */,
+				WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */,
 				WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */,
 				WIDGETINTENTSGROUP000001 /* Intents */,
 				WIDGETLISTQVGROUP0000001 /* ListQuickView */,
 				WIDGETDUEITEMSGROUP00001 /* DueItems */,
+				WIDGETQUICKADDGROUP00001 /* QuickAdd */,
+				WIDGETLOCKSCREENGRP00001 /* LockScreen */,
 			);
 			path = GatherListsWidgets;
 			sourceTree = "<group>";
@@ -527,6 +546,7 @@
 			children = (
 				SELECTLISTINTENT00000001 /* SelectListIntent.swift */,
 				SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */,
+				ADDITEMINTENT0000000001 /* AddItemIntent.swift */,
 			);
 			path = Intents;
 			sourceTree = "<group>";
@@ -551,6 +571,26 @@
 				DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */,
 			);
 			path = DueItems;
+			sourceTree = "<group>";
+		};
+		WIDGETQUICKADDGROUP00001 /* QuickAdd */ = {
+			isa = PBXGroup;
+			children = (
+				QUICKADDWIDGET0000000001 /* QuickAddWidget.swift */,
+				QUICKADDSMALL00000000001 /* QuickAddSmall.swift */,
+				QUICKADDMEDIUM0000000001 /* QuickAddMedium.swift */,
+				QUICKADDLARGE00000000001 /* QuickAddLarge.swift */,
+			);
+			path = QuickAdd;
+			sourceTree = "<group>";
+		};
+		WIDGETLOCKSCREENGRP00001 /* LockScreen */ = {
+			isa = PBXGroup;
+			children = (
+				ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */,
+				NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */,
+			);
+			path = LockScreen;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -795,6 +835,14 @@
 				DUEITEMSSMALL00000000002 /* DueItemsSmall.swift in Sources */,
 				DUEITEMSMEDIUM0000000002 /* DueItemsMedium.swift in Sources */,
 				DUEITEMSLARGE00000000002 /* DueItemsLarge.swift in Sources */,
+				WIDGETSUPABASECLIENT0002 /* WidgetSupabaseClient.swift in Sources */,
+				ADDITEMINTENT0000000002 /* AddItemIntent.swift in Sources */,
+				QUICKADDWIDGET0000000002 /* QuickAddWidget.swift in Sources */,
+				QUICKADDSMALL00000000002 /* QuickAddSmall.swift in Sources */,
+				QUICKADDMEDIUM0000000002 /* QuickAddMedium.swift in Sources */,
+				QUICKADDLARGE00000000002 /* QuickAddLarge.swift in Sources */,
+				ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */,
+				NEXTDUELOCKSCREEN000002 /* NextDueLockScreenWidget.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

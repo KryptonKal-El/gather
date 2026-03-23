@@ -1,0 +1,23 @@
+# iOS Widgets Progress
+
+## Codebase Patterns
+
+- **Widget data sharing:** Main app writes to `SharedDataStore` (App Group container), widgets read via `WidgetDataProvider`
+- **Auth in widgets:** `SharedDefaults` stores Supabase URL, anon key, and auth tokens; `WidgetSupabaseClient` uses REST API (not full SDK) to keep binary small
+- **Widget refresh:** Call `WidgetCenter.shared.reloadAllTimelines()` after any SharedDataStore write
+- **Deep links:** Use `gatherlists://list/{listId}` for widget tap navigation; handled in `GatherListsApp.onOpenURL`
+- **Lock screen widgets:** Use `.accessoryCircular` and `.accessoryRectangular` families with `.containerBackground(.fill.tertiary, for: .widget)`
+- **Configuration intents:** `SelectListIntent` for single-list widgets, `SelectListOrAllIntent` for due items (supports "All Lists" option)
+
+---
+
+## 2026-03-24 - US-016, US-018 Completion
+- Added `import WidgetKit` and `WidgetCenter.shared.reloadAllTimelines()` to:
+  - `ListViewModel.swift` — after `SharedDataStore.shared.saveLists()` in `rebuildAllLists()`
+  - `ListDetailViewModel.swift` — after `SharedDataStore.shared.saveItems()` in `loadData()` and `refetchItems()`
+  - `SupabaseManager.swift` — on `signedOut` event after clearing data
+- Verified `GatherListsWidgetsBundle.swift` registers all 6 widgets
+- Build succeeds
+- **All 18 user stories now pass**
+
+---

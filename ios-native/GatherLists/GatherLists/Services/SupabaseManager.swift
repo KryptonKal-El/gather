@@ -1,5 +1,6 @@
 import Foundation
 import Supabase
+import WidgetKit
 
 /// Singleton manager that initializes and provides access to the Supabase client.
 @MainActor
@@ -25,6 +26,9 @@ final class SupabaseManager {
         self.anonKey = anonKey
         client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
         
+        // Store Supabase config in shared container for widget access
+        SharedDefaults.saveSupabaseConfig(url: urlString, anonKey: anonKey)
+        
         startAuthSessionSync()
     }
     
@@ -44,6 +48,7 @@ final class SupabaseManager {
                 case .signedOut:
                     SharedDefaults.clearAuthSession()
                     Task { await SharedDataStore.shared.clearAll() }
+                    WidgetCenter.shared.reloadAllTimelines()
                 default:
                     break
                 }

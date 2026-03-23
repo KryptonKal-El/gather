@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import Supabase
 import Realtime
+import WidgetKit
 
 /// Manages item list state with realtime subscriptions for items, stores, and history.
 @Observable
@@ -147,6 +148,7 @@ final class ListDetailViewModel {
             
             // Sync items to shared container for widget access
             await SharedDataStore.shared.saveItems(itemsResult, for: listId)
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !items.isEmpty
@@ -249,6 +251,7 @@ final class ListDetailViewModel {
             
             // Sync to shared container for widget access
             await SharedDataStore.shared.saveItems(items, for: listId)
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch items: \(error.localizedDescription)")

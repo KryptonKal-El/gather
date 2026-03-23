@@ -2,6 +2,7 @@ import Foundation
 import Observation
 import Supabase
 import Realtime
+import WidgetKit
 
 /// Manages list state with realtime subscriptions for owned and shared lists.
 @Observable
@@ -76,7 +77,10 @@ final class ListViewModel {
         allLists = sorted
         
         // Sync to shared container for widget access
-        Task { await SharedDataStore.shared.saveLists(sorted) }
+        Task {
+            await SharedDataStore.shared.saveLists(sorted)
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
     
     /// Saves the current allLists order to UserDefaults.

@@ -15,6 +15,11 @@ struct SharedDefaults {
     private static let refreshTokenKey = "auth_refresh_token"
     private static let userIdKey = "auth_user_id"
     
+    // MARK: - Supabase Config Keys
+    
+    private static let supabaseUrlKey = "supabase_url"
+    private static let supabaseAnonKeyKey = "supabase_anon_key"
+    
     // MARK: - Auth Token Methods
     
     static func saveAuthSession(accessToken: String, refreshToken: String, userId: String) {
@@ -39,6 +44,21 @@ struct SharedDefaults {
         defaults?.removeObject(forKey: accessTokenKey)
         defaults?.removeObject(forKey: refreshTokenKey)
         defaults?.removeObject(forKey: userIdKey)
+    }
+    
+    // MARK: - Supabase Config Methods
+    
+    static func saveSupabaseConfig(url: String, anonKey: String) {
+        defaults?.set(url, forKey: supabaseUrlKey)
+        defaults?.set(anonKey, forKey: supabaseAnonKeyKey)
+    }
+    
+    static func getSupabaseUrl() -> String? {
+        defaults?.string(forKey: supabaseUrlKey)
+    }
+    
+    static func getSupabaseAnonKey() -> String? {
+        defaults?.string(forKey: supabaseAnonKeyKey)
     }
     
     // MARK: - Generic Accessors
