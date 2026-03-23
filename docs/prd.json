@@ -124,8 +124,10 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added fetchCompletionHistory to database.js and ItemService.swift. React: expandable history section in edit panel. Swift: CompletionHistorySheet presented from EditItemSheet.",
+      "status": "completed",
+      "completedAt": "2026-03-23T16:30:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

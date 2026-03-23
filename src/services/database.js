@@ -424,6 +424,7 @@ export const subscribeItems = (userId, listId, callback) => {
       callback(
         data.map((row) => ({
           id: row.id,
+          listId: row.list_id,
           name: row.name,
           category: row.category,
           isChecked: row.is_checked,
@@ -1113,6 +1114,34 @@ const mapUserCategoryDefaults = (rows) =>
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }));
+
+/**
+ * Fetches completion history for a recurring item.
+ * Returns past checked-off instances in the same list with the same name.
+ * @param {string} listId - The list ID
+ * @param {string} itemName - The item name to match
+ * @returns {Promise<Array<{id: string, name: string, dueDate: string|null, checkedAt: string|null}>>} Sorted by checkedAt desc
+ */
+export const fetchCompletionHistory = async (listId, itemName) => {
+  const { data, error } = await supabase
+    .from('items')
+    .select('id, name, due_date, checked_at')
+    .eq('list_id', listId)
+    .eq('name', itemName)
+    .eq('is_checked', true)
+    .not('checked_at', 'is', null)
+    .order('checked_at', { ascending: false })
+    .limit(50);
+
+  if (error) throw new Error(`Failed to fetch completion history: listId=${listId}, name=${itemName}`, { cause: error });
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    dueDate: row.due_date,
+    checkedAt: row.checked_at,
+  }));
+};
 
 /**
  * Subscribes to user category defaults for all list types.

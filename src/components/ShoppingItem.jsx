@@ -5,6 +5,7 @@ import { getTypeConfig } from '../utils/listTypes.js';
 import { formatPrice, getCurrencySymbol } from '../utils/formatPrice.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
+import { fetchCompletionHistory } from '../services/database.js';
 import { ImagePicker } from './ImagePicker.jsx';
 import { ITEM_UNITS } from '../constants/units.js';
 import styles from './ShoppingItem.module.css';
@@ -38,6 +39,9 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const categoryPickerRef = useRef(null);
   const storePickerRef = useRef(null);
   const priceInputRef = useRef(null);
@@ -225,6 +229,23 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
   const handleRemoveImage = () => {
     onUpdateItem(item.id, { imageUrl: null });
     setIsImagePickerOpen(false);
+  };
+
+  const handleShowHistory = async () => {
+    if (showHistory) {
+      setShowHistory(false);
+      return;
+    }
+    setHistoryLoading(true);
+    try {
+      const history = await fetchCompletionHistory(item.listId, item.name);
+      setHistoryItems(history);
+      setShowHistory(true);
+    } catch (err) {
+      console.error('Failed to fetch completion history:', err);
+    } finally {
+      setHistoryLoading(false);
+    }
   };
 
   // Swipe gesture handlers (mobile only)
@@ -588,6 +609,40 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
               </select>
             </div>
           )}
+          {(item.recurrenceRule || item.parentItemId) && (
+            <div className={styles.editRow}>
+              <button
+                className={styles.historyToggle}
+                onClick={handleShowHistory}
+                type="button"
+              >
+                <span className={styles.editLabel}>Completion History</span>
+                <span className={styles.historyChevron}>{showHistory ? '▼' : '▶'}</span>
+              </button>
+            </div>
+          )}
+          {(item.recurrenceRule || item.parentItemId) && historyLoading && (
+            <div className={styles.historyLoading}>Loading...</div>
+          )}
+          {(item.recurrenceRule || item.parentItemId) && showHistory && !historyLoading && (
+            <div className={styles.historyList}>
+              {historyItems.length === 0 ? (
+                <p className={styles.historyEmpty}>No completions yet</p>
+              ) : (
+                historyItems.map((h) => (
+                  <div key={h.id} className={styles.historyEntry}>
+                    <span className={styles.historyCheck}>✓</span>
+                    <span className={styles.historyDate}>
+                      {h.dueDate ? new Date(h.dueDate).toLocaleDateString() : '—'}
+                    </span>
+                    <span className={styles.historyTime}>
+                      {h.checkedAt ? new Date(h.checkedAt).toLocaleDateString() : '—'}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
           <div className={styles.editFooter}>
             <button
               type="button"
@@ -632,6 +687,9 @@ ShoppingItem.propTypes = {
     imageUrl: PropTypes.string,
     unit: PropTypes.string,
     rsvpStatus: PropTypes.string,
+    listId: PropTypes.string,
+    recurrenceRule: PropTypes.string,
+    parentItemId: PropTypes.string,
   }).isRequired,
   stores: PropTypes.array,
   listType: PropTypes.string,

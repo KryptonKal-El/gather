@@ -17,6 +17,7 @@ struct EditItemSheet: View {
     @State private var selectedCategory: String?
     @State private var selectedUnit: String
     @State private var selectedRsvpStatus: String?
+    @State private var showingHistory = false
     
     private var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
     
@@ -166,6 +167,17 @@ struct EditItemSheet: View {
                         }
                     }
                 }
+                
+                // Completion History — shown when item has recurrence or parent
+                if item.recurrenceRule != nil || item.parentItemId != nil {
+                    Section {
+                        Button {
+                            showingHistory = true
+                        } label: {
+                            Label("Completion History", systemImage: "clock.arrow.circlepath")
+                        }
+                    }
+                }
             }
             .navigationTitle("Edit Item")
             .navigationBarTitleDisplayMode(.inline)
@@ -186,6 +198,9 @@ struct EditItemSheet: View {
                     }
                     .disabled(isSaveDisabled)
                 }
+            }
+            .sheet(isPresented: $showingHistory) {
+                CompletionHistorySheet(listId: item.listId, itemName: item.name)
             }
         }
     }

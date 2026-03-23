@@ -202,6 +202,23 @@ struct ItemService {
         return restored
     }
     
+    /// Fetches completion history for a recurring item.
+    /// Returns past checked-off instances in the same list with the same name.
+    static func fetchCompletionHistory(listId: UUID, itemName: String) async throws -> [Item] {
+        let response: [Item] = try await client
+            .from("items")
+            .select()
+            .eq("list_id", value: listId.uuidString)
+            .eq("name", value: itemName)
+            .eq("is_checked", value: true)
+            .not("checked_at", operator: .is, value: "null")
+            .order("checked_at", ascending: false)
+            .limit(50)
+            .execute()
+            .value
+        return response
+    }
+    
     /// Batch inserts new items and updates quantities for duplicates from a preview.
     static func applyIngredientPreview(
         listId: UUID,
