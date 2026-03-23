@@ -536,6 +536,22 @@
       "currentStory": null,
       "storiesCompleted": 7,
       "completedAt": "2026-03-20T15:50:00Z"
+    },
+    {
+      "id": "prd-recurring-items",
+      "name": "Recurring Items & Reminders",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-recurring-items.md",
+      "jsonPath": "docs/prds/prd-recurring-items.json",
+      "createdAt": "2026-03-23",
+      "updatedAt": "2026-03-23",
+      "estimatedStories": 13,
+      "dependsOn": [
+        "prd-ios-notifications"
+      ],
+      "startedAt": "2026-03-23T14:14:55Z",
+      "currentStory": "US-013",
+      "storiesCompleted": 1
     }
   ]
 }

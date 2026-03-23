@@ -7,9 +7,7 @@
       "service": "Apple APNs",
       "credentialType": "authKey",
       "requestTiming": "upfront",
-      "requiredForStories": [
-        "US-011"
-      ],
+      "requiredForStories": ["US-011"],
       "fallbackPlan": "Same key as prd-ios-notifications. All stories except US-011 can proceed without it. Build/test the cron logic locally without actual APNs delivery.",
       "status": "pending"
     }
@@ -32,8 +30,8 @@
         "Migration runs successfully"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Migration adds 6 columns (due_date, recurrence_rule, reminder_days_before, checked_at, parent_item_id, reminder_sent_at) and 2 indexes",
+      "passes": false,
+      "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -44,9 +42,7 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [],
-      "status": "completed",
-      "completedAt": "2026-03-23T10:05:00Z"
+      "requiredCredentials": []
     },
     {
       "id": "US-002",
@@ -337,9 +333,7 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": [
-        "Apple APNs"
-      ]
+      "requiredCredentials": ["Apple APNs"]
     },
     {
       "id": "US-012",

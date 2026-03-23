@@ -1,0 +1,82 @@
+{
+  "id": "builder-1774275309",
+  "mode": "prd",
+  "source": {
+    "prdId": "prd-recurring-items"
+  },
+  "branch": "main",
+  "analysisCompleted": true,
+  "probeStatus": "confirmed",
+  "status": "in_progress",
+  "startedAt": "2026-03-23T14:15:09Z",
+  "currentChunk": "US-001",
+  "currentAction": null,
+  "chunks": [
+    {
+      "id": "US-001",
+      "title": "Database migration — recurrence and due date columns",
+      "status": "pending"
+    },
+    {
+      "id": "US-002",
+      "title": "Recurrence rule engine — next occurrence calculation",
+      "status": "pending"
+    },
+    {
+      "id": "US-003",
+      "title": "Auto-generate next occurrence on check-off",
+      "status": "pending"
+    },
+    {
+      "id": "US-004",
+      "title": "Completion history view",
+      "status": "pending"
+    },
+    {
+      "id": "US-005",
+      "title": "Due date field in edit item forms",
+      "status": "pending"
+    },
+    {
+      "id": "US-006",
+      "title": "Recurrence rule field in edit item forms",
+      "status": "pending"
+    },
+    {
+      "id": "US-007",
+      "title": "Reminder setting field in edit item forms",
+      "status": "pending"
+    },
+    {
+      "id": "US-008",
+      "title": "Due date display on item rows",
+      "status": "pending"
+    },
+    {
+      "id": "US-009",
+      "title": "Overdue visual indicator",
+      "status": "pending"
+    },
+    {
+      "id": "US-010",
+      "title": "Due Date sort level",
+      "status": "pending"
+    },
+    {
+      "id": "US-011",
+      "title": "Reminder notification cron job",
+      "status": "pending"
+    },
+    {
+      "id": "US-012",
+      "title": "Reset reminder on new recurrence instance",
+      "status": "pending"
+    },
+    {
+      "id": "US-013",
+      "title": "Item model updates (React and Swift)",
+      "status": "pending"
+    }
+  ],
+  "decisions": []
+}
