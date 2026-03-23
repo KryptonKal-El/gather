@@ -9,13 +9,20 @@
   "probeStatus": "confirmed",
   "status": "in_progress",
   "startedAt": "2026-03-23T14:15:09Z",
-  "currentChunk": "US-001",
-  "currentAction": null,
+  "currentChunk": "US-002",
+  "currentAction": {
+    "description": "Completed US-013, advancing to US-002",
+    "contextAnchor": "recurrence engine",
+    "lastAction": "Committed US-013",
+    "updatedAt": "2026-03-23T16:05:00Z"
+  },
   "chunks": [
     {
       "id": "US-001",
       "title": "Database migration — recurrence and due date columns",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T10:05:00Z",
+      "commitHash": "6bdc9b5"
     },
     {
       "id": "US-002",
@@ -75,7 +82,8 @@
     {
       "id": "US-013",
       "title": "Item model updates (React and Swift)",
-      "status": "pending"
+      "status": "completed",
+      "committedAt": "2026-03-23T16:05:00Z"
     }
   ],
   "decisions": []

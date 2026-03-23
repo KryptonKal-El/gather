@@ -378,8 +378,10 @@
         "Build succeeds (both platforms)"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Added RecurrenceRule struct (Swift), 6 new optional fields to Item on both platforms, updated subscribeItems/addItem/addItems/updateItem in database.js",
+      "status": "completed",
+      "completedAt": "2026-03-23T16:05:00Z",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

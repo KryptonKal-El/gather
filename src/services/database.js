@@ -256,6 +256,12 @@ export const addItem = async (userId, listId, item) => {
         image_url: item.imageUrl ?? null,
         unit: item.unit ?? 'each',
         rsvp_status: item.rsvpStatus ?? null,
+        due_date: item.dueDate ?? null,
+        recurrence_rule: item.recurrenceRule ?? null,
+        reminder_days_before: item.reminderDaysBefore ?? null,
+        checked_at: item.checkedAt ?? null,
+        parent_item_id: item.parentItemId ?? null,
+        reminder_sent_at: item.reminderSentAt ?? null,
       })
       .select('id')
       .single();
@@ -288,6 +294,12 @@ export const addItems = async (userId, listId, items) => {
       image_url: item.imageUrl ?? null,
       unit: item.unit ?? 'each',
       rsvp_status: item.rsvpStatus ?? null,
+      due_date: item.dueDate ?? null,
+      recurrence_rule: item.recurrenceRule ?? null,
+      reminder_days_before: item.reminderDaysBefore ?? null,
+      checked_at: item.checkedAt ?? null,
+      parent_item_id: item.parentItemId ?? null,
+      reminder_sent_at: item.reminderSentAt ?? null,
     }));
 
     const { error } = await supabase.from('items').insert(rows);
@@ -323,6 +335,18 @@ export const updateItem = async (userId, listId, itemId, updates) => {
     if (updates.unit !== undefined) mapped.unit = updates.unit;
     if (updates.rsvpStatus !== undefined) mapped.rsvp_status = updates.rsvpStatus;
     if (updates.rsvp_status !== undefined) mapped.rsvp_status = updates.rsvp_status;
+    if (updates.dueDate !== undefined) mapped.due_date = updates.dueDate;
+    if (updates.due_date !== undefined) mapped.due_date = updates.due_date;
+    if (updates.recurrenceRule !== undefined) mapped.recurrence_rule = updates.recurrenceRule;
+    if (updates.recurrence_rule !== undefined) mapped.recurrence_rule = updates.recurrence_rule;
+    if (updates.reminderDaysBefore !== undefined) mapped.reminder_days_before = updates.reminderDaysBefore;
+    if (updates.reminder_days_before !== undefined) mapped.reminder_days_before = updates.reminder_days_before;
+    if (updates.checkedAt !== undefined) mapped.checked_at = updates.checkedAt;
+    if (updates.checked_at !== undefined) mapped.checked_at = updates.checked_at;
+    if (updates.parentItemId !== undefined) mapped.parent_item_id = updates.parentItemId;
+    if (updates.parent_item_id !== undefined) mapped.parent_item_id = updates.parent_item_id;
+    if (updates.reminderSentAt !== undefined) mapped.reminder_sent_at = updates.reminderSentAt;
+    if (updates.reminder_sent_at !== undefined) mapped.reminder_sent_at = updates.reminder_sent_at;
 
     const { error } = await supabase
       .from('items')
@@ -410,6 +434,12 @@ export const subscribeItems = (userId, listId, callback) => {
           unit: row.unit ?? 'each',
           addedAt: row.added_at,
           rsvpStatus: row.rsvp_status,
+          dueDate: row.due_date ?? null,
+          recurrenceRule: row.recurrence_rule ?? null,
+          reminderDaysBefore: row.reminder_days_before ?? null,
+          checkedAt: row.checked_at ?? null,
+          parentItemId: row.parent_item_id ?? null,
+          reminderSentAt: row.reminder_sent_at ?? null,
         }))
       );
     } catch (error) {
