@@ -162,10 +162,15 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
                         <button
                           type="button"
                           className={styles.gridItem}
-                          onClick={() => onSelectUrl(img.thumbnail)}
+                          onClick={() => onSelectUrl(img.url)}
                           title={img.title}
                         >
-                          <img src={img.thumbnail} alt={img.title} className={styles.gridImg} />
+                          <img
+                            src={img.thumbnail}
+                            alt={img.title}
+                            className={styles.gridImg}
+                            onError={(e) => { e.target.closest('.' + styles.gridCell)?.style.setProperty('display', 'none'); }}
+                          />
                         </button>
                       </div>
                     ))}
