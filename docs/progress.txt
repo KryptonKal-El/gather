@@ -8,6 +8,20 @@
 - **Deep links:** Use `gatherlists://list/{listId}` for widget tap navigation; handled in `GatherListsApp.onOpenURL`
 - **Lock screen widgets:** Use `.accessoryCircular` and `.accessoryRectangular` families with `.containerBackground(.fill.tertiary, for: .widget)`
 - **Configuration intents:** `SelectListIntent` for single-list widgets, `SelectListOrAllIntent` for due items (supports "All Lists" option)
+- **Image picker view mode:** Use `@State private var viewMode: Bool` initialized from `item.imageUrl` presence to toggle between view-only (large image + remove) and picker (tabs + search + upload) modes
+
+---
+
+## 2026-03-23 - US-004, US-005, US-006 (iOS Image Viewer Simplification)
+- Modified `ItemImagePickerSheet.swift` to implement view-only mode
+- Added `@State private var viewMode: Bool` initialized based on `item.imageUrl` presence
+- Added `@State private var shouldTriggerSearch: Bool` for triggering search after mode transition
+- Created `viewOnlyContent(imageUrl:)` — large AsyncImage (scaledToFit, full width) + Remove button
+- Created `pickerContent` — segmented tabs + search/upload content
+- Updated `.task` to guard on `!viewMode` to prevent auto-search when viewing existing image
+- Updated `removeImage()` to transition to picker mode (`viewMode = false`) and trigger search instead of dismissing
+- **Learnings:** Use `.onChange(of:)` with a boolean flag to trigger async actions after state changes; SwiftUI's `.task` only runs on initial appear
+- Build succeeds
 
 ---
 

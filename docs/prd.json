@@ -31,7 +31,8 @@
       "relatedToolNames": [],
       "considerations": [],
       "requiredCredentials": [],
-      "status": "in_progress"
+      "status": "completed",
+      "completedAt": "2026-03-23T23:30:00Z"
     },
     {
       "id": "US-002",
@@ -59,7 +60,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T23:30:00Z"
     },
     {
       "id": "US-003",
@@ -83,7 +86,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T23:30:00Z"
     },
     {
       "id": "US-004",
@@ -98,7 +103,7 @@
         "Works in both light and dark mode (if applicable to the sheet)"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -110,7 +115,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T23:45:00Z"
     },
     {
       "id": "US-005",
@@ -124,7 +131,7 @@
         "If the user selects a new image or taps Close, it behaves the same as today"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -136,7 +143,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T23:45:00Z"
     },
     {
       "id": "US-006",
@@ -147,7 +156,7 @@
         "No regressions in search, upload, camera, or photo library flows"
       ],
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -159,7 +168,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-03-23T23:45:00Z"
     }
   ]
 }

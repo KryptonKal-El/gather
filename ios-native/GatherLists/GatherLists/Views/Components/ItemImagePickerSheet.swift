@@ -2,6 +2,8 @@ import SwiftUI
 import PhotosUI
 
 /// Sheet for selecting or uploading an image for a shopping list item.
+/// When an image exists, shows view-only mode with large preview and remove button.
+/// When no image or after removal, shows full picker with search/upload tabs.
 struct ItemImagePickerSheet: View {
     let item: Item
     let userId: UUID
@@ -9,6 +11,7 @@ struct ItemImagePickerSheet: View {
     let onImageRemoved: () -> Void
     @Environment(\.dismiss) private var dismiss
     
+    @State private var viewMode: Bool
     @State private var selectedTab = 0
     @State private var searchQuery: String
     @State private var searchResults: [ProductSearchResult] = []
@@ -19,6 +22,7 @@ struct ItemImagePickerSheet: View {
     @State private var errorMessage: String?
     @State private var showCamera = false
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var shouldTriggerSearch = false
     
     init(
         item: Item,
@@ -31,26 +35,17 @@ struct ItemImagePickerSheet: View {
         self.onImageUrlSet = onImageUrlSet
         self.onImageRemoved = onImageRemoved
         _searchQuery = State(initialValue: item.name)
+        _viewMode = State(initialValue: item.imageUrl != nil && !item.imageUrl!.isEmpty)
     }
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    if let imageUrl = item.imageUrl, !imageUrl.isEmpty {
-                        existingImageSection(imageUrl: imageUrl)
-                    }
-                    
-                    Picker("Tab", selection: $selectedTab) {
-                        Text("Search online").tag(0)
-                        Text("Upload").tag(1)
-                    }
-                    .pickerStyle(.segmented)
-                    
-                    if selectedTab == 0 {
-                        searchTabContent
+                    if viewMode, let imageUrl = item.imageUrl, !imageUrl.isEmpty {
+                        viewOnlyContent(imageUrl: imageUrl)
                     } else {
-                        uploadTabContent
+                        pickerContent
                     }
                     
                     if let error = errorMessage {
@@ -82,7 +77,13 @@ struct ItemImagePickerSheet: View {
                 }
             }
             .task {
-                if !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                if !viewMode && !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                    performSearch()
+                }
+            }
+            .onChange(of: shouldTriggerSearch) { _, newValue in
+                if newValue {
+                    shouldTriggerSearch = false
                     performSearch()
                 }
             }
@@ -90,36 +91,62 @@ struct ItemImagePickerSheet: View {
     }
     
     @ViewBuilder
-    private func existingImageSection(imageUrl: String) -> some View {
-        VStack(spacing: 8) {
+    private func viewOnlyContent(imageUrl: String) -> some View {
+        VStack(spacing: 16) {
             AsyncImage(url: URL(string: imageUrl)) { phase in
                 switch phase {
                 case .success(let image):
                     image
                         .resizable()
-                        .scaledToFill()
+                        .scaledToFit()
                 case .failure:
                     Image(systemName: "photo")
+                        .font(.system(size: 60))
                         .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 300)
+                        .background(Color(.systemGray6))
                 case .empty:
                     ProgressView()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 300)
                 @unknown default:
                     EmptyView()
                 }
             }
-            .frame(width: 120, height: 120)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .frame(maxWidth: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             
             Button(role: .destructive) {
                 removeImage()
             } label: {
                 if isRemoving {
                     ProgressView()
+                        .frame(maxWidth: .infinity)
                 } else {
                     Text("Remove image")
+                        .frame(maxWidth: .infinity)
                 }
             }
+            .buttonStyle(.bordered)
             .disabled(isRemoving)
+        }
+    }
+    
+    @ViewBuilder
+    private var pickerContent: some View {
+        VStack(spacing: 16) {
+            Picker("Tab", selection: $selectedTab) {
+                Text("Search online").tag(0)
+                Text("Upload").tag(1)
+            }
+            .pickerStyle(.segmented)
+            
+            if selectedTab == 0 {
+                searchTabContent
+            } else {
+                uploadTabContent
+            }
         }
     }
     
@@ -261,7 +288,10 @@ struct ItemImagePickerSheet: View {
             do {
                 try await StorageService.deleteItemImage(userId: userId, itemId: item.id)
                 onImageRemoved()
-                dismiss()
+                viewMode = false
+                selectedTab = 0
+                isRemoving = false
+                shouldTriggerSearch = true
             } catch {
                 errorMessage = "Failed to remove image: \(error.localizedDescription)"
                 isRemoving = false
