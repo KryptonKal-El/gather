@@ -259,6 +259,7 @@
 		WIDGETPLACEHOLDER000000001 /* PlaceholderWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderWidget.swift; sourceTree = "<group>"; };
 		WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataProvider.swift; sourceTree = "<group>"; };
 		WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GatherListsWidgets.entitlements; sourceTree = "<group>"; };
+		WIDGETINFOPLIST0000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		SELECTLISTINTENT00000001 /* SelectListIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListIntent.swift; sourceTree = "<group>"; };
 		SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListOrAllIntent.swift; sourceTree = "<group>"; };
 		DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsWidget.swift; sourceTree = "<group>"; };
@@ -532,6 +533,7 @@
 				WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */,
 				WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */,
 				WIDGETENTITLEMENTS000001 /* GatherListsWidgets.entitlements */,
+				WIDGETINFOPLIST0000000001 /* Info.plist */,
 				WIDGETINTENTSGROUP000001 /* Intents */,
 				WIDGETLISTQVGROUP0000001 /* ListQuickView */,
 				WIDGETDUEITEMSGROUP00001 /* DueItems */,
@@ -1052,8 +1054,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GatherListsWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GatherListsWidgets;
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1080,8 +1082,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GatherListsWidgets/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GatherListsWidgets;
-				INFOPLIST_KEY_NSExtensionPointIdentifier = "com.apple.widgetkit-extension";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
