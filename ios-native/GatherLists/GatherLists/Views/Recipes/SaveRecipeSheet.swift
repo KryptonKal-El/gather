@@ -89,7 +89,7 @@ struct SaveRecipeSheet: View {
                             selectedCollectionId = collection.id
                         } label: {
                             HStack {
-                                Text(collection.emoji ?? "📁")
+                                Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
                                     .font(.title3)
                                 Text(collection.name)
                                     .foregroundStyle(.primary)

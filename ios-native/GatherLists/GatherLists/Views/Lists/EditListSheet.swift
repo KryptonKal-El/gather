@@ -73,8 +73,8 @@ struct EditListSheet: View {
                         showEmojiPicker = true
                     } label: {
                         HStack {
-                            if let emoji = selectedEmoji, !emoji.isEmpty {
-                                Text(emoji)
+                        if let emoji = selectedEmoji, emoji.containsVisualEmoji {
+                            Text(emoji)
                                     .font(.system(size: 32))
                             } else {
                                 Image(systemName: "face.smiling")
@@ -281,7 +281,7 @@ struct EditListSheet: View {
         
         isSaving = true
         Task {
-            let emojiValue = selectedEmoji?.isEmpty == false ? selectedEmoji : ""
+            let emojiValue = selectedEmoji?.isEmpty == false ? selectedEmoji : nil
             let categoriesToSave = categoryTypes.contains(list.type) ? categories : nil
             await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, categories: categoriesToSave)
             dismiss()

@@ -229,7 +229,7 @@ struct CollectionRecipeListView: View {
                         }
                     } label: {
                         HStack(spacing: 12) {
-                            Text(targetCollection.emoji ?? "")
+                            Text((targetCollection.emoji?.containsVisualEmoji == true ? targetCollection.emoji : nil) ?? "📁")
                                 .font(.title2)
                             Text(targetCollection.name)
                                 .font(.body)

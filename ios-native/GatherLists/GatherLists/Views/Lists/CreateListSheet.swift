@@ -107,8 +107,8 @@ struct CreateListSheet: View {
                             showEmojiPicker = true
                         } label: {
                             HStack {
-                                if let emoji = selectedEmoji {
-                                    Text(emoji)
+                            if let emoji = selectedEmoji, emoji.containsVisualEmoji {
+                                Text(emoji)
                                         .font(.system(size: 32))
                                 } else {
                                     Image(systemName: "face.smiling")

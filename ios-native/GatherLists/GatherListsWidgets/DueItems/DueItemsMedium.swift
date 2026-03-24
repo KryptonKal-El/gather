@@ -76,7 +76,7 @@ struct DueItemsMedium: View {
     
     private func itemRow(_ item: DueItemInfo) -> some View {
         HStack(spacing: 6) {
-            Text(item.listEmoji ?? "📝")
+            Text((item.listEmoji?.containsVisualEmoji == true ? item.listEmoji : nil) ?? "📝")
                 .font(.caption)
             
             Text(item.name)

@@ -132,7 +132,7 @@ struct DueItemsLarge: View {
     
     private func itemRow(_ item: DueItemInfo) -> some View {
         HStack(spacing: 8) {
-            Text(item.listEmoji ?? "📝")
+            Text((item.listEmoji?.containsVisualEmoji == true ? item.listEmoji : nil) ?? "📝")
                 .font(.subheadline)
             
             Text(item.name)
