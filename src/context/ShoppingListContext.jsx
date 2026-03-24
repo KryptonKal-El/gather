@@ -348,10 +348,17 @@ export const ShoppingListProvider = ({ children }) => {
       setActiveItems([]);
       return;
     }
-    if (isActiveListShared) {
-      return subscribeSharedItems(activeListOwnerUid, activeListId, setActiveItems);
-    }
-    return subscribeItems(userId, activeListId, setActiveItems);
+    let cancelled = false;
+    const safeSetItems = (items) => {
+      if (!cancelled) setActiveItems(items);
+    };
+    const unsub = isActiveListShared
+      ? subscribeSharedItems(activeListOwnerUid, activeListId, safeSetItems)
+      : subscribeItems(userId, activeListId, safeSetItems);
+    return () => {
+      cancelled = true;
+      unsub();
+    };
   }, [userId, activeListId, activeListOwnerUid, isActiveListShared]);
 
   // Subscribe to history
