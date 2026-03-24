@@ -12,7 +12,7 @@ struct ListRowView: View {
                 .fill(Color(hex: list.color))
                 .frame(width: 12, height: 12)
             
-            if let emoji = list.emoji, !emoji.isEmpty {
+            if let emoji = list.emoji, !emoji.isEmpty, emoji.unicodeScalars.first?.properties.isEmoji == true {
                 Text(emoji)
                     .font(.title2)
                     .alignmentGuide(.listRowSeparatorLeading) { d in d[.leading] }
