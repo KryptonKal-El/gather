@@ -23,7 +23,7 @@ struct ListQuickViewSmall: View {
     
     var body: some View {
         VStack(spacing: 8) {
-            Text(entry.listEmoji ?? "📝")
+            Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                 .font(.system(size: 40))
             
             Text(entry.listName)

@@ -20,7 +20,8 @@ struct ListEntity: AppEntity {
     static var typeDisplayRepresentation = TypeDisplayRepresentation(name: "List")
     
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(emoji ?? "📝") \(name)")
+        let displayEmoji = (emoji?.containsVisualEmoji == true ? emoji : nil) ?? "📝"
+        return DisplayRepresentation(title: "\(displayEmoji) \(name)")
     }
     
     static var defaultQuery = ListEntityQuery()

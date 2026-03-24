@@ -118,7 +118,7 @@ struct NextDueLockScreenEntryView: View {
         Group {
             if entry.hasItems, let itemName = entry.itemName {
                 HStack(spacing: 6) {
-                    Text(entry.listEmoji ?? "📝")
+                    Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                         .font(.system(size: 20))
                     
                     VStack(alignment: .leading, spacing: 2) {

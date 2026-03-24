@@ -77,7 +77,7 @@ struct QuickAddLarge: View {
     
     private var headerRow: some View {
         HStack(spacing: 8) {
-            Text(entry.listEmoji ?? "📝")
+            Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                 .font(.title2)
             
             Text(entry.listName)

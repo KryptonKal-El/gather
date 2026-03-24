@@ -214,7 +214,7 @@ struct AddToListSheet: View {
                             selectedListId = list.id
                         } label: {
                             HStack {
-                                Text(list.emoji ?? "🛒")
+                                Text((list.emoji?.containsVisualEmoji == true ? list.emoji : nil) ?? "🛒")
                                     .font(.title3)
                                 Text(list.name)
                                     .foregroundStyle(.primary)

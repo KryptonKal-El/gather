@@ -74,7 +74,7 @@ struct QuickAddMedium: View {
     
     private var headerRow: some View {
         HStack(spacing: 6) {
-            Text(entry.listEmoji ?? "📝")
+            Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                 .font(.title3)
             
             Text(entry.listName)

@@ -220,7 +220,7 @@ struct CollectionBrowserView: View {
     @ViewBuilder
     private func collectionRow(collection: RecipeCollection, isShared: Bool) -> some View {
         HStack(spacing: 12) {
-            if let emoji = collection.emoji, !emoji.isEmpty {
+            if let emoji = collection.emoji, emoji.containsVisualEmoji {
                 Text(emoji)
                     .font(.title2)
             } else {

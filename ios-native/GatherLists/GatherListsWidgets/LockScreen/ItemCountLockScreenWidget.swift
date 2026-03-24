@@ -82,7 +82,7 @@ struct ItemCountLockScreenEntryView: View {
     
     private var circularView: some View {
         VStack(spacing: 2) {
-            Text(entry.listEmoji ?? "📝")
+            Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                 .font(.system(size: 20))
             
             Text("\(entry.uncheckedCount)")
@@ -96,7 +96,7 @@ struct ItemCountLockScreenEntryView: View {
     
     private var rectangularView: some View {
         HStack(spacing: 8) {
-            Text(entry.listEmoji ?? "📝")
+            Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                 .font(.system(size: 24))
             
             VStack(alignment: .leading, spacing: 2) {

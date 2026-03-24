@@ -6,7 +6,7 @@ struct ListDetailPlaceholderView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            if let emoji = list.emoji, !emoji.isEmpty {
+            if let emoji = list.emoji, emoji.containsVisualEmoji {
                 Text(emoji)
                     .font(.system(size: 64))
             } else {

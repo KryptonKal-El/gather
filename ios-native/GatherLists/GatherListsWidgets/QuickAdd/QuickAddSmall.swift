@@ -24,7 +24,7 @@ struct QuickAddSmall: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack {
-                Text(entry.listEmoji ?? "📝")
+                Text((entry.listEmoji?.containsVisualEmoji == true ? entry.listEmoji : nil) ?? "📝")
                     .font(.title3)
                 
                 Text(entry.listName)

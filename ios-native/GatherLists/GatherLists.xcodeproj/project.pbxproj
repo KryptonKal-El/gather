@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		STRINGEMOJI0000000000002 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
+		STRINGEMOJI0000000000003 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
 		SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
 		SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
 		WIDGETBUNDLE0000000000002 /* GatherListsWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */; };
@@ -279,6 +281,7 @@
 		QUICKADDLARGE00000000001 /* QuickAddLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddLarge.swift; sourceTree = "<group>"; };
 		ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCountLockScreenWidget.swift; sourceTree = "<group>"; };
 		NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextDueLockScreenWidget.swift; sourceTree = "<group>"; };
+		STRINGEMOJI0000000000001 /* String+Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Emoji.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -520,6 +523,7 @@
 				SHAREDDATASTORE000000001 /* SharedDataStore.swift */,
 				SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2C1 /* SortPipeline.swift */,
+				STRINGEMOJI0000000000001 /* String+Emoji.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -811,6 +815,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */,
 				SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */,
 				SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */,
+				STRINGEMOJI0000000000002 /* String+Emoji.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -845,6 +850,7 @@
 				QUICKADDLARGE00000000002 /* QuickAddLarge.swift in Sources */,
 				ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */,
 				NEXTDUELOCKSCREEN000002 /* NextDueLockScreenWidget.swift in Sources */,
+				STRINGEMOJI0000000000003 /* String+Emoji.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

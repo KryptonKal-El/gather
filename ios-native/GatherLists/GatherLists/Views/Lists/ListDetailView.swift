@@ -61,7 +61,7 @@ struct ListDetailView: View {
     @State private var scrollTarget: UUID?
     
     private var navigationTitle: String {
-        if let emoji = list.emoji, !emoji.isEmpty {
+        if let emoji = list.emoji, emoji.containsVisualEmoji {
             return "\(emoji) \(list.name)"
         }
         return list.name
