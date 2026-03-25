@@ -9,6 +9,7 @@ struct EditItemSheet: View {
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
+    @Environment(NotificationService.self) private var notificationService
     
     @State private var name: String
     @State private var quantity: Int
@@ -25,6 +26,7 @@ struct EditItemSheet: View {
     @State private var customFrequency: String
     @State private var selectedDaysOfWeek: Set<Int>
     @State private var selectedReminderDays: Int?
+    @State private var showPermissionDenied = false
     
     private var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
     
@@ -283,6 +285,17 @@ struct EditItemSheet: View {
                                 Text(option.1).tag(option.0)
                             }
                         }
+                        .onChange(of: selectedReminderDays) { _, newValue in
+                            if newValue != nil && !notificationService.permissionGranted {
+                                Task {
+                                    let granted = await notificationService.requestPermission()
+                                    if !granted {
+                                        selectedReminderDays = nil
+                                        showPermissionDenied = true
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 
@@ -366,6 +379,11 @@ struct EditItemSheet: View {
             }
             .sheet(isPresented: $showingHistory) {
                 CompletionHistorySheet(listId: item.listId, itemName: item.name)
+            }
+            .alert("Notifications Disabled", isPresented: $showPermissionDenied) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("To receive reminders, enable notifications in Settings > Gather Lists > Notifications.")
             }
         }
     }

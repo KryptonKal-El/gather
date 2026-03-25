@@ -36,6 +36,16 @@ struct ProfileService {
             .eq("id", value: userId)
             .execute()
     }
+    
+    /// Updates the user's timezone for reminder delivery scheduling.
+    static func updateTimezone(userId: UUID) async throws {
+        let update = TimezoneUpdate(timezone: TimeZone.current.identifier)
+        try await client
+            .from("profiles")
+            .update(update)
+            .eq("id", value: userId)
+            .execute()
+    }
 }
 
 // MARK: - DTOs
@@ -54,4 +64,8 @@ private struct AvatarUrlUpdate: Encodable {
     enum CodingKeys: String, CodingKey {
         case avatarUrl = "avatar_url"
     }
+}
+
+private struct TimezoneUpdate: Encodable {
+    let timezone: String
 }

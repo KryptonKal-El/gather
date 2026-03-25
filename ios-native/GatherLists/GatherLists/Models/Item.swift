@@ -37,6 +37,7 @@ struct Item: Codable, Identifiable, Hashable {
     var checkedAt: Date?
     var parentItemId: UUID?
     var reminderSentAt: Date?
+    var createdBy: UUID?
     
     init(
         id: UUID = UUID(),
@@ -56,7 +57,8 @@ struct Item: Codable, Identifiable, Hashable {
         reminderDaysBefore: Int? = nil,
         checkedAt: Date? = nil,
         parentItemId: UUID? = nil,
-        reminderSentAt: Date? = nil
+        reminderSentAt: Date? = nil,
+        createdBy: UUID? = nil
     ) {
         self.id = id
         self.listId = listId
@@ -76,6 +78,7 @@ struct Item: Codable, Identifiable, Hashable {
         self.checkedAt = checkedAt
         self.parentItemId = parentItemId
         self.reminderSentAt = reminderSentAt
+        self.createdBy = createdBy
     }
     
     enum CodingKeys: String, CodingKey {
@@ -97,5 +100,33 @@ struct Item: Codable, Identifiable, Hashable {
         case checkedAt = "checked_at"
         case parentItemId = "parent_item_id"
         case reminderSentAt = "reminder_sent_at"
+        case createdBy = "created_by"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Required fields
+        id = try container.decode(UUID.self, forKey: .id)
+        listId = try container.decode(UUID.self, forKey: .listId)
+        name = try container.decode(String.self, forKey: .name)
+        addedAt = try container.decode(Date.self, forKey: .addedAt)
+        
+        // Optional fields with safe defaults
+        category = try container.decodeIfPresent(String.self, forKey: .category)
+        isChecked = try container.decodeIfPresent(Bool.self, forKey: .isChecked) ?? false
+        storeId = try container.decodeIfPresent(UUID.self, forKey: .storeId)
+        quantity = try container.decodeIfPresent(Int.self, forKey: .quantity) ?? 1
+        price = try container.decodeIfPresent(Decimal.self, forKey: .price)
+        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
+        unit = try container.decodeIfPresent(String.self, forKey: .unit) ?? "each"
+        rsvpStatus = try container.decodeIfPresent(String.self, forKey: .rsvpStatus)
+        dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        recurrenceRule = try? container.decodeIfPresent(RecurrenceRule.self, forKey: .recurrenceRule)
+        reminderDaysBefore = try container.decodeIfPresent(Int.self, forKey: .reminderDaysBefore)
+        checkedAt = try container.decodeIfPresent(Date.self, forKey: .checkedAt)
+        parentItemId = try container.decodeIfPresent(UUID.self, forKey: .parentItemId)
+        reminderSentAt = try container.decodeIfPresent(Date.self, forKey: .reminderSentAt)
+        createdBy = try container.decodeIfPresent(UUID.self, forKey: .createdBy)
     }
 }

@@ -50,6 +50,7 @@ interface ReminderItem {
   reminder_days_before: number
   list_id: string
   list_name: string
+  created_by: string | null
 }
 
 // ============================================================================
@@ -90,19 +91,41 @@ function buildReminderMessage(
 // Date Utilities
 // ============================================================================
 
-function isReminderDue(dueDate: string, reminderDaysBefore: number): boolean {
-  const today = new Date()
+function isReminderDue(dueDate: string, reminderDaysBefore: number, timezone: string): boolean {
+  const now = new Date()
+  const localDateStr = now.toLocaleDateString('en-CA', { timeZone: timezone })
+  const today = new Date(localDateStr)
   today.setHours(0, 0, 0, 0)
 
   const due = new Date(dueDate)
   due.setHours(0, 0, 0, 0)
 
-  // Calculate the reminder trigger date: due_date - reminder_days_before
   const reminderTriggerDate = new Date(due)
   reminderTriggerDate.setDate(reminderTriggerDate.getDate() - reminderDaysBefore)
 
-  // Reminder is due if today >= trigger date
   return today >= reminderTriggerDate
+}
+
+function isInDeliveryWindow(timezone: string): boolean {
+  const now = new Date()
+  const localHour = parseInt(now.toLocaleString('en-US', { timeZone: timezone, hour: 'numeric', hour12: false }))
+  return localHour >= 7 && localHour < 10
+}
+
+async function getTargetUserTimezone(
+  supabase: ReturnType<typeof createClient>,
+  userId: string
+): Promise<string> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('timezone')
+    .eq('id', userId)
+    .single()
+
+  if (error || !data?.timezone) {
+    return 'UTC'
+  }
+  return data.timezone
 }
 
 // ============================================================================
@@ -133,6 +156,7 @@ Deno.serve(async (req) => {
       due_date,
       reminder_days_before,
       list_id,
+      created_by,
       lists!inner (
         name
       )
@@ -150,17 +174,15 @@ Deno.serve(async (req) => {
     )
   }
 
-  // Filter items where reminder is due (date check in code)
-  const reminderItems: ReminderItem[] = (items ?? [])
-    .filter((item) => isReminderDue(item.due_date, item.reminder_days_before))
-    .map((item) => ({
-      id: item.id,
-      name: item.name,
-      due_date: item.due_date,
-      reminder_days_before: item.reminder_days_before,
-      list_id: item.list_id,
-      list_name: (item.lists as { name: string }).name,
-    }))
+  const reminderItems: ReminderItem[] = (items ?? []).map((item) => ({
+    id: item.id,
+    name: item.name,
+    due_date: item.due_date,
+    reminder_days_before: item.reminder_days_before,
+    list_id: item.list_id,
+    list_name: (item.lists as { name: string }).name,
+    created_by: item.created_by,
+  }))
 
   return await processReminders(supabase, reminderItems)
 })
@@ -169,38 +191,44 @@ async function processReminders(
   supabase: ReturnType<typeof createClient>,
   items: ReminderItem[]
 ): Promise<Response> {
-  console.log(`Found ${items.length} items with due reminders`)
+  console.log(`Processing ${items.length} candidate reminder items`)
 
   let sent = 0
   let failed = 0
   let skipped = 0
+  let notInWindow = 0
 
   for (const item of items) {
-    // Get list owner
-    const ownerId = await getListOwnerId(supabase, item.list_id)
-    if (!ownerId) {
-      console.log(`Skipping item ${item.id}: no list owner found`)
+    const targetUserId = item.created_by ?? await getListOwnerId(supabase, item.list_id)
+    if (!targetUserId) {
+      console.log(`Skipping item ${item.id}: no target user found`)
       skipped++
       continue
     }
 
-    // Get owner's device tokens
-    const tokens = await getDeviceTokensForUser(supabase, ownerId)
-    if (tokens.length === 0) {
-      console.log(`Skipping item ${item.id}: owner has no device tokens`)
+    const timezone = await getTargetUserTimezone(supabase, targetUserId)
 
-      // Still mark as sent to avoid re-checking
+    if (!isInDeliveryWindow(timezone)) {
+      notInWindow++
+      continue
+    }
+
+    if (!isReminderDue(item.due_date, item.reminder_days_before, timezone)) {
+      continue
+    }
+
+    const tokens = await getDeviceTokensForUser(supabase, targetUserId)
+    if (tokens.length === 0) {
+      console.log(`Skipping item ${item.id}: target user has no device tokens`)
       await markReminderSent(supabase, item.id)
       skipped++
       continue
     }
 
-    // Build notification content
     const dueDate = new Date(item.due_date)
     const content = buildReminderMessage(item.name, dueDate, item.list_name)
     content.listId = item.list_id
 
-    // Send to all owner's devices
     let itemSent = false
     for (const tokenRecord of tokens) {
       const success = await sendPushNotification(
@@ -216,7 +244,6 @@ async function processReminders(
       }
     }
 
-    // Mark reminder as sent (even if some devices failed)
     if (itemSent || tokens.length > 0) {
       await markReminderSent(supabase, item.id)
       console.log(
@@ -225,7 +252,7 @@ async function processReminders(
     }
   }
 
-  const result = { processed: items.length, sent, failed, skipped }
+  const result = { processed: items.length, sent, failed, skipped, notInWindow }
   console.log(`Reminder check complete:`, result)
 
   return new Response(JSON.stringify({ success: true, ...result }), {

@@ -36,6 +36,7 @@ struct GatherListsApp: App {
                         .environment(authViewModel)
                         .task {
                             await notificationService.refreshTokenIfNeeded()
+                            await updateUserTimezone()
                         }
                 } else {
                     LoginView()
@@ -107,6 +108,15 @@ struct GatherListsApp: App {
             if let listId = UUID(uuidString: listIdString) {
                 notificationService.pendingListId = listId
             }
+        }
+    }
+    
+    private func updateUserTimezone() async {
+        guard let userId = authViewModel.currentUser?.id else { return }
+        do {
+            try await ProfileService.updateTimezone(userId: userId)
+        } catch {
+            print("Failed to update timezone: \(error)")
         }
     }
 }

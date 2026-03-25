@@ -54,6 +54,8 @@ struct ItemService {
             resolvedCategory = CategoryDefinitions.categorizeItem(capitalizedName, listType: listType, categories: listCategories.isEmpty ? nil : listCategories)
         }
         
+        let currentUserId = try? await client.auth.session.user.id
+        
         let newItem = NewItem(
             listId: listId,
             name: capitalizedName,
@@ -64,7 +66,8 @@ struct ItemService {
             price: price,
             imageUrl: imageUrl,
             unit: unit,
-            rsvpStatus: rsvpStatus
+            rsvpStatus: rsvpStatus,
+            createdBy: currentUserId
         )
         
         let item: Item = try await client
@@ -169,7 +172,8 @@ struct ItemService {
         price: Decimal?,
         imageUrl: String?,
         unit: String = "each",
-        rsvpStatus: String? = nil
+        rsvpStatus: String? = nil,
+        createdBy: UUID? = nil
     ) async throws -> Item {
         let restoreData = RestoreItem(
             listId: listId,
@@ -181,7 +185,8 @@ struct ItemService {
             price: price,
             imageUrl: imageUrl,
             unit: unit,
-            rsvpStatus: rsvpStatus
+            rsvpStatus: rsvpStatus,
+            createdBy: createdBy
         )
         let item: Item = try await client
             .from("items")
@@ -207,7 +212,8 @@ struct ItemService {
                 price: item.price,
                 imageUrl: item.imageUrl,
                 unit: item.unit,
-                rsvpStatus: item.rsvpStatus
+                rsvpStatus: item.rsvpStatus,
+                createdBy: item.createdBy
             )
             restored.append(restoredItem)
         }
@@ -241,6 +247,7 @@ struct ItemService {
         let itemsToUpdate = duplicates.filter { !$0.isExcluded && $0.newQuantity != $0.currentQuantity }
         
         if !itemsToAdd.isEmpty {
+            let currentUserId = try? await client.auth.session.user.id
             let insertData = itemsToAdd.map { item in
                 IngredientItem(
                     listId: listId,
@@ -248,7 +255,8 @@ struct ItemService {
                     category: item.category,
                     quantity: item.quantity,
                     isChecked: false,
-                    unit: item.unit
+                    unit: item.unit,
+                    createdBy: currentUserId
                 )
             }
             
@@ -279,6 +287,7 @@ private struct NewItem: Encodable {
     let imageUrl: String?
     var unit: String = "each"
     let rsvpStatus: String?
+    let createdBy: UUID?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -291,6 +300,7 @@ private struct NewItem: Encodable {
         case imageUrl = "image_url"
         case unit
         case rsvpStatus = "rsvp_status"
+        case createdBy = "created_by"
     }
     
     func encode(to encoder: Encoder) throws {
@@ -305,6 +315,7 @@ private struct NewItem: Encodable {
         if let price { try container.encode(price, forKey: .price) }
         if let imageUrl { try container.encode(imageUrl, forKey: .imageUrl) }
         if let rsvpStatus { try container.encode(rsvpStatus, forKey: .rsvpStatus) }
+        if let createdBy { try container.encode(createdBy, forKey: .createdBy) }
     }
 }
 
@@ -408,6 +419,7 @@ private struct RestoreItem: Encodable {
     let imageUrl: String?
     var unit: String = "each"
     let rsvpStatus: String?
+    let createdBy: UUID?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -420,6 +432,7 @@ private struct RestoreItem: Encodable {
         case imageUrl = "image_url"
         case unit
         case rsvpStatus = "rsvp_status"
+        case createdBy = "created_by"
     }
 }
 
@@ -430,6 +443,7 @@ private struct IngredientItem: Encodable {
     let quantity: Int
     let isChecked: Bool
     var unit: String = "each"
+    let createdBy: UUID?
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
@@ -438,5 +452,6 @@ private struct IngredientItem: Encodable {
         case quantity
         case isChecked = "is_checked"
         case unit
+        case createdBy = "created_by"
     }
 }

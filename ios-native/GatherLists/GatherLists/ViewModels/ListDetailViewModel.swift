@@ -152,7 +152,11 @@ final class ListDetailViewModel {
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !items.isEmpty
-            print("[ListDetailViewModel] Failed to load data: \(error.localizedDescription)")
+            if let decodingError = error as? DecodingError {
+                print("[ListDetailViewModel] Decoding error: \(decodingError)")
+            } else {
+                print("[ListDetailViewModel] Failed to load data: \(error.localizedDescription)")
+            }
         }
         
         isLoading = false

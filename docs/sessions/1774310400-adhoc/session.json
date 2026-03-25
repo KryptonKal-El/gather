@@ -1,0 +1,35 @@
+{
+  "id": "1774310400-adhoc",
+  "mode": "adhoc",
+  "source": { "taskId": "TSK-002" },
+  "analysisCompleted": true,
+  "probeStatus": "confirmed",
+  "taskType": "source-change",
+  "chunks": [
+    {
+      "id": "TSK-001",
+      "title": "Fix stale items race condition when switching lists",
+      "status": "completed",
+      "startedAt": "2026-03-24T16:05:00Z",
+      "committedAt": "2026-03-24T16:08:00Z",
+      "commitHash": "76ed3d2"
+    },
+    {
+      "id": "TSK-002",
+      "title": "Fix widget extension simulator install — add NSExtension Info.plist",
+      "status": "completed",
+      "startedAt": "2026-03-24T16:45:00Z",
+      "committedAt": "2026-03-24T16:50:00Z",
+      "commitHash": "4c963dd"
+    }
+  ],
+  "currentChunk": null,
+  "implementationDecisions": null,
+  "startedAt": "2026-03-24T16:00:00Z",
+  "status": "completed",
+  "currentAction": {
+    "description": "TSK-002 complete — widget extension simulator install fixed and pushed",
+    "lastAction": "Pushed to origin/main",
+    "updatedAt": "2026-03-24T16:50:00Z"
+  }
+}
