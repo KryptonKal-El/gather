@@ -26,8 +26,6 @@ struct EditListSheet: View {
     @State private var selectedType: String
     @State private var showTypeChangeConfirm = false
     @State private var typeChangeMessage: String = ""
-    @State private var pendingType: String?
-    @State private var pendingTypeCategories: [CategoryDef]?
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
@@ -252,17 +250,9 @@ struct EditListSheet: View {
                 Text("Default \(selectedType.capitalized) categories updated.")
             }
             .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
-                Button("Cancel", role: .cancel) {
-                    pendingType = nil
-                    pendingTypeCategories = nil
-                }
-                Button("Change") {
-                    if let newType = pendingType {
-                        selectedType = newType
-                        categories = pendingTypeCategories ?? []
-                    }
-                    pendingType = nil
-                    pendingTypeCategories = nil
+                Button("Cancel", role: .cancel) { }
+                Button("Save") {
+                    performSave()
                 }
             } message: {
                 Text(typeChangeMessage)
@@ -342,23 +332,15 @@ struct EditListSheet: View {
         let fromCategoryType = Self.categorySupportedTypes.contains(currentType)
         let toCategoryType = Self.categorySupportedTypes.contains(newType)
         
-        if fromCategoryType && toCategoryType {
-            Task {
-                let newCats = await resolveNewCategories(for: newType)
-                pendingType = newType
-                pendingTypeCategories = newCats
-                typeChangeMessage = "Changing to \(newLabel) will reset this list's categories to your \(newLabel) defaults. Continue?"
-                showTypeChangeConfirm = true
-            }
-        } else if fromCategoryType && !toCategoryType {
-            selectedType = newType
-            categories = []
-        } else if !fromCategoryType && toCategoryType {
+        if toCategoryType {
             Task {
                 let newCats = await resolveNewCategories(for: newType)
                 selectedType = newType
                 categories = newCats ?? []
             }
+        } else if fromCategoryType {
+            selectedType = newType
+            categories = []
         } else {
             selectedType = newType
         }
@@ -377,6 +359,31 @@ struct EditListSheet: View {
     }
     
     private func saveChanges() {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return }
+        
+        if selectedType != list.type {
+            let newLabel = ListTypes.getConfig(selectedType).label
+            let fromCategoryType = Self.categorySupportedTypes.contains(list.type)
+            let toCategoryType = Self.categorySupportedTypes.contains(selectedType)
+            
+            if fromCategoryType && toCategoryType {
+                typeChangeMessage = "Changing to \(newLabel) will reset this list's categories to your \(newLabel) defaults. Save anyway?"
+            } else if fromCategoryType {
+                typeChangeMessage = "Changing to \(newLabel) will remove all categories from this list. Save anyway?"
+            } else if toCategoryType {
+                typeChangeMessage = "Changing to \(newLabel) will add default \(newLabel) categories. Save anyway?"
+            } else {
+                typeChangeMessage = "Change list type to \(newLabel)? Save anyway?"
+            }
+            showTypeChangeConfirm = true
+            return
+        }
+        
+        performSave()
+    }
+    
+    private func performSave() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
         
