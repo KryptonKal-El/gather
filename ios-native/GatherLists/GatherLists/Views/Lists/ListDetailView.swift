@@ -50,12 +50,10 @@ struct ListDetailView: View {
     @State private var preferencesTask: Task<Void, Never>?
     @State private var showSortSheet = false
     
-    // Change type state
-    @State private var showChangeTypeSheet = false
-    @State private var pendingTypeChange: String?
-    @State private var pendingCategories: [CategoryDef]?
-    @State private var showTypeChangeConfirm = false
-    @State private var typeChangeMessage: String = ""
+    // List options menu state
+    @State private var showEditSheet = false
+    @State private var showShareSettingsSheet = false
+    @State private var showDeleteConfirm = false
     
     // Auto-scroll target after adding item
     @State private var scrollTarget: UUID?
@@ -1227,148 +1225,54 @@ struct ListDetailView: View {
     
     // MARK: - List Options Menu
     
+    @Environment(\.dismiss) private var dismiss
+    
     private var listOptionsMenu: some View {
         Menu {
             Button {
-                showChangeTypeSheet = true
+                showEditSheet = true
             } label: {
-                Label("Change List Type", systemImage: "arrow.triangle.swap")
+                Label("Edit", systemImage: "pencil")
+            }
+            
+            Button {
+                showShareSettingsSheet = true
+            } label: {
+                Label("Share Settings", systemImage: "person.badge.plus")
+            }
+            
+            Divider()
+            
+            Button(role: .destructive) {
+                showDeleteConfirm = true
+            } label: {
+                Label("Delete List", systemImage: "trash")
             }
         } label: {
             Image(systemName: "ellipsis.circle")
                 .font(.subheadline)
                 .foregroundStyle(.white)
         }
-        .sheet(isPresented: $showChangeTypeSheet) {
-            changeTypeSheet()
+        .sheet(isPresented: $showEditSheet) {
+            EditListSheet(list: list, viewModel: viewModel)
         }
-        .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
-            Button("Cancel", role: .cancel) {
-                pendingTypeChange = nil
-                pendingCategories = nil
-            }
-            Button("Change") {
-                guard let newType = pendingTypeChange else { return }
+        .sheet(isPresented: $showShareSettingsSheet) {
+            ShareListSheet(
+                list: list,
+                viewModel: viewModel,
+                ownerEmail: authViewModel.currentUser?.email ?? ""
+            )
+        }
+        .alert("Delete List?", isPresented: $showDeleteConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
                 Task {
-                    await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: pendingCategories)
-                    if let newCats = pendingCategories {
-                        detailViewModel?.updateCategories(newCats)
-                    }
-                    let newConfig = ListTypes.getConfig(newType)
-                    if let currentSort = list.sortConfig {
-                        let validLevels = Set(newConfig.sortLevels)
-                        let hasInvalid = currentSort.contains { !validLevels.contains($0) }
-                        if hasInvalid {
-                            try? await PreferenceService.updateListSortConfig(listId: list.id, config: nil)
-                            activeSortConfig = SortPipeline.getDefaultConfig(for: newType)
-                        }
-                    }
-                    pendingTypeChange = nil
-                    pendingCategories = nil
+                    await viewModel.deleteList(id: list.id)
+                    dismiss()
                 }
             }
         } message: {
-            Text(typeChangeMessage)
-        }
-    }
-    
-    // MARK: - Change Type Sheet
-    
-    private static let categorySupportedTypes: Set<String> = ["grocery", "packing", "todo"]
-    
-    private func resolveNewCategories(for newType: String) async -> [CategoryDef]? {
-        guard let userId = authViewModel.currentUser?.id else {
-            return CategoryService.getSystemDefaults(for: newType)
-        }
-        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
-           let match = defaults.first(where: { $0.listType == newType }),
-           !match.categories.isEmpty {
-            return match.categories
-        }
-        return CategoryService.getSystemDefaults(for: newType)
-    }
-    
-    private func changeTypeSheet() -> some View {
-        NavigationStack {
-            Form {
-                Section("Select List Type") {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                        ForEach(LIST_TYPE_IDS, id: \.self) { typeId in
-                            let config = ListTypes.getConfig(typeId)
-                            let isCurrent = typeId == list.type
-                            Button {
-                                if !isCurrent {
-                                    handleTypeSelection(newType: typeId, newLabel: config.label)
-                                }
-                            } label: {
-                                VStack(spacing: 4) {
-                                    ListTypeIconView(typeId: typeId, size: 28)
-                                    Text(config.label)
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(isCurrent ? Color(hex: "#3D7A63") : .primary)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(isCurrent ? Color(hex: "#3D7A63").opacity(0.15) : Color(.systemGray6))
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .stroke(isCurrent ? Color(hex: "#3D7A63") : Color.clear, lineWidth: 2)
-                                )
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-            .navigationTitle("List Type")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        showChangeTypeSheet = false
-                    }
-                }
-            }
-        }
-    }
-    
-    private func handleTypeSelection(newType: String, newLabel: String) {
-        let currentType = list.type
-        let fromCategoryType = Self.categorySupportedTypes.contains(currentType)
-        let toCategoryType = Self.categorySupportedTypes.contains(newType)
-        
-        showChangeTypeSheet = false
-        
-        if fromCategoryType && toCategoryType {
-            Task {
-                let newCats = await resolveNewCategories(for: newType)
-                pendingTypeChange = newType
-                pendingCategories = newCats
-                typeChangeMessage = "Changing to \(newLabel) will reset this list's categories to your \(newLabel) defaults. Continue?"
-                showTypeChangeConfirm = true
-            }
-        } else if fromCategoryType && !toCategoryType {
-            Task {
-                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: [])
-                detailViewModel?.updateCategories([])
-            }
-        } else if !fromCategoryType && toCategoryType {
-            Task {
-                let newCats = await resolveNewCategories(for: newType)
-                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType, categories: newCats)
-                if let cats = newCats {
-                    detailViewModel?.updateCategories(cats)
-                }
-            }
-        } else {
-            Task {
-                await viewModel.updateList(id: list.id, name: nil, emoji: nil, color: nil, type: newType)
-            }
+            Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
         }
     }
     

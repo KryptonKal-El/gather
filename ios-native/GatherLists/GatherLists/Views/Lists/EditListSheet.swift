@@ -23,6 +23,11 @@ struct EditListSheet: View {
     @State private var categoryToDelete: CategoryDef?
     @State private var showSaveDefaultConfirm = false
     @State private var showSaveDefaultSuccess = false
+    @State private var selectedType: String
+    @State private var showTypeChangeConfirm = false
+    @State private var typeChangeMessage: String = ""
+    @State private var pendingType: String?
+    @State private var pendingTypeCategories: [CategoryDef]?
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
@@ -30,6 +35,8 @@ struct EditListSheet: View {
     ]
     
     private let categoryTypes = ["grocery", "todo", "packing", "project"]
+    
+    private static let categorySupportedTypes: Set<String> = ["grocery", "packing", "todo"]
     
     init(list: GatherList, viewModel: ListViewModel) {
         self.list = list
@@ -47,6 +54,7 @@ struct EditListSheet: View {
         }
         
         _categories = State(initialValue: list.categories ?? CategoryService.getSystemDefaults(for: list.type) ?? [])
+        _selectedType = State(initialValue: list.type)
     }
     
     private var effectiveColor: String {
@@ -106,7 +114,11 @@ struct EditListSheet: View {
                     colorPickerRow
                 }
                 
-                if categoryTypes.contains(list.type) {
+                Section("List Type") {
+                    listTypeGrid
+                }
+                
+                if categoryTypes.contains(selectedType) {
                     Section {
                         DisclosureGroup(isExpanded: $showCategoryPreview) {
                             ForEach(categories, id: \.key) { category in
@@ -150,7 +162,7 @@ struct EditListSheet: View {
                             Button {
                                 showSaveDefaultConfirm = true
                             } label: {
-                                Label("Set as Default for \(list.type.capitalized)", systemImage: "square.and.arrow.down")
+                                Label("Set as Default for \(selectedType.capitalized)", systemImage: "square.and.arrow.down")
                             }
                         } label: {
                             HStack {
@@ -232,12 +244,28 @@ struct EditListSheet: View {
                     saveAsDefault()
                 }
             } message: {
-                Text("This will replace your default \(list.type.capitalized) categories with this list's categories. Continue?")
+                Text("This will replace your default \(selectedType.capitalized) categories with this list's categories. Continue?")
             }
             .alert("Saved", isPresented: $showSaveDefaultSuccess) {
                 Button("OK", role: .cancel) { }
             } message: {
-                Text("Default \(list.type.capitalized) categories updated.")
+                Text("Default \(selectedType.capitalized) categories updated.")
+            }
+            .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
+                Button("Cancel", role: .cancel) {
+                    pendingType = nil
+                    pendingTypeCategories = nil
+                }
+                Button("Change") {
+                    if let newType = pendingType {
+                        selectedType = newType
+                        categories = pendingTypeCategories ?? []
+                    }
+                    pendingType = nil
+                    pendingTypeCategories = nil
+                }
+            } message: {
+                Text(typeChangeMessage)
             }
         }
         .interactiveDismissDisabled(isSaving)
@@ -275,6 +303,79 @@ struct EditListSheet: View {
         }
     }
     
+    private var listTypeGrid: some View {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            ForEach(LIST_TYPE_IDS, id: \.self) { typeId in
+                let config = ListTypes.getConfig(typeId)
+                let isCurrent = typeId == selectedType
+                Button {
+                    if !isCurrent {
+                        handleTypeSelection(newType: typeId, newLabel: config.label)
+                    }
+                } label: {
+                    VStack(spacing: 4) {
+                        ListTypeIconView(typeId: typeId, size: 28)
+                        Text(config.label)
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(isCurrent ? Color(hex: "#3D7A63") : .primary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(isCurrent ? Color(hex: "#3D7A63").opacity(0.15) : Color(.systemGray6))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(isCurrent ? Color(hex: "#3D7A63") : Color.clear, lineWidth: 2)
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+    
+    private func handleTypeSelection(newType: String, newLabel: String) {
+        let currentType = selectedType
+        let fromCategoryType = Self.categorySupportedTypes.contains(currentType)
+        let toCategoryType = Self.categorySupportedTypes.contains(newType)
+        
+        if fromCategoryType && toCategoryType {
+            Task {
+                let newCats = await resolveNewCategories(for: newType)
+                pendingType = newType
+                pendingTypeCategories = newCats
+                typeChangeMessage = "Changing to \(newLabel) will reset this list's categories to your \(newLabel) defaults. Continue?"
+                showTypeChangeConfirm = true
+            }
+        } else if fromCategoryType && !toCategoryType {
+            selectedType = newType
+            categories = []
+        } else if !fromCategoryType && toCategoryType {
+            Task {
+                let newCats = await resolveNewCategories(for: newType)
+                selectedType = newType
+                categories = newCats ?? []
+            }
+        } else {
+            selectedType = newType
+        }
+    }
+    
+    private func resolveNewCategories(for newType: String) async -> [CategoryDef]? {
+        guard let userId = authViewModel.currentUser?.id else {
+            return CategoryService.getSystemDefaults(for: newType)
+        }
+        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
+           let match = defaults.first(where: { $0.listType == newType }),
+           !match.categories.isEmpty {
+            return match.categories
+        }
+        return CategoryService.getSystemDefaults(for: newType)
+    }
+    
     private func saveChanges() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
@@ -282,8 +383,9 @@ struct EditListSheet: View {
         isSaving = true
         Task {
             let emojiValue = selectedEmoji?.isEmpty == false ? selectedEmoji : nil
-            let categoriesToSave = categoryTypes.contains(list.type) ? categories : nil
-            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, categories: categoriesToSave)
+            let typeToSave = selectedType != list.type ? selectedType : nil
+            let categoriesToSave = categoryTypes.contains(selectedType) ? categories : nil
+            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, type: typeToSave, categories: categoriesToSave)
             dismiss()
         }
     }
@@ -315,7 +417,7 @@ struct EditListSheet: View {
             do {
                 try await UserCategoryDefaultService.upsertDefault(
                     userId: userId,
-                    listType: list.type,
+                    listType: selectedType,
                     categories: categories
                 )
                 showSaveDefaultSuccess = true
