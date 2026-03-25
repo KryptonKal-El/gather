@@ -121,12 +121,22 @@ struct Item: Codable, Identifiable, Hashable {
         imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
         unit = try container.decodeIfPresent(String.self, forKey: .unit) ?? "each"
         rsvpStatus = try container.decodeIfPresent(String.self, forKey: .rsvpStatus)
-        dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        if let dueDateString = try container.decodeIfPresent(String.self, forKey: .dueDate) {
+            let iso8601 = ISO8601DateFormatter()
+            iso8601.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+            let dateOnly = DateFormatter()
+            dateOnly.dateFormat = "yyyy-MM-dd"
+            dateOnly.locale = Locale(identifier: "en_US_POSIX")
+            dateOnly.timeZone = TimeZone(secondsFromGMT: 0)
+            dueDate = iso8601.date(from: dueDateString) ?? dateOnly.date(from: dueDateString)
+        } else {
+            dueDate = nil
+        }
         recurrenceRule = try? container.decodeIfPresent(RecurrenceRule.self, forKey: .recurrenceRule)
         reminderDaysBefore = try container.decodeIfPresent(Int.self, forKey: .reminderDaysBefore)
-        checkedAt = try container.decodeIfPresent(Date.self, forKey: .checkedAt)
+        checkedAt = try? container.decodeIfPresent(Date.self, forKey: .checkedAt)
         parentItemId = try container.decodeIfPresent(UUID.self, forKey: .parentItemId)
-        reminderSentAt = try container.decodeIfPresent(Date.self, forKey: .reminderSentAt)
+        reminderSentAt = try? container.decodeIfPresent(Date.self, forKey: .reminderSentAt)
         createdBy = try container.decodeIfPresent(UUID.self, forKey: .createdBy)
     }
 }
