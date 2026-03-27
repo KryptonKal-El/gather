@@ -671,6 +671,7 @@ export const App = () => {
               <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
               <ShoppingList
                 items={activeList.items}
+                isLoading={activeList.isLoadingItems}
                 stores={state.stores}
                 sortConfig={effectiveSortConfig(activeList)}
                 listType={activeList.type}

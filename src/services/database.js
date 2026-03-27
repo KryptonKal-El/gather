@@ -136,11 +136,14 @@ export const fetchListCollaborators = async (listId) => {
 /**
  * Subscribes to all lists for a user.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.
  * @param {string} userId - User ID
  * @param {function} callback - Called with array of list objects
  * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeLists = (userId, callback) => {
+  let channel = null;
+
   const fetchLists = async () => {
     try {
       const { data, error } = await supabase
@@ -151,6 +154,10 @@ export const subscribeLists = (userId, callback) => {
 
       if (error) {
         console.error('Failed to fetch lists:', error);
+        // On auth errors, return empty array (fail-closed)
+        if (error.message?.includes('JWT') || error.code === 'PGRST301') {
+          callback([]);
+        }
         return;
       }
 
@@ -178,7 +185,7 @@ export const subscribeLists = (userId, callback) => {
   fetchLists();
 
   // Subscribe to real-time changes
-  const channel = supabase
+  channel = supabase
     .channel(`lists-${userId}`)
     .on(
       'postgres_changes',
@@ -194,11 +201,17 @@ export const subscribeLists = (userId, callback) => {
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeLists] Realtime subscription error:', err);
+        // On auth/JWT errors, return empty array (fail-closed behavior)
+        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
+          callback([]);
+        }
       }
     });
 
   return () => {
-    supabase.removeChannel(channel);
+    if (channel) {
+      supabase.removeChannel(channel);
+    }
   };
 };
 
@@ -402,12 +415,15 @@ export const clearCheckedItems = async (userId, listId, checkedItemIds) => {
 /**
  * Subscribes to all items in a list.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.
  * @param {string} userId - User ID (kept for API compatibility)
  * @param {string} listId - List ID
  * @param {function} callback - Called with array of item objects
  * @returns {function} Unsubscribe function that removes the channel
  */
 export const subscribeItems = (userId, listId, callback) => {
+  let channel = null;
+
   const fetchItems = async () => {
     try {
       const { data, error } = await supabase
@@ -418,6 +434,10 @@ export const subscribeItems = (userId, listId, callback) => {
 
       if (error) {
         console.error('Failed to fetch items:', error);
+        // On auth errors, return empty array (fail-closed)
+        if (error.message?.includes('JWT') || error.code === 'PGRST301') {
+          callback([]);
+        }
         return;
       }
 
@@ -452,7 +472,7 @@ export const subscribeItems = (userId, listId, callback) => {
   fetchItems();
 
   // Subscribe to real-time changes
-  const channel = supabase
+  channel = supabase
     .channel(`items-${listId}`)
     .on(
       'postgres_changes',
@@ -468,11 +488,17 @@ export const subscribeItems = (userId, listId, callback) => {
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeItems] Realtime subscription error:', err);
+        // On auth/JWT errors, return empty array (fail-closed behavior)
+        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
+          callback([]);
+        }
       }
     });
 
   return () => {
-    supabase.removeChannel(channel);
+    if (channel) {
+      supabase.removeChannel(channel);
+    }
   };
 };
 

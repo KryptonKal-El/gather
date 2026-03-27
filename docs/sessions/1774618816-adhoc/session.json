@@ -1,0 +1,38 @@
+{
+  "id": "1774618816-adhoc",
+  "mode": "adhoc",
+  "source": {
+    "taskId": null
+  },
+  "analysisCompleted": true,
+  "probeStatus": "partially-confirmed",
+  "chunks": [
+    {
+      "id": "TSK-001",
+      "title": "Fix stale list items after overnight auth/realtime expiry",
+      "status": "completed",
+      "order": 1,
+      "startedAt": "2026-03-27T00:00:00Z",
+      "committedAt": "2026-03-27T00:00:00Z",
+      "testFlowResult": {
+        "build": "pass",
+        "lint": "pass-with-preexisting-project-errors",
+        "playwright": "pass",
+        "critic": "pass"
+      }
+    }
+  ],
+  "currentChunk": null,
+  "implementationDecisions": null,
+  "startedAt": "2026-03-27T00:00:00Z",
+  "status": "completed",
+  "currentAction": {
+    "description": "TSK-001 verified and ready to commit",
+    "contextAnchor": "TSK-001",
+    "lastAction": "Preparing task-only commit",
+    "updatedAt": "2026-03-27T00:00:00Z"
+  },
+  "taskType": "source-change",
+  "runtimeImpact": "Authenticated web list switching shows stale item data only after long idle session according to report; fresh probe did not reproduce.",
+  "verificationTarget": "Authenticated list switching across multiple lists after idle/reconnect conditions on web app"
+}

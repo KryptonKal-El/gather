@@ -51,7 +51,7 @@ export const ShoppingListContext = createContext(null);
  * plus shared list references from other users.
  */
 export const ShoppingListProvider = ({ children }) => {
-  const { user } = useAuth();
+  const { user, sessionVersion } = useAuth();
   const userId = user?.id ?? null;
   const userEmail = user?.email ?? null;
 
@@ -67,6 +67,7 @@ export const ShoppingListProvider = ({ children }) => {
     }
   });
   const [activeItems, setActiveItems] = useState([]);
+  const [activeItemsLoading, setActiveItemsLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
   const [sharedStores, setSharedStores] = useState([]);
@@ -87,6 +88,7 @@ export const ShoppingListProvider = ({ children }) => {
   const listOrderDebounceRef = useRef(null);
 
   // Subscribe to owned lists
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!userId) {
       setLists([]);
@@ -104,7 +106,7 @@ export const ShoppingListProvider = ({ children }) => {
       setLists(newLists);
       hasLoadedOwnedLists.current = true;
     });
-  }, [userId]);
+  }, [userId, sessionVersion]);
 
   // Load preferences from Supabase and sync localStorage (server wins)
   useEffect(() => {
@@ -182,6 +184,7 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId]);
 
   // Subscribe to shared list refs (lists others shared with me)
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!userEmail) {
       setSharedListRefs([]);
@@ -194,7 +197,7 @@ export const ShoppingListProvider = ({ children }) => {
         hasLoadedSharedLists.current = true;
       }
     });
-  }, [userEmail]);
+  }, [userEmail, sessionVersion]);
 
   // Subscribe to metadata for each shared list
   useEffect(() => {
@@ -343,14 +346,24 @@ export const ShoppingListProvider = ({ children }) => {
   const isActiveListShared = activeListEntry?._isShared ?? false;
 
   // Subscribe to items of the active list (using the owner's UID for path)
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!activeListId || !activeListOwnerUid) {
       setActiveItems([]);
+      setActiveItemsLoading(false);
       return;
     }
+
+    // Immediately clear items and set loading (fail-closed: never show stale items)
+    setActiveItems([]);
+    setActiveItemsLoading(true);
+
     let cancelled = false;
     const safeSetItems = (items) => {
-      if (!cancelled) setActiveItems(items);
+      if (!cancelled) {
+        setActiveItems(items);
+        setActiveItemsLoading(false);
+      }
     };
     const unsub = isActiveListShared
       ? subscribeSharedItems(activeListOwnerUid, activeListId, safeSetItems)
@@ -359,34 +372,37 @@ export const ShoppingListProvider = ({ children }) => {
       cancelled = true;
       unsub();
     };
-  }, [userId, activeListId, activeListOwnerUid, isActiveListShared]);
+  }, [userId, activeListId, activeListOwnerUid, isActiveListShared, sessionVersion]);
 
   // Subscribe to history
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!userId) {
       setHistory([]);
       return;
     }
     return subscribeHistory(userId, setHistory);
-  }, [userId]);
+  }, [userId, sessionVersion]);
 
   // Subscribe to stores
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!userId) {
       setStores([]);
       return;
     }
     return subscribeStores(userId, setStores);
-  }, [userId]);
+  }, [userId, sessionVersion]);
 
   // Subscribe to user category defaults
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!userId) {
       setUserCategoryDefaults([]);
       return;
     }
     return subscribeUserCategoryDefaults(userId, setUserCategoryDefaults);
-  }, [userId]);
+  }, [userId, sessionVersion]);
 
   // Subscribe to shared stores when viewing a shared list
   useEffect(() => {
@@ -770,7 +786,7 @@ export const ShoppingListProvider = ({ children }) => {
 
   const activeListMeta = allLists.find((l) => l.id === activeListId) ?? null;
   const activeList = activeListMeta
-    ? { ...activeListMeta, items: activeItems }
+    ? { ...activeListMeta, items: activeItems, isLoadingItems: activeItemsLoading }
     : null;
 
   return (

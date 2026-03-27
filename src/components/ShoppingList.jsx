@@ -116,6 +116,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
  */
 export const ShoppingList = ({
   items,
+  isLoading,
   stores,
   sortConfig,
   listType,
@@ -154,6 +155,14 @@ export const ShoppingList = ({
     }
     return { counts, totalHeadCount };
   })() : null;
+
+  if (isLoading) {
+    return (
+      <div className={styles.empty}>
+        <p className={styles.loading}>Loading items...</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -278,6 +287,7 @@ export const ShoppingList = ({
 
 ShoppingList.propTypes = {
   items: PropTypes.array.isRequired,
+  isLoading: PropTypes.bool,
   stores: PropTypes.array,
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listType: PropTypes.string,
@@ -293,6 +303,7 @@ ShoppingList.propTypes = {
 };
 
 ShoppingList.defaultProps = {
+  isLoading: false,
   stores: [],
   sortConfig: null,
   listType: 'grocery',

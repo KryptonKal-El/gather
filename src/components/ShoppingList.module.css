@@ -20,6 +20,16 @@
   font-size: 0.9rem;
 }
 
+.loading {
+  color: var(--text-secondary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 .topLevelSection {
   border: 1px solid var(--border-default);
   border-radius: 10px;

@@ -2,8 +2,9 @@
  * Authentication context using Supabase Auth.
  * Supports Apple sign-in and email/password.
  * Provides user state, loading state, and auth actions to the component tree.
+ * Exposes sessionVersion to signal downstream contexts when auth/token refreshes.
  */
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { supabase } from '../services/supabase.js';
 
 export const AuthContext = createContext(null);
@@ -49,20 +50,32 @@ const mergeUserWithProfile = (supabaseUser, profile) => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Incremented when session/token refreshes; downstream contexts use this to resubscribe
+  const [sessionVersion, setSessionVersion] = useState(0);
+  const lastAccessTokenRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         if (!isMounted) return;
 
         if (session?.user) {
+          // Detect token refresh: same user but new access token
+          const currentToken = session.access_token;
+          const previousToken = lastAccessTokenRef.current;
+          if (previousToken && currentToken !== previousToken && event === 'TOKEN_REFRESHED') {
+            setSessionVersion((v) => v + 1);
+          }
+          lastAccessTokenRef.current = currentToken;
+
           const profile = await fetchProfile(session.user.id);
           if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
           setIsLoading(false);
-        } else if (_event === 'SIGNED_OUT') {
+        } else if (event === 'SIGNED_OUT') {
+          lastAccessTokenRef.current = null;
           setUser(null);
           setIsLoading(false);
         }
@@ -74,6 +87,7 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!isMounted) return;
         if (session?.user) {
+          lastAccessTokenRef.current = session.access_token;
           const profile = await fetchProfile(session.user.id);
           if (!isMounted) return;
           setUser(mergeUserWithProfile(session.user, profile));
@@ -162,7 +176,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser }}>
+    <AuthContext.Provider value={{ user, isLoading, sessionVersion, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -171,7 +185,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signOut: Function, refreshUser: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);
