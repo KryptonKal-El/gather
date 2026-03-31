@@ -1,0 +1,19 @@
+{
+  "id": "1775020000-adhoc",
+  "mode": "adhoc",
+  "source": { "taskId": null },
+  "analysisCompleted": true,
+  "probeStatus": "partially-confirmed",
+  "chunks": [],
+  "currentChunk": null,
+  "implementationDecisions": [],
+  "taskType": "source-change",
+  "startedAt": "2026-03-31T00:00:00Z",
+  "status": "completed",
+  "currentAction": {
+    "description": "Completed React idle/realtime/auth fix",
+    "contextAnchor": "docs/sessions/1775020000-adhoc/session.json",
+    "lastAction": "Ready for commit and push per user request",
+    "updatedAt": "2026-03-31T00:15:00Z"
+  }
+}

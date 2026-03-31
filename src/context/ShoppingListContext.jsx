@@ -200,6 +200,7 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userEmail, sessionVersion]);
 
   // Subscribe to metadata for each shared list
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (sharedListRefs.length === 0) {
       return;
@@ -228,7 +229,7 @@ export const ShoppingListProvider = ({ children }) => {
             },
           }));
         } else {
-          // List was deleted by owner
+          // List was deleted by owner or auth error (fail-closed)
           setSharedListMetas((prev) => {
             const next = { ...prev };
             delete next[key];
@@ -244,7 +245,7 @@ export const ShoppingListProvider = ({ children }) => {
       }
       setSharedListMetas({});
     };
-  }, [sharedListRefs]);
+  }, [sharedListRefs, sessionVersion]);
 
   // Fetch collaborators for all lists
   const [collaboratorsByListId, setCollaboratorsByListId] = useState({});
@@ -405,6 +406,7 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId, sessionVersion]);
 
   // Subscribe to shared stores when viewing a shared list
+  // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
     if (!isActiveListShared || !activeListOwnerUid || activeItems.length === 0) {
       setSharedStores([]);
@@ -425,7 +427,7 @@ export const ShoppingListProvider = ({ children }) => {
     }
 
     return subscribeSharedStores(activeListOwnerUid, missingStoreIds, setSharedStores);
-  }, [isActiveListShared, activeListOwnerUid, activeItems, stores]);
+  }, [isActiveListShared, activeListOwnerUid, activeItems, stores, sessionVersion]);
 
   // Debounced persistence of activeListId to user_preferences and localStorage
   const lastListIdTimeoutRef = useRef(null);

@@ -668,6 +668,7 @@ export const unshareList = async (ownerUid, listId, email) => {
  * Subscribes to shared list references for a user (by email).
  * Returns refs for lists that others have shared with this user.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.
  * @param {string} email - User's email
  * @param {function} callback - Called with array of shared list ref objects
  * @returns {function} Unsubscribe function that removes the channel
@@ -689,6 +690,9 @@ export const subscribeSharedListRefs = (email, callback) => {
 
       if (sharesError) {
         console.error('Failed to fetch shared list refs:', sharesError);
+        if (sharesError.message?.includes('JWT') || sharesError.code === 'PGRST301') {
+          callback([]);
+        }
         return;
       }
 
@@ -706,6 +710,9 @@ export const subscribeSharedListRefs = (email, callback) => {
 
       if (listsError) {
         console.error('Failed to fetch shared lists:', listsError);
+        if (listsError.message?.includes('JWT') || listsError.code === 'PGRST301') {
+          callback([]);
+        }
         return;
       }
 
@@ -754,6 +761,9 @@ export const subscribeSharedListRefs = (email, callback) => {
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeSharedListRefs] Realtime subscription error:', err);
+        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
+          callback([]);
+        }
       }
     });
 
@@ -765,6 +775,7 @@ export const subscribeSharedListRefs = (email, callback) => {
 /**
  * Subscribes to a single list document.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * If subscription encounters auth errors (e.g., expired JWT), calls callback with null.
  * @param {string} ownerUid - Owner's user ID (kept for API compatibility)
  * @param {string} listId - List ID
  * @param {function} callback - Called with list object or null
@@ -781,6 +792,9 @@ export const subscribeList = (ownerUid, listId, callback) => {
 
       if (error) {
         console.error('Failed to fetch list:', error);
+        if (error.message?.includes('JWT') || error.code === 'PGRST301') {
+          callback(null);
+        }
         return;
       }
 
@@ -839,6 +853,9 @@ export const subscribeList = (ownerUid, listId, callback) => {
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeList] Realtime subscription error:', err);
+        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
+          callback(null);
+        }
       }
     });
 
@@ -1085,6 +1102,7 @@ export const fetchStoresByIds = async (storeIds) => {
 /**
  * Subscribes to realtime changes on a set of shared stores by ID.
  * Performs initial fetch and listens for changes on the owner's stores.
+ * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.
  * @param {string} ownerUid - The store owner's user ID (for the realtime filter)
  * @param {string[]} storeIds - Array of store UUIDs to fetch
  * @param {function} callback - Called with array of store objects on each update
@@ -1119,6 +1137,9 @@ export const subscribeSharedStores = (ownerUid, storeIds, callback) => {
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeSharedStores] Realtime subscription error:', err);
+        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
+          callback([]);
+        }
       }
     });
 
