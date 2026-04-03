@@ -90,6 +90,7 @@ struct DefaultCategoryEditorView: View {
         .sheet(item: $editingCategory) { category in
             CategoryDetailEditor(
                 category: category,
+                isAddMode: false,
                 presetColors: presetColors,
                 existingKeys: Set(categories.map(\.key)),
                 onSave: { updated in updateCategory(original: category, updated: updated) }
@@ -98,6 +99,7 @@ struct DefaultCategoryEditorView: View {
         .sheet(item: $pendingNewCategory) { category in
             CategoryDetailEditor(
                 category: category,
+                isAddMode: true,
                 presetColors: presetColors,
                 existingKeys: Set(categories.map(\.key)),
                 onSave: { updated in

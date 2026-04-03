@@ -1,0 +1,71 @@
+{
+  "id": "TSK-001-01-ios-list-edit-ui-bugs",
+  "storyId": "TSK-001",
+  "title": "Fix iOS list edit toolbar, category text, and add-category title bugs",
+  "status": "completed",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": "2026-04-02T00:00:00Z",
+  "filesModified": [
+    "ios-native/GatherLists/GatherLists/Views/Lists/EditListSheet.swift",
+    "ios-native/GatherLists/GatherLists/Views/Lists/CategoryEditorSheet.swift",
+    "ios-native/GatherLists/GatherLists/Views/Lists/CreateListSheet.swift",
+    "ios-native/GatherLists/GatherLists/Views/Settings/DefaultCategoryEditorView.swift"
+  ],
+  "tests": {
+    "build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "build",
+        "status": "pass"
+      },
+      {
+        "activity": "swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "follow-up-build",
+        "status": "pass"
+      },
+      {
+        "activity": "follow-up-swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "emoji-picker-build",
+        "status": "pass"
+      },
+      {
+        "activity": "emoji-picker-swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "tap-target-build",
+        "status": "pass"
+      },
+      {
+        "activity": "tap-target-swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "native-ui-visual-check",
+        "status": "pending-manual",
+        "reason": "No automated iOS UI harness in repo; user approved probe skip and should verify in Xcode Simulator"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": {
+    "hash": "3ad40809c1eafaec48c0f9a807efa1c8298d2c14",
+    "message": "fix(ios): polish list edit category flows"
+  },
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}

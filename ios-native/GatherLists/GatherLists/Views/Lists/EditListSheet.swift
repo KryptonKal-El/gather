@@ -134,7 +134,9 @@ struct EditListSheet: View {
                                             .font(.caption)
                                             .foregroundStyle(.tertiary)
                                     }
+                                    .contentShape(Rectangle())
                                 }
+                                .buttonStyle(.plain)
                             }
                             .onMove { from, to in
                                 categories.move(fromOffsets: from, toOffset: to)
@@ -165,6 +167,7 @@ struct EditListSheet: View {
                         } label: {
                             HStack {
                                 Text("Customize Categories")
+                                    .foregroundStyle(.primary)
                                 Spacer()
                                 if !showCategoryPreview {
                                     Text("\(categories.count) \(categories.count == 1 ? "category" : "categories")")
@@ -186,6 +189,8 @@ struct EditListSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(Color(hex: "#3D7A63"))
                     .disabled(isSaving)
                 }
                 ToolbarItem(placement: .confirmationAction) {
@@ -193,6 +198,7 @@ struct EditListSheet: View {
                         saveChanges()
                     }
                     .fontWeight(.semibold)
+                    .foregroundStyle(Color(hex: "#3D7A63"))
                     .disabled(!canSave)
                 }
             }
@@ -202,6 +208,7 @@ struct EditListSheet: View {
             .sheet(item: $selectedCategoryForEdit) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: false,
                     presetColors: presetColors,
                     existingKeys: Set(categories.map(\.key)),
                     onSave: { updated in
@@ -214,6 +221,7 @@ struct EditListSheet: View {
             .sheet(item: $pendingNewCategory) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: true,
                     presetColors: presetColors,
                     existingKeys: Set(categories.map(\.key)),
                     onSave: { updated in

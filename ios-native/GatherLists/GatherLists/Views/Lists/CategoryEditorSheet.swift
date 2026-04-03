@@ -85,6 +85,8 @@ struct CategoryEditorSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(brandGreen)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -92,6 +94,7 @@ struct CategoryEditorSheet: View {
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .foregroundStyle(brandGreen)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -105,6 +108,7 @@ struct CategoryEditorSheet: View {
             .sheet(item: $selectedCategory) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: false,
                     presetColors: presetColors,
                     existingKeys: Set(categories.map(\.key)),
                     onSave: { updated in
@@ -117,6 +121,7 @@ struct CategoryEditorSheet: View {
             .sheet(item: $pendingNewCategory) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: true,
                     presetColors: presetColors,
                     existingKeys: Set(categories.map(\.key)),
                     onSave: { updated in
@@ -261,6 +266,7 @@ extension CategoryDef: Identifiable {
 
 struct CategoryDetailEditor: View {
     let category: CategoryDef
+    let isAddMode: Bool
     let presetColors: [String]
     let existingKeys: Set<String>
     let onSave: (CategoryDef) -> Void
@@ -273,8 +279,9 @@ struct CategoryDetailEditor: View {
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
-    init(category: CategoryDef, presetColors: [String], existingKeys: Set<String>, onSave: @escaping (CategoryDef) -> Void) {
+    init(category: CategoryDef, isAddMode: Bool, presetColors: [String], existingKeys: Set<String>, onSave: @escaping (CategoryDef) -> Void) {
         self.category = category
+        self.isAddMode = isAddMode
         self.presetColors = presetColors
         self.existingKeys = existingKeys
         self.onSave = onSave
@@ -362,13 +369,15 @@ struct CategoryDetailEditor: View {
                     Text("Comma-separated. Items matching keywords will auto-assign to this category.")
                 }
             }
-            .navigationTitle("Edit Category")
+            .navigationTitle(isAddMode ? "New Category" : "Edit Category")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(brandGreen)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {

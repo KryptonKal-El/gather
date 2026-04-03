@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "1775182289-adhoc",
+  "lastHeartbeat": "2026-04-02T00:00:00Z",
+  "project": "gather",
+  "mode": "adhoc",
+  "source": {
+    "taskId": null,
+    "request": "Fix native iOS list edit UI bugs: low-contrast toolbar/category text and wrong add-category title/back color"
+  },
+  "branch": "main",
+  "analysisCompleted": true,
+  "probeStatus": "user-skipped",
+  "taskType": "source-change",
+  "currentChunk": "TSK-001-01-ios-list-edit-ui-bugs",
+  "currentAction": {
+    "description": "Committed iOS list edit flow fixes and awaiting push result",
+    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-001-01-ios-list-edit-ui-bugs/chunk.json",
+    "lastAction": "Committed fix(ios): polish list edit category flows",
+    "updatedAt": "2026-04-02T00:00:00Z"
+  },
+  "status": "in_progress",
+  "chunks": [
+    {
+      "id": "TSK-001",
+      "slug": "ios-list-edit-ui-bugs",
+      "title": "Fix iOS list edit toolbar, category text, and add-category title bugs",
+      "status": "completed",
+      "order": 1
+    }
+  ]
+}

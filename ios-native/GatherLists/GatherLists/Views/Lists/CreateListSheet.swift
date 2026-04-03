@@ -164,6 +164,7 @@ struct CreateListSheet: View {
                                                     .font(.caption)
                                                     .foregroundStyle(.tertiary)
                                             }
+                                            .contentShape(Rectangle())
                                         }
                                         .buttonStyle(.plain)
                                     }
@@ -184,6 +185,7 @@ struct CreateListSheet: View {
                             } label: {
                                 HStack {
                                     Text("Customize Categories")
+                                        .foregroundStyle(.primary)
                                     Spacer()
                                     if !showCategoryPreview {
                                         Text("\(displayCategories.count) \(displayCategories.count == 1 ? "default" : "defaults")")
@@ -239,6 +241,7 @@ struct CreateListSheet: View {
             .sheet(item: $selectedCategoryForEdit) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: false,
                     presetColors: presetColors,
                     existingKeys: Set(displayCategories.map(\.key)),
                     onSave: { updated in
@@ -253,6 +256,7 @@ struct CreateListSheet: View {
             .sheet(item: $pendingNewCategory) { category in
                 CategoryDetailEditor(
                     category: category,
+                    isAddMode: true,
                     presetColors: presetColors,
                     existingKeys: Set(displayCategories.map(\.key)),
                     onSave: { updated in
