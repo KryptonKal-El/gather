@@ -15,6 +15,13 @@ struct ShareListSheet: View {
     @State private var removingEmail: String?
     @State private var errorMessage: String?
     @State private var userPreferences: UserPreferences?
+    @State private var emailHistory: [String] = []
+    @State private var isEmailFieldFocused = false
+    @FocusState private var emailFieldFocus: Bool
+    
+    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
+    private static let emailHistoryKey = "share_email_history"
+    private static let maxEmailHistory = 20
     
     var body: some View {
         NavigationStack {
@@ -27,6 +34,7 @@ struct ShareListSheet: View {
                 
                 collaboratorsList
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle("Share \"\(list.name)\"")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -34,9 +42,12 @@ struct ShareListSheet: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .fontWeight(.semibold)
+                    .foregroundStyle(brandGreen)
                 }
             }
             .task {
+                loadEmailHistory()
                 await loadCollaborators()
                 do {
                     userPreferences = try await PreferenceService.fetchUserPreferences()
@@ -47,6 +58,22 @@ struct ShareListSheet: View {
         }
     }
     
+    private var filteredSuggestions: [String] {
+        let lowercasedInput = emailInput.lowercased().trimmingCharacters(in: .whitespaces)
+        let currentEmails = Set(collaborators.map { $0.sharedWithEmail.lowercased() })
+        let normalizedOwner = ownerEmail.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return emailHistory
+            .filter { email in
+                let lowered = email.lowercased()
+                return lowered != normalizedOwner &&
+                       !currentEmails.contains(lowered) &&
+                       (lowercasedInput.isEmpty || lowered.contains(lowercasedInput))
+            }
+            .prefix(5)
+            .map { $0 }
+    }
+    
     private var addCollaboratorSection: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
@@ -55,6 +82,10 @@ struct ShareListSheet: View {
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
                     .textFieldStyle(.roundedBorder)
+                    .focused($emailFieldFocus)
+                    .onChange(of: emailFieldFocus) { _, focused in
+                        isEmailFieldFocused = focused
+                    }
                 
                 Button {
                     Task {
@@ -63,16 +94,57 @@ struct ShareListSheet: View {
                 } label: {
                     if isAddingCollaborator {
                         ProgressView()
+                            .tint(.white)
                             .frame(width: 20, height: 20)
                     } else {
                         Text("Add")
+                            .foregroundStyle(.white)
                     }
                 }
-                .buttonStyle(.borderedProminent)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(
+                    emailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAddingCollaborator
+                        ? Color.gray.opacity(0.3)
+                        : brandGreen
+                )
+                .cornerRadius(8)
                 .disabled(emailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAddingCollaborator)
+            }
+            
+            if isEmailFieldFocused && !filteredSuggestions.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(filteredSuggestions, id: \.self) { suggestion in
+                        Button {
+                            emailInput = suggestion
+                            emailFieldFocus = false
+                        } label: {
+                            HStack {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                Text(suggestion)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        
+                        if suggestion != filteredSuggestions.last {
+                            Divider()
+                                .padding(.leading, 36)
+                        }
+                    }
+                }
+                .background(Color(.secondarySystemBackground))
+                .cornerRadius(8)
             }
         }
         .padding()
+        .background(Color(.systemGroupedBackground))
     }
     
     private func errorBanner(_ message: String) -> some View {
@@ -201,6 +273,7 @@ struct ShareListSheet: View {
             let effectiveConfig = PreferenceService.effectiveSortConfig(for: list, userPreferences: userPreferences)
             let configStrings = effectiveConfig.map { $0.rawValue }
             try await viewModel.shareList(id: list.id, email: email, sortConfig: configStrings)
+            saveEmailToHistory(email)
             emailInput = ""
             await loadCollaborators()
         } catch let error as NSError {
@@ -235,5 +308,29 @@ struct ShareListSheet: View {
             let share = collaborators[index]
             await removeCollaborator(email: share.sharedWithEmail)
         }
+    }
+    
+    // MARK: - Email History
+    
+    private func loadEmailHistory() {
+        emailHistory = UserDefaults.standard.stringArray(forKey: Self.emailHistoryKey) ?? []
+    }
+    
+    private func saveEmailToHistory(_ email: String) {
+        var history = UserDefaults.standard.stringArray(forKey: Self.emailHistoryKey) ?? []
+        
+        // Remove if already exists (to move to front)
+        history.removeAll { $0.lowercased() == email.lowercased() }
+        
+        // Insert at front
+        history.insert(email, at: 0)
+        
+        // Trim to max size
+        if history.count > Self.maxEmailHistory {
+            history = Array(history.prefix(Self.maxEmailHistory))
+        }
+        
+        UserDefaults.standard.set(history, forKey: Self.emailHistoryKey)
+        emailHistory = history
     }
 }

@@ -12,10 +12,10 @@
   "analysisCompleted": true,
   "probeStatus": "user-skipped",
   "taskType": "source-change",
-  "currentChunk": "TSK-002-02-ios-add-item-auto-scroll",
+  "currentChunk": "TSK-003-03-ios-share-settings-improvements",
   "currentAction": {
-    "description": "Auto-scroll implementation complete; awaiting user verification",
-    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-002-02-ios-add-item-auto-scroll/changes.md",
+    "description": "Share Settings improvements complete; awaiting user verification",
+    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-003-03-ios-share-settings-improvements/changes.md",
     "lastAction": "Developer changes built successfully and critic review passed",
     "updatedAt": "2026-04-02T00:00:00Z"
   },
@@ -34,6 +34,13 @@
       "title": "Auto-scroll newly added iOS list items into view",
       "status": "completed",
       "order": 2
+    },
+    {
+      "id": "TSK-003",
+      "slug": "ios-share-settings-improvements",
+      "title": "Improve iOS Share Settings styling and email suggestions",
+      "status": "completed",
+      "order": 3
     }
   ]
 }

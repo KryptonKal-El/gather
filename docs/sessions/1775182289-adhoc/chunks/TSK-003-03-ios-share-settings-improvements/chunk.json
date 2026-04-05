@@ -1,0 +1,41 @@
+{
+  "id": "TSK-003-03-ios-share-settings-improvements",
+  "storyId": "TSK-003",
+  "title": "Improve iOS Share Settings styling and email suggestions",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "ios-native/GatherLists/GatherLists/Views/Lists/ShareListSheet.swift"
+  ],
+  "tests": {
+    "build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "build",
+        "status": "pass"
+      },
+      {
+        "activity": "swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "native-ui-visual-check",
+        "status": "pending-manual",
+        "reason": "Verify Share Settings styling, Add button visibility, and local email suggestions in Xcode Simulator"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}
