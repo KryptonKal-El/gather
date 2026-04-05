@@ -1,0 +1,42 @@
+{
+  "id": "TSK-002-02-ios-add-item-auto-scroll",
+  "storyId": "TSK-002",
+  "title": "Auto-scroll newly added iOS list items into view",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "ios-native/GatherLists/GatherLists/ViewModels/ListDetailViewModel.swift",
+    "ios-native/GatherLists/GatherLists/Views/Lists/ListDetailView.swift"
+  ],
+  "tests": {
+    "build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "build",
+        "status": "pass"
+      },
+      {
+        "activity": "swift-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "native-ui-visual-check",
+        "status": "pending-manual",
+        "reason": "Verify in Xcode Simulator that adding an item scrolls the newly inserted row into view for both direct add and suggestion add flows"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}

@@ -17,6 +17,9 @@ final class ListDetailViewModel {
     var isShowingCachedData = false
     var cachedAt: Date?
     
+    /// ID of the most recently added item, used for auto-scrolling.
+    var lastAddedItemId: UUID?
+    
     // List categories (resolved via CategoryService)
     private(set) var listCategories: [CategoryDef] = []
     
@@ -311,6 +314,7 @@ final class ListDetailViewModel {
                 rsvpStatus: rsvpDefault
             )
             items.append(newItem)
+            lastAddedItemId = newItem.id
             
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
             try await HistoryService.addHistoryEntry(userId: userId, name: capitalizedName)
@@ -341,6 +345,7 @@ final class ListDetailViewModel {
                 rsvpStatus: rsvpDefault
             )
             items.append(newItem)
+            lastAddedItemId = newItem.id
             
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
             try await HistoryService.addHistoryEntry(userId: userId, name: capitalizedName)

@@ -55,9 +55,6 @@ struct ListDetailView: View {
     @State private var showShareSettingsSheet = false
     @State private var showDeleteConfirm = false
     
-    // Auto-scroll target after adding item
-    @State private var scrollTarget: UUID?
-    
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
             return "\(emoji) \(list.name)"
@@ -398,13 +395,12 @@ struct ListDetailView: View {
             .refreshable {
                 await detailViewModel?.refresh()
             }
-            .onChange(of: scrollTarget) { _, newId in
-                if newId != nil {
-                    withAnimation {
-                        proxy.scrollTo("list-bottom", anchor: .bottom)
-                    }
-                    scrollTarget = nil
+            .onChange(of: detailViewModel?.lastAddedItemId) { _, newId in
+                guard let targetId = newId else { return }
+                withAnimation {
+                    proxy.scrollTo(targetId, anchor: .bottom)
                 }
+                detailViewModel?.lastAddedItemId = nil
             }
         }
     }
@@ -442,6 +438,7 @@ struct ListDetailView: View {
                         } else if let items = group.items {
                             ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
                                 itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                                    .id(item.id)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                         Button(role: .destructive) {
                                             Task {
@@ -473,6 +470,7 @@ struct ListDetailView: View {
                 } else if let items = group.items {
                     ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
                         itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                            .id(item.id)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                 Button(role: .destructive) {
                                     Task {
@@ -596,6 +594,7 @@ struct ListDetailView: View {
     private func flatItemsSection(items: [Item]) -> some View {
         ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
             itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                .id(item.id)
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     Button(role: .destructive) {
                         Task {
@@ -1287,7 +1286,6 @@ struct ListDetailView: View {
                     isInputFocused = true
                     Task {
                         await detailViewModel?.addItemFromSuggestion(name: suggestion, fallbackStoreId: storeId)
-                        scrollTarget = UUID()
                     }
                 } label: {
                     HStack {
@@ -1434,7 +1432,6 @@ struct ListDetailView: View {
             await detailViewModel?.addItem(name: trimmedName, storeId: selectedStoreId)
             itemName = ""
             isInputFocused = true
-            scrollTarget = UUID()
         }
     }
     
