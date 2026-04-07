@@ -12,11 +12,11 @@
   "analysisCompleted": true,
   "probeStatus": "user-skipped",
   "taskType": "source-change",
-  "currentChunk": "TSK-003-03-ios-share-settings-improvements",
+  "currentChunk": "TSK-006-06-high-res-item-images",
   "currentAction": {
-    "description": "Share Settings improvements complete; awaiting user verification",
-    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-003-03-ios-share-settings-improvements/changes.md",
-    "lastAction": "Developer changes built successfully and critic review passed",
+    "description": "High-resolution item image fix complete; awaiting user verification",
+    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-006-06-high-res-item-images/changes.md",
+    "lastAction": "Developer changes built successfully and security review passed",
     "updatedAt": "2026-04-02T00:00:00Z"
   },
   "status": "in_progress",
@@ -41,6 +41,27 @@
       "title": "Improve iOS Share Settings styling and email suggestions",
       "status": "completed",
       "order": 3
+    },
+    {
+      "id": "TSK-004",
+      "slug": "collaborator-avatar-fix",
+      "title": "Fix shared collaborator avatars across web and iOS",
+      "status": "completed",
+      "order": 4
+    },
+    {
+      "id": "TSK-005",
+      "slug": "collaborator-avatar-follow-up",
+      "title": "Fix collaborator avatar regression and missing shared collaborator lookup",
+      "status": "completed",
+      "order": 5
+    },
+    {
+      "id": "TSK-006",
+      "slug": "high-res-item-images",
+      "title": "Use highest-resolution grocery item images after selection",
+      "status": "completed",
+      "order": 6
     }
   ]
 }

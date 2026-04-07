@@ -251,8 +251,8 @@ struct ItemImagePickerSheet: View {
     private func selectSearchResult(_ result: ProductSearchResult) {
         Task {
             do {
-                try await ItemService.updateItem(itemId: item.id, imageUrl: result.thumbnail)
-                onImageUrlSet(result.thumbnail)
+                try await ItemService.updateItem(itemId: item.id, imageUrl: result.url)
+                onImageUrlSet(result.url)
                 dismiss()
             } catch {
                 errorMessage = "Failed to set image: \(error.localizedDescription)"

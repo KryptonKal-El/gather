@@ -1,0 +1,51 @@
+{
+  "id": "TSK-006-06-high-res-item-images",
+  "storyId": "TSK-006",
+  "title": "Use highest-resolution grocery item images after selection",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "supabase/functions/search-products/index.ts",
+    "ios-native/GatherLists/GatherLists/Views/Components/ItemImagePickerSheet.swift"
+  ],
+  "tests": {
+    "web-build": {
+      "status": "pass",
+      "command": "npm run build"
+    },
+    "ios-build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "web-build",
+        "status": "pass"
+      },
+      {
+        "activity": "ios-build",
+        "status": "pass"
+      },
+      {
+        "activity": "security-critic",
+        "status": "pass",
+        "notes": "Only a non-blocking suggestion about server-side numItems validation"
+      },
+      {
+        "activity": "manual-web-ios-image-check",
+        "status": "pending-manual",
+        "reason": "Verify selected grocery item images are sharper in both saved thumbnails and expanded views on web and iOS"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}
