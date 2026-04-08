@@ -12,7 +12,7 @@ actor OfflineCache {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
     
-    private var cacheDirectory: URL {
+    nonisolated private var cacheDirectory: URL {
         fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("OfflineCache", isDirectory: true)
     }

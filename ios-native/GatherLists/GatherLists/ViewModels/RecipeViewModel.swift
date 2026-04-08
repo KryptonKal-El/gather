@@ -23,12 +23,12 @@ final class RecipeViewModel {
     let userEmail: String
     
     // MARK: - Realtime Channels
-    nonisolated(unsafe) private var collectionsChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var sharesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var recipesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var collectionsTask: Task<Void, Never>?
-    nonisolated(unsafe) private var sharesTask: Task<Void, Never>?
-    nonisolated(unsafe) private var recipesTask: Task<Void, Never>?
+    private var collectionsChannel: RealtimeChannelV2?
+    private var sharesChannel: RealtimeChannelV2?
+    private var recipesChannel: RealtimeChannelV2?
+    private var collectionsTask: Task<Void, Never>?
+    private var sharesTask: Task<Void, Never>?
+    private var recipesTask: Task<Void, Never>?
     
     // MARK: - Computed
     
