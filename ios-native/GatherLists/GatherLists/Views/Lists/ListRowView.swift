@@ -49,7 +49,7 @@ struct ListRowView: View {
             if !collaborators.isEmpty {
                 AvatarGroupView(
                     collaborators: collaborators,
-                    size: 20,
+                    size: 28,
                     color: Color(hex: list.color)
                 )
             }

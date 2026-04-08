@@ -343,7 +343,7 @@ export const ListSelector = ({
           {list._collaborators?.length > 0 && (
             <AvatarGroup
               collaborators={list._collaborators}
-              size={20}
+              size={28}
               color={list.color || '#1565c0'}
             />
           )}
