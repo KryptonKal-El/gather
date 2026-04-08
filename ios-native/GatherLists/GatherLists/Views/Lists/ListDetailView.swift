@@ -14,7 +14,6 @@ struct ListDetailView: View {
     
     @State private var detailViewModel: ListDetailViewModel?
     @State private var shareCount: Int = 0
-    @State private var isLoadingShares = false
     @State private var itemName: String = ""
     @State private var selectedStoreId: UUID?
     @FocusState private var isInputFocused: Bool
@@ -25,9 +24,6 @@ struct ListDetailView: View {
     // Notification sheet state
     @State private var showNotificationSheet = false
     @State private var hasNotificationsEnabled = false
-    
-    // Share sheet state
-    @State private var showShareSheet = false
     
     // Context menu edit states
     @State private var editingItem: Item?
@@ -144,7 +140,6 @@ struct ListDetailView: View {
                 if isOwned {
                     listOptionsMenu
                 }
-                shareStatusIndicator
             }
         }
         .alert("Clear checked items?", isPresented: $showClearCheckedAlert) {
@@ -255,17 +250,6 @@ struct ListDetailView: View {
         }
         .sheet(isPresented: $showNotificationSheet) {
             ListNotificationSheet(list: list)
-        }
-        .sheet(isPresented: $showShareSheet) {
-            if isOwned {
-                ShareListSheet(
-                    list: list,
-                    viewModel: viewModel,
-                    ownerEmail: authViewModel.currentUser?.email ?? ""
-                )
-            } else {
-                CollaboratorsInfoSheet(list: list, currentUserId: authViewModel.currentUser?.id)
-            }
         }
         .task {
             await initializeDetailViewModel()
@@ -1164,42 +1148,6 @@ struct ListDetailView: View {
         }
     }
     
-    // MARK: - Share Status Indicator
-    
-    @ViewBuilder
-    private var shareStatusIndicator: some View {
-        if isLoadingShares {
-            ProgressView()
-                .tint(.white)
-        } else if isOwned {
-            if shareCount > 0 {
-                Button {
-                    showShareSheet = true
-                } label: {
-                    Label {
-                        Text("\(shareCount)")
-                    } icon: {
-                        Image(systemName: "person.2.fill")
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.white)
-                }
-            }
-        } else {
-            Button {
-                showShareSheet = true
-            } label: {
-                Label {
-                    Text("Shared")
-                } icon: {
-                    Image(systemName: "person.fill")
-                }
-                .font(.subheadline)
-                .foregroundStyle(.white)
-            }
-        }
-    }
-    
     // MARK: - Sort Menu
     
     private var sortMenu: some View {
@@ -1447,14 +1395,12 @@ struct ListDetailView: View {
     
     private func loadShareInfo() async {
         guard isOwned else { return }
-        isLoadingShares = true
         do {
             let shares = try await ListService.fetchSharesForList(listId: list.id)
             shareCount = shares.count
         } catch {
             print("[ListDetailView] Failed to load shares: \(error.localizedDescription)")
         }
-        isLoadingShares = false
     }
     
     private func loadNotificationStatus() async {
