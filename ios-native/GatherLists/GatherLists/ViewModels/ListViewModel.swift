@@ -27,12 +27,12 @@ final class ListViewModel {
     
     private static let listOrderKey = "gather_list_order"
     
-    private var ownedListsChannel: RealtimeChannelV2?
-    private var sharedListsChannel: RealtimeChannelV2?
-    private var ownedListsTask: Task<Void, Never>?
-    private var sharedListsTask: Task<Void, Never>?
-    private var persistListIdTask: Task<Void, Never>?
-    private var listOrderSyncTask: Task<Void, Never>?
+    nonisolated(unsafe) private var ownedListsChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var sharedListsChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var ownedListsTask: Task<Void, Never>?
+    nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
+    nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
+    nonisolated(unsafe) private var listOrderSyncTask: Task<Void, Never>?
     
     /// Filtered lists based on search query matching name or emoji.
     var filteredLists: [GatherList] {

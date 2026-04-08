@@ -166,8 +166,8 @@ final class PreferenceRealtimeManager {
     
     private var client: SupabaseClient { SupabaseManager.shared.client }
     
-    private var preferencesChannel: RealtimeChannelV2?
-    private var preferencesTask: Task<Void, Never>?
+    nonisolated(unsafe) private var preferencesChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var preferencesTask: Task<Void, Never>?
     private var subscribedUserId: UUID?
     
     private init() {}

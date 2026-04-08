@@ -12,13 +12,15 @@ actor OfflineCache {
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
     
-    nonisolated private var cacheDirectory: URL {
+    private var cacheDirectory: URL {
         fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("OfflineCache", isDirectory: true)
     }
     
     private init() {
-        try? fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+        let cacheDir = fileManager.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("OfflineCache", isDirectory: true)
+        try? fileManager.createDirectory(at: cacheDir, withIntermediateDirectories: true)
     }
     
     func save<T: Codable>(_ data: T, forKey key: String) {

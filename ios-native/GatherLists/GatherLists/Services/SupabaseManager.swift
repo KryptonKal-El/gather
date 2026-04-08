@@ -11,7 +11,7 @@ final class SupabaseManager {
     let supabaseURL: URL
     let anonKey: String
     
-    private var authSyncTask: Task<Void, Never>?
+    nonisolated(unsafe) private var authSyncTask: Task<Void, Never>?
     
     private init() {
         guard let path = Bundle.main.path(forResource: "Secrets", ofType: "plist"),

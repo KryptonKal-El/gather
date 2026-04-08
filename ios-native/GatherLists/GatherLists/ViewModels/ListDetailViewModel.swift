@@ -35,14 +35,14 @@ final class ListDetailViewModel {
     var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
     
     // Realtime channels and tasks
-    private var itemsChannel: RealtimeChannelV2?
-    private var storesChannel: RealtimeChannelV2?
-    private var historyChannel: RealtimeChannelV2?
-    private var itemsTask: Task<Void, Never>?
-    private var storesTask: Task<Void, Never>?
-    private var sharedStoresChannel: RealtimeChannelV2?
-    private var sharedStoresTask: Task<Void, Never>?
-    private var historyTask: Task<Void, Never>?
+    nonisolated(unsafe) private var itemsChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var storesChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var historyChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var itemsTask: Task<Void, Never>?
+    nonisolated(unsafe) private var storesTask: Task<Void, Never>?
+    nonisolated(unsafe) private var sharedStoresChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var sharedStoresTask: Task<Void, Never>?
+    nonisolated(unsafe) private var historyTask: Task<Void, Never>?
     
     // MARK: - Computed Properties
     

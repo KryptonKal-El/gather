@@ -28,7 +28,7 @@ final class AuthViewModel {
         currentUser?.email
     }
     
-    private var authStateTask: Task<Void, Never>?
+    nonisolated(unsafe) private var authStateTask: Task<Void, Never>?
     
     init() {
         Task {

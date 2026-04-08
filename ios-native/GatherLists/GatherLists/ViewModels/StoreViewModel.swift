@@ -15,8 +15,8 @@ final class StoreViewModel {
     
     private let userId: UUID
     
-    private var storesChannel: RealtimeChannelV2?
-    private var storesTask: Task<Void, Never>?
+    nonisolated(unsafe) private var storesChannel: RealtimeChannelV2?
+    nonisolated(unsafe) private var storesTask: Task<Void, Never>?
     
     init(userId: UUID) {
         self.userId = userId
