@@ -131,11 +131,16 @@ final class RecipeViewModel {
             AnyAction.self,
             schema: "public",
             table: "collections",
-            filter: "owner_id=eq.\(userId.uuidString)"
+            filter: .eq("owner_id", value: userId)
         )
         
         collectionsTask = Task {
-            await collChannel.subscribe()
+            do {
+                try await collChannel.subscribeWithError()
+            } catch {
+                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in collChanges {
                 await refetchAllData()
             }
@@ -150,11 +155,16 @@ final class RecipeViewModel {
             AnyAction.self,
             schema: "public",
             table: "collection_shares",
-            filter: "shared_with_email=eq.\(normalizedEmail)"
+            filter: .eq("shared_with_email", value: normalizedEmail)
         )
         
         sharesTask = Task {
-            await shareChannel.subscribe()
+            do {
+                try await shareChannel.subscribeWithError()
+            } catch {
+                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in shareChanges {
                 await refetchAllData()
             }
@@ -168,11 +178,16 @@ final class RecipeViewModel {
             AnyAction.self,
             schema: "public",
             table: "recipes",
-            filter: "owner_id=eq.\(userId.uuidString)"
+            filter: .eq("owner_id", value: userId)
         )
         
         recipesTask = Task {
-            await recipeChannel.subscribe()
+            do {
+                try await recipeChannel.subscribeWithError()
+            } catch {
+                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in recipeChanges {
                 await refetchAllData()
             }

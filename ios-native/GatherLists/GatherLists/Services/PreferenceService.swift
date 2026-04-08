@@ -185,11 +185,16 @@ final class PreferenceRealtimeManager {
             AnyAction.self,
             schema: "public",
             table: "user_preferences",
-            filter: "user_id=eq.\(userId.uuidString)"
+            filter: .eq("user_id", value: userId)
         )
         
         preferencesTask = Task {
-            await channel.subscribe()
+            do {
+                try await channel.subscribeWithError()
+            } catch {
+                print("[PreferenceService] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in changes {
                 await handlePreferenceChange()
             }

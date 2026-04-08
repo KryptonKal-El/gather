@@ -236,11 +236,16 @@ final class ListViewModel {
             AnyAction.self,
             schema: "public",
             table: "lists",
-            filter: "owner_id=eq.\(userId.uuidString)"
+            filter: .eq("owner_id", value: userId)
         )
         
         ownedListsTask = Task {
-            await ownedChannel.subscribe()
+            do {
+                try await ownedChannel.subscribeWithError()
+            } catch {
+                print("[ListViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in ownedChanges {
                 await refetchAllData()
             }
@@ -255,11 +260,16 @@ final class ListViewModel {
             AnyAction.self,
             schema: "public",
             table: "list_shares",
-            filter: "shared_with_email=eq.\(normalizedEmail)"
+            filter: .eq("shared_with_email", value: normalizedEmail)
         )
         
         sharedListsTask = Task {
-            await sharedChannel.subscribe()
+            do {
+                try await sharedChannel.subscribeWithError()
+            } catch {
+                print("[ListViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in sharedChanges {
                 await refetchAllData()
             }

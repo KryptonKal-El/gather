@@ -1434,11 +1434,16 @@ struct ListDetailView: View {
             AnyAction.self,
             schema: "public",
             table: "user_preferences",
-            filter: "user_id=eq.\(userId.uuidString)"
+            filter: .eq("user_id", value: userId)
         )
         
         preferencesTask = Task {
-            await channel.subscribe()
+            do {
+                try await channel.subscribeWithError()
+            } catch {
+                print("[ListDetailView] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in changes {
                 PreferenceService.clearCache()
                 await loadSortPreferences()

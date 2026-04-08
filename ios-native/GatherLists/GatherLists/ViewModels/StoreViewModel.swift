@@ -67,11 +67,16 @@ final class StoreViewModel {
             AnyAction.self,
             schema: "public",
             table: "stores",
-            filter: "user_id=eq.\(userId.uuidString)"
+            filter: .eq("user_id", value: userId)
         )
         
         storesTask = Task {
-            await channel.subscribe()
+            do {
+                try await channel.subscribeWithError()
+            } catch {
+                print("[StoreViewModel] Subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in changes {
                 await refetchStores()
             }

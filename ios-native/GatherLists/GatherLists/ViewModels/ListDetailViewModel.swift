@@ -180,11 +180,16 @@ final class ListDetailViewModel {
             AnyAction.self,
             schema: "public",
             table: "items",
-            filter: "list_id=eq.\(listId.uuidString)"
+            filter: .eq("list_id", value: listId)
         )
         
         itemsTask = Task {
-            await itemsCh.subscribe()
+            do {
+                try await itemsCh.subscribeWithError()
+            } catch {
+                print("[ListDetailViewModel] Items subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in itemsChanges {
                 await refetchItems()
             }
@@ -198,11 +203,16 @@ final class ListDetailViewModel {
             AnyAction.self,
             schema: "public",
             table: "stores",
-            filter: "user_id=eq.\(userId.uuidString)"
+            filter: .eq("user_id", value: userId)
         )
         
         storesTask = Task {
-            await storesCh.subscribe()
+            do {
+                try await storesCh.subscribeWithError()
+            } catch {
+                print("[ListDetailViewModel] Stores subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in storesChanges {
                 await refetchStores()
             }
@@ -217,11 +227,16 @@ final class ListDetailViewModel {
                 AnyAction.self,
                 schema: "public",
                 table: "stores",
-                filter: "user_id=eq.\(ownerId.uuidString)"
+                filter: .eq("user_id", value: ownerId)
             )
             
             sharedStoresTask = Task {
-                await sharedStoresCh.subscribe()
+                do {
+                    try await sharedStoresCh.subscribeWithError()
+                } catch {
+                    print("[ListDetailViewModel] Shared stores subscription failed: \(error.localizedDescription)")
+                    return
+                }
                 for await _ in sharedStoresChanges {
                     await refetchStores()
                 }
@@ -236,11 +251,16 @@ final class ListDetailViewModel {
             AnyAction.self,
             schema: "public",
             table: "history",
-            filter: "user_id=eq.\(userId.uuidString)"
+            filter: .eq("user_id", value: userId)
         )
         
         historyTask = Task {
-            await historyCh.subscribe()
+            do {
+                try await historyCh.subscribeWithError()
+            } catch {
+                print("[ListDetailViewModel] History subscription failed: \(error.localizedDescription)")
+                return
+            }
             for await _ in historyChanges {
                 await refetchHistory()
             }
