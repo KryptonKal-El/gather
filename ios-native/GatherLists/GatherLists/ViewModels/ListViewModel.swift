@@ -137,7 +137,7 @@ final class ListViewModel {
         if activeListId == nil && !allLists.isEmpty {
             if let cachedId = cachedLastListId, allLists.contains(where: { $0.id == cachedId }) {
                 activeListId = cachedId
-            } else if let cachedId = cachedLastListId {
+            } else if cachedLastListId != nil {
                 clearInvalidLastListId()
                 if let firstList = allLists.first {
                     activeListId = firstList.id
@@ -169,19 +169,19 @@ final class ListViewModel {
             if activeListId == nil && !allLists.isEmpty {
                 if let cachedId = cachedLastListId, allLists.contains(where: { $0.id == cachedId }) {
                     activeListId = cachedId
-                } else if let cachedId = cachedLastListId {
-                    clearInvalidLastListId()
-                    if let firstList = allLists.first {
-                        activeListId = firstList.id
-                        persistLastListIdDebounced(firstList.id)
-                    }
-                } else if let firstList = allLists.first {
+            } else if cachedLastListId != nil {
+                clearInvalidLastListId()
+                if let firstList = allLists.first {
                     activeListId = firstList.id
                     persistLastListIdDebounced(firstList.id)
                 }
+            } else if let firstList = allLists.first {
+                activeListId = firstList.id
+                persistLastListIdDebounced(firstList.id)
             }
-            
-            // Reconcile server preferences with UserDefaults cache
+        }
+        
+        // Reconcile server preferences with UserDefaults cache
             await reconcileServerPreferences()
             
             // Load collaborators for shared lists
