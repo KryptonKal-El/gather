@@ -83,6 +83,8 @@ export const resizeImage = (file, maxDimension = 256) => {
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
 
       canvas.toBlob(
@@ -129,16 +131,16 @@ export const uploadProfileImage = async (user, file) => {
     .from('profile-images')
     .getPublicUrl(path);
 
-  const publicUrl = urlData.publicUrl;
+  const cacheBustedUrl = `${urlData.publicUrl}?v=${Date.now()}`;
 
   const { error: updateError } = await supabase
     .from('profiles')
-    .update({ avatar_url: publicUrl })
+    .update({ avatar_url: cacheBustedUrl })
     .eq('id', user.id);
 
   if (updateError) {
     throw new Error('Failed to update profile avatar URL', { cause: updateError });
   }
 
-  return publicUrl;
+  return cacheBustedUrl;
 };

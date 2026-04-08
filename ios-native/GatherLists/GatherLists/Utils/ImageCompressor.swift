@@ -20,14 +20,12 @@ struct ImageCompressor {
             targetSize = CGSize(width: size.width * scale, height: size.height * scale)
         }
         
-        if targetSize != size {
-            let renderer = UIGraphicsImageRenderer(size: targetSize)
-            let resized = renderer.image { _ in
-                image.draw(in: CGRect(origin: .zero, size: targetSize))
-            }
-            return resized.jpegData(compressionQuality: quality)
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let flattened = renderer.image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(origin: .zero, size: targetSize))
+            image.draw(in: CGRect(origin: .zero, size: targetSize))
         }
-        
-        return image.jpegData(compressionQuality: quality)
+        return flattened.jpegData(compressionQuality: quality)
     }
 }

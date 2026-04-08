@@ -156,12 +156,19 @@ struct SettingsView: View {
     private var avatarView: some View {
         ZStack {
             if let avatarUrl = authViewModel.avatarUrl, let url = URL(string: avatarUrl) {
-                AsyncImage(url: url) { image in
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } placeholder: {
-                    firstLetterCircle
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    case .failure:
+                        firstLetterCircle
+                    case .empty:
+                        firstLetterCircle
+                    @unknown default:
+                        firstLetterCircle
+                    }
                 }
                 .frame(width: 56, height: 56)
                 .clipShape(Circle())

@@ -23,7 +23,7 @@
     "cap:sync": "npm run build && npx cap sync",
     "cap:ios": "npm run build && npx cap sync ios && npx cap open ios"
   },
-  "devPort": 4000,
+  "devPort": 5173,
   "paths": {
     "src": "src",
     "components": "src/components",
@@ -102,7 +102,7 @@
       "name": "web",
       "type": "web",
       "framework": "react-vite",
-      "port": 4000
+      "port": 5173
     },
     {
       "name": "ios-native",
