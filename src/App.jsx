@@ -375,6 +375,7 @@ export const App = () => {
                   onCreate={actions.createList}
                   onUpdateDetails={actions.updateListDetails}
                   onDelete={actions.deleteList}
+                  onDuplicate={actions.duplicateList}
                   onShareClick={(list) => setSharingListId(list.id)}
                 />
               </div>
@@ -649,6 +650,7 @@ export const App = () => {
             onCreate={actions.createList}
             onUpdateDetails={actions.updateListDetails}
             onDelete={actions.deleteList}
+            onDuplicate={actions.duplicateList}
             onShareClick={(list) => setSharingListId(list.id)}
           />
         </aside>

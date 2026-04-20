@@ -80,6 +80,7 @@ export const ListSelector = ({
   onCreate,
   onUpdateDetails,
   onDelete,
+  onDuplicate,
   onShareClick,
 }) => {
   const [newName, setNewName] = useState('');
@@ -89,6 +90,8 @@ export const ListSelector = ({
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [duplicatingListId, setDuplicatingListId] = useState(null);
+  const [duplicateName, setDuplicateName] = useState('');
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
@@ -399,6 +402,18 @@ export const ListSelector = ({
                   Share Settings
                 </button>
               )}
+              <button
+                type="button"
+                className={styles.menuItem}
+                onClick={() => {
+                  setDuplicatingListId(list.id);
+                  setDuplicateName(`${list.name} (2)`);
+                  setMenuOpenId(null);
+                }}
+              >
+                <span className={styles.menuIcon}>📋</span>
+                Duplicate
+              </button>
               {isOwned && (
                 <button
                   type="button"
@@ -459,6 +474,17 @@ export const ListSelector = ({
                     Share Settings
                   </button>
                 )}
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => {
+                    setDuplicatingListId(list.id);
+                    setDuplicateName(`${list.name} (2)`);
+                    setMenuOpenId(null);
+                  }}
+                >
+                  Duplicate
+                </button>
                 {isOwned && (
                   <button
                     type="button"
@@ -938,6 +964,68 @@ export const ListSelector = ({
         </div>,
         document.body,
       )}
+
+      {duplicatingListId && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) setDuplicatingListId(null); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setDuplicatingListId(null); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Duplicate List"
+        >
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Duplicate List</h3>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setDuplicatingListId(null)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <input
+                className={styles.editInput}
+                type="text"
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && duplicateName.trim()) {
+                    onDuplicate(duplicatingListId, duplicateName.trim());
+                    setDuplicatingListId(null);
+                  }
+                  if (e.key === 'Escape') setDuplicatingListId(null);
+                }}
+                placeholder="New list name..."
+                autoFocus
+              />
+              <div className={styles.editActions}>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  disabled={!duplicateName.trim()}
+                  onClick={() => {
+                    onDuplicate(duplicatingListId, duplicateName.trim());
+                    setDuplicatingListId(null);
+                  }}
+                >
+                  Duplicate
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setDuplicatingListId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </>
   );
 };
@@ -950,5 +1038,6 @@ ListSelector.propTypes = {
   onCreate: PropTypes.func.isRequired,
   onUpdateDetails: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
   onShareClick: PropTypes.func,
 };

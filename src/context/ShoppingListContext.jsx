@@ -18,6 +18,7 @@ import {
   createList as dbCreateList,
   updateList as dbUpdateList,
   deleteList as dbDeleteList,
+  duplicateList as dbDuplicateList,
   addItem as dbAddItem,
   addItems as dbAddItems,
   updateItem as dbUpdateItem,
@@ -534,6 +535,23 @@ export const ShoppingListProvider = ({ children }) => {
     }
   }, [userId, activeListId, allLists, getListOwnerUid]);
 
+  const duplicateListAction = useCallback(async (listId, newName) => {
+    if (!userId) return;
+    const newList = await dbDuplicateList(listId, newName);
+    setLists(prev => [...prev, {
+      id: newList.id,
+      name: newList.name,
+      emoji: newList.emoji,
+      color: newList.color,
+      type: newList.type,
+      categories: newList.categories,
+      itemCount: newList.item_count,
+      ownerId: userId,
+      createdAt: newList.created_at,
+    }]);
+    setActiveListId(newList.id);
+  }, [userId]);
+
   const renameListAction = useCallback(async (id, newName) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(id);
@@ -767,6 +785,7 @@ export const ShoppingListProvider = ({ children }) => {
     renameList: renameListAction,
     updateListDetails: updateListDetailsAction,
     deleteList: deleteListAction,
+    duplicateList: duplicateListAction,
     selectList: selectListAction,
     addItem: addItemAction,
     addItems: addItemsAction,
