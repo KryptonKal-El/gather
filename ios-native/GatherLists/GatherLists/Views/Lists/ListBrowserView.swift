@@ -91,16 +91,19 @@ struct ListBrowserView: View {
             } message: { list in
                 Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
             }
-            .alert("Duplicate List", isPresented: $showDuplicateAlert) {
-                TextField("List name", text: $duplicateName)
-                Button("Cancel", role: .cancel) {}
-                Button("Duplicate") {
-                    guard let list = listToDuplicate else { return }
-                    Task {
-                        await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
+        .alert("Duplicate List", isPresented: $showDuplicateAlert) {
+            TextField("List name", text: $duplicateName)
+            Button("Cancel", role: .cancel) {}
+            Button("Duplicate") {
+                guard let list = listToDuplicate else { return }
+                Task {
+                    await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
+                    if let newId = viewModel?.activeListId {
+                        navigateToList(id: newId)
                     }
                 }
             }
+        }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -115,6 +118,15 @@ struct ListBrowserView: View {
             if let deferredId = pendingDeepLinkId {
                 navigateToList(id: deferredId)
             }
+        }
+        .onChange(of: viewModel?.activeListId) { oldId, newId in
+            guard let newId,
+                  newId != oldId,
+                  let vm = viewModel,
+                  vm.allLists.contains(where: { $0.id == newId }),
+                  navigationPath.count == 0
+            else { return }
+            navigateToList(id: newId)
         }
     }
     

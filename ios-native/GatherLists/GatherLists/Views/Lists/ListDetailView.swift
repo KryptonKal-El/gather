@@ -1236,6 +1236,7 @@ struct ListDetailView: View {
             Button("Duplicate") {
                 Task {
                     await viewModel.duplicateList(listId: list.id, newName: duplicateName)
+                    dismiss()
                 }
             }
         }
