@@ -420,6 +420,21 @@ final class ListViewModel {
         }
     }
     
+    func duplicateList(listId: UUID, newName: String) async {
+        error = nil
+        do {
+            let duplicatedList = try await ListService.duplicateList(listId: listId, newName: newName, userId: userId)
+            ownedLists.append(duplicatedList)
+            rebuildAllLists()
+            saveListOrderToCache()
+            activeListId = duplicatedList.id
+            persistLastListIdDebounced(duplicatedList.id)
+        } catch {
+            self.error = error.localizedDescription
+            print("[ListViewModel] Failed to duplicate list: \(error.localizedDescription)")
+        }
+    }
+    
     func selectList(id: UUID) {
         activeListId = id
         persistLastListIdDebounced(id)

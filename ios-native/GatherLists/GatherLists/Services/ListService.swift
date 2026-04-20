@@ -57,6 +57,54 @@ struct ListService {
             .execute()
     }
     
+    /// Duplicates a list with all its items (is_checked reset to false).
+    static func duplicateList(listId: UUID, newName: String, userId: UUID) async throws -> GatherList {
+        let sourceList: GatherList = try await client
+            .from("lists")
+            .select()
+            .eq("id", value: listId)
+            .single()
+            .execute()
+            .value
+        
+        let ownedLists = try await fetchOwnedLists(userId: userId)
+        let newSortOrder = ownedLists.count
+        
+        let newList = try await createList(
+            userId: userId,
+            name: newName,
+            emoji: sourceList.emoji,
+            color: sourceList.color,
+            sortOrder: newSortOrder,
+            type: sourceList.type
+        )
+        
+        if let categories = sourceList.categories {
+            try await updateList(listId: newList.id, name: nil, emoji: nil, color: nil, categories: categories)
+        }
+        
+        let sourceItems = try await ItemService.fetchItems(listId: listId)
+        for item in sourceItems {
+            _ = try await ItemService.restoreItem(
+                listId: newList.id,
+                name: item.name,
+                category: item.category,
+                storeId: item.storeId,
+                quantity: item.quantity,
+                isChecked: false,
+                price: item.price,
+                imageUrl: item.imageUrl,
+                unit: item.unit,
+                rsvpStatus: item.rsvpStatus,
+                createdBy: nil
+            )
+        }
+        
+        var duplicatedList = newList
+        duplicatedList.categories = sourceList.categories
+        return duplicatedList
+    }
+    
     /// Saves the order of lists by upserting all lists with updated sort_order values.
     static func saveListOrder(userId: UUID, lists: [GatherList]) async throws {
         let entries = lists.enumerated().map { index, list in
