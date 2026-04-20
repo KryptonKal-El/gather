@@ -12,6 +12,9 @@ struct ListBrowserView: View {
     @State private var showDeleteConfirm = false
     @State private var navigationPath = NavigationPath()
     @State private var pendingDeepLinkId: UUID?
+    @State private var showDuplicateAlert = false
+    @State private var listToDuplicate: GatherList?
+    @State private var duplicateName = ""
     
     private var allFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -88,6 +91,16 @@ struct ListBrowserView: View {
             } message: { list in
                 Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
             }
+            .alert("Duplicate List", isPresented: $showDuplicateAlert) {
+                TextField("List name", text: $duplicateName)
+                Button("Cancel", role: .cancel) {}
+                Button("Duplicate") {
+                    guard let list = listToDuplicate else { return }
+                    Task {
+                        await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
+                    }
+                }
+            }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -135,7 +148,17 @@ struct ListBrowserView: View {
                                 } label: {
                                     Label("Share Settings", systemImage: "person.badge.plus")
                                 }
-                                
+                            }
+                            
+                            Button {
+                                listToDuplicate = list
+                                duplicateName = "\(list.name) (2)"
+                                showDuplicateAlert = true
+                            } label: {
+                                Label("Duplicate", systemImage: "doc.on.doc")
+                            }
+                            
+                            if isOwned {
                                 Divider()
                                 
                                 Button(role: .destructive) {

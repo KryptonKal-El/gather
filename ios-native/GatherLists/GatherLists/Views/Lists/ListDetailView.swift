@@ -50,6 +50,8 @@ struct ListDetailView: View {
     @State private var showEditSheet = false
     @State private var showShareSettingsSheet = false
     @State private var showDeleteConfirm = false
+    @State private var showDuplicateAlert = false
+    @State private var duplicateName = ""
     
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
@@ -1188,6 +1190,13 @@ struct ListDetailView: View {
                 Label("Share Settings", systemImage: "person.badge.plus")
             }
             
+            Button {
+                duplicateName = "\(list.name) (2)"
+                showDuplicateAlert = true
+            } label: {
+                Label("Duplicate", systemImage: "doc.on.doc")
+            }
+            
             Divider()
             
             Button(role: .destructive) {
@@ -1220,6 +1229,15 @@ struct ListDetailView: View {
             }
         } message: {
             Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
+        }
+        .alert("Duplicate List", isPresented: $showDuplicateAlert) {
+            TextField("List name", text: $duplicateName)
+            Button("Cancel", role: .cancel) {}
+            Button("Duplicate") {
+                Task {
+                    await viewModel.duplicateList(listId: list.id, newName: duplicateName)
+                }
+            }
         }
     }
     
