@@ -1,13 +1,16 @@
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { AddItemForm } from './AddItemForm.jsx';
 import { ShoppingList } from './ShoppingList.jsx';
 import { Suggestions } from './Suggestions.jsx';
 import { SortPicker } from './SortPicker.jsx';
+import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './MobileListDetail.module.css';
 
 /**
  * Full-screen mobile list detail view with iOS-style navigation.
- * Shows a top nav bar with back arrow, list name, and share button.
+ * Shows a top nav bar with back arrow, list name, and 3-dot menu.
  */
 export const MobileListDetail = ({
   list,
@@ -27,10 +30,28 @@ export const MobileListDetail = ({
   onUpdateItem,
   onClearChecked,
   onShareClick,
+  onDuplicate,
   onSortSelect,
   restoredItemIds,
   onRestoreAnimationDone,
 }) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [duplicatingList, setDuplicatingList] = useState(false);
+  const [duplicateName, setDuplicateName] = useState('');
+  const menuRef = useRef(null);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
+
   const listType = list.type ?? 'grocery';
 
   return (
@@ -66,31 +87,85 @@ export const MobileListDetail = ({
           onSelect={onSortSelect}
           listType={list.type ?? 'grocery'}
         />
-        {!isGuest && (
+        <div className={styles.menuWrap} ref={!isMobile && menuOpen ? menuRef : null}>
           <button
             type="button"
-            className={styles.shareButton}
-            onClick={() => onShareClick(list)}
-            aria-label="Share list"
+            className={styles.menuBtn}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="List options"
           >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
+            &#x22EE;
           </button>
+          {menuOpen && !isMobile && (
+            <div className={styles.menuDropdown}>
+              {!isGuest && onShareClick && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => { onShareClick(list); setMenuOpen(false); }}
+                >
+                  <span className={styles.menuIcon}>🔗</span>
+                  Share Settings
+                </button>
+              )}
+              <button
+                type="button"
+                className={styles.menuItem}
+                onClick={() => {
+                  setDuplicatingList(true);
+                  setDuplicateName(`${list.name} (2)`);
+                  setMenuOpen(false);
+                }}
+              >
+                <span className={styles.menuIcon}>📋</span>
+                Duplicate
+              </button>
+            </div>
+          )}
+        </div>
+        {menuOpen && isMobile && (
+          <>
+            <div
+              className={styles.actionSheetBackdrop}
+              onClick={() => setMenuOpen(false)}
+            />
+            <div className={styles.actionSheet}>
+              <div className={styles.actionSheetGroup}>
+                <div className={styles.actionSheetTitle}>
+                  {list.emoji && <span>{list.emoji} </span>}
+                  {list.name}
+                </div>
+                {!isGuest && onShareClick && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => { onShareClick(list); setMenuOpen(false); }}
+                  >
+                    Share Settings
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.actionSheetItem}
+                  onClick={() => {
+                    setDuplicatingList(true);
+                    setDuplicateName(`${list.name} (2)`);
+                    setMenuOpen(false);
+                  }}
+                >
+                  Duplicate
+                </button>
+              </div>
+              <button
+                type="button"
+                className={styles.actionSheetCancel}
+                onClick={() => setMenuOpen(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
         )}
-        {isGuest && <div className={styles.spacer} />}
       </nav>
 
       <div className={styles.scrollContent}>
@@ -112,6 +187,68 @@ export const MobileListDetail = ({
         />
         <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />
       </div>
+
+      {duplicatingList && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) setDuplicatingList(false); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setDuplicatingList(false); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Duplicate List"
+        >
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>Duplicate List</h3>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={() => setDuplicatingList(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <input
+                className={styles.editInput}
+                type="text"
+                value={duplicateName}
+                onChange={(e) => setDuplicateName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && duplicateName.trim()) {
+                    onDuplicate(list.id, duplicateName.trim());
+                    setDuplicatingList(false);
+                  }
+                  if (e.key === 'Escape') setDuplicatingList(false);
+                }}
+                placeholder="New list name..."
+                autoFocus
+              />
+              <div className={styles.editActions}>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  disabled={!duplicateName.trim()}
+                  onClick={() => {
+                    onDuplicate(list.id, duplicateName.trim());
+                    setDuplicatingList(false);
+                  }}
+                >
+                  Duplicate
+                </button>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setDuplicatingList(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
     </div>
   );
 };
@@ -139,7 +276,8 @@ MobileListDetail.propTypes = {
   onUpdateStore: PropTypes.func.isRequired,
   onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
-  onShareClick: PropTypes.func.isRequired,
+  onShareClick: PropTypes.func,
+  onDuplicate: PropTypes.func.isRequired,
   onSortSelect: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,

@@ -400,6 +400,7 @@ export const App = () => {
                 onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
                 onShareClick={(list) => setSharingListId(list.id)}
+                onDuplicate={actions.duplicateList}
                 onSortSelect={handleSortSelect}
                 restoredItemIds={restoredItemIds}
                 onRestoreAnimationDone={handleRestoreAnimationDone}
