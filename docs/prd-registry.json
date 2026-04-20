@@ -2,6 +2,34 @@
   "$schema": "https://opencode.ai/prd-registry.json",
   "prds": [
     {
+      "id": "prd-duplicate-list",
+      "name": "Duplicate List",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-duplicate-list.md",
+      "jsonPath": "docs/prds/prd-duplicate-list.json",
+      "branchName": "feature/duplicate-list",
+      "createdAt": "2026-04-20",
+      "updatedAt": "2026-04-20",
+      "estimatedStories": 4,
+      "notes": "Add ability to duplicate a list from context menu and 3-dot menu, copying all metadata and items (unchecked) with a naming dialog",
+      "startedAt": "2026-04-20T20:00:00Z",
+      "currentStory": "US-001"
+    },
+    {
+      "id": "prd-app-store-distribution",
+      "name": "App Store Distribution Prep",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-app-store-distribution.md",
+      "jsonPath": "docs/prds/prd-app-store-distribution.json",
+      "branchName": "feature/app-store-distribution",
+      "createdAt": "2026-03-25",
+      "updatedAt": "2026-03-25",
+      "estimatedStories": 7,
+      "notes": "Marketing page (gatherlists.com), support page (/support), move React app to /app, screenshots, metadata update.",
+      "startedAt": "2026-03-25T19:00:00Z",
+      "currentStory": "US-001"
+    },
+    {
       "id": "prd-ios-mobile-nav",
       "name": "iOS-Style Mobile Navigation",
       "status": "completed",
@@ -592,6 +620,19 @@
       "estimatedStories": 6,
       "currentStory": null,
       "storiesCompleted": 6
+    },
+    {
+      "id": "prd-duplicate-list",
+      "name": "Duplicate List",
+      "status": "in_progress",
+      "filePath": "docs/prds/prd-duplicate-list.md",
+      "jsonPath": "docs/prds/prd-duplicate-list.json",
+      "branchName": "feature/duplicate-list",
+      "createdAt": "2026-04-20",
+      "updatedAt": "2026-04-20",
+      "estimatedStories": 4,
+      "startedAt": "2026-04-20T20:00:00Z",
+      "currentStory": "US-001"
     }
   ]
 }

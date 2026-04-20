@@ -101,6 +101,93 @@ export const deleteList = async (userId, listId) => {
 };
 
 /**
+ * Duplicates a list and all its items for the current user.
+ * Works for both owned and shared lists.
+ * @param {string} listId - Source list ID to duplicate
+ * @param {string} newName - Name for the duplicated list
+ * @returns {Promise<object>} The newly created list object
+ */
+export const duplicateList = async (listId, newName) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data: sourceList, error: listError } = await supabase
+    .from('lists')
+    .select('*')
+    .eq('id', listId)
+    .single();
+
+  if (listError) throw new Error(`Failed to fetch source list: listId=${listId}`, { cause: listError });
+
+  const { data: sourceItems, error: itemsError } = await supabase
+    .from('items')
+    .select('*')
+    .eq('list_id', listId);
+
+  if (itemsError) throw new Error(`Failed to fetch source items: listId=${listId}`, { cause: itemsError });
+
+  const { data: maxRow } = await supabase
+    .from('lists')
+    .select('sort_order')
+    .eq('owner_id', user.id)
+    .order('sort_order', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const nextSortOrder = maxRow?.sort_order != null ? maxRow.sort_order + 1 : 0;
+
+  const { data: newList, error: insertError } = await supabase
+    .from('lists')
+    .insert({
+      owner_id: user.id,
+      name: newName,
+      emoji: sourceList.emoji,
+      color: sourceList.color,
+      type: sourceList.type,
+      sort_config: sourceList.sort_config,
+      categories: sourceList.categories,
+      item_count: 0,
+      sort_order: nextSortOrder,
+    })
+    .select('*')
+    .single();
+
+  if (insertError) throw new Error(`Failed to create duplicate list: name=${newName}`, { cause: insertError });
+
+  if (sourceItems.length > 0) {
+    const newItems = sourceItems.map((item) => ({
+      list_id: newList.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      price: item.price,
+      category: item.category,
+      store_id: item.store_id,
+      image_url: item.image_url,
+      sort_order: item.sort_order,
+      is_checked: false,
+    }));
+
+    const { error: itemsInsertError } = await supabase.from('items').insert(newItems);
+    if (itemsInsertError) throw new Error(`Failed to copy items to duplicate list: listId=${newList.id}`, { cause: itemsInsertError });
+  }
+
+  return {
+    id: newList.id,
+    name: newList.name,
+    emoji: newList.emoji,
+    color: newList.color,
+    itemCount: newList.item_count,
+    ownerId: newList.owner_id,
+    createdAt: newList.created_at,
+    sortConfig: newList.sort_config,
+    sortOrder: newList.sort_order,
+    type: newList.type,
+    categories: newList.categories,
+  };
+};
+
+/**
  * Adjusts the item_count on a list using the RPC function.
  * NOTE: This is supplementary — database triggers auto-manage item_count on
  * insert/delete/check. Use this only for manual corrections if needed.

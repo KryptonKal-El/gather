@@ -1,0 +1,41 @@
+{
+  "id": "builder-1776695635",
+  "mode": "prd",
+  "source": {
+    "prdId": "prd-duplicate-list"
+  },
+  "branch": "main",
+  "analysisCompleted": true,
+  "probeStatus": "confirmed",
+  "status": "in_progress",
+  "startedAt": "2026-04-20T20:00:00Z",
+  "currentChunk": "US-001",
+  "currentAction": {
+    "description": "Starting PRD prd-duplicate-list execution",
+    "lastAction": "Session initialized",
+    "updatedAt": "2026-04-20T20:00:00Z"
+  },
+  "chunks": [
+    {
+      "id": "US-001",
+      "title": "Duplicate List Service Layer",
+      "status": "pending"
+    },
+    {
+      "id": "US-002",
+      "title": "Duplicate Option in List Browser Context Menu",
+      "status": "pending"
+    },
+    {
+      "id": "US-003",
+      "title": "Duplicate Option in List Detail 3-Dot Menu",
+      "status": "pending"
+    },
+    {
+      "id": "US-004",
+      "title": "ViewModel Integration",
+      "status": "pending"
+    }
+  ],
+  "decisions": []
+}
