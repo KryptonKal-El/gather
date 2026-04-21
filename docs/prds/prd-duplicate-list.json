@@ -17,7 +17,7 @@
         "Build succeeds"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -29,7 +29,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T00:00:00Z"
     },
     {
       "id": "US-002",
@@ -44,7 +46,7 @@
         "Build succeeds"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -56,7 +58,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T00:00:00Z"
     },
     {
       "id": "US-003",
@@ -71,7 +75,7 @@
         "Build succeeds"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -83,7 +87,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T00:00:00Z"
     },
     {
       "id": "US-004",
@@ -96,7 +102,7 @@
         "Build succeeds"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "",
       "supportArticleRequired": false,
       "documentationType": null,
@@ -108,7 +114,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T00:00:00Z"
     }
   ]
 }

@@ -112,17 +112,20 @@ Add the ability to duplicate a list from both the long-press context menu in the
 - No batch duplication (multiple lists at once)
 - No duplication of share permissions
 - No cross-user duplication (duplicating someone else's list into their account)
-- No React web implementation (iOS only per scope)
 - No duplication of recurring item schedules
+
+> **Doc correction (post-hoc, 2026-04-21):** This PRD originally listed "No React web implementation (iOS only per scope)" as a non-goal. That was incorrect — the feature shipped on **both** React web and Swift iOS. The web and iOS implementations diverged slightly: iOS preserves `rsvp_status` on duplicated items; web omits `rsvp_status` from the insert (so it falls back to the column default). This parity gap is tracked and fixed in `prd-reset-list-items` US-006.
 
 ## Technical Considerations
 
-- **Platform:** Swift iOS only (ios-native/)
-- **Service:** Extend `ListService` with a `duplicateList` static method
+- **Platforms:** React web (`src/`) **and** Swift iOS (`ios-native/`)
+- **Service (iOS):** `ListService.duplicateList` static method
+- **Service (web):** `duplicateList` in `src/services/database.js`, wired via `ShoppingListContext`
 - **Database:** Uses existing Supabase `lists` and `items` tables — no migration needed
-- **Approach:** Create list via existing `createList`, then bulk-insert copied items
-- **Categories:** Copy `custom_categories` JSONB field from source list
-- **Sort preferences:** Copy `sort_preferences` JSONB field from source list
+- **Approach:** Create list via existing create path, then bulk-insert copied items
+- **Categories:** Copy `custom_categories` / `categories` JSONB field from source list
+- **Sort preferences:** Copy `sort_preferences` / `sort_config` JSONB field from source list
+- **Known divergence:** Web insert does not copy `rsvp_status` (and possibly `recipe_id` / `recipe_name`); iOS does copy `rsvp_status`. Resolved in `prd-reset-list-items` US-006.
 
 ## Success Metrics
 
