@@ -179,8 +179,7 @@ final class ListDetailViewModel {
         let itemsChanges = itemsCh.postgresChange(
             AnyAction.self,
             schema: "public",
-            table: "items",
-            filter: .eq("list_id", value: listId)
+            table: "items"
         )
         
         itemsTask = Task {
