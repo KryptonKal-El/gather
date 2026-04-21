@@ -133,6 +133,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */; };
+		DUPLISTSHEET00000002 /* DuplicateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUPLISTSHEET00000001 /* DuplicateListSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -255,6 +256,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCategoryEditorView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarGroupView.swift; sourceTree = "<group>"; };
+		DUPLISTSHEET00000001 /* DuplicateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateListSheet.swift; sourceTree = "<group>"; };
 		COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionHistorySheet.swift; sourceTree = "<group>"; };
 		SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
 		SHAREDDATASTORE000000001 /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
@@ -502,6 +504,7 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */,
+				DUPLISTSHEET00000001 /* DuplicateListSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */,
 				A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */,
@@ -817,6 +820,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */,
+				DUPLISTSHEET00000002 /* DuplicateListSheet.swift in Sources */,
 				SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */,
 				SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */,
 				STRINGEMOJI0000000000002 /* String+Emoji.swift in Sources */,

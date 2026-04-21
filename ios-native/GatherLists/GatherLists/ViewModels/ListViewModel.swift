@@ -420,18 +420,42 @@ final class ListViewModel {
         }
     }
     
-    func duplicateList(listId: UUID, newName: String) async {
+    func duplicateList(
+        listId: UUID,
+        newName: String,
+        resetRsvp: Bool = false,
+        toastController: ToastController? = nil
+    ) async -> DuplicateListResult? {
         error = nil
         do {
-            let duplicatedList = try await ListService.duplicateList(listId: listId, newName: newName, userId: userId)
+            let result = try await ListService.duplicateList(
+                listId: listId,
+                newName: newName,
+                userId: userId,
+                resetRsvp: resetRsvp
+            )
+            let duplicatedList = result.list
             ownedLists.append(duplicatedList)
             rebuildAllLists()
             saveListOrderToCache()
             activeListId = duplicatedList.id
             persistLastListIdDebounced(duplicatedList.id)
+
+            if result.resetFailed {
+                toastController?.show("List duplicated, but RSVP reset failed", variant: .error)
+            } else if result.resetCount > 0 {
+                let noun = result.resetCount == 1 ? "guest" : "guests"
+                toastController?.show("\(result.resetCount) \(noun) reset", variant: .success)
+            } else {
+                toastController?.show("List duplicated", variant: .success)
+            }
+
+            return result
         } catch {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to duplicate list: \(error.localizedDescription)")
+            toastController?.show("Couldn't duplicate list — try again", variant: .error)
+            return nil
         }
     }
     

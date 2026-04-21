@@ -536,9 +536,10 @@ export const ShoppingListProvider = ({ children }) => {
     }
   }, [userId, activeListId, allLists, getListOwnerUid]);
 
-  const duplicateListAction = useCallback(async (listId, newName) => {
+  const duplicateListAction = useCallback(async (listId, newName, options = {}) => {
     if (!userId) return;
-    const newList = await dbDuplicateList(listId, newName);
+    const result = await dbDuplicateList(listId, newName, options);
+    const newList = result.list;
     setLists(prev => [...prev, {
       id: newList.id,
       name: newList.name,
@@ -546,11 +547,12 @@ export const ShoppingListProvider = ({ children }) => {
       color: newList.color,
       type: newList.type,
       categories: newList.categories,
-      itemCount: newList.item_count,
+      itemCount: newList.itemCount,
       ownerId: userId,
-      createdAt: newList.created_at,
+      createdAt: newList.createdAt,
     }]);
     setActiveListId(newList.id);
+    return result;
   }, [userId]);
 
   const renameListAction = useCallback(async (id, newName) => {

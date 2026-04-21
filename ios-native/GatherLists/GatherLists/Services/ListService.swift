@@ -7,6 +7,13 @@ struct SharedListRef {
     let shareSortConfig: [String]?
 }
 
+struct DuplicateListResult {
+    let list: GatherList
+    let resetCount: Int
+    let resetFailed: Bool
+    let didResetRsvp: Bool
+}
+
 /// Service layer wrapping Supabase queries for list and share operations.
 struct ListService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
@@ -58,7 +65,7 @@ struct ListService {
     }
     
     /// Duplicates a list with all its items (is_checked reset to false).
-    static func duplicateList(listId: UUID, newName: String, userId: UUID) async throws -> GatherList {
+    static func duplicateList(listId: UUID, newName: String, userId: UUID, resetRsvp: Bool = false) async throws -> DuplicateListResult {
         let sourceList: GatherList = try await client
             .from("lists")
             .select()
@@ -84,25 +91,50 @@ struct ListService {
         }
         
         let sourceItems = try await ItemService.fetchItems(listId: listId)
+        let isSharedListDuplicate = sourceList.ownerId != userId
         for item in sourceItems {
             _ = try await ItemService.restoreItem(
                 listId: newList.id,
                 name: item.name,
                 category: item.category,
-                storeId: item.storeId,
+                storeId: isSharedListDuplicate ? nil : item.storeId,
                 quantity: item.quantity,
                 isChecked: false,
                 price: item.price,
                 imageUrl: item.imageUrl,
                 unit: item.unit,
                 rsvpStatus: item.rsvpStatus,
+                dueDate: item.dueDate,
+                recurrenceRule: item.recurrenceRule,
+                reminderDaysBefore: item.reminderDaysBefore,
+                // parent_item_id intentionally not copied — would reference source list's items
+                parentItemId: nil,
+                reminderSentAt: item.reminderSentAt,
                 createdBy: nil
             )
+        }
+
+        let shouldResetRsvp = resetRsvp && sourceList.type == "guest_list"
+        var resetCount = 0
+        var resetFailed = false
+
+        if shouldResetRsvp {
+            do {
+                resetCount = try await ItemService.resetRsvpStatuses(listId: newList.id)
+            } catch {
+                resetFailed = true
+                print("[ListService] RSVP reset failed after duplicate: \(error.localizedDescription)")
+            }
         }
         
         var duplicatedList = newList
         duplicatedList.categories = sourceList.categories
-        return duplicatedList
+        return DuplicateListResult(
+            list: duplicatedList,
+            resetCount: resetCount,
+            resetFailed: resetFailed,
+            didResetRsvp: shouldResetRsvp
+        )
     }
     
     /// Saves the order of lists by upserting all lists with updated sort_order values.

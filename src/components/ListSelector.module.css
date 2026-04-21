@@ -487,6 +487,32 @@
   min-width: 0;
 }
 
+.checkboxField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  color: var(--text-primary);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.checkboxRow input {
+  margin: 0;
+}
+
+.checkboxHelp {
+  padding-left: 1.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
 .saveBtn {
   padding: 0.35rem 0.65rem;
   background: var(--primary);

@@ -13,11 +13,9 @@ struct ListBrowserView: View {
     @State private var showDeleteConfirm = false
     @State private var navigationPath = NavigationPath()
     @State private var pendingDeepLinkId: UUID?
-    @State private var showDuplicateAlert = false
     @State private var listToDuplicate: GatherList?
     @State private var showResetItemsConfirm = false
     @State private var listToResetItems: GatherList?
-    @State private var duplicateName = ""
     
     private var allFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -94,18 +92,27 @@ struct ListBrowserView: View {
             } message: { list in
                 Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
             }
-            .alert("Duplicate List", isPresented: $showDuplicateAlert) {
-                TextField("List name", text: $duplicateName)
-                Button("Cancel", role: .cancel) {}
-                Button("Duplicate") {
-                    guard let list = listToDuplicate else { return }
-                    Task {
-                        await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
-                        if let newId = viewModel?.activeListId {
-                            navigateToList(id: newId)
+            .sheet(item: $listToDuplicate) { list in
+                DuplicateListSheet(
+                    list: list,
+                    onDuplicate: { name, resetRsvp in
+                        listToDuplicate = nil
+                        Task {
+                            let result = await viewModel?.duplicateList(
+                                listId: list.id,
+                                newName: name,
+                                resetRsvp: resetRsvp,
+                                toastController: toastController
+                            )
+                            if let newId = result?.list.id {
+                                navigateToList(id: newId)
+                            }
                         }
+                    },
+                    onCancel: {
+                        listToDuplicate = nil
                     }
-                }
+                )
             }
             .alert("Reset items", isPresented: $showResetItemsConfirm, presenting: listToResetItems) { list in
                 Button("Cancel", role: .cancel) {}
@@ -175,13 +182,11 @@ struct ListBrowserView: View {
                                 }
                             }
                             
-                            Button {
-                                listToDuplicate = list
-                                duplicateName = "\(list.name) (2)"
-                                showDuplicateAlert = true
-                            } label: {
-                                Label("Duplicate", systemImage: "doc.on.doc")
-                            }
+                             Button {
+                                 listToDuplicate = list
+                             } label: {
+                                 Label("Duplicate", systemImage: "doc.on.doc")
+                             }
 
                              if isOwned && list.type == "guest_list" {
                                   Button {

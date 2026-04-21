@@ -51,10 +51,9 @@ struct ListDetailView: View {
     @State private var showEditSheet = false
     @State private var showShareSettingsSheet = false
     @State private var showDeleteConfirm = false
-    @State private var showDuplicateAlert = false
+    @State private var showDuplicateSheet = false
     @State private var showResetItemsConfirm = false
     @State private var showResetAlreadyDoneInfo = false
-    @State private var duplicateName = ""
     
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
@@ -1194,8 +1193,7 @@ struct ListDetailView: View {
             }
             
             Button {
-                duplicateName = "\(list.name) (2)"
-                showDuplicateAlert = true
+                showDuplicateSheet = true
             } label: {
                 Label("Duplicate", systemImage: "doc.on.doc")
             }
@@ -1239,6 +1237,26 @@ struct ListDetailView: View {
                 ownerEmail: authViewModel.currentUser?.email ?? ""
             )
         }
+        .sheet(isPresented: $showDuplicateSheet) {
+            DuplicateListSheet(
+                list: list,
+                onDuplicate: { name, resetRsvp in
+                    showDuplicateSheet = false
+                    Task {
+                        _ = await viewModel.duplicateList(
+                            listId: list.id,
+                            newName: name,
+                            resetRsvp: resetRsvp,
+                            toastController: toastController
+                        )
+                        dismiss()
+                    }
+                },
+                onCancel: {
+                    showDuplicateSheet = false
+                }
+            )
+        }
         .alert("Delete List?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
@@ -1249,16 +1267,6 @@ struct ListDetailView: View {
             }
         } message: {
             Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
-        }
-        .alert("Duplicate List", isPresented: $showDuplicateAlert) {
-            TextField("List name", text: $duplicateName)
-            Button("Cancel", role: .cancel) {}
-            Button("Duplicate") {
-                Task {
-                    await viewModel.duplicateList(listId: list.id, newName: duplicateName)
-                    dismiss()
-                }
-            }
         }
         .alert("Reset items", isPresented: $showResetItemsConfirm) {
             Button("Cancel", role: .cancel) {}

@@ -93,6 +93,7 @@ export const ListSelector = ({
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
   const [duplicatingListId, setDuplicatingListId] = useState(null);
   const [duplicateName, setDuplicateName] = useState('');
+  const [resetRsvpOnDuplicate, setResetRsvpOnDuplicate] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState('');
@@ -409,6 +410,7 @@ export const ListSelector = ({
                 onClick={() => {
                   setDuplicatingListId(list.id);
                   setDuplicateName(`${list.name} (2)`);
+                  setResetRsvpOnDuplicate(false);
                   setMenuOpenId(null);
                 }}
               >
@@ -496,6 +498,7 @@ export const ListSelector = ({
                   onClick={() => {
                     setDuplicatingListId(list.id);
                     setDuplicateName(`${list.name} (2)`);
+                    setResetRsvpOnDuplicate(false);
                     setMenuOpenId(null);
                   }}
                 >
@@ -866,6 +869,20 @@ export const ListSelector = ({
     if (e.target === e.currentTarget) setEditingId(null);
   };
 
+  const closeDuplicateModal = () => {
+    setDuplicatingListId(null);
+    setResetRsvpOnDuplicate(false);
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!duplicatingListId || !duplicateName.trim()) return;
+
+    const result = await onDuplicate(duplicatingListId, duplicateName.trim(), { resetRsvp: resetRsvpOnDuplicate });
+    if (result) {
+      closeDuplicateModal();
+    }
+  };
+
   const handleTypeModalKeyDown = (e) => {
     if (e.key === 'Escape') setChangingTypeForId(null);
   };
@@ -877,6 +894,8 @@ export const ListSelector = ({
   const editingList = editingId ? lists.find((l) => l.id === editingId) : null;
   const changingTypeList = changingTypeForId ? lists.find((l) => l.id === changingTypeForId) : null;
   const editingCategoriesList = editingCategoriesForId ? lists.find((l) => l.id === editingCategoriesForId) : null;
+  const duplicatingList = duplicatingListId ? lists.find((l) => l.id === duplicatingListId) : null;
+  const shouldShowDuplicateReset = duplicatingList?.type === 'guest_list';
 
   return (
     <>
@@ -999,8 +1018,16 @@ export const ListSelector = ({
       {duplicatingListId && createPortal(
         <div
           className={styles.modalBackdrop}
-          onClick={(e) => { if (e.target === e.currentTarget) setDuplicatingListId(null); }}
-          onKeyDown={(e) => { if (e.key === 'Escape') setDuplicatingListId(null); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeDuplicateModal();
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              closeDuplicateModal();
+            }
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Duplicate List"
@@ -1010,7 +1037,7 @@ export const ListSelector = ({
               <h3 className={styles.modalTitle}>Duplicate List</h3>
               <button
                 className={styles.modalCloseBtn}
-                onClick={() => setDuplicatingListId(null)}
+                onClick={closeDuplicateModal}
                 aria-label="Close"
               >
                 &times;
@@ -1022,32 +1049,43 @@ export const ListSelector = ({
                 type="text"
                 value={duplicateName}
                 onChange={(e) => setDuplicateName(e.target.value)}
-                onKeyDown={(e) => {
+                onKeyDown={async (e) => {
                   if (e.key === 'Enter' && duplicateName.trim()) {
-                    onDuplicate(duplicatingListId, duplicateName.trim());
-                    setDuplicatingListId(null);
+                    await handleDuplicateConfirm();
                   }
-                  if (e.key === 'Escape') setDuplicatingListId(null);
+                  if (e.key === 'Escape') {
+                    closeDuplicateModal();
+                  }
                 }}
                 placeholder="New list name..."
                 autoFocus
               />
+              {shouldShowDuplicateReset && (
+                <label className={styles.checkboxField}>
+                  <span className={styles.checkboxRow}>
+                    <input
+                      type="checkbox"
+                      checked={resetRsvpOnDuplicate}
+                      onChange={(e) => setResetRsvpOnDuplicate(e.target.checked)}
+                    />
+                    <span>Reset RSVP statuses</span>
+                  </span>
+                  <span className={styles.checkboxHelp}>Mark all guests as Not Yet Invited in the new list</span>
+                </label>
+              )}
               <div className={styles.editActions}>
                 <button
                   type="button"
                   className={styles.saveBtn}
                   disabled={!duplicateName.trim()}
-                  onClick={() => {
-                    onDuplicate(duplicatingListId, duplicateName.trim());
-                    setDuplicatingListId(null);
-                  }}
+                  onClick={handleDuplicateConfirm}
                 >
                   Duplicate
                 </button>
                 <button
                   type="button"
                   className={styles.cancelBtn}
-                  onClick={() => setDuplicatingListId(null)}
+                  onClick={closeDuplicateModal}
                 >
                   Cancel
                 </button>

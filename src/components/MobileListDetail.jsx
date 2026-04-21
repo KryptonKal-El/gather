@@ -39,6 +39,7 @@ export const MobileListDetail = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [duplicatingList, setDuplicatingList] = useState(false);
   const [duplicateName, setDuplicateName] = useState('');
+  const [resetRsvpOnDuplicate, setResetRsvpOnDuplicate] = useState(false);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
 
@@ -56,6 +57,20 @@ export const MobileListDetail = ({
   const listType = list.type ?? 'grocery';
   const isOwned = !list._isShared;
   const hasItems = (list.items?.length ?? 0) > 0;
+
+  const closeDuplicateModal = () => {
+    setDuplicatingList(false);
+    setResetRsvpOnDuplicate(false);
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!duplicateName.trim()) return;
+
+    const result = await onDuplicate(list.id, duplicateName.trim(), { resetRsvp: resetRsvpOnDuplicate });
+    if (result) {
+      closeDuplicateModal();
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -117,6 +132,7 @@ export const MobileListDetail = ({
                 onClick={() => {
                   setDuplicatingList(true);
                   setDuplicateName(`${list.name} (2)`);
+                  setResetRsvpOnDuplicate(false);
                   setMenuOpen(false);
                 }}
               >
@@ -168,6 +184,7 @@ export const MobileListDetail = ({
                   onClick={() => {
                     setDuplicatingList(true);
                     setDuplicateName(`${list.name} (2)`);
+                    setResetRsvpOnDuplicate(false);
                     setMenuOpen(false);
                   }}
                 >
@@ -224,8 +241,16 @@ export const MobileListDetail = ({
       {duplicatingList && createPortal(
         <div
           className={styles.modalBackdrop}
-          onClick={(e) => { if (e.target === e.currentTarget) setDuplicatingList(false); }}
-          onKeyDown={(e) => { if (e.key === 'Escape') setDuplicatingList(false); }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeDuplicateModal();
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') {
+              closeDuplicateModal();
+            }
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Duplicate List"
@@ -235,7 +260,7 @@ export const MobileListDetail = ({
               <h3 className={styles.modalTitle}>Duplicate List</h3>
               <button
                 className={styles.modalCloseBtn}
-                onClick={() => setDuplicatingList(false)}
+                onClick={closeDuplicateModal}
                 aria-label="Close"
               >
                 &times;
@@ -247,32 +272,43 @@ export const MobileListDetail = ({
                 type="text"
                 value={duplicateName}
                 onChange={(e) => setDuplicateName(e.target.value)}
-                onKeyDown={(e) => {
+                onKeyDown={async (e) => {
                   if (e.key === 'Enter' && duplicateName.trim()) {
-                    onDuplicate(list.id, duplicateName.trim());
-                    setDuplicatingList(false);
+                    await handleDuplicateConfirm();
                   }
-                  if (e.key === 'Escape') setDuplicatingList(false);
+                  if (e.key === 'Escape') {
+                    closeDuplicateModal();
+                  }
                 }}
                 placeholder="New list name..."
                 autoFocus
               />
+              {list.type === 'guest_list' && (
+                <label className={styles.checkboxField}>
+                  <span className={styles.checkboxRow}>
+                    <input
+                      type="checkbox"
+                      checked={resetRsvpOnDuplicate}
+                      onChange={(e) => setResetRsvpOnDuplicate(e.target.checked)}
+                    />
+                    <span>Reset RSVP statuses</span>
+                  </span>
+                  <span className={styles.checkboxHelp}>Mark all guests as Not Yet Invited in the new list</span>
+                </label>
+              )}
               <div className={styles.editActions}>
                 <button
                   type="button"
                   className={styles.saveBtn}
                   disabled={!duplicateName.trim()}
-                  onClick={() => {
-                    onDuplicate(list.id, duplicateName.trim());
-                    setDuplicatingList(false);
-                  }}
+                  onClick={handleDuplicateConfirm}
                 >
                   Duplicate
                 </button>
                 <button
                   type="button"
                   className={styles.cancelBtn}
-                  onClick={() => setDuplicatingList(false)}
+                  onClick={closeDuplicateModal}
                 >
                   Cancel
                 </button>

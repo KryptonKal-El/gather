@@ -343,6 +343,32 @@ export const App = () => {
     }
   }, [resetConfirmList, actions, showToast]);
 
+  const handleDuplicateList = useCallback(async (listId, newName, options = {}) => {
+    try {
+      const result = await actions.duplicateList(listId, newName, options);
+      if (!result) return null;
+
+      const { resetCount, resetFailed } = result;
+
+      if (resetFailed) {
+        showToast({ message: 'List duplicated, but RSVP reset failed', variant: 'error' });
+      } else if (resetCount > 0) {
+        showToast({
+          message: `${resetCount} guest${resetCount === 1 ? '' : 's'} reset`,
+          variant: 'success',
+        });
+      } else {
+        showToast({ message: 'List duplicated', variant: 'success' });
+      }
+
+      return result;
+    } catch (error) {
+      console.error('[App] Failed to duplicate list:', error);
+      showToast({ message: "Couldn't duplicate list — try again", variant: 'error' });
+      return null;
+    }
+  }, [actions, showToast]);
+
   if (isLoading) {
     return (
       <>
@@ -429,7 +455,7 @@ export const App = () => {
                   onCreate={actions.createList}
                   onUpdateDetails={actions.updateListDetails}
                   onDelete={actions.deleteList}
-                  onDuplicate={actions.duplicateList}
+                  onDuplicate={handleDuplicateList}
                   onResetItems={handleResetItems}
                   onShareClick={(list) => setSharingListId(list.id)}
                 />
@@ -455,7 +481,7 @@ export const App = () => {
                 onUpdateItem={handleUpdateItem}
                 onClearChecked={handleClearChecked}
                 onShareClick={(list) => setSharingListId(list.id)}
-                onDuplicate={actions.duplicateList}
+                onDuplicate={handleDuplicateList}
                 onResetItems={handleResetItems}
                 onSortSelect={handleSortSelect}
                 restoredItemIds={restoredItemIds}
@@ -707,7 +733,7 @@ export const App = () => {
             onCreate={actions.createList}
             onUpdateDetails={actions.updateListDetails}
             onDelete={actions.deleteList}
-            onDuplicate={actions.duplicateList}
+            onDuplicate={handleDuplicateList}
             onResetItems={handleResetItems}
             onShareClick={(list) => setSharingListId(list.id)}
           />

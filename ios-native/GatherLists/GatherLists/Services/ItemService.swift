@@ -183,6 +183,11 @@ struct ItemService {
         imageUrl: String?,
         unit: String = "each",
         rsvpStatus: String? = nil,
+        dueDate: Date? = nil,
+        recurrenceRule: RecurrenceRule? = nil,
+        reminderDaysBefore: Int? = nil,
+        parentItemId: UUID? = nil,
+        reminderSentAt: Date? = nil,
         createdBy: UUID? = nil
     ) async throws -> Item {
         let restoreData = RestoreItem(
@@ -196,6 +201,11 @@ struct ItemService {
             imageUrl: imageUrl,
             unit: unit,
             rsvpStatus: rsvpStatus,
+            dueDate: dueDate,
+            recurrenceRule: recurrenceRule,
+            reminderDaysBefore: reminderDaysBefore,
+            parentItemId: parentItemId,
+            reminderSentAt: reminderSentAt,
             createdBy: createdBy
         )
         let item: Item = try await client
@@ -223,6 +233,11 @@ struct ItemService {
                 imageUrl: item.imageUrl,
                 unit: item.unit,
                 rsvpStatus: item.rsvpStatus,
+                dueDate: item.dueDate,
+                recurrenceRule: item.recurrenceRule,
+                reminderDaysBefore: item.reminderDaysBefore,
+                parentItemId: item.parentItemId,
+                reminderSentAt: item.reminderSentAt,
                 createdBy: item.createdBy
             )
             restored.append(restoredItem)
@@ -429,6 +444,11 @@ private struct RestoreItem: Encodable {
     let imageUrl: String?
     var unit: String = "each"
     let rsvpStatus: String?
+    let dueDate: Date?
+    let recurrenceRule: RecurrenceRule?
+    let reminderDaysBefore: Int?
+    let parentItemId: UUID?
+    let reminderSentAt: Date?
     let createdBy: UUID?
     
     enum CodingKeys: String, CodingKey {
@@ -442,6 +462,11 @@ private struct RestoreItem: Encodable {
         case imageUrl = "image_url"
         case unit
         case rsvpStatus = "rsvp_status"
+        case dueDate = "due_date"
+        case recurrenceRule = "recurrence_rule"
+        case reminderDaysBefore = "reminder_days_before"
+        case parentItemId = "parent_item_id"
+        case reminderSentAt = "reminder_sent_at"
         case createdBy = "created_by"
     }
 }

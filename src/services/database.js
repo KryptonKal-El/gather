@@ -105,86 +105,121 @@ export const deleteList = async (userId, listId) => {
  * Works for both owned and shared lists.
  * @param {string} listId - Source list ID to duplicate
  * @param {string} newName - Name for the duplicated list
- * @returns {Promise<object>} The newly created list object
+ * @param {{resetRsvp?: boolean}} [options] - Duplicate options
+ * @returns {Promise<{list: object, resetCount: number, resetFailed: boolean}>} Duplicate result
  */
-export const duplicateList = async (listId, newName) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Not authenticated');
+export const duplicateList = async (listId, newName, options = {}) => {
+  try {
+    const { resetRsvp = false } = options;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
 
-  const { data: sourceList, error: listError } = await supabase
-    .from('lists')
-    .select('*')
-    .eq('id', listId)
-    .single();
+    const { data: sourceList, error: listError } = await supabase
+      .from('lists')
+      .select('*')
+      .eq('id', listId)
+      .single();
 
-  if (listError) throw new Error(`Failed to fetch source list: listId=${listId}`, { cause: listError });
+    if (listError) throw new Error(`Failed to fetch source list: listId=${listId}`, { cause: listError });
 
-  const { data: sourceItems, error: itemsError } = await supabase
-    .from('items')
-    .select('*')
-    .eq('list_id', listId);
+    const { data: sourceItems, error: itemsError } = await supabase
+      .from('items')
+      .select('*')
+      .eq('list_id', listId);
 
-  if (itemsError) throw new Error(`Failed to fetch source items: listId=${listId}`, { cause: itemsError });
+    if (itemsError) throw new Error(`Failed to fetch source items: listId=${listId}`, { cause: itemsError });
 
-  const { data: maxRow } = await supabase
-    .from('lists')
-    .select('sort_order')
-    .eq('owner_id', user.id)
-    .order('sort_order', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    const isSharedListDuplicate = sourceList.owner_id !== user.id;
 
-  const nextSortOrder = maxRow?.sort_order != null ? maxRow.sort_order + 1 : 0;
+    const { data: maxRow } = await supabase
+      .from('lists')
+      .select('sort_order')
+      .eq('owner_id', user.id)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-  const { data: newList, error: insertError } = await supabase
-    .from('lists')
-    .insert({
-      owner_id: user.id,
-      name: newName,
-      emoji: sourceList.emoji,
-      color: sourceList.color,
-      type: sourceList.type,
-      sort_config: sourceList.sort_config,
-      categories: sourceList.categories,
-      item_count: 0,
-      sort_order: nextSortOrder,
-    })
-    .select('*')
-    .single();
+    const nextSortOrder = maxRow?.sort_order != null ? maxRow.sort_order + 1 : 0;
 
-  if (insertError) throw new Error(`Failed to create duplicate list: name=${newName}`, { cause: insertError });
+    const { data: newList, error: insertError } = await supabase
+      .from('lists')
+      .insert({
+        owner_id: user.id,
+        name: newName,
+        emoji: sourceList.emoji,
+        color: sourceList.color,
+        type: sourceList.type,
+        sort_config: sourceList.sort_config,
+        categories: sourceList.categories,
+        item_count: 0,
+        sort_order: nextSortOrder,
+      })
+      .select('*')
+      .single();
 
-  if (sourceItems.length > 0) {
-    const newItems = sourceItems.map((item) => ({
-      list_id: newList.id,
-      name: item.name,
-      quantity: item.quantity,
-      unit: item.unit,
-      price: item.price,
-      category: item.category,
-      store_id: item.store_id,
-      image_url: item.image_url,
-      sort_order: item.sort_order,
-      is_checked: false,
-    }));
+    if (insertError) throw new Error(`Failed to create duplicate list: name=${newName}`, { cause: insertError });
 
-    const { error: itemsInsertError } = await supabase.from('items').insert(newItems);
-    if (itemsInsertError) throw new Error(`Failed to copy items to duplicate list: listId=${newList.id}`, { cause: itemsInsertError });
+    if (sourceItems.length > 0) {
+      const newItems = sourceItems.map((item) => ({
+        list_id: newList.id,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        price: item.price,
+        category: item.category,
+        store_id: isSharedListDuplicate ? null : item.store_id,
+        image_url: item.image_url,
+        // items table has no sort_order column; ordering is determined elsewhere
+        rsvp_status: item.rsvp_status,
+        due_date: item.due_date,
+        recurrence_rule: item.recurrence_rule,
+        reminder_days_before: item.reminder_days_before,
+        // parent_item_id intentionally not copied — would reference source list's items
+        parent_item_id: null,
+        reminder_sent_at: item.reminder_sent_at,
+        is_checked: false,
+      }));
+
+      const { error: itemsInsertError } = await supabase.from('items').insert(newItems);
+      if (itemsInsertError) throw new Error(`Failed to copy items to duplicate list: listId=${newList.id}`, { cause: itemsInsertError });
+    }
+
+    let resetCount = 0;
+    let resetFailed = false;
+
+    if (resetRsvp === true && sourceList.type === 'guest_list') {
+      try {
+        resetCount = await resetGuestListRsvp(newList.id);
+      } catch (error) {
+        resetFailed = true;
+        console.error('[duplicateList] RSVP reset failed after duplicate', {
+          sourceListId: listId,
+          newListId: newList.id,
+          error,
+        });
+      }
+    }
+
+    return {
+      list: {
+        id: newList.id,
+        name: newList.name,
+        emoji: newList.emoji,
+        color: newList.color,
+        itemCount: newList.item_count,
+        ownerId: newList.owner_id,
+        createdAt: newList.created_at,
+        sortConfig: newList.sort_config,
+        sortOrder: newList.sort_order,
+        type: newList.type,
+        categories: newList.categories,
+      },
+      resetCount,
+      resetFailed,
+    };
+  } catch (error) {
+    throw new Error(`Failed to duplicate list: listId=${listId}, name=${newName}`, { cause: error });
   }
-
-  return {
-    id: newList.id,
-    name: newList.name,
-    emoji: newList.emoji,
-    color: newList.color,
-    itemCount: newList.item_count,
-    ownerId: newList.owner_id,
-    createdAt: newList.created_at,
-    sortConfig: newList.sort_config,
-    sortOrder: newList.sort_order,
-    type: newList.type,
-    categories: newList.categories,
-  };
 };
 
 /**
