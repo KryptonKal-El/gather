@@ -149,7 +149,7 @@ export const ShoppingList = ({
     const counts = { invited: 0, confirmed: 0, declined: 0, maybe: 0, not_invited: 0 };
     let totalHeadCount = 0;
     for (const item of items) {
-      const status = item.rsvpStatus ?? 'invited';
+      const status = item.rsvpStatus ?? 'not_invited';
       counts[status] = (counts[status] ?? 0) + (item.quantity ?? 1);
       totalHeadCount += item.quantity ?? 1;
     }

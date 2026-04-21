@@ -439,6 +439,22 @@ final class ListViewModel {
         activeListId = id
         persistLastListIdDebounced(id)
     }
+
+    func resetGuestListRsvp(listId: UUID) async -> Int {
+        guard ownedLists.contains(where: { $0.id == listId }) else {
+            error = "Only the list owner can reset RSVP statuses"
+            print("[ListViewModel] Failed to reset RSVP: Only the list owner can reset RSVP statuses")
+            return 0
+        }
+
+        do {
+            return try await ItemService.resetRsvpStatuses(listId: listId)
+        } catch {
+            self.error = error.localizedDescription
+            print("[ListViewModel] Failed to reset RSVP: \(error.localizedDescription)")
+            return 0
+        }
+    }
     
     private func persistLastListIdDebounced(_ listId: UUID?) {
         // Update UserDefaults cache immediately for fast launch restore

@@ -512,13 +512,13 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
               <div className={styles.rsvpPickerWrapper}>
                 <select
                   className={styles.rsvpPickerSelect}
-                  value={item.rsvpStatus ?? 'invited'}
+                  value={item.rsvpStatus ?? 'not_invited'}
                   onChange={(e) => {
                     e.stopPropagation();
                     onUpdateItem(item.id, { rsvpStatus: e.target.value });
                   }}
                   onClick={(e) => e.stopPropagation()}
-                  style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus] ?? RSVP_COLORS.invited }}
+                  style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus ?? 'not_invited'] ?? RSVP_COLORS.not_invited }}
                 >
                   <option value="invited">Invited</option>
                   <option value="confirmed">Confirmed</option>
@@ -706,7 +706,7 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
               <span className={styles.editLabel}>RSVP</span>
               <select
                 className={styles.rsvpSelect}
-                value={item.rsvpStatus ?? 'invited'}
+                value={item.rsvpStatus ?? 'not_invited'}
                 onChange={(e) => onUpdateItem(item.id, { rsvpStatus: e.target.value })}
               >
                 <option value="invited">Invited</option>

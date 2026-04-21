@@ -500,6 +500,22 @@ export const clearCheckedItems = async (userId, listId, checkedItemIds) => {
 };
 
 /**
+ * Resets RSVP statuses for all non-reset guest list items.
+ * @param {string} listId - List ID to update
+ * @returns {Promise<number>} Number of items reset
+ */
+export const resetGuestListRsvp = async (listId) => {
+  try {
+    const { data, error } = await supabase.rpc('reset_guest_list_rsvp', { p_list_id: listId });
+
+    if (error) throw error;
+    return data ?? 0;
+  } catch (error) {
+    throw new Error(`Failed to reset RSVP statuses: listId=${listId}`, { cause: error });
+  }
+};
+
+/**
  * Subscribes to all items in a list.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
  * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.

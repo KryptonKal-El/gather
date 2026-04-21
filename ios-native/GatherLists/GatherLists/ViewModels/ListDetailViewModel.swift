@@ -505,7 +505,41 @@ final class ListDetailViewModel {
             return []
         }
     }
-    
+
+    func resetRsvp() async -> Int {
+        guard ownerId == userId else {
+            error = "Only the list owner can reset RSVP statuses"
+            print("[ListDetailViewModel] Failed to reset RSVP: Only the list owner can reset RSVP statuses")
+            return 0
+        }
+
+        let affectedIds: Set<UUID> = Set(items.filter { ($0.rsvpStatus ?? "not_invited") != "not_invited" }.map { $0.id })
+        guard !affectedIds.isEmpty else { return 0 }
+
+        let snapshot: [UUID: String?] = Dictionary(
+            uniqueKeysWithValues: items
+                .filter { affectedIds.contains($0.id) }
+                .map { ($0.id, $0.rsvpStatus) }
+        )
+
+        for index in items.indices where affectedIds.contains(items[index].id) {
+            items[index].rsvpStatus = "not_invited"
+        }
+
+        do {
+            let count = try await ItemService.resetRsvpStatuses(listId: listId)
+            return count
+        } catch {
+            for (id, originalStatus) in snapshot {
+                guard let index = items.firstIndex(where: { $0.id == id }) else { continue }
+                items[index].rsvpStatus = originalStatus
+            }
+            self.error = error.localizedDescription
+            print("[ListDetailViewModel] Failed to reset RSVP: \(error.localizedDescription)")
+            return 0
+        }
+    }
+
     func restoreItem(_ item: Item) async {
         do {
             let restoredItem = try await ItemService.restoreItem(

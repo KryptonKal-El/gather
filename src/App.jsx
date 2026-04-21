@@ -320,12 +320,17 @@ export const App = () => {
     setResetConfirmList({ list, count });
   }, [activeList]);
 
-  const handleResetConfirm = useCallback(() => {
+  const handleResetConfirm = useCallback(async () => {
     if (!resetConfirmList) return;
 
-    console.log('[US-002] Reset confirmed for list:', resetConfirmList.list.id, 'count:', resetConfirmList.count);
+    const { list } = resetConfirmList;
     setResetConfirmList(null);
-  }, [resetConfirmList]);
+    try {
+      await actions.resetGuestListRsvp(list.id);
+    } catch (err) {
+      console.error('[US-003] Reset failed:', err);
+    }
+  }, [resetConfirmList, actions]);
 
   if (isLoading) {
     return (

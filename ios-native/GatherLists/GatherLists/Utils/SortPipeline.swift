@@ -454,7 +454,7 @@ enum SortPipeline {
         var grouped: [String: [Item]] = [:]
         
         for item in items {
-            let status = item.rsvpStatus ?? "invited"
+            let status = item.rsvpStatus ?? "not_invited"
             grouped[status, default: []].append(item)
         }
         

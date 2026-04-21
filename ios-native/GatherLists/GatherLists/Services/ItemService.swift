@@ -141,6 +141,16 @@ struct ItemService {
             .eq("id", value: itemId)
             .execute()
     }
+
+    /// Resets RSVP statuses for all non-reset items in a guest list.
+    static func resetRsvpStatuses(listId: UUID) async throws -> Int {
+        let count: Int = try await client
+            .rpc("reset_guest_list_rsvp", params: ["p_list_id": listId])
+            .execute()
+            .value
+
+        return count
+    }
     
     /// Deletes a single item.
     static func deleteItem(itemId: UUID) async throws {

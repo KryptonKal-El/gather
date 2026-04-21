@@ -5,25 +5,27 @@
   "prdId": "prd-reset-list-items",
   "branch": "main",
   "startedAt": "2026-04-21T10:30:00Z",
-  "lastHeartbeat": "2026-04-21T10:30:00Z",
-  "currentChunk": "US-002-confirmation-dialog",
+  "lastHeartbeat": "2026-04-21T16:15:00Z",
+  "currentChunk": "US-004-realtime-sync",
   "analysisCompleted": true,
   "probeStatus": "user-skipped",
   "chunks": [
     {
       "id": "US-001",
       "slug": "reset-items-menu",
-      "status": "pending"
+      "status": "completed",
+      "commitHash": "3d2c587"
     },
     {
       "id": "US-002",
       "slug": "confirmation-dialog",
-      "status": "pending"
+      "status": "completed",
+      "commitHash": "e284942"
     },
     {
       "id": "US-003",
       "slug": "supabase-reset",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "id": "US-004",
@@ -47,9 +49,9 @@
     }
   ],
   "currentAction": {
-    "description": "US-002 complete — committing",
-    "contextAnchor": "docs/prd.json",
-    "lastAction": "Critic findings fixed, staging commit",
-    "updatedAt": "2026-04-21T15:47:23Z"
+    "description": "US-003 complete with critic fixes (owner-only RPC + audit + optimistic rollback). Advancing to US-004 realtime sync verification.",
+    "contextAnchor": "supabase/migrations/20260421120000_reset_guest_list_rsvp_rpc.sql",
+    "lastAction": "US-003 commit pending",
+    "updatedAt": "2026-04-21T16:15:00Z"
   }
 }

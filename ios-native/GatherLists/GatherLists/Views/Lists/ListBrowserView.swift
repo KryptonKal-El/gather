@@ -109,7 +109,9 @@ struct ListBrowserView: View {
             .alert("Reset items", isPresented: $showResetItemsConfirm, presenting: listToResetItems) { list in
                 Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
-                    print("[US-002] Reset confirmed for list: \(list.id)")
+                    Task {
+                        await viewModel?.resetGuestListRsvp(listId: list.id)
+                    }
                 }
             } message: { list in
                 Text("Reset all \(list.itemCount) guests to Not Yet Invited? This will clear their current RSVP status.")

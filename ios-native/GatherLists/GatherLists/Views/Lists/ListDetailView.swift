@@ -310,7 +310,7 @@ struct ListDetailView: View {
               let items = detailViewModel?.items else { return nil }
         var confirmed = 0, maybe = 0, declined = 0, invited = 0, notInvited = 0, totalHeadCount = 0
         for item in items {
-            let status = item.rsvpStatus ?? "invited"
+            let status = item.rsvpStatus ?? "not_invited"
             let count = item.quantity
             switch status {
             case "confirmed": confirmed += count
@@ -718,7 +718,7 @@ struct ListDetailView: View {
                                 }
                             }
                         } label: {
-                            Text(rsvpDisplayName(for: item.rsvpStatus ?? "invited"))
+                            Text(rsvpDisplayName(for: item.rsvpStatus ?? "not_invited"))
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundStyle(.white)
@@ -726,11 +726,11 @@ struct ListDetailView: View {
                                 .padding(.vertical, 3)
                                 .background(
                                     Capsule()
-                                        .fill(rsvpColor(for: item.rsvpStatus))
+                                        .fill(rsvpColor(for: item.rsvpStatus ?? "not_invited"))
                                 )
                         }
                     } else {
-                        Text(rsvpDisplayName(for: item.rsvpStatus ?? "invited"))
+                        Text(rsvpDisplayName(for: item.rsvpStatus ?? "not_invited"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -1001,7 +1001,7 @@ struct ListDetailView: View {
                     }
                 }
             } label: {
-                let rsvpLabel = rsvpDisplayName(for: item.rsvpStatus ?? "invited")
+                let rsvpLabel = rsvpDisplayName(for: item.rsvpStatus ?? "not_invited")
                 Label("RSVP: \(rsvpLabel)", systemImage: "person.crop.circle.badge.questionmark")
             }
         }
@@ -1135,13 +1135,13 @@ struct ListDetailView: View {
         return formatter.string(from: date)
     }
     
-    private func rsvpColor(for status: String?) -> Color {
+    private func rsvpColor(for status: String) -> Color {
         switch status {
         case "confirmed": return Color(hex: "#4caf50")
         case "declined": return Color(hex: "#f44336")
         case "maybe": return Color(hex: "#ff9800")
         case "not_invited": return Color(hex: "#9e9e9e")
-        default: return Color(hex: "#42a5f5")   // "invited" or nil
+        default: return Color(hex: "#42a5f5")
         }
     }
     
@@ -1262,7 +1262,9 @@ struct ListDetailView: View {
         .alert("Reset items", isPresented: $showResetItemsConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive) {
-                print("[US-002] Reset confirmed for list: \(list.id)")
+                Task {
+                    await detailViewModel?.resetRsvp()
+                }
             }
         } message: {
             Text("Reset all \(detailViewModel?.items.count ?? 0) guests to Not Yet Invited? This will clear their current RSVP status.")

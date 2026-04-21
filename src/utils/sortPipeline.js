@@ -430,7 +430,7 @@ const groupByRsvp = (items, stores, remainingLevels, listType, listCategories) =
   const grouped = new Map();
 
   for (const item of items) {
-    const status = item.rsvpStatus ?? 'invited';
+    const status = item.rsvpStatus ?? 'not_invited';
     if (!grouped.has(status)) {
       grouped.set(status, []);
     }

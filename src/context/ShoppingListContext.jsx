@@ -24,6 +24,7 @@ import {
   updateItem as dbUpdateItem,
   removeItem as dbRemoveItem,
   clearCheckedItems,
+  resetGuestListRsvp,
   addHistoryEntry,
   addHistoryEntries,
   createStore as dbCreateStore,
@@ -44,7 +45,7 @@ const LAST_LIST_ID_KEY = 'gather_last_list_id';
 /** Capitalizes the first letter of a string. */
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
-export const ShoppingListContext = createContext(null);
+export const ShoppingListContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
 
 /**
  * Provides shopping list state and actions to the component tree.
@@ -651,6 +652,13 @@ export const ShoppingListProvider = ({ children }) => {
     await clearCheckedItems(ownerUid, listId, checkedIds);
   }, [userId, activeItems, getListOwnerUid]);
 
+  const resetGuestListRsvpAction = useCallback(async (listId) => {
+    if (!userId || !listId) return 0;
+    const ownerUid = getListOwnerUid(listId);
+    if (ownerUid !== userId) return 0;
+    return await resetGuestListRsvp(listId);
+  }, [userId, getListOwnerUid]);
+
   /**
    * Restores a previously deleted item with its original data.
    * Used by undo functionality to re-insert items after swipe-delete.
@@ -793,6 +801,7 @@ export const ShoppingListProvider = ({ children }) => {
     removeItem: removeItemAction,
     updateItem: updateItemAction,
     clearChecked: clearCheckedAction,
+    resetGuestListRsvp: resetGuestListRsvpAction,
     restoreItem: restoreItemAction,
     restoreItems: restoreItemsAction,
     addStore: addStoreAction,
