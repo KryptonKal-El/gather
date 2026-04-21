@@ -31,6 +31,7 @@ export const MobileListDetail = ({
   onClearChecked,
   onShareClick,
   onDuplicate,
+  onResetItems,
   onSortSelect,
   restoredItemIds,
   onRestoreAnimationDone,
@@ -53,6 +54,8 @@ export const MobileListDetail = ({
   }, [menuOpen]);
 
   const listType = list.type ?? 'grocery';
+  const isOwned = !list._isShared;
+  const hasItems = (list.items?.length ?? 0) > 0;
 
   return (
     <div className={styles.container}>
@@ -120,6 +123,21 @@ export const MobileListDetail = ({
                 <span className={styles.menuIcon}>📋</span>
                 Duplicate
               </button>
+              {isOwned && list.type === 'guest_list' && onResetItems && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  disabled={!hasItems}
+                  onClick={() => {
+                    if (!hasItems) return;
+                    onResetItems?.(list);
+                    setMenuOpen(false);
+                  }}
+                >
+                  <span className={styles.menuIcon}>🔄</span>
+                  Reset items
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -155,6 +173,21 @@ export const MobileListDetail = ({
                 >
                   Duplicate
                 </button>
+                {isOwned && list.type === 'guest_list' && onResetItems && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    disabled={!hasItems}
+                    onClick={() => {
+                      if (!hasItems) return;
+                      onResetItems?.(list);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <span className={styles.menuIcon}>🔄</span>
+                    Reset items
+                  </button>
+                )}
               </div>
               <button
                 type="button"
@@ -278,6 +311,7 @@ MobileListDetail.propTypes = {
   onClearChecked: PropTypes.func.isRequired,
   onShareClick: PropTypes.func,
   onDuplicate: PropTypes.func.isRequired,
+  onResetItems: PropTypes.func,
   onSortSelect: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,
@@ -288,6 +322,7 @@ MobileListDetail.defaultProps = {
   listSortConfig: null,
   listCategories: null,
   isGuest: false,
+  onResetItems: null,
   restoredItemIds: null,
   onRestoreAnimationDone: null,
 };

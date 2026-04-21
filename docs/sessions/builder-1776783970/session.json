@@ -1,0 +1,55 @@
+{
+  "sessionId": "builder-1776783970",
+  "status": "in_progress",
+  "mode": "prd",
+  "prdId": "prd-reset-list-items",
+  "branch": "main",
+  "startedAt": "2026-04-21T10:30:00Z",
+  "lastHeartbeat": "2026-04-21T10:30:00Z",
+  "currentChunk": "US-001",
+  "analysisCompleted": true,
+  "probeStatus": "user-skipped",
+  "chunks": [
+    {
+      "id": "US-001",
+      "slug": "reset-items-menu",
+      "status": "pending"
+    },
+    {
+      "id": "US-002",
+      "slug": "confirmation-dialog",
+      "status": "pending"
+    },
+    {
+      "id": "US-003",
+      "slug": "supabase-reset",
+      "status": "pending"
+    },
+    {
+      "id": "US-004",
+      "slug": "realtime-sync",
+      "status": "pending"
+    },
+    {
+      "id": "US-005",
+      "slug": "undo-support",
+      "status": "pending"
+    },
+    {
+      "id": "US-006",
+      "slug": "duplicate-parity-fix",
+      "status": "pending"
+    },
+    {
+      "id": "US-007",
+      "slug": "empty-state-edge-cases",
+      "status": "pending"
+    }
+  ],
+  "currentAction": {
+    "description": "US-001 verified, committing",
+    "contextAnchor": "src/components/MobileListDetail.jsx",
+    "lastAction": "Critics passed, fixup applied",
+    "updatedAt": "2026-04-21T15:25:14Z"
+  }
+}

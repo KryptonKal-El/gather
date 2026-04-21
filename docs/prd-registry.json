@@ -4,14 +4,17 @@
     {
       "id": "prd-reset-list-items",
       "name": "Reset List Items",
-      "status": "ready",
+      "status": "in_progress",
       "filePath": "docs/prds/prd-reset-list-items.md",
       "jsonPath": "docs/prds/prd-reset-list-items.json",
       "branchName": "feature/reset-list-items",
       "createdAt": "2026-04-21",
       "updatedAt": "2026-04-21",
       "estimatedStories": 7,
-      "notes": "Guest List only in v1. Reset all RSVP statuses to not_invited. Owner-only action. 3-dot menu (web+iOS) + toggle in existing iOS duplicate-list flow."
+      "notes": "Guest List only in v1. Reset all RSVP statuses to not_invited. Owner-only action. 3-dot menu (web+iOS) + toggle in existing iOS duplicate-list flow.",
+      "startedAt": "2026-04-21T10:30:00Z",
+      "currentStory": "US-002",
+      "storiesCompleted": 1
     },
     {
       "id": "prd-app-store-distribution",

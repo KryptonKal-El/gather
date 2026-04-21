@@ -289,6 +289,10 @@ export const App = () => {
     return () => clearTimeout(timer);
   }, [avatarUploadError]);
 
+  const handleResetItems = useCallback((list) => {
+    console.log('[US-001] Reset items requested for list:', list?.id, list?.name);
+  }, []);
+
   if (isLoading) {
     return (
       <>
@@ -376,6 +380,7 @@ export const App = () => {
                   onUpdateDetails={actions.updateListDetails}
                   onDelete={actions.deleteList}
                   onDuplicate={actions.duplicateList}
+                  onResetItems={handleResetItems}
                   onShareClick={(list) => setSharingListId(list.id)}
                 />
               </div>
@@ -401,6 +406,7 @@ export const App = () => {
                 onClearChecked={handleClearChecked}
                 onShareClick={(list) => setSharingListId(list.id)}
                 onDuplicate={actions.duplicateList}
+                onResetItems={handleResetItems}
                 onSortSelect={handleSortSelect}
                 restoredItemIds={restoredItemIds}
                 onRestoreAnimationDone={handleRestoreAnimationDone}
@@ -652,6 +658,7 @@ export const App = () => {
             onUpdateDetails={actions.updateListDetails}
             onDelete={actions.deleteList}
             onDuplicate={actions.duplicateList}
+            onResetItems={handleResetItems}
             onShareClick={(list) => setSharingListId(list.id)}
           />
         </aside>

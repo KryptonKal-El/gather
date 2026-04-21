@@ -51,6 +51,7 @@ struct ListDetailView: View {
     @State private var showShareSettingsSheet = false
     @State private var showDeleteConfirm = false
     @State private var showDuplicateAlert = false
+    @State private var showResetItemsConfirm = false
     @State private var duplicateName = ""
     
     private var navigationTitle: String {
@@ -1195,6 +1196,15 @@ struct ListDetailView: View {
                 showDuplicateAlert = true
             } label: {
                 Label("Duplicate", systemImage: "doc.on.doc")
+            }
+
+            if isOwned && list.type == "guest_list" {
+                Button {
+                    showResetItemsConfirm = true
+                } label: {
+                    Label("Reset items", systemImage: "arrow.counterclockwise")
+                }
+                .disabled(detailViewModel?.items.isEmpty ?? true)
             }
             
             Divider()

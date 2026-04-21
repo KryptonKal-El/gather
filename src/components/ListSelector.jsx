@@ -81,6 +81,7 @@ export const ListSelector = ({
   onUpdateDetails,
   onDelete,
   onDuplicate,
+  onResetItems,
   onShareClick,
 }) => {
   const [newName, setNewName] = useState('');
@@ -414,6 +415,21 @@ export const ListSelector = ({
                 <span className={styles.menuIcon}>📋</span>
                 Duplicate
               </button>
+              {isOwned && list.type === 'guest_list' && onResetItems && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  disabled={(list.itemCount ?? 0) === 0}
+                  onClick={() => {
+                    if ((list.itemCount ?? 0) === 0) return;
+                    onResetItems?.(list);
+                    setMenuOpenId(null);
+                  }}
+                >
+                  <span className={styles.menuIcon}>🔄</span>
+                  Reset items
+                </button>
+              )}
               {isOwned && (
                 <button
                   type="button"
@@ -485,6 +501,21 @@ export const ListSelector = ({
                 >
                   Duplicate
                 </button>
+                {isOwned && list.type === 'guest_list' && onResetItems && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    disabled={(list.itemCount ?? 0) === 0}
+                    onClick={() => {
+                      if ((list.itemCount ?? 0) === 0) return;
+                      onResetItems?.(list);
+                      setMenuOpenId(null);
+                    }}
+                  >
+                    <span className={styles.menuIcon}>🔄</span>
+                    Reset items
+                  </button>
+                )}
                 {isOwned && (
                   <button
                     type="button"
@@ -1039,5 +1070,6 @@ ListSelector.propTypes = {
   onUpdateDetails: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onDuplicate: PropTypes.func.isRequired,
+  onResetItems: PropTypes.func,
   onShareClick: PropTypes.func,
 };

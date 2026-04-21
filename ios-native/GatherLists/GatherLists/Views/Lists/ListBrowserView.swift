@@ -14,6 +14,8 @@ struct ListBrowserView: View {
     @State private var pendingDeepLinkId: UUID?
     @State private var showDuplicateAlert = false
     @State private var listToDuplicate: GatherList?
+    @State private var showResetItemsConfirm = false
+    @State private var listToResetItems: GatherList?
     @State private var duplicateName = ""
     
     private var allFiltered: [GatherList] {
@@ -169,6 +171,17 @@ struct ListBrowserView: View {
                             } label: {
                                 Label("Duplicate", systemImage: "doc.on.doc")
                             }
+
+                             if isOwned && list.type == "guest_list" {
+                                 Button {
+                                     listToResetItems = list
+                                     showResetItemsConfirm = true
+                                 } label: {
+                                     Label("Reset items", systemImage: "arrow.counterclockwise")
+                                 }
+                                 .disabled(list.itemCount == 0)
+                                 // US-002: confirmation alert; disabled-when-empty handled at dialog/action level.
+                             }
                             
                             if isOwned {
                                 Divider()
