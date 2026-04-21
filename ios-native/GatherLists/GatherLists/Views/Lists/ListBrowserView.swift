@@ -93,19 +93,27 @@ struct ListBrowserView: View {
             } message: { list in
                 Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
             }
-        .alert("Duplicate List", isPresented: $showDuplicateAlert) {
-            TextField("List name", text: $duplicateName)
-            Button("Cancel", role: .cancel) {}
-            Button("Duplicate") {
-                guard let list = listToDuplicate else { return }
-                Task {
-                    await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
-                    if let newId = viewModel?.activeListId {
-                        navigateToList(id: newId)
+            .alert("Duplicate List", isPresented: $showDuplicateAlert) {
+                TextField("List name", text: $duplicateName)
+                Button("Cancel", role: .cancel) {}
+                Button("Duplicate") {
+                    guard let list = listToDuplicate else { return }
+                    Task {
+                        await viewModel?.duplicateList(listId: list.id, newName: duplicateName)
+                        if let newId = viewModel?.activeListId {
+                            navigateToList(id: newId)
+                        }
                     }
                 }
             }
-        }
+            .alert("Reset items", isPresented: $showResetItemsConfirm, presenting: listToResetItems) { list in
+                Button("Cancel", role: .cancel) {}
+                Button("Reset", role: .destructive) {
+                    print("[US-002] Reset confirmed for list: \(list.id)")
+                }
+            } message: { list in
+                Text("Reset all \(list.itemCount) guests to Not Yet Invited? This will clear their current RSVP status.")
+            }
         }
         .onAppear {
             initializeViewModelIfNeeded()
@@ -173,10 +181,13 @@ struct ListBrowserView: View {
                             }
 
                              if isOwned && list.type == "guest_list" {
-                                 Button {
-                                     listToResetItems = list
-                                     showResetItemsConfirm = true
-                                 } label: {
+                                  Button {
+                                      // Browser rows do not load item RSVP data, so this view always
+                                      // shows the confirmation alert and lets the detail screen handle
+                                      // the already-reset edge case when item data is available.
+                                      listToResetItems = list
+                                      showResetItemsConfirm = true
+                                  } label: {
                                      Label("Reset items", systemImage: "arrow.counterclockwise")
                                  }
                                  .disabled(list.itemCount == 0)

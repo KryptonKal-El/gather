@@ -52,6 +52,7 @@ struct ListDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showDuplicateAlert = false
     @State private var showResetItemsConfirm = false
+    @State private var showResetAlreadyDoneInfo = false
     @State private var duplicateName = ""
     
     private var navigationTitle: String {
@@ -1200,7 +1201,15 @@ struct ListDetailView: View {
 
             if isOwned && list.type == "guest_list" {
                 Button {
-                    showResetItemsConfirm = true
+                    let remaining = (detailViewModel?.items ?? []).filter {
+                        ($0.rsvpStatus ?? "not_invited") != "not_invited"
+                    }.count
+
+                    if remaining == 0 {
+                        showResetAlreadyDoneInfo = true
+                    } else {
+                        showResetItemsConfirm = true
+                    }
                 } label: {
                     Label("Reset items", systemImage: "arrow.counterclockwise")
                 }
@@ -1249,6 +1258,19 @@ struct ListDetailView: View {
                     dismiss()
                 }
             }
+        }
+        .alert("Reset items", isPresented: $showResetItemsConfirm) {
+            Button("Cancel", role: .cancel) {}
+            Button("Reset", role: .destructive) {
+                print("[US-002] Reset confirmed for list: \(list.id)")
+            }
+        } message: {
+            Text("Reset all \(detailViewModel?.items.count ?? 0) guests to Not Yet Invited? This will clear their current RSVP status.")
+        }
+        .alert("Already reset", isPresented: $showResetAlreadyDoneInfo) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("All guests are already at Not Yet Invited")
         }
     }
     

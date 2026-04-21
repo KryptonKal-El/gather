@@ -52,8 +52,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Web: handleResetItems shows destructive/info ConfirmDialog; ConfirmDialog extended with title + optional cancel + neutral confirm + alertdialog role + aria-labelledby/describedby. iOS: .alert modifiers on both ListDetailView (destructive + info) and ListBrowserView (destructive only — row items not loaded).",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -64,7 +64,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T15:47:23Z"
     },
     {
       "id": "US-003",

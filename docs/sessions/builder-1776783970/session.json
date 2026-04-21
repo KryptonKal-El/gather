@@ -6,7 +6,7 @@
   "branch": "main",
   "startedAt": "2026-04-21T10:30:00Z",
   "lastHeartbeat": "2026-04-21T10:30:00Z",
-  "currentChunk": "US-001",
+  "currentChunk": "US-002-confirmation-dialog",
   "analysisCompleted": true,
   "probeStatus": "user-skipped",
   "chunks": [
@@ -47,9 +47,9 @@
     }
   ],
   "currentAction": {
-    "description": "US-001 verified, committing",
-    "contextAnchor": "src/components/MobileListDetail.jsx",
-    "lastAction": "Critics passed, fixup applied",
-    "updatedAt": "2026-04-21T15:25:14Z"
+    "description": "US-002 complete — committing",
+    "contextAnchor": "docs/prd.json",
+    "lastAction": "Critic findings fixed, staging commit",
+    "updatedAt": "2026-04-21T15:47:23Z"
   }
 }

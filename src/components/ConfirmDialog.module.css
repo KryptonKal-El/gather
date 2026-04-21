@@ -22,6 +22,13 @@
   animation: scaleIn 0.15s ease;
 }
 
+.title {
+  font-size: 1.1rem;
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
 .message {
   font-size: 1rem;
   line-height: 1.5;
@@ -36,7 +43,8 @@
 }
 
 .cancelBtn,
-.confirmBtn {
+.confirmBtn,
+.confirmBtnNeutral {
   padding: 0.55rem 1.15rem;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -62,6 +70,15 @@
 
 .confirmBtn:hover {
   background: var(--danger-hover);
+}
+
+.confirmBtnNeutral {
+  background: var(--primary);
+  color: #fff;
+}
+
+.confirmBtnNeutral:hover {
+  background: var(--primary-hover);
 }
 
 @keyframes fadeIn {

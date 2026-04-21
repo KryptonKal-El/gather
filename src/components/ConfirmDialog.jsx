@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import styles from './ConfirmDialog.module.css';
@@ -9,8 +9,10 @@ import styles from './ConfirmDialog.module.css';
  * ancestor opacity or overflow. Shows a backdrop overlay with a message
  * and confirm/cancel buttons. Closes on Escape key or backdrop click.
  */
-export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) => {
+export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, destructive, onConfirm, onCancel }) => {
   const dialogRef = useRef(null);
+  const titleId = useId();
+  const messageId = useId();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -31,13 +33,26 @@ export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) =>
 
   return createPortal(
     <div className={styles.backdrop} onClick={handleBackdropClick} ref={dialogRef}>
-      <div className={styles.dialog}>
-        <p className={styles.message}>{message}</p>
+      <div
+        className={styles.dialog}
+        role={destructive ? 'alertdialog' : 'dialog'}
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-describedby={messageId}
+      >
+        {title && <h2 id={titleId} className={styles.title}>{title}</h2>}
+        <p id={messageId} className={styles.message}>{message}</p>
         <div className={styles.actions}>
-          <button type="button" className={styles.cancelBtn} onClick={onCancel}>
-            Cancel
-          </button>
-          <button type="button" className={styles.confirmBtn} onClick={onConfirm}>
+          {cancelLabel && (
+            <button type="button" className={styles.cancelBtn} onClick={onCancel}>
+              {cancelLabel}
+            </button>
+          )}
+          <button
+            type="button"
+            className={destructive ? styles.confirmBtn : styles.confirmBtnNeutral}
+            onClick={onConfirm}
+          >
             {confirmLabel ?? 'Delete'}
           </button>
         </div>
@@ -48,8 +63,18 @@ export const ConfirmDialog = ({ message, confirmLabel, onConfirm, onCancel }) =>
 };
 
 ConfirmDialog.propTypes = {
+  title: PropTypes.string,
   message: PropTypes.string.isRequired,
   confirmLabel: PropTypes.string,
+  cancelLabel: PropTypes.string,
+  destructive: PropTypes.bool,
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+};
+
+ConfirmDialog.defaultProps = {
+  title: null,
+  confirmLabel: 'Delete',
+  cancelLabel: 'Cancel',
+  destructive: true,
 };

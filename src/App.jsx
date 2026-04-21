@@ -32,6 +32,7 @@ import { OnlineRecipeSearch } from './components/OnlineRecipeSearch.jsx';
 import { OnlineRecipePreview } from './components/OnlineRecipePreview.jsx';
 import { SaveRecipeModal } from './components/SaveRecipeModal.jsx';
 import { SortPicker } from './components/SortPicker.jsx';
+import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import styles from './App.module.css';
 
 /**
@@ -78,6 +79,8 @@ export const App = () => {
   const [onlinePreviewRecipe, setOnlinePreviewRecipe] = useState(null);
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
   const [showDesktopSettings, setShowDesktopSettings] = useState(false);
+  const [resetConfirmList, setResetConfirmList] = useState(null);
+  const [resetInfoMessage, setResetInfoMessage] = useState(null);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -290,8 +293,39 @@ export const App = () => {
   }, [avatarUploadError]);
 
   const handleResetItems = useCallback((list) => {
-    console.log('[US-001] Reset items requested for list:', list?.id, list?.name);
-  }, []);
+    if (!list) return;
+
+    const isActiveGuestList = activeList?.id === list.id;
+    const activeItems = isActiveGuestList ? (activeList.items ?? []) : null;
+
+    if (activeItems) {
+      const hasResettableItems = activeItems.some(
+        (item) => (item.rsvpStatus ?? 'not_invited') !== 'not_invited'
+      );
+
+      if (!hasResettableItems) {
+        setResetInfoMessage('All guests are already at Not Yet Invited');
+        return;
+      }
+
+      setResetConfirmList({ list, count: activeItems.length });
+      return;
+    }
+
+    const count = list.itemCount ?? 0;
+    if (count === 0) return;
+
+    // Non-active lists do not have item rows loaded in App state yet, so use the
+    // summary count and defer the already-reset edge-case to the active-list flow.
+    setResetConfirmList({ list, count });
+  }, [activeList]);
+
+  const handleResetConfirm = useCallback(() => {
+    if (!resetConfirmList) return;
+
+    console.log('[US-002] Reset confirmed for list:', resetConfirmList.list.id, 'count:', resetConfirmList.count);
+    setResetConfirmList(null);
+  }, [resetConfirmList]);
 
   if (isLoading) {
     return (
@@ -956,6 +990,30 @@ export const App = () => {
           activeCollectionId={recipeState.activeCollectionId}
           onSave={handleSaveOnlineRecipe}
           onClose={() => setSaveRecipeDetail(null)}
+        />
+      )}
+
+      {resetConfirmList && (
+        <ConfirmDialog
+          title="Reset items"
+          message={`Reset all ${resetConfirmList.count} guests to Not Yet Invited? This will clear their current RSVP status.`}
+          confirmLabel="Reset"
+          cancelLabel="Cancel"
+          destructive
+          onConfirm={handleResetConfirm}
+          onCancel={() => setResetConfirmList(null)}
+        />
+      )}
+
+      {resetInfoMessage && (
+        <ConfirmDialog
+          title="Already reset"
+          message={resetInfoMessage}
+          confirmLabel="OK"
+          cancelLabel={null}
+          destructive={false}
+          onConfirm={() => setResetInfoMessage(null)}
+          onCancel={() => setResetInfoMessage(null)}
         />
       )}
 

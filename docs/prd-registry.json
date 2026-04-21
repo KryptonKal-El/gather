@@ -13,8 +13,9 @@
       "estimatedStories": 7,
       "notes": "Guest List only in v1. Reset all RSVP statuses to not_invited. Owner-only action. 3-dot menu (web+iOS) + toggle in existing iOS duplicate-list flow.",
       "startedAt": "2026-04-21T10:30:00Z",
-      "currentStory": "US-002",
-      "storiesCompleted": 1
+      "currentStory": "US-003",
+      "storiesCompleted": 2,
+      "lastUpdated": "2026-04-21T15:47:23Z"
     },
     {
       "id": "prd-app-store-distribution",
