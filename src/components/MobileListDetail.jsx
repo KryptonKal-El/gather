@@ -143,6 +143,7 @@ export const MobileListDetail = ({
                 <button
                   type="button"
                   className={styles.menuItem}
+                  title="List has no items to reset"
                   disabled={!hasItems}
                   onClick={() => {
                     if (!hasItems) return;
@@ -194,6 +195,7 @@ export const MobileListDetail = ({
                   <button
                     type="button"
                     className={styles.actionSheetItem}
+                    title="List has no items to reset"
                     disabled={!hasItems}
                     onClick={() => {
                       if (!hasItems) return;

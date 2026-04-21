@@ -421,6 +421,7 @@ export const ListSelector = ({
                 <button
                   type="button"
                   className={styles.menuItem}
+                  title="List has no items to reset"
                   disabled={(list.itemCount ?? 0) === 0}
                   onClick={() => {
                     if ((list.itemCount ?? 0) === 0) return;
@@ -508,6 +509,7 @@ export const ListSelector = ({
                   <button
                     type="button"
                     className={styles.actionSheetItem}
+                    title="List has no items to reset"
                     disabled={(list.itemCount ?? 0) === 0}
                     onClick={() => {
                       if ((list.itemCount ?? 0) === 0) return;

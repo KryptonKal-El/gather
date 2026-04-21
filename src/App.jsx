@@ -82,7 +82,6 @@ export const App = () => {
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
   const [showDesktopSettings, setShowDesktopSettings] = useState(false);
   const [resetConfirmList, setResetConfirmList] = useState(null);
-  const [resetInfoMessage, setResetInfoMessage] = useState(null);
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -306,7 +305,7 @@ export const App = () => {
       );
 
       if (!hasResettableItems) {
-        setResetInfoMessage('All guests are already at Not Yet Invited');
+        showToast({ message: 'Already reset', variant: 'info' });
         return;
       }
 
@@ -320,7 +319,7 @@ export const App = () => {
     // Non-active lists do not have item rows loaded in App state yet, so use the
     // summary count and defer the already-reset edge-case to the active-list flow.
     setResetConfirmList({ list, count });
-  }, [activeList]);
+  }, [activeList, showToast]);
 
   const handleResetConfirm = useCallback(async () => {
     if (!resetConfirmList) return;
@@ -331,7 +330,9 @@ export const App = () => {
     try {
       const count = await actions.resetGuestListRsvp(list.id);
 
-      if (count > 0) {
+      if (count === 0) {
+        showToast({ message: 'Already reset', variant: 'info' });
+      } else {
         showToast({
           message: `Reset ${count} guest${count === 1 ? '' : 's'}`,
           variant: 'success',
@@ -1044,18 +1045,6 @@ export const App = () => {
           destructive
           onConfirm={handleResetConfirm}
           onCancel={() => setResetConfirmList(null)}
-        />
-      )}
-
-      {resetInfoMessage && (
-        <ConfirmDialog
-          title="Already reset"
-          message={resetInfoMessage}
-          confirmLabel="OK"
-          cancelLabel={null}
-          destructive={false}
-          onConfirm={() => setResetInfoMessage(null)}
-          onCancel={() => setResetInfoMessage(null)}
         />
       )}
 
