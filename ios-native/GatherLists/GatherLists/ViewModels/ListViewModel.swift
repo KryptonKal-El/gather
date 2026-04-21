@@ -440,11 +440,11 @@ final class ListViewModel {
         persistLastListIdDebounced(id)
     }
 
-    func resetGuestListRsvp(listId: UUID) async -> Int {
+    func resetGuestListRsvp(listId: UUID) async -> Int? {
         guard ownedLists.contains(where: { $0.id == listId }) else {
             error = "Only the list owner can reset RSVP statuses"
             print("[ListViewModel] Failed to reset RSVP: Only the list owner can reset RSVP statuses")
-            return 0
+            return nil
         }
 
         do {
@@ -452,7 +452,7 @@ final class ListViewModel {
         } catch {
             self.error = error.localizedDescription
             print("[ListViewModel] Failed to reset RSVP: \(error.localizedDescription)")
-            return 0
+            return nil
         }
     }
     

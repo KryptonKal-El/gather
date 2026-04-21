@@ -11,6 +11,7 @@ struct ListDetailView: View {
     
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.undoManager) private var undoManager
+    @Environment(ToastController.self) private var toastController
     
     @State private var detailViewModel: ListDetailViewModel?
     @State private var shareCount: Int = 0
@@ -1263,11 +1264,12 @@ struct ListDetailView: View {
             Button("Cancel", role: .cancel) {}
             Button("Reset", role: .destructive) {
                 Task {
-                    await detailViewModel?.resetRsvp()
+                    await handleResetItems()
                 }
             }
         } message: {
-            Text("Reset all \(detailViewModel?.items.count ?? 0) guests to Not Yet Invited? This will clear their current RSVP status.")
+            let count = detailViewModel?.items.count ?? 0
+            Text("Reset all \(count) guest\(count == 1 ? "" : "s")? Reset cannot be undone — all guests will be marked Not Yet Invited.")
         }
         .alert("Already reset", isPresented: $showResetAlreadyDoneInfo) {
             Button("OK", role: .cancel) {}
@@ -1462,6 +1464,18 @@ struct ListDetailView: View {
         } else {
             hasNotificationsEnabled = false
         }
+    }
+
+    private func handleResetItems() async {
+        guard let detailViewModel else { return }
+
+        guard let affectedCount = await detailViewModel.resetRsvp() else {
+            toastController.show("Couldn't reset — try again", variant: .error)
+            return
+        }
+
+        guard affectedCount > 0 else { return }
+        toastController.show("Reset \(affectedCount) guest\(affectedCount == 1 ? "" : "s")", variant: .success)
     }
     
     private func loadSortPreferences() async {

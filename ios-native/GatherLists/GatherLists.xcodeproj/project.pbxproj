@@ -115,6 +115,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AB /* CachedDataBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */; };
+		TOASTBANNER000000000002 /* ToastBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOASTBANNER000000000001 /* ToastBanner.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */; };
 		B1C2D3E4F5A6B7C8D9E0F1A2 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A3 /* Secrets.plist */; };
 		B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */; };
@@ -237,6 +238,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedDataBanner.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedLogoView.swift; sourceTree = "<group>"; };
+		TOASTBANNER000000000001 /* ToastBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBanner.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B1C2D3E4F5A6B7C8D9E0F1A3 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
@@ -508,6 +510,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2A6 /* SuggestionsView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */,
+				TOASTBANNER000000000001 /* ToastBanner.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -797,6 +800,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2AB /* CachedDataBanner.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */,
+				TOASTBANNER000000000002 /* ToastBanner.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2BE /* UserPreferences.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C0 /* PreferenceService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C2 /* SortPipeline.swift in Sources */,

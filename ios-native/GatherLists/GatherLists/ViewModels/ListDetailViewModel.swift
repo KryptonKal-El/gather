@@ -505,11 +505,11 @@ final class ListDetailViewModel {
         }
     }
 
-    func resetRsvp() async -> Int {
+    func resetRsvp() async -> Int? {
         guard ownerId == userId else {
             error = "Only the list owner can reset RSVP statuses"
             print("[ListDetailViewModel] Failed to reset RSVP: Only the list owner can reset RSVP statuses")
-            return 0
+            return nil
         }
 
         let affectedIds: Set<UUID> = Set(items.filter { ($0.rsvpStatus ?? "not_invited") != "not_invited" }.map { $0.id })
@@ -535,7 +535,7 @@ final class ListDetailViewModel {
             }
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to reset RSVP: \(error.localizedDescription)")
-            return 0
+            return nil
         }
     }
 

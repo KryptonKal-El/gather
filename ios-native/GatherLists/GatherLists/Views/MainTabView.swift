@@ -4,6 +4,7 @@ struct MainTabView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(NetworkMonitor.self) private var networkMonitor
     @Environment(NotificationService.self) private var notificationService
+    @Environment(ToastController.self) private var toastController
     @State private var selectedTab = 0
     
     private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
@@ -55,6 +56,16 @@ struct MainTabView: View {
             .tint(brandGreen)
         }
         .animation(.easeInOut, value: networkMonitor.isConnected)
+        .safeAreaInset(edge: .bottom) {
+            if let message = toastController.message {
+                ToastBanner(message: message, variant: toastController.variant)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .allowsHitTesting(false)
+            }
+        }
+        .animation(.easeInOut(duration: 0.22), value: toastController.message != nil)
         .onChange(of: notificationService.pendingListId) { _, listId in
             if listId != nil {
                 selectedTab = 0
@@ -62,5 +73,4 @@ struct MainTabView: View {
         }
     }
 }
-
 

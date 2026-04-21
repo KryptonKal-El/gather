@@ -23,6 +23,7 @@ struct GatherListsApp: App {
     @State private var authViewModel = AuthViewModel()
     @State private var networkMonitor = NetworkMonitor()
     @State private var notificationService = NotificationService()
+    @State private var toastController = ToastController()
     @Environment(\.scenePhase) private var scenePhase
     private var appearanceManager = AppearanceManager.shared
     
@@ -46,6 +47,7 @@ struct GatherListsApp: App {
             .environment(networkMonitor)
             .environment(appearanceManager)
             .environment(notificationService)
+            .environment(toastController)
             .preferredColorScheme(appearanceManager.setting.colorScheme)
             .onAppear {
                 appDelegate.notificationService = notificationService

@@ -5,6 +5,7 @@ import { useRecipes } from './hooks/useRecipes.js';
 import { useSortPreferences } from './hooks/useSortPreferences.js';
 import { useAuth } from './context/AuthContext.jsx';
 import { useUndo } from './context/UndoContext.jsx';
+import { useToast } from './context/ToastContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
 import { usePWAInstall } from './hooks/usePWAInstall.js';
@@ -47,6 +48,7 @@ export const App = () => {
   const { state: recipeState, actions: recipeActions } = useRecipes();
   const { effectiveSortConfig, updateListSort } = useSortPreferences();
   const { pushUndo } = useUndo();
+  const { showToast } = useToast();
   const [sharingListId, setSharingListId] = useState(null);
   const [sharingCollectionId, setSharingCollectionId] = useState(null);
   const [isAvatarUploading, setIsAvatarUploading] = useState(false);
@@ -325,12 +327,21 @@ export const App = () => {
 
     const { list } = resetConfirmList;
     setResetConfirmList(null);
+
     try {
-      await actions.resetGuestListRsvp(list.id);
+      const count = await actions.resetGuestListRsvp(list.id);
+
+      if (count > 0) {
+        showToast({
+          message: `Reset ${count} guest${count === 1 ? '' : 's'}`,
+          variant: 'success',
+        });
+      }
     } catch (err) {
-      console.error('[US-003] Reset failed:', err);
+      console.error('[US-005] Reset failed:', err);
+      showToast({ message: "Couldn't reset — try again", variant: 'error' });
     }
-  }, [resetConfirmList, actions]);
+  }, [resetConfirmList, actions, showToast]);
 
   if (isLoading) {
     return (
@@ -1001,7 +1012,7 @@ export const App = () => {
       {resetConfirmList && (
         <ConfirmDialog
           title="Reset items"
-          message={`Reset all ${resetConfirmList.count} guests to Not Yet Invited? This will clear their current RSVP status.`}
+          message={`Reset all ${resetConfirmList.count} guests? Reset cannot be undone — all guests will be marked Not Yet Invited.`}
           confirmLabel="Reset"
           cancelLabel="Cancel"
           destructive

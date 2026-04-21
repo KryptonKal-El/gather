@@ -4,6 +4,7 @@ import SwiftUI
 struct ListBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(NotificationService.self) private var notificationService
+    @Environment(ToastController.self) private var toastController
     @State private var viewModel: ListViewModel?
     @State private var showCreateSheet = false
     @State private var listToEdit: GatherList?
@@ -110,11 +111,11 @@ struct ListBrowserView: View {
                 Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
                     Task {
-                        await viewModel?.resetGuestListRsvp(listId: list.id)
+                        await handleResetItems(for: list)
                     }
                 }
             } message: { list in
-                Text("Reset all \(list.itemCount) guests to Not Yet Invited? This will clear their current RSVP status.")
+                Text("Reset all \(list.itemCount) guest\(list.itemCount == 1 ? "" : "s")? Reset cannot be undone — all guests will be marked Not Yet Invited.")
             }
         }
         .onAppear {
@@ -318,5 +319,17 @@ struct ListBrowserView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             navigationPath.append(list)
         }
+    }
+
+    private func handleResetItems(for list: GatherList) async {
+        guard let viewModel else { return }
+
+        guard let affectedCount = await viewModel.resetGuestListRsvp(listId: list.id) else {
+            toastController.show("Couldn't reset — try again", variant: .error)
+            return
+        }
+
+        guard affectedCount > 0 else { return }
+        toastController.show("Reset \(affectedCount) guest\(affectedCount == 1 ? "" : "s")", variant: .success)
     }
 }
