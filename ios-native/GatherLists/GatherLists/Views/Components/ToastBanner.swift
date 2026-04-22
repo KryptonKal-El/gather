@@ -3,11 +3,14 @@ import Observation
 
 /// Visual variants for transient toast feedback.
 enum ToastVariant {
+    case info
     case success
     case error
 
     var duration: Duration {
         switch self {
+        case .info:
+            return .seconds(3)
         case .success:
             return .seconds(3)
         case .error:
@@ -17,6 +20,8 @@ enum ToastVariant {
 
     var tint: Color {
         switch self {
+        case .info:
+            return .blue
         case .success:
             return Color(hex: "#3D7A63")
         case .error:
@@ -26,6 +31,8 @@ enum ToastVariant {
 
     var symbolName: String {
         switch self {
+        case .info:
+            return "info.circle.fill"
         case .success:
             return "checkmark.circle.fill"
         case .error:

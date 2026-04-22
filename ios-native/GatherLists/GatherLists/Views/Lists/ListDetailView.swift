@@ -53,7 +53,6 @@ struct ListDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showDuplicateSheet = false
     @State private var showResetItemsConfirm = false
-    @State private var showResetAlreadyDoneInfo = false
     
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
@@ -1205,7 +1204,7 @@ struct ListDetailView: View {
                     }.count
 
                     if remaining == 0 {
-                        showResetAlreadyDoneInfo = true
+                        toastController.show("Already reset", variant: .info)
                     } else {
                         showResetItemsConfirm = true
                     }
@@ -1278,11 +1277,6 @@ struct ListDetailView: View {
         } message: {
             let count = detailViewModel?.items.count ?? 0
             Text("Reset all \(count) guest\(count == 1 ? "" : "s")? Reset cannot be undone — all guests will be marked Not Yet Invited.")
-        }
-        .alert("Already reset", isPresented: $showResetAlreadyDoneInfo) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("All guests are already at Not Yet Invited")
         }
     }
     
@@ -1482,7 +1476,10 @@ struct ListDetailView: View {
             return
         }
 
-        guard affectedCount > 0 else { return }
+        guard affectedCount > 0 else {
+            toastController.show("Already reset", variant: .info)
+            return
+        }
         toastController.show("Reset \(affectedCount) guest\(affectedCount == 1 ? "" : "s")", variant: .success)
     }
     

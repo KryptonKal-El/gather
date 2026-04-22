@@ -334,7 +334,10 @@ struct ListBrowserView: View {
             return
         }
 
-        guard affectedCount > 0 else { return }
+        guard affectedCount > 0 else {
+            toastController.show("Already reset", variant: .info)
+            return
+        }
         toastController.show("Reset \(affectedCount) guest\(affectedCount == 1 ? "" : "s")", variant: .success)
     }
 }
