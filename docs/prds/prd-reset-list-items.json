@@ -52,8 +52,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Confirmation dialog committed e284942",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -64,7 +64,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T16:35:00Z"
     },
     {
       "id": "US-003",
@@ -81,8 +83,8 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Bulk RPC + audit + rollback committed 49ee9b6",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -93,7 +95,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T16:35:00Z"
     },
     {
       "id": "US-004",
@@ -109,8 +113,8 @@
         "Verify in browser"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Realtime sync — removed non-PK filter on iOS items channel; web already correct. Committed 4e77990. See docs/memory/supabase-realtime-replica-identity.md",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -121,7 +125,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T16:35:00Z"
     },
     {
       "id": "US-005",
@@ -139,8 +145,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Toast feedback + cannot-be-undone warning committed 5b8ffdb",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -151,7 +157,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T16:35:00Z"
     },
     {
       "id": "US-006",
@@ -170,8 +178,8 @@
         "Web and iOS share identical toggle semantics, default state, and user-facing copy"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Duplicate-list RSVP parity + opt-in reset committed bbec0df",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -182,7 +190,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-21T16:35:00Z"
     },
     {
       "id": "US-007",
@@ -198,8 +208,8 @@
         "Verify in browser"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Web tooltip + 'Already reset' toast committed 1e5f858. iOS alert→toast swap + ListBrowserView empty-path toast + .info ToastVariant case committed 2abf30f. Playwright 3-pass stability verified (AC-1 + AC-2). Underlying RPC migration 20260421120000 deployed via supabase db push (deployment was missing — see docs/memory/supabase-migration-deployment.md).",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -210,7 +220,9 @@
       "toolsType": null,
       "relatedToolNames": [],
       "considerations": [],
-      "requiredCredentials": []
+      "requiredCredentials": [],
+      "status": "completed",
+      "completedAt": "2026-04-22T12:00:00Z"
     }
   ]
 }
