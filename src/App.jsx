@@ -8,6 +8,7 @@ import { useUndo } from './context/UndoContext.jsx';
 import { useToast } from './context/ToastContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
 import { useMobileNav } from './hooks/useMobileNav.js';
+import { usePendingToggles } from './hooks/usePendingToggles.js';
 import { usePWAInstall } from './hooks/usePWAInstall.js';
 import { getSuggestions } from './services/suggestions.js';
 import { uploadProfileImage } from './services/imageStorage.js';
@@ -107,14 +108,24 @@ export const App = () => {
     return getEffectiveCategories(activeList, state.userCategoryDefaults);
   }, [activeList, state.userCategoryDefaults]);
 
+  const handleCommitToggleItem = useCallback(async (listId, itemId, nextChecked) => {
+    await actions.toggleItem(listId, itemId, nextChecked);
+  }, [actions]);
+
+  const { getEffectiveChecked, handleToggle: handlePendingToggle } = usePendingToggles({
+    items: activeList?.items ?? [],
+    onCommitToggle: handleCommitToggleItem,
+  });
+
   const handleAddItem = (name, storeId = null) => {
     if (!activeList) return;
     actions.addItem(activeList.id, name, storeId);
   };
 
-  const handleToggleItem = (itemId) => {
-    if (!activeList) return;
-    actions.toggleItem(activeList.id, itemId);
+  const handleToggleItem = (item) => {
+    const listId = item.listId ?? activeList?.id ?? null;
+    if (!listId) return;
+    handlePendingToggle({ ...item, listId });
   };
 
   const handleRemoveItem = (itemId) => {
@@ -473,6 +484,7 @@ export const App = () => {
                 sortConfig={activeList ? effectiveSortConfig(activeList) : null}
                 listSortConfig={activeList?.sortConfig ?? null}
                 listCategories={listCategories}
+                getEffectiveChecked={getEffectiveChecked}
                 onBack={handleBack}
                 onAddItem={handleAddItem}
                 onToggle={handleToggleItem}
@@ -757,6 +769,7 @@ export const App = () => {
               </div>
               <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
               <ShoppingList
+                getEffectiveChecked={getEffectiveChecked}
                 items={activeList.items}
                 isLoading={activeList.isLoadingItems}
                 stores={state.stores}

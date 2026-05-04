@@ -623,9 +623,15 @@ export const ShoppingListProvider = ({ children }) => {
     await addHistoryEntries(userId, itemNames);
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
-  const toggleItemAction = useCallback(async (listId, itemId) => {
+  const toggleItemAction = useCallback(async (listId, itemId, explicitChecked = null) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
+
+    if (typeof explicitChecked === 'boolean') {
+      await dbUpdateItem(ownerUid, listId, itemId, { isChecked: explicitChecked });
+      return;
+    }
+
     const item = activeItems.find((i) => i.id === itemId);
     if (!item) return;
     const nowChecked = !item.isChecked;

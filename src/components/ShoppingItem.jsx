@@ -42,11 +42,12 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
+export const ShoppingItem = ({ item, isChecked, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
   const { user } = useAuth();
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
   const isRsvpList = fields.rsvpStatus;
+  const effectiveChecked = isChecked ?? item.isChecked;
 
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
@@ -451,7 +452,7 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
         </div>
       )}
       <div
-        className={`${styles.item} ${item.isChecked ? styles.checked : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
+        className={`${styles.item} ${effectiveChecked ? styles.checked : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -538,7 +539,7 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
                     </span>
                   )}
                   {fields.dueDate && item.dueDate && (() => {
-                    const isOverdue = !item.isChecked &&
+                    const isOverdue = !effectiveChecked &&
                       new Date(item.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
                     return (
                       <span className={`${styles.dueDateLabel} ${isOverdue ? styles.overdue : ''}`}>
@@ -935,6 +936,7 @@ ShoppingItem.propTypes = {
     parentItemId: PropTypes.string,
     reminderDaysBefore: PropTypes.number,
   }).isRequired,
+  isChecked: PropTypes.bool,
   stores: PropTypes.array,
   listType: PropTypes.string,
   listCategories: PropTypes.array,
@@ -949,6 +951,7 @@ ShoppingItem.propTypes = {
 
 ShoppingItem.defaultProps = {
   stores: [],
+  isChecked: undefined,
   listType: 'grocery',
   listCategories: null,
   isRestored: false,

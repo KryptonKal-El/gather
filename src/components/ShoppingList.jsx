@@ -28,18 +28,19 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
+const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
         key={item.id}
         item={item}
+        isChecked={getEffectiveChecked(item)}
         stores={stores}
         listType={listType}
         listCategories={listCategories}
         isRestored={restoredItemIds?.has(item.id)}
         onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
-        onToggle={() => onToggle(item.id)}
+        onToggle={() => onToggle(item)}
         onRemove={() => onRemove(item.id)}
         onUpdateCategory={onUpdateCategory}
         onUpdateStore={onUpdateStore}
@@ -50,8 +51,8 @@ const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, on
 );
 
 /** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
-const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem }) => {
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
 
   const allItems = collectGroupItems(group);
   const count = group.type === 'rsvp' ? allItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0) : allItems.length;
@@ -121,6 +122,7 @@ export const ShoppingList = ({
   sortConfig,
   listType,
   listCategories,
+  getEffectiveChecked,
   onToggle,
   onRemove,
   onUpdateCategory,
@@ -180,7 +182,7 @@ export const ShoppingList = ({
   const uncheckedResult = applySortPipeline(unchecked, config, stores, listType, listCategories);
   const checkedResult = applySortPipeline(checkedItems, config, stores, listType, listCategories);
 
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
@@ -292,6 +294,7 @@ ShoppingList.propTypes = {
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listType: PropTypes.string,
   listCategories: PropTypes.array,
+  getEffectiveChecked: PropTypes.func,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
@@ -308,6 +311,7 @@ ShoppingList.defaultProps = {
   sortConfig: null,
   listType: 'grocery',
   listCategories: null,
+  getEffectiveChecked: (item) => item.isChecked,
   restoredItemIds: null,
   onRestoreAnimationDone: null,
 };

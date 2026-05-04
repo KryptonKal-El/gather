@@ -20,6 +20,7 @@ export const MobileListDetail = ({
   sortConfig,
   listSortConfig,
   listCategories,
+  getEffectiveChecked,
   isGuest,
   onBack,
   onAddItem,
@@ -223,6 +224,7 @@ export const MobileListDetail = ({
       <div className={styles.scrollContent}>
         <AddItemForm stores={stores} history={history} listType={listType} onAdd={onAddItem} />
         <ShoppingList
+          getEffectiveChecked={getEffectiveChecked}
           items={list.items}
           stores={stores}
           sortConfig={sortConfig}
@@ -338,6 +340,7 @@ MobileListDetail.propTypes = {
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listSortConfig: PropTypes.arrayOf(PropTypes.string),
   listCategories: PropTypes.array,
+  getEffectiveChecked: PropTypes.func,
   isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,
@@ -359,6 +362,7 @@ MobileListDetail.defaultProps = {
   sortConfig: null,
   listSortConfig: null,
   listCategories: null,
+  getEffectiveChecked: (item) => item.isChecked,
   isGuest: false,
   onResetItems: null,
   restoredItemIds: null,
