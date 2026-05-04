@@ -623,24 +623,11 @@ struct ListDetailView: View {
     // MARK: - Item Row
     
     private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true) -> some View {
-        HStack(spacing: 0) {
+        let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
+
+        return HStack(spacing: 0) {
             // Main row content
             HStack(spacing: 12) {
-                if detailViewModel?.typeConfig.fields.rsvpStatus != true {
-                    Button {
-                        Task {
-                            await detailViewModel?.toggleItem(item)
-                        }
-                    } label: {
-                        Image(systemName: isChecked ? "checkmark.circle.fill" : "circle")
-                            .font(.title3)
-                            .foregroundStyle(isChecked ? .secondary : listColor)
-                            .frame(width: 44, height: 44)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-                
                 if detailViewModel?.typeConfig.fields.image == true {
                     itemThumbnail(item: item)
                 }
@@ -735,7 +722,7 @@ struct ListDetailView: View {
                     }
                 }
             }
-            .padding(.leading, detailViewModel?.typeConfig.fields.rsvpStatus == true ? 12 : 28)
+            .padding(.leading, isRsvpList ? 12 : 0)
             .padding(.trailing, 12)
             .padding(.vertical, 10)
             
@@ -765,12 +752,12 @@ struct ListDetailView: View {
                 Rectangle()
                     .fill(Color(.separator))
                     .frame(height: 1 / UIScreen.main.scale)
-                    .padding(.leading, 44)
+                    .padding(.leading, isRsvpList ? 44 : 0)
             }
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
-            guard detailViewModel?.typeConfig.fields.rsvpStatus != true else { return }
+            guard !isRsvpList else { return }
             Task {
                 await detailViewModel?.toggleItem(item)
             }
