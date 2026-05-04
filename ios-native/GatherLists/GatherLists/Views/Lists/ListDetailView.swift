@@ -624,6 +624,7 @@ struct ListDetailView: View {
     
     private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true) -> some View {
         let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
+        let effectiveIsChecked = detailViewModel?.effectiveIsChecked(for: item) ?? item.isChecked
 
         return HStack(spacing: 0) {
             // Main row content
@@ -633,8 +634,8 @@ struct ListDetailView: View {
                 }
                 
                 Text(item.name)
-                    .strikethrough(isChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
-                    .foregroundStyle(isChecked ? .secondary : .primary)
+                    .strikethrough(effectiveIsChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
+                    .foregroundStyle(effectiveIsChecked ? .secondary : .primary)
                 
                 if detailViewModel?.typeConfig.fields.quantity == true {
                     if item.unit != "each" {
@@ -663,7 +664,7 @@ struct ListDetailView: View {
                 }
                 
                 if detailViewModel?.typeConfig.fields.dueDate == true, let dueDate = item.dueDate {
-                    let isOverdue = !isChecked &&
+                    let isOverdue = !effectiveIsChecked &&
                         Calendar.current.startOfDay(for: dueDate) < Calendar.current.startOfDay(for: Date())
                     HStack(spacing: 2) {
                         if item.recurrenceRule != nil {
@@ -682,7 +683,7 @@ struct ListDetailView: View {
                     if let price = item.price {
                         Text(formatPrice(price))
                             .font(.subheadline)
-                            .foregroundStyle(isChecked ? .tertiary : .secondary)
+                            .foregroundStyle(effectiveIsChecked ? .tertiary : .secondary)
                     }
                 }
                 
@@ -757,9 +758,12 @@ struct ListDetailView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
-            guard !isRsvpList else { return }
-            Task {
-                await detailViewModel?.toggleItem(item)
+            if isRsvpList {
+                Task {
+                    await detailViewModel?.toggleItem(item)
+                }
+            } else {
+                detailViewModel?.scheduleToggleItem(item)
             }
         }
         .contextMenu {

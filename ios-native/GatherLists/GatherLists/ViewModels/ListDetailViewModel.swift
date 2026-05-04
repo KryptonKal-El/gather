@@ -8,6 +8,18 @@ import WidgetKit
 @Observable
 @MainActor
 final class ListDetailViewModel {
+    private final class RuntimeState {
+        var itemsChannel: RealtimeChannelV2?
+        var storesChannel: RealtimeChannelV2?
+        var historyChannel: RealtimeChannelV2?
+        var itemsTask: Task<Void, Never>?
+        var storesTask: Task<Void, Never>?
+        var sharedStoresChannel: RealtimeChannelV2?
+        var sharedStoresTask: Task<Void, Never>?
+        var historyTask: Task<Void, Never>?
+        var pendingToggleTasks: [UUID: Task<Void, Never>] = [:]
+    }
+
     // Published state
     var items: [Item] = []
     var stores: [Store] = []
@@ -29,20 +41,13 @@ final class ListDetailViewModel {
     private let ownerId: UUID
     let listType: String
     private var list: GatherList?
+    @ObservationIgnored private let runtime = RuntimeState()
     
     var isSharedList: Bool { ownerId != userId }
     
     var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
-    
-    // Realtime channels and tasks
-    nonisolated(unsafe) private var itemsChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var storesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var historyChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var itemsTask: Task<Void, Never>?
-    nonisolated(unsafe) private var storesTask: Task<Void, Never>?
-    nonisolated(unsafe) private var sharedStoresChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var sharedStoresTask: Task<Void, Never>?
-    nonisolated(unsafe) private var historyTask: Task<Void, Never>?
+
+    private(set) var pendingToggleStates: [UUID: Bool] = [:]
     
     // MARK: - Computed Properties
     
@@ -168,13 +173,13 @@ final class ListDetailViewModel {
     // MARK: - Realtime Subscriptions
     
     private func setupRealtimeSubscriptions() async {
-        guard itemsChannel == nil else { return }
+        guard runtime.itemsChannel == nil else { return }
         
         let client = SupabaseManager.shared.client
         
         // Channel for items
         let itemsCh = client.realtimeV2.channel("list-items-\(listId.uuidString)")
-        itemsChannel = itemsCh
+        runtime.itemsChannel = itemsCh
         
         let itemsChanges = itemsCh.postgresChange(
             AnyAction.self,
@@ -182,7 +187,7 @@ final class ListDetailViewModel {
             table: "items"
         )
         
-        itemsTask = Task {
+        runtime.itemsTask = Task {
             do {
                 try await itemsCh.subscribeWithError()
             } catch {
@@ -190,13 +195,14 @@ final class ListDetailViewModel {
                 return
             }
             for await _ in itemsChanges {
+                cancelAllPendingToggles()
                 await refetchItems()
             }
         }
         
         // Channel for stores
         let storesCh = client.realtimeV2.channel("user-stores-\(userId.uuidString)")
-        storesChannel = storesCh
+        runtime.storesChannel = storesCh
         
         let storesChanges = storesCh.postgresChange(
             AnyAction.self,
@@ -205,7 +211,7 @@ final class ListDetailViewModel {
             filter: .eq("user_id", value: userId)
         )
         
-        storesTask = Task {
+        runtime.storesTask = Task {
             do {
                 try await storesCh.subscribeWithError()
             } catch {
@@ -220,7 +226,7 @@ final class ListDetailViewModel {
         // Channel for owner's stores (shared lists only)
         if isSharedList {
             let sharedStoresCh = client.realtimeV2.channel("owner-stores-\(ownerId.uuidString)")
-            sharedStoresChannel = sharedStoresCh
+            runtime.sharedStoresChannel = sharedStoresCh
             
             let sharedStoresChanges = sharedStoresCh.postgresChange(
                 AnyAction.self,
@@ -229,7 +235,7 @@ final class ListDetailViewModel {
                 filter: .eq("user_id", value: ownerId)
             )
             
-            sharedStoresTask = Task {
+            runtime.sharedStoresTask = Task {
                 do {
                     try await sharedStoresCh.subscribeWithError()
                 } catch {
@@ -244,7 +250,7 @@ final class ListDetailViewModel {
         
         // Channel for history
         let historyCh = client.realtimeV2.channel("user-history-\(userId.uuidString)")
-        historyChannel = historyCh
+        runtime.historyChannel = historyCh
         
         let historyChanges = historyCh.postgresChange(
             AnyAction.self,
@@ -253,7 +259,7 @@ final class ListDetailViewModel {
             filter: .eq("user_id", value: userId)
         )
         
-        historyTask = Task {
+        runtime.historyTask = Task {
             do {
                 try await historyCh.subscribeWithError()
             } catch {
@@ -384,6 +390,63 @@ final class ListDetailViewModel {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to toggle item: \(error.localizedDescription)")
         }
+    }
+
+    /// Returns the checked state used for rendering while a delayed toggle is pending.
+    func effectiveIsChecked(for item: Item) -> Bool {
+        pendingToggleStates[item.id] ?? item.isChecked
+    }
+
+    /// Schedules a delayed item toggle, or cancels the pending toggle if one already exists.
+    func scheduleToggleItem(_ item: Item) {
+        if let existingTask = runtime.pendingToggleTasks[item.id] {
+            existingTask.cancel()
+            runtime.pendingToggleTasks.removeValue(forKey: item.id)
+            pendingToggleStates.removeValue(forKey: item.id)
+            return
+        }
+
+        pendingToggleStates[item.id] = !item.isChecked
+
+        let itemId = item.id
+        runtime.pendingToggleTasks[itemId] = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(1500))
+            guard !Task.isCancelled else { return }
+            guard let self else { return }
+            await self.commitPendingToggle(itemId: itemId)
+        }
+    }
+
+    private func commitPendingToggle(itemId: UUID) async {
+        guard let index = items.firstIndex(where: { $0.id == itemId }) else {
+            runtime.pendingToggleTasks.removeValue(forKey: itemId)
+            pendingToggleStates.removeValue(forKey: itemId)
+            return
+        }
+
+        let currentItem = items[index]
+        let nextChecked = !currentItem.isChecked
+
+        do {
+            try await ItemService.toggleItem(itemId: itemId, isChecked: nextChecked)
+            if let updatedIndex = items.firstIndex(where: { $0.id == itemId }) {
+                items[updatedIndex].isChecked = nextChecked
+            }
+        } catch {
+            self.error = error.localizedDescription
+            print("[ListDetailViewModel] Failed to commit pending toggle for item \(itemId): \(error.localizedDescription)")
+        }
+
+        runtime.pendingToggleTasks.removeValue(forKey: itemId)
+        pendingToggleStates.removeValue(forKey: itemId)
+    }
+
+    private func cancelAllPendingToggles() {
+        for task in runtime.pendingToggleTasks.values {
+            task.cancel()
+        }
+        runtime.pendingToggleTasks.removeAll()
+        pendingToggleStates.removeAll()
     }
     
     @discardableResult
@@ -570,15 +633,19 @@ final class ListDetailViewModel {
     }
     
     deinit {
-        itemsTask?.cancel()
-        storesTask?.cancel()
-        sharedStoresTask?.cancel()
-        historyTask?.cancel()
+        for task in runtime.pendingToggleTasks.values {
+            task.cancel()
+        }
+
+        runtime.itemsTask?.cancel()
+        runtime.storesTask?.cancel()
+        runtime.sharedStoresTask?.cancel()
+        runtime.historyTask?.cancel()
         
-        let itemsCh = itemsChannel
-        let storesCh = storesChannel
-        let sharedStoresCh = sharedStoresChannel
-        let historyCh = historyChannel
+        let itemsCh = runtime.itemsChannel
+        let storesCh = runtime.storesChannel
+        let sharedStoresCh = runtime.sharedStoresChannel
+        let historyCh = runtime.historyChannel
         
         Task {
             await itemsCh?.unsubscribe()

@@ -21,8 +21,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Removed leading checkbox path; non-RSVP rows use rowBody wrapper for double-tap toggle. RSVP path preserved separately. Commit 69f8d34.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -55,8 +55,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "usePendingToggles hook in src/hooks/, owned by App.jsx so it survives row unmount. Realtime: remote DB change clears pending entry. Commit b3f5c3b.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -86,8 +86,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Removed leading checkmark.circle Button. Padding 28→0 for non-RSVP. Build succeeded. Commit 9457c32.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
@@ -120,8 +120,8 @@
         "Works in both light and dark mode"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Per-item cancellable Tasks in ListDetailViewModel (RuntimeState helper for @Observable). effectiveIsChecked drives styling; section partitioning uses raw isChecked. Realtime cancels all pending toggles. RSVP path unchanged. xcodebuild SUCCEEDED.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
