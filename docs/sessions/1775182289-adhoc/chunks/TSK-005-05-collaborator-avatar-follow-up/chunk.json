@@ -1,0 +1,54 @@
+{
+  "id": "TSK-005-05-collaborator-avatar-follow-up",
+  "storyId": "TSK-005",
+  "title": "Fix collaborator avatar regression and missing shared collaborator lookup",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "supabase/migrations/20260406140000_fix_collaborator_email_matching.sql"
+  ],
+  "tests": {
+    "web-build": {
+      "status": "pass",
+      "command": "npm run build"
+    },
+    "ios-build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "web-build",
+        "status": "pass"
+      },
+      {
+        "activity": "ios-build",
+        "status": "pass"
+      },
+      {
+        "activity": "security-critic",
+        "status": "warn",
+        "notes": "Non-blocking privacy consideration: collaborator avatars may expose OAuth avatar_url metadata"
+      },
+      {
+        "activity": "db-push",
+        "status": "pass"
+      },
+      {
+        "activity": "manual-web-ios-check",
+        "status": "pending-manual",
+        "reason": "Verify shared lists show the other collaborator avatar and private lists do not show owner-only avatar groups"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}

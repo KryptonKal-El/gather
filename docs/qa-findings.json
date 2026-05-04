@@ -1,48 +1,57 @@
 {
   "findings": [],
   "probeMetadata": {
-    "probeDate": "2026-03-24",
-    "devPort": 4000,
-    "baseURL": "http://localhost:4000",
-    "bugUnderInvestigation": "Race condition: switching between shopping lists sometimes shows stale items from previous list",
+    "probeDate": "2026-03-31",
+    "devPort": 5173,
+    "baseURL": "http://localhost:5173",
+    "bugUnderInvestigation": "Idle/realtime/auth issue - app shows only shared list and auth/realtime errors are visible/looping",
     "testApproach": [
-      "Created automated Playwright tests to probe list switching behavior",
-      "Tested normal list switching with 1000ms wait between switches",
-      "Tested rapid list switching (30 attempts) with no wait between clicks",
-      "Tested with simulated 200ms network latency (20 attempts)",
-      "Verified item content correctness after rapid switching",
-      "Monitored console for errors/warnings"
+      "Authenticated via Playwright using test credentials (e2e-test@gatherlists.com)",
+      "Created 3 test lists to populate the account (My Groceries, Weekly Shopping, Party Supplies)",
+      "Monitored console for 30+ seconds looking for auth, realtime, websocket errors",
+      "Captured screenshots of UI state at multiple phases",
+      "Checked for error loop behavior (>5 errors in monitoring period)"
     ],
     "observations": {
-      "baselineSwitching": "PASS - headings correctly change between lists",
-      "rapidSwitchingStaleStates": "0/30 - no stale headings detected",
-      "latencyTestStaleStates": "0/20 - no stale states even with network delay",
-      "itemContentCorrect": "PASS - list items correctly update on switch",
-      "loadingStatesVisible": "NO - instant transitions, no loading indicator",
-      "consoleErrors": 0
+      "authenticationStatus": "SUCCESS - login completed without errors",
+      "listsDisplayed": [
+        "My Groceries (0 items, GROCERY)",
+        "Weekly Shopping (0 items, GROCERY)",
+        "Party Supplies (0 items, GROCERY)"
+      ],
+      "allOwnedListsVisible": true,
+      "sharedListsPresent": false,
+      "consoleErrors": 0,
+      "authApiErrors": 0,
+      "realtimeErrors": 0,
+      "websocketReconnects": 0,
+      "networkFailures": 0,
+      "errorLoopDetected": false,
+      "visibleErrorMessages": "NONE"
     },
     "codeAnalysis": {
-      "subscriptionLocation": "src/context/ShoppingListContext.jsx lines 346-355",
-      "subscribeItemsFunction": "src/services/database.js lines 410-477",
-      "potentialRaceCondition": "The useEffect cleanup may not complete before new subscription starts, but React's effect cleanup ordering should prevent this",
-      "mitigatingFactors": [
-        "React's useEffect cleanup runs synchronously before the next effect",
-        "Supabase channel.removeChannel() is immediate",
-        "Initial fetch is scoped to listId, so even if old callback fires, it won't override new list's data"
-      ]
+      "note": "No code changes requested - observational inspection only"
     },
-    "conclusion": "The reported race condition was NOT reproducible in automated testing. The subscription cleanup/setup appears to be working correctly. The bug may be:",
+    "conclusion": "The reported 'idle/realtime/auth' issue was NOT reproducible in this testing session.",
     "possibleExplanations": [
-      "Intermittent and requires specific timing/network conditions not simulated",
-      "Related to Supabase Realtime events arriving at specific moments",
-      "User perception issue rather than actual data inconsistency",
-      "Already fixed in a recent code change",
-      "Only occurs on slower devices or with specific browser conditions"
+      "Test account had no SHARED lists - the 'only shared list showing' scenario could not be tested",
+      "Issue may be intermittent or require longer idle periods (5+ minutes)",
+      "Issue may be specific to certain network conditions or Supabase server state",
+      "Issue may only occur with lists containing items (not empty lists)",
+      "Issue may be browser/device specific and not reproducible in headless Playwright",
+      "Issue may have been resolved by recent code changes"
     ],
     "recommendations": [
-      "Add user-visible loading state during list transitions to improve perceived reliability",
-      "Consider adding a subscription ID check in the callback to ignore stale responses",
-      "Request more details from users experiencing the issue (browser, network, specific steps)"
+      "Test with an account that has BOTH owned AND shared lists to reproduce the specific scenario",
+      "Have user capture browser console screenshot when issue occurs",
+      "Test with lists containing items to trigger realtime sync activity",
+      "Consider extended idle monitoring (5-10 minutes) for idle-state issues",
+      "Check if issue is specific to PWA/mobile mode vs desktop browser"
     ]
+  },
+  "previousProbe": {
+    "probeDate": "2026-03-24",
+    "bugUnderInvestigation": "Race condition: switching between shopping lists sometimes shows stale items from previous list",
+    "conclusion": "NOT reproducible - subscription cleanup/setup working correctly"
   }
 }

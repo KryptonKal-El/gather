@@ -1,0 +1,54 @@
+{
+  "id": "TSK-004-04-collaborator-avatar-fix",
+  "storyId": "TSK-004",
+  "title": "Fix shared collaborator avatars across web and iOS",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "supabase/migrations/20260406120000_sync_avatar_url_from_oauth.sql"
+  ],
+  "tests": {
+    "build": {
+      "status": "pass",
+      "command": "npm run build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "build",
+        "status": "pass"
+      },
+      {
+        "activity": "security-critic",
+        "status": "pass",
+        "notes": "Minor suggestion only: explicit search_path on handle_new_user for consistency"
+      },
+      {
+        "activity": "manual-db-apply-and-ui-check",
+        "status": "pending-manual",
+        "reason": "Apply migration, then verify collaborator avatars on both web and iOS shared lists"
+      },
+      {
+        "activity": "follow-up-build",
+        "status": "pass"
+      },
+      {
+        "activity": "follow-up-security-critic",
+        "status": "pass"
+      },
+      {
+        "activity": "follow-up-db-push",
+        "status": "pass"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}

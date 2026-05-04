@@ -55,3 +55,8 @@ ios-native/**/Secrets.plist
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Builder agent
+ai-tmp/
+.tmp/
+docs/builder-config.json

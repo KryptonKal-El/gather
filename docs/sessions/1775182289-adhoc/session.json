@@ -12,11 +12,11 @@
   "analysisCompleted": true,
   "probeStatus": "user-skipped",
   "taskType": "source-change",
-  "currentChunk": "TSK-006-06-high-res-item-images",
+  "currentChunk": "TSK-007-07-profile-image-upload-fix",
   "currentAction": {
-    "description": "High-resolution item image fix complete; awaiting user verification",
-    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-006-06-high-res-item-images/changes.md",
-    "lastAction": "Developer changes built successfully and security review passed",
+    "description": "Profile image upload fix complete; awaiting user verification",
+    "contextAnchor": "docs/sessions/1775182289-adhoc/chunks/TSK-007-07-profile-image-upload-fix/changes.md",
+    "lastAction": "Developer changes built successfully on web and iOS",
     "updatedAt": "2026-04-02T00:00:00Z"
   },
   "status": "in_progress",
@@ -62,6 +62,13 @@
       "title": "Use highest-resolution grocery item images after selection",
       "status": "completed",
       "order": 6
+    },
+    {
+      "id": "TSK-007",
+      "slug": "profile-image-upload-fix",
+      "title": "Fix profile image upload refresh across web and iOS",
+      "status": "completed",
+      "order": 7
     }
   ]
 }

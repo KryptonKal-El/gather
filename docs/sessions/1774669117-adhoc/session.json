@@ -1,0 +1,22 @@
+{
+  "id": "1774669117-adhoc",
+  "mode": "adhoc",
+  "source": {
+    "taskId": null
+  },
+  "analysisCompleted": false,
+  "probeStatus": "confirmed",
+  "taskType": "source-change",
+  "runtimeImpact": "After idle/network disruption, selecting lists can leave web UI stuck on Loading items forever.",
+  "verificationTarget": "Authenticated list switching after network/realtime disruption on web app",
+  "chunks": [],
+  "currentChunk": null,
+  "implementationDecisions": null,
+  "startedAt": "2026-03-27T00:00:00Z",
+  "status": "active",
+  "currentAction": {
+    "description": "Analysis complete for stuck loading after idle/network disruption",
+    "lastAction": "Probe confirmed infinite loading path after offline/realtime failure",
+    "updatedAt": "2026-03-27T00:00:00Z"
+  }
+}

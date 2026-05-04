@@ -1,0 +1,53 @@
+{
+  "id": "TSK-007-07-profile-image-upload-fix",
+  "storyId": "TSK-007",
+  "title": "Fix profile image upload refresh across web and iOS",
+  "status": "in_progress",
+  "startedAt": "2026-04-02T00:00:00Z",
+  "completedAt": null,
+  "filesModified": [
+    "src/services/imageStorage.js",
+    "ios-native/GatherLists/GatherLists/Services/StorageService.swift",
+    "ios-native/GatherLists/GatherLists/Utils/ImageCompressor.swift",
+    "ios-native/GatherLists/GatherLists/Views/Settings/SettingsView.swift"
+  ],
+  "tests": {
+    "web-build": {
+      "status": "pass",
+      "command": "npm run build"
+    },
+    "ios-build": {
+      "status": "pass",
+      "command": "xcodebuild -project \"ios-native/GatherLists/GatherLists.xcodeproj\" -scheme \"GatherLists\" -destination 'platform=iOS Simulator,name=iPhone 17' build"
+    }
+  },
+  "verification": {
+    "status": "manual-follow-up-required",
+    "results": [
+      {
+        "activity": "web-build",
+        "status": "pass"
+      },
+      {
+        "activity": "ios-build",
+        "status": "pass"
+      },
+      {
+        "activity": "manual-avatar-upload-check",
+        "status": "pending-manual",
+        "reason": "Verify profile image updates immediately after upload on web and iOS and persists after refresh/relaunch"
+      },
+      {
+        "activity": "swift-critic",
+        "status": "pass",
+        "notes": "Only minor UX suggestions; no correctness issues"
+      }
+    ],
+    "completedAt": "2026-04-02T00:00:00Z"
+  },
+  "commit": null,
+  "uncommitted": null,
+  "reassignment": null,
+  "advisory": null,
+  "pendingUpdates": null
+}
