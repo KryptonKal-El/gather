@@ -46,6 +46,7 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
   const { user } = useAuth();
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
+  const isRsvpList = fields.rsvpStatus;
 
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
   const [isStorePickerOpen, setIsStorePickerOpen] = useState(false);
@@ -456,84 +457,105 @@ export const ShoppingItem = ({ item, stores, listType, listCategories, onToggle,
         onTouchEnd={handleTouchEnd}
         style={getSwipeStyle()}
       >
-        {fields.image && (
-          <button
-            type="button"
-            className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
-            onClick={() => {
-              setUploadError(null);
-              setIsImagePickerOpen(true);
-            }}
-            title="Set item image"
-          >
-            {imageUrl ? (
-              <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
-            ) : (
-              <span className={styles.thumbnailPlaceholder}>+</span>
-            )}
-          </button>
-        )}
-        <div className={styles.details} onDoubleClick={onToggle}>
-          <span className={styles.label}>
-            <span className={styles.name}>
-              {item.name}
-              {fields.quantity && (
-                (item.unit && item.unit !== 'each')
-                  ? <span className={styles.qty}> ({qty} {item.unit})</span>
-                  : qty > 1 && <span className={styles.qty}> ({qty})</span>
-              )}
-            </span>
-          </span>
-          <div className={styles.badges}>
-            {fields.store && assignedStore && (
-              <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
-                {assignedStore.name}
-              </span>
-            )}
-            {fields.category && item.category && (
-              <span
-                className={styles.categoryCompact}
-                style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
-              >
-                {allLabels[item.category] ?? 'Other'}
-              </span>
-            )}
-            {fields.dueDate && item.dueDate && (() => {
-              const isOverdue = !item.isChecked &&
-                new Date(item.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
-              return (
-                <span className={`${styles.dueDateLabel} ${isOverdue ? styles.overdue : ''}`}>
-                  {item.recurrenceRule && <span className={styles.repeatIcon}>↻</span>}
-                  Due {formatDueDateLabel(item.dueDate)}
+        {isRsvpList ? (
+          <>
+            <div className={styles.details}>
+              <span className={styles.label}>
+                <span className={styles.name}>
+                  {item.name}
+                  {fields.quantity && (
+                    (item.unit && item.unit !== 'each')
+                      ? <span className={styles.qty}> ({qty} {item.unit})</span>
+                      : qty > 1 && <span className={styles.qty}> ({qty})</span>
+                  )}
                 </span>
-              );
-            })()}
-            {fields.rsvpStatus && (
-              <div className={styles.rsvpPickerWrapper}>
-                <select
-                  className={styles.rsvpPickerSelect}
-                  value={item.rsvpStatus ?? 'not_invited'}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onUpdateItem(item.id, { rsvpStatus: e.target.value });
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus ?? 'not_invited'] ?? RSVP_COLORS.not_invited }}
-                >
-                  <option value="invited">Invited</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="declined">Declined</option>
-                  <option value="maybe">Maybe</option>
-                  <option value="not_invited">Not Yet Invited</option>
-                </select>
+              </span>
+              <div className={styles.badges}>
+                <div className={styles.rsvpPickerWrapper}>
+                  <select
+                    className={styles.rsvpPickerSelect}
+                    value={item.rsvpStatus ?? 'not_invited'}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      onUpdateItem(item.id, { rsvpStatus: e.target.value });
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ backgroundColor: RSVP_COLORS[item.rsvpStatus ?? 'not_invited'] ?? RSVP_COLORS.not_invited }}
+                  >
+                    <option value="invited">Invited</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="declined">Declined</option>
+                    <option value="maybe">Maybe</option>
+                    <option value="not_invited">Not Yet Invited</option>
+                  </select>
+                </div>
               </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {fields.image && (
+              <button
+                type="button"
+                className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
+                onClick={() => {
+                  setUploadError(null);
+                  setIsImagePickerOpen(true);
+                }}
+                title="Set item image"
+              >
+                {imageUrl ? (
+                  <img src={imageUrl} alt={item.name} className={styles.thumbnailImg} />
+                ) : (
+                  <span className={styles.thumbnailPlaceholder}>+</span>
+                )}
+              </button>
             )}
-          </div>
-        </div>
-        {fields.price && lineTotal !== null && (
-          <span className={styles.price} onDoubleClick={onToggle}>
-            {formatPrice(lineTotal)}
-          </span>
+            <div className={styles.rowBody} onDoubleClick={onToggle}>
+              <div className={styles.details}>
+                <span className={styles.label}>
+                  <span className={styles.name}>
+                    {item.name}
+                    {fields.quantity && (
+                      (item.unit && item.unit !== 'each')
+                        ? <span className={styles.qty}> ({qty} {item.unit})</span>
+                        : qty > 1 && <span className={styles.qty}> ({qty})</span>
+                    )}
+                  </span>
+                </span>
+                <div className={styles.badges}>
+                  {fields.store && assignedStore && (
+                    <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
+                      {assignedStore.name}
+                    </span>
+                  )}
+                  {fields.category && item.category && (
+                    <span
+                      className={styles.categoryCompact}
+                      style={{ backgroundColor: allColors[item.category] ?? '#9e9e9e' }}
+                    >
+                      {allLabels[item.category] ?? 'Other'}
+                    </span>
+                  )}
+                  {fields.dueDate && item.dueDate && (() => {
+                    const isOverdue = !item.isChecked &&
+                      new Date(item.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
+                    return (
+                      <span className={`${styles.dueDateLabel} ${isOverdue ? styles.overdue : ''}`}>
+                        {item.recurrenceRule && <span className={styles.repeatIcon}>↻</span>}
+                        Due {formatDueDateLabel(item.dueDate)}
+                      </span>
+                    );
+                  })()}
+                </div>
+              </div>
+              {fields.price && lineTotal !== null && (
+                <span className={styles.price}>
+                  {formatPrice(lineTotal)}
+                </span>
+              )}
+            </div>
+          </>
         )}
         <button
           type="button"
