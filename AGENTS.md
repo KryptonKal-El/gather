@@ -186,3 +186,44 @@ Things that are NOT easily discoverable from the code or documentation alone:
 - Standard library or framework usage
 - Information already in project documentation
 - Temporary notes or TODOs
+
+# Specialists
+
+Project-level specialist agents that the four global Concepture routers (`Concepture-Developer`, `Concepture-Quality`, `Concepture-Tester`, `Concepture-Critic`) dispatch to for this project. Specialist agent files live in `.opencode/agents/`.
+
+| Role | Specialist | File |
+|------|------------|------|
+| developer | `react-dev` | `.opencode/agents/react-dev.md` |
+| tester | `react-tester` | `.opencode/agents/react-tester.md` |
+| critic | `react-critic` | `.opencode/agents/react-critic.md` |
+| quality | *(none — falls back to `commands.lint` and `commands.quality` from `docs/project.json`)* | — |
+| security-critic | *(none — falls back to the global `security-critic` for universal concerns)* | — |
+
+Notes:
+
+- `react-tester` handles both test writing (Write mode) and test-file review (Review mode). `Concepture-Critic` routes `*.test.*`, `*.spec.*`, and `__tests__/` paths to `react-tester`; `Concepture-Critic` routes all other source files to `react-critic`.
+- Quality runs through `commands.lint` (`npm run lint`) and `commands.quality` (currently aliased to lint). When project-specific quality rules accrete, a dedicated quality specialist can be added.
+- The global `security-critic` covers universal stack-agnostic security concerns (secrets in source, RLS bypass attempts, auth handling). Add a `security-critic-js` specialist if and when JS-specific security rules accrete.
+
+# Agent Models
+
+Model and temperature settings for every sub-agent involved in this project. Routers (`Concepture-*`) are global and run with their own defaults; the project specialists below are pinned to specific models in their agent file frontmatter.
+
+| Agent | Model | Temperature |
+|-------|-------|-------------|
+| react-dev | `github-copilot/gpt-5.5` | 0.2 |
+| react-tester | `github-copilot/gpt-5.5` | 0.1 |
+| react-critic | `github-copilot/gpt-5.5` | 0.0 |
+| Concepture-Explore | (global default) | 0.0 |
+| Concepture-Developer | (global default) | 0.0 |
+| Concepture-Quality | (global default) | 0.0 |
+| Concepture-Tester | (global default) | 0.0 |
+| Concepture-Critic | (global default) | 0.0 |
+| toolkit-critic | (global default) | 0.0 |
+| security-critic | (global default) | 0.0 |
+
+Notes:
+
+- All project specialists run on `github-copilot/gpt-5.5`.
+- Temperatures: developer 0.2 (some flexibility for implementation choice), tester 0.1 (mostly deterministic), critic 0.0 (deterministic review).
+- Router agents inherit their model and temperature from the global toolkit agent definitions; only project specialists need explicit pinning here.

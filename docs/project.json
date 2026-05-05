@@ -19,6 +19,8 @@
     "dev": "npm run dev",
     "build": "npm run build",
     "lint": "npm run lint",
+    "quality": "npm run lint",
+    "test": "npm test",
     "preview": "npm run preview",
     "cap:sync": "npm run build && npx cap sync",
     "cap:ios": "npm run build && npx cap sync ios && npx cap open ios"
