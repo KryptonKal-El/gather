@@ -12,6 +12,33 @@
 
 ---
 
+============================================================
+[2026-05-05 12:00:03 CDT] — Story TSK-20260505-01 — react-dev
+============================================================
+
+## What I implemented
+
+Added a dedicated Vitest + React Testing Library setup so unit tests run separately from the existing Playwright suite and avoid loading the Vite PWA config.
+
+## Files changed
+
+- package.json — added Vitest/RTL dev scripts and dependencies.
+- package-lock.json — locked the new test infrastructure packages.
+- vitest.config.js — configured jsdom, globals, setup file, React JSX support, and unit-test include patterns.
+- test/setup.js — imported jest-dom matchers and polyfilled window.matchMedia for jsdom.
+- eslint.config.js — added Vitest globals for test files while preserving app lint rules.
+- src/components/Avatar.test.jsx — added the Avatar fallback-initial smoke test.
+
+## Build / lint results
+
+- npm run test:run: pass (1 test passing)
+- npm run lint: fail due to pre-existing unrelated errors in .tmp, ai-tmp, e2e, playwright.config.js, and context files; newly changed files pass targeted ESLint.
+- npm run build: pass (existing chunk-size warning only)
+
+## Conventions Observed
+
+- testing layer: Vitest should explicitly include `src/**/*.test.{js,jsx}` and `test/**/*.test.{js,jsx}` so existing Playwright specs outside scope are not collected by Vitest.
+
 ## 2026-03-23 - US-004, US-005, US-006 (iOS Image Viewer Simplification)
 - Modified `ItemImagePickerSheet.swift` to implement view-only mode
 - Added `@State private var viewMode: Bool` initialized based on `item.imageUrl` presence
