@@ -34,9 +34,6 @@ functions/.env
 # Temp files
 .tmp/
 
-# Symlinked toolkit dirs (don't commit these)
-agents
-skills
 .vercel
 
 # Playwright
