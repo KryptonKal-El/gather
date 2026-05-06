@@ -62,3 +62,53 @@ Added a dedicated Vitest + React Testing Library setup so unit tests run separat
 - **All 18 user stories now pass**
 
 ---
+
+============================================================
+[2026-05-05 13:01:05 CDT] — Story TSK-20260505-01 — react-dev
+============================================================
+
+## What I implemented
+
+Updated store grouping so items without a store become a proper bottom-positioned "Unassigned" store group when additional grouping levels, like Category, are active. The group uses the locked gray color and preserves category sub-groups including the existing "Other" bucket for missing categories.
+
+## Files changed
+
+- src/utils/sortPipeline.js — changed unassigned-store handling to emit a top-level group with category sub-groups when remaining levels produce groups.
+
+## Build / lint results
+
+- npm run lint: fail due to pre-existing unrelated lint errors in .tmp, ai-tmp, e2e, playwright.config.js, and context files; changed file passes targeted ESLint (`npx eslint src/utils/sortPipeline.js`).
+- npm run build: not run
+
+## Conventions Observed
+
+- 
+
+============================================================
+[2026-05-05 13:03:57 CDT] — Story TSK-20260505-01 — react-tester
+============================================================
+
+## Test Strategy
+
+Chose unit tests for `applySortPipeline()` because the story change is pure grouping logic in `sortPipeline.js`; direct pipeline assertions cover the private `groupByStore()` behavior without React rendering or data-layer mocks.
+
+## Tests written
+
+- src/utils/sortPipeline.test.js:emits Unassigned after real stores when grouping by store and category — verifies unassigned store items become a bottom top-level group after sort-ordered stores.
+- src/utils/sortPipeline.test.js:sub-groups unassigned items by category — verifies Unassigned mirrors Store→Category nested grouping.
+- src/utils/sortPipeline.test.js:places missing categories inside the Unassigned Other category bucket — verifies missing categories fall into the existing Other bucket.
+- src/utils/sortPipeline.test.js:uses gray for the Unassigned store group — verifies top-level Unassigned metadata includes `#bbb`.
+- src/utils/sortPipeline.test.js:keeps store-only unassigned items in the existing ungrouped bucket — verifies Store-only behavior does not regress.
+- src/utils/sortPipeline.test.js:returns the same Unassigned grouping shape for checked items — verifies checked-item pipeline inputs produce the same nested Unassigned shape.
+
+## npm test
+
+- pass — 2 test files passed, 7 tests passed.
+
+## Coverage Gaps Observed
+
+- src/utils/sortPipeline.js — RSVP/guest-list grouping paths were not expanded in this story — guest lists are acceptance-protected as unaffected, but no adjacent regression suite exists yet.
+
+## Conventions Observed
+
+- conventions file for testing is missing, consider proposing a convention for unit-vs-integration choice and mock strategy.

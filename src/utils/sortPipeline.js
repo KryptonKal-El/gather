@@ -280,7 +280,31 @@ const groupByStore = (items, stores, remainingLevels, listType, listCategories) 
       listType,
       listCategories
     );
-    processedUngrouped = subResult.items ?? ungrouped;
+    if (subResult.groups) {
+      const subGroups = [...subResult.groups];
+      if (subResult.ungrouped?.length > 0) {
+        subGroups.push({
+          key: 'store-unassigned-other',
+          label: 'Other',
+          color: '#9e9e9e',
+          type: 'category',
+          items: subResult.ungrouped,
+        });
+      }
+
+      const unassignedGroup = {
+        key: 'store-unassigned',
+        label: 'Unassigned',
+        color: '#bbb',
+        type: 'store',
+        subGroups,
+      };
+
+      groups.push(unassignedGroup);
+      processedUngrouped = [];
+    } else {
+      processedUngrouped = subResult.items ?? ungrouped;
+    }
   }
 
   return { groups, ungrouped: processedUngrouped };
