@@ -1,4 +1,15 @@
 {
   "$schema": "https://opencode.ai/session-locks.json",
-  "locks": []
+  "locks": [
+    {
+      "sessionId": "builder-1778003044-b8d8c4",
+      "agent": "Concepture-Builder",
+      "mode": "adhoc",
+      "taskId": "TSK-20260505-01",
+      "status": "suspended-handoff",
+      "startedAt": "2026-05-05T17:44:04Z",
+      "lastHeartbeat": "2026-05-06T12:00:00Z",
+      "note": "Suspended at human review gate. 2 advisory critic findings pending user decision (approve vs tighten). No commit yet."
+    }
+  ]
 }
