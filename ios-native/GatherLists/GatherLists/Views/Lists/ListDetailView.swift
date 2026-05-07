@@ -1083,8 +1083,9 @@ struct ListDetailView: View {
                         .rotationEffect(.degrees(isCheckedCollapsed ? 0 : 90))
                     
                     Text("Crossed (\(allChecked.count))")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
                     
                     Spacer()
                     
@@ -1095,13 +1096,16 @@ struct ListDetailView: View {
                     .foregroundStyle(.red)
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                .padding(.vertical, 8)
+                .padding(.leading, 20)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(.secondarySystemGroupedBackground))
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             }
+            .buttonStyle(.plain)
+            .textCase(nil)
             
             if !isCheckedCollapsed {
                 ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
