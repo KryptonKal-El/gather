@@ -1063,6 +1063,13 @@ struct ListDetailView: View {
             let result = vm.checkedPipelineResult(for: activeSortConfig)
             let allChecked = result.items ?? collectAllItems(from: result.groups) + result.ungrouped
             
+            // Spacer to create visual gap before crossed section
+            Color.clear
+                .frame(height: 16)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            
             HStack {
                 Text("Crossed (\(allChecked.count))")
                     .font(.headline)
@@ -1078,7 +1085,6 @@ struct ListDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .padding(.top, 20)
             .background(Color(.secondarySystemGroupedBackground))
             .listRowInsets(EdgeInsets())
             .listRowSeparator(.hidden)
