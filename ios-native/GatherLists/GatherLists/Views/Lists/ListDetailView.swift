@@ -1071,60 +1071,63 @@ struct ListDetailView: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             
-            Button {
-                withAnimation(.easeInOut(duration: 0.2)) {
-                    isCheckedCollapsed.toggle()
-                }
-            } label: {
-                HStack(spacing: 10) {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(isCheckedCollapsed ? 0 : 90))
-                    
-                    Text("Crossed (\(allChecked.count))")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
-                    
-                    Spacer()
-                    
-                    Button("Clear crossed") {
-                        showClearCheckedAlert = true
-                    }
-                    .font(.subheadline)
-                    .foregroundStyle(.red)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .padding(.leading, 20)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemGroupedBackground))
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            }
-            .buttonStyle(.plain)
-            .textCase(nil)
-            
-            if !isCheckedCollapsed {
-                ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
-                    itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                Task {
-                                    if await detailViewModel?.deleteItem(item) != nil {
-                                        registerDeleteUndo(for: item)
+            Section {
+                if !isCheckedCollapsed {
+                    ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
+                        itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    Task {
+                                        if await detailViewModel?.deleteItem(item) != nil {
+                                            registerDeleteUndo(for: item)
+                                        }
                                     }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
-                            } label: {
-                                Label("Delete", systemImage: "trash")
                             }
-                        }
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(Color.clear)
+                            .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(Color.clear)
+                    }
                 }
+            } header: {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isCheckedCollapsed.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(isCheckedCollapsed ? 0 : 90))
+                        
+                        Text("Crossed")
+                            .font(.headline)
+                            .foregroundStyle(.primary)
+                        
+                        Text("(\(allChecked.count))")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        
+                        Spacer()
+                        
+                        Button("Clear crossed") {
+                            showClearCheckedAlert = true
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(.red)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .textCase(nil)
+                .listRowInsets(EdgeInsets())
             }
         }
     }
