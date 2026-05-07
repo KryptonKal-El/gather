@@ -20,6 +20,7 @@ struct ListDetailView: View {
     @FocusState private var isInputFocused: Bool
     
     @State private var collapsedStores: Set<String> = []
+    @State private var isCheckedCollapsed = false
     @State private var showClearCheckedAlert = false
     
     // Notification sheet state
@@ -1070,42 +1071,56 @@ struct ListDetailView: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
             
-            HStack {
-                Text("Crossed (\(allChecked.count))")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                
-                Spacer()
-                
-                Button("Clear crossed") {
-                    showClearCheckedAlert = true
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isCheckedCollapsed.toggle()
                 }
-                .font(.subheadline)
-                .foregroundStyle(.red)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(Color(.secondarySystemGroupedBackground))
-            .listRowInsets(EdgeInsets())
-            .listRowSeparator(.hidden)
-            .listRowBackground(Color.clear)
-            
-            ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
-                itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            Task {
-                                if await detailViewModel?.deleteItem(item) != nil {
-                                    registerDeleteUndo(for: item)
-                                }
-                            }
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(isCheckedCollapsed ? 0 : 90))
+                    
+                    Text("Crossed (\(allChecked.count))")
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    
+                    Spacer()
+                    
+                    Button("Clear crossed") {
+                        showClearCheckedAlert = true
                     }
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(.secondarySystemGroupedBackground))
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+            }
+            
+            if !isCheckedCollapsed {
+                ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
+                    itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                Task {
+                                    if await detailViewModel?.deleteItem(item) != nil {
+                                        registerDeleteUndo(for: item)
+                                    }
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
+                }
             }
         }
     }
