@@ -254,10 +254,10 @@ export const ShoppingList = ({
         <div className={styles.checkedSection}>
           <div className={styles.checkedHeader}>
             <h3 className={styles.groupTitle}>
-              Checked ({checkedItems.length})
+              Crossed ({checkedItems.length})
             </h3>
             <button className={styles.clearBtn} onClick={() => setIsConfirmingClear(true)}>
-              Clear checked
+              Clear crossed
             </button>
             {isConfirmingClear && (
               <ConfirmDialog

@@ -194,6 +194,7 @@ Project-level specialist agents that the four global Concepture routers (`Concep
 | Role | Specialist | File |
 |------|------------|------|
 | developer | `react-dev` | `.opencode/agents/react-dev.md` |
+| developer | `swift-dev` | `.opencode/agents/swift-dev.md` |
 | tester | `react-tester` | `.opencode/agents/react-tester.md` |
 | critic | `react-critic` | `.opencode/agents/react-critic.md` |
 | quality | *(none — falls back to `commands.lint` and `commands.quality` from `docs/project.json`)* | — |
@@ -212,6 +213,7 @@ Model and temperature settings for every sub-agent involved in this project. Rou
 | Agent | Model | Temperature |
 |-------|-------|-------------|
 | react-dev | `github-copilot/gpt-5.5` | 0.2 |
+| swift-dev | `github-copilot/gpt-5.5` | 0.2 |
 | react-tester | `github-copilot/gpt-5.5` | 0.1 |
 | react-critic | `github-copilot/gpt-5.5` | 0.0 |
 | Concepture-Explore | (global default) | 0.0 |

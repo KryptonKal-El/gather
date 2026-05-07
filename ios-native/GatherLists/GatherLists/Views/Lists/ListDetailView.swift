@@ -145,7 +145,7 @@ struct ListDetailView: View {
                 }
             }
         }
-        .alert("Clear checked items?", isPresented: $showClearCheckedAlert) {
+        .alert("Clear crossed items?", isPresented: $showClearCheckedAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Clear", role: .destructive) {
                 Task {
@@ -156,7 +156,7 @@ struct ListDetailView: View {
                 }
             }
         } message: {
-            Text("This will permanently delete all checked items.")
+            Text("This will permanently delete all crossed items.")
         }
         .alert("Edit Name", isPresented: $showEditNameAlert) {
             TextField("Item name", text: $editNameText)
@@ -1064,13 +1064,13 @@ struct ListDetailView: View {
             let allChecked = result.items ?? collectAllItems(from: result.groups) + result.ungrouped
             
             HStack {
-                Text("Checked (\(allChecked.count))")
+                Text("Crossed (\(allChecked.count))")
                     .font(.headline)
                     .foregroundStyle(.secondary)
                 
                 Spacer()
                 
-                Button("Clear checked") {
+                Button("Clear crossed") {
                     showClearCheckedAlert = true
                 }
                 .font(.subheadline)
@@ -1078,7 +1078,7 @@ struct ListDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .padding(.top, 8)
+            .padding(.top, 20)
             .background(Color(.secondarySystemGroupedBackground))
             .listRowInsets(EdgeInsets())
             .listRowSeparator(.hidden)
