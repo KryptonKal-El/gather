@@ -93,9 +93,9 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
 
   // Depth 1+: Small sub-header (for ANY group type at nested level)
   return (
-    <div className={styles.nestedGroup}>
+    <div className={styles.nestedGroup} style={{ '--category-bar-color': group.color ?? '#9e9e9e' }}>
+      {/* Pass color to ::before pseudo-element via CSS custom property */}
       <h4 className={styles.nestedGroupTitle}>
-        <span className={styles.nestedGroupDot} style={{ backgroundColor: group.color ?? '#9e9e9e' }} />
         {group.label}
         <span className={styles.count}>{count}</span>
       </h4>
