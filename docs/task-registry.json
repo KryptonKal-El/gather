@@ -3,9 +3,10 @@
     {
       "id": "TSK-20260526-01",
       "title": "Replace category color dot with full-height left bar in iOS native shopping list",
-      "status": "ready",
+      "status": "completed",
       "createdAt": "2026-05-26T10:52:00Z",
-      "path": "docs/tasks/TSK-20260526-01.md"
+      "completedAt": "2026-05-26T12:28:00Z",
+      "path": "docs/tasks/completed/TSK-20260526-01.md"
     }
   ]
 }
