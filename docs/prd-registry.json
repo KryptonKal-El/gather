@@ -639,27 +639,20 @@
       "completedAt": "2026-03-03T23:30:00Z",
       "notes": "All 6 stories complete. Walmart \u2192 Open Food Facts \u2192 SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     },
-    {
-      "id": "prd-item-row-toggle-ux",
-      "name": "Item Row Toggle UX \u2014 Remove Checkbox & Delayed Move",
-      "status": "ready",
-      "filePath": "docs/prds/prd-item-row-toggle-ux.md",
-      "createdAt": "2026-05-04",
-      "updatedAt": "2026-05-04",
-      "estimatedStories": 4,
-      "notes": "Remove circle checkbox, add 1.5s delay before section move with double-tap-to-cancel. Both web and iOS. Guest Lists unaffected.",
-      "jsonPath": "docs/prds/prd-item-row-toggle-ux.json",
-      "branchName": "feature/item-row-toggle-ux"
-    }
-    ,{
-      "id": "prd-category-group-left-bar",
-      "name": "Category Group Left Bar Visual Treatment",
-      "status": "ready",
-      "filePath": "docs/prds/prd-category-group-left-bar.md",
-      "createdAt": "2026-05-26",
-      "updatedAt": "2026-05-26",
-      "estimatedStories": 3,
-      "notes": "Replace nested category color dot with a full-height 3px left vertical color bar. Items indented 12px from bar. Store card treatment unchanged. React web only."
-    }
+     {
+       "id": "prd-category-group-left-bar",
+       "name": "Category Group Left Bar Visual Treatment",
+       "status": "completed",
+       "filePath": "docs/prds/prd-category-group-left-bar.md",
+       "jsonPath": "docs/prds/prd-category-group-left-bar.json",
+       "createdAt": "2026-05-26",
+       "updatedAt": "2026-05-26",
+       "estimatedStories": 3,
+       "notes": "Replace nested category color dot with a full-height 3px left vertical color bar. Items indented 12px from bar. Store card treatment unchanged. React web only.",
+       "startedAt": "2026-05-26T00:00:00Z",
+       "completedAt": "2026-05-26T10:50:00Z",
+       "currentStory": null,
+       "storiesCompleted": 3
+     }
   ]
 }
