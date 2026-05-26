@@ -1,0 +1,23 @@
+{
+  "sessionId": "planner-1779802846-4f53ef",
+  "agent": "Concepture-Planner",
+  "mode": "prd",
+  "workBranch": "main",
+  "startedAt": "2026-05-26T00:00:00Z",
+  "currentPrd": "docs/drafts/prd-category-group-left-bar.md",
+  "lockedDecisions": [
+    {
+      "question": "Should the bar span full height of the category block or header only?",
+      "decision": "Full height — bar runs from category label through all items in that category."
+    },
+    {
+      "question": "Apply bar treatment to top-level store groups too?",
+      "decision": "No — stores keep existing card/border treatment. Categories only."
+    },
+    {
+      "question": "Left indent for items from the bar on mobile?",
+      "decision": "12px."
+    }
+  ],
+  "resumePrompt": "Resume Concepture-Planner session planner-1779802846-4f53ef. Active PRD draft: docs/drafts/prd-category-group-left-bar.md. Feature: replace nested category color dot with a full-height 3px left vertical color bar; indent items 12px from bar. Stores keep existing card treatment. Locked decisions: full-height bar, categories only, 12px indent. PRD has 3 stories (S-1, S-2, S-3). Awaiting user review."
+}

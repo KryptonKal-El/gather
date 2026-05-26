@@ -651,5 +651,15 @@
       "jsonPath": "docs/prds/prd-item-row-toggle-ux.json",
       "branchName": "feature/item-row-toggle-ux"
     }
+    ,{
+      "id": "prd-category-group-left-bar",
+      "name": "Category Group Left Bar Visual Treatment",
+      "status": "ready",
+      "filePath": "docs/prds/prd-category-group-left-bar.md",
+      "createdAt": "2026-05-26",
+      "updatedAt": "2026-05-26",
+      "estimatedStories": 3,
+      "notes": "Replace nested category color dot with a full-height 3px left vertical color bar. Items indented 12px from bar. Store card treatment unchanged. React web only."
+    }
   ]
 }
