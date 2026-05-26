@@ -379,6 +379,7 @@ struct ListDetailView: View {
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
+            .environment(\.defaultMinListRowHeight, 0)
             .contentMargins(.bottom, 80, for: .scrollContent)
             .refreshable {
                 await detailViewModel?.refresh()
@@ -448,31 +449,39 @@ struct ListDetailView: View {
                     level1Header(group: group)
                 }
             } else {
-                categoryHeader(label: group.label, color: group.color ?? "#9e9e9e", itemCount: (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0))
+                let barColor = group.color ?? "#9e9e9e"
+                let itemCount = (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0)
+
+                categoryHeader(label: group.label, color: barColor, itemCount: itemCount)
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                
+                    .listRowBackground(Color(.systemBackground))
+
                 if let subGroups = group.subGroups {
                     pipelineGroupsView(groups: subGroups, level: level + 1)
                 } else if let items = group.items {
                     ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
-                        itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
-                            .id(item.id)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    Task {
-                                        if await detailViewModel?.deleteItem(item) != nil {
-                                            registerDeleteUndo(for: item)
-                                        }
+                        itemRow(
+                            item: item,
+                            isChecked: false,
+                            showSeparator: idx < items.count - 1,
+                            leadingBar: barColor
+                        )
+                        .id(item.id)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                Task {
+                                    if await detailViewModel?.deleteItem(item) != nil {
+                                        registerDeleteUndo(for: item)
                                     }
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
                                 }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
                             }
-                            .listRowInsets(EdgeInsets())
-                            .listRowSeparator(.hidden)
-                            .listRowBackground(Color.clear)
+                        }
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                     }
                 }
             }
@@ -528,6 +537,11 @@ struct ListDetailView: View {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground))
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color(.separator))
+                    .frame(height: 1)
+            }
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -604,26 +618,28 @@ struct ListDetailView: View {
     
     private func categoryHeader(label: String, color: String, itemCount: Int) -> some View {
         HStack(spacing: 8) {
-            Circle()
-                .fill(Color(hex: color))
-                .frame(width: 8, height: 8)
             Text(label)
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color(hex: color))
             Text("(\(itemCount))")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
             Spacer()
         }
-        .padding(.horizontal, 16)
+        .padding(.leading, 12)
+        .padding(.trailing, 16)
         .padding(.vertical, 8)
-        .padding(.leading, 20)
+        .overlay(alignment: .leading) {
+            Rectangle()
+                .fill(Color(hex: color))
+                .frame(width: 3)
+        }
     }
     
     // MARK: - Item Row
     
-    private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true) -> some View {
+    private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true, leadingBar: String? = nil) -> some View {
         let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
         let effectiveIsChecked = detailViewModel?.effectiveIsChecked(for: item) ?? item.isChecked
 
@@ -769,6 +785,13 @@ struct ListDetailView: View {
         }
         .contextMenu {
             itemContextMenu(item: item)
+        }
+        .overlay(alignment: .leading) {
+            if let hex = leadingBar {
+                Rectangle()
+                    .fill(Color(hex: hex))
+                    .frame(width: 3)
+            }
         }
     }
     
