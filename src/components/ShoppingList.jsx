@@ -95,7 +95,7 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
   return (
     <div className={styles.nestedGroup} style={{ '--category-bar-color': group.color ?? '#9e9e9e' }}>
       {/* Pass color to ::before pseudo-element via CSS custom property */}
-      <h4 className={styles.nestedGroupTitle}>
+      <h4 className={styles.nestedGroupTitle} style={{ color: group.color ?? '#9e9e9e' }}>
         {group.label}
         <span className={styles.count}>{count}</span>
       </h4>
