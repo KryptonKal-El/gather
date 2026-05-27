@@ -418,7 +418,7 @@ export const ShoppingListProvider = ({ children }) => {
     const missingStoreIds = [
       ...new Set(
         activeItems
-          .map((item) => item.storeId)
+          .map((item) => item.store)
           .filter((id) => id && !stores.some((s) => s.id === id))
       ),
     ];
