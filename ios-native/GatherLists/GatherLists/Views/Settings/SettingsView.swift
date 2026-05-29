@@ -99,7 +99,7 @@ struct SettingsView: View {
                         .onChange(of: openfoodfactsEnabled) { _, newValue in
                             Task { await toggleImageSearchSource(openfoodfacts: newValue) }
                         }
-                    Toggle("SerpAPI", isOn: $serpApiEnabled)
+                    Toggle("Google Images", isOn: $serpApiEnabled)
                         .onChange(of: serpApiEnabled) { _, newValue in
                             Task { await toggleImageSearchSource(serpapi: newValue) }
                         }

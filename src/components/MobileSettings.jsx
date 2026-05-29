@@ -26,7 +26,7 @@ const IMAGE_SEARCH_SOURCES = [
   { key: 'walmart', label: 'Walmart' },
   { key: 'spoonacular', label: 'Spoonacular' },
   { key: 'openfoodfacts', label: 'Open Food Facts' },
-  { key: 'serpapi', label: 'SerpAPI' },
+  { key: 'serpapi', label: 'Google Images' },
 ];
 
 /**
