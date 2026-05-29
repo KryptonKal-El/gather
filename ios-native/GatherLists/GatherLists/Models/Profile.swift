@@ -22,6 +22,13 @@ struct Profile: Codable, Identifiable, Hashable {
     var displayName: String?
     var imageSearchSettings: ImageSearchSettings
     
+    init(id: UUID, avatarUrl: String? = nil, displayName: String? = nil, imageSearchSettings: ImageSearchSettings = .defaultSettings) {
+        self.id = id
+        self.avatarUrl = avatarUrl
+        self.displayName = displayName
+        self.imageSearchSettings = imageSearchSettings
+    }
+
     enum CodingKeys: String, CodingKey {
         case id
         case avatarUrl = "avatar_url"
