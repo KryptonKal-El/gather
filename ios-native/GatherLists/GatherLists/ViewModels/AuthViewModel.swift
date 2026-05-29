@@ -203,7 +203,7 @@ final class AuthViewModel {
         do {
             try await ProfileService.updateImageSearchSettings(settings, userId: userId)
         } catch {
-            profile?.imageSearchSettings = previous
+            profile?.imageSearchSettings = previous ?? ImageSearchSettings.defaultSettings
             throw error
         }
     }
