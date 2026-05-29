@@ -148,7 +148,10 @@ struct SettingsView: View {
                 }
                 Task { await loadCategoryCounts() }
             }
-            .alert("Image Search Error", isPresented: $imageSearchError != nil) {
+            .alert("Image Search Error", isPresented: Binding(
+                get: { imageSearchError != nil },
+                set: { if !$0 { imageSearchError = nil } }
+            )) {
                 Button("OK", role: .cancel) { imageSearchError = nil }
             } message: {
                 if let error = imageSearchError {
