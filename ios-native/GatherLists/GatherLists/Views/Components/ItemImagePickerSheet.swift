@@ -203,25 +203,27 @@ struct ItemImagePickerSheet: View {
                                     spacing: 8
                                 ) {
                                     ForEach(group.results, id: \.url) { result in
-                                        AsyncImage(url: URL(string: result.url)) { phase in
-                                            switch phase {
-                                            case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
-                                            case .failure:
-                                                Image(systemName: "photo")
-                                                    .foregroundStyle(.secondary)
-                                            case .empty:
-                                                ProgressView()
-                                            @unknown default:
-                                                EmptyView()
+                                        ZStack {
+                                            Color(.systemGray6)
+                                            AsyncImage(url: URL(string: result.url)) { phase in
+                                                switch phase {
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                case .failure:
+                                                    Image(systemName: "photo")
+                                                        .foregroundStyle(.secondary)
+                                                case .empty:
+                                                    ProgressView()
+                                                @unknown default:
+                                                    EmptyView()
+                                                }
                                             }
+                                            .padding(6)
                                         }
                                         .frame(width: 100, height: 100)
-                                        .clipped()
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                                        .background(Color(.systemGray6).clipShape(RoundedRectangle(cornerRadius: 8)))
                                         .onTapGesture {
                                             selectSearchResult(result)
                                         }
