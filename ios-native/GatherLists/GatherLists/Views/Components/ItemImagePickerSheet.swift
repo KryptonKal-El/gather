@@ -220,7 +220,7 @@ struct ItemImagePickerSheet: View {
                                                     EmptyView()
                                                 }
                                             }
-                                            .padding(2)
+                                            .padding(3)
                                         }
                                         .frame(width: 100, height: 100)
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
