@@ -202,8 +202,8 @@ struct ItemImagePickerSheet: View {
                                     ],
                                     spacing: 8
                                 ) {
-                                    ForEach(group.results, id: \.thumbnail) { result in
-                                        AsyncImage(url: URL(string: result.thumbnail)) { phase in
+                                    ForEach(group.results, id: \.url) { result in
+                                        AsyncImage(url: URL(string: result.url)) { phase in
                                             switch phase {
                                             case .success(let image):
                                                 image
