@@ -180,6 +180,19 @@
   gap: 0.5rem;
 }
 
+.resultGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.groupTitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
 @media (max-width: 400px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
@@ -222,6 +235,20 @@
   text-align: center;
   margin: 0;
   padding: 1rem 0;
+}
+
+.settingsLink {
+  margin-top: 0.75rem;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.settingsLink:hover {
+  color: var(--primary-hover);
 }
 
 .uploadPane {

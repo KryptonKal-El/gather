@@ -5,6 +5,17 @@
 
 const CACHE_TTL = 5 * 60 * 1000;
 const searchCache = new Map();
+const DEFAULT_ENABLED_SOURCES = {
+  walmart: true,
+  spoonacular: true,
+  openfoodfacts: true,
+  serpapi: true,
+};
+
+const getSourcesString = (enabledSources) => Object.keys(enabledSources)
+  .filter((source) => enabledSources[source])
+  .sort()
+  .join(',');
 
 /**
  * Searches for product images matching the query.
@@ -12,13 +23,19 @@ const searchCache = new Map();
  * Results are cached client-side for 5 minutes.
  * @param {string} query - The search term
  * @param {number} [count=25] - Number of results to return
- * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
+ * @param {Object} [enabledSources] - Image search sources enabled by the user
+ * @returns {Promise<Array<{ source: string, label: string, results: Array<{ url: string, thumbnail: string, title: string }> }>>}
  */
-export const searchImages = async (query, count = 25) => {
-  const cacheKey = query.trim().toLowerCase();
+export const searchImages = async (query, count = 25, enabledSources = DEFAULT_ENABLED_SOURCES) => {
+  const sourcesString = getSourcesString(enabledSources ?? DEFAULT_ENABLED_SOURCES);
+  if (!sourcesString) {
+    return [];
+  }
+
+  const cacheKey = `${query.trim().toLowerCase()}:${sourcesString}`;
   const cached = searchCache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.results;
+    return cached.groups;
   }
   const baseUrl = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL;
   if (!baseUrl) {
@@ -35,6 +52,7 @@ export const searchImages = async (query, count = 25) => {
   const params = new URLSearchParams({
     q: query,
     num: String(count),
+    sources: sourcesString,
   });
 
   try {
@@ -50,11 +68,11 @@ export const searchImages = async (query, count = 25) => {
     }
 
     const data = await res.json();
-    const results = data.results ?? [];
-    if (results.length > 0) {
-      searchCache.set(cacheKey, { results, timestamp: Date.now() });
+    const groups = Array.isArray(data.groups) ? data.groups : [];
+    if (groups.length > 0) {
+      searchCache.set(cacheKey, { groups, timestamp: Date.now() });
     }
-    return results;
+    return groups;
   } catch (err) {
     console.error('Image search error:', err);
     return [];

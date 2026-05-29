@@ -17,6 +17,11 @@ struct SettingsView: View {
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
     @State private var categoryCounts: [String: Int] = [:]
+    @State private var walmartEnabled = true
+    @State private var spoonacularEnabled = false
+    @State private var openfoodfactsEnabled = false
+    @State private var serpApiEnabled = false
+    @State private var imageSearchError: String?
     
     private let listTypes: [(id: String, name: String)] = [
         ("grocery", "Grocery"),
@@ -81,6 +86,25 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("Image Search") {
+                    Toggle("Walmart", isOn: $walmartEnabled)
+                        .onChange(of: walmartEnabled) { _, newValue in
+                            Task { await toggleImageSearchSource(walmart: newValue) }
+                        }
+                    Toggle("Spoonacular", isOn: $spoonacularEnabled)
+                        .onChange(of: spoonacularEnabled) { _, newValue in
+                            Task { await toggleImageSearchSource(spoonacular: newValue) }
+                        }
+                    Toggle("Open Food Facts", isOn: $openfoodfactsEnabled)
+                        .onChange(of: openfoodfactsEnabled) { _, newValue in
+                            Task { await toggleImageSearchSource(openfoodfacts: newValue) }
+                        }
+                    Toggle("SerpAPI", isOn: $serpApiEnabled)
+                        .onChange(of: serpApiEnabled) { _, newValue in
+                            Task { await toggleImageSearchSource(serpapi: newValue) }
+                        }
+                }
+                
                 Section("Category Defaults") {
                     ForEach(listTypes, id: \.id) { type in
                         NavigationLink(destination: DefaultCategoryEditorView(listType: type.id)) {
@@ -115,6 +139,22 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .onAppear {
+                if let settings = authViewModel.profile?.imageSearchSettings {
+                    walmartEnabled = settings.walmart
+                    spoonacularEnabled = settings.spoonacular
+                    openfoodfactsEnabled = settings.openfoodfacts
+                    serpApiEnabled = settings.serpapi
+                }
+                Task { await loadCategoryCounts() }
+            }
+            .alert("Image Search Error", isPresented: $imageSearchError != nil) {
+                Button("OK", role: .cancel) { imageSearchError = nil }
+            } message: {
+                if let error = imageSearchError {
+                    Text(error)
+                }
+            }
             .confirmationDialog("Change Profile Photo", isPresented: $showPhotoSourceSheet) {
                 Button("Take Photo") {
                     showCamera = true
@@ -243,6 +283,21 @@ struct SettingsView: View {
             for type in types {
                 categoryCounts[type] = CategoryService.getSystemDefaults(for: type)?.count ?? 0
             }
+        }
+    }
+    
+    private func toggleImageSearchSource(walmart: Bool? = nil, spoonacular: Bool? = nil, openfoodfacts: Bool? = nil, serpapi: Bool? = nil) async {
+        let settings = ImageSearchSettings(
+            walmart: walmart ?? walmartEnabled,
+            spoonacular: spoonacular ?? spoonacularEnabled,
+            openfoodfacts: openfoodfacts ?? openfoodfactsEnabled,
+            serpapi: serpapi ?? serpApiEnabled
+        )
+        
+        do {
+            try await authViewModel.updateImageSearchSettings(settings)
+        } catch {
+            imageSearchError = error.localizedDescription
         }
     }
 }

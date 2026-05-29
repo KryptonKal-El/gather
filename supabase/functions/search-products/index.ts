@@ -11,6 +11,23 @@ interface ProductResult {
   title: string;
 }
 
+type SourceKey = 'walmart' | 'spoonacular' | 'openfoodfacts' | 'serpapi';
+
+const SOURCE_ORDER: SourceKey[] = ['walmart', 'spoonacular', 'openfoodfacts', 'serpapi'];
+
+const SOURCE_LABELS: Record<SourceKey, string> = {
+  walmart: 'Walmart',
+  spoonacular: 'Spoonacular',
+  openfoodfacts: 'Open Food Facts',
+  serpapi: 'Google Images',
+};
+
+interface ResultGroup {
+  source: SourceKey;
+  label: string;
+  results: ProductResult[];
+}
+
 const ALLOWED_ORIGINS = [
   'https://gatherlists.com',
   'https://gatherapp.vercel.app',
@@ -318,50 +335,57 @@ Deno.serve(async (req) => {
     );
   }
 
-  const respond = (body: { results: ProductResult[]; source: string }) =>
+  // Parse sources param (comma-separated, filter to valid SourceKey values)
+  const sourcesParam = url.searchParams.get('sources');
+  const enabledSources: Set<SourceKey> = sourcesParam
+    ? new Set(sourcesParam.split(',').map(s => s.trim()).filter((s): s is SourceKey => SOURCE_ORDER.includes(s as SourceKey)))
+    : new Set(SOURCE_ORDER);
+
+  const respond = (body: { groups: ResultGroup[] }) =>
     new Response(JSON.stringify(body), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
     });
 
-  // Run Walmart, Spoonacular, and Open Food Facts in parallel
-  const [walmartResults, spoonacularResults, offResults] = await Promise.all([
-    searchWalmart(query, numItems),
-    searchSpoonacularProducts(query, numItems),
-    searchOpenFoodFacts(query, numItems),
-  ]);
+  // Build primary search functions
+  const primaryKeys: SourceKey[] = ['walmart', 'spoonacular', 'openfoodfacts'];
+  const primarySearchFns: Record<string, () => Promise<ProductResult[]>> = {
+    walmart: () => searchWalmart(query, numItems),
+    spoonacular: () => searchSpoonacularProducts(query, numItems),
+    openfoodfacts: () => searchOpenFoodFacts(query, numItems),
+  };
 
-  // Concatenate results: Walmart first, then Spoonacular, then Open Food Facts
-  const combined = [...walmartResults, ...spoonacularResults, ...offResults];
+  // Run only enabled primary sources in parallel
+  const primaryResults = await Promise.all(
+    primaryKeys
+      .filter(k => enabledSources.has(k))
+      .map(k => primarySearchFns[k]().then(results => ({ source: k as SourceKey, results })))
+  );
 
-  // Deduplicate by thumbnail URL
-  const seen = new Set<string>();
-  const merged: ProductResult[] = [];
-  for (const r of combined) {
-    if (r.thumbnail && !seen.has(r.thumbnail)) {
-      seen.add(r.thumbnail);
-      merged.push(r);
-    }
+  // Determine if SerpAPI should be called
+  const enabledPrimariesAllEmpty = primaryResults.every(r => r.results.length === 0);
+  const onlySerpApi = enabledSources.size === 1 && enabledSources.has('serpapi');
+
+  const serpResults: ProductResult[] =
+    enabledSources.has('serpapi') && (enabledPrimariesAllEmpty || onlySerpApi)
+      ? await searchSerpApi(query, numItems)
+      : [];
+
+  // Build result map
+  const allResults: Record<SourceKey, ProductResult[]> = {
+    walmart: [],
+    spoonacular: [],
+    openfoodfacts: [],
+    serpapi: serpResults,
+  };
+  for (const { source, results } of primaryResults) {
+    allResults[source] = results;
   }
 
-  // Determine source based on which APIs returned results
-  const sources: string[] = [];
-  if (walmartResults.length > 0) sources.push('walmart');
-  if (spoonacularResults.length > 0) sources.push('spoonacular');
-  if (offResults.length > 0) sources.push('openfoodfacts');
+  // Build groups: only include sources with results, in defined order
+  const groups: ResultGroup[] = SOURCE_ORDER
+    .filter(key => allResults[key].length > 0)
+    .map(key => ({ source: key, label: SOURCE_LABELS[key], results: allResults[key] }));
 
-  const source = sources.length > 1 ? 'merged' : sources.length === 1 ? sources[0] : 'none';
-
-  // Return merged results if any source returned data
-  if (merged.length > 0) {
-    return respond({ results: merged, source });
-  }
-
-  // Final fallback: SerpAPI (only called if all three returned empty)
-  const serpResults = await searchSerpApi(query, numItems);
-  if (serpResults.length > 0) {
-    return respond({ results: serpResults, source: 'serpapi' });
-  }
-
-  return respond({ results: [], source: 'none' });
+  return respond({ groups });
 });

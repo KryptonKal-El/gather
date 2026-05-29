@@ -36,6 +36,7 @@ export const MobileListDetail = ({
   onSortSelect,
   restoredItemIds,
   onRestoreAnimationDone,
+  onNavigateToSettings,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [duplicatingList, setDuplicatingList] = useState(false);
@@ -238,6 +239,7 @@ export const MobileListDetail = ({
           onClearChecked={onClearChecked}
           restoredItemIds={restoredItemIds}
           onRestoreAnimationDone={onRestoreAnimationDone}
+          onNavigateToSettings={onNavigateToSettings}
         />
         <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />
       </div>
@@ -356,6 +358,7 @@ MobileListDetail.propTypes = {
   onSortSelect: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,
+  onNavigateToSettings: PropTypes.func,
 };
 
 MobileListDetail.defaultProps = {
@@ -367,4 +370,5 @@ MobileListDetail.defaultProps = {
   onResetItems: null,
   restoredItemIds: null,
   onRestoreAnimationDone: null,
+  onNavigateToSettings: null,
 };

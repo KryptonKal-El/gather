@@ -42,8 +42,9 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, isChecked, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone }) => {
+export const ShoppingItem = ({ item, isChecked, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone, onNavigateToSettings }) => {
   const { user } = useAuth();
+  const imageSearchSettings = user?.profile?.imageSearchSettings;
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
   const isRsvpList = fields.rsvpStatus;
@@ -907,6 +908,8 @@ export const ShoppingItem = ({ item, isChecked, stores, listType, listCategories
           onClose={() => setIsImagePickerOpen(false)}
           isUploading={isUploadingImage}
           uploadError={uploadError}
+          imageSearchSettings={imageSearchSettings}
+          onNavigateToSettings={onNavigateToSettings}
         />
       )}
     </div>
@@ -947,6 +950,7 @@ ShoppingItem.propTypes = {
   onUpdateItem: PropTypes.func.isRequired,
   isRestored: PropTypes.bool,
   onRestoreAnimationDone: PropTypes.func,
+  onNavigateToSettings: PropTypes.func,
 };
 
 ShoppingItem.defaultProps = {
@@ -956,4 +960,5 @@ ShoppingItem.defaultProps = {
   listCategories: null,
   isRestored: false,
   onRestoreAnimationDone: null,
+  onNavigateToSettings: null,
 };

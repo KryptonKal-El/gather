@@ -199,22 +199,23 @@ struct ListDetailView: View {
                 }
             }
         }
-        .sheet(item: $imagePickerItem) { item in
-            ItemImagePickerSheet(
-                item: item,
-                userId: authViewModel.currentUser?.id ?? UUID(),
-                onImageUrlSet: { url in
-                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
-                        detailViewModel?.items[index].imageUrl = url
-                    }
-                },
-                onImageRemoved: {
-                    if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
-                        detailViewModel?.items[index].imageUrl = nil
-                    }
-                }
-            )
-        }
+         .sheet(item: $imagePickerItem) { item in
+             ItemImagePickerSheet(
+                 item: item,
+                 userId: authViewModel.currentUser?.id ?? UUID(),
+                 imageSearchSettings: authViewModel.profile?.imageSearchSettings ?? .defaultSettings,
+                 onImageUrlSet: { url in
+                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                         detailViewModel?.items[index].imageUrl = url
+                     }
+                 },
+                 onImageRemoved: {
+                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                         detailViewModel?.items[index].imageUrl = nil
+                     }
+                 }
+             )
+         }
         .sheet(item: $editSheetItem) { item in
             EditItemSheet(
                 item: item,

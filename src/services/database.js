@@ -338,6 +338,24 @@ export const subscribeLists = (userId, callback) => {
 };
 
 // ---------------------------------------------------------------------------
+// Profile
+// ---------------------------------------------------------------------------
+
+/**
+ * Updates the image search settings for a user's profile.
+ * @param {string} userId
+ * @param {{ walmart: boolean, spoonacular: boolean, openfoodfacts: boolean, serpapi: boolean }} settings
+ * @returns {Promise<{ error: import('@supabase/supabase-js').PostgrestError | null }>}
+ */
+export const updateImageSearchSettings = async (userId, settings) => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ image_search_settings: settings })
+    .eq('id', userId);
+  return { error };
+};
+
+// ---------------------------------------------------------------------------
 // Items
 // ---------------------------------------------------------------------------
 

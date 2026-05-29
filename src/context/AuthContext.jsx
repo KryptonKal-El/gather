@@ -18,7 +18,7 @@ const fetchProfile = async (userId) => {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, display_name, email, avatar_url, created_at')
+      .select('id, display_name, email, avatar_url, created_at, timezone, image_search_settings')
       .eq('id', userId)
       .single();
 
@@ -42,7 +42,10 @@ const fetchProfile = async (userId) => {
 const mergeUserWithProfile = (supabaseUser, profile) => {
   return {
     ...supabaseUser,
-    profile,
+    profile: {
+      ...profile,
+      imageSearchSettings: profile?.image_search_settings ?? { walmart: true, spoonacular: false, openfoodfacts: false, serpapi: false },
+    },
   };
 };
 

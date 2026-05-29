@@ -7,12 +7,27 @@ import PropTypes from 'prop-types';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
+import { updateImageSearchSettings } from '../services/database.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { CategoryEditor } from './CategoryEditor.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import styles from './MobileSettings.module.css';
+
+const DEFAULT_IMAGE_SEARCH_SETTINGS = {
+  walmart: true,
+  spoonacular: false,
+  openfoodfacts: false,
+  serpapi: false,
+};
+
+const IMAGE_SEARCH_SOURCES = [
+  { key: 'walmart', label: 'Walmart' },
+  { key: 'spoonacular', label: 'Spoonacular' },
+  { key: 'openfoodfacts', label: 'Open Food Facts' },
+  { key: 'serpapi', label: 'SerpAPI' },
+];
 
 /**
  * Renders the mobile settings screen.
@@ -26,11 +41,17 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const { state, actions } = useShoppingList();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [imageSearchError, setImageSearchError] = useState(null);
+  const [localImageSearchSettings, setLocalImageSearchSettings] = useState(null);
   const [expandedCategoryType, setExpandedCategoryType] = useState(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
+  const userId = user?.id;
+  const imageSearchSettings = localImageSearchSettings
+    ?? user?.profile?.imageSearchSettings
+    ?? DEFAULT_IMAGE_SEARCH_SETTINGS;
 
   const categoryTypes = [
     { value: 'grocery', label: 'Grocery' },
@@ -76,6 +97,42 @@ export const MobileSettings = ({ user, onSignOut }) => {
     } finally {
       setIsUploading(false);
       e.target.value = '';
+    }
+  };
+
+  const handleImageSearchToggle = async (key) => {
+    if (!userId) {
+      setImageSearchError('Unable to save image search settings. Please try again.');
+      return;
+    }
+
+    const previousSettings = imageSearchSettings;
+    const updatedSettings = {
+      ...previousSettings,
+      [key]: !previousSettings[key],
+    };
+
+    setImageSearchError(null);
+    setLocalImageSearchSettings(updatedSettings);
+
+    try {
+      const { error } = await updateImageSearchSettings(userId, updatedSettings);
+      if (error) {
+        console.error('Failed to update image search settings:', error);
+        setLocalImageSearchSettings(previousSettings);
+        setImageSearchError('Unable to save image search settings. Please try again.');
+        return;
+      }
+
+      try {
+        await refreshUser();
+      } catch (err) {
+        console.error('Failed to refresh user after image search settings update:', err);
+      }
+    } catch (err) {
+      console.error('Failed to update image search settings:', err);
+      setLocalImageSearchSettings(previousSettings);
+      setImageSearchError('Unable to save image search settings. Please try again.');
     }
   };
 
@@ -144,6 +201,30 @@ export const MobileSettings = ({ user, onSignOut }) => {
             <span className={styles.toggleTrack} />
           </label>
         </div>
+      </div>
+
+      <h3 className={styles.sectionHeader}>Image Search</h3>
+      <div className={styles.section}>
+        {IMAGE_SEARCH_SOURCES.map(({ key, label }) => (
+          <div className={styles.toggleRow} key={key}>
+            <span className={styles.toggleLabel}>{label}</span>
+            <label className={styles.toggle}>
+              <input
+                type="checkbox"
+                className={styles.toggleInput}
+                checked={Boolean(imageSearchSettings[key])}
+                onChange={() => handleImageSearchToggle(key)}
+                aria-label={`Toggle ${label} image search`}
+              />
+              <span className={styles.toggleTrack} />
+            </label>
+          </div>
+        ))}
+        {imageSearchError && (
+          <div className={styles.uploadError}>
+            <span>{imageSearchError}</span>
+          </div>
+        )}
       </div>
 
       <h3 className={styles.sectionHeader}>Category Defaults</h3>

@@ -195,6 +195,19 @@ final class AuthViewModel {
         }
     }
     
+    /// Updates image search settings, with optimistic updates and rollback on error.
+    func updateImageSearchSettings(_ settings: ImageSearchSettings) async throws {
+        guard let userId = currentUser?.id else { return }
+        let previous = profile?.imageSearchSettings
+        profile?.imageSearchSettings = settings
+        do {
+            try await ProfileService.updateImageSearchSettings(settings, userId: userId)
+        } catch {
+            profile?.imageSearchSettings = previous
+            throw error
+        }
+    }
+    
     deinit {
         authStateTask?.cancel()
     }

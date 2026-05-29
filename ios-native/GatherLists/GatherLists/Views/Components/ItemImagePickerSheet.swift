@@ -7,14 +7,16 @@ import PhotosUI
 struct ItemImagePickerSheet: View {
     let item: Item
     let userId: UUID
+    let imageSearchSettings: ImageSearchSettings
     let onImageUrlSet: (String) -> Void
     let onImageRemoved: () -> Void
     @Environment(\.dismiss) private var dismiss
+    @Environment(AuthViewModel.self) private var authViewModel
     
     @State private var viewMode: Bool
     @State private var selectedTab = 0
     @State private var searchQuery: String
-    @State private var searchResults: [ProductSearchResult] = []
+    @State private var searchResultGroups: [ProductResultGroup] = []
     @State private var isSearching = false
     @State private var hasSearched = false
     @State private var isUploading = false
@@ -27,11 +29,13 @@ struct ItemImagePickerSheet: View {
     init(
         item: Item,
         userId: UUID,
+        imageSearchSettings: ImageSearchSettings = .defaultSettings,
         onImageUrlSet: @escaping (String) -> Void,
         onImageRemoved: @escaping () -> Void
     ) {
         self.item = item
         self.userId = userId
+        self.imageSearchSettings = imageSearchSettings
         self.onImageUrlSet = onImageUrlSet
         self.onImageRemoved = onImageRemoved
         _searchQuery = State(initialValue: item.name)
@@ -152,6 +156,9 @@ struct ItemImagePickerSheet: View {
     
     @ViewBuilder
     private var searchTabContent: some View {
+        let allSourcesOff = !imageSearchSettings.walmart && !imageSearchSettings.spoonacular && 
+                           !imageSearchSettings.openfoodfacts && !imageSearchSettings.serpapi
+        
         VStack(spacing: 12) {
             HStack {
                 TextField("Search...", text: $searchQuery)
@@ -167,38 +174,59 @@ struct ItemImagePickerSheet: View {
                 .disabled(searchQuery.trimmingCharacters(in: .whitespaces).isEmpty || isSearching)
             }
             
-            if isSearching {
+            if allSourcesOff {
+                VStack(spacing: 12) {
+                    Text("No image search sources enabled.")
+                        .foregroundStyle(.secondary)
+                    NavigationLink("Open Settings") {
+                        SettingsView()
+                            .environment(authViewModel)
+                    }
+                }
+            } else if isSearching {
                 ProgressView("Searching...")
-            } else if !searchResults.isEmpty {
-                LazyVGrid(
-                    columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ],
-                    spacing: 8
-                ) {
-                    ForEach(searchResults, id: \.thumbnail) { result in
-                        AsyncImage(url: URL(string: result.thumbnail)) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .scaledToFill()
-                            case .failure:
-                                Image(systemName: "photo")
+            } else if !searchResultGroups.isEmpty {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(searchResultGroups, id: \.source) { group in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(group.label)
+                                    .font(.caption)
                                     .foregroundStyle(.secondary)
-                            case .empty:
-                                ProgressView()
-                            @unknown default:
-                                EmptyView()
+                                
+                                LazyVGrid(
+                                    columns: [
+                                        GridItem(.flexible()),
+                                        GridItem(.flexible()),
+                                        GridItem(.flexible())
+                                    ],
+                                    spacing: 8
+                                ) {
+                                    ForEach(group.results, id: \.thumbnail) { result in
+                                        AsyncImage(url: URL(string: result.thumbnail)) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                            case .failure:
+                                                Image(systemName: "photo")
+                                                    .foregroundStyle(.secondary)
+                                            case .empty:
+                                                ProgressView()
+                                            @unknown default:
+                                                EmptyView()
+                                            }
+                                        }
+                                        .frame(width: 100, height: 100)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .onTapGesture {
+                                            selectSearchResult(result)
+                                        }
+                                    }
+                                }
                             }
-                        }
-                        .frame(width: 100, height: 100)
-                        .clipped()
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .onTapGesture {
-                            selectSearchResult(result)
                         }
                     }
                 }
@@ -241,14 +269,14 @@ struct ItemImagePickerSheet: View {
         isSearching = true
         
         Task {
-            let results = await ProductSearchService.searchProducts(query: searchQuery)
-            searchResults = results
+            let groups = await ProductSearchService.searchProducts(query: searchQuery, sources: imageSearchSettings)
+            searchResultGroups = groups
             hasSearched = true
             isSearching = false
         }
     }
     
-    private func selectSearchResult(_ result: ProductSearchResult) {
+    private func selectSearchResult(_ result: ProductResult) {
         Task {
             do {
                 try await ItemService.updateItem(itemId: item.id, imageUrl: result.url)

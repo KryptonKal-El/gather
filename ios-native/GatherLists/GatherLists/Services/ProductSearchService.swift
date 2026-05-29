@@ -7,31 +7,59 @@ struct ProductSearchResult: Codable {
     let title: String
 }
 
+/// Typealias for backward compatibility and cleaner naming.
+typealias ProductResult = ProductSearchResult
+
+/// Grouped results from image search, organized by source.
+struct ProductResultGroup: Codable {
+    let source: String
+    let label: String
+    let results: [ProductResult]
+}
+
 private actor SearchCache {
-    private var cache: [String: (results: [ProductSearchResult], timestamp: Date)] = [:]
+    private var cache: [String: (groups: [ProductResultGroup], timestamp: Date)] = [:]
     private let ttl: TimeInterval = 300 // 5 minutes
     
-    func get(_ key: String) -> [ProductSearchResult]? {
+    func get(_ key: String) -> [ProductResultGroup]? {
         guard let entry = cache[key],
               Date().timeIntervalSince(entry.timestamp) < ttl else {
             return nil
         }
-        return entry.results
+        return entry.groups
     }
     
-    func set(_ key: String, results: [ProductSearchResult]) {
-        cache[key] = (results: results, timestamp: Date())
+    func set(_ key: String, groups: [ProductResultGroup]) {
+        cache[key] = (groups: groups, timestamp: Date())
     }
 }
 
 /// Client for the search-products Supabase edge function.
 struct ProductSearchService {
     fileprivate static let cache = SearchCache()
+    
     /// Searches for product images online via the edge function.
     /// Returns an empty array on failure (graceful degradation).
+    /// - Parameters:
+    ///   - query: Search query string
+    ///   - count: Number of results per source (default 25)
+    ///   - sources: Image search settings determining which providers to query (default all enabled via defaultSettings)
+    /// - Returns: Grouped results organized by source, or empty array if all sources disabled or request fails
     @MainActor
-    static func searchProducts(query: String, count: Int = 25) async -> [ProductSearchResult] {
-        let cacheKey = query.trimmingCharacters(in: .whitespaces).lowercased()
+    static func searchProducts(query: String, count: Int = 25, sources: ImageSearchSettings = .defaultSettings) async -> [ProductResultGroup] {
+        // Early return if all sources are disabled
+        guard sources.walmart || sources.spoonacular || sources.openfoodfacts || sources.serpapi else {
+            return []
+        }
+        
+        let enabledSources = [
+            sources.walmart ? "walmart" : nil,
+            sources.spoonacular ? "spoonacular" : nil,
+            sources.openfoodfacts ? "openfoodfacts" : nil,
+            sources.serpapi ? "serpapi" : nil
+        ].compactMap { $0 }.joined(separator: ",")
+        
+        let cacheKey = "\(query.trimmingCharacters(in: .whitespaces).lowercased()):\(enabledSources)"
         if let cached = await cache.get(cacheKey) {
             return cached
         }
@@ -45,7 +73,8 @@ struct ProductSearchService {
         }
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
-            URLQueryItem(name: "num", value: String(count))
+            URLQueryItem(name: "num", value: String(count)),
+            URLQueryItem(name: "sources", value: enabledSources)
         ]
         guard let url = components.url else { return [] }
         
@@ -60,10 +89,10 @@ struct ProductSearchService {
                 return []
             }
             let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
-            if !decoded.results.isEmpty {
-                await cache.set(cacheKey, results: decoded.results)
+            if !decoded.groups.isEmpty {
+                await cache.set(cacheKey, groups: decoded.groups)
             }
-            return decoded.results
+            return decoded.groups
         } catch {
             print("[ProductSearchService] Search failed: \(error.localizedDescription)")
             return []
@@ -72,5 +101,5 @@ struct ProductSearchService {
 }
 
 private struct SearchResponse: Codable {
-    let results: [ProductSearchResult]
+    let groups: [ProductResultGroup]
 }

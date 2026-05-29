@@ -46,6 +46,16 @@ struct ProfileService {
             .eq("id", value: userId)
             .execute()
     }
+    
+    /// Updates the user's image search settings.
+    static func updateImageSearchSettings(_ settings: ImageSearchSettings, userId: UUID) async throws {
+        let update = ImageSearchSettingsUpdate(imageSearchSettings: settings)
+        try await client
+            .from("profiles")
+            .update(update)
+            .eq("id", value: userId)
+            .execute()
+    }
 }
 
 // MARK: - DTOs
@@ -68,4 +78,12 @@ private struct AvatarUrlUpdate: Encodable {
 
 private struct TimezoneUpdate: Encodable {
     let timezone: String
+}
+
+private struct ImageSearchSettingsUpdate: Encodable {
+    let imageSearchSettings: ImageSearchSettings
+    
+    enum CodingKeys: String, CodingKey {
+        case imageSearchSettings = "image_search_settings"
+    }
 }

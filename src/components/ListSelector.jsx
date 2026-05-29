@@ -83,6 +83,7 @@ export const ListSelector = ({
   onDuplicate,
   onResetItems,
   onShareClick,
+  onNavigateToSettings: _onNavigateToSettings,
 }) => {
   const [newName, setNewName] = useState('');
   const [newEmoji, setNewEmoji] = useState(null);
@@ -1112,4 +1113,5 @@ ListSelector.propTypes = {
   onDuplicate: PropTypes.func.isRequired,
   onResetItems: PropTypes.func,
   onShareClick: PropTypes.func,
+  onNavigateToSettings: PropTypes.func,
 };

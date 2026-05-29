@@ -83,6 +83,13 @@ export const App = () => {
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
   const [showDesktopSettings, setShowDesktopSettings] = useState(false);
   const [resetConfirmList, setResetConfirmList] = useState(null);
+  const handleNavigateToMobileSettings = useCallback(() => {
+    handleTabChange('settings');
+  }, [handleTabChange]);
+  const handleNavigateToDesktopSettings = useCallback(() => {
+    setShowDesktopSettings(true);
+  }, []);
+  const handleNavigateToSettings = isMobile ? handleNavigateToMobileSettings : handleNavigateToDesktopSettings;
 
   // Sync openListId with the shopping list state on mobile
   useEffect(() => {
@@ -470,6 +477,7 @@ export const App = () => {
                   onDuplicate={handleDuplicateList}
                   onResetItems={handleResetItems}
                   onShareClick={(list) => setSharingListId(list.id)}
+                  onNavigateToSettings={handleNavigateToSettings}
                 />
               </div>
             </section>
@@ -499,6 +507,7 @@ export const App = () => {
                 onSortSelect={handleSortSelect}
                 restoredItemIds={restoredItemIds}
                 onRestoreAnimationDone={handleRestoreAnimationDone}
+                onNavigateToSettings={handleNavigateToSettings}
               />
             </section>
           )}
@@ -749,6 +758,7 @@ export const App = () => {
             onDuplicate={handleDuplicateList}
             onResetItems={handleResetItems}
             onShareClick={(list) => setSharingListId(list.id)}
+            onNavigateToSettings={handleNavigateToSettings}
           />
         </aside>
 
@@ -784,6 +794,7 @@ export const App = () => {
                 onClearChecked={handleClearChecked}
                 restoredItemIds={restoredItemIds}
                 onRestoreAnimationDone={handleRestoreAnimationDone}
+                onNavigateToSettings={handleNavigateToSettings}
               />
               <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
             </>

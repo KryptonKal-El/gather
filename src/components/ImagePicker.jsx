@@ -21,8 +21,10 @@ import styles from './ImagePicker.module.css';
  * @param {Function} props.onClose - Called to close the picker
  * @param {boolean} props.isUploading - Whether an upload is in progress
  * @param {string|null} props.uploadError - Error message from failed upload
+ * @param {Object} props.imageSearchSettings - Enabled image search source settings
+ * @param {Function} props.onNavigateToSettings - Called to open settings from empty state
  */
-export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose, isUploading, uploadError }) => {
+export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose, isUploading, uploadError, imageSearchSettings, onNavigateToSettings }) => {
   const [viewMode, setViewMode] = useState(!!currentImageUrl);
   const [searchQuery, setSearchQuery] = useState(itemName);
   const [results, setResults] = useState([]);
@@ -33,15 +35,18 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
   const didAutoSearch = useRef(false);
+  const allSourcesOff = imageSearchSettings && Object.values(imageSearchSettings).every(v => !v);
+  const visibleGroups = results.filter((group) => group.results?.length > 0);
 
   const handleSearch = useCallback(async () => {
+    if (allSourcesOff) return;
     const q = searchQuery.trim();
     if (!q) return;
     setIsSearching(true);
     setError(null);
     try {
-      const images = await searchImages(q);
-      setResults(images);
+      const groups = await searchImages(q, 25, imageSearchSettings);
+      setResults(groups);
       setHasSearched(true);
     } catch (err) {
       setError(`Search failed: ${err.message}`);
@@ -49,7 +54,7 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
     } finally {
       setIsSearching(false);
     }
-  }, [searchQuery]);
+  }, [allSourcesOff, imageSearchSettings, searchQuery]);
 
   useEffect(() => {
     if (viewMode) return;
@@ -133,52 +138,66 @@ export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, 
 
             {activeTab === 'search' && (
               <div className={styles.searchPane}>
-                <div className={styles.searchRow}>
-                  <input
-                    className={styles.searchInput}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    placeholder="Search for images..."
-                    aria-label="Image search query"
-                  />
-                  <button
-                    type="button"
-                    className={styles.searchBtn}
-                    onClick={handleSearch}
-                    disabled={isSearching || !searchQuery.trim()}
-                  >
-                    {isSearching ? 'Searching...' : 'Search'}
-                  </button>
-                </div>
-
-                {error && <p className={styles.error}>{error}</p>}
-
-                {results.length > 0 && (
-                  <div className={styles.grid}>
-                    {results.map((img, index) => (
-                      <div key={`${img.url}-${index}`} className={styles.gridCell}>
-                        <button
-                          type="button"
-                          className={styles.gridItem}
-                          onClick={() => onSelectUrl(img.url)}
-                          title={img.title}
-                        >
-                          <img
-                            src={img.thumbnail}
-                            alt={img.title}
-                            className={styles.gridImg}
-                            onError={(e) => { e.target.closest('.' + styles.gridCell)?.style.setProperty('display', 'none'); }}
-                          />
-                        </button>
-                      </div>
-                    ))}
+                {allSourcesOff ? (
+                  <div className={styles.noResults}>
+                    <p>Image search is turned off for all sources.</p>
+                    <button type="button" className={styles.settingsLink} onClick={onNavigateToSettings}>
+                      Open image search settings
+                    </button>
                   </div>
-                )}
+                ) : (
+                  <>
+                    <div className={styles.searchRow}>
+                      <input
+                        className={styles.searchInput}
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                        placeholder="Search for images..."
+                        aria-label="Image search query"
+                      />
+                      <button
+                        type="button"
+                        className={styles.searchBtn}
+                        onClick={handleSearch}
+                        disabled={isSearching || !searchQuery.trim()}
+                      >
+                        {isSearching ? 'Searching...' : 'Search'}
+                      </button>
+                    </div>
 
-                {hasSearched && results.length === 0 && !isSearching && !error && (
-                  <p className={styles.noResults}>No images found. Try a different search term.</p>
+                    {error && <p className={styles.error}>{error}</p>}
+
+                    {visibleGroups.map((group) => (
+                      <section key={group.source} className={styles.resultGroup}>
+                        <h4 className={styles.groupTitle}>{group.label}</h4>
+                        <div className={styles.grid}>
+                          {group.results.map((img) => (
+                            <div key={`${group.source}-${img.url}`} className={styles.gridCell}>
+                              <button
+                                type="button"
+                                className={styles.gridItem}
+                                onClick={() => onSelectUrl(img.url)}
+                                title={img.title}
+                              >
+                                <img
+                                  src={img.thumbnail}
+                                  alt={img.title}
+                                  className={styles.gridImg}
+                                  onError={(e) => { e.target.closest('.' + styles.gridCell)?.style.setProperty('display', 'none'); }}
+                                />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+
+                    {hasSearched && visibleGroups.length === 0 && !isSearching && !error && (
+                      <p className={styles.noResults}>No images found. Try a different search term.</p>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -222,10 +241,14 @@ ImagePicker.propTypes = {
   onClose: PropTypes.func.isRequired,
   isUploading: PropTypes.bool,
   uploadError: PropTypes.string,
+  imageSearchSettings: PropTypes.object,
+  onNavigateToSettings: PropTypes.func,
 };
 
 ImagePicker.defaultProps = {
   currentImageUrl: null,
   isUploading: false,
   uploadError: null,
+  imageSearchSettings: null,
+  onNavigateToSettings: null,
 };
