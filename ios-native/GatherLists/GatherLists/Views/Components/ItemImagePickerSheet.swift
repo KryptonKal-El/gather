@@ -221,6 +221,7 @@ struct ItemImagePickerSheet: View {
                                         .frame(width: 100, height: 100)
                                         .clipped()
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .background(Color(.systemGray6).clipShape(RoundedRectangle(cornerRadius: 8)))
                                         .onTapGesture {
                                             selectSearchResult(result)
                                         }
