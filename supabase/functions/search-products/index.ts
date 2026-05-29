@@ -363,11 +363,8 @@ Deno.serve(async (req) => {
   );
 
   // Determine if SerpAPI should be called
-  const enabledPrimariesAllEmpty = primaryResults.every(r => r.results.length === 0);
-  const onlySerpApi = enabledSources.size === 1 && enabledSources.has('serpapi');
-
   const serpResults: ProductResult[] =
-    enabledSources.has('serpapi') && (enabledPrimariesAllEmpty || onlySerpApi)
+    enabledSources.has('serpapi')
       ? await searchSerpApi(query, numItems)
       : [];
 
