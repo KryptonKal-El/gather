@@ -51,7 +51,7 @@
       "filePath": "docs/bugs/prd-bugs.json",
       "createdAt": "2026-02-25",
       "updatedAt": "2026-03-12",
-      "notes": "BUG-001\u2013011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
+      "notes": "BUG-001–011 resolved. BUG-011: iOS auto-scroll after adding item via ScrollViewReader + bottom sentinel."
     },
     {
       "id": "prd-bundle-id-update",
@@ -150,7 +150,7 @@
     },
     {
       "id": "prd-ios-item-edit-row",
-      "name": "iOS Item Row \u2014 Edit Button, Tap Behavior & Store Indicator",
+      "name": "iOS Item Row — Edit Button, Tap Behavior & Store Indicator",
       "status": "completed",
       "filePath": "docs/prds/prd-ios-item-edit-row.md",
       "jsonPath": "docs/prds/prd-ios-item-edit-row.json",
@@ -281,7 +281,7 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-02T20:00:00Z",
       "completedAt": "2026-03-03T12:30:00Z",
-      "notes": "US-001\u2013004 all complete. US-004 went through 3 iterations: opacity tint \u2192 full-color backgrounds \u2192 4px left border accent (final)."
+      "notes": "US-001–004 all complete. US-004 went through 3 iterations: opacity tint → full-color backgrounds → 4px left border accent (final)."
     },
     {
       "id": "prd-list-sort-preferences",
@@ -448,7 +448,7 @@
       "startedAt": "2026-03-10T14:00:00Z",
       "completedAt": "2026-03-10T17:00:00Z",
       "currentStory": null,
-      "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items\u2192list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
+      "notes": "All 6 stories complete. RLS refactored to 4 granular policies with shared store SELECT via items→list_shares join. React: fetchStoresByIds + sharedStores state + allStores merge + realtime subscription for owner's stores + StoreManager read-only guard. Swift: StoreService.fetchStoresByIds + ListDetailViewModel shared store fetch/merge + second realtime channel for owner's stores. Swift StoreBrowserView naturally guarded (only shows own stores)."
     },
     {
       "id": "prd-splash-stacked-logo",
@@ -487,11 +487,11 @@
       "updatedAt": "2026-02-27",
       "startedAt": "2026-02-27T12:00:00Z",
       "completedAt": "2026-02-27T23:45:00Z",
-      "notes": "Google and Apple OAuth deferred \u2014 email/password auth active. Configure providers in Supabase dashboard when ready."
+      "notes": "Google and Apple OAuth deferred — email/password auth active. Configure providers in Supabase dashboard when ready."
     },
     {
       "id": "prd-swift-final-polish",
-      "name": "Native Swift iOS App \u2014 Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
+      "name": "Native Swift iOS App — Phase 8: Smart Suggestions, Offline Cache, Deep Links & Capacitor Retirement",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-final-polish.md",
       "jsonPath": "docs/prds/prd-swift-final-polish.json",
@@ -505,7 +505,7 @@
     },
     {
       "id": "prd-swift-ios-setup",
-      "name": "Native Swift iOS App \u2014 Phase 1: Project Setup & Auth",
+      "name": "Native Swift iOS App — Phase 1: Project Setup & Auth",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-ios-setup.md",
       "jsonPath": "docs/prds/prd-swift-ios-setup.json",
@@ -519,7 +519,7 @@
     },
     {
       "id": "prd-swift-lists-core",
-      "name": "Native Swift iOS App \u2014 Phase 2: Lists Core",
+      "name": "Native Swift iOS App — Phase 2: Lists Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-lists-core.md",
       "jsonPath": "docs/prds/prd-swift-lists-core.json",
@@ -533,7 +533,7 @@
     },
     {
       "id": "prd-swift-recipes-advanced",
-      "name": "Native Swift iOS App \u2014 Phase 6: Recipes Advanced",
+      "name": "Native Swift iOS App — Phase 6: Recipes Advanced",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-advanced.md",
       "jsonPath": "docs/prds/prd-swift-recipes-advanced.json",
@@ -547,7 +547,7 @@
     },
     {
       "id": "prd-swift-recipes-core",
-      "name": "Native Swift iOS App \u2014 Phase 5: Recipes & Collections Core",
+      "name": "Native Swift iOS App — Phase 5: Recipes & Collections Core",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-recipes-core.md",
       "jsonPath": "docs/prds/prd-swift-recipes-core.json",
@@ -561,7 +561,7 @@
     },
     {
       "id": "prd-swift-settings-images",
-      "name": "Native Swift iOS App \u2014 Phase 7: Settings, Profile & Item Images",
+      "name": "Native Swift iOS App — Phase 7: Settings, Profile & Item Images",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-settings-images.md",
       "jsonPath": "docs/prds/prd-swift-settings-images.json",
@@ -575,7 +575,7 @@
     },
     {
       "id": "prd-swift-shopping-list",
-      "name": "Native Swift iOS App \u2014 Phase 3: Shopping List Items",
+      "name": "Native Swift iOS App — Phase 3: Shopping List Items",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-shopping-list.md",
       "jsonPath": "docs/prds/prd-swift-shopping-list.json",
@@ -589,7 +589,7 @@
     },
     {
       "id": "prd-swift-stores",
-      "name": "Native Swift iOS App \u2014 Phase 4: Store Management",
+      "name": "Native Swift iOS App — Phase 4: Store Management",
       "status": "completed",
       "filePath": "docs/prds/prd-swift-stores.md",
       "jsonPath": "docs/prds/prd-swift-stores.json",
@@ -637,37 +637,39 @@
       "updatedAt": "2026-03-03",
       "startedAt": "2026-03-03T22:00:00Z",
       "completedAt": "2026-03-03T23:30:00Z",
-      "notes": "All 6 stories complete. Walmart \u2192 Open Food Facts \u2192 SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
+      "notes": "All 6 stories complete. Walmart → Open Food Facts → SerpAPI fallback chain deployed as search-products Edge Function. Old search-images kept for rollback."
     },
-     {
-       "id": "prd-category-group-left-bar",
-       "name": "Category Group Left Bar Visual Treatment",
-       "status": "completed",
-       "filePath": "docs/prds/prd-category-group-left-bar.md",
-       "jsonPath": "docs/prds/prd-category-group-left-bar.json",
-       "createdAt": "2026-05-26",
-       "updatedAt": "2026-05-26",
-       "estimatedStories": 3,
-       "notes": "Replace nested category color dot with a full-height 3px left vertical color bar. Items indented 12px from bar. Store card treatment unchanged. React web only.",
-       "startedAt": "2026-05-26T00:00:00Z",
-       "completedAt": "2026-05-26T10:50:00Z",
-       "currentStory": null,
-        "storiesCompleted": 3
-      },
-      {
-        "id": "prd-image-search-source-toggles",
-        "name": "Image Search Source Toggles",
-        "status": "ready",
-        "filePath": "docs/prds/prd-image-search-source-toggles.md",
-        "jsonPath": "docs/prds/prd-image-search-source-toggles.json",
-        "branchName": "feature/image-search-source-toggles",
-        "createdAt": "2026-05-29",
-        "readyAt": "2026-05-29",
-        "updatedAt": "2026-05-29",
-        "estimatedStories": 7,
-        "notes": "Per-user image search source toggles in Settings (React web + Swift iOS). Preferences stored as JSONB column image_search_settings on profiles. Defaults: walmart=true, others=false. Edge function returns grouped results. ImagePicker renders per-service sections. Empty-state with Settings link when all sources off.",
-        "currentStory": null,
-        "storiesCompleted": 0
-      }
-   ]
+    {
+      "id": "prd-category-group-left-bar",
+      "name": "Category Group Left Bar Visual Treatment",
+      "status": "completed",
+      "filePath": "docs/prds/prd-category-group-left-bar.md",
+      "jsonPath": "docs/prds/prd-category-group-left-bar.json",
+      "createdAt": "2026-05-26",
+      "updatedAt": "2026-05-26",
+      "estimatedStories": 3,
+      "notes": "Replace nested category color dot with a full-height 3px left vertical color bar. Items indented 12px from bar. Store card treatment unchanged. React web only.",
+      "startedAt": "2026-05-26T00:00:00Z",
+      "completedAt": "2026-05-26T10:50:00Z",
+      "currentStory": null,
+      "storiesCompleted": 3
+    },
+    {
+      "id": "prd-image-search-source-toggles",
+      "name": "Image Search Source Toggles",
+      "status": "completed",
+      "filePath": "docs/prds/prd-image-search-source-toggles.md",
+      "jsonPath": "docs/prds/prd-image-search-source-toggles.json",
+      "branchName": "main",
+      "createdAt": "2026-05-29",
+      "readyAt": "2026-05-29",
+      "updatedAt": "2026-05-29",
+      "estimatedStories": 7,
+      "notes": "Per-user image search source toggles in Settings (React web + Swift iOS). Preferences stored as JSONB column image_search_settings on profiles. Defaults: walmart=true, others=false. Edge function returns grouped results. ImagePicker renders per-service sections. Empty-state with Settings link when all sources off.",
+      "currentStory": null,
+      "storiesCompleted": 7,
+      "startedAt": "2026-05-29T13:28:02.554Z",
+      "completedAt": "2026-05-29T00:00:00Z"
+    }
+  ]
 }
