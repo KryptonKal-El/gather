@@ -1,23 +1,47 @@
 {
-  "sessionId": "planner-1779802846-4f53ef",
+  "sessionId": "planner-1780058228-a3f9b2",
   "agent": "Concepture-Planner",
   "mode": "prd",
   "workBranch": "main",
-  "startedAt": "2026-05-26T00:00:00Z",
-  "currentPrd": "docs/drafts/prd-category-group-left-bar.md",
+  "startedAt": "2026-05-29T00:00:00Z",
+  "currentPrd": "docs/drafts/prd-image-search-source-toggles.md",
   "lockedDecisions": [
     {
-      "question": "Should the bar span full height of the category block or header only?",
-      "decision": "Full height — bar runs from category label through all items in that category."
+      "question": "Where are preferences stored?",
+      "decision": "Per-user in Supabase profiles table."
     },
     {
-      "question": "Apply bar treatment to top-level store groups too?",
-      "decision": "No — stores keep existing card/border treatment. Categories only."
+      "question": "Which services are toggle-able?",
+      "decision": "All four: Walmart, Spoonacular, Open Food Facts, SerpAPI."
     },
     {
-      "question": "Left indent for items from the bar on mobile?",
-      "decision": "12px."
+      "question": "What happens when all are off?",
+      "decision": "Keep Search online tab visible; show empty-state message + link to Settings to enable sources."
+    },
+    {
+      "question": "Default states?",
+      "decision": "Walmart on; Spoonacular, Open Food Facts, SerpAPI off."
+    },
+    {
+      "question": "Storage format?",
+      "decision": "JSONB column image_search_settings on profiles."
+    },
+    {
+      "question": "Platforms?",
+      "decision": "React web + Swift iOS."
+    },
+    {
+      "question": "How are search results rendered?",
+      "decision": "Per-service sections with a label heading per source. Edge function returns grouped response: { groups: [{ source, label, results }] }."
     }
   ],
-  "resumePrompt": "Resume Concepture-Planner session planner-1779802846-4f53ef. Active PRD draft: docs/drafts/prd-category-group-left-bar.md. Feature: replace nested category color dot with a full-height 3px left vertical color bar; indent items 12px from bar. Stores keep existing card treatment. Locked decisions: full-height bar, categories only, 12px indent. PRD has 3 stories (S-1, S-2, S-3). Awaiting user review."
+  "consistencyPassCompleted": true,
+  "consistencyFixes": [
+    "S-5: searchImages always returns an array; cache key includes sources string",
+    "S-4: deployment order note added — must release atomically with S-5 and S-7",
+    "Out of scope: removed contradictory item about not showing source labels",
+    "S-2: snake_case to camelCase mapping explicitly called out in flow chart",
+    "S-6 AC#5: removed self-contradictory CodingKeys note; clarified no CodingKeys needed"
+  ],
+  "resumePrompt": "Resume Concepture-Planner session planner-1780058228-a3f9b2. Active PRD draft: docs/drafts/prd-image-search-source-toggles.md. Feature: per-user image search source toggles in Settings (React web + Swift iOS). Preferences stored as JSONB column image_search_settings on profiles. Defaults: walmart=true, others=false. All four services toggle-able. When all off, keep Search online tab but show empty-state message + link to Settings. Results rendered in per-service sections; edge function returns grouped response { groups }. 7 stories (S-1 through S-7). Consistency pass completed and all 6 fixes applied. Awaiting R to mark ready."
 }

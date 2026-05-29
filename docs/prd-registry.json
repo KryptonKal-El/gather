@@ -652,7 +652,22 @@
        "startedAt": "2026-05-26T00:00:00Z",
        "completedAt": "2026-05-26T10:50:00Z",
        "currentStory": null,
-       "storiesCompleted": 3
-     }
-  ]
+        "storiesCompleted": 3
+      },
+      {
+        "id": "prd-image-search-source-toggles",
+        "name": "Image Search Source Toggles",
+        "status": "ready",
+        "filePath": "docs/prds/prd-image-search-source-toggles.md",
+        "jsonPath": "docs/prds/prd-image-search-source-toggles.json",
+        "branchName": "feature/image-search-source-toggles",
+        "createdAt": "2026-05-29",
+        "readyAt": "2026-05-29",
+        "updatedAt": "2026-05-29",
+        "estimatedStories": 7,
+        "notes": "Per-user image search source toggles in Settings (React web + Swift iOS). Preferences stored as JSONB column image_search_settings on profiles. Defaults: walmart=true, others=false. Edge function returns grouped results. ImagePicker renders per-service sections. Empty-state with Settings link when all sources off.",
+        "currentStory": null,
+        "storiesCompleted": 0
+      }
+   ]
 }
