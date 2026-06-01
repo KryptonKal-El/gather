@@ -1,47 +1,47 @@
 {
-  "sessionId": "planner-1780058228-a3f9b2",
+  "sessionId": "planner-1780346707-0059f4",
   "agent": "Concepture-Planner",
   "mode": "prd",
   "workBranch": "main",
-  "startedAt": "2026-05-29T00:00:00Z",
-  "currentPrd": "docs/drafts/prd-image-search-source-toggles.md",
+  "startedAt": "2026-06-01T00:00:00Z",
+  "currentPrd": "docs/drafts/prd-collaborator-edit-access.md",
+  "previousPrd": "docs/drafts/prd-list-scoped-stores.md",
   "lockedDecisions": [
     {
-      "question": "Where are preferences stored?",
-      "decision": "Per-user in Supabase profiles table."
+      "prd": "prd-list-scoped-stores",
+      "question": "New list default stores?",
+      "decision": "Copy from user_store_defaults at list creation time."
     },
     {
-      "question": "Which services are toggle-able?",
-      "decision": "All four: Walmart, Spoonacular, Open Food Facts, SerpAPI."
+      "prd": "prd-list-scoped-stores",
+      "question": "Migration of existing stores?",
+      "decision": "Migrate to defaults only — no backfill of existing lists."
     },
     {
-      "question": "What happens when all are off?",
-      "decision": "Keep Search online tab visible; show empty-state message + link to Settings to enable sources."
-    },
-    {
-      "question": "Default states?",
-      "decision": "Walmart on; Spoonacular, Open Food Facts, SerpAPI off."
-    },
-    {
+      "prd": "prd-list-scoped-stores",
       "question": "Storage format?",
-      "decision": "JSONB column image_search_settings on profiles."
+      "decision": "Relational — add list_id to stores table, drop user_id."
     },
     {
-      "question": "Platforms?",
-      "decision": "React web + Swift iOS."
+      "prd": "prd-list-scoped-stores",
+      "question": "Defaults storage?",
+      "decision": "New user_store_defaults table (mirrors user_category_defaults)."
     },
     {
-      "question": "How are search results rendered?",
-      "decision": "Per-service sections with a label heading per source. Edge function returns grouped response: { groups: [{ source, label, results }] }."
+      "prd": "prd-collaborator-edit-access",
+      "question": "List Type change for collaborators?",
+      "decision": "Owner-only — too destructive."
+    },
+    {
+      "prd": "prd-collaborator-edit-access",
+      "question": "Reset items for collaborators?",
+      "decision": "Owner-only — bulk destructive admin action."
+    },
+    {
+      "prd": "prd-collaborator-edit-access",
+      "question": "Edit Categories for collaborators?",
+      "decision": "Unlocked."
     }
   ],
-  "consistencyPassCompleted": true,
-  "consistencyFixes": [
-    "S-5: searchImages always returns an array; cache key includes sources string",
-    "S-4: deployment order note added — must release atomically with S-5 and S-7",
-    "Out of scope: removed contradictory item about not showing source labels",
-    "S-2: snake_case to camelCase mapping explicitly called out in flow chart",
-    "S-6 AC#5: removed self-contradictory CodingKeys note; clarified no CodingKeys needed"
-  ],
-  "resumePrompt": "Resume Concepture-Planner session planner-1780058228-a3f9b2. Active PRD draft: docs/drafts/prd-image-search-source-toggles.md. Feature: per-user image search source toggles in Settings (React web + Swift iOS). Preferences stored as JSONB column image_search_settings on profiles. Defaults: walmart=true, others=false. All four services toggle-able. When all off, keep Search online tab but show empty-state message + link to Settings. Results rendered in per-service sections; edge function returns grouped response { groups }. 7 stories (S-1 through S-7). Consistency pass completed and all 6 fixes applied. Awaiting R to mark ready."
+  "resumePrompt": "Resume Concepture-Planner session planner-1780346707-0059f4. Two PRD drafts in progress: (1) docs/drafts/prd-list-scoped-stores.md — move stores from per-user to per-list, user_store_defaults table, new lists seeded from defaults, 7 stories S-1 through S-7, awaiting review. (2) docs/drafts/prd-collaborator-edit-access.md — unlock Edit Categories for collaborators, fix Share Settings visibility bug in MobileListDetail, 3 stories S-1 through S-3, awaiting review."
 }

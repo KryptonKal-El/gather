@@ -10,6 +10,32 @@
       "startedAt": "2026-05-05T17:44:04Z",
       "lastHeartbeat": "2026-05-06T12:00:00Z",
       "note": "Suspended at human review gate. 2 advisory critic findings pending user decision (approve vs tighten). No commit yet."
+    },
+    {
+      "sessionId": "builder-1779803805-5d3331",
+      "agent": "Concepture-Builder",
+      "mode": "prd",
+      "status": "active",
+      "startedAt": "2026-05-26T00:00:00Z",
+      "lastHeartbeat": "2026-05-26T00:00:00Z"
+    }
+  ],
+  "sessions": [
+    {
+      "sessionId": "builder-1780061222-633425",
+      "agent": "Concepture-Builder",
+      "mode": "prd",
+      "status": "active",
+      "startedAt": "2026-05-29T13:27:07Z",
+      "lastHeartbeat": "2026-05-29T13:27:07Z"
+    },
+    {
+      "sessionId": "planner-1780346707-0059f4",
+      "agent": "Concepture-Planner",
+      "mode": "prd",
+      "status": "active",
+      "startedAt": "2026-06-01T00:00:00Z",
+      "lastHeartbeat": "2026-06-01T00:00:00Z"
     }
   ]
 }

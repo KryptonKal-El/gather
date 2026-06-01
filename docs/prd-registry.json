@@ -670,6 +670,17 @@
       "storiesCompleted": 7,
       "startedAt": "2026-05-29T13:28:02.554Z",
       "completedAt": "2026-05-29T00:00:00Z"
+    },
+    {
+      "id": "prd-collaborator-edit-access",
+      "name": "Collaborator Edit Access on Shared Lists",
+      "status": "ready",
+      "filePath": "docs/prds/prd-collaborator-edit-access.md",
+      "createdAt": "2026-06-01",
+      "readyAt": "2026-06-01",
+      "updatedAt": "2026-06-01",
+      "estimatedStories": 3,
+      "notes": "Unlock Edit Categories for collaborators. Fix Share Settings visibility bug in MobileListDetail (isGuest never passed from App.jsx). List Type change, Delete List, Reset items stay owner-only."
     }
   ]
 }
