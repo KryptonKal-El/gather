@@ -681,6 +681,17 @@
       "updatedAt": "2026-06-01",
       "estimatedStories": 3,
       "notes": "Unlock Edit Categories for collaborators. Fix Share Settings visibility bug in MobileListDetail (isGuest never passed from App.jsx). List Type change, Delete List, Reset items stay owner-only."
+    },
+    {
+      "id": "prd-list-scoped-stores",
+      "name": "List-Scoped Stores",
+      "status": "ready",
+      "filePath": "docs/prds/prd-list-scoped-stores.md",
+      "createdAt": "2026-06-01",
+      "readyAt": "2026-06-01",
+      "updatedAt": "2026-06-01",
+      "estimatedStories": 8,
+      "notes": "Move stores from per-user to per-list. New user_store_defaults table with list_type column. Store-supporting types: grocery, packing, project. Existing stores migrate to defaults (list_type=grocery). StoreManager moves from top-level tab to list context menu (ungated, owner+collaborators). Settings renames Category Defaults to List Defaults with per-list-type Stores sub-section. S-8 enables store field for packing+project list types on web and iOS."
     }
   ]
 }

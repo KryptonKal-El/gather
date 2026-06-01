@@ -4,18 +4,18 @@
   "mode": "prd",
   "workBranch": "main",
   "startedAt": "2026-06-01T00:00:00Z",
-  "currentPrd": "docs/drafts/prd-collaborator-edit-access.md",
-  "previousPrd": "docs/drafts/prd-list-scoped-stores.md",
+  "currentPrd": "docs/drafts/prd-list-scoped-stores.md",
+  "previousPrd": "docs/drafts/prd-collaborator-edit-access.md",
   "lockedDecisions": [
     {
       "prd": "prd-list-scoped-stores",
       "question": "New list default stores?",
-      "decision": "Copy from user_store_defaults at list creation time."
+      "decision": "Copy from user_store_defaults at list creation time, filtered by list_type."
     },
     {
       "prd": "prd-list-scoped-stores",
       "question": "Migration of existing stores?",
-      "decision": "Migrate to defaults only — no backfill of existing lists."
+      "decision": "Migrate to defaults only (list_type='grocery') — no backfill of existing lists."
     },
     {
       "prd": "prd-list-scoped-stores",
@@ -25,7 +25,32 @@
     {
       "prd": "prd-list-scoped-stores",
       "question": "Defaults storage?",
-      "decision": "New user_store_defaults table (mirrors user_category_defaults)."
+      "decision": "New user_store_defaults table with list_type column (mirrors user_category_defaults)."
+    },
+    {
+      "prd": "prd-list-scoped-stores",
+      "question": "List types supporting stores?",
+      "decision": "grocery, packing, project only."
+    },
+    {
+      "prd": "prd-list-scoped-stores",
+      "question": "Settings UI for defaults?",
+      "decision": "Rename 'Category Defaults' to 'List Defaults'. Add Stores sub-section per eligible list type (grocery, packing, project)."
+    },
+    {
+      "prd": "prd-list-scoped-stores",
+      "question": "StoreManager entry point?",
+      "decision": "Remove top-level Stores tab. Add 'Manage Stores' to list context menu (ListSelector + MobileListDetail), ungated (owner + collaborators)."
+    },
+    {
+      "prd": "prd-list-scoped-stores",
+      "question": "iOS Stores entry point?",
+      "decision": "Remove Stores tab. Add 'Manage Stores' to list detail context menu / options sheet."
+    },
+    {
+      "prd": "prd-list-scoped-stores",
+      "question": "fetchStoresByIds — keep or remove?",
+      "decision": "Builder verifies at implementation time."
     },
     {
       "prd": "prd-collaborator-edit-access",
@@ -43,5 +68,5 @@
       "decision": "Unlocked."
     }
   ],
-  "resumePrompt": "Resume Concepture-Planner session planner-1780346707-0059f4. Two PRD drafts in progress: (1) docs/drafts/prd-list-scoped-stores.md — move stores from per-user to per-list, user_store_defaults table, new lists seeded from defaults, 7 stories S-1 through S-7, awaiting review. (2) docs/drafts/prd-collaborator-edit-access.md — unlock Edit Categories for collaborators, fix Share Settings visibility bug in MobileListDetail, 3 stories S-1 through S-3, awaiting review."
+  "resumePrompt": "Resume Concepture-Planner session planner-1780346707-0059f4. Active PRD draft: docs/drafts/prd-list-scoped-stores.md. Feature: move stores from per-user to per-list. user_store_defaults has list_type column. Store-supporting types: grocery, packing, project. Existing stores migrate to defaults with list_type='grocery'. StoreManager moves from top-level tab to list context menu (ungated). Settings renames 'Category Defaults' to 'List Defaults' with per-list-type Stores sub-section. 7 stories S-1 through S-7. Walkthrough complete — consistency pass in progress (Issue 2 was the trigger for the S-6 redesign, now resolved). Ready to wrap up consistency pass and mark ready."
 }
