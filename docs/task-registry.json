@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260602-121651",
+      "title": "List three-dot menu — reorder, rename, and add Manage Categories",
+      "status": "completed",
+      "createdAt": "2026-06-02T12:16:51Z",
+      "completedAt": "2026-06-02T12:45:00Z",
+      "path": "docs/tasks/completed/TSK-20260602-121651.md"
+    },
+    {
       "id": "TSK-20260602-114044",
       "title": "Fix Manage Stores visual — background color and Add button style",
       "status": "completed",
