@@ -8,6 +8,7 @@ struct EditListSheet: View {
     
     let list: GatherList
     let viewModel: ListViewModel
+    let isOwned: Bool
     
     @State private var name: String
     @State private var selectedEmoji: String?
@@ -15,14 +16,6 @@ struct EditListSheet: View {
     @State private var customColor: Color
     @State private var showEmojiPicker = false
     @State private var isSaving = false
-    @State private var showCategoryPreview = false
-    @State private var categories: [CategoryDef] = []
-    @State private var selectedCategoryForEdit: CategoryDef?
-    @State private var pendingNewCategory: CategoryDef?
-    @State private var showDeleteConfirm = false
-    @State private var categoryToDelete: CategoryDef?
-    @State private var showSaveDefaultConfirm = false
-    @State private var showSaveDefaultSuccess = false
     @State private var selectedType: String
     @State private var showTypeChangeConfirm = false
     @State private var typeChangeMessage: String = ""
@@ -32,13 +25,12 @@ struct EditListSheet: View {
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
     
-    private let categoryTypes = ["grocery", "todo", "packing", "project"]
+    static let categorySupportedTypes: Set<String> = ["grocery", "packing", "todo"]
     
-    private static let categorySupportedTypes: Set<String> = ["grocery", "packing", "todo"]
-    
-    init(list: GatherList, viewModel: ListViewModel) {
+    init(list: GatherList, viewModel: ListViewModel, isOwned: Bool = true) {
         self.list = list
         self.viewModel = viewModel
+        self.isOwned = isOwned
         _name = State(initialValue: list.name)
         _selectedEmoji = State(initialValue: list.emoji)
         
@@ -51,7 +43,6 @@ struct EditListSheet: View {
             _customColor = State(initialValue: Color(hex: listColor))
         }
         
-        _categories = State(initialValue: list.categories ?? CategoryService.getSystemDefaults(for: list.type) ?? [])
         _selectedType = State(initialValue: list.type)
     }
     
@@ -112,73 +103,9 @@ struct EditListSheet: View {
                     colorPickerRow
                 }
                 
-                Section("List Type") {
-                    listTypeGrid
-                }
-                
-                if categoryTypes.contains(selectedType) {
-                    Section {
-                        DisclosureGroup(isExpanded: $showCategoryPreview) {
-                            ForEach(categories, id: \.key) { category in
-                                Button {
-                                    selectedCategoryForEdit = category
-                                } label: {
-                                    HStack {
-                                        Circle()
-                                            .fill(Color(hex: category.color))
-                                            .frame(width: 12, height: 12)
-                                        Text(category.name)
-                                            .foregroundStyle(.primary)
-                                        Spacer()
-                                        Image(systemName: "chevron.right")
-                                            .font(.caption)
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                    .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                            }
-                            .onMove { from, to in
-                                categories.move(fromOffsets: from, toOffset: to)
-                            }
-                            .onDelete { offsets in
-                                if let index = offsets.first {
-                                    categoryToDelete = categories[index]
-                                    showDeleteConfirm = true
-                                }
-                            }
-                            
-                            Button {
-                                addNewCategory()
-                            } label: {
-                                HStack {
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundStyle(.green)
-                                    Text("Add Category")
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            
-                            Button {
-                                showSaveDefaultConfirm = true
-                            } label: {
-                                Label("Set as Default for \(selectedType.capitalized)", systemImage: "square.and.arrow.down")
-                            }
-                        } label: {
-                            HStack {
-                                Text("Customize Categories")
-                                    .foregroundStyle(.primary)
-                                Spacer()
-                                if !showCategoryPreview {
-                                    Text("\(categories.count) \(categories.count == 1 ? "category" : "categories")")
-                                        .foregroundStyle(.secondary)
-                                        .font(.subheadline)
-                                }
-                            }
-                        }
-                        .environment(\.editMode, showCategoryPreview ? .constant(.active) : .constant(.inactive))
-                    } footer: {
-                        Text("Edit categories for this list.")
+                if isOwned {
+                    Section("List Type") {
+                        listTypeGrid
                     }
                 }
             }
@@ -189,7 +116,6 @@ struct EditListSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .fontWeight(.semibold)
                     .foregroundStyle(Color(hex: "#3D7A63"))
                     .disabled(isSaving)
                 }
@@ -204,58 +130,6 @@ struct EditListSheet: View {
             }
             .sheet(isPresented: $showEmojiPicker) {
                 EmojiPickerView(selectedEmoji: $selectedEmoji)
-            }
-            .sheet(item: $selectedCategoryForEdit) { category in
-                CategoryDetailEditor(
-                    category: category,
-                    isAddMode: false,
-                    presetColors: presetColors,
-                    existingKeys: Set(categories.map(\.key)),
-                    onSave: { updated in
-                        if let index = categories.firstIndex(where: { $0.key == category.key }) {
-                            categories[index] = updated
-                        }
-                    }
-                )
-            }
-            .sheet(item: $pendingNewCategory) { category in
-                CategoryDetailEditor(
-                    category: category,
-                    isAddMode: true,
-                    presetColors: presetColors,
-                    existingKeys: Set(categories.map(\.key)),
-                    onSave: { updated in
-                        categories.append(updated)
-                    }
-                )
-            }
-            .alert("Delete Category?", isPresented: $showDeleteConfirm) {
-                Button("Cancel", role: .cancel) {
-                    categoryToDelete = nil
-                }
-                Button("Delete", role: .destructive) {
-                    if let cat = categoryToDelete {
-                        categories.removeAll { $0.key == cat.key }
-                    }
-                    categoryToDelete = nil
-                }
-            } message: {
-                if let cat = categoryToDelete {
-                    Text("Delete \"\(cat.name)\"?")
-                }
-            }
-            .alert("Set as Default", isPresented: $showSaveDefaultConfirm) {
-                Button("Cancel", role: .cancel) { }
-                Button("Save") {
-                    saveAsDefault()
-                }
-            } message: {
-                Text("This will replace your default \(selectedType.capitalized) categories with this list's categories. Continue?")
-            }
-            .alert("Saved", isPresented: $showSaveDefaultSuccess) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text("Default \(selectedType.capitalized) categories updated.")
             }
             .alert("Change List Type?", isPresented: $showTypeChangeConfirm) {
                 Button("Cancel", role: .cancel) { }
@@ -336,41 +210,14 @@ struct EditListSheet: View {
     }
     
     private func handleTypeSelection(newType: String, newLabel: String) {
-        let currentType = selectedType
-        let fromCategoryType = Self.categorySupportedTypes.contains(currentType)
-        let toCategoryType = Self.categorySupportedTypes.contains(newType)
-        
-        if toCategoryType {
-            Task {
-                let newCats = await resolveNewCategories(for: newType)
-                selectedType = newType
-                categories = newCats ?? []
-            }
-        } else if fromCategoryType {
-            selectedType = newType
-            categories = []
-        } else {
-            selectedType = newType
-        }
-    }
-    
-    private func resolveNewCategories(for newType: String) async -> [CategoryDef]? {
-        guard let userId = authViewModel.currentUser?.id else {
-            return CategoryService.getSystemDefaults(for: newType)
-        }
-        if let defaults = try? await UserCategoryDefaultService.fetchDefaults(userId: userId),
-           let match = defaults.first(where: { $0.listType == newType }),
-           !match.categories.isEmpty {
-            return match.categories
-        }
-        return CategoryService.getSystemDefaults(for: newType)
+        selectedType = newType
     }
     
     private func saveChanges() {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { return }
         
-        if selectedType != list.type {
+        if isOwned && selectedType != list.type {
             let newLabel = ListTypes.getConfig(selectedType).label
             let fromCategoryType = Self.categorySupportedTypes.contains(list.type)
             let toCategoryType = Self.categorySupportedTypes.contains(selectedType)
@@ -398,47 +245,9 @@ struct EditListSheet: View {
         isSaving = true
         Task {
             let emojiValue = selectedEmoji?.isEmpty == false ? selectedEmoji : nil
-            let typeToSave = selectedType != list.type ? selectedType : nil
-            let categoriesToSave = categoryTypes.contains(selectedType) ? categories : nil
-            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, type: typeToSave, categories: categoriesToSave)
+            let typeToSave = isOwned && selectedType != list.type ? selectedType : nil
+            await viewModel.updateList(id: list.id, name: trimmedName, emoji: emojiValue, color: effectiveColor, type: typeToSave, categories: list.categories)
             dismiss()
-        }
-    }
-    
-    private func addNewCategory() {
-        let usedColors = Set(categories.map(\.color))
-        let nextColor = presetColors.first { !usedColors.contains($0) } ?? presetColors[categories.count % presetColors.count]
-        
-        let existingKeys = Set(categories.map(\.key))
-        var newKey = "new_category"
-        var suffix = 2
-        while existingKeys.contains(newKey) {
-            newKey = "new_category_\(suffix)"
-            suffix += 1
-        }
-        
-        let newCategory = CategoryDef(
-            key: newKey,
-            name: "",
-            color: nextColor,
-            keywords: []
-        )
-        pendingNewCategory = newCategory
-    }
-    
-    private func saveAsDefault() {
-        Task {
-            guard let userId = authViewModel.currentUser?.id else { return }
-            do {
-                try await UserCategoryDefaultService.upsertDefault(
-                    userId: userId,
-                    listType: selectedType,
-                    categories: categories
-                )
-                showSaveDefaultSuccess = true
-            } catch {
-                print("Failed to save default categories: \(error)")
-            }
         }
     }
     
@@ -453,6 +262,7 @@ struct EditListSheet: View {
 #Preview {
     EditListSheet(
         list: GatherList(ownerId: UUID(), name: "Groceries", emoji: "🛒", color: "#1565c0"),
-        viewModel: ListViewModel(userId: UUID(), userEmail: "test@example.com")
+        viewModel: ListViewModel(userId: UUID(), userEmail: "test@example.com"),
+        isOwned: true
     )
 }

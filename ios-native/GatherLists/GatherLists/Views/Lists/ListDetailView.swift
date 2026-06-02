@@ -48,13 +48,14 @@ struct ListDetailView: View {
     @State private var preferencesTask: Task<Void, Never>?
     @State private var showSortSheet = false
     
-    // List options menu state
-    @State private var showEditSheet = false
-    @State private var showShareSettingsSheet = false
-    @State private var showDeleteConfirm = false
-    @State private var showDuplicateSheet = false
-    @State private var showResetItemsConfirm = false
-    @State private var showManageStoresSheet = false
+     // List options menu state
+     @State private var showEditSheet = false
+     @State private var showShareSettingsSheet = false
+     @State private var showDeleteConfirm = false
+     @State private var showDuplicateSheet = false
+     @State private var showResetItemsConfirm = false
+     @State private var showManageStoresSheet = false
+     @State private var showManageCategoriesSheet = false
     
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
@@ -144,6 +145,12 @@ struct ListDetailView: View {
                 sortMenu
                 if isOwned {
                     listOptionsMenu
+                } else if EditListSheet.categorySupportedTypes.contains(list.type) {
+                    Button {
+                        showEditSheet = true
+                    } label: {
+                        Image(systemName: "pencil")
+                    }
                 }
             }
         }
@@ -1226,65 +1233,73 @@ struct ListDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-    private var listOptionsMenu: some View {
-        Menu {
-            Button {
-                showEditSheet = true
-            } label: {
-                Label("Edit", systemImage: "pencil")
-            }
-            
-            Button {
-                showShareSettingsSheet = true
-            } label: {
-                Label("Share Settings", systemImage: "person.badge.plus")
-            }
-            
+     private var listOptionsMenu: some View {
+         Menu {
              Button {
-                 showDuplicateSheet = true
+                 showEditSheet = true
              } label: {
-                 Label("Duplicate", systemImage: "doc.on.doc")
+                 Label("Name, Icon & Color", systemImage: "pencil")
              }
+             
+              if ListTypes.getConfig(list.type).fields.store {
+                  Button {
+                      showManageStoresSheet = true
+                  } label: {
+                      Label("Manage Stores", systemImage: "storefront")
+                  }
+              }
+             
+              if EditListSheet.categorySupportedTypes.contains(list.type) {
+                  Button {
+                      showManageCategoriesSheet = true
+                  } label: {
+                      Label("Manage Categories", systemImage: "tag")
+                  }
+              }
 
-             if ListTypes.getConfig(list.type).fields.store {
+             Button {
+                 showShareSettingsSheet = true
+             } label: {
+                 Label("Share Settings", systemImage: "person.badge.plus")
+             }
+             
+              Button {
+                  showDuplicateSheet = true
+              } label: {
+                  Label("Duplicate", systemImage: "doc.on.doc")
+              }
+
+              if isOwned && list.type == "guest_list" {
                  Button {
-                     showManageStoresSheet = true
+                     let remaining = (detailViewModel?.items ?? []).filter {
+                         ($0.rsvpStatus ?? "not_invited") != "not_invited"
+                     }.count
+
+                     if remaining == 0 {
+                         toastController.show("Already reset", variant: .info)
+                     } else {
+                         showResetItemsConfirm = true
+                     }
                  } label: {
-                     Label("Manage Stores", systemImage: "storefront")
+                     Label("Reset items", systemImage: "arrow.counterclockwise")
                  }
+                 .disabled(detailViewModel?.items.isEmpty ?? true)
              }
-
-             if isOwned && list.type == "guest_list" {
-                Button {
-                    let remaining = (detailViewModel?.items ?? []).filter {
-                        ($0.rsvpStatus ?? "not_invited") != "not_invited"
-                    }.count
-
-                    if remaining == 0 {
-                        toastController.show("Already reset", variant: .info)
-                    } else {
-                        showResetItemsConfirm = true
-                    }
-                } label: {
-                    Label("Reset items", systemImage: "arrow.counterclockwise")
-                }
-                .disabled(detailViewModel?.items.isEmpty ?? true)
-            }
-            
-            Divider()
-            
-            Button(role: .destructive) {
-                showDeleteConfirm = true
-            } label: {
-                Label("Delete List", systemImage: "trash")
-            }
-        } label: {
-            Image(systemName: "ellipsis.circle")
-                .font(.subheadline)
-                .foregroundStyle(.white)
-        }
+             
+             Divider()
+             
+             Button(role: .destructive) {
+                 showDeleteConfirm = true
+             } label: {
+                 Label("Delete List", systemImage: "trash")
+             }
+         } label: {
+             Image(systemName: "ellipsis.circle")
+                 .font(.subheadline)
+                 .foregroundStyle(.white)
+         }
         .sheet(isPresented: $showEditSheet) {
-            EditListSheet(list: list, viewModel: viewModel)
+            EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
         }
         .sheet(isPresented: $showShareSettingsSheet) {
             ShareListSheet(
@@ -1314,8 +1329,28 @@ struct ListDetailView: View {
              )
          }
          .sheet(isPresented: $showManageStoresSheet) {
-             StoreBrowserView()
+             StoreBrowserView(listId: list.id)
                  .environment(authViewModel)
+         }
+         .sheet(isPresented: $showManageCategoriesSheet) {
+             CategoryEditorSheet(
+                 listId: list.id,
+                 listType: list.type,
+                 initialCategories: detailViewModel?.listCategories ?? list.categories ?? [],
+                 onSave: { updatedCategories in
+                     Task {
+                         await viewModel.updateList(
+                             id: list.id,
+                             name: nil,
+                             emoji: nil,
+                             color: nil,
+                             type: nil,
+                             categories: updatedCategories
+                         )
+                     }
+                 }
+             )
+             .environment(authViewModel)
          }
          .alert("Delete List?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
