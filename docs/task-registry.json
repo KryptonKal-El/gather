@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260602-193703",
+      "title": "Fix — collaborator pencil button does nothing in list detail view",
+      "status": "completed",
+      "createdAt": "2026-06-02T19:37:03Z",
+      "completedAt": "2026-06-02T19:37:03Z",
+      "path": "docs/tasks/completed/TSK-20260602-193703.md"
+    },
+    {
       "id": "TSK-20260602-135047",
       "title": "Manage Stores — tappable rows with chevron and × close button",
       "status": "completed",
