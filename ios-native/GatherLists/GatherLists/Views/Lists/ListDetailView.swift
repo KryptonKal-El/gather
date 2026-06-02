@@ -287,6 +287,9 @@ struct ListDetailView: View {
             preferencesTask?.cancel()
             preferencesTask = nil
         }
+        .sheet(isPresented: $showEditSheet) {
+            EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
+        }
     }
     
     // MARK: - Loading State
@@ -1298,9 +1301,6 @@ struct ListDetailView: View {
                  .font(.subheadline)
                  .foregroundStyle(.white)
          }
-        .sheet(isPresented: $showEditSheet) {
-            EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
-        }
         .sheet(isPresented: $showShareSettingsSheet) {
             ShareListSheet(
                 list: list,
