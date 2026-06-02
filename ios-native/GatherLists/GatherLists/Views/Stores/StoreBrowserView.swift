@@ -3,41 +3,43 @@ import SwiftUI
 /// Browse all stores with search, edit mode for reorder, and CRUD actions.
 struct StoreBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
-    @State private var viewModel: StoreViewModel?
+    let listId: UUID
+    @State private var viewModel: StoreViewModel
     @State private var showCreateSheet = false
     @State private var storeToEdit: Store?
     @State private var storeToDelete: Store?
     @State private var showDeleteConfirm = false
     
+    init(listId: UUID) {
+        self.listId = listId
+        _viewModel = State(initialValue: StoreViewModel(listId: listId))
+    }
+    
     private var filteredStores: [Store] {
-        guard let vm = viewModel else { return [] }
-        guard !searchQuery.isEmpty else { return vm.stores }
+        guard !searchQuery.isEmpty else { return viewModel.stores }
         let query = searchQuery.lowercased()
-        return vm.stores.filter { $0.name.lowercased().contains(query) }
+        return viewModel.stores.filter { $0.name.lowercased().contains(query) }
     }
     
     @State private var searchQuery = ""
+    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     var body: some View {
         NavigationStack {
             Group {
-                if let vm = viewModel {
-                    if vm.isLoading && vm.stores.isEmpty {
-                        loadingView
-                    } else if vm.stores.isEmpty {
-                        emptyStateView
-                    } else {
-                        storeListContent(vm: vm)
-                    }
-                } else {
+                if viewModel.isLoading && viewModel.stores.isEmpty {
                     loadingView
+                } else if viewModel.stores.isEmpty {
+                    emptyStateView
+                } else {
+                    storeListContent
                 }
             }
             .navigationTitle("Stores")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if let vm = viewModel, !vm.stores.isEmpty {
+                    if !viewModel.stores.isEmpty {
                         EditButton()
                     }
                 }
@@ -50,19 +52,15 @@ struct StoreBrowserView: View {
                 }
             }
             .sheet(isPresented: $showCreateSheet) {
-                if let vm = viewModel {
-                    CreateStoreSheet(viewModel: vm)
-                }
+                CreateStoreSheet(viewModel: viewModel)
             }
             .sheet(item: $storeToEdit) { store in
-                if let vm = viewModel {
-                    EditStoreSheet(store: store, viewModel: vm)
-                }
+                EditStoreSheet(store: store, viewModel: viewModel)
             }
             .alert("Delete Store?", isPresented: $showDeleteConfirm, presenting: storeToDelete) { store in
                 Button("Delete", role: .destructive) {
                     Task {
-                        await viewModel?.deleteStore(store.id)
+                        await viewModel.deleteStore(store.id)
                     }
                 }
                 Button("Cancel", role: .cancel) {}
@@ -70,16 +68,17 @@ struct StoreBrowserView: View {
                 Text("Delete \"\(store.name)\"? Items assigned to this store will become unassigned.")
             }
         }
-        .onAppear {
-            initializeViewModelIfNeeded()
+        .tint(brandGreen)
+        .task {
+            await viewModel.start()
         }
     }
     
     @ViewBuilder
-    private func storeListContent(vm: StoreViewModel) -> some View {
+    private var storeListContent: some View {
         List {
-            if vm.isShowingCachedData {
-                CachedDataBanner(cachedAt: vm.cachedAt)
+            if viewModel.isShowingCachedData {
+                CachedDataBanner(cachedAt: viewModel.cachedAt)
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
             }
@@ -113,12 +112,12 @@ struct StoreBrowserView: View {
                 }
             }
             .onMove { source, destination in
-                vm.moveStore(from: source, to: destination)
+                viewModel.moveStore(from: source, to: destination)
             }
         }
         .listStyle(.insetGrouped)
         .refreshable {
-            await vm.refresh()
+            await viewModel.refresh()
         }
         .searchable(text: $searchQuery, prompt: "Search stores")
     }
@@ -172,10 +171,5 @@ struct StoreBrowserView: View {
         }
         .padding()
     }
-    
-    private func initializeViewModelIfNeeded() {
-        guard viewModel == nil else { return }
-        guard let user = authViewModel.currentUser else { return }
-        viewModel = StoreViewModel(userId: user.id)
-    }
 }
+
