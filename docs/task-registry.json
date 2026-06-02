@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260602-135047",
+      "title": "Manage Stores — tappable rows with chevron and × close button",
+      "status": "completed",
+      "createdAt": "2026-06-02T13:50:47Z",
+      "completedAt": "2026-06-02T19:21:04Z",
+      "path": "docs/tasks/completed/TSK-20260602-135047.md"
+    },
+    {
       "id": "TSK-20260602-121651",
       "title": "List three-dot menu — reorder, rename, and add Manage Categories",
       "status": "completed",
