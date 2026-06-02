@@ -63,6 +63,7 @@ struct CreateStoreSheet: View {
                     }
                     .fontWeight(.semibold)
                     .disabled(!canCreate)
+                    .tint(canCreate ? Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255) : Color(.tertiaryLabel))
                 }
             }
         }
