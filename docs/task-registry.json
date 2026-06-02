@@ -1,6 +1,13 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260602-01",
+      "title": "Create project conventions documentation",
+      "status": "active",
+      "createdAt": "2026-06-02T00:00:00Z",
+      "path": "docs/tasks/drafts/TSK-20260602-01.md"
+    },
+    {
       "id": "TSK-20260526-01",
       "title": "Replace category color dot with full-height left bar in iOS native shopping list",
       "status": "completed",
