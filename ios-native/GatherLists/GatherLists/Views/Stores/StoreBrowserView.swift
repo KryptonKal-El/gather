@@ -150,7 +150,7 @@ struct StoreBrowserView: View {
         VStack(spacing: 16) {
             Image(systemName: "storefront")
                 .font(.system(size: 48))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary)
             
             Text("No stores yet")
                 .font(.title2)
@@ -158,7 +158,7 @@ struct StoreBrowserView: View {
             
             Text("Add a store to organize items by where you shop.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.primary.opacity(0.6))
                 .multilineTextAlignment(.center)
             
             Button {
