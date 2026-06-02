@@ -1,0 +1,73 @@
+{
+  "id": "prd-list-scoped-stores",
+  "name": "List-Scoped Stores",
+  "status": "completed",
+  "startedAt": "2026-06-01T00:00:00Z",
+  "completedAt": "2026-06-02T00:00:00Z",
+  "stories": [
+    {
+      "id": "S-1",
+      "title": "Database Migration: List-Scoped Stores",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "Migration adds list_id FK to stores and creates user_store_defaults table. DROP POLICY order fixed to precede DROP COLUMN."
+    },
+    {
+      "id": "S-2",
+      "title": "Service Layer: List-Scoped Store CRUD + User Store Defaults",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "database.js updated for list-scoped CRUD. saveUserStoreDefaultOrder filters temp IDs. duplicateList nulls store_id on duplicated items."
+    },
+    {
+      "id": "S-3",
+      "title": "New List Creation Copies User Store Defaults",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "New list creation seeds stores from user_store_defaults for the matching list type."
+    },
+    {
+      "id": "S-4",
+      "title": "State Management: List-Scoped Stores in ShoppingListContext",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "Stores scoped to activeListId. createUserStoreDefaultAction appends full object. saveUserStoreDefaultOrderAction merges by listType."
+    },
+    {
+      "id": "S-5",
+      "title": "Store Management UI: List-Scoped (React Web)",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "StoreManager listId prop removed. ListSelector and MobileListDetail updated. isOwned gate fixes applied for prd-collaborator-edit-access compatibility."
+    },
+    {
+      "id": "S-6",
+      "title": "List Defaults Settings UI: Stores Per List Type (React Web)",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "UserStoreDefaultsManager component with separate onCreateDefault, onUpdateDefault, onDeleteDefault, onReorderDefaults callbacks. MobileSettings wired to context actions."
+    },
+    {
+      "id": "S-7",
+      "title": "iOS: List-Scoped Store Management (Swift)",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "StoreService and ListDetailViewModel updated for list-scoped stores. UserStoreDefaultService and DefaultStoreEditorView added. Stores tab removed from MainTabView."
+    },
+    {
+      "id": "S-8",
+      "title": "Enable Store Assignment for Packing and Project List Types (React Web + iOS)",
+      "status": "completed",
+      "completedAt": "2026-06-02T00:00:00Z",
+      "passes": true,
+      "notes": "listTypes.js and ListTypeConfig.swift updated — packing and project types now have fields.store: true and store in sortLevels/defaultSort."
+    }
+  ]
+}

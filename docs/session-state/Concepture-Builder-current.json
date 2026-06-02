@@ -1,13 +1,13 @@
 {
-  "sessionId": "builder-1780349443-8eb63d",
-  "sessionDir": "docs/sessions/builder-1780349443-8eb63d/",
+  "sessionId": null,
+  "sessionDir": null,
   "workBranch": "main",
-  "mode": "prd",
-  "prdId": "prd-list-scoped-stores",
-  "pipelineMode": "batched",
-  "startedAt": "2026-06-01T00:00:00Z",
-  "currentStory": "S-1",
+  "mode": null,
+  "prdId": null,
+  "pipelineMode": null,
+  "startedAt": null,
+  "currentStory": null,
   "postStoryReviewPending": false,
-  "sessionGapReport": null,
-  "specialistsBlock": "| developer | react-dev | .opencode/agents/react-dev.md |\n| developer | swift-dev | .opencode/agents/swift-dev.md |\n| tester | react-tester | .opencode/agents/react-tester.md |\n| critic | react-critic | .opencode/agents/react-critic.md |"
+  "sessionGapReport": "docs/toolkit-gaps/2026-06-02-builder-gap-report.md",
+  "specialistsBlock": null
 }
