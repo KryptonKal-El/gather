@@ -3,6 +3,7 @@ import SwiftUI
 /// Browse all stores with search, edit mode for reorder, and CRUD actions.
 struct StoreBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(\.dismiss) private var dismiss
     let listId: UUID
     @State private var viewModel: StoreViewModel
     @State private var showCreateSheet = false
@@ -39,9 +40,12 @@ struct StoreBrowserView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if !viewModel.stores.isEmpty {
-                        EditButton()
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
+                    .foregroundStyle(Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255))
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -83,37 +87,47 @@ struct StoreBrowserView: View {
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
             }
-            
-            ForEach(filteredStores) { store in
-                storeRow(store)
-                .contextMenu {
+
+            Section {
+                ForEach(filteredStores) { store in
                     Button {
                         storeToEdit = store
                     } label: {
-                        Label("Edit Name & Color", systemImage: "pencil")
+                        storeRow(store)
+                            .contentShape(Rectangle())
                     }
-                    
-                    Divider()
-                    
-                    Button(role: .destructive) {
-                        storeToDelete = store
-                        showDeleteConfirm = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button {
+                            storeToEdit = store
+                        } label: {
+                            Label("Edit Name & Color", systemImage: "pencil")
+                        }
+
+                        Divider()
+
+                        Button(role: .destructive) {
+                            storeToDelete = store
+                            showDeleteConfirm = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            storeToDelete = store
+                            showDeleteConfirm = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .tint(.red)
                     }
                 }
-                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                    Button(role: .destructive) {
-                        storeToDelete = store
-                        showDeleteConfirm = true
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                    .tint(.red)
+                .onMove { source, destination in
+                    viewModel.moveStore(from: source, to: destination)
                 }
-            }
-            .onMove { source, destination in
-                viewModel.moveStore(from: source, to: destination)
+            } footer: {
+                Text("Swipe to delete. Press and hold to reorder.")
             }
         }
         .listStyle(.insetGrouped)
@@ -133,6 +147,10 @@ struct StoreBrowserView: View {
                 .font(.body)
             
             Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
     }
     
