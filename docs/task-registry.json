@@ -3,9 +3,10 @@
     {
       "id": "TSK-20260602-01",
       "title": "Create project conventions documentation",
-      "status": "active",
+      "status": "completed",
       "createdAt": "2026-06-02T00:00:00Z",
-      "path": "docs/tasks/drafts/TSK-20260602-01.md"
+      "completedAt": "2026-06-02T00:00:00Z",
+      "path": "docs/tasks/completed/TSK-20260602-01.md"
     },
     {
       "id": "TSK-20260526-01",
