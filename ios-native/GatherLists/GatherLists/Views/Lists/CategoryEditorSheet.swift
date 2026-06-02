@@ -40,7 +40,7 @@ struct CategoryEditorSheet: View {
     
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     if categories.isEmpty {
                         Text("No categories defined")
@@ -49,59 +49,62 @@ struct CategoryEditorSheet: View {
                     } else {
                         ForEach(filteredCategories, id: \.key) { category in
                             categoryRow(category)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                    Button(role: .destructive) {
+                                        categoryToDelete = category
+                                        showDeleteConfirm = true
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                    .tint(.red)
+                                }
                         }
                         .onMove(perform: moveCategory)
-                        .onDelete(perform: deleteCategory)
                     }
-                } header: {
-                    Text("Categories")
                 } footer: {
-                    Text("Swipe to delete. Drag to reorder.")
+                    Text("Swipe to delete. Press and hold to reorder.")
                 }
-                
+
                 Section {
                     Button(role: .destructive) {
                         showDeleteAllConfirm = true
                     } label: {
-                        Label("Delete All", systemImage: "trash")
+                        Text("Delete All")
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .disabled(categories.isEmpty)
                 }
-                
+
                 Section {
                     Button {
                         showSaveDefaultConfirm = true
                     } label: {
-                        Label("Save as Default for \(listType.capitalized)", systemImage: "square.and.arrow.down")
+                        Text("Save as Default for \(listType.capitalized)")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .foregroundStyle(brandGreen)
                     }
                 }
             }
+            .listStyle(.insetGrouped)
             .searchable(text: $searchText, prompt: "Search categories")
-            .environment(\.editMode, .constant(.active))
-            .navigationTitle("Edit Categories")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Categories")
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        onSave(categories)
                         dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
                     }
-                    .fontWeight(.semibold)
                     .foregroundStyle(brandGreen)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .primaryAction) {
                     Button {
                         addNewCategory()
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .foregroundStyle(brandGreen)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onSave(categories)
-                        dismiss()
-                    }
-                    .fontWeight(.semibold)
                     .foregroundStyle(brandGreen)
                 }
             }
@@ -194,19 +197,13 @@ struct CategoryEditorSheet: View {
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
     
     private func moveCategory(from source: IndexSet, to destination: Int) {
         categories.move(fromOffsets: source, toOffset: destination)
-    }
-    
-    private func deleteCategory(at offsets: IndexSet) {
-        if let index = offsets.first {
-            categoryToDelete = filteredCategories[index]
-            showDeleteConfirm = true
-        }
     }
     
     private func addNewCategory() {
@@ -376,11 +373,10 @@ struct CategoryDetailEditor: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .fontWeight(.semibold)
                     .foregroundStyle(brandGreen)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    Button("Save") {
                         let updated = CategoryDef(
                             key: generatedKey,
                             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
