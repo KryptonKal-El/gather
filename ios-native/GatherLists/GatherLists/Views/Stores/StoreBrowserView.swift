@@ -69,6 +69,7 @@ struct StoreBrowserView: View {
             }
         }
         .tint(brandGreen)
+        .background(Color(.systemGroupedBackground))
         .task {
             await viewModel.start()
         }
