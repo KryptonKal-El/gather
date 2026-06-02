@@ -171,8 +171,6 @@ struct StoreBrowserView: View {
             .padding(.top, 8)
         }
         .padding()
-        .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
-        .padding(.horizontal)
     }
 }
 
