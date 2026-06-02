@@ -1,0 +1,316 @@
+/* Container for the manager */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Description text */
+.description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 0.5rem 0;
+}
+
+/* Create form */
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.createForm input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  font-size: 1rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.createForm input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Color picker */
+.colorPicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.colorOption {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.15s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.colorOption:hover {
+  transform: scale(1.15);
+}
+
+.colorSelected {
+  border-color: var(--text-primary);
+  transform: scale(1.15);
+}
+
+/* Form buttons */
+.formButtons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.saveBtn {
+  flex: 1;
+  padding: 0.4rem 0.75rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.saveBtn:hover {
+  background: var(--primary-hover);
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cancelBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+/* List container */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* List item */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.item:hover {
+  background: var(--bg-hover);
+}
+
+.dragging {
+  opacity: 0.5;
+}
+
+/* Drag handle */
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+  color: var(--text-primary);
+}
+
+/* Color swatch in item */
+.color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Store name */
+.name {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Edit form in item */
+.editForm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.editForm input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.editForm input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Item buttons */
+.editBtn,
+.deleteBtn {
+  padding: 0.3rem 0.6rem;
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+
+.editBtn:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.deleteBtn:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
+/* Add button */
+.addBtn {
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: var(--primary-hover);
+}
+
+/* Empty state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem;
+  background: var(--bg-input);
+  border: 1px dashed var(--border-light);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.emptyMessage {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Confirm dialog overlay */
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirmDialog {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 300px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.confirmDialog p {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+}
+
+.confirmButtons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.confirmBtn {
+  padding: 0.4rem 0.75rem;
+  background: var(--danger);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.confirmBtn:hover {
+  background: var(--danger-dark);
+}

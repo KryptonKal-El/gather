@@ -54,6 +54,7 @@ struct ListDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showDuplicateSheet = false
     @State private var showResetItemsConfirm = false
+    @State private var showManageStoresSheet = false
     
     private var navigationTitle: String {
         if let emoji = list.emoji, emoji.containsVisualEmoji {
@@ -1239,13 +1240,21 @@ struct ListDetailView: View {
                 Label("Share Settings", systemImage: "person.badge.plus")
             }
             
-            Button {
-                showDuplicateSheet = true
-            } label: {
-                Label("Duplicate", systemImage: "doc.on.doc")
-            }
+             Button {
+                 showDuplicateSheet = true
+             } label: {
+                 Label("Duplicate", systemImage: "doc.on.doc")
+             }
 
-            if isOwned && list.type == "guest_list" {
+             if ListTypes.getConfig(list.type).fields.store {
+                 Button {
+                     showManageStoresSheet = true
+                 } label: {
+                     Label("Manage Stores", systemImage: "storefront")
+                 }
+             }
+
+             if isOwned && list.type == "guest_list" {
                 Button {
                     let remaining = (detailViewModel?.items ?? []).filter {
                         ($0.rsvpStatus ?? "not_invited") != "not_invited"
@@ -1284,27 +1293,31 @@ struct ListDetailView: View {
                 ownerEmail: authViewModel.currentUser?.email ?? ""
             )
         }
-        .sheet(isPresented: $showDuplicateSheet) {
-            DuplicateListSheet(
-                list: list,
-                onDuplicate: { name, resetRsvp in
-                    showDuplicateSheet = false
-                    Task {
-                        _ = await viewModel.duplicateList(
-                            listId: list.id,
-                            newName: name,
-                            resetRsvp: resetRsvp,
-                            toastController: toastController
-                        )
-                        dismiss()
-                    }
-                },
-                onCancel: {
-                    showDuplicateSheet = false
-                }
-            )
-        }
-        .alert("Delete List?", isPresented: $showDeleteConfirm) {
+         .sheet(isPresented: $showDuplicateSheet) {
+             DuplicateListSheet(
+                 list: list,
+                 onDuplicate: { name, resetRsvp in
+                     showDuplicateSheet = false
+                     Task {
+                         _ = await viewModel.duplicateList(
+                             listId: list.id,
+                             newName: name,
+                             resetRsvp: resetRsvp,
+                             toastController: toastController
+                         )
+                         dismiss()
+                     }
+                 },
+                 onCancel: {
+                     showDuplicateSheet = false
+                 }
+             )
+         }
+         .sheet(isPresented: $showManageStoresSheet) {
+             StoreBrowserView()
+                 .environment(authViewModel)
+         }
+         .alert("Delete List?", isPresented: $showDeleteConfirm) {
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 Task {

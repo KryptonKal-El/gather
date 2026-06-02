@@ -10,6 +10,7 @@ import { uploadProfileImage } from '../services/imageStorage.js';
 import { updateImageSearchSettings } from '../services/database.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { CategoryEditor } from './CategoryEditor.jsx';
+import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
@@ -36,16 +37,17 @@ const IMAGE_SEARCH_SOURCES = [
  * @param {Function} props.onSignOut - Sign out callback
  */
 export const MobileSettings = ({ user, onSignOut }) => {
-  const { theme, toggleTheme } = useTheme();
-  const { refreshUser } = useAuth();
-  const { state, actions } = useShoppingList();
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
-  const [imageSearchError, setImageSearchError] = useState(null);
-  const [localImageSearchSettings, setLocalImageSearchSettings] = useState(null);
-  const [expandedCategoryType, setExpandedCategoryType] = useState(null);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-  const fileInputRef = useRef(null);
+   const { theme, toggleTheme } = useTheme();
+   const { refreshUser } = useAuth();
+   const { state, actions } = useShoppingList();
+   const [isUploading, setIsUploading] = useState(false);
+   const [uploadError, setUploadError] = useState(null);
+   const [imageSearchError, setImageSearchError] = useState(null);
+   const [localImageSearchSettings, setLocalImageSearchSettings] = useState(null);
+   const [expandedCategoryType, setExpandedCategoryType] = useState(null);
+   const [expandedStoreType, setExpandedStoreType] = useState(null);
+   const [showResetConfirm, setShowResetConfirm] = useState(false);
+   const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
   const userId = user?.id;
@@ -53,19 +55,31 @@ export const MobileSettings = ({ user, onSignOut }) => {
     ?? user?.profile?.imageSearchSettings
     ?? DEFAULT_IMAGE_SEARCH_SETTINGS;
 
-  const categoryTypes = [
-    { value: 'grocery', label: 'Grocery' },
-    { value: 'todo', label: 'To-Do' },
-    { value: 'packing', label: 'Packing' },
-    { value: 'project', label: 'Project' },
-  ];
+   const categoryTypes = [
+     { value: 'grocery', label: 'Grocery' },
+     { value: 'todo', label: 'To-Do' },
+     { value: 'packing', label: 'Packing' },
+     { value: 'project', label: 'Project' },
+   ];
 
-  const CATEGORY_TYPE_ICONS = {
-    grocery: GroceryIcon,
-    todo: TodoIcon,
-    packing: PackingIcon,
-    project: ProjectIcon,
-  };
+   const storeTypes = [
+     { value: 'grocery', label: 'Grocery' },
+     { value: 'packing', label: 'Packing' },
+     { value: 'project', label: 'Project' },
+   ];
+
+   const CATEGORY_TYPE_ICONS = {
+     grocery: GroceryIcon,
+     todo: TodoIcon,
+     packing: PackingIcon,
+     project: ProjectIcon,
+   };
+
+   const STORE_TYPE_ICONS = {
+     grocery: GroceryIcon,
+     packing: PackingIcon,
+     project: ProjectIcon,
+   };
 
   const getCurrentDefaults = (listType) => {
     const userDefault = state.userCategoryDefaults.find(d => d.listType === listType);
@@ -129,14 +143,46 @@ export const MobileSettings = ({ user, onSignOut }) => {
       } catch (err) {
         console.error('Failed to refresh user after image search settings update:', err);
       }
-    } catch (err) {
-      console.error('Failed to update image search settings:', err);
-      setLocalImageSearchSettings(previousSettings);
-      setImageSearchError('Unable to save image search settings. Please try again.');
-    }
-  };
+   } catch (err) {
+       console.error('Failed to update image search settings:', err);
+       setLocalImageSearchSettings(previousSettings);
+       setImageSearchError('Unable to save image search settings. Please try again.');
+     }
+   };
 
-  return (
+    const handleCreateStoreDefault = async (listType, name, color) => {
+      try {
+        await actions.createUserStoreDefault(listType, name, color);
+      } catch (err) {
+        console.error('Failed to create store default:', err);
+      }
+    };
+
+    const handleUpdateStoreDefault = async (id, name, color) => {
+      try {
+        await actions.updateUserStoreDefault(id, { name, color });
+      } catch (err) {
+        console.error('Failed to update store default:', err);
+      }
+    };
+
+    const handleDeleteStoreDefault = async (defaultId) => {
+      try {
+        await actions.deleteUserStoreDefault(defaultId);
+      } catch (err) {
+        console.error('Failed to delete store default:', err);
+      }
+    };
+
+    const handleReorderStoreDefaults = async (reorderedDefaults) => {
+      try {
+        await actions.saveUserStoreDefaultOrder(reorderedDefaults);
+      } catch (err) {
+        console.error('Failed to reorder store defaults:', err);
+      }
+    };
+
+   return (
     <div className={styles.container}>
       <h3 className={styles.sectionHeader}>Account</h3>
       <div className={styles.section}>
@@ -275,22 +321,63 @@ export const MobileSettings = ({ user, onSignOut }) => {
         })}
       </div>
 
-      {showResetConfirm && (
-        <ConfirmDialog
-          message={`This will replace your ${categoryTypes.find(t => t.value === expandedCategoryType)?.label} category defaults with the system defaults. Continue?`}
-          confirmLabel="Reset"
-          onConfirm={() => {
-            const systemDefaults = getSystemDefaultCategories(expandedCategoryType);
-            if (systemDefaults) {
-              actions.saveUserCategoryDefault(expandedCategoryType, systemDefaults);
-            }
-            setShowResetConfirm(false);
-          }}
-          onCancel={() => setShowResetConfirm(false)}
-        />
-      )}
+       {showResetConfirm && (
+         <ConfirmDialog
+           message={`This will replace your ${categoryTypes.find(t => t.value === expandedCategoryType)?.label} category defaults with the system defaults. Continue?`}
+           confirmLabel="Reset"
+           onConfirm={() => {
+             const systemDefaults = getSystemDefaultCategories(expandedCategoryType);
+             if (systemDefaults) {
+               actions.saveUserCategoryDefault(expandedCategoryType, systemDefaults);
+             }
+             setShowResetConfirm(false);
+           }}
+           onCancel={() => setShowResetConfirm(false)}
+         />
+       )}
 
-      <h3 className={styles.sectionHeader}>Account Actions</h3>
+       <h3 className={styles.sectionHeader}>Store Defaults</h3>
+       <div className={styles.section}>
+         {storeTypes.map(type => {
+           const IconComponent = STORE_TYPE_ICONS[type.value];
+           const storesForType = state.userStoreDefaults.filter(d => d.listType === type.value);
+           const isExpanded = expandedStoreType === type.value;
+           return (
+             <div key={type.value}>
+               <button
+                 type="button"
+                 className={styles.categoryDefaultRow}
+                 onClick={() => setExpandedStoreType(isExpanded ? null : type.value)}
+               >
+                 <span className={styles.categoryDefaultRowLeft}>
+                   {IconComponent && <IconComponent size={20} />}
+                   <span className={styles.categoryDefaultLabel}>{type.label}</span>
+                 </span>
+                 <span className={styles.categoryDefaultRowRight}>
+                   <span className={styles.categoryDefaultCount}>{storesForType.length}</span>
+                   <span className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}>
+                     ›
+                   </span>
+                 </span>
+               </button>
+                {isExpanded && (
+                  <div className={styles.categoryEditorWrapper}>
+                    <UserStoreDefaultsManager
+                      listType={type.value}
+                      userStoreDefaults={state.userStoreDefaults}
+                      onCreateDefault={handleCreateStoreDefault}
+                      onUpdateDefault={handleUpdateStoreDefault}
+                      onDeleteDefault={handleDeleteStoreDefault}
+                      onReorderDefaults={handleReorderStoreDefaults}
+                    />
+                  </div>
+                )}
+             </div>
+           );
+         })}
+       </div>
+
+       <h3 className={styles.sectionHeader}>Account Actions</h3>
       <div className={styles.section}>
         <button
           type="button"

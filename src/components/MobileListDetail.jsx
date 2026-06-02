@@ -6,6 +6,7 @@ import { ShoppingList } from './ShoppingList.jsx';
 import { Suggestions } from './Suggestions.jsx';
 import { SortPicker } from './SortPicker.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
+import { LIST_TYPES } from '../utils/listTypes.js';
 import styles from './MobileListDetail.module.css';
 
 /**
@@ -21,7 +22,7 @@ export const MobileListDetail = ({
   listSortConfig,
   listCategories,
   getEffectiveChecked,
-  isGuest,
+   _isGuest,
   onBack,
   onAddItem,
   onToggle,
@@ -31,6 +32,7 @@ export const MobileListDetail = ({
   onUpdateItem,
   onClearChecked,
   onShareClick,
+  onManageStores,
   onDuplicate,
   onResetItems,
   onSortSelect,
@@ -116,49 +118,59 @@ export const MobileListDetail = ({
           >
             &#x22EE;
           </button>
-          {menuOpen && !isMobile && (
-            <div className={styles.menuDropdown}>
-              {!isGuest && onShareClick && (
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { onShareClick(list); setMenuOpen(false); }}
-                >
-                  <span className={styles.menuIcon}>🔗</span>
-                  Share Settings
-                </button>
-              )}
-              <button
-                type="button"
-                className={styles.menuItem}
-                onClick={() => {
-                  setDuplicatingList(true);
-                  setDuplicateName(`${list.name} (2)`);
-                  setResetRsvpOnDuplicate(false);
-                  setMenuOpen(false);
-                }}
-              >
-                <span className={styles.menuIcon}>📋</span>
-                Duplicate
-              </button>
-              {isOwned && list.type === 'guest_list' && onResetItems && (
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  title="List has no items to reset"
-                  disabled={!hasItems}
-                  onClick={() => {
-                    if (!hasItems) return;
-                    onResetItems?.(list);
-                    setMenuOpen(false);
-                  }}
-                >
-                  <span className={styles.menuIcon}>🔄</span>
-                  Reset items
-                </button>
-              )}
-            </div>
-          )}
+           {menuOpen && !isMobile && (
+             <div className={styles.menuDropdown}>
+               {isOwned && onShareClick && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { onShareClick(list); setMenuOpen(false); }}
+                 >
+                   <span className={styles.menuIcon}>🔗</span>
+                   Share Settings
+                 </button>
+               )}
+               {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { onManageStores(list); setMenuOpen(false); }}
+                 >
+                   <span className={styles.menuIcon}>🏪</span>
+                   Manage Stores
+                 </button>
+               )}
+               <button
+                 type="button"
+                 className={styles.menuItem}
+                 onClick={() => {
+                   setDuplicatingList(true);
+                   setDuplicateName(`${list.name} (2)`);
+                   setResetRsvpOnDuplicate(false);
+                   setMenuOpen(false);
+                 }}
+               >
+                 <span className={styles.menuIcon}>📋</span>
+                 Duplicate
+               </button>
+               {isOwned && list.type === 'guest_list' && onResetItems && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   title="List has no items to reset"
+                   disabled={!hasItems}
+                   onClick={() => {
+                     if (!hasItems) return;
+                     onResetItems?.(list);
+                     setMenuOpen(false);
+                   }}
+                 >
+                   <span className={styles.menuIcon}>🔄</span>
+                   Reset items
+                 </button>
+               )}
+             </div>
+           )}
         </div>
         {menuOpen && isMobile && (
           <>
@@ -172,43 +184,52 @@ export const MobileListDetail = ({
                   {list.emoji && <span>{list.emoji} </span>}
                   {list.name}
                 </div>
-                {!isGuest && onShareClick && (
-                  <button
-                    type="button"
-                    className={styles.actionSheetItem}
-                    onClick={() => { onShareClick(list); setMenuOpen(false); }}
-                  >
-                    Share Settings
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className={styles.actionSheetItem}
-                  onClick={() => {
-                    setDuplicatingList(true);
-                    setDuplicateName(`${list.name} (2)`);
-                    setResetRsvpOnDuplicate(false);
-                    setMenuOpen(false);
-                  }}
-                >
-                  Duplicate
-                </button>
-                {isOwned && list.type === 'guest_list' && onResetItems && (
-                  <button
-                    type="button"
-                    className={styles.actionSheetItem}
-                    title="List has no items to reset"
-                    disabled={!hasItems}
-                    onClick={() => {
-                      if (!hasItems) return;
-                      onResetItems?.(list);
-                      setMenuOpen(false);
-                    }}
-                  >
-                    <span className={styles.menuIcon}>🔄</span>
-                    Reset items
-                  </button>
-                )}
+                  {isOwned && onShareClick && (
+                    <button
+                      type="button"
+                      className={styles.actionSheetItem}
+                      onClick={() => { onShareClick(list); setMenuOpen(false); }}
+                    >
+                      Share Settings
+                    </button>
+                  )}
+                 {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                   <button
+                     type="button"
+                     className={styles.actionSheetItem}
+                     onClick={() => { onManageStores(list); setMenuOpen(false); }}
+                   >
+                     Manage Stores
+                   </button>
+                 )}
+                 <button
+                   type="button"
+                   className={styles.actionSheetItem}
+                   onClick={() => {
+                     setDuplicatingList(true);
+                     setDuplicateName(`${list.name} (2)`);
+                     setResetRsvpOnDuplicate(false);
+                     setMenuOpen(false);
+                   }}
+                 >
+                   Duplicate
+                 </button>
+                 {isOwned && list.type === 'guest_list' && onResetItems && (
+                   <button
+                     type="button"
+                     className={styles.actionSheetItem}
+                     title="List has no items to reset"
+                     disabled={!hasItems}
+                     onClick={() => {
+                       if (!hasItems) return;
+                       onResetItems?.(list);
+                       setMenuOpen(false);
+                     }}
+                   >
+                     <span className={styles.menuIcon}>🔄</span>
+                     Reset items
+                   </button>
+                 )}
               </div>
               <button
                 type="button"
@@ -353,6 +374,7 @@ MobileListDetail.propTypes = {
   onUpdateItem: PropTypes.func.isRequired,
   onClearChecked: PropTypes.func.isRequired,
   onShareClick: PropTypes.func,
+  onManageStores: PropTypes.func,
   onDuplicate: PropTypes.func.isRequired,
   onResetItems: PropTypes.func,
   onSortSelect: PropTypes.func.isRequired,

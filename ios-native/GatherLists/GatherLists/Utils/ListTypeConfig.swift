@@ -183,21 +183,21 @@ enum ListTypes {
             id: "packing",
             label: "Packing",
             icon: "🧳",
-            fields: ListTypeFields(store: false, category: true, price: false, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: false, recurrence: false, reminder: false),
+            fields: ListTypeFields(store: true, category: true, price: false, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: false, recurrence: false, reminder: false),
             quantityLabel: "Qty",
             categories: ListTypeCategories.packing,
-            sortLevels: ["category", "name", "date"],
-            defaultSort: ["category", "name"]
+            sortLevels: ["store", "category", "name", "date"],
+            defaultSort: ["store", "category", "name"]
         ),
         "project": ListTypeConfig(
             id: "project",
             label: "Project",
             icon: "🏗️",
-            fields: ListTypeFields(store: false, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true, reminder: true),
+            fields: ListTypeFields(store: true, category: true, price: true, quantity: true, unit: false, image: false, rsvpStatus: false, dueDate: true, recurrence: true, reminder: true),
             quantityLabel: "Qty",
             categories: ListTypeCategories.project,
-            sortLevels: ["category", "name", "date", "price", "dueDate"],
-            defaultSort: ["category", "name"]
+            sortLevels: ["store", "category", "name", "date", "price", "dueDate"],
+            defaultSort: ["store", "category", "name"]
         ),
         "todo": ListTypeConfig(
             id: "todo",

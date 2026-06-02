@@ -119,7 +119,7 @@ final class ListDetailViewModel {
             items = cachedItems.data
             cachedAt = cachedItems.cachedAt
         }
-        if let cachedStores: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
+        if let cachedStores: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(listId.uuidString)") {
             stores = cachedStores.data
         }
         if let cachedHistory: CachedEntry<[HistoryEntry]> = await OfflineCache.shared.load(forKey: "history-\(userId.uuidString)") {
@@ -127,32 +127,23 @@ final class ListDetailViewModel {
         }
         
         // Fetch fresh data from Supabase
-        do {
-            async let fetchedItems = ItemService.fetchItems(listId: listId)
-            async let fetchedStores = StoreService.fetchStores(userId: userId)
-            async let fetchedHistory = HistoryService.fetchHistory(userId: userId)
-            
-            let (itemsResult, storesResult, historyResult) = try await (fetchedItems, fetchedStores, fetchedHistory)
-            items = itemsResult
-            stores = storesResult
-            historyEntries = historyResult
-            
-            if isSharedList {
-                let ownStoreIds = Set(storesResult.map { $0.id })
-                let missingStoreIds = Set(itemsResult.compactMap { $0.storeId }).subtracting(ownStoreIds)
-                if !missingStoreIds.isEmpty {
-                    let sharedStores = try await StoreService.fetchStoresByIds(Array(missingStoreIds))
-                    stores = storesResult + sharedStores
-                }
-            }
-            
-            isShowingCachedData = false
-            cachedAt = nil
-            
-            // Cache the fresh data
-            await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
-            await OfflineCache.shared.save(storesResult, forKey: "stores-\(userId.uuidString)")
-            await OfflineCache.shared.save(historyResult, forKey: "history-\(userId.uuidString)")
+         do {
+             async let fetchedItems = ItemService.fetchItems(listId: listId)
+             async let fetchedStores = StoreService.fetchStores(listId: listId)
+             async let fetchedHistory = HistoryService.fetchHistory(userId: userId)
+             
+             let (itemsResult, storesResult, historyResult) = try await (fetchedItems, fetchedStores, fetchedHistory)
+             items = itemsResult
+             stores = storesResult
+             historyEntries = historyResult
+             
+             isShowingCachedData = false
+             cachedAt = nil
+             
+             // Cache the fresh data
+             await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
+             await OfflineCache.shared.save(storesResult, forKey: "stores-\(listId.uuidString)")
+             await OfflineCache.shared.save(historyResult, forKey: "history-\(userId.uuidString)")
             
             // Sync items to shared container for widget access
             await SharedDataStore.shared.saveItems(itemsResult, for: listId)
@@ -201,54 +192,28 @@ final class ListDetailViewModel {
         }
         
         // Channel for stores
-        let storesCh = client.realtimeV2.channel("user-stores-\(userId.uuidString)")
-        runtime.storesChannel = storesCh
-        
-        let storesChanges = storesCh.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "stores",
-            filter: .eq("user_id", value: userId)
-        )
-        
-        runtime.storesTask = Task {
-            do {
-                try await storesCh.subscribeWithError()
-            } catch {
-                print("[ListDetailViewModel] Stores subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in storesChanges {
-                await refetchStores()
-            }
-        }
-        
-        // Channel for owner's stores (shared lists only)
-        if isSharedList {
-            let sharedStoresCh = client.realtimeV2.channel("owner-stores-\(ownerId.uuidString)")
-            runtime.sharedStoresChannel = sharedStoresCh
-            
-            let sharedStoresChanges = sharedStoresCh.postgresChange(
-                AnyAction.self,
-                schema: "public",
-                table: "stores",
-                filter: .eq("user_id", value: ownerId)
-            )
-            
-            runtime.sharedStoresTask = Task {
-                do {
-                    try await sharedStoresCh.subscribeWithError()
-                } catch {
-                    print("[ListDetailViewModel] Shared stores subscription failed: \(error.localizedDescription)")
-                    return
-                }
-                for await _ in sharedStoresChanges {
-                    await refetchStores()
-                }
-            }
-        }
-        
-        // Channel for history
+         let storesCh = client.realtimeV2.channel("list-stores-\(listId.uuidString)")
+         runtime.storesChannel = storesCh
+         
+         let storesChanges = storesCh.postgresChange(
+             AnyAction.self,
+             schema: "public",
+             table: "stores"
+         )
+         
+         runtime.storesTask = Task {
+             do {
+                 try await storesCh.subscribeWithError()
+             } catch {
+                 print("[ListDetailViewModel] Stores subscription failed: \(error.localizedDescription)")
+                 return
+             }
+             for await _ in storesChanges {
+                 await refetchStores()
+             }
+         }
+         
+         // Channel for history
         let historyCh = client.realtimeV2.channel("user-history-\(userId.uuidString)")
         runtime.historyChannel = historyCh
         
@@ -290,24 +255,16 @@ final class ListDetailViewModel {
         }
     }
     
-    private func refetchStores() async {
-        do {
-            var result = try await StoreService.fetchStores(userId: userId)
-            if isSharedList {
-                let ownStoreIds = Set(result.map { $0.id })
-                let missingStoreIds = Set(items.compactMap { $0.storeId }).subtracting(ownStoreIds)
-                if !missingStoreIds.isEmpty {
-                    let sharedStores = try await StoreService.fetchStoresByIds(Array(missingStoreIds))
-                    result += sharedStores
-                }
-            }
-            stores = result
-            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
-        } catch {
-            self.error = error.localizedDescription
-            print("[ListDetailViewModel] Failed to refetch stores: \(error.localizedDescription)")
-        }
-    }
+     private func refetchStores() async {
+         do {
+             let result = try await StoreService.fetchStores(listId: listId)
+             stores = result
+             await OfflineCache.shared.save(stores, forKey: "stores-\(listId.uuidString)")
+         } catch {
+             self.error = error.localizedDescription
+             print("[ListDetailViewModel] Failed to refetch stores: \(error.localizedDescription)")
+         }
+     }
     
     private func refetchHistory() async {
         do {

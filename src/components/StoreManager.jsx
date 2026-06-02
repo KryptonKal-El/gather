@@ -479,6 +479,7 @@ export const StoreManager = ({
 };
 
 StoreManager.propTypes = {
+  listId: PropTypes.string,
   stores: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

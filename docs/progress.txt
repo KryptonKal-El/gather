@@ -85,6 +85,85 @@ Updated store grouping so items without a store become a proper bottom-positione
 - 
 
 ============================================================
+[2026-06-02 08:34:38 CDT] — Story prd-list-scoped-stores — react-tester
+============================================================
+
+## Test Strategy
+
+Chose focused service/unit tests for Supabase store contracts and list type configuration, plus component/provider integration tests for user-visible StoreManager/UserStoreDefaultsManager behavior and ShoppingListProvider state merging because the batch spans service payloads, context state updates, and UI callback wiring.
+
+## Tests written
+
+- src/services/database.test.js:fetches stores by list ID when subscribing to stores — verifies store reads filter by `list_id`.
+- src/services/database.test.js:includes the list ID when creating a store — verifies store insert payload includes `list_id`.
+- src/services/database.test.js:saves order only for persisted user store defaults with UUID IDs — verifies temp and non-UUID defaults are skipped.
+- src/services/database.test.js:skips Supabase writes when user store default order has no persisted UUID IDs — verifies all-transient reorder no-ops.
+- src/context/ShoppingListContext.test.jsx:subscribes to stores for the active list ID — verifies store state is scoped by active list.
+- src/context/ShoppingListContext.test.jsx:appends a complete user store default after creating one — verifies new defaults are full state objects.
+- src/context/ShoppingListContext.test.jsx:merges reordered user store defaults by list type — verifies reordering one list type preserves other defaults.
+- src/components/StoreManager.test.jsx:renders stores without a list ID prop — verifies removed prop is not required.
+- src/components/UserStoreDefaultsManager.test.jsx:calls onCreateDefault with the list type, name, and color for new defaults — verifies create callback contract.
+- src/components/UserStoreDefaultsManager.test.jsx:calls onUpdateDefault with the default ID, name, and color separately — verifies update callback contract.
+- src/components/UserStoreDefaultsManager.test.jsx:calls onDeleteDefault with the selected default ID — verifies delete callback contract.
+- src/components/UserStoreDefaultsManager.test.jsx:calls onReorderDefaults with only reordered defaults for the current list type — verifies reorder callback contract.
+- src/utils/listTypes.test.js:enables store fields and sorting for packing lists — verifies packing store field and sort level.
+- src/utils/listTypes.test.js:enables store fields and sorting for project lists — verifies project store field and sort level.
+
+## npm test
+
+- pass — 11 test files passed, 54 tests passed.
+
+## Coverage Gaps Observed
+
+- src/context/ShoppingListContext.jsx — new list creation seeding from user store defaults is only indirectly covered here — failures in sequential default creation could affect S-3 behavior.
+- src/components/StoreManager.jsx — drag-and-drop reorder behavior remains lightly covered — DnD regressions could affect store ordering UX.
+
+## Conventions Observed
+
+- conventions file for testing is missing, consider proposing a convention for unit-vs-integration choice and mock strategy.
+
+============================================================
+[2026-05-29 10:03:02 CDT] — Story Image Search Toggles feature — react-tester
+============================================================
+
+## Test Strategy
+
+Chose focused unit tests for the Supabase/database and image search service boundaries, plus component integration tests for MobileSettings and ImagePicker because the acceptance criteria depend on user-visible optimistic state, rollback behavior, empty states, and rendered grouped results.
+
+## Tests written
+
+- src/services/database.test.js:saves image search settings to the user profile — verifies Supabase update payload and profile filter.
+- src/services/database.test.js:returns the Supabase error when saving fails — verifies the `{ error }` return pattern.
+- src/services/database.test.js:passes null settings through to Supabase — verifies null settings handling.
+- src/services/database.test.js:passes undefined user IDs through to the profile filter — verifies undefined user ID handling.
+- src/services/imageSearch.test.js:returns grouped results for enabled sources — verifies grouped edge-function response and sources query param.
+- src/services/imageSearch.test.js:returns an empty array without fetching when all sources are off — verifies disabled-source short circuit.
+- src/services/imageSearch.test.js:defaults null enabled sources to all image sources — verifies null settings fallback.
+- src/services/imageSearch.test.js:returns cached results for the same query and sources — verifies five-minute cache key behavior without repeat fetches.
+- src/services/imageSearch.test.js:returns an empty array when the edge function responds with an error — verifies HTTP error handling.
+- src/services/imageSearch.test.js:returns an empty array when fetch rejects — verifies network error handling.
+- src/components/MobileSettings.test.jsx:renders toggles for every image search source — verifies accessible source toggles and defaults.
+- src/components/MobileSettings.test.jsx:optimistically enables a source and refreshes the user after saving — verifies optimistic update, save payload, and refresh.
+- src/components/MobileSettings.test.jsx:rolls back the optimistic update when saving fails — verifies rollback and error message.
+- src/components/ImagePicker.test.jsx:shows an empty state when all image search sources are off — verifies all-sources-off empty state and no auto-search.
+- src/components/ImagePicker.test.jsx:opens settings from the all-sources-off empty state — verifies settings navigation callback.
+- src/components/ImagePicker.test.jsx:renders the normal search UI when settings are null — verifies null settings do not trigger all-sources-off.
+- src/components/ImagePicker.test.jsx:renders grouped image search results and selects an image — verifies grouped rendering and image selection.
+
+## npm test
+
+- pass — 7 test files passed, 40 tests passed.
+
+## Coverage Gaps Observed
+
+- src/components/ImagePicker.jsx — upload tab and current-image remove flow remain outside this story's tests — these image-picker paths are adjacent but not part of the source-toggle acceptance criteria.
+- src/components/MobileSettings.jsx — missing-user-id save guard is untested — could matter for anonymous/session-edge cases.
+
+## Conventions Observed
+
+- docs/CONVENTIONS.md and docs/conventions/testing.md were not present; consider adding testing conventions for service-boundary mocks and component provider/mocking strategy.
+
+============================================================
 [2026-05-05 13:03:57 CDT] — Story TSK-20260505-01 — react-tester
 ============================================================
 
@@ -161,3 +240,119 @@ Updated ListDetailView.swift to rename user-facing labels from "Checked" to "Cro
 
 - UI/UX label consistency: Renamed user-facing strings while preserving internal data model naming
 - Visual spacing: Used SwiftUI padding modifiers to increase visual distinction between list sections
+
+============================================================
+[2026-05-26 12:02:19 CDT] — Story Fix Swipe-to-Delete for Categorized Items — swift-dev
+============================================================
+
+## What I implemented
+
+Restored swipe-to-delete for level 2+ categorized items by applying the same destructive trailing swipe action and list row modifiers used by level 1 and flat item rows.
+
+## Files changed
+
+- ios-native/GatherLists/GatherLists/Views/Lists/ListDetailView.swift — added swipe actions and row modifiers to nested categorized item rows.
+
+## Build results
+
+- xcodebuild build: not run
+- swiftc -parse: pass
+
+## Conventions Observed
+
+- SwiftUI row behavior: Keep delete swipe actions colocated with each concrete item row, including nested grouped rows, so List gestures are available consistently across grouping modes.
+============================================================
+[2026-05-29 09:10:57 CDT] — Story S-2 — react-dev
+============================================================
+
+## What I implemented
+
+Loaded profile image search settings into AuthContext with an explicit camelCase mapping and null fallback, and added a profile service update function that persists provider toggles while returning `{ error }` for callers.
+
+## Files changed
+
+- src/context/AuthContext.jsx — selected timezone and image_search_settings from profiles and exposed imageSearchSettings with the pre-migration default fallback.
+- src/services/database.js — added updateImageSearchSettings for saving profiles.image_search_settings by user ID.
+
+## Build / lint results
+
+- npm run lint: fail due to pre-existing unrelated lint errors in .tmp, ai-tmp, e2e, playwright.config.js, and context files; no new story-scoped lint errors identified beyond existing AuthContext fast-refresh export warnings.
+- npm run build: pass (existing chunk-size warning only)
+
+## Conventions Observed
+
+- 
+============================================================
+[2026-05-29 09:16:08 CDT] — Story S-3 — react-dev
+============================================================
+
+## What I implemented
+
+Added an Image Search settings section to the mobile settings screen with per-provider toggles backed by profile settings, optimistic saves, and revert-on-error handling.
+
+## Files changed
+
+- src/components/MobileSettings.jsx — added image search source toggles, optimistic local state, Supabase settings update call, and save error UI.
+
+## Build / lint results
+
+- npm run lint: fail due to pre-existing unrelated errors in .tmp, ai-tmp, e2e, playwright.config.js, and context files; changed file passes targeted ESLint (`npx eslint src/components/MobileSettings.jsx`).
+- npm run build: pass (existing chunk-size warning only)
+
+## Conventions Observed
+
+- conventions file for React/styling layers is missing, consider proposing where mobile settings sections should keep section metadata and defaults.
+
+============================================================
+[2026-05-29 09:40:05 CDT] — Story S-5 — react-dev
+============================================================
+
+## What I implemented
+
+Updated image search to pass user-enabled sources to the edge function, cache grouped responses by query and source set, and render grouped image results with a settings empty state when all sources are disabled.
+
+## Files changed
+
+- src/services/imageSearch.js — added enabled source filtering, all-off short-circuit, source-aware cache keys, sources URL param, and grouped response handling.
+- src/components/ImagePicker.jsx — passed image search settings into searches, rendered all-sources-off settings empty state, and displayed grouped per-source result sections.
+- src/components/ImagePicker.module.css — added grouped results heading and settings-link styles.
+- src/components/ShoppingItem.jsx — read image search settings from auth profile and passed settings navigation into ImagePicker.
+- src/components/ShoppingList.jsx — threaded settings navigation through item rendering.
+- src/components/MobileListDetail.jsx — threaded settings navigation into ShoppingList.
+- src/components/ListSelector.jsx — accepted the threaded settings navigation prop for call-chain compatibility.
+- src/App.jsx — defined mobile/desktop settings navigation callbacks and passed them through list/detail views.
+
+## Build / lint results
+
+- npm run lint: fail due to pre-existing unrelated errors in .tmp, ai-tmp, e2e, playwright config, and context files; targeted ESLint for changed JS/JSX files passed, with one expected warning for CSS Module file ignored by ESLint config.
+- npm run build: pass (existing chunk-size warning only)
+
+## Conventions Observed
+
+- 
+
+============================================================
+[2026-06-02 08:42:02 CDT] — Story test-gaps-store-defaults — react-tester
+============================================================
+
+## Test Strategy
+
+Updated focused integration-style component/context tests because both gaps involve observable context state changes or callback wiring through rendered React components.
+
+## Tests written
+
+- src/context/ShoppingListContext.test.jsx:merges reordered user store defaults by list type — verifies reordered grocery defaults update state, packing defaults are preserved, and total defaults are not duplicated.
+- src/components/MobileSettings.test.jsx:calls the context create action when adding a store default — verifies UserStoreDefaultsManager create flow is wired to MobileSettings context actions.
+- src/components/MobileSettings.test.jsx:calls the context delete action when deleting a store default — verifies UserStoreDefaultsManager delete flow is wired to MobileSettings context actions.
+
+## npm test
+
+- pass — npm test -- --run: 11 test files passed, 56 tests passed.
+
+## Coverage Gaps Observed
+
+- none
+
+## Conventions Observed
+
+- conventions file for testing is missing, consider proposing a convention for unit-vs-integration choice and mock strategy.

@@ -120,16 +120,14 @@ export const duplicateList = async (listId, newName, options = {}) => {
       .eq('id', listId)
       .single();
 
-    if (listError) throw new Error(`Failed to fetch source list: listId=${listId}`, { cause: listError });
+     if (listError) throw new Error(`Failed to fetch source list: listId=${listId}`, { cause: listError });
 
-    const { data: sourceItems, error: itemsError } = await supabase
-      .from('items')
-      .select('*')
-      .eq('list_id', listId);
+     const { data: sourceItems, error: itemsError } = await supabase
+       .from('items')
+       .select('*')
+       .eq('list_id', listId);
 
-    if (itemsError) throw new Error(`Failed to fetch source items: listId=${listId}`, { cause: itemsError });
-
-    const isSharedListDuplicate = sourceList.owner_id !== user.id;
+     if (itemsError) throw new Error(`Failed to fetch source items: listId=${listId}`, { cause: itemsError });
 
     const { data: maxRow } = await supabase
       .from('lists')
@@ -159,26 +157,26 @@ export const duplicateList = async (listId, newName, options = {}) => {
 
     if (insertError) throw new Error(`Failed to create duplicate list: name=${newName}`, { cause: insertError });
 
-    if (sourceItems.length > 0) {
-      const newItems = sourceItems.map((item) => ({
-        list_id: newList.id,
-        name: item.name,
-        quantity: item.quantity,
-        unit: item.unit,
-        price: item.price,
-        category: item.category,
-        store_id: isSharedListDuplicate ? null : item.store_id,
-        image_url: item.image_url,
-        // items table has no sort_order column; ordering is determined elsewhere
-        rsvp_status: item.rsvp_status,
-        due_date: item.due_date,
-        recurrence_rule: item.recurrence_rule,
-        reminder_days_before: item.reminder_days_before,
-        // parent_item_id intentionally not copied — would reference source list's items
-        parent_item_id: null,
-        reminder_sent_at: item.reminder_sent_at,
-        is_checked: false,
-      }));
+     if (sourceItems.length > 0) {
+       const newItems = sourceItems.map((item) => ({
+         list_id: newList.id,
+         name: item.name,
+         quantity: item.quantity,
+         unit: item.unit,
+         price: item.price,
+         category: item.category,
+         store_id: null,
+         image_url: item.image_url,
+         // items table has no sort_order column; ordering is determined elsewhere
+         rsvp_status: item.rsvp_status,
+         due_date: item.due_date,
+         recurrence_rule: item.recurrence_rule,
+         reminder_days_before: item.reminder_days_before,
+         // parent_item_id intentionally not copied — would reference source list's items
+         parent_item_id: null,
+         reminder_sent_at: item.reminder_sent_at,
+         is_checked: false,
+       }));
 
       const { error: itemsInsertError } = await supabase.from('items').insert(newItems);
       if (itemsInsertError) throw new Error(`Failed to copy items to duplicate list: listId=${newList.id}`, { cause: itemsInsertError });
@@ -1030,33 +1028,39 @@ export const subscribeList = (ownerUid, listId, callback) => {
  * @param {object} store - Store data
  * @returns {Promise<string>} The new store's ID
  */
-export const createStore = async (userId, store) => {
+/**
+ * Creates a new store for a list.
+ * @param {string} userId - User ID (kept for context, not stored in DB)
+ * @param {string} listId - List ID
+ * @param {{name: string, color?: string, sortOrder?: number}} data - Store data
+ * @returns {Promise<string>} The new store's ID
+ */
+export const createStore = async (userId, listId, data) => {
   try {
-    const { data, error } = await supabase
+    const { data: result, error } = await supabase
       .from('stores')
       .insert({
-        user_id: userId,
-        name: store.name,
-        color: store.color ?? null,
-        sort_order: store.order ?? 0,
+        list_id: listId,
+        name: data.name,
+        color: data.color ?? null,
+        sort_order: data.sortOrder ?? 0,
       })
       .select('id')
       .single();
 
     if (error) throw error;
-    return data.id;
+    return result.id;
   } catch (error) {
-    throw new Error(`Failed to create store: name=${store.name}`, { cause: error });
+    throw new Error(`Failed to create store: name=${data.name}`, { cause: error });
   }
 };
 
 /**
  * Updates a store.
- * @param {string} userId - User ID (kept for API compatibility)
  * @param {string} storeId - Store ID to update
  * @param {object} updates - Fields to update
  */
-export const updateStore = async (userId, storeId, updates) => {
+export const updateStore = async (storeId, updates) => {
   try {
     const mapped = {};
     if (updates.name !== undefined) mapped.name = updates.name;
@@ -1077,10 +1081,9 @@ export const updateStore = async (userId, storeId, updates) => {
 
 /**
  * Deletes a store.
- * @param {string} userId - User ID (kept for API compatibility)
  * @param {string} storeId - Store ID to delete
  */
-export const deleteStore = async (userId, storeId) => {
+export const deleteStore = async (storeId) => {
   try {
     const { error } = await supabase
       .from('stores')
@@ -1096,13 +1099,12 @@ export const deleteStore = async (userId, storeId) => {
 /**
  * Saves the full ordered array of stores (for reordering).
  * Uses a single upsert for efficiency.
- * @param {string} userId - User ID
- * @param {Array<object>} stores - Array of store objects with id
+ * @param {Array<object>} stores - Array of store objects with id and list_id
  */
-export const saveStoreOrder = async (userId, stores) => {
+export const saveStoreOrder = async (stores) => {
   const updates = stores.map((store, i) => ({
     id: store.id,
-    user_id: userId,
+    list_id: store.list_id,
     name: store.name,
     color: store.color,
     sort_order: i,
@@ -1164,19 +1166,19 @@ export const upsertUserCategoryDefault = async (userId, listType, categories) =>
 };
 
 /**
- * Subscribes to stores.
+ * Subscribes to stores for a specific list.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
- * @param {string} userId - User ID
+ * @param {string} listId - List ID
  * @param {function} callback - Called with array of store objects
  * @returns {function} Unsubscribe function that removes the channel
  */
-export const subscribeStores = (userId, callback) => {
+export const subscribeStores = (listId, callback) => {
   const fetchStores = async () => {
     try {
       const { data, error } = await supabase
         .from('stores')
         .select('*')
-        .eq('user_id', userId)
+        .eq('list_id', listId)
         .order('sort_order', { ascending: true });
 
       if (error) {
@@ -1187,6 +1189,7 @@ export const subscribeStores = (userId, callback) => {
       callback(
         data.map((row) => ({
           id: row.id,
+          list_id: row.list_id,
           name: row.name,
           color: row.color,
           order: row.sort_order,
@@ -1201,9 +1204,9 @@ export const subscribeStores = (userId, callback) => {
   // Initial fetch
   fetchStores();
 
-  // Subscribe to real-time changes
+  // Subscribe to real-time changes (no filter due to replica identity limitation)
   const channel = supabase
-    .channel(`stores-${userId}`)
+    .channel(`stores-${listId}`)
     .on(
       'postgres_changes',
       {
@@ -1226,82 +1229,170 @@ export const subscribeStores = (userId, callback) => {
   };
 };
 
+// ---------------------------------------------------------------------------
+// User Store Defaults
+// ---------------------------------------------------------------------------
+
 /**
- * Fetches stores by an array of IDs. Used to load shared-list owner stores
- * that the RLS policy now permits reading.
- * @param {string[]} storeIds - Array of store UUIDs to fetch
- * @returns {Promise<Array>} Array of store objects (same shape as subscribeStores callback)
+ * Fetches user store defaults for a given list type.
+ * @param {string} userId - User ID
+ * @param {string} listType - List type (e.g., 'grocery', 'packing', 'project')
+ * @returns {Promise<Array>} Array of store default objects
  */
-export const fetchStoresByIds = async (storeIds) => {
-  if (!storeIds.length) return [];
-  const { data, error } = await supabase
-    .from('stores')
-    .select('*')
-    .in('id', storeIds)
-    .order('sort_order', { ascending: true });
+export const fetchUserStoreDefaults = async (userId, listType) => {
+  try {
+    const { data, error } = await supabase
+      .from('user_store_defaults')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('list_type', listType)
+      .order('sort_order', { ascending: true });
 
-  if (error) {
-    console.error('Failed to fetch stores by IDs:', error);
-    return [];
+    if (error) throw error;
+    return (data ?? []).map((row) => ({
+      id: row.id,
+      userId: row.user_id,
+      listType: row.list_type,
+      name: row.name,
+      color: row.color,
+      sortOrder: row.sort_order,
+      createdAt: row.created_at,
+    }));
+  } catch (error) {
+    throw new Error(`Failed to fetch user store defaults: userId=${userId}, listType=${listType}`, { cause: error });
   }
-
-  return data.map((row) => ({
-    id: row.id,
-    name: row.name,
-    color: row.color,
-    order: row.sort_order,
-    createdAt: row.created_at,
-    _isShared: true,
-  }));
 };
 
 /**
- * Subscribes to realtime changes on a set of shared stores by ID.
- * Performs initial fetch and listens for changes on the owner's stores.
- * If subscription encounters auth errors (e.g., expired JWT), calls callback with empty array.
- * @param {string} ownerUid - The store owner's user ID (for the realtime filter)
- * @param {string[]} storeIds - Array of store UUIDs to fetch
- * @param {function} callback - Called with array of store objects on each update
- * @returns {function} Unsubscribe function
+ * Creates a user store default.
+ * @param {string} userId - User ID
+ * @param {string} listType - List type
+ * @param {{name: string, color?: string, sortOrder?: number}} data - Store default data
+ * @returns {Promise<string>} The new store default ID
  */
-export const subscribeSharedStores = (ownerUid, storeIds, callback) => {
-  if (!storeIds.length) {
-    callback([]);
-    return () => {};
+export const createUserStoreDefault = async (userId, listType, data) => {
+  try {
+    const { data: result, error } = await supabase
+      .from('user_store_defaults')
+      .insert({
+        user_id: userId,
+        list_type: listType,
+        name: data.name,
+        color: data.color ?? null,
+        sort_order: data.sortOrder ?? 0,
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    return result.id;
+  } catch (error) {
+    throw new Error(`Failed to create user store default: listType=${listType}, name=${data.name}`, { cause: error });
   }
+};
 
-  const fetchShared = async () => {
-    const result = await fetchStoresByIds(storeIds);
-    callback(result);
+/**
+ * Updates a user store default.
+ * @param {string} id - Store default ID
+ * @param {object} updates - Fields to update
+ */
+export const updateUserStoreDefault = async (id, updates) => {
+  try {
+    const mapped = {};
+    if (updates.name !== undefined) mapped.name = updates.name;
+    if (updates.color !== undefined) mapped.color = updates.color;
+    if (updates.sortOrder !== undefined) mapped.sort_order = updates.sortOrder;
+    if (updates.sort_order !== undefined) mapped.sort_order = updates.sort_order;
+
+    const { error } = await supabase
+      .from('user_store_defaults')
+      .update(mapped)
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to update user store default: id=${id}`, { cause: error });
+  }
+};
+
+/**
+ * Deletes a user store default.
+ * @param {string} id - Store default ID
+ */
+export const deleteUserStoreDefault = async (id) => {
+  try {
+    const { error } = await supabase
+      .from('user_store_defaults')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  } catch (error) {
+    throw new Error(`Failed to delete user store default: id=${id}`, { cause: error });
+  }
+};
+
+/**
+ * Saves the full ordered array of user store defaults (for reordering).
+ * Uses a single upsert for efficiency.
+ * Only processes rows with valid UUIDs (skips temp rows with id starting with "temp-").
+ * Note: This function is reorder-only for persisted rows. New defaults should use createUserStoreDefault.
+ * @param {Array<object>} defaults - Array of store default objects with id
+ */
+export const saveUserStoreDefaultOrder = async (defaults) => {
+  const updates = defaults
+    .filter(def => def.id && typeof def.id === 'string' && !def.id.startsWith('temp-') && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(def.id))
+    .map((def, i) => ({
+      id: def.id,
+      sort_order: i,
+    }));
+
+  if (updates.length === 0) return;
+
+  const { error } = await supabase
+    .from('user_store_defaults')
+    .upsert(updates, { onConflict: 'id' });
+
+  if (error) {
+    throw new Error('Failed to save user store default order', { cause: error });
+  }
+};
+
+/**
+ * Subscribes to user store defaults for a given list type.
+ * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
+ * @param {string} userId - User ID
+ * @param {string} listType - List type
+ * @param {function} callback - Called with array of store default objects
+ * @returns {function} Unsubscribe function that removes the channel
+ */
+export const subscribeUserStoreDefaults = (userId, listType, callback) => {
+  const fetchDefaults = async () => {
+    try {
+      const data = await fetchUserStoreDefaults(userId, listType);
+      callback(data);
+    } catch (error) {
+      console.error('Failed to fetch user store defaults:', error);
+      callback([]);
+    }
   };
 
-  fetchShared();
+  // Initial fetch
+  fetchDefaults();
 
+  // Subscribe to real-time changes (no filter due to replica identity limitation)
   const channel = supabase
-    .channel(`shared-stores-${ownerUid}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'stores',
-      },
-      () => {
-        fetchShared();
-      }
-    )
-    .subscribe((status, err) => {
-      if (status === 'CHANNEL_ERROR') {
-        console.error('[subscribeSharedStores] Realtime subscription error:', err);
-        if (err?.message?.includes('JWT') || err?.message?.includes('token')) {
-          callback([]);
-        }
-      }
-    });
+    .channel(`user-store-defaults-${userId}-${listType}`)
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'user_store_defaults',
+    }, () => {
+      fetchDefaults();
+    })
+    .subscribe();
 
-  return () => {
-    supabase.removeChannel(channel);
-  };
+  return () => supabase.removeChannel(channel);
 };
 
 // ---------------------------------------------------------------------------

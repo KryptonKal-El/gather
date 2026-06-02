@@ -39,19 +39,12 @@ struct MainTabView: View {
                     }
                     .tag(1)
                 
-                StoreBrowserView()
-                    .environment(authViewModel)
-                    .tabItem {
-                        Label("Stores", systemImage: "storefront")
-                    }
-                    .tag(2)
-                
                 SettingsView()
                     .environment(authViewModel)
                     .tabItem {
                         Label("Settings", systemImage: "gearshape")
                     }
-                    .tag(3)
+                    .tag(2)
             }
             .tint(brandGreen)
         }

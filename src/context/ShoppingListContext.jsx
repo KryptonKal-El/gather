@@ -5,6 +5,7 @@
  */
 import { createContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { categorizeItem, getEffectiveCategories, getSystemDefaultCategories } from '../utils/categories.js';
+import { LIST_TYPES } from '../utils/listTypes.js';
 import { useAuth } from './AuthContext.jsx';
 import {
   subscribeLists,
@@ -31,9 +32,13 @@ import {
   updateStore as dbUpdateStore,
   deleteStore as dbDeleteStore,
   saveStoreOrder,
+  fetchUserStoreDefaults,
+  createUserStoreDefault as dbCreateUserStoreDefault,
+  updateUserStoreDefault as dbUpdateUserStoreDefault,
+  deleteUserStoreDefault as dbDeleteUserStoreDefault,
+  saveUserStoreDefaultOrder,
   shareList as dbShareList,
   unshareList as dbUnshareList,
-  subscribeSharedStores,
   upsertUserCategoryDefault,
   fetchListCollaborators,
 } from '../services/database.js';
@@ -72,8 +77,8 @@ export const ShoppingListProvider = ({ children }) => {
   const [activeItemsLoading, setActiveItemsLoading] = useState(false);
   const [history, setHistory] = useState([]);
   const [stores, setStores] = useState([]);
-  const [sharedStores, setSharedStores] = useState([]);
   const [userCategoryDefaults, setUserCategoryDefaults] = useState([]);
+  const [userStoreDefaults, setUserStoreDefaults] = useState([]);
   const [listOrderVersion, setListOrderVersion] = useState(0);
 
   // Track whether we've auto-selected a list on initial load
@@ -387,15 +392,15 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeHistory(userId, setHistory);
   }, [userId, sessionVersion]);
 
-  // Subscribe to stores
-  // Re-subscribes when sessionVersion changes (token refresh after long idle)
+  // Subscribe to stores for the active list
+  // Re-subscribes when activeListId or sessionVersion changes
   useEffect(() => {
-    if (!userId) {
+    if (!activeListId) {
       setStores([]);
       return;
     }
-    return subscribeStores(userId, setStores);
-  }, [userId, sessionVersion]);
+    return subscribeStores(activeListId, setStores);
+  }, [activeListId, sessionVersion]);
 
   // Subscribe to user category defaults
   // Re-subscribes when sessionVersion changes (token refresh after long idle)
@@ -407,29 +412,24 @@ export const ShoppingListProvider = ({ children }) => {
     return subscribeUserCategoryDefaults(userId, setUserCategoryDefaults);
   }, [userId, sessionVersion]);
 
-  // Subscribe to shared stores when viewing a shared list
+  // Subscribe to user store defaults for all list types
   // Re-subscribes when sessionVersion changes (token refresh after long idle)
   useEffect(() => {
-    if (!isActiveListShared || !activeListOwnerUid || activeItems.length === 0) {
-      setSharedStores([]);
+    if (!userId) {
+      setUserStoreDefaults([]);
       return;
     }
-
-    const missingStoreIds = [
-      ...new Set(
-        activeItems
-          .map((item) => item.store)
-          .filter((id) => id && !stores.some((s) => s.id === id))
-      ),
-    ];
-
-    if (missingStoreIds.length === 0) {
-      setSharedStores([]);
-      return;
-    }
-
-    return subscribeSharedStores(activeListOwnerUid, missingStoreIds, setSharedStores);
-  }, [isActiveListShared, activeListOwnerUid, activeItems, stores, sessionVersion]);
+    // Fetch store defaults for all list types
+    Promise.all([
+      fetchUserStoreDefaults(userId, 'grocery'),
+      fetchUserStoreDefaults(userId, 'packing'),
+      fetchUserStoreDefaults(userId, 'project'),
+    ])
+      .then(([groceryDefaults, packingDefaults, projectDefaults]) => {
+        setUserStoreDefaults([...groceryDefaults, ...packingDefaults, ...projectDefaults]);
+      })
+      .catch(() => setUserStoreDefaults([]));
+  }, [userId, sessionVersion]);
 
   // Debounced persistence of activeListId to user_preferences and localStorage
   const lastListIdTimeoutRef = useRef(null);
@@ -461,11 +461,6 @@ export const ShoppingListProvider = ({ children }) => {
       }
     };
   }, [userId, activeListId]);
-
-  const allStores = useMemo(() => {
-    if (!isActiveListShared) return stores;
-    return [...stores, ...sharedStores.filter((ss) => !stores.some((s) => s.id === ss.id))];
-  }, [isActiveListShared, stores, sharedStores]);
 
   // -----------------------------------------------------------------------
   // Helpers
@@ -511,6 +506,15 @@ export const ShoppingListProvider = ({ children }) => {
     const categoriesToUse = customCategories ?? getSeedCategoriesForType(type, userCategoryDefaults);
     if (categoriesToUse) {
       await dbUpdateList(userId, newId, { categories: categoriesToUse });
+    }
+    
+    // Seed stores if the list type supports them
+    const typeConfig = LIST_TYPES[type];
+    if (typeConfig?.fields?.store) {
+      const storeDefaults = await fetchUserStoreDefaults(userId, type);
+      for (const def of storeDefaults) {
+        await dbCreateStore(userId, newId, { name: def.name, color: def.color, sortOrder: def.sortOrder });
+      }
     }
     
     setLists(prev => [...prev, { 
@@ -714,53 +718,107 @@ export const ShoppingListProvider = ({ children }) => {
   }, [userId, getListOwnerUid]);
 
   const addStoreAction = useCallback(async (name, color) => {
-    if (!userId) return;
-    await dbCreateStore(userId, {
+    if (!userId || !activeListId) return;
+    await dbCreateStore(userId, activeListId, {
       name,
       color,
-      order: stores.length,
+      sortOrder: stores.length,
     });
-  }, [userId, stores.length]);
+  }, [userId, activeListId, stores.length]);
 
   const updateStoreAction = useCallback(async (id, updates) => {
     if (!userId) return;
-    await dbUpdateStore(userId, id, updates);
+    await dbUpdateStore(id, updates);
   }, [userId]);
 
   const deleteStoreAction = useCallback(async (id) => {
     if (!userId) return;
-    await dbDeleteStore(userId, id);
+    await dbDeleteStore(id);
   }, [userId]);
 
   const reorderStoresAction = useCallback(async (reorderedStores) => {
     if (!userId) return;
     setStores(reorderedStores); // optimistic update
-    await saveStoreOrder(userId, reorderedStores);
+    await saveStoreOrder(reorderedStores);
   }, [userId]);
 
-  const reorderListsAction = useCallback(async (orderedIds) => {
-    // Immediate: update localStorage + trigger re-render
-    localStorage.setItem('gather_list_order', JSON.stringify(orderedIds));
-    setListOrderVersion((v) => v + 1);
-    
-    // Debounced: sync to Supabase (300ms debounce to avoid rapid writes during drag)
-    if (listOrderDebounceRef.current) {
-      clearTimeout(listOrderDebounceRef.current);
-    }
-    listOrderDebounceRef.current = setTimeout(async () => {
-      if (userId) {
-        try {
-          await updateListOrder(userId, orderedIds);
-        } catch (error) {
-          console.error('Failed to sync list order to server:', error);
+   const reorderListsAction = useCallback(async (orderedIds) => {
+     // Immediate: update localStorage + trigger re-render
+     localStorage.setItem('gather_list_order', JSON.stringify(orderedIds));
+     setListOrderVersion((v) => v + 1);
+     
+     // Debounced: sync to Supabase (300ms debounce to avoid rapid writes during drag)
+     if (listOrderDebounceRef.current) {
+       clearTimeout(listOrderDebounceRef.current);
+     }
+     listOrderDebounceRef.current = setTimeout(async () => {
+       if (userId) {
+         try {
+           await updateListOrder(userId, orderedIds);
+         } catch (error) {
+           console.error('Failed to sync list order to server:', error);
+         }
+       }
+     }, 300);
+   }, [userId]);
+
+   // -----------------------------------------------------------------------
+   // User store defaults actions
+   // -----------------------------------------------------------------------
+
+    const createUserStoreDefaultAction = useCallback(async (listType, name, color) => {
+      if (!userId) return;
+      const newId = await dbCreateUserStoreDefault(userId, listType, {
+        name,
+        color,
+        sortOrder: (userStoreDefaults.filter(d => d.listType === listType) ?? []).length,
+      });
+      const newDefault = {
+        id: newId,
+        userId,
+        listType,
+        name,
+        color: color ?? null,
+        sortOrder: (userStoreDefaults.filter(d => d.listType === listType) ?? []).length,
+        createdAt: new Date().toISOString(),
+      };
+      setUserStoreDefaults([...userStoreDefaults, newDefault]);
+    }, [userId, userStoreDefaults]);
+
+   const updateUserStoreDefaultAction = useCallback(async (id, updates) => {
+     if (!userId) return;
+     await dbUpdateUserStoreDefault(id, updates);
+     setUserStoreDefaults(userStoreDefaults.map(d => (d.id === id ? { ...d, ...updates } : d)));
+   }, [userId, userStoreDefaults]);
+
+   const deleteUserStoreDefaultAction = useCallback(async (id) => {
+     if (!userId) return;
+     await dbDeleteUserStoreDefault(id);
+     setUserStoreDefaults(userStoreDefaults.filter(d => d.id !== id));
+   }, [userId, userStoreDefaults]);
+
+    const saveUserStoreDefaultOrderAction = useCallback(async (defaults) => {
+      if (!userId) return;
+      // Merge updated defaults for this list type into existing state
+      const listType = defaults[0]?.listType;
+      if (!listType) return;
+      
+      setUserStoreDefaults(prev => {
+        if (defaults.length === 0) {
+          // Remove all defaults for this list type
+          return prev.filter(d => d.listType !== listType);
         }
-      }
-    }, 300);
-  }, [userId]);
+        // Keep defaults from other list types, replace this list type's defaults
+        const unchanged = prev.filter(d => d.listType !== listType);
+        return [...unchanged, ...defaults];
+      });
+      
+      await saveUserStoreDefaultOrder(defaults);
+    }, [userId]);
 
-  // -----------------------------------------------------------------------
-  // Sharing actions
-  // -----------------------------------------------------------------------
+   // -----------------------------------------------------------------------
+   // Sharing actions
+   // -----------------------------------------------------------------------
 
   const shareListAction = useCallback(async (listId, email, sortConfig = null) => {
     if (!userId) return;
@@ -792,35 +850,40 @@ export const ShoppingListProvider = ({ children }) => {
     lists: allLists,
     activeListId,
     history,
-    stores: allStores,
+    stores,
     userCategoryDefaults,
+    userStoreDefaults,
   };
 
-  const actions = {
-    createList: createListAction,
-    renameList: renameListAction,
-    updateListDetails: updateListDetailsAction,
-    deleteList: deleteListAction,
-    duplicateList: duplicateListAction,
-    selectList: selectListAction,
-    addItem: addItemAction,
-    addItems: addItemsAction,
-    toggleItem: toggleItemAction,
-    removeItem: removeItemAction,
-    updateItem: updateItemAction,
-    clearChecked: clearCheckedAction,
-    resetGuestListRsvp: resetGuestListRsvpAction,
-    restoreItem: restoreItemAction,
-    restoreItems: restoreItemsAction,
-    addStore: addStoreAction,
-    updateStore: updateStoreAction,
-    deleteStore: deleteStoreAction,
-    reorderStores: reorderStoresAction,
-    reorderLists: reorderListsAction,
-    shareList: shareListAction,
-    unshareList: unshareListAction,
-    saveUserCategoryDefault: saveUserCategoryDefaultAction,
-  };
+   const actions = {
+     createList: createListAction,
+     renameList: renameListAction,
+     updateListDetails: updateListDetailsAction,
+     deleteList: deleteListAction,
+     duplicateList: duplicateListAction,
+     selectList: selectListAction,
+     addItem: addItemAction,
+     addItems: addItemsAction,
+     toggleItem: toggleItemAction,
+     removeItem: removeItemAction,
+     updateItem: updateItemAction,
+     clearChecked: clearCheckedAction,
+     resetGuestListRsvp: resetGuestListRsvpAction,
+     restoreItem: restoreItemAction,
+     restoreItems: restoreItemsAction,
+     addStore: addStoreAction,
+     updateStore: updateStoreAction,
+     deleteStore: deleteStoreAction,
+     reorderStores: reorderStoresAction,
+     reorderLists: reorderListsAction,
+     createUserStoreDefault: createUserStoreDefaultAction,
+     updateUserStoreDefault: updateUserStoreDefaultAction,
+     deleteUserStoreDefault: deleteUserStoreDefaultAction,
+     saveUserStoreDefaultOrder: saveUserStoreDefaultOrderAction,
+     shareList: shareListAction,
+     unshareList: unshareListAction,
+     saveUserCategoryDefault: saveUserCategoryDefaultAction,
+   };
 
   const activeListMeta = allLists.find((l) => l.id === activeListId) ?? null;
   const activeList = activeListMeta

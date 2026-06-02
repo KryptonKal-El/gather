@@ -11,7 +11,7 @@ const TRANSITION_DURATION = 300;
  * @param {Array} lists - Current lists array to lookup list data during transitions
  * @param {Array} recipes - Current recipes array to lookup recipe data during transitions
  * @returns {{
- *   activeTab: 'lists' | 'recipes' | 'stores' | 'settings',
+ *   activeTab: 'lists' | 'recipes' | 'settings',
  *   openListId: string | null,
  *   openRecipeId: string | null,
  *   openCollectionId: string | null,

@@ -13,6 +13,7 @@ import { usePWAInstall } from './hooks/usePWAInstall.js';
 import { getSuggestions } from './services/suggestions.js';
 import { uploadProfileImage } from './services/imageStorage.js';
 import { getEffectiveCategories } from './utils/categories.js';
+import { LIST_TYPES } from './utils/listTypes.js';
 import { Login } from './components/Login.jsx';
 import { ListSelector } from './components/ListSelector.jsx';
 import { AddItemForm } from './components/AddItemForm.jsx';
@@ -83,6 +84,7 @@ export const App = () => {
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
   const [showDesktopSettings, setShowDesktopSettings] = useState(false);
   const [resetConfirmList, setResetConfirmList] = useState(null);
+  const [showStoresModal, setShowStoresModal] = useState(false);
   const handleNavigateToMobileSettings = useCallback(() => {
     handleTabChange('settings');
   }, [handleTabChange]);
@@ -477,6 +479,7 @@ export const App = () => {
                   onDuplicate={handleDuplicateList}
                   onResetItems={handleResetItems}
                   onShareClick={(list) => setSharingListId(list.id)}
+                  onManageStores={(list) => { handleListSelect(list.id); setShowStoresModal(true); }}
                   onNavigateToSettings={handleNavigateToSettings}
                 />
               </div>
@@ -484,31 +487,32 @@ export const App = () => {
           )}
           {showDetailScreen && detailList && (
             <section className={getDetailScreenClass()}>
-              <MobileListDetail
-                list={detailList}
-                stores={state.stores}
-                history={state.history}
-                suggestions={suggestions}
-                sortConfig={activeList ? effectiveSortConfig(activeList) : null}
-                listSortConfig={activeList?.sortConfig ?? null}
-                listCategories={listCategories}
-                getEffectiveChecked={getEffectiveChecked}
-                onBack={handleBack}
-                onAddItem={handleAddItem}
-                onToggle={handleToggleItem}
-                onRemove={handleRemoveItem}
-                onUpdateCategory={handleUpdateCategory}
-                onUpdateStore={handleUpdateStore}
-                onUpdateItem={handleUpdateItem}
-                onClearChecked={handleClearChecked}
-                onShareClick={(list) => setSharingListId(list.id)}
-                onDuplicate={handleDuplicateList}
-                onResetItems={handleResetItems}
-                onSortSelect={handleSortSelect}
-                restoredItemIds={restoredItemIds}
-                onRestoreAnimationDone={handleRestoreAnimationDone}
-                onNavigateToSettings={handleNavigateToSettings}
-              />
+               <MobileListDetail
+                 list={detailList}
+                 stores={state.stores}
+                 history={state.history}
+                 suggestions={suggestions}
+                 sortConfig={activeList ? effectiveSortConfig(activeList) : null}
+                 listSortConfig={activeList?.sortConfig ?? null}
+                 listCategories={listCategories}
+                 getEffectiveChecked={getEffectiveChecked}
+                 onBack={handleBack}
+                 onAddItem={handleAddItem}
+                 onToggle={handleToggleItem}
+                 onRemove={handleRemoveItem}
+                 onUpdateCategory={handleUpdateCategory}
+                 onUpdateStore={handleUpdateStore}
+                 onUpdateItem={handleUpdateItem}
+                 onClearChecked={handleClearChecked}
+                 onShareClick={(list) => setSharingListId(list.id)}
+                  onManageStores={(_list) => { setShowStoresModal(true); }}
+                 onDuplicate={handleDuplicateList}
+                 onResetItems={handleResetItems}
+                 onSortSelect={handleSortSelect}
+                 restoredItemIds={restoredItemIds}
+                 onRestoreAnimationDone={handleRestoreAnimationDone}
+                 onNavigateToSettings={handleNavigateToSettings}
+               />
             </section>
           )}
         </div>
@@ -686,20 +690,6 @@ export const App = () => {
       );
     }
 
-    if (activeTab === 'stores') {
-      return (
-        <section className={styles.mobileScreen}>
-          <StoreManager
-            stores={state.stores}
-            onAdd={actions.addStore}
-            onUpdate={actions.updateStore}
-            onDelete={actions.deleteStore}
-            onReorder={actions.reorderStores}
-          />
-        </section>
-      );
-    }
-
     if (activeTab === 'settings') {
       return (
         <section className={styles.mobileScreen}>
@@ -758,6 +748,7 @@ export const App = () => {
             onDuplicate={handleDuplicateList}
             onResetItems={handleResetItems}
             onShareClick={(list) => setSharingListId(list.id)}
+            onManageStores={(list) => { actions.selectList(list.id); setShowStoresModal(true); }}
             onNavigateToSettings={handleNavigateToSettings}
           />
         </aside>
@@ -886,55 +877,35 @@ export const App = () => {
               <p>Select a recipe or create a new one.</p>
             </div>
           )}
-        </section>
-      </>
-    );
+         </section>
+       </>
+     );
 
-    const renderStoresView = () => (
-      <div className={styles.storesViewWrap}>
-        <StoreManager
-          stores={state.stores}
-          onAdd={actions.addStore}
-          onUpdate={actions.updateStore}
-          onDelete={actions.deleteStore}
-          onReorder={actions.reorderStores}
-        />
-      </div>
-    );
-
-    return (
-      <div className={styles.desktopWrapper}>
-        <div className={styles.desktopTabs}>
-          <button
-            type="button"
-            className={`${styles.desktopTab} ${desktopView === 'lists' ? styles.desktopTabActive : ''}`}
-            onClick={() => setDesktopView('lists')}
-          >
-            Lists
-          </button>
-          <button
-            type="button"
-            className={`${styles.desktopTab} ${desktopView === 'recipes' ? styles.desktopTabActive : ''}`}
-            onClick={() => setDesktopView('recipes')}
-          >
-            Recipes
-          </button>
-          <button
-            type="button"
-            className={`${styles.desktopTab} ${desktopView === 'stores' ? styles.desktopTabActive : ''}`}
-            onClick={() => setDesktopView('stores')}
-          >
-            Stores
-          </button>
-        </div>
-        <div className={styles.desktopBody}>
-          {desktopView === 'lists' && renderListsView()}
-          {desktopView === 'recipes' && renderRecipesView()}
-          {desktopView === 'stores' && renderStoresView()}
-        </div>
-      </div>
-    );
-  };
+     return (
+       <div className={styles.desktopWrapper}>
+         <div className={styles.desktopTabs}>
+           <button
+             type="button"
+             className={`${styles.desktopTab} ${desktopView === 'lists' ? styles.desktopTabActive : ''}`}
+             onClick={() => setDesktopView('lists')}
+           >
+             Lists
+           </button>
+           <button
+             type="button"
+             className={`${styles.desktopTab} ${desktopView === 'recipes' ? styles.desktopTabActive : ''}`}
+             onClick={() => setDesktopView('recipes')}
+           >
+             Recipes
+           </button>
+         </div>
+         <div className={styles.desktopBody}>
+           {desktopView === 'lists' && renderListsView()}
+           {desktopView === 'recipes' && renderRecipesView()}
+         </div>
+       </div>
+     );
+   };
 
   return (
     <div className={styles.app}>
@@ -1070,6 +1041,40 @@ export const App = () => {
           onConfirm={handleResetConfirm}
           onCancel={() => setResetConfirmList(null)}
         />
+      )}
+
+      {showStoresModal && activeList && createPortal(
+        <div
+          className={styles.storesBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowStoresModal(false); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setShowStoresModal(false); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Manage Stores"
+        >
+          <div className={styles.storesModal}>
+            <div className={styles.storesModalHeader}>
+              <h2 className={styles.storesModalTitle}>Stores</h2>
+              <button
+                type="button"
+                className={styles.storesModalCloseBtn}
+                onClick={() => setShowStoresModal(false)}
+                aria-label="Close"
+              >&times;</button>
+            </div>
+            <div className={styles.storesModalBody}>
+              <StoreManager
+                listId={activeList.id}
+                stores={state.stores}
+                onAdd={actions.addStore}
+                onUpdate={actions.updateStore}
+                onDelete={actions.deleteStore}
+                onReorder={actions.reorderStores}
+              />
+            </div>
+          </div>
+        </div>,
+        document.body,
       )}
 
       {showDesktopSettings && createPortal(

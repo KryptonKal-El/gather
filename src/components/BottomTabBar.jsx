@@ -3,7 +3,8 @@ import styles from './BottomTabBar.module.css';
 
 /**
  * Fixed bottom navigation bar for mobile devices.
- * Displays four tabs: Lists, Recipes, Stores, and Settings.
+ * Displays three tabs: Lists, Recipes, and Settings.
+ * Stores are managed per-list via context menu.
  * Only visible on viewports ≤700px.
  */
 export const BottomTabBar = ({ activeTab, onTabChange }) => {
@@ -31,16 +32,6 @@ export const BottomTabBar = ({ activeTab, onTabChange }) => {
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           <line x1="12" y1="6" x2="12" y2="13" />
           <line x1="9" y1="9.5" x2="15" y2="9.5" />
-        </svg>
-      ),
-    },
-    {
-      id: 'stores',
-      label: 'Stores',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
         </svg>
       ),
     },
@@ -77,6 +68,6 @@ export const BottomTabBar = ({ activeTab, onTabChange }) => {
 };
 
 BottomTabBar.propTypes = {
-  activeTab: PropTypes.oneOf(['lists', 'recipes', 'stores', 'settings']).isRequired,
+  activeTab: PropTypes.oneOf(['lists', 'recipes', 'settings']).isRequired,
   onTabChange: PropTypes.func.isRequired,
 };

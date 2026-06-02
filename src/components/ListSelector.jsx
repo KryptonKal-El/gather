@@ -83,6 +83,7 @@ export const ListSelector = ({
   onDuplicate,
   onResetItems,
   onShareClick,
+  onManageStores,
   onNavigateToSettings: _onNavigateToSettings,
 }) => {
   const [newName, setNewName] = useState('');
@@ -385,17 +386,27 @@ export const ListSelector = ({
                   List Type
                 </button>
               )}
-              {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                >
-                  <span className={styles.menuIcon}>🏷️</span>
-                  Edit Categories
-                </button>
-              )}
-              {isOwned && onShareClick && (
+               {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                 >
+                   <span className={styles.menuIcon}>🏷️</span>
+                   Edit Categories
+                 </button>
+               )}
+               {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { onManageStores(list); setMenuOpenId(null); }}
+                 >
+                   <span className={styles.menuIcon}>🏪</span>
+                   Manage Stores
+                 </button>
+               )}
+               {isOwned && onShareClick && (
                 <button
                   type="button"
                   className={styles.menuItem}
@@ -476,16 +487,25 @@ export const ListSelector = ({
                     List Type
                   </button>
                 )}
-                {isOwned && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                  <button
-                    type="button"
-                    className={styles.actionSheetItem}
-                    onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                  >
-                    Edit Categories
-                  </button>
-                )}
-                {isOwned && onShareClick && (
+                  {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                    <button
+                      type="button"
+                      className={styles.actionSheetItem}
+                      onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                    >
+                      Edit Categories
+                    </button>
+                  )}
+                 {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                   <button
+                     type="button"
+                     className={styles.actionSheetItem}
+                     onClick={() => { onManageStores(list); setMenuOpenId(null); }}
+                   >
+                     Manage Stores
+                   </button>
+                 )}
+                 {isOwned && onShareClick && (
                   <button
                     type="button"
                     className={styles.actionSheetItem}
@@ -1113,5 +1133,6 @@ ListSelector.propTypes = {
   onDuplicate: PropTypes.func.isRequired,
   onResetItems: PropTypes.func,
   onShareClick: PropTypes.func,
+  onManageStores: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
 };

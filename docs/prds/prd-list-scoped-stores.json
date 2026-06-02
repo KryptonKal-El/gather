@@ -1,0 +1,72 @@
+{
+  "id": "prd-list-scoped-stores",
+  "name": "List-Scoped Stores",
+  "status": "in_progress",
+  "startedAt": "2026-06-01T00:00:00Z",
+  "stories": [
+    {
+      "id": "S-1",
+      "title": "Database Migration: List-Scoped Stores",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-2",
+      "title": "Service Layer: List-Scoped Store CRUD + User Store Defaults",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-3",
+      "title": "New List Creation Copies User Store Defaults",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-4",
+      "title": "State Management: List-Scoped Stores in ShoppingListContext",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-5",
+      "title": "Store Management UI: List-Scoped (React Web)",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-6",
+      "title": "List Defaults Settings UI: Stores Per List Type (React Web)",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-7",
+      "title": "iOS: List-Scoped Store Management (Swift)",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    },
+    {
+      "id": "S-8",
+      "title": "Enable Store Assignment for Packing and Project List Types (React Web + iOS)",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": ""
+    }
+  ]
+}

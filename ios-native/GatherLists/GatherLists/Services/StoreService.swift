@@ -5,16 +5,24 @@ import Supabase
 struct StoreService {
     private static var client: SupabaseClient { SupabaseManager.shared.client }
     
-    /// Fetches all stores for a user, ordered by sort_order ascending.
-    static func fetchStores(userId: UUID) async throws -> [Store] {
+    /// Fetches all stores for a list, ordered by sort_order ascending.
+    static func fetchStores(listId: UUID) async throws -> [Store] {
         let stores: [Store] = try await client
             .from("stores")
             .select()
-            .eq("user_id", value: userId)
+            .eq("list_id", value: listId)
             .order("sort_order", ascending: true)
             .execute()
             .value
         return stores
+    }
+    
+    /// Fetches all stores for a user (deprecated — kept for backward compatibility).
+    @available(*, deprecated, message: "Use fetchStores(listId:) instead")
+    static func fetchStores(userId: UUID) async throws -> [Store] {
+        // This endpoint no longer exists in the new schema.
+        // Return empty to prevent crashes in legacy code paths.
+        return []
     }
     
     /// Fetches stores by their IDs. Used to load shared-list owner stores.
@@ -30,9 +38,9 @@ struct StoreService {
         return stores
     }
     
-    /// Creates a new store for a user.
+    /// Creates a new store for a list.
     static func createStore(
-        userId: UUID,
+        listId: UUID,
         name: String,
         color: String?
     ) async throws -> Store {
@@ -41,11 +49,11 @@ struct StoreService {
             throw StoreServiceError.emptyName
         }
         
-        let existingStores = try await fetchStores(userId: userId)
+        let existingStores = try await fetchStores(listId: listId)
         let sortOrder = existingStores.count
         
         let newStore = NewStore(
-            userId: userId,
+            listId: listId,
             name: trimmedName,
             color: color,
             sortOrder: sortOrder
@@ -88,11 +96,11 @@ struct StoreService {
     }
     
     /// Saves the order of stores by upserting all stores with updated sort_order values.
-    static func saveStoreOrder(userId: UUID, stores: [Store]) async throws {
+    static func saveStoreOrder(listId: UUID, stores: [Store]) async throws {
         let entries = stores.enumerated().map { index, store in
             StoreOrderEntry(
                 id: store.id,
-                userId: userId,
+                listId: listId,
                 name: store.name,
                 color: store.color,
                 sortOrder: index,
@@ -122,13 +130,13 @@ enum StoreServiceError: Error, LocalizedError {
 // MARK: - DTOs
 
 private struct NewStore: Encodable {
-    let userId: UUID
+    let listId: UUID
     let name: String
     let color: String?
     let sortOrder: Int
     
     enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
+        case listId = "list_id"
         case name
         case color
         case sortOrder = "sort_order"
@@ -153,7 +161,7 @@ private struct StoreUpdate: Encodable {
 
 private struct StoreOrderEntry: Encodable {
     let id: UUID
-    let userId: UUID
+    let listId: UUID
     let name: String
     let color: String?
     let sortOrder: Int
@@ -161,7 +169,7 @@ private struct StoreOrderEntry: Encodable {
     
     enum CodingKeys: String, CodingKey {
         case id
-        case userId = "user_id"
+        case listId = "list_id"
         case name
         case color
         case sortOrder = "sort_order"

@@ -22,6 +22,14 @@
   ],
   "sessions": [
     {
+      "sessionId": "builder-1780349443-8eb63d",
+      "agent": "Concepture-Builder",
+      "mode": "prd",
+      "status": "active",
+      "startedAt": "2026-06-01T00:00:00Z",
+      "lastHeartbeat": "2026-06-01T00:00:00Z"
+    },
+    {
       "sessionId": "builder-1780061222-633425",
       "agent": "Concepture-Builder",
       "mode": "prd",

@@ -124,6 +124,18 @@ struct SettingsView: View {
                     Task { await loadCategoryCounts() }
                 }
                 
+                Section("Store Defaults") {
+                    ForEach(listTypes.filter { ListTypes.getConfig($0.id).fields.store }, id: \.id) { type in
+                        NavigationLink(destination: DefaultStoreEditorView(listType: type.id)) {
+                            HStack(spacing: 12) {
+                                ListTypeIconView(typeId: type.id, size: 24)
+                                Text(type.name)
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+                
                 Section {
                     Button(role: .destructive) {
                         Task {
