@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260602-114044",
+      "title": "Fix Manage Stores visual — background color and Add button style",
+      "status": "completed",
+      "createdAt": "2026-06-02T11:40:44Z",
+      "completedAt": "2026-06-02T11:50:00Z",
+      "path": "docs/tasks/completed/TSK-20260602-114044.md"
+    },
+    {
       "id": "TSK-20260602-01",
       "title": "Create project conventions documentation",
       "status": "completed",
