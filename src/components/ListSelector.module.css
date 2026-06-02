@@ -97,8 +97,8 @@
   height: 28px;
   border-radius: 50%;
   border: none;
-  background: var(--primary);
-  color: #fff;
+  background: none;
+  color: var(--primary);
   font-size: 1.2rem;
   font-weight: 600;
   line-height: 1;
@@ -108,11 +108,11 @@
   cursor: pointer;
   padding: 0;
   flex-shrink: 0;
-  transition: background 0.15s, transform 0.15s;
+  transition: color 0.15s, transform 0.15s;
 }
 
 .circleBtn:hover {
-  background: var(--primary-deep);
+  color: var(--primary-deep);
   transform: scale(1.1);
 }
 
