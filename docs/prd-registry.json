@@ -2,6 +2,18 @@
   "$schema": "https://opencode.ai/prd-registry.json",
   "prds": [
     {
+      "id": "prd-marketing-site-redesign",
+      "name": "Marketing Site Redesign",
+      "status": "ready",
+      "filePath": "docs/prds/prd-marketing-site-redesign.md",
+      "jsonPath": "docs/prds/prd-marketing-site-redesign.json",
+      "createdAt": "2026-06-03T00:00:00Z",
+      "readyAt": "2026-06-03T00:00:00Z",
+      "estimatedStories": 5,
+      "storiesCompleted": null,
+      "currentStory": null
+    },
+    {
       "id": "prd-reset-list-items",
       "name": "Reset List Items",
       "status": "completed",

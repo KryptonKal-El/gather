@@ -1,0 +1,113 @@
+{
+  "$schema": "https://opencode.ai/prd.json",
+  "id": "prd-marketing-site-redesign",
+  "name": "Marketing Site Redesign",
+  "status": "ready",
+  "createdAt": "2026-06-03T00:00:00Z",
+  "readyAt": "2026-06-03T00:00:00Z",
+  "stories": [
+    {
+      "id": "S-01",
+      "title": "Sticky Navigation Bar",
+      "priority": "high",
+      "status": "pending",
+      "passes": false,
+      "notes": "",
+      "description": "Replace the current <header class=\"hero\"> with a proper sticky nav bar. The nav contains the Gather Lists logo on the left, anchor links to #features in the center, and a 'Launch App' button on the right that links to /app.",
+      "acceptanceCriteria": [
+        "<header> contains a <nav> element.",
+        "Logo (/logo/stacked.svg) is displayed on the left, max-height 36px.",
+        "Nav link 'Features' anchors to #features.",
+        "'Launch App' button links to /app, styled with brand green background (#3D7A63), white text, rounded corners, visible on all screen sizes.",
+        "Header is position: sticky; top: 0 with a solid background and a subtle bottom border or shadow so it reads over the hero.",
+        "On mobile (≤ 600px): nav links are hidden; logo and 'Launch App' button remain visible.",
+        "No <script> tags anywhere in the file.",
+        "npm test passes (all existing marketing-page tests pass; new tests added for nav elements)."
+      ],
+      "flowChart": "1. public/index-marketing.html\n   ├─ Replace <header class=\"hero\"> with <header class=\"site-header\">\n   ├─ Add <nav> inside header\n   ├─ Add logo <img> (left), nav links (center), \"Launch App\" <a> button (right)\n   ├─ Add .site-header CSS: position sticky, background, shadow, z-index\n   ├─ Add .nav-logo, .nav-links, .nav-cta CSS\n   └─ Add @media (max-width: 600px): hide .nav-links\n\n2. src/__tests__/marketing-page.test.js\n   ├─ Add test: contains <nav> element\n   ├─ Add test: contains \"Launch App\" link to /app in header\n   └─ Add test: contains sticky header CSS\n\n3. VERIFY QUALITY\n   ├─ Run lint (n/a — static HTML; verify no <script> tags)\n   └─ Run npm test"
+    },
+    {
+      "id": "S-02",
+      "title": "Full-Bleed Hero Section",
+      "priority": "high",
+      "status": "pending",
+      "passes": false,
+      "notes": "",
+      "description": "Replace the current hero (which was the <header>) with a dedicated <section class=\"hero\"> inside <main>. The hero uses a dark background with a large 2-line headline, a short subline, the App Store badge, and a phone screenshot image on the right (desktop) / below (mobile).",
+      "acceptanceCriteria": [
+        "Hero is a <section> inside <main>, not the <header>.",
+        "Background: dark (#0f0f0f or a dark gradient from #0f0f0f to #1a2e24) spanning full viewport width.",
+        "Headline: large (≥ 48px desktop, ≥ 32px mobile), bold, white, two lines max. Copy: \"Every list, in one place.\"",
+        "Subline: 18px, light grey (#aaa), below headline. Copy: \"Groceries, meals, sharing — all synced in real time on web and iOS.\"",
+        "App Store badge link to https://apps.apple.com/app/id6760205400 present below subline.",
+        "Phone screenshot <img src=\"/marketing/app-screenshot.png\" alt=\"Gather Lists app screenshot\"> displayed to the right of the text column on desktop; stacked below on mobile.",
+        "Hero layout: two-column flex on desktop (text left, image right), single column on mobile.",
+        "apple-itunes-app meta tag retained in <head> (existing test must still pass).",
+        "npm test passes."
+      ],
+      "flowChart": "1. public/index-marketing.html\n   ├─ Add <section class=\"hero\"> inside <main> (above features)\n   ├─ Add .hero-content (text column): headline, subline, App Store badge\n   ├─ Add .hero-image (image column): <img src=\"/marketing/app-screenshot.png\">\n   ├─ Add .hero CSS: dark background, two-column flex, min-height\n   ├─ Add .hero h1 CSS: large font-size, white, bold\n   ├─ Add .hero p CSS: subline color and size\n   └─ Add @media (max-width: 600px): single column, image below text\n\n2. src/__tests__/marketing-page.test.js\n   ├─ Add test: contains hero section with dark background CSS\n   ├─ Add test: contains /marketing/app-screenshot.png img\n   └─ Add test: hero headline text present\n\n3. VERIFY QUALITY\n   ├─ Run lint (verify no <script> tags)\n   └─ Run npm test"
+    },
+    {
+      "id": "S-03",
+      "title": "Alternating Feature Rows",
+      "priority": "high",
+      "status": "pending",
+      "passes": false,
+      "notes": "",
+      "description": "Replace the 2×2 feature card grid with 4 Novu-style alternating rows. Each row has a short punchy headline (2 lines, italic key word in brand green), a 1–2 sentence description, and an emoji icon. Rows alternate text-left/text-right layout on desktop; stack single-column on mobile. The section has id=\"features\" so the nav anchor works.",
+      "acceptanceCriteria": [
+        "<section id=\"features\"> replaces the old <main class=\"features\">.",
+        "4 .feature-row elements, alternating .row-reverse class on even rows.",
+        "Each row: .row-text (headline + description) and .row-icon (large emoji, ≥ 80px).",
+        "Headlines: ≥ 28px, bold, dark (#111), with <em> on the italic key word styled in brand green #3D7A63.",
+        "Row 1: headline \"Every kind of <em>list.</em>\" — description \"Groceries, packing lists, party supplies — one app handles them all, exactly the way you need.\"",
+        "Row 2: headline \"Shared in <em>real time.</em>\" — description \"Add an item and it appears on everyone's list instantly. No refreshing, no waiting.\"",
+        "Row 3: headline \"Meals into <em>lists.</em>\" — description \"Save recipes, plan the week, and send ingredients straight to your grocery list in one tap.\"",
+        "Row 4: headline \"Web, iOS, <em>everywhere.</em>\" — description \"Open it in the browser or on your iPhone. Everything stays in sync across every device.\"",
+        "Descriptions: 16px, #555.",
+        "Desktop: two-column flex, 50/50 split, rows alternate direction.",
+        "Mobile: single column, icon above text.",
+        "Old feature card tests (Smart Lists, Real-Time Sharing, Recipes & Meal Planning, Works Everywhere) updated in the test file to match new copy.",
+        "npm test passes."
+      ],
+      "flowChart": "1. public/index-marketing.html\n   ├─ Replace <main class=\"features\"> with <section id=\"features\">\n   ├─ Add 4 .feature-row elements with .row-reverse on rows 2 and 4\n   ├─ Each row: .row-text (h2 with <em>, p) and .row-icon (emoji span)\n   ├─ Add .feature-row CSS: flex, align-center, gap, padding\n   ├─ Add .row-reverse CSS: flex-direction row-reverse\n   ├─ Add h2 em CSS: color #3D7A63, font-style italic\n   └─ Add @media (max-width: 600px): flex-direction column, icon above text\n\n2. src/__tests__/marketing-page.test.js\n   ├─ Update \"Smart Lists\" test → match \"Every kind of\" copy\n   ├─ Update \"Real-Time Sharing\" test → match \"Shared in real time\" copy\n   ├─ Update \"Recipes & Meal Planning\" test → match \"Meals into lists\" copy\n   ├─ Update \"Works Everywhere\" test → match \"Web, iOS, everywhere\" copy\n   └─ Add test: contains id=\"features\"\n\n3. VERIFY QUALITY\n   ├─ Run lint (verify no <script> tags)\n   └─ Run npm test"
+    },
+    {
+      "id": "S-04",
+      "title": "Bottom CTA Section",
+      "priority": "medium",
+      "status": "pending",
+      "passes": false,
+      "notes": "",
+      "description": "Add a full-bleed CTA section above the footer. Brand green background, large white headline, short subline, and the App Store badge only.",
+      "acceptanceCriteria": [
+        "<section class=\"cta-section\"> present above <footer>.",
+        "Background: brand green #3D7A63 (or a dark green gradient).",
+        "Headline: white, ≥ 32px. Copy: \"Start your lists today.\"",
+        "Subline: white/light, 18px. Copy: \"Free on web and iOS.\"",
+        "App Store badge link to https://apps.apple.com/app/id6760205400.",
+        "npm test passes."
+      ],
+      "flowChart": "1. public/index-marketing.html\n   ├─ Add <section class=\"cta-section\"> above <footer>\n   ├─ Add headline, subline, App Store badge inside section\n   └─ Add .cta-section CSS: brand green background, centered, padding\n\n2. src/__tests__/marketing-page.test.js\n   └─ Add test: contains \"Start your lists today\" CTA text\n\n3. VERIFY QUALITY\n   ├─ Run lint (verify no <script> tags)\n   └─ Run npm test"
+    },
+    {
+      "id": "S-05",
+      "title": "Footer Cleanup",
+      "priority": "low",
+      "status": "pending",
+      "passes": false,
+      "notes": "",
+      "description": "Restyle the footer to match the new design. Keep Support and Privacy Policy links and copyright. Remove the 'App' footer link — superseded by the sticky nav 'Launch App' button. Dark background footer.",
+      "acceptanceCriteria": [
+        "<footer> retained with Support and Privacy Policy links.",
+        "\"App\" link (<a href=\"/app\">) removed from the footer.",
+        "Copyright line: © 2026 Gather Lists.",
+        "Brand color #3D7A63 used on footer links (existing test passes).",
+        "Footer styled: dark background (#0f0f0f or similar), white or light-grey link text.",
+        "Existing tests for support link, privacy link, copyright, and brand color still pass.",
+        "npm test passes."
+      ],
+      "flowChart": "1. public/index-marketing.html\n   ├─ Remove <a href=\"/app\">App</a> from footer\n   ├─ Restyle .footer CSS: dark background (#0f0f0f), white/light-grey link text\n   └─ Ensure © 2026 Gather Lists copyright retained\n\n2. src/__tests__/marketing-page.test.js\n   ├─ Update \"contains app footer link\" test → assert <a href=\"/app\"> exists in <header> (not footer)\n   └─ Verify support, privacy, copyright tests still pass\n\n3. VERIFY QUALITY\n   ├─ Run lint (verify no <script> tags)\n   └─ Run npm test"
+    }
+  ]
+}

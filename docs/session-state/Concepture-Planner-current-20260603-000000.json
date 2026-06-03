@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sessionId": "planner-1780521056-6dd684",
+  "agent": "Concepture-Planner",
+  "project": "gather",
+  "mode": "prd",
+  "startedAt": "2026-06-03T00:00:00Z",
+  "lastUpdatedAt": "2026-06-03T00:00:00Z",
+  "intent": "Redesign public/index-marketing.html to a modern bold app-marketing page inspired by withnovu.com",
+  "currentPrd": "prd-marketing-site-redesign",
+  "active": {
+    "kind": "planning",
+    "id": "prd-marketing-site-redesign",
+    "step": "ready"
+  },
+  "lockedDecisions": [
+    { "q": "Design direction", "a": "Bold & modern — large typography, brand green #3D7A63, soft gradient accents" },
+    { "q": "Sign In CTA placement", "a": "Header only — sticky nav 'Launch App' button links to /app" },
+    { "q": "Hero content", "a": "Logo + tagline + App Store badge + phone screenshot (/marketing/app-screenshot.png)" },
+    { "q": "Screenshot asset", "a": "Spec /marketing/app-screenshot.png; user will supply the image" },
+    { "q": "Feature section", "a": "Replace 2x2 grid with Novu-style alternating feature rows" },
+    { "q": "Feature row topics", "a": "Smart Lists, Real-Time Sharing, Recipes & Meal Planning, Works Everywhere — reframed in punchy 2-line copy" },
+    { "q": "Nav CTA label", "a": "Launch App" },
+    { "q": "Bottom CTA actions", "a": "App Store badge only (no Launch App button in CTA section)" },
+    { "q": "Footer background", "a": "Dark (#0f0f0f)" }
+  ],
+  "resumePrompt": "prd-marketing-site-redesign is marked ready. docs/prds/prd-marketing-site-redesign.json and .md written. Registry updated. Session complete."
+}
