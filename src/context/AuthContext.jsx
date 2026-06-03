@@ -114,13 +114,18 @@ export const AuthProvider = ({ children }) => {
    * Signs in with Apple via OAuth redirect flow.
    * @returns {Promise<void>}
    */
-  const signInWithApple = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
-    if (error) {
-      console.error('Apple sign-in failed:', error);
-      throw error;
-    }
-  };
+   const signInWithApple = async () => {
+     const { error } = await supabase.auth.signInWithOAuth({
+       provider: 'apple',
+       options: {
+         redirectTo: `${window.location.origin}/app`,
+       },
+     });
+     if (error) {
+       console.error('Apple sign-in failed:', error);
+       throw error;
+     }
+   };
 
   /**
    * Signs in with email and password.
