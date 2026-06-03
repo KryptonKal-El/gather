@@ -77,8 +77,8 @@
         "Lint passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Implemented. Also fixed pre-existing PWA SW intercepting static HTML pages (vite.config.js).",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

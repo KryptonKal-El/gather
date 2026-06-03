@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support — Gather Lists</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+            padding: 20px;
+        }
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 24px;
+            color: #3D7A63;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        h1 {
+            color: #3D7A63;
+            font-size: 28px;
+            margin-bottom: 32px;
+        }
+        h2 {
+            color: #222;
+            font-size: 20px;
+            margin-top: 32px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #3D7A63;
+            padding-bottom: 6px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        a {
+            color: #3D7A63;
+        }
+        details {
+            border-bottom: 1px solid #eee;
+            padding: 16px 0;
+        }
+        details:last-of-type {
+            border-bottom: none;
+        }
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+            color: #222;
+            list-style: none;
+            padding-right: 24px;
+            position: relative;
+        }
+        summary::after {
+            content: '+';
+            position: absolute;
+            right: 0;
+            color: #3D7A63;
+            font-size: 20px;
+            line-height: 1;
+        }
+        details[open] summary::after {
+            content: '−';
+        }
+        details p {
+            margin-top: 12px;
+            color: #555;
+            line-height: 1.7;
+        }
+        .contact-section {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .contact-section h2 {
+            margin-top: 0;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #666;
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+            .container {
+                padding: 24px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">&larr; Back to Gather Lists</a>
+
+        <h1>Support</h1>
+
+        <h2>Frequently Asked Questions</h2>
+
+        <details>
+            <summary>How do I create a list?</summary>
+            <p>To create a new list, tap the "+" button on the home screen. Enter a name for your list and choose a color to help organize your lists. You can start adding items immediately after creation.</p>
+        </details>
+
+        <details>
+            <summary>How do I share a list with someone?</summary>
+            <p>Open the list you want to share and tap the share icon. You can generate a shareable link and send it to anyone. Recipients can view and edit the list in real-time without needing to create an account.</p>
+        </details>
+
+        <details>
+            <summary>How do I add items to a list?</summary>
+            <p>Open any list and tap the input field at the bottom. Type the item name and optionally set a quantity. Press Enter or tap the add button to add the item to your list. You can also use the camera feature to search for products.</p>
+        </details>
+
+        <details>
+            <summary>Does Gather Lists work on multiple devices?</summary>
+            <p>Yes! Your lists are synced across all your devices automatically when you're signed in with the same account. Changes made on one device appear on all others instantly.</p>
+        </details>
+
+        <details>
+            <summary>How do I change my profile picture?</summary>
+            <p>Go to Settings and select "Profile". Tap your current profile picture to upload a new photo from your camera roll. Your new picture will be visible to anyone you share lists with.</p>
+        </details>
+
+        <details>
+            <summary>Can I save recipes and plan meals?</summary>
+            <p>Gather Lists is designed primarily for shopping lists, but you can use lists creatively for meal planning. Create a list named "Meal Plan" and add recipes as items, or use multiple lists to organize ingredients by recipe.</p>
+        </details>
+
+        <details>
+            <summary>Is my data private and secure?</summary>
+            <p>Yes. We use industry-standard encryption for data in transit and at rest. Your lists are only visible to you and people you explicitly share them with. We don't sell data, show ads, or track your activity.</p>
+        </details>
+
+        <details>
+            <summary>How do I switch between light and dark mode?</summary>
+            <p>Gather Lists respects your device's system appearance setting. Go to your device's Settings, select Display, and toggle Dark Mode on or off. The app will automatically adjust to match your preference.</p>
+        </details>
+
+        <details>
+            <summary>How do I delete my account?</summary>
+            <p>Go to Settings and select "Account". Scroll to the bottom and tap "Delete Account". Confirm your choice and your account and all associated data will be permanently deleted. This action cannot be undone.</p>
+        </details>
+
+        <details>
+            <summary>How do I contact support?</summary>
+            <p>You can reach us at <a href="mailto:support@gatherlists.com">support@gatherlists.com</a> with any questions, feedback, or technical issues. We typically respond within 24 hours.</p>
+        </details>
+
+        <div class="contact-section">
+            <h2>Still Have Questions?</h2>
+            <p>If you couldn't find the answer you were looking for, please don't hesitate to get in touch with us at <a href="mailto:support@gatherlists.com">support@gatherlists.com</a>. We're here to help!</p>
+            <p class="footer">We're always improving Gather Lists based on your feedback.</p>
+        </div>
+    </div>
+</body>
+</html>
