@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260603-154131",
+      "title": "Fix /app route breakage caused by postbuild rename + Workbox precache mismatch",
+      "status": "completed",
+      "createdAt": "2026-06-03T15:41:31Z",
+      "completedAt": "2026-06-03T16:00:00Z",
+      "path": "docs/tasks/completed/TSK-20260603-154131.md"
+    },
+    {
       "id": "TSK-20260602-193703",
       "title": "Fix — collaborator pencil button does nothing in list detail view",
       "status": "completed",
