@@ -1,10 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { rename } from 'node:fs/promises'
+import { resolve } from 'node:path'
+
+/** Rename dist/index.html → dist/app.html before Workbox generates the precache manifest. */
+/** @type {import('vite').Plugin} */
+const renameIndexToApp = {
+  name: 'rename-index-to-app',
+  apply: 'build',
+  async writeBundle(options) {
+    const outDir = options.dir ?? 'dist'
+    await rename(
+      resolve(outDir, 'index.html'),
+      resolve(outDir, 'app.html'),
+    )
+  },
+}
 
 export default defineConfig({
   plugins: [
     react(),
+    renameIndexToApp,
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['icon.svg', 'icon-64x64.png'],
@@ -37,8 +54,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,svg,png,woff2}', 'index.html'],
-        navigateFallback: '/index.html',
+        globPatterns: ['**/*.{js,css,svg,png,woff2}', 'app.html'],
+        navigateFallback: '/app.html',
         navigateFallbackDenylist: [/^\/$/, /^\/support(\.html)?$/, /^\/privacy(\.html)?$/, /^\/index-marketing(\.html)?$/],
         runtimeCaching: [
           {
