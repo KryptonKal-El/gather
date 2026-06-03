@@ -189,21 +189,25 @@ Things that are NOT easily discoverable from the code or documentation alone:
 
 # Specialists
 
-Project-level specialist agents that the four global Concepture routers (`Concepture-Developer`, `Concepture-Quality`, `Concepture-Tester`, `Concepture-Critic`) dispatch to for this project. Specialist agent files live in `.opencode/agents/`.
+Project-level specialist agents that the six global Concepture routers (`Concepture-Developer`, `Concepture-Quality`, `Concepture-Tester`, `Concepture-Critic-Source`, `Concepture-Critic-Tests`, `Concepture-Data`) dispatch to for this project. Specialist agent files live in `.opencode/agents/`.
 
-| Role | Specialist | File |
-|------|------------|------|
-| developer | `react-dev` | `.opencode/agents/react-dev.md` |
-| developer | `swift-dev` | `.opencode/agents/swift-dev.md` |
-| tester | `react-tester` | `.opencode/agents/react-tester.md` |
-| critic | `react-critic` | `.opencode/agents/react-critic.md` |
-| quality | *(none — falls back to `commands.lint` and `commands.quality` from `docs/project.json`)* | — |
-| security-critic | *(none — falls back to the global `security-critic` for universal concerns)* | — |
+- developer: react-dev | React + Vite + Supabase component and hook implementation
+- developer: swift-dev | Swift/SwiftUI views, services, models, and XCUITest authoring
+- developer: web-dev | Static HTML/CSS/vanilla JS implementation (public/index-marketing.html and other static files)
+- tester: react-tester | Vitest + React Testing Library test writing and test-file review
+- critic-source: react-critic | React/JS source file review (.js, .jsx, .ts, .tsx — excluding tests)
+- critic-source: swift-critic | Swift/SwiftUI source review and XCUITest file review
+- critic-source: web-critic | Static HTML structure, CSS patterns, vanilla JS correctness, WCAG AA accessibility review
+- quality: web-quality | ESLint, Stylelint, HTMLHint for static HTML stories
 
 Notes:
 
-- `react-tester` handles both test writing (Write mode) and test-file review (Review mode). `Concepture-Critic` routes `*.test.*`, `*.spec.*`, and `__tests__/` paths to `react-tester`; `Concepture-Critic` routes all other source files to `react-critic`.
-- Quality runs through `commands.lint` (`npm run lint`) and `commands.quality` (currently aliased to lint). When project-specific quality rules accrete, a dedicated quality specialist can be added.
+- `react-tester` handles both test writing (Write mode) and test-file review (Review mode). `Concepture-Critic-Tests` routes `*.test.*`, `*.spec.*`, and `__tests__/` paths to `react-tester`; `Concepture-Critic-Source` routes all other source files to `react-critic`.
+- `swift-critic` handles both Swift source review and XCUITest file review (`*UITests/**/*.swift`). XCUITest authoring quality is tightly coupled to source patterns (accessibility identifiers, view structure), so a separate swift-critic-tests agent is not warranted.
+- `web-dev` handles static HTML/CSS/vanilla JS work only — scoped to `public/index-marketing.html` and any other static files. Does not handle React components, hooks, or TypeScript. Routers should dispatch to `web-dev` for stories targeting `.html` static files.
+- `web-critic` handles HTML structure, CSS patterns, vanilla JS correctness, and WCAG AA accessibility review for static files. Routes `*.html` static files; does not cover React source files (those go to `react-critic`).
+- `web-quality` runs ESLint, Stylelint, and HTMLHint for static HTML stories. Dispatched by `Concepture-Quality` when story files include `.html` or inline CSS. React and Swift work falls back to `commands.lint` / `commands.quality`.
+- Quality runs through `commands.lint` (`npm run lint`) and `commands.quality` (currently aliased to lint) for React and Swift work.
 - The global `security-critic` covers universal stack-agnostic security concerns (secrets in source, RLS bypass attempts, auth handling). Add a `security-critic-js` specialist if and when JS-specific security rules accrete.
 
 # Agent Models
@@ -212,20 +216,25 @@ Model and temperature settings for every sub-agent involved in this project. Rou
 
 | Agent | Model | Temperature |
 |-------|-------|-------------|
-| react-dev | `github-copilot/gpt-5.5` | 0.2 |
-| swift-dev | `github-copilot/gpt-5.5` | 0.2 |
-| react-tester | `github-copilot/gpt-5.5` | 0.1 |
-| react-critic | `github-copilot/gpt-5.5` | 0.0 |
+| react-dev | `github-copilot/claude-haiku-4.5` | 0.2 |
+| swift-dev | `github-copilot/claude-haiku-4.5` | 0.2 |
+| web-dev | `github-copilot/claude-haiku-4.5` | 0.2 |
+| react-tester | `github-copilot/claude-haiku-4.5` | 0.1 |
+| react-critic | `github-copilot/claude-haiku-4.5` | 0.0 |
+| swift-critic | `github-copilot/claude-haiku-4.5` | 0.3 |
+| web-critic | `github-copilot/claude-haiku-4.5` | 0.3 |
+| web-quality | `github-copilot/claude-haiku-4.5` | 0.2 |
 | Concepture-Explore | (global default) | 0.0 |
 | Concepture-Developer | (global default) | 0.0 |
 | Concepture-Quality | (global default) | 0.0 |
 | Concepture-Tester | (global default) | 0.0 |
-| Concepture-Critic | (global default) | 0.0 |
+| Concepture-Critic-Source | (global default) | 0.0 |
+| Concepture-Critic-Tests | (global default) | 0.0 |
 | toolkit-critic | (global default) | 0.0 |
 | security-critic | (global default) | 0.0 |
 
 Notes:
 
-- All project specialists run on `github-copilot/gpt-5.5`.
+- All project specialists run on `github-copilot/claude-haiku-4.5`.
 - Temperatures: developer 0.2 (some flexibility for implementation choice), tester 0.1 (mostly deterministic), critic 0.0 (deterministic review).
 - Router agents inherit their model and temperature from the global toolkit agent definitions; only project specialists need explicit pinning here.
