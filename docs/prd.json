@@ -109,8 +109,8 @@
         "Lint passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": "RISKIEST STORY — touches Vite config base, PWA manifest scope, service worker scope, OAuth redirects, and Universal Links. PWA re-install may be required (acceptable pre-launch).",
+      "passes": true,
+      "notes": "Implemented. Vite base /app, vercel.json rewrites, AASA paths updated.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],

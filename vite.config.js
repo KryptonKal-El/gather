@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/app',
   plugins: [
     react(),
     VitePWA({
@@ -15,21 +16,21 @@ export default defineConfig({
         theme_color: '#3D7A63',
         background_color: '#FAFAF7',
         display: 'standalone',
-        scope: '/',
-        start_url: '/',
+        scope: '/app',
+        start_url: '/app',
         icons: [
           {
-            src: 'icon-192x192.png',
+            src: '/icon-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: 'icon-512x512.png',
+            src: '/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: 'icon-512x512.png',
+            src: '/icon-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable',
@@ -38,7 +39,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,svg,png,woff2}', 'index.html'],
-        navigateFallback: '/',
+        navigateFallback: '/app',
         navigateFallbackDenylist: [/^\/support(\.html)?$/, /^\/privacy(\.html)?$/, /^\/index-marketing(\.html)?$/],
         runtimeCaching: [
           {
