@@ -145,12 +145,8 @@ struct ListDetailView: View {
                 sortMenu
                 if isOwned {
                     listOptionsMenu
-                } else if EditListSheet.categorySupportedTypes.contains(list.type) {
-                    Button {
-                        showEditSheet = true
-                    } label: {
-                        Image(systemName: "pencil")
-                    }
+                } else {
+                    collaboratorOptionsMenu
                 }
             }
         }
@@ -289,6 +285,30 @@ struct ListDetailView: View {
         }
         .sheet(isPresented: $showEditSheet) {
             EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
+        }
+        .sheet(isPresented: $showManageStoresSheet) {
+            StoreBrowserView(listId: list.id)
+                .environment(authViewModel)
+        }
+        .sheet(isPresented: $showManageCategoriesSheet) {
+            CategoryEditorSheet(
+                listId: list.id,
+                listType: list.type,
+                initialCategories: detailViewModel?.listCategories ?? list.categories ?? [],
+                onSave: { updatedCategories in
+                    Task {
+                        await viewModel.updateList(
+                            id: list.id,
+                            name: nil,
+                            emoji: nil,
+                            color: nil,
+                            type: nil,
+                            categories: updatedCategories
+                        )
+                    }
+                }
+            )
+            .environment(authViewModel)
         }
     }
     
@@ -1236,147 +1256,167 @@ struct ListDetailView: View {
     
     @Environment(\.dismiss) private var dismiss
     
-     private var listOptionsMenu: some View {
-         Menu {
-             Button {
-                 showEditSheet = true
-             } label: {
-                 Label("Name, Icon & Color", systemImage: "pencil")
+      private var listOptionsMenu: some View {
+          Menu {
+              Button {
+                  showEditSheet = true
+              } label: {
+                  Label("Name, Icon & Color", systemImage: "pencil")
+              }
+              .accessibilityIdentifier("ownerMenu-editNameIconColor")
+              
+               if ListTypes.getConfig(list.type).fields.store {
+                   Button {
+                       showManageStoresSheet = true
+                   } label: {
+                       Label("Manage Stores", systemImage: "storefront")
+                   }
+                   .accessibilityIdentifier("ownerMenu-manageStores")
+               }
+              
+               if EditListSheet.categorySupportedTypes.contains(list.type) {
+                   Button {
+                       showManageCategoriesSheet = true
+                   } label: {
+                       Label("Manage Categories", systemImage: "tag")
+                   }
+                   .accessibilityIdentifier("ownerMenu-manageCategories")
+               }
+
+              Button {
+                  showShareSettingsSheet = true
+              } label: {
+                  Label("Share Settings", systemImage: "person.badge.plus")
+              }
+              .accessibilityIdentifier("ownerMenu-shareSettings")
+              
+               Button {
+                   showDuplicateSheet = true
+               } label: {
+                   Label("Duplicate", systemImage: "doc.on.doc")
+               }
+               .accessibilityIdentifier("ownerMenu-duplicate")
+
+               if isOwned && list.type == "guest_list" {
+                  Button {
+                      let remaining = (detailViewModel?.items ?? []).filter {
+                          ($0.rsvpStatus ?? "not_invited") != "not_invited"
+                      }.count
+
+                      if remaining == 0 {
+                          toastController.show("Already reset", variant: .info)
+                      } else {
+                          showResetItemsConfirm = true
+                      }
+                  } label: {
+                      Label("Reset items", systemImage: "arrow.counterclockwise")
+                  }
+                  .disabled(detailViewModel?.items.isEmpty ?? true)
+                  .accessibilityIdentifier("ownerMenu-resetItems")
+              }
+              
+              Divider()
+              
+              Button(role: .destructive) {
+                  showDeleteConfirm = true
+              } label: {
+                  Label("Delete List", systemImage: "trash")
+              }
+              .accessibilityIdentifier("ownerMenu-deleteList")
+           } label: {
+               Image(systemName: "ellipsis.circle")
+                   .font(.subheadline)
+                   .foregroundStyle(.white)
+                   .accessibilityLabel("List options")
+           }
+           .accessibilityIdentifier("listDetail-ownerMenuButton")
+         .sheet(isPresented: $showShareSettingsSheet) {
+             ShareListSheet(
+                 list: list,
+                 viewModel: viewModel,
+                 ownerEmail: authViewModel.currentUser?.email ?? ""
+             )
+         }
+          .sheet(isPresented: $showDuplicateSheet) {
+              DuplicateListSheet(
+                  list: list,
+                  onDuplicate: { name, resetRsvp in
+                      showDuplicateSheet = false
+                      Task {
+                          _ = await viewModel.duplicateList(
+                              listId: list.id,
+                              newName: name,
+                              resetRsvp: resetRsvp,
+                              toastController: toastController
+                          )
+                          dismiss()
+                      }
+                  },
+                  onCancel: {
+                      showDuplicateSheet = false
+                  }
+              )
+          }
+          .alert("Delete List?", isPresented: $showDeleteConfirm) {
+             Button("Cancel", role: .cancel) {}
+             Button("Delete", role: .destructive) {
+                 Task {
+                     await viewModel.deleteList(id: list.id)
+                     dismiss()
+                 }
              }
-             
+         } message: {
+             Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
+         }
+         .alert("Reset items", isPresented: $showResetItemsConfirm) {
+             Button("Cancel", role: .cancel) {}
+             Button("Reset", role: .destructive) {
+                 Task {
+                     await handleResetItems()
+                 }
+             }
+         } message: {
+             let count = detailViewModel?.items.count ?? 0
+             Text("Reset all \(count) guest\(count == 1 ? "" : "s")? Reset cannot be undone — all guests will be marked Not Yet Invited.")
+         }
+     }
+     
+      private var collaboratorOptionsMenu: some View {
+          Menu {
+              Button {
+                  showEditSheet = true
+              } label: {
+                  Label("Name, Icon & Color", systemImage: "pencil")
+              }
+              .accessibilityIdentifier("collaboratorMenu-editNameIconColor")
+
               if ListTypes.getConfig(list.type).fields.store {
                   Button {
                       showManageStoresSheet = true
                   } label: {
                       Label("Manage Stores", systemImage: "storefront")
                   }
+                  .accessibilityIdentifier("collaboratorMenu-manageStores")
               }
-             
+
               if EditListSheet.categorySupportedTypes.contains(list.type) {
                   Button {
                       showManageCategoriesSheet = true
                   } label: {
                       Label("Manage Categories", systemImage: "tag")
                   }
-              }
-
-             Button {
-                 showShareSettingsSheet = true
-             } label: {
-                 Label("Share Settings", systemImage: "person.badge.plus")
-             }
-             
-              Button {
-                  showDuplicateSheet = true
-              } label: {
-                  Label("Duplicate", systemImage: "doc.on.doc")
-              }
-
-              if isOwned && list.type == "guest_list" {
-                 Button {
-                     let remaining = (detailViewModel?.items ?? []).filter {
-                         ($0.rsvpStatus ?? "not_invited") != "not_invited"
-                     }.count
-
-                     if remaining == 0 {
-                         toastController.show("Already reset", variant: .info)
-                     } else {
-                         showResetItemsConfirm = true
-                     }
-                 } label: {
-                     Label("Reset items", systemImage: "arrow.counterclockwise")
-                 }
-                 .disabled(detailViewModel?.items.isEmpty ?? true)
-             }
-             
-             Divider()
-             
-             Button(role: .destructive) {
-                 showDeleteConfirm = true
-             } label: {
-                 Label("Delete List", systemImage: "trash")
-             }
-         } label: {
-             Image(systemName: "ellipsis.circle")
-                 .font(.subheadline)
-                 .foregroundStyle(.white)
-         }
-        .sheet(isPresented: $showShareSettingsSheet) {
-            ShareListSheet(
-                list: list,
-                viewModel: viewModel,
-                ownerEmail: authViewModel.currentUser?.email ?? ""
-            )
-        }
-         .sheet(isPresented: $showDuplicateSheet) {
-             DuplicateListSheet(
-                 list: list,
-                 onDuplicate: { name, resetRsvp in
-                     showDuplicateSheet = false
-                     Task {
-                         _ = await viewModel.duplicateList(
-                             listId: list.id,
-                             newName: name,
-                             resetRsvp: resetRsvp,
-                             toastController: toastController
-                         )
-                         dismiss()
-                     }
-                 },
-                 onCancel: {
-                     showDuplicateSheet = false
-                 }
-             )
-         }
-         .sheet(isPresented: $showManageStoresSheet) {
-             StoreBrowserView(listId: list.id)
-                 .environment(authViewModel)
-         }
-         .sheet(isPresented: $showManageCategoriesSheet) {
-             CategoryEditorSheet(
-                 listId: list.id,
-                 listType: list.type,
-                 initialCategories: detailViewModel?.listCategories ?? list.categories ?? [],
-                 onSave: { updatedCategories in
-                     Task {
-                         await viewModel.updateList(
-                             id: list.id,
-                             name: nil,
-                             emoji: nil,
-                             color: nil,
-                             type: nil,
-                             categories: updatedCategories
-                         )
-                     }
-                 }
-             )
-             .environment(authViewModel)
-         }
-         .alert("Delete List?", isPresented: $showDeleteConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
-                Task {
-                    await viewModel.deleteList(id: list.id)
-                    dismiss()
-                }
-            }
-        } message: {
-            Text("Are you sure you want to delete \"\(list.name)\"? This action cannot be undone.")
-        }
-        .alert("Reset items", isPresented: $showResetItemsConfirm) {
-            Button("Cancel", role: .cancel) {}
-            Button("Reset", role: .destructive) {
-                Task {
-                    await handleResetItems()
-                }
-            }
-        } message: {
-            let count = detailViewModel?.items.count ?? 0
-            Text("Reset all \(count) guest\(count == 1 ? "" : "s")? Reset cannot be undone — all guests will be marked Not Yet Invited.")
-        }
-    }
-    
-    // MARK: - Suggestions Overlay
+                  .accessibilityIdentifier("collaboratorMenu-manageCategories")
+               }
+           } label: {
+               Image(systemName: "ellipsis.circle")
+                   .font(.subheadline)
+                   .foregroundStyle(.white)
+                   .accessibilityLabel("List options")
+           }
+           .accessibilityIdentifier("listDetail-collaboratorMenuButton")
+       }
+     
+     // MARK: - Suggestions Overlay
     
     private var suggestionsOverlay: some View {
         VStack(spacing: 0) {

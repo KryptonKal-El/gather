@@ -674,13 +674,16 @@
     {
       "id": "prd-collaborator-edit-access",
       "name": "Collaborator Edit Access on Shared Lists",
-      "status": "ready",
+      "status": "completed",
       "filePath": "docs/prds/prd-collaborator-edit-access.md",
       "createdAt": "2026-06-01",
       "readyAt": "2026-06-01",
       "updatedAt": "2026-06-01",
       "estimatedStories": 3,
-      "notes": "Unlock Edit Categories for collaborators. Fix Share Settings visibility bug in MobileListDetail (isGuest never passed from App.jsx). List Type change, Delete List, Reset items stay owner-only."
+      "notes": "Unlock Edit Categories for collaborators. Fix Share Settings visibility bug in MobileListDetail (isGuest never passed from App.jsx). List Type change, Delete List, Reset items stay owner-only.",
+      "startedAt": "2026-06-02T00:00:00Z",
+      "completedAt": "2026-06-03T19:21:08.615Z",
+      "storiesCompleted": 1
     },
     {
       "id": "prd-list-scoped-stores",

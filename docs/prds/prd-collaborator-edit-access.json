@@ -1,17 +1,17 @@
 {
   "id": "prd-collaborator-edit-access",
   "name": "Collaborator Edit Access on Shared Lists",
-  "status": "completed",
+  "status": "in_progress",
   "startedAt": "2026-06-03T00:00:00Z",
-  "completedAt": "2026-06-03T19:21:02.351Z",
+  "completedAt": null,
   "stories": [
     {
       "id": "S-1",
       "title": "Unlock Edit Categories for Collaborators (React Web)",
-      "status": "skipped",
+      "status": "pending",
       "completedAt": null,
       "passes": null,
-      "notes": "Already implemented prior to this session.",
+      "notes": null,
       "description": "As a collaborator on a shared list, I want to be able to edit the list's categories, so that I can help keep the list organized without needing the owner to do it for me.",
       "acceptanceCriteria": [
         "The 'Edit Categories' menu item in ListSelector is shown for both owners and collaborators (remove the isOwned gate on that item only).",
@@ -25,10 +25,10 @@
     {
       "id": "S-2",
       "title": "Fix: Share Settings Visible to Collaborators in Mobile Detail View (React Web)",
-      "status": "skipped",
+      "status": "pending",
       "completedAt": null,
       "passes": null,
-      "notes": "Already implemented prior to this session.",
+      "notes": null,
       "description": "As a collaborator, I want the Share Settings button to not appear in my list detail menu, so that the UI is consistent and I'm not shown controls I can't use.",
       "acceptanceCriteria": [
         "MobileListDetail.jsx currently gates Share Settings behind !isGuest. isGuest is a prop that App.jsx never passes, so it always defaults to false — making Share Settings always visible.",
@@ -42,10 +42,10 @@
     {
       "id": "S-3",
       "title": "iOS: Match Collaborator Edit Access",
-      "status": "completed",
-      "completedAt": "2026-06-03T19:21:02.351Z",
-      "passes": true,
-      "notes": "Collaborator 3-dot menu implemented. S-1 and S-2 confirmed already implemented.",
+      "status": "pending",
+      "completedAt": null,
+      "passes": null,
+      "notes": null,
       "description": "As an iOS collaborator, I want the native iOS app to reflect the same permissions as the web app, so that what I can do on iOS is consistent with what I can do on web.",
       "acceptanceCriteria": [
         "Edit Categories is accessible to collaborators on iOS.",

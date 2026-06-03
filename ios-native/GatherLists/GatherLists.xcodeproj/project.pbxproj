@@ -84,7 +84,9 @@
 		A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2DF /* UserStoreDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2DD /* DefaultStoreEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */; };
 		ADDITEMINTENT0000000002 /* AddItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDITEMINTENT0000000001 /* AddItemIntent.swift */; };
@@ -240,7 +242,9 @@
 		A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefault.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefaultService.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStoreDefaultService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCategoryEditorView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultStoreEditorView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarGroupView.swift; sourceTree = "<group>"; };
 		ADDITEMINTENT0000000001 /* AddItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemIntent.swift; sourceTree = "<group>"; };
@@ -400,6 +404,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2BF /* PreferenceService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */,
 				D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */,
 			);
@@ -493,6 +498,7 @@
 			children = (
 				F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -812,10 +818,12 @@
 				A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2DF /* UserStoreDefaultService.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */,
 				D1E2F3A4B5C6D7E8F9A0B1C6 /* ListNotificationSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2DD /* DefaultStoreEditorView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */,
 				DUPLISTSHEET00000002 /* DuplicateListSheet.swift in Sources */,
