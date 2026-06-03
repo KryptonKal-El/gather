@@ -3,7 +3,6 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/app',
   plugins: [
     react(),
     VitePWA({
@@ -39,7 +38,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,svg,png,woff2}', 'index.html'],
-        navigateFallback: '/app',
+        navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/support(\.html)?$/, /^\/privacy(\.html)?$/, /^\/index-marketing(\.html)?$/],
         runtimeCaching: [
           {

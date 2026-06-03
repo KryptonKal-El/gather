@@ -3,8 +3,8 @@
     { "source": "/.well-known/(.*)", "destination": "/.well-known/$1" },
     { "source": "/privacy.html",     "destination": "/privacy.html" },
     { "source": "/support",          "destination": "/support.html" },
-    { "source": "/app",              "destination": "/app.html" },
-    { "source": "/app/(.*)",         "destination": "/app.html" },
+    { "source": "/app",              "destination": "/index.html" },
+    { "source": "/app/(.*)",         "destination": "/index.html" },
     { "source": "/",                 "destination": "/index-marketing.html" }
   ],
   "headers": [
@@ -15,13 +15,13 @@
       ]
     },
     {
-      "source": "/app/assets/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/app/sw.js",
+      "source": "/sw.js",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache" }
       ]
