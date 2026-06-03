@@ -139,8 +139,8 @@
         "File saved and committed"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": "",
+      "passes": true,
+      "notes": "Updated subtitle, Support URL, keywords, description, What's New. Removed inaccurate AI/snap claims. Softened recipe suggestions wording.",
       "supportArticleRequired": false,
       "documentationType": null,
       "relatedArticleSlugs": [],
