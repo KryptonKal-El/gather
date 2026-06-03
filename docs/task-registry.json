@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260603-160005",
+      "title": "Fix Apple Sign-In redirect landing on marketing page instead of /app",
+      "status": "completed",
+      "createdAt": "2026-06-03T16:00:05Z",
+      "completedAt": "2026-06-03T16:10:00Z",
+      "path": "docs/tasks/completed/TSK-20260603-160005.md"
+    },
+    {
       "id": "TSK-20260603-154131",
       "title": "Fix /app route breakage caused by postbuild rename + Workbox precache mismatch",
       "status": "completed",
