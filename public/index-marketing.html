@@ -78,6 +78,51 @@
             font-size: 16px;
             line-height: 1.6;
         }
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-bottom: 1px solid #eee;
+        }
+        .site-header nav {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .site-header .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .site-header .logo img {
+            max-height: 36px;
+            width: auto;
+        }
+        .site-header .nav-link {
+            color: #333;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .site-header .nav-link:hover {
+            color: #3D7A63;
+        }
+        .site-header .launch-button {
+            background: #3D7A63;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-block;
+        }
+        .site-header .launch-button:hover {
+            background: #2d5f4b;
+        }
         .footer {
             max-width: 960px;
             margin: 0 auto;
@@ -105,6 +150,15 @@
         @media (max-width: 600px) {
             body {
                 padding: 12px;
+            }
+            .site-header .nav-link {
+                display: none;
+            }
+            .site-header nav {
+                padding: 10px 12px;
+            }
+            .site-header .logo img {
+                max-height: 32px;
             }
             .hero {
                 padding: 40px 12px;
@@ -140,17 +194,17 @@
     </style>
 </head>
 <body>
-    <header class="hero">
-        <img src="/logo/stacked.svg" alt="Gather Lists">
-        <h1>Gather your lists, meals, and more</h1>
-        <div class="app-store-badge">
-            <a href="https://apps.apple.com/app/id6760205400">
-                <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us" alt="Download on the App Store">
+    <header class="site-header">
+        <nav>
+            <a href="/" class="logo">
+                <img src="/logo/icon-name.svg" alt="Gather Lists">
             </a>
-        </div>
+            <a href="#features" class="nav-link">Features</a>
+            <a href="/app" class="launch-button">Launch App</a>
+        </nav>
     </header>
 
-    <main class="features">
+    <main class="features" id="features">
         <div class="feature-card">
             <div class="feature-icon">📋</div>
             <h2>Smart Lists</h2>

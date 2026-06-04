@@ -48,16 +48,6 @@ describe('marketing page (public/index-marketing.html)', () => {
     expect(htmlContent).toContain('<meta name="description"');
   });
 
-  it('contains h1 heading tag', () => {
-    htmlContent = readFileSync(marketingPagePath, 'utf-8');
-    expect(htmlContent).toContain('<h1>');
-  });
-
-  it('contains App Store badge link to correct app', () => {
-    htmlContent = readFileSync(marketingPagePath, 'utf-8');
-    expect(htmlContent).toContain('https://apps.apple.com/app/id6760205400');
-  });
-
   it('contains Smart Lists feature card label', () => {
     htmlContent = readFileSync(marketingPagePath, 'utf-8');
     expect(htmlContent).toContain('Smart Lists');
@@ -121,5 +111,34 @@ describe('marketing page (public/index-marketing.html)', () => {
   it('contains correct brand color #3D7A63 in stylesheet', () => {
     htmlContent = readFileSync(marketingPagePath, 'utf-8');
     expect(htmlContent).toContain('#3D7A63');
+  });
+
+  // New tests for sticky navigation bar (S-01)
+  it('contains nav element inside header', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain('<header class="site-header">');
+    expect(htmlContent).toContain('<nav>');
+  });
+
+  it('contains logo image with /logo/icon-name.svg src in header', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain('<img src="/logo/icon-name.svg"');
+  });
+
+  it('contains Features anchor link to #features in header nav', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain('<a href="#features"');
+    expect(htmlContent).toContain('Features');
+  });
+
+  it('contains Launch App link with href /app in header', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain('<a href="/app"');
+    expect(htmlContent).toContain('Launch App');
+  });
+
+  it('contains sticky header CSS (position: sticky)', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain('position: sticky');
   });
 });
