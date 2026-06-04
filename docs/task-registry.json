@@ -1,6 +1,14 @@
 {
   "tasks": [
     {
+      "id": "TSK-20260604-140645",
+      "title": "Redesign hero section to center text/CTA inside iPhone mockup image",
+      "status": "completed",
+      "createdAt": "2026-06-04T14:06:45Z",
+      "completedAt": "2026-06-04T16:30:00Z",
+      "path": "docs/tasks/completed/TSK-20260604-140645.md"
+    },
+    {
       "id": "TSK-20260603-160005",
       "title": "Fix Apple Sign-In redirect landing on marketing page instead of /app",
       "status": "completed",
