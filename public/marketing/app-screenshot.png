@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="390" height="844" fill="url(#bgGradient)"/>
+  
+  <!-- Phone bezel -->
+  <rect x="5" y="5" width="380" height="834" rx="40" fill="none" stroke="#999" stroke-width="2"/>
+  
+  <!-- Notch -->
+  <rect x="140" y="5" width="110" height="25" rx="0 0 20 20" fill="#333"/>
+  
+  <!-- Text placeholder -->
+  <text x="195" y="420" font-size="24" font-weight="bold" fill="#888" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif">
+    Screenshot
+  </text>
+  <text x="195" y="455" font-size="16" fill="#999" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif">
+    coming soon
+  </text>
+</svg>

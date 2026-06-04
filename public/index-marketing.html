@@ -21,77 +21,203 @@
             line-height: 1.6;
             color: #333;
             background: #fafafa;
-            padding: 20px;
         }
-        .hero {
-            background: #1a1a2e;
-            color: #fff;
-            padding: 60px 20px;
-            text-align: center;
-            margin-bottom: 40px;
-            border-radius: 12px;
+        main {
         }
-        .hero img {
-            max-width: 200px;
-            height: auto;
-            margin-bottom: 24px;
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            background: #0a0a0a;
         }
-        .hero p {
-            font-size: 18px;
-            margin-bottom: 32px;
+
+        .hero-scroll-height {
+            min-height: 300vh;
         }
-        .hero h1 {
-            font-size: 18px;
-            margin-bottom: 32px;
-        }
-        .app-store-badge {
-            display: inline-block;
-        }
-        .app-store-badge img {
-            height: 50px;
-            width: auto;
-        }
-        .features {
-            max-width: 960px;
-            margin: 0 auto 60px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-        }
-        .feature-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 32px;
-        }
-        .feature-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        .feature-card h2 {
-            color: #222;
-            font-size: 20px;
-            margin-bottom: 12px;
-        }
-        .feature-card p {
-            color: #666;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        .site-header {
+
+        .hero-sticky {
             position: sticky;
             top: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 152px;
+        }
+
+        .hero-section__canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-phone-stack {
+            position: relative;
+            width: min(80vw, 920px);
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Real iPhone mockup image */
+        .hero-phone-frame {
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 1;
+            user-select: none;
+            pointer-events: none;
+            -webkit-user-drag: none;
+        }
+
+        /* Phone screen overlay container */
+        .hero-phone-screens {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Individual slides */
+        .hero-phone-slide {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            padding-top: 18%;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            text-align: center;
+        }
+
+        .hero-phone-slide.active {
+            opacity: 1;
+        }
+
+        /* Hero CTA slide (slide 0) */
+        .hero-phone-slide[data-slide="0"] .hero-headline,
+        .hero-phone-slide[data-slide="0"] .hero-subline {
+            display: block;
+        }
+
+        .hero-headline {
+            font-size: clamp(2.5rem, 7vw, 4.25rem);
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 0.875rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subline {
+            font-size: clamp(1.125rem, 3vw, 1.75rem);
+            color: rgba(255,255,255,0.7);
+            line-height: 1.55;
+            margin-bottom: 1.5rem;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            height: 48px;
+            padding: 0 1.5rem;
+            border-radius: 9999px;
+            background: #ffffff;
+            color: #111111;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            pointer-events: auto;
+            margin-top: 0.5rem;
+        }
+
+        .nav-link:focus-visible,
+        .launch-button:focus-visible,
+        .hero-cta:focus-visible,
+        .footer a:focus-visible {
+            outline: 2px solid rgba(255,255,255,0.5);
+            outline-offset: 2px;
+        }
+
+        .hero-cta:focus-visible {
+            outline: 2px solid rgba(17, 17, 17, 0.8);
+            outline-offset: 2px;
+        }
+
+        /* Feature slides */
+        .hero-feature-slide {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .hero-feature-icon {
+            font-size: 4rem;
+            display: block;
+        }
+
+        .hero-feature-title {
+            font-size: clamp(1.75rem, 4.5vw, 2.75rem);
+            font-weight: 700;
+            color: #fff;
+            margin: 0;
+        }
+
+        .hero-feature-desc {
+            font-size: clamp(0.875rem, 2vw, 1.125rem);
+            color: rgba(255,255,255,0.75);
+            line-height: 1.5;
+            margin: 0;
+            max-width: 300px;
+        }
+
+        /* Bottom fade gradient */
+        .hero-bottom-fade {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 15%;
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0), rgba(10, 10, 10, 1));
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .cta-download {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+         .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-bottom: 1px solid #eee;
+            background: transparent;
+            padding-top: 1.5rem;
         }
         .site-header nav {
             max-width: 960px;
             margin: 0 auto;
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
         }
         .site-header .logo {
@@ -99,98 +225,220 @@
             align-items: center;
             text-decoration: none;
         }
-        .site-header .logo img {
-            max-height: 36px;
-            width: auto;
+         .site-header .logo img {
+             max-height: 52px;
+             width: auto;
+         }
+        .nav-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem;
+            border-radius: 50vw;
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: inset 1px 1px 1px 0px rgba(255,255,255,0.4), inset -1px -1px 1px 0px rgba(255,255,255,0.2);
         }
         .site-header .nav-link {
-            color: #333;
+            display: inline-flex;
+            align-items: center;
+            height: 42px;
+            padding: 0 1.375rem;
+            border-radius: 9999px;
+            color: rgba(255,255,255,0.85);
             text-decoration: none;
-            font-size: 16px;
+            font-size: 15px;
+            transition: background-color 0.2s, color 0.2s;
         }
         .site-header .nav-link:hover {
-            color: #3D7A63;
+            background: rgba(255,255,255,0.1);
+            color: white;
         }
-        .site-header .launch-button {
-            background: #3D7A63;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 16px;
-            display: inline-block;
-        }
-        .site-header .launch-button:hover {
-            background: #2d5f4b;
+         .site-header .launch-button {
+             display: inline-flex;
+             align-items: center;
+             gap: 0.5rem;
+             height: 42px;
+             padding: 0 1.375rem;
+             border-radius: 9999px;
+             background: #111;
+             color: white;
+             text-decoration: none;
+             font-size: 15px;
+             font-weight: 500;
+             transition: opacity 0.2s;
+         }
+         .letter-wrapper {
+             position: relative;
+             display: inline-block;
+             overflow: hidden;
+             vertical-align: baseline;
+             height: 1.25em;
+             line-height: 1.25;
+         }
+         .letter-top,
+         .letter-bottom {
+             display: inline-block;
+             transition-property: transform;
+             transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+             transition-duration: 500ms;
+         }
+          .letter-bottom {
+              position: absolute;
+              left: 0;
+              top: 100%;
+          }
+           .launch-button .apple-icon,
+           .hero-cta .apple-icon {
+               flex-shrink: 0;
+               display: block;
+           }
+           .launch-button .btn-text,
+           .hero-cta .btn-text {
+               display: inline-flex;
+               align-items: baseline;
+           }
+           .launch-button:hover .letter-top,
+           .launch-button:hover .letter-bottom,
+           .hero-cta:hover .letter-top,
+           .hero-cta:hover .letter-bottom {
+               transform: translateY(-100%);
+           }
+          .nav-right {
+             display: flex;
+             align-items: center;
+             justify-content: flex-end;
+             gap: 0.75rem;
+         }
+         .sign-in-link {
+             display: inline-flex;
+             align-items: center;
+             color: rgba(255, 255, 255, 0.85);
+             text-decoration: none;
+             font-size: 15px;
+             transition: color 0.2s;
+         }
+         .sign-in-link:hover {
+             color: #fff;
+         }
+         .sign-in-link:focus-visible {
+             outline: 2px solid rgba(255,255,255,0.8);
+             outline-offset: 4px;
+             border-radius: 4px;
+         }
+        .nav-cta-mobile {
+            display: none;
         }
         .footer {
-            max-width: 960px;
-            margin: 0 auto;
+            background: #0f0f0f;
+            color: #aaa;
             text-align: center;
-            color: #666;
-            padding: 40px 0;
-            border-top: 1px solid #eee;
-            font-size: 14px;
+            padding: 2.5rem 1rem;
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
         }
         .footer a {
             color: #3D7A63;
             text-decoration: none;
-            margin: 0 12px;
+            font-size: 14px;
         }
         .footer a:hover {
-            text-decoration: underline;
-        }
-        .footer-links {
-            margin-bottom: 12px;
+            color: #fff;
         }
         .copyright {
-            color: #999;
-            margin-top: 12px;
+            font-size: 13px;
+            color: #666;
         }
-        @media (max-width: 600px) {
-            body {
-                padding: 12px;
-            }
-            .site-header .nav-link {
-                display: none;
-            }
-            .site-header nav {
-                padding: 10px 12px;
-            }
-            .site-header .logo img {
-                max-height: 32px;
-            }
-            .hero {
-                padding: 40px 12px;
-                margin-bottom: 24px;
-            }
-            .hero img {
-                max-width: 150px;
-            }
-            .hero p {
-                font-size: 16px;
-            }
-            .hero h1 {
-                font-size: 16px;
-            }
-            .features {
-                grid-template-columns: 1fr;
-                gap: 16px;
-                margin-bottom: 40px;
-            }
-            .feature-card {
-                padding: 24px;
-            }
-            .feature-icon {
-                font-size: 40px;
-            }
-            .feature-card h2 {
-                font-size: 18px;
-            }
-            .footer {
-                padding: 24px 0;
-            }
+        .cta-section {
+            background: #3D7A63;
+            text-align: center;
+            padding: 5rem 2rem;
         }
+        .cta-section h2 {
+            color: #fff;
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .cta-section p {
+            color: rgba(255,255,255,0.85);
+            font-size: 18px;
+            margin-bottom: 2rem;
+        }
+         @media (max-width: 600px) {
+             main {
+             }
+             .nav-pill {
+                 display: none;
+             }
+             .nav-right {
+                 display: flex;
+                 align-items: center;
+                 justify-content: flex-end;
+                 gap: 0.5rem;
+             }
+             .sign-in-link {
+                 display: none;
+             }
+             .nav-cta-mobile {
+                 display: inline-flex;
+                 align-items: center;
+                 gap: 0.5rem;
+                 height: 42px;
+                 padding: 0 1.375rem;
+                 border-radius: 9999px;
+                 background: #111;
+                 color: white;
+                 text-decoration: none;
+                 font-size: 15px;
+                 font-weight: 500;
+                 transition: opacity 0.2s;
+             }
+             .nav-cta-mobile:hover {
+                 opacity: 0.8;
+             }
+             .site-header {
+                 padding-top: 1rem;
+             }
+             .site-header nav {
+                 padding: 0 12px;
+             }
+              .site-header .logo img {
+                  max-height: 44px;
+              }
+             .hero-scroll-height {
+                 min-height: 400vh;
+             }
+              .hero-phone-stack {
+                  width: min(95vw, 480px);
+              }
+              .hero-sticky {
+                   padding-top: 116px;
+               }
+              .hero-headline {
+                   font-size: clamp(1.75rem, 6.5vw, 2.75rem);
+               }
+              .hero-subline {
+                   font-size: clamp(1rem, 3.5vw, 1.35rem);
+                   max-width: 300px;
+               }
+              .hero-feature-title {
+                  font-size: clamp(1.4rem, 5vw, 2rem);
+              }
+              .hero-feature-desc {
+                  font-size: clamp(0.8rem, 2vw, 1rem);
+               max-width: 240px;
+               }
+              .footer {
+                 padding: 24px 0;
+             }
+         }
     </style>
 </head>
 <body>
@@ -199,39 +447,272 @@
             <a href="/" class="logo">
                 <img src="/logo/icon-name.svg" alt="Gather Lists">
             </a>
-            <a href="#features" class="nav-link">Features</a>
-            <a href="/app" class="launch-button">Launch App</a>
+            <div class="nav-pill">
+                <a href="/support" class="nav-link">Support</a>
+                <a href="https://apps.apple.com/app/id6760205400" class="launch-button" target="_blank" rel="noopener noreferrer" aria-label="Download Gather on the App Store">
+                    <svg class="apple-icon" aria-hidden="true" width="12" height="16" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                    <span class="btn-text"><span class="letter-wrapper"><span class="letter-top" style="transition-delay:0ms">D</span><span class="letter-bottom" style="transition-delay:0ms">D</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:22ms">o</span><span class="letter-bottom" style="transition-delay:22ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:44ms">w</span><span class="letter-bottom" style="transition-delay:44ms">w</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:66ms">n</span><span class="letter-bottom" style="transition-delay:66ms">n</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:88ms">l</span><span class="letter-bottom" style="transition-delay:88ms">l</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:110ms">o</span><span class="letter-bottom" style="transition-delay:110ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:132ms">a</span><span class="letter-bottom" style="transition-delay:132ms">a</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:154ms">d</span><span class="letter-bottom" style="transition-delay:154ms">d</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:176ms">&nbsp;</span><span class="letter-bottom" style="transition-delay:176ms">&nbsp;</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:198ms">A</span><span class="letter-bottom" style="transition-delay:198ms">A</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:220ms">p</span><span class="letter-bottom" style="transition-delay:220ms">p</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:242ms">p</span><span class="letter-bottom" style="transition-delay:242ms">p</span></span></span>
+                </a>
+            </div>
+            <div class="nav-right">
+                <a href="/app" class="sign-in-link">Sign In</a>
+                <a href="https://apps.apple.com/app/id6760205400" class="nav-cta-mobile" target="_blank" rel="noopener noreferrer" aria-label="Download Gather on the App Store"><svg aria-hidden="true" width="12" height="16" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg> Download App</a>
+            </div>
         </nav>
     </header>
 
-    <main class="features" id="features">
-        <div class="feature-card">
-            <div class="feature-icon">📋</div>
-            <h2>Smart Lists</h2>
-            <p>Groceries, packing lists, party supplies — one app for every kind of list.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">👥</div>
-            <h2>Real-Time Sharing</h2>
-            <p>Share lists with family and friends. Changes sync instantly for everyone.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🍳</div>
-            <h2>Recipes & Meal Planning</h2>
-            <p>Save recipes, plan meals, and add ingredients straight to your list.</p>
-        </div>
-        <div class="feature-card">
-            <div class="feature-icon">🌐</div>
-            <h2>Works Everywhere</h2>
-            <p>Available on web and native iOS. Your data stays in sync across every device.</p>
-        </div>
-    </main>
+    <main>
+        <section class="hero-section">
+            <div class="hero-scroll-height">
+                <div class="hero-sticky">
+                    <canvas id="hero-canvas" class="hero-section__canvas" aria-hidden="true"></canvas>
+
+                    <div class="hero-phone-stack" id="heroPhoneStack">
+                        <img class="hero-phone-frame"
+                             src="/marketing/iphone-mockup.png"
+                             alt="Gather Lists on iPhone">
+
+                        <div class="hero-phone-screens">
+                            <!-- Slide 0: hero CTA -->
+                            <div class="hero-phone-slide active" data-slide="0">
+                                <h1 class="hero-headline">Every list,<br>in one place.</h1>
+                                <p class="hero-subline">Groceries, meals, sharing — all synced in real time on web and iOS.</p>
+                                 <a class="hero-cta" href="https://apps.apple.com/app/id6760205400" target="_blank" rel="noopener noreferrer" aria-label="Download Gather on the App Store">
+                                     <svg class="apple-icon" aria-hidden="true" width="12" height="16" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+                                     <span class="btn-text"><span class="letter-wrapper"><span class="letter-top" style="transition-delay:0ms">D</span><span class="letter-bottom" style="transition-delay:0ms">D</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:22ms">o</span><span class="letter-bottom" style="transition-delay:22ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:44ms">w</span><span class="letter-bottom" style="transition-delay:44ms">w</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:66ms">n</span><span class="letter-bottom" style="transition-delay:66ms">n</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:88ms">l</span><span class="letter-bottom" style="transition-delay:88ms">l</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:110ms">o</span><span class="letter-bottom" style="transition-delay:110ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:132ms">a</span><span class="letter-bottom" style="transition-delay:132ms">a</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:154ms">d</span><span class="letter-bottom" style="transition-delay:154ms">d</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:176ms">&nbsp;</span><span class="letter-bottom" style="transition-delay:176ms">&nbsp;</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:198ms">A</span><span class="letter-bottom" style="transition-delay:198ms">A</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:220ms">p</span><span class="letter-bottom" style="transition-delay:220ms">p</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:242ms">p</span><span class="letter-bottom" style="transition-delay:242ms">p</span></span></span>
+                                 </a>
+                            </div>
+                            <!-- Slide 1 -->
+                            <div class="hero-phone-slide" data-slide="1">
+                                <div class="hero-feature-slide">
+                                    <span class="hero-feature-icon">📋</span>
+                                    <h3 class="hero-feature-title">Every kind of list.</h3>
+                                    <p class="hero-feature-desc">Groceries, packing lists, party supplies — one app handles them all.</p>
+                                </div>
+                            </div>
+                            <!-- Slide 2 -->
+                            <div class="hero-phone-slide" data-slide="2">
+                                <div class="hero-feature-slide">
+                                    <span class="hero-feature-icon">👥</span>
+                                    <h3 class="hero-feature-title">Shared in real time.</h3>
+                                    <p class="hero-feature-desc">Add an item and it appears on everyone's list instantly.</p>
+                                </div>
+                            </div>
+                            <!-- Slide 3 -->
+                            <div class="hero-phone-slide" data-slide="3">
+                                <div class="hero-feature-slide">
+                                    <span class="hero-feature-icon">🍳</span>
+                                    <h3 class="hero-feature-title">Meals into lists.</h3>
+                                    <p class="hero-feature-desc">Save recipes, plan the week, and send ingredients to your grocery list.</p>
+                                </div>
+                            </div>
+                            <!-- Slide 4 -->
+                            <div class="hero-phone-slide" data-slide="4">
+                                <div class="hero-feature-slide">
+                                    <span class="hero-feature-icon">🌐</span>
+                                    <h3 class="hero-feature-title">Web, iOS, everywhere.</h3>
+                                    <p class="hero-feature-desc">Open it in the browser or on your iPhone. Everything stays in sync.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hero-bottom-fade"></div>
+                </div>
+            </div>
+
+            <script>
+            (function() {
+                const canvas = document.getElementById('hero-canvas');
+                const ctx = canvas.getContext('2d');
+                let mouse = { x: null, y: null };
+                let particles = [];
+                const COUNT = 80;
+                const PARTICLE_RADIUS = 4;
+                const MAX_DIST = 120;
+
+                function resize() {
+                    canvas.width = canvas.offsetWidth;
+                    canvas.height = canvas.offsetHeight;
+                }
+
+                function Particle() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    /* Slow constant drift — gives each particle a persistent direction */
+                    this.driftVx = (Math.random() - 0.5) * 0.35;
+                    this.driftVy = (Math.random() - 0.5) * 0.35;
+                    /* Extra velocity (from mouse interaction); decays back to zero */
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.radius = PARTICLE_RADIUS;
+                }
+
+                Particle.prototype.update = function() {
+                    if (mouse.x !== null) {
+                        const dx = this.x - mouse.x;
+                        const dy = this.y - mouse.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < MAX_DIST && dist > 0) {
+                            /* Stronger repulsion when mouse is near */
+                            const force = (MAX_DIST - dist) / MAX_DIST * 0.12;
+                            this.vx += (dx / dist) * force;
+                            this.vy += (dy / dist) * force;
+                        }
+                    }
+                    /* Extra velocity decays toward zero; drift is always maintained */
+                    this.vx *= 0.96;
+                    this.vy *= 0.96;
+                    this.x += this.driftVx + this.vx;
+                    this.y += this.driftVy + this.vy;
+                    if (this.x < 0) this.x = canvas.width;
+                    if (this.x > canvas.width) this.x = 0;
+                    if (this.y < 0) this.y = canvas.height;
+                    if (this.y > canvas.height) this.y = 0;
+                };
+
+                /**
+                 * Draws a small heart centered at (cx, cy) with half-width `size`.
+                 * @param {CanvasRenderingContext2D} ctx
+                 * @param {number} cx - center x
+                 * @param {number} cy - center y
+                 * @param {number} size - half-width of the heart
+                 */
+                function drawHeart(ctx, cx, cy, size) {
+                    var s = size;
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.beginPath();
+                    ctx.moveTo(0, s * 0.35);
+                    ctx.bezierCurveTo(-s * 0.95, -s * 0.2,  -s * 1.05, -s * 0.85, -s * 0.5, -s * 0.85);
+                    ctx.bezierCurveTo(-s * 0.15, -s * 0.85,   0,         -s * 0.5,   0,        -s * 0.2);
+                    ctx.bezierCurveTo(  0,        -s * 0.5,   s * 0.15, -s * 0.85,  s * 0.5,  -s * 0.85);
+                    ctx.bezierCurveTo( s * 1.05, -s * 0.85,   s * 0.95, -s * 0.2,   0,         s * 0.35);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                function init() {
+                    particles = [];
+                    for (let i = 0; i < COUNT; i++) particles.push(new Particle());
+                }
+
+                function drawLines() {
+                    for (let i = 0; i < particles.length; i++) {
+                        for (let j = i + 1; j < particles.length; j++) {
+                            const dx = particles[i].x - particles[j].x;
+                            const dy = particles[i].y - particles[j].y;
+                            const dist = Math.sqrt(dx * dx + dy * dy);
+                            if (dist < 100) {
+                                ctx.beginPath();
+                                ctx.strokeStyle = `rgba(255,255,255,${(1 - dist / 100) * 0.15})`;
+                                ctx.lineWidth = 0.5;
+                                ctx.moveTo(particles[i].x, particles[i].y);
+                                ctx.lineTo(particles[j].x, particles[j].y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+
+                function loop() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(function(p) {
+                        p.update();
+                        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+                        drawHeart(ctx, p.x, p.y, p.radius);
+                    });
+                    drawLines();
+                    requestAnimationFrame(loop);
+                }
+
+                window.addEventListener('resize', function() { resize(); init(); });
+                canvas.addEventListener('mousemove', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    mouse.x = e.clientX - rect.left;
+                    mouse.y = e.clientY - rect.top;
+                });
+                canvas.addEventListener('mouseleave', function() {
+                    mouse.x = null; mouse.y = null;
+                });
+
+                resize();
+                init();
+                loop();
+
+                /* ── Scroll-driven: phone shrink + slide cycling ── */
+                const scrollHeight = document.querySelector('.hero-scroll-height');
+                const phoneStack = document.getElementById('heroPhoneStack');
+                const slides = document.querySelectorAll('.hero-phone-slide');
+
+                if (!scrollHeight || !phoneStack || slides.length === 0) {
+                    console.warn('Hero scroll elements not found; skipping animation');
+                    return;
+                }
+
+                 const INITIAL_WIDTH_VW = 0.80;
+                 const INITIAL_WIDTH_MAX = 920;
+                 const FINAL_WIDTH = 380;
+                const SHRINK_END = 0.2;
+                const SLIDES_START = 0.18;
+
+                function easeOutCubic(t) {
+                    return 1 - Math.pow(1 - t, 3);
+                }
+
+                function setSlide(index) {
+                    slides.forEach(function(s, i) {
+                        s.classList.toggle('active', i === index);
+                    });
+                }
+
+                function onScroll() {
+                    const scrollY = window.scrollY;
+                    const totalScroll = scrollHeight.offsetHeight - window.innerHeight;
+                    if (totalScroll <= 0) return;
+
+                    const progress = Math.min(scrollY / totalScroll, 1);
+
+                    /* Phone shrink */
+                    const shrinkP = Math.min(progress / SHRINK_END, 1);
+                    const initialW = Math.min(window.innerWidth * INITIAL_WIDTH_VW, INITIAL_WIDTH_MAX);
+                    const currentW = initialW + (FINAL_WIDTH - initialW) * easeOutCubic(shrinkP);
+                    phoneStack.style.width = Math.max(currentW, FINAL_WIDTH) + 'px';
+
+                    /* Slide cycling */
+                    if (progress < SLIDES_START) {
+                        setSlide(0);
+                    } else {
+                        const sp = (progress - SLIDES_START) / (1 - SLIDES_START);
+                        const idx = Math.min(Math.floor(sp * 4) + 1, 4);
+                        setSlide(idx);
+                    }
+                }
+
+                window.addEventListener('scroll', onScroll, { passive: true });
+                window.addEventListener('resize', function() {
+                    phoneStack.style.width = '';
+                    onScroll();
+                });
+                onScroll();
+            })();
+            </script>
+        </section>
+     </main>
+
+    <section class="cta-section">
+        <h2>Start your lists today.</h2>
+        <p>Free on web and iOS.</p>
+        <a class="hero-cta cta-download" href="https://apps.apple.com/app/id6760205400" target="_blank" rel="noopener noreferrer" aria-label="Download Gather on the App Store">
+            <svg class="apple-icon" aria-hidden="true" width="12" height="16" viewBox="0 0 384 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+            <span class="btn-text"><span class="letter-wrapper"><span class="letter-top" style="transition-delay:0ms">D</span><span class="letter-bottom" style="transition-delay:0ms">D</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:22ms">o</span><span class="letter-bottom" style="transition-delay:22ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:44ms">w</span><span class="letter-bottom" style="transition-delay:44ms">w</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:66ms">n</span><span class="letter-bottom" style="transition-delay:66ms">n</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:88ms">l</span><span class="letter-bottom" style="transition-delay:88ms">l</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:110ms">o</span><span class="letter-bottom" style="transition-delay:110ms">o</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:132ms">a</span><span class="letter-bottom" style="transition-delay:132ms">a</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:154ms">d</span><span class="letter-bottom" style="transition-delay:154ms">d</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:176ms">&nbsp;</span><span class="letter-bottom" style="transition-delay:176ms">&nbsp;</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:198ms">A</span><span class="letter-bottom" style="transition-delay:198ms">A</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:220ms">p</span><span class="letter-bottom" style="transition-delay:220ms">p</span></span><span class="letter-wrapper"><span class="letter-top" style="transition-delay:242ms">p</span><span class="letter-bottom" style="transition-delay:242ms">p</span></span></span>
+        </a>
+    </section>
 
     <footer class="footer">
         <div class="footer-links">
             <a href="/support">Support</a>
             <a href="/privacy.html">Privacy Policy</a>
-            <a href="/app">App</a>
         </div>
         <div class="copyright">© 2026 Gather Lists</div>
     </footer>
