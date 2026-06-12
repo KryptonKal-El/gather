@@ -1054,7 +1054,7 @@ export const App = () => {
         >
           <div className={styles.storesModal}>
             <div className={styles.storesModalHeader}>
-              <h2 className={styles.storesModalTitle}>Stores</h2>
+              <h3 className={styles.storesModalTitle}>Manage Stores</h3>
               <button
                 type="button"
                 className={styles.storesModalCloseBtn}
@@ -1062,16 +1062,16 @@ export const App = () => {
                 aria-label="Close"
               >&times;</button>
             </div>
-            <div className={styles.storesModalBody}>
-              <StoreManager
-                listId={activeList.id}
-                stores={state.stores}
-                onAdd={actions.addStore}
-                onUpdate={actions.updateStore}
-                onDelete={actions.deleteStore}
-                onReorder={actions.reorderStores}
-              />
-            </div>
+            <StoreManager
+              listId={activeList.id}
+              listType={activeList.type}
+              stores={state.stores}
+              onAdd={actions.addStore}
+              onUpdate={actions.updateStore}
+              onDelete={actions.deleteStore}
+              onReorder={actions.reorderStores}
+              onSaveAsDefault={actions.saveStoresAsDefault}
+            />
           </div>
         </div>,
         document.body,

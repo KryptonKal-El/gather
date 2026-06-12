@@ -155,6 +155,13 @@ export const UserStoreDefaultsManager = ({
                         />
                         <button
                           type="button"
+                          className={styles.cancelBtn}
+                          onClick={() => setEditingId(null)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
                           className={styles.saveBtn}
                           onClick={() => {
                             handleUpdateDefault(def.id, { name: editName.trim(), color: editColor });
@@ -162,13 +169,6 @@ export const UserStoreDefaultsManager = ({
                           }}
                         >
                           Save
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.cancelBtn}
-                          onClick={() => setEditingId(null)}
-                        >
-                          Cancel
                         </button>
                       </div>
                     ) : (
@@ -215,17 +215,17 @@ export const UserStoreDefaultsManager = ({
             <div className={styles.confirmButtons}>
               <button
                 type="button"
-                className={styles.confirmBtn}
-                onClick={() => handleDeleteDefault(confirmingDeleteId)}
-              >
-                Delete
-              </button>
-              <button
-                type="button"
                 className={styles.cancelBtn}
                 onClick={() => setConfirmingDeleteId(null)}
               >
                 Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmBtn}
+                onClick={() => handleDeleteDefault(confirmingDeleteId)}
+              >
+                Delete
               </button>
             </div>
           </div>

@@ -1,10 +1,7 @@
 /* --- Main container (desktop) --- */
+/* Card chrome (background, border, padding) comes from the Manage Stores modal wrapper. */
 .container {
   margin-top: 0;
-  border: 1px solid var(--border-default);
-  border-radius: 10px;
-  background: var(--bg-card);
-  padding: 1rem;
 }
 
 /* --- Header row (title + button) --- */
@@ -174,7 +171,7 @@
   align-items: center;
   justify-content: center;
   width: 24px;
-  height: 44px;
+  height: 24px;
   flex-shrink: 0;
   background: none;
   border: none;
@@ -388,40 +385,38 @@
 }
 
 .saveBtn {
-  flex: 1;
-  padding: 0.4rem 0.75rem;
-  background: var(--info-darker);
-  color: white;
-  border: none;
-  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
   font-size: 0.85rem;
   font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s;
+  transition: background 0.15s, opacity 0.15s;
 }
 
 .saveBtn:hover {
-  background: var(--info-dark);
+  background: var(--primary-hover);
 }
 
 .cancelBtn {
-  flex: 1;
-  padding: 0.4rem 0.75rem;
-  background: var(--bg-card);
-  color: var(--text-muted);
-  border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  padding: 0.35rem 0.65rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s, color 0.15s;
+  transition: color 0.15s, background 0.15s;
 }
 
 .cancelBtn:hover {
-  background: var(--bg-hover);
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 /* iOS Action Sheet */
@@ -687,5 +682,88 @@
   .emptyHint {
     padding: 2rem 1rem;
     font-size: 0.9rem;
+  }
+}
+
+/* --- Delete All / Save as Default sections (match CategoryEditor) --- */
+.deleteAllSection {
+  display: flex;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.deleteAllButton {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--danger);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.deleteAllButton:hover {
+  background: rgba(229, 57, 53, 0.1);
+  border-color: var(--danger);
+}
+
+.saveDefaultSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.saveDefaultButton {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.saveDefaultButton:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+  border-color: var(--primary);
+}
+
+.saveDefaultSuccess {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--success, #2e7d32);
+  padding: 0.25rem 0;
+  animation: storeFadeInOut 2s ease-in-out forwards;
+}
+
+@keyframes storeFadeInOut {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 700px) {
+  .deleteAllSection,
+  .saveDefaultSection {
+    padding-top: 1rem;
+    margin-top: 0.75rem;
+  }
+
+  .deleteAllButton,
+  .saveDefaultButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-height: 44px;
   }
 }

@@ -711,17 +711,17 @@ export const RecipeSelector = ({
         />
         <button
           type="button"
-          className={`${styles.inlineBtn} ${styles.inlineSaveBtn}`}
-          onClick={handleCreateCollection}
-        >
-          Create
-        </button>
-        <button
-          type="button"
           className={`${styles.inlineBtn} ${styles.inlineCancelBtn}`}
           onClick={() => { setShowNewCollectionForm(false); setNewCollectionName(''); setNewCollectionEmoji('📁'); }}
         >
           Cancel
+        </button>
+        <button
+          type="button"
+          className={`${styles.inlineBtn} ${styles.inlineSaveBtn}`}
+          onClick={handleCreateCollection}
+        >
+          Create
         </button>
       </div>
     );

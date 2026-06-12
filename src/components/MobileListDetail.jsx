@@ -18,11 +18,11 @@ export const MobileListDetail = ({
   stores,
   history,
   suggestions,
-  sortConfig,
-  listSortConfig,
-  listCategories,
-  getEffectiveChecked,
-   _isGuest,
+  sortConfig = null,
+  listSortConfig = null,
+  listCategories = null,
+  getEffectiveChecked = (item) => item.isChecked,
+  _isGuest = false,
   onBack,
   onAddItem,
   onToggle,
@@ -34,11 +34,11 @@ export const MobileListDetail = ({
   onShareClick,
   onManageStores,
   onDuplicate,
-  onResetItems,
+  onResetItems = null,
   onSortSelect,
-  restoredItemIds,
-  onRestoreAnimationDone,
-  onNavigateToSettings,
+  restoredItemIds = null,
+  onRestoreAnimationDone = null,
+  onNavigateToSettings = null,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [duplicatingList, setDuplicatingList] = useState(false);
@@ -326,18 +326,18 @@ export const MobileListDetail = ({
               <div className={styles.editActions}>
                 <button
                   type="button"
+                  className={styles.cancelBtn}
+                  onClick={closeDuplicateModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
                   className={styles.saveBtn}
                   disabled={!duplicateName.trim()}
                   onClick={handleDuplicateConfirm}
                 >
                   Duplicate
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={closeDuplicateModal}
-                >
-                  Cancel
                 </button>
               </div>
             </div>
@@ -383,14 +383,3 @@ MobileListDetail.propTypes = {
   onNavigateToSettings: PropTypes.func,
 };
 
-MobileListDetail.defaultProps = {
-  sortConfig: null,
-  listSortConfig: null,
-  listCategories: null,
-  getEffectiveChecked: (item) => item.isChecked,
-  isGuest: false,
-  onResetItems: null,
-  restoredItemIds: null,
-  onRestoreAnimationDone: null,
-  onNavigateToSettings: null,
-};

@@ -60,14 +60,14 @@ export const DeleteCollectionDialog = ({
         )}
 
         <div className={styles.footer}>
+          <button type="button" className={styles.cancelBtn} onClick={onCancel}>
+            Cancel
+          </button>
           {!hasRecipes && (
             <button type="button" className={styles.deleteBtn} onClick={onDeleteAll}>
               Delete
             </button>
           )}
-          <button type="button" className={styles.cancelBtn} onClick={onCancel}>
-            Cancel
-          </button>
         </div>
       </div>
     </div>,

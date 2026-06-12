@@ -46,17 +46,21 @@ const SortableStoreItem = ({ id, children, isMobile }) => {
  * Renders mobile or desktop layout based on viewport.
  * @param {Object} props
  * @param {Array} props.stores - List of store objects.
+ * @param {string} [props.listType] - List type for "Save as Default" feature.
  * @param {Function} props.onAdd - Callback to add a new store.
  * @param {Function} props.onUpdate - Callback to update a store.
  * @param {Function} props.onDelete - Callback to delete a store.
  * @param {Function} props.onReorder - Callback to reorder stores.
+ * @param {Function} [props.onSaveAsDefault] - Called when "Save as Default" is confirmed.
  */
 export const StoreManager = ({
   stores,
+  listType,
   onAdd,
   onUpdate,
   onDelete,
   onReorder,
+  onSaveAsDefault,
 }) => {
   const [isCreating, setIsCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -66,6 +70,9 @@ export const StoreManager = ({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
+  const [showSaveDefaultConfirm, setShowSaveDefaultConfirm] = useState(false);
+  const [saveDefaultSuccess, setSaveDefaultSuccess] = useState(false);
   const [menuOpenId, setMenuOpenId] = useState(null);
   const isMobile = useIsMobile();
   const menuRef = useRef(null);
@@ -85,6 +92,12 @@ export const StoreManager = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [menuOpenId]);
+
+  useEffect(() => {
+    if (!saveDefaultSuccess) return;
+    const timeout = setTimeout(() => setSaveDefaultSuccess(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [saveDefaultSuccess]);
 
   const filteredStores = searchQuery.trim()
     ? stores.filter((s) => s.name.toLowerCase().includes(searchQuery.trim().toLowerCase()))
@@ -136,6 +149,70 @@ export const StoreManager = ({
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const listTypeDisplay = listType ? listType.charAt(0).toUpperCase() + listType.slice(1) : '';
+
+  const handleDeleteAll = () => {
+    ownStores.forEach((store) => onDelete(store.id));
+    setShowDeleteAllConfirm(false);
+  };
+
+  const handleSaveAsDefault = async () => {
+    if (onSaveAsDefault && listType) {
+      await onSaveAsDefault(listType, ownStores);
+      setShowSaveDefaultConfirm(false);
+      setSaveDefaultSuccess(true);
+    }
+  };
+
+  const renderFooterSections = () => (
+    <>
+      {ownStores.length > 0 && (
+        <div className={styles.deleteAllSection}>
+          <button
+            type="button"
+            className={styles.deleteAllButton}
+            onClick={() => setShowDeleteAllConfirm(true)}
+          >
+            Delete All
+          </button>
+        </div>
+      )}
+
+      {listType && onSaveAsDefault && (
+        <div className={styles.saveDefaultSection}>
+          <button
+            type="button"
+            className={styles.saveDefaultButton}
+            onClick={() => setShowSaveDefaultConfirm(true)}
+          >
+            Save as Default for {listTypeDisplay}
+          </button>
+          {saveDefaultSuccess && (
+            <div className={styles.saveDefaultSuccess}>Saved as default!</div>
+          )}
+        </div>
+      )}
+
+      {showDeleteAllConfirm && (
+        <ConfirmDialog
+          message="Delete all stores? This will remove all stores from this list."
+          onConfirm={handleDeleteAll}
+          onCancel={() => setShowDeleteAllConfirm(false)}
+        />
+      )}
+
+      {showSaveDefaultConfirm && (
+        <ConfirmDialog
+          message={`This will replace your default ${listTypeDisplay} stores with this list's stores. Continue?`}
+          confirmLabel="Save"
+          destructive={false}
+          onConfirm={handleSaveAsDefault}
+          onCancel={() => setShowSaveDefaultConfirm(false)}
+        />
+      )}
+    </>
   );
 
   const renderCreateForm = () => (
@@ -192,11 +269,11 @@ export const StoreManager = ({
               ))}
             </div>
             <div className={styles.editActions}>
-              <button type="button" className={styles.saveBtn} onClick={() => handleSaveEdit(store.id)}>
-                Save
-              </button>
               <button type="button" className={styles.cancelBtn} onClick={handleCancelEdit}>
                 Cancel
+              </button>
+              <button type="button" className={styles.saveBtn} onClick={() => handleSaveEdit(store.id)}>
+                Save
               </button>
             </div>
           </div>
@@ -386,6 +463,7 @@ export const StoreManager = ({
             </>
           )}
         </div>
+        {renderFooterSections()}
       </div>
     </div>
   );
@@ -472,6 +550,7 @@ export const StoreManager = ({
           </>
         )}
       </div>
+      {renderFooterSections()}
     </div>
   );
 
@@ -487,8 +566,10 @@ StoreManager.propTypes = {
       color: PropTypes.string.isRequired,
     })
   ).isRequired,
+  listType: PropTypes.string,
   onAdd: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onReorder: PropTypes.func.isRequired,
+  onSaveAsDefault: PropTypes.func,
 };

@@ -513,6 +513,68 @@
   padding: 0.5rem 1.25rem 1.25rem;
 }
 
+.storesBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--overlay-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: settingsFadeIn 0.15s ease;
+}
+
+.storesModal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 1rem;
+  width: 100%;
+  max-width: 440px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: settingsScaleIn 0.15s ease;
+}
+
+.storesModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.storesModalTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.storesModalCloseBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.storesModalCloseBtn:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
 @keyframes settingsFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }

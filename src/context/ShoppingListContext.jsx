@@ -499,21 +499,27 @@ export const ShoppingListProvider = ({ children }) => {
   // Actions
   // -----------------------------------------------------------------------
 
-  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery', customCategories = null) => {
+  const createListAction = useCallback(async (name, emoji = null, color = '#1565c0', type = 'grocery', customCategories = null, customStores = null) => {
     if (!userId) return;
     const newId = await dbCreateList(userId, name, userEmail, emoji, color, type);
-    
+
     const categoriesToUse = customCategories ?? getSeedCategoriesForType(type, userCategoryDefaults);
     if (categoriesToUse) {
       await dbUpdateList(userId, newId, { categories: categoriesToUse });
     }
-    
+
     // Seed stores if the list type supports them
     const typeConfig = LIST_TYPES[type];
     if (typeConfig?.fields?.store) {
-      const storeDefaults = await fetchUserStoreDefaults(userId, type);
-      for (const def of storeDefaults) {
-        await dbCreateStore(userId, newId, { name: def.name, color: def.color, sortOrder: def.sortOrder });
+      if (customStores) {
+        for (const [index, store] of customStores.entries()) {
+          await dbCreateStore(userId, newId, { name: store.name, color: store.color, sortOrder: index });
+        }
+      } else {
+        const storeDefaults = await fetchUserStoreDefaults(userId, type);
+        for (const def of storeDefaults) {
+          await dbCreateStore(userId, newId, { name: def.name, color: def.color, sortOrder: def.sortOrder });
+        }
       }
     }
     
@@ -797,6 +803,32 @@ export const ShoppingListProvider = ({ children }) => {
      setUserStoreDefaults(userStoreDefaults.filter(d => d.id !== id));
    }, [userId, userStoreDefaults]);
 
+    const saveStoresAsDefaultAction = useCallback(async (listType, storesToSave) => {
+      if (!userId) return;
+      const existing = userStoreDefaults.filter(d => d.listType === listType);
+      for (const def of existing) {
+        await dbDeleteUserStoreDefault(def.id);
+      }
+      const created = [];
+      for (const [index, store] of storesToSave.entries()) {
+        const newId = await dbCreateUserStoreDefault(userId, listType, {
+          name: store.name,
+          color: store.color,
+          sortOrder: index,
+        });
+        created.push({
+          id: newId,
+          userId,
+          listType,
+          name: store.name,
+          color: store.color ?? null,
+          sortOrder: index,
+          createdAt: new Date().toISOString(),
+        });
+      }
+      setUserStoreDefaults(prev => [...prev.filter(d => d.listType !== listType), ...created]);
+    }, [userId, userStoreDefaults]);
+
     const saveUserStoreDefaultOrderAction = useCallback(async (defaults) => {
       if (!userId) return;
       // Merge updated defaults for this list type into existing state
@@ -880,6 +912,7 @@ export const ShoppingListProvider = ({ children }) => {
      updateUserStoreDefault: updateUserStoreDefaultAction,
      deleteUserStoreDefault: deleteUserStoreDefaultAction,
      saveUserStoreDefaultOrder: saveUserStoreDefaultOrderAction,
+     saveStoresAsDefault: saveStoresAsDefaultAction,
      shareList: shareListAction,
      unshareList: unshareListAction,
      saveUserCategoryDefault: saveUserCategoryDefaultAction,

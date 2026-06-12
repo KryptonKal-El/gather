@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   DndContext,
@@ -41,11 +41,7 @@ const generateKey = (name, existingKeys) => {
 
 const SortableCategoryRow = ({
   category,
-  isExpanded,
-  onToggleExpand,
-  onRename,
-  onColorChange,
-  onKeywordsChange,
+  onEdit,
   onDelete,
   disableDrag,
 }) => {
@@ -60,11 +56,14 @@ const SortableCategoryRow = ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(category.name);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [editColor, setEditColor] = useState(category.color);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [keywordInput, setKeywordInput] = useState(
     (category.keywords ?? []).join(', ')
   );
   const customColorRef = useRef(null);
+  const menuRef = useRef(null);
+  const actionSheetRef = useRef(null);
 
   const [swipeX, setSwipeX] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
@@ -86,28 +85,47 @@ const SortableCategoryRow = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const handleNameSave = () => {
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleClickOutside = (e) => {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(e.target) &&
+        (!actionSheetRef.current || !actionSheetRef.current.contains(e.target))
+      ) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
+
+  const handleStartEdit = () => {
+    setEditName(category.name);
+    setEditColor(category.color);
+    setKeywordInput((category.keywords ?? []).join(', '));
+    setIsEditing(true);
+    setMenuOpen(false);
+  };
+
+  const handleSaveEdit = () => {
     const trimmed = editName.trim();
-    if (trimmed && trimmed !== category.name) {
-      onRename(category.key, trimmed);
-    }
-    setIsEditing(false);
-  };
-
-  const handleNameKeyDown = (e) => {
-    if (e.key === 'Enter') handleNameSave();
-    if (e.key === 'Escape') {
-      setEditName(category.name);
-      setIsEditing(false);
-    }
-  };
-
-  const handleKeywordsSave = () => {
+    if (!trimmed) return;
     const keywords = keywordInput
       .split(',')
       .map((k) => k.trim())
       .filter(Boolean);
-    onKeywordsChange(category.key, keywords);
+    onEdit(category.key, { name: trimmed, color: editColor, keywords });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+  };
+
+  const handleEditKeyDown = (e) => {
+    if (e.key === 'Enter') handleSaveEdit();
+    if (e.key === 'Escape') handleCancelEdit();
   };
 
   useEffect(() => {
@@ -182,7 +200,7 @@ const SortableCategoryRow = ({
       el.removeEventListener('touchmove', handleTouchMove);
       el.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobile, category.key, onDelete]);
+  }, [isMobile, category.key, onDelete, isEditing]);
 
   const getSwipeStyle = () => {
     if (isSwiping || swipeX !== 0) {
@@ -196,8 +214,78 @@ const SortableCategoryRow = ({
 
   const keywordCount = (category.keywords ?? []).length;
 
+  if (isEditing) {
+    return (
+      <div ref={setNodeRef} style={style} className={styles.categoryItem}>
+        <div className={styles.editForm}>
+          <input
+            type="text"
+            className={styles.nameInput}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onKeyDown={handleEditKeyDown}
+            placeholder="Category name"
+            autoFocus
+          />
+          <div className={styles.editColorPicker}>
+            {CATEGORY_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`${styles.colorSwatch} ${editColor === c ? styles.colorSelected : ''}`}
+                style={{ backgroundColor: c }}
+                onClick={() => setEditColor(c)}
+                aria-label={`Select color ${c}`}
+              />
+            ))}
+            <div className={styles.customColorWrapper}>
+              <input
+                ref={customColorRef}
+                type="color"
+                value={editColor}
+                onChange={(e) => setEditColor(e.target.value)}
+                className={styles.customColorInput}
+              />
+              <button
+                type="button"
+                className={styles.customColorBtn}
+                onClick={() => customColorRef.current?.click()}
+                aria-label="Choose custom color"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className={styles.keywordLabel}>Keywords (comma-separated)</label>
+            <input
+              type="text"
+              className={styles.keywordInput}
+              value={keywordInput}
+              onChange={(e) => setKeywordInput(e.target.value)}
+              onKeyDown={handleEditKeyDown}
+              placeholder="e.g. milk, cheese, yogurt"
+            />
+          </div>
+          <div className={styles.editActions}>
+            <button type="button" className={styles.cancelBtn} onClick={handleCancelEdit}>
+              Cancel
+            </button>
+            <button type="button" className={styles.saveBtn} onClick={handleSaveEdit} disabled={!editName.trim()}>
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={setNodeRef} style={style} className={styles.categoryItem}>
+    <div ref={setNodeRef} style={style} className={`${styles.categoryItem} ${menuOpen ? styles.menuOpenItem : ''}`}>
       <div className={styles.swipeContainer}>
         {isMobile && (isSwiping || swipeX !== 0) && (
           <div className={`${styles.swipeBehind} ${Math.abs(swipeX) >= 80 ? styles.swipeBehindActive : ''}`}>
@@ -230,108 +318,81 @@ const SortableCategoryRow = ({
               </button>
             )}
 
-            <button
-              type="button"
+            <span
               className={styles.colorDot}
               style={{ backgroundColor: category.color }}
-              onClick={() => setShowColorPicker(!showColorPicker)}
-              aria-label="Change color"
             />
 
-            {isEditing ? (
-              <input
-                type="text"
-                className={styles.nameInput}
-                value={editName}
-                onChange={(e) => setEditName(e.target.value)}
-                onBlur={handleNameSave}
-                onKeyDown={handleNameKeyDown}
-                autoFocus
-              />
-            ) : (
-              <button
-                type="button"
-                className={styles.categoryName}
-                onClick={() => {
-                  setEditName(category.name);
-                  setIsEditing(true);
-                }}
-              >
-                {category.name}
-              </button>
-            )}
+            <span className={styles.categoryName}>{category.name}</span>
 
             {keywordCount > 0 && (
               <span className={styles.keywordCount}>{keywordCount}</span>
             )}
 
-            <button
-              type="button"
-              className={styles.expandBtn}
-              onClick={() => onToggleExpand(category.key)}
-              aria-label={isExpanded ? 'Collapse keywords' : 'Expand keywords'}
-            >
-              {isExpanded ? '▲' : '▼'}
-            </button>
+            <div className={styles.menuWrap} ref={menuOpen ? menuRef : null}>
+              <button
+                type="button"
+                className={styles.menuBtn}
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label="Category options"
+              >
+                ⋯
+              </button>
+              {menuOpen && !isMobile && (
+                <div className={styles.menuDropdown}>
+                  <button
+                    type="button"
+                    className={styles.menuItem}
+                    onClick={handleStartEdit}
+                  >
+                    Edit Category
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.menuItem} ${styles.menuDanger}`}
+                    onClick={() => { onDelete(category.key); setMenuOpen(false); }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {showColorPicker && (
-        <div className={styles.colorPickerDropdown}>
-          {CATEGORY_COLORS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={`${styles.colorSwatch} ${category.color === c ? styles.colorSelected : ''}`}
-              style={{ backgroundColor: c }}
-              onClick={() => {
-                onColorChange(category.key, c);
-                setShowColorPicker(false);
-              }}
-              aria-label={`Select color ${c}`}
-            />
-          ))}
-          <div className={styles.customColorWrapper}>
-            <input
-              ref={customColorRef}
-              type="color"
-              value={category.color}
-              onChange={(e) => {
-                onColorChange(category.key, e.target.value);
-                setShowColorPicker(false);
-              }}
-              className={styles.customColorInput}
-            />
+      {menuOpen && isMobile && (
+        <>
+          <div className={styles.actionSheetBackdrop} onClick={() => setMenuOpen(false)} />
+          <div className={styles.actionSheet} ref={actionSheetRef}>
+            <div className={styles.actionSheetGroup}>
+              <div className={styles.actionSheetTitle}>{category.name}</div>
+              <button
+                type="button"
+                className={styles.actionSheetItem}
+                onClick={handleStartEdit}
+              >
+                Edit Category
+              </button>
+              <button
+                type="button"
+                className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
+                onClick={() => { onDelete(category.key); setMenuOpen(false); }}
+              >
+                Delete Category
+              </button>
+            </div>
             <button
               type="button"
-              className={styles.customColorBtn}
-              onClick={() => customColorRef.current?.click()}
-              aria-label="Choose custom color"
+              className={styles.actionSheetCancel}
+              onClick={() => setMenuOpen(false)}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-              </svg>
+              Cancel
             </button>
           </div>
-        </div>
+        </>
       )}
 
-      {isExpanded && (
-        <div className={styles.keywordEditor}>
-          <label className={styles.keywordLabel}>Keywords (comma-separated)</label>
-          <input
-            type="text"
-            className={styles.keywordInput}
-            value={keywordInput}
-            onChange={(e) => setKeywordInput(e.target.value)}
-            onBlur={handleKeywordsSave}
-            placeholder="e.g. milk, cheese, yogurt"
-          />
-        </div>
-      )}
     </div>
   );
 };
@@ -339,18 +400,18 @@ const SortableCategoryRow = ({
 /**
  * Category editor for managing list categories.
  * Supports adding, removing, renaming, reordering, color changing, and keyword editing.
- * Uses deferred saves - changes are only persisted when user clicks Save.
+ * Changes apply immediately - every edit calls onSave right away.
  * @param {Object} props
  * @param {Array} props.categories - Array of category objects
  * @param {string} [props.listType] - List type for "Save as Default" feature
- * @param {Function} props.onSave - Called when user explicitly saves changes
+ * @param {Function} props.onSave - Called with the updated categories after every change
  * @param {Function} [props.onSaveAsDefault] - Called when "Save as Default" is clicked
- * @param {Function} [props.onClose] - Called when close/cancel button is clicked
+ * @param {Function} [props.onClose] - Called when the close button is clicked
  * @param {boolean} [props.showHeader=true] - Whether to show the header bar
+ * @param {boolean} [props.embedded=false] - Strips the card chrome when hosted inside another container
  */
-export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true }) => {
+export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true, embedded = false }) => {
   const [localCategories, setLocalCategories] = useState(categories);
-  const [expandedKey, setExpandedKey] = useState(null);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(CATEGORY_COLORS[0]);
   const [confirmingDeleteKey, setConfirmingDeleteKey] = useState(null);
@@ -358,21 +419,13 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const [saveDefaultSuccess, setSaveDefaultSuccess] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
-  const [showNewColorPicker, setShowNewColorPicker] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const newCustomColorRef = useRef(null);
-  const [baselineCategories, setBaselineCategories] = useState(categories);
-
-  const hasChanges = useMemo(
-    () => JSON.stringify(localCategories) !== JSON.stringify(baselineCategories),
-    [localCategories, baselineCategories]
-  );
 
   const categoriesJson = JSON.stringify(categories);
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocalCategories(categories);
-    setBaselineCategories(categories);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [categoriesJson]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -389,17 +442,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
 
   const updateLocal = (updated) => {
     setLocalCategories(updated);
-  };
-
-  const handleSave = () => {
-    onSave(localCategories);
-    setBaselineCategories(localCategories);
-    if (onClose) onClose();
-  };
-
-  const handleCancel = () => {
-    setLocalCategories(baselineCategories);
-    if (onClose) onClose();
+    onSave(updated);
   };
 
   const handleDragEnd = (event) => {
@@ -428,26 +471,12 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
     setNewName('');
     setNewColor(CATEGORY_COLORS[0]);
     setSearchQuery('');
-    setShowNewColorPicker(false);
+    setIsCreating(false);
   };
 
-  const handleRename = (key, newNameValue) => {
+  const handleEdit = (key, updates) => {
     const updated = localCategories.map((c) =>
-      c.key === key ? { ...c, name: newNameValue } : c
-    );
-    updateLocal(updated);
-  };
-
-  const handleColorChange = (key, color) => {
-    const updated = localCategories.map((c) =>
-      c.key === key ? { ...c, color } : c
-    );
-    updateLocal(updated);
-  };
-
-  const handleKeywordsChange = (key, keywords) => {
-    const updated = localCategories.map((c) =>
-      c.key === key ? { ...c, keywords } : c
+      c.key === key ? { ...c, ...updates } : c
     );
     updateLocal(updated);
   };
@@ -460,11 +489,6 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
     const updated = localCategories.filter((c) => c.key !== confirmingDeleteKey);
     updateLocal(updated);
     setConfirmingDeleteKey(null);
-    if (expandedKey === confirmingDeleteKey) setExpandedKey(null);
-  };
-
-  const handleToggleExpand = (key) => {
-    setExpandedKey(expandedKey === key ? null : key);
   };
 
   const handleSaveAsDefault = async () => {
@@ -472,7 +496,6 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       await onSaveAsDefault(listType, localCategories);
       setShowSaveDefaultConfirm(false);
       setSaveDefaultSuccess(true);
-      setBaselineCategories(localCategories);
     }
   };
 
@@ -487,35 +510,36 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
   const handleDeleteAll = () => {
     updateLocal([]);
     setShowDeleteAllConfirm(false);
-    setExpandedKey(null);
   };
 
   return (
-    <div className={styles.editor}>
+    <div className={`${styles.editor} ${embedded ? styles.editorEmbedded : ''}`}>
       {showHeader && (
         <div className={styles.header}>
-          <h3 className={styles.title}>Edit Categories</h3>
-          <div className={styles.headerActions}>
-            {onClose && (
-              <button
-                type="button"
-                className={styles.cancelBtn}
-                onClick={handleCancel}
-              >
-                Cancel
-              </button>
-            )}
+          <h3 className={styles.title}>Manage Categories</h3>
+          {onClose && (
             <button
               type="button"
-              className={styles.saveBtn}
-              onClick={handleSave}
-              disabled={!hasChanges}
+              className={styles.closeBtn}
+              onClick={onClose}
+              aria-label="Close"
             >
-              Save
+              &times;
             </button>
-          </div>
+          )}
         </div>
       )}
+
+      <div className={styles.headerRow}>
+        <h4 className={styles.sectionTitle}>Your Categories ({localCategories.length})</h4>
+        <button
+          type="button"
+          className={styles.newBtn}
+          onClick={() => setIsCreating(!isCreating)}
+        >
+          {isCreating ? 'Cancel' : '+ New'}
+        </button>
+      </div>
 
       <div className={styles.searchBarWrapper}>
         <input
@@ -526,6 +550,61 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
           placeholder="Search categories..."
         />
       </div>
+
+      {isCreating && (
+        <div className={styles.createForm}>
+          <input
+            type="text"
+            className={styles.nameInput}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            placeholder="Category name (e.g. Produce, Snacks)"
+            autoFocus
+          />
+          <div className={styles.editColorPicker}>
+            {CATEGORY_COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                style={{ backgroundColor: c }}
+                onClick={() => setNewColor(c)}
+                aria-label={`Select color ${c}`}
+              />
+            ))}
+            <div className={styles.customColorWrapper}>
+              <input
+                ref={newCustomColorRef}
+                type="color"
+                value={newColor}
+                onChange={(e) => setNewColor(e.target.value)}
+                className={styles.customColorInput}
+              />
+              <button
+                type="button"
+                className={styles.customColorBtn}
+                onClick={() => newCustomColorRef.current?.click()}
+                aria-label="Choose custom color"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            className={styles.createBtn}
+            onClick={handleAdd}
+            disabled={!newName.trim()}
+          >
+            Create
+          </button>
+        </div>
+      )}
 
       <div className={styles.categoryList}>
         <DndContext
@@ -542,86 +621,13 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
               <SortableCategoryRow
                 key={cat.key}
                 category={cat}
-                isExpanded={expandedKey === cat.key}
-                onToggleExpand={handleToggleExpand}
-                onRename={handleRename}
-                onColorChange={handleColorChange}
-                onKeywordsChange={handleKeywordsChange}
+                onEdit={handleEdit}
                 onDelete={handleDelete}
                 disableDrag={isSearching}
               />
             ))}
           </SortableContext>
         </DndContext>
-      </div>
-
-      <div className={styles.addRow}>
-        <div className={styles.addColorWrapper}>
-          <button
-            type="button"
-            className={styles.addColorBtn}
-            style={{ backgroundColor: newColor }}
-            onClick={() => setShowNewColorPicker(!showNewColorPicker)}
-            aria-label="Choose color for new category"
-          />
-          {showNewColorPicker && (
-            <div className={styles.addColorDropdown}>
-              {CATEGORY_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
-                  style={{ backgroundColor: c }}
-                  onClick={() => {
-                    setNewColor(c);
-                    setShowNewColorPicker(false);
-                  }}
-                  aria-label={`Select color ${c}`}
-                />
-              ))}
-              <div className={styles.customColorWrapper}>
-                <input
-                  ref={newCustomColorRef}
-                  type="color"
-                  value={newColor}
-                  onChange={(e) => {
-                    setNewColor(e.target.value);
-                    setShowNewColorPicker(false);
-                  }}
-                  className={styles.customColorInput}
-                />
-                <button
-                  type="button"
-                  className={styles.customColorBtn}
-                  onClick={() => newCustomColorRef.current?.click()}
-                  aria-label="Choose custom color"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="16" />
-                    <line x1="8" y1="12" x2="16" y2="12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        <input
-          type="text"
-          className={styles.addInput}
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          placeholder="New category name..."
-        />
-        <button
-          type="button"
-          className={styles.addBtn}
-          onClick={handleAdd}
-          disabled={!newName.trim()}
-        >
-          Add
-        </button>
       </div>
 
       {localCategories.length > 0 && (
@@ -651,22 +657,11 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
         </div>
       )}
 
-      {!showHeader && (
-        <div className={styles.footerActions}>
-          <button
-            type="button"
-            className={styles.saveBtn}
-            onClick={handleSave}
-            disabled={!hasChanges}
-          >
-            Save Changes
-          </button>
-        </div>
-      )}
-
       {showSaveDefaultConfirm && (
         <ConfirmDialog
           message={`This will replace your default ${listTypeDisplay} categories with this list's categories. Continue?`}
+          confirmLabel="Save"
+          destructive={false}
           onConfirm={handleSaveAsDefault}
           onCancel={() => setShowSaveDefaultConfirm(false)}
         />
@@ -705,4 +700,5 @@ CategoryEditor.propTypes = {
   onSaveAsDefault: PropTypes.func,
   onClose: PropTypes.func,
   showHeader: PropTypes.bool,
+  embedded: PropTypes.bool,
 };

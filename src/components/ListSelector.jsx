@@ -20,6 +20,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { EmojiPicker } from './EmojiPicker.jsx';
 import { CategoryEditor } from './CategoryEditor.jsx';
+import { StoreManager } from './StoreManager.jsx';
 import { AvatarGroup } from './AvatarGroup.jsx';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
@@ -70,7 +71,8 @@ const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo', 'project'];
 /**
  * Sidebar/dropdown for managing multiple shopping lists.
  * Shows all lists (owned + shared) with emoji icons, allows creating new ones,
- * and provides a three-dot menu with Name & Icon, Share Settings, and Delete List.
+ * and provides a three-dot menu with Name, Icon & Color (including list type),
+ * Manage Stores, Manage Categories, Share Settings, Duplicate, and Delete List.
  */
 export const ListSelector = ({
   lists,
@@ -101,11 +103,13 @@ export const ListSelector = ({
   const [editName, setEditName] = useState('');
   const [editEmoji, setEditEmoji] = useState(null);
   const [editColor, setEditColor] = useState('#1565c0');
-  const [changingTypeForId, setChangingTypeForId] = useState(null);
-  const [pendingTypeChange, setPendingTypeChange] = useState(null);
+  const [editType, setEditType] = useState('grocery');
+  const [pendingEditSave, setPendingEditSave] = useState(null);
   const [editingCategoriesForId, setEditingCategoriesForId] = useState(null);
   const [showCategoryPreview, setShowCategoryPreview] = useState(false);
   const [customCategories, setCustomCategories] = useState(null);
+  const [showStorePreview, setShowStorePreview] = useState(false);
+  const [customStores, setCustomStores] = useState(null);
   const menuRef = useRef(null);
   const isMobile = useIsMobile();
   const { state, actions } = useShoppingList();
@@ -120,6 +124,35 @@ export const ListSelector = ({
     if (userDefault?.categories?.length > 0) return userDefault.categories;
     return getSystemDefaultCategories(newType);
   }, [newType, customCategories, userCategoryDefaults]);
+
+  const userStoreDefaults = useMemo(() => state.userStoreDefaults ?? [], [state.userStoreDefaults]);
+  const newTypeSupportsStores = !!LIST_TYPES[newType]?.fields?.store;
+
+  const resolvedPreviewStores = useMemo(() => {
+    if (!newTypeSupportsStores) return null;
+    if (customStores) return customStores;
+    return userStoreDefaults
+      .filter((d) => d.listType === newType)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((d) => ({ id: `default-${d.id}`, name: d.name, color: d.color ?? LIST_PRESET_COLORS[0] }));
+  }, [newTypeSupportsStores, customStores, userStoreDefaults, newType]);
+
+  const updatePreviewStores = (stores) => setCustomStores(stores);
+
+  const handlePreviewStoreAdd = (name, color) => {
+    const current = customStores ?? resolvedPreviewStores ?? [];
+    updatePreviewStores([...current, { id: `preview-${crypto.randomUUID()}`, name, color }]);
+  };
+
+  const handlePreviewStoreUpdate = (id, updates) => {
+    const current = customStores ?? resolvedPreviewStores ?? [];
+    updatePreviewStores(current.map((s) => (s.id === id ? { ...s, ...updates } : s)));
+  };
+
+  const handlePreviewStoreDelete = (id) => {
+    const current = customStores ?? resolvedPreviewStores ?? [];
+    updatePreviewStores(current.filter((s) => s.id !== id));
+  };
 
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -171,7 +204,8 @@ export const ListSelector = ({
     const trimmed = newName.trim();
     if (!trimmed) return;
     const categoriesToPass = showCategoryPreview ? customCategories : null;
-    onCreate(trimmed, newEmoji, newColor, newType, categoriesToPass);
+    const storesToPass = showStorePreview ? customStores : null;
+    onCreate(trimmed, newEmoji, newColor, newType, categoriesToPass, storesToPass);
     setNewName('');
     setNewEmoji(null);
     setNewColor('#1565c0');
@@ -180,6 +214,8 @@ export const ListSelector = ({
     setSearchQuery('');
     setShowCategoryPreview(false);
     setCustomCategories(null);
+    setShowStorePreview(false);
+    setCustomStores(null);
   };
 
   const handleStartEdit = (list) => {
@@ -187,6 +223,7 @@ export const ListSelector = ({
     setEditName(list.name);
     setEditEmoji(list.emoji ?? null);
     setEditColor(list.color ?? '#1565c0');
+    setEditType(list.type ?? 'grocery');
     setMenuOpenId(null);
   };
 
@@ -196,7 +233,51 @@ export const ListSelector = ({
       setEditingId(null);
       return;
     }
-    onUpdateDetails(id, { name: trimmed, emoji: editEmoji, color: editColor });
+    const baseUpdates = { name: trimmed, emoji: editEmoji, color: editColor };
+    const list = lists.find((l) => l.id === id);
+    const currentType = list?.type ?? 'grocery';
+    const isOwned = list && !list._isShared;
+    if (!isOwned || editType === currentType) {
+      onUpdateDetails(id, baseUpdates);
+      setEditingId(null);
+      return;
+    }
+
+    const cfg = LIST_TYPES[editType];
+    const fromCategoryType = CATEGORY_SUPPORTED_TYPES.includes(currentType);
+    const toCategoryType = CATEGORY_SUPPORTED_TYPES.includes(editType);
+    const updates = { ...baseUpdates, type: editType };
+    let message;
+    if (fromCategoryType && toCategoryType) {
+      updates.categories = resolveNewCategories(editType);
+      message = `Changing to ${cfg.label} will reset this list's categories to your ${cfg.label} defaults. Save anyway?`;
+    } else if (fromCategoryType) {
+      updates.categories = null;
+      message = `Changing to ${cfg.label} will remove all categories from this list. Save anyway?`;
+    } else if (toCategoryType) {
+      updates.categories = resolveNewCategories(editType);
+      message = `Changing to ${cfg.label} will add default ${cfg.label} categories. Save anyway?`;
+    } else {
+      message = `Change list type to ${cfg.label}? Save anyway?`;
+    }
+    setPendingEditSave({ id, updates, message });
+  };
+
+  const applyPendingEditSave = async () => {
+    if (!pendingEditSave) return;
+    const { id, updates } = pendingEditSave;
+    onUpdateDetails(id, updates);
+    const currentList = lists.find((l) => l.id === id);
+    if (currentList?.sortConfig) {
+      const newTypeConfig = LIST_TYPES[updates.type];
+      const hasInvalidLevels = currentList.sortConfig.some(
+        (level) => !newTypeConfig.sortLevels.includes(level)
+      );
+      if (hasInvalidLevels) {
+        await updateListSortConfig(id, null);
+      }
+    }
+    setPendingEditSave(null);
     setEditingId(null);
   };
 
@@ -205,22 +286,18 @@ export const ListSelector = ({
     if (e.key === 'Escape') setEditingId(null);
   };
 
-  const renderTypeGrid = () => (
+  const renderTypeGrid = (selectedType, onSelectType) => (
     <div className={styles.typeGrid}>
       {LIST_TYPE_IDS.map((typeId) => {
         const cfg = LIST_TYPES[typeId];
-        const isSelected = newType === typeId;
+        const isSelected = selectedType === typeId;
         const IconComponent = TYPE_ICON_MAP[typeId];
         return (
           <button
             key={typeId}
             type="button"
             className={`${styles.typeCell} ${isSelected ? styles.typeCellSelected : ''}`}
-            onClick={() => {
-              setNewType(typeId);
-              setCustomCategories(null);
-              setShowCategoryPreview(false);
-            }}
+            onClick={() => onSelectType(typeId)}
           >
             <span className={styles.typeCellIcon}><IconComponent size={28} /></span>
             <span className={styles.typeCellLabel}>{cfg.label}</span>
@@ -234,59 +311,6 @@ export const ListSelector = ({
     const userDefault = userCategoryDefaults.find(d => d.listType === newType);
     if (userDefault?.categories?.length > 0) return userDefault.categories;
     return getSystemDefaultCategories(newType);
-  };
-
-  const renderChangeTypeGrid = (list) => {
-    const currentType = list.type ?? 'grocery';
-    const fromCategoryType = CATEGORY_SUPPORTED_TYPES.includes(currentType);
-
-    return (
-      <div className={styles.typeGrid}>
-        {LIST_TYPE_IDS.map((typeId) => {
-          const cfg = LIST_TYPES[typeId];
-          const isCurrent = currentType === typeId;
-          const IconComponent = TYPE_ICON_MAP[typeId];
-          const toCategoryType = CATEGORY_SUPPORTED_TYPES.includes(typeId);
-
-          return (
-            <button
-              key={typeId}
-              type="button"
-              className={`${styles.typeCell} ${isCurrent ? styles.typeCellSelected : ''}`}
-              onClick={() => {
-                if (!isCurrent) {
-                  if (fromCategoryType && toCategoryType) {
-                    setPendingTypeChange({
-                      listId: list.id,
-                      newType: typeId,
-                      newLabel: cfg.label,
-                      categoryMessage: `Changing to ${cfg.label} will reset this list's categories to your ${cfg.label} defaults. Continue?`,
-                      newCategories: resolveNewCategories(typeId),
-                    });
-                  } else if (fromCategoryType && !toCategoryType) {
-                    onUpdateDetails(list.id, { type: typeId, categories: null });
-                    setChangingTypeForId(null);
-                    return;
-                  } else if (!fromCategoryType && toCategoryType) {
-                    onUpdateDetails(list.id, { type: typeId, categories: resolveNewCategories(typeId) });
-                    setChangingTypeForId(null);
-                    return;
-                  } else {
-                    onUpdateDetails(list.id, { type: typeId });
-                    setChangingTypeForId(null);
-                    return;
-                  }
-                }
-                setChangingTypeForId(null);
-              }}
-            >
-              <span className={styles.typeCellIcon}><IconComponent size={28} /></span>
-              <span className={styles.typeCellLabel}>{cfg.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
   };
 
   const query = searchQuery.toLowerCase().trim();
@@ -376,26 +400,6 @@ export const ListSelector = ({
                 <span className={styles.menuIcon}>✏️</span>
                 Name, Icon &amp; Color
               </button>
-              {isOwned && (
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
-                >
-                  <span className={styles.menuIcon}>🔄</span>
-                  List Type
-                </button>
-              )}
-               {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                 <button
-                   type="button"
-                   className={styles.menuItem}
-                   onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                 >
-                   <span className={styles.menuIcon}>🏷️</span>
-                   Edit Categories
-                 </button>
-               )}
                {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                  <button
                    type="button"
@@ -404,6 +408,16 @@ export const ListSelector = ({
                  >
                    <span className={styles.menuIcon}>🏪</span>
                    Manage Stores
+                 </button>
+               )}
+               {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                 >
+                   <span className={styles.menuIcon}>🏷️</span>
+                   Manage Categories
                  </button>
                )}
                {isOwned && onShareClick && (
@@ -446,14 +460,17 @@ export const ListSelector = ({
                 </button>
               )}
               {isOwned && (
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.menuDanger}`}
-                  onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
-                >
-                  <span className={styles.menuIcon}>🗑️</span>
-                  Delete List
-                </button>
+                <>
+                  <div className={styles.menuSeparator} role="separator" />
+                  <button
+                    type="button"
+                    className={`${styles.menuItem} ${styles.menuDanger}`}
+                    onClick={() => { setConfirmingDeleteId(list.id); setMenuOpenId(null); }}
+                  >
+                    <span className={styles.menuIcon}>🗑️</span>
+                    Delete List
+                  </button>
+                </>
               )}
             </div>
           )}
@@ -478,24 +495,6 @@ export const ListSelector = ({
                 >
                   Name, Icon &amp; Color
                 </button>
-                {isOwned && (
-                  <button
-                    type="button"
-                    className={styles.actionSheetItem}
-                    onClick={() => { setChangingTypeForId(list.id); setMenuOpenId(null); }}
-                  >
-                    List Type
-                  </button>
-                )}
-                  {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
-                    <button
-                      type="button"
-                      className={styles.actionSheetItem}
-                      onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
-                    >
-                      Edit Categories
-                    </button>
-                  )}
                  {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                    <button
                      type="button"
@@ -505,6 +504,15 @@ export const ListSelector = ({
                      Manage Stores
                    </button>
                  )}
+                  {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                    <button
+                      type="button"
+                      className={styles.actionSheetItem}
+                      onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
+                    >
+                      Manage Categories
+                    </button>
+                  )}
                  {isOwned && onShareClick && (
                   <button
                     type="button"
@@ -574,33 +582,6 @@ export const ListSelector = ({
           />
         )}
 
-        {pendingTypeChange && pendingTypeChange.listId === list.id && (
-          <ConfirmDialog
-            message={pendingTypeChange.categoryMessage || `Change to ${pendingTypeChange.newLabel}? Some fields may be hidden but your data will be preserved.`}
-            confirmLabel="Change"
-            onConfirm={async () => {
-              const { listId, newType: selectedType, newCategories } = pendingTypeChange;
-              const updates = { type: selectedType };
-              if (newCategories !== undefined) {
-                updates.categories = newCategories;
-              }
-              onUpdateDetails(listId, updates);
-              const currentList = lists.find((l) => l.id === listId);
-              if (currentList?.sortConfig) {
-                const newTypeConfig = LIST_TYPES[selectedType];
-                const hasInvalidLevels = currentList.sortConfig.some(
-                  (level) => !newTypeConfig.sortLevels.includes(level)
-                );
-                if (hasInvalidLevels) {
-                  await updateListSortConfig(listId, null);
-                }
-              }
-              setPendingTypeChange(null);
-              setChangingTypeForId(null);
-            }}
-            onCancel={() => setPendingTypeChange(null)}
-          />
-        )}
       </div>
     );
   };
@@ -611,11 +592,11 @@ export const ListSelector = ({
         <div className={styles.header}>
           <h2 className={styles.title}>Lists</h2>
           <button
-            className={`${styles.circleBtn} ${isCreating ? styles.circleBtnCancel : ''}`}
-            onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
-            aria-label={isCreating ? 'Cancel' : 'New list'}
+            className={styles.circleBtn}
+            onClick={() => setIsCreating(true)}
+            aria-label="New list"
           >
-            {isCreating ? '×' : '+'}
+            +
           </button>
         </div>
 
@@ -655,71 +636,6 @@ export const ListSelector = ({
       </div>
 
       <div className={styles.scrollArea}>
-        {isCreating && (
-          <div className={styles.createForm}>
-            {renderTypeGrid()}
-            {newType !== null && (
-              <>
-                <div className={styles.createRow}>
-                  <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
-                  <input
-                    className={styles.createInput}
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="List name..."
-                    autoFocus
-                  />
-                </div>
-                <div className={styles.colorPicker}>
-                  {LIST_PRESET_COLORS.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
-                      style={{ backgroundColor: c }}
-                      onClick={() => setNewColor(c)}
-                      aria-label={`Select color ${c}`}
-                    />
-                  ))}
-                </div>
-                {CATEGORY_SUPPORTED_TYPES.includes(newType) && (
-                  <div className={styles.categoryPreviewSection}>
-                    <button
-                      type="button"
-                      className={styles.categoryPreviewToggle}
-                      onClick={() => setShowCategoryPreview(!showCategoryPreview)}
-                    >
-                      <span className={styles.categoryPreviewLabel}>Customize Categories</span>
-                      <span className={`${styles.categoryPreviewChevron} ${showCategoryPreview ? styles.categoryPreviewChevronOpen : ''}`}>
-                        &#x276F;
-                      </span>
-                    </button>
-                    {showCategoryPreview && resolvedPreviewCategories && (
-                      <div className={styles.categoryPreviewEditor}>
-                        <CategoryEditor
-                          categories={customCategories ?? resolvedPreviewCategories}
-                          listType={newType}
-                          onSave={setCustomCategories}
-                          showHeader={false}
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-                <button
-                  className={styles.createBtn}
-                  type="button"
-                  disabled={!newName.trim()}
-                  onClick={handleCreate}
-                >
-                  Create
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
         <div className={styles.lists}>
           {filteredLists.length === 0 && (
             <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
@@ -753,9 +669,9 @@ export const ListSelector = ({
         <h2 className={styles.title}>Lists</h2>
         <button
           className={styles.newBtn}
-          onClick={() => { if (isCreating) setNewType('grocery'); setIsCreating(!isCreating); }}
+          onClick={() => setIsCreating(true)}
         >
-          {isCreating ? 'Cancel' : '+ New'}
+          + New
         </button>
       </div>
 
@@ -793,71 +709,6 @@ export const ListSelector = ({
         )}
       </div>
 
-      {isCreating && (
-        <div className={styles.createForm}>
-          {renderTypeGrid()}
-          {newType !== null && (
-            <>
-              <div className={styles.createRow}>
-                <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
-                <input
-                  className={styles.createInput}
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="List name..."
-                  autoFocus
-                />
-              </div>
-              <div className={styles.colorPicker}>
-                {LIST_PRESET_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
-                    style={{ backgroundColor: c }}
-                    onClick={() => setNewColor(c)}
-                    aria-label={`Select color ${c}`}
-                  />
-                ))}
-              </div>
-              {CATEGORY_SUPPORTED_TYPES.includes(newType) && (
-                <div className={styles.categoryPreviewSection}>
-                  <button
-                    type="button"
-                    className={styles.categoryPreviewToggle}
-                    onClick={() => setShowCategoryPreview(!showCategoryPreview)}
-                  >
-                    <span className={styles.categoryPreviewLabel}>Customize Categories</span>
-                    <span className={`${styles.categoryPreviewChevron} ${showCategoryPreview ? styles.categoryPreviewChevronOpen : ''}`}>
-                      &#x276F;
-                    </span>
-                  </button>
-                  {showCategoryPreview && resolvedPreviewCategories && (
-                    <div className={styles.categoryPreviewEditor}>
-                      <CategoryEditor
-                        categories={customCategories ?? resolvedPreviewCategories}
-                        listType={newType}
-                        onSave={setCustomCategories}
-                        showHeader={false}
-                      />
-                    </div>
-                  )}
-                </div>
-              )}
-              <button
-                className={styles.createBtn}
-                type="button"
-                disabled={!newName.trim()}
-                onClick={handleCreate}
-              >
-                Create
-              </button>
-            </>
-          )}
-        </div>
-      )}
-
       <div className={styles.lists}>
         {filteredLists.length === 0 && (
           <p className={styles.emptyMsg}>No lists yet. Create one to get started.</p>
@@ -884,6 +735,18 @@ export const ListSelector = ({
     </div>
   );
 
+  const closeCreateModal = () => {
+    setIsCreating(false);
+    setNewName('');
+    setNewEmoji(null);
+    setNewColor('#1565c0');
+    setNewType('grocery');
+    setShowCategoryPreview(false);
+    setCustomCategories(null);
+    setShowStorePreview(false);
+    setCustomStores(null);
+  };
+
   const handleEditModalKeyDown = (e) => {
     if (e.key === 'Escape') setEditingId(null);
   };
@@ -906,16 +769,7 @@ export const ListSelector = ({
     }
   };
 
-  const handleTypeModalKeyDown = (e) => {
-    if (e.key === 'Escape') setChangingTypeForId(null);
-  };
-
-  const handleTypeModalBackdropClick = (e) => {
-    if (e.target === e.currentTarget) setChangingTypeForId(null);
-  };
-
   const editingList = editingId ? lists.find((l) => l.id === editingId) : null;
-  const changingTypeList = changingTypeForId ? lists.find((l) => l.id === changingTypeForId) : null;
   const editingCategoriesList = editingCategoriesForId ? lists.find((l) => l.id === editingCategoriesForId) : null;
   const duplicatingList = duplicatingListId ? lists.find((l) => l.id === duplicatingListId) : null;
   const shouldShowDuplicateReset = duplicatingList?.type === 'guest_list';
@@ -923,6 +777,128 @@ export const ListSelector = ({
   return (
     <>
       {isMobile ? renderMobileLayout() : renderDesktopLayout()}
+
+      {isCreating && createPortal(
+        <div
+          className={styles.modalBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) closeCreateModal(); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') closeCreateModal(); }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="New List"
+        >
+          <div className={styles.modalCard}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>New List</h3>
+              <button
+                className={styles.modalCloseBtn}
+                onClick={closeCreateModal}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.createRow}>
+                <EmojiPicker value={newEmoji} onSelect={setNewEmoji} />
+                <input
+                  className={styles.createInput}
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && newName.trim()) handleCreate(e); }}
+                  placeholder="List name..."
+                  autoFocus
+                />
+              </div>
+              <div className={styles.colorPicker}>
+                {LIST_PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    className={`${styles.colorSwatch} ${newColor === c ? styles.colorSelected : ''}`}
+                    style={{ backgroundColor: c }}
+                    onClick={() => setNewColor(c)}
+                    aria-label={`Select color ${c}`}
+                  />
+                ))}
+              </div>
+              <div className={styles.editTypeSection}>
+                <div className={styles.editSectionLabel}>List Type</div>
+                {renderTypeGrid(newType, (typeId) => { setNewType(typeId); setCustomCategories(null); setShowCategoryPreview(false); setCustomStores(null); setShowStorePreview(false); })}
+              </div>
+              {newTypeSupportsStores && (
+                <div className={styles.categoryPreviewSection}>
+                  <button
+                    type="button"
+                    className={styles.categoryPreviewToggle}
+                    onClick={() => setShowStorePreview(!showStorePreview)}
+                  >
+                    <span className={styles.categoryPreviewLabel}>Customize Stores</span>
+                    <span className={`${styles.categoryPreviewChevron} ${showStorePreview ? styles.categoryPreviewChevronOpen : ''}`}>
+                      &#x276F;
+                    </span>
+                  </button>
+                  {showStorePreview && resolvedPreviewStores && (
+                    <div className={styles.categoryPreviewEditor}>
+                      <StoreManager
+                        stores={customStores ?? resolvedPreviewStores}
+                        onAdd={handlePreviewStoreAdd}
+                        onUpdate={handlePreviewStoreUpdate}
+                        onDelete={handlePreviewStoreDelete}
+                        onReorder={updatePreviewStores}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+              {CATEGORY_SUPPORTED_TYPES.includes(newType) && (
+                <div className={styles.categoryPreviewSection}>
+                  <button
+                    type="button"
+                    className={styles.categoryPreviewToggle}
+                    onClick={() => setShowCategoryPreview(!showCategoryPreview)}
+                  >
+                    <span className={styles.categoryPreviewLabel}>Customize Categories</span>
+                    <span className={`${styles.categoryPreviewChevron} ${showCategoryPreview ? styles.categoryPreviewChevronOpen : ''}`}>
+                      &#x276F;
+                    </span>
+                  </button>
+                  {showCategoryPreview && resolvedPreviewCategories && (
+                    <div className={styles.categoryPreviewEditor}>
+                      <CategoryEditor
+                        categories={customCategories ?? resolvedPreviewCategories}
+                        listType={newType}
+                        onSave={setCustomCategories}
+                        showHeader={false}
+                        embedded
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className={styles.editActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={closeCreateModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  disabled={!newName.trim()}
+                  onClick={handleCreate}
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
 
       {editingId && editingList && createPortal(
         <div
@@ -968,20 +944,26 @@ export const ListSelector = ({
                   />
                 ))}
               </div>
+              {!editingList._isShared && (
+                <div className={styles.editTypeSection}>
+                  <div className={styles.editSectionLabel}>List Type</div>
+                  {renderTypeGrid(editType, setEditType)}
+                </div>
+              )}
               <div className={styles.editActions}>
-                <button
-                  type="button"
-                  className={styles.saveBtn}
-                  onClick={() => handleSaveEdit(editingId)}
-                >
-                  Save
-                </button>
                 <button
                   type="button"
                   className={styles.cancelBtn}
                   onClick={() => setEditingId(null)}
                 >
                   Cancel
+                </button>
+                <button
+                  type="button"
+                  className={styles.saveBtn}
+                  onClick={() => handleSaveEdit(editingId)}
+                >
+                  Save
                 </button>
               </div>
             </div>
@@ -990,40 +972,23 @@ export const ListSelector = ({
         document.body,
       )}
 
-      {changingTypeForId && changingTypeList && createPortal(
-        <div
-          className={styles.modalBackdrop}
-          onClick={handleTypeModalBackdropClick}
-          onKeyDown={handleTypeModalKeyDown}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Change List Type"
-        >
-          <div className={styles.modalCard}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>Change List Type</h3>
-              <button
-                className={styles.modalCloseBtn}
-                onClick={() => setChangingTypeForId(null)}
-                aria-label="Close"
-              >
-                &times;
-              </button>
-            </div>
-            <div className={styles.modalBody}>
-              {renderChangeTypeGrid(changingTypeList)}
-            </div>
-          </div>
-        </div>,
-        document.body,
+      {pendingEditSave && (
+        <ConfirmDialog
+          message={pendingEditSave.message}
+          confirmLabel="Save"
+          onConfirm={applyPendingEditSave}
+          onCancel={() => setPendingEditSave(null)}
+        />
       )}
 
       {editingCategoriesForId && editingCategoriesList && createPortal(
         <div
           className={styles.modalBackdrop}
+          onClick={(e) => { if (e.target === e.currentTarget) setEditingCategoriesForId(null); }}
+          onKeyDown={(e) => { if (e.key === 'Escape') setEditingCategoriesForId(null); }}
           role="dialog"
           aria-modal="true"
-          aria-label="Edit Categories"
+          aria-label="Manage Categories"
         >
           <div className={styles.modalCardTransparent}>
             <CategoryEditor
@@ -1099,18 +1064,18 @@ export const ListSelector = ({
               <div className={styles.editActions}>
                 <button
                   type="button"
+                  className={styles.cancelBtn}
+                  onClick={closeDuplicateModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
                   className={styles.saveBtn}
                   disabled={!duplicateName.trim()}
                   onClick={handleDuplicateConfirm}
                 >
                   Duplicate
-                </button>
-                <button
-                  type="button"
-                  className={styles.cancelBtn}
-                  onClick={closeDuplicateModal}
-                >
-                  Cancel
                 </button>
               </div>
             </div>
