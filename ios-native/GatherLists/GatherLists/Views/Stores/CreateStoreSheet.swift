@@ -10,7 +10,8 @@ struct CreateStoreSheet: View {
     @State private var selectedPresetColor: String? = "#B5E8C8"
     @State private var customColor: Color = .blue
     @State private var isCreating = false
-    
+    @FocusState private var isNameFieldFocused: Bool
+
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
@@ -33,6 +34,7 @@ struct CreateStoreSheet: View {
                 Section {
                     TextField("Store name", text: $name)
                         .textInputAutocapitalization(.words)
+                        .focused($isNameFieldFocused)
                 }
                 
                 Section("Color") {
@@ -50,6 +52,9 @@ struct CreateStoreSheet: View {
             }
             .navigationTitle("New Store")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                isNameFieldFocused = true
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
