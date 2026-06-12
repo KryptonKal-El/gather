@@ -42,7 +42,7 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, isChecked, stores, listType, listCategories, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored, onRestoreAnimationDone, onNavigateToSettings }) => {
+export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, onNavigateToSettings = null }) => {
   const { user } = useAuth();
   const imageSearchSettings = user?.profile?.imageSearchSettings;
   const typeConfig = getTypeConfig(listType);
@@ -953,12 +953,3 @@ ShoppingItem.propTypes = {
   onNavigateToSettings: PropTypes.func,
 };
 
-ShoppingItem.defaultProps = {
-  stores: [],
-  isChecked: undefined,
-  listType: 'grocery',
-  listCategories: null,
-  isRestored: false,
-  onRestoreAnimationDone: null,
-  onNavigateToSettings: null,
-};

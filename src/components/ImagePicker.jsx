@@ -24,7 +24,7 @@ import styles from './ImagePicker.module.css';
  * @param {Object} props.imageSearchSettings - Enabled image search source settings
  * @param {Function} props.onNavigateToSettings - Called to open settings from empty state
  */
-export const ImagePicker = ({ itemName, currentImageUrl, onSelectUrl, onUpload, onRemove, onClose, isUploading, uploadError, imageSearchSettings, onNavigateToSettings }) => {
+export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onUpload, onRemove, onClose, isUploading = false, uploadError = null, imageSearchSettings = null, onNavigateToSettings = null }) => {
   const [viewMode, setViewMode] = useState(!!currentImageUrl);
   const [searchQuery, setSearchQuery] = useState(itemName);
   const [results, setResults] = useState([]);
@@ -245,10 +245,3 @@ ImagePicker.propTypes = {
   onNavigateToSettings: PropTypes.func,
 };
 
-ImagePicker.defaultProps = {
-  currentImageUrl: null,
-  isUploading: false,
-  uploadError: null,
-  imageSearchSettings: null,
-  onNavigateToSettings: null,
-};

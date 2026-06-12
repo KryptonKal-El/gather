@@ -16,7 +16,7 @@ const EXIT_DURATION_MS = 180;
  * @param {Function} props.onExited - Called after the exit transition completes
  * @returns {JSX.Element}
  */
-export const Toast = ({ message, variant, durationMs, isVisible, onDismiss, onExited }) => {
+export const Toast = ({ message, variant = 'success', durationMs, isVisible, onDismiss, onExited }) => {
   useEffect(() => {
     if (!isVisible) return undefined;
 
@@ -79,6 +79,3 @@ Toast.propTypes = {
   onExited: PropTypes.func.isRequired,
 };
 
-Toast.defaultProps = {
-  variant: 'success',
-};

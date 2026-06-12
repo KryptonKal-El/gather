@@ -26,7 +26,7 @@ const getUniqueNames = (history) => {
  * Includes an input field with autocomplete from history,
  * optional store selector (when list type supports stores), and submit button.
  */
-export const AddItemForm = ({ stores, history, listType, onAdd }) => {
+export const AddItemForm = ({ stores = [], history = [], listType = 'grocery', onAdd }) => {
   const typeConfig = getTypeConfig(listType);
   const [value, setValue] = useState('');
   const [selectedStore, setSelectedStore] = useState('');
@@ -169,8 +169,3 @@ AddItemForm.propTypes = {
   onAdd: PropTypes.func.isRequired,
 };
 
-AddItemForm.defaultProps = {
-  stores: [],
-  history: [],
-  listType: 'grocery',
-};

@@ -9,7 +9,15 @@ import styles from './ConfirmDialog.module.css';
  * ancestor opacity or overflow. Shows a backdrop overlay with a message
  * and confirm/cancel buttons. Closes on Escape key or backdrop click.
  */
-export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, destructive, onConfirm, onCancel }) => {
+export const ConfirmDialog = ({
+  title = null,
+  message,
+  confirmLabel = 'Delete',
+  cancelLabel = 'Cancel',
+  destructive = true,
+  onConfirm,
+  onCancel,
+}) => {
   const dialogRef = useRef(null);
   const titleId = useId();
   const messageId = useId();
@@ -53,7 +61,7 @@ export const ConfirmDialog = ({ title, message, confirmLabel, cancelLabel, destr
             className={destructive ? styles.confirmBtn : styles.confirmBtnNeutral}
             onClick={onConfirm}
           >
-            {confirmLabel ?? 'Delete'}
+            {confirmLabel}
           </button>
         </div>
       </div>
@@ -70,11 +78,4 @@ ConfirmDialog.propTypes = {
   destructive: PropTypes.bool,
   onConfirm: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
-};
-
-ConfirmDialog.defaultProps = {
-  title: null,
-  confirmLabel: 'Delete',
-  cancelLabel: 'Cancel',
-  destructive: true,
 };

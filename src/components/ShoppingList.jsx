@@ -118,21 +118,21 @@ const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, store
  */
 export const ShoppingList = ({
   items,
-  isLoading,
-  stores,
-  sortConfig,
-  listType,
-  listCategories,
-  getEffectiveChecked,
+  isLoading = false,
+  stores = [],
+  sortConfig = null,
+  listType = 'grocery',
+  listCategories = null,
+  getEffectiveChecked = (item) => item.isChecked,
   onToggle,
   onRemove,
   onUpdateCategory,
   onUpdateStore,
   onUpdateItem,
   onClearChecked,
-  restoredItemIds,
-  onRestoreAnimationDone,
-  onNavigateToSettings,
+  restoredItemIds = null,
+  onRestoreAnimationDone = null,
+  onNavigateToSettings = null,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState(new Set());
@@ -308,14 +308,3 @@ ShoppingList.propTypes = {
   onNavigateToSettings: PropTypes.func,
 };
 
-ShoppingList.defaultProps = {
-  isLoading: false,
-  stores: [],
-  sortConfig: null,
-  listType: 'grocery',
-  listCategories: null,
-  getEffectiveChecked: (item) => item.isChecked,
-  restoredItemIds: null,
-  onRestoreAnimationDone: null,
-  onNavigateToSettings: null,
-};
