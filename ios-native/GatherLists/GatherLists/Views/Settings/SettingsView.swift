@@ -91,6 +91,10 @@ struct SettingsView: View {
                         .onChange(of: walmartEnabled) { _, newValue in
                             Task { await toggleImageSearchSource(walmart: newValue) }
                         }
+                    Toggle("Google Images", isOn: $serpApiEnabled)
+                        .onChange(of: serpApiEnabled) { _, newValue in
+                            Task { await toggleImageSearchSource(serpapi: newValue) }
+                        }
                     Toggle("Spoonacular", isOn: $spoonacularEnabled)
                         .onChange(of: spoonacularEnabled) { _, newValue in
                             Task { await toggleImageSearchSource(spoonacular: newValue) }
@@ -99,41 +103,36 @@ struct SettingsView: View {
                         .onChange(of: openfoodfactsEnabled) { _, newValue in
                             Task { await toggleImageSearchSource(openfoodfacts: newValue) }
                         }
-                    Toggle("Google Images", isOn: $serpApiEnabled)
-                        .onChange(of: serpApiEnabled) { _, newValue in
-                            Task { await toggleImageSearchSource(serpapi: newValue) }
-                        }
                 }
                 
-                Section("Category Defaults") {
+                Section("List Type Defaults") {
                     ForEach(listTypes, id: \.id) { type in
-                        NavigationLink(destination: DefaultCategoryEditorView(listType: type.id)) {
+                        DisclosureGroup {
+                            if ListTypes.getConfig(type.id).fields.store {
+                                NavigationLink(destination: DefaultStoreEditorView(listType: type.id)) {
+                                    Text("Stores")
+                                }
+                            }
+                            NavigationLink(destination: DefaultCategoryEditorView(listType: type.id)) {
+                                HStack {
+                                    Text("Categories")
+                                    Spacer()
+                                    if let count = categoryCounts[type.id] {
+                                        Text("\(count)")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                        } label: {
                             HStack(spacing: 12) {
                                 ListTypeIconView(typeId: type.id, size: 24)
                                 Text(type.name)
-                                Spacer()
-                                if let count = categoryCounts[type.id] {
-                                    Text("\(count)")
-                                        .foregroundStyle(.secondary)
-                                }
                             }
                         }
                     }
                 }
                 .onAppear {
                     Task { await loadCategoryCounts() }
-                }
-                
-                Section("Store Defaults") {
-                    ForEach(listTypes.filter { ListTypes.getConfig($0.id).fields.store }, id: \.id) { type in
-                        NavigationLink(destination: DefaultStoreEditorView(listType: type.id)) {
-                            HStack(spacing: 12) {
-                                ListTypeIconView(typeId: type.id, size: 24)
-                                Text(type.name)
-                                Spacer()
-                            }
-                        }
-                    }
                 }
                 
                 Section {

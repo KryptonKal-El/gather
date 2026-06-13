@@ -38,6 +38,16 @@ import { SortPicker } from './components/SortPicker.jsx';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import styles from './App.module.css';
 
+const isLightColor = (hex) => {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex ?? '');
+  if (!match) return true;
+  const value = parseInt(match[1], 16);
+  const r = (value >> 16) & 0xff;
+  const g = (value >> 8) & 0xff;
+  const b = value & 0xff;
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150;
+};
+
 /**
  * Root application component.
  * Gates content behind authentication.
@@ -755,8 +765,14 @@ export const App = () => {
 
         <section className={styles.content}>
           {activeList ? (
-            <>
-              <div className={styles.listHeader}>
+            <div
+              className={styles.listCard}
+              style={{
+                '--list-color': activeList.color || '#1565c0',
+                ...(isLightColor(activeList.color || '#1565c0') ? {} : { '--list-header-text': '#ffffff' }),
+              }}
+            >
+              <div className={styles.listCardHeader}>
                 <h2 className={styles.listTitle}>
                   {activeList.emoji && <span>{activeList.emoji} </span>}
                   {activeList.name}
@@ -768,27 +784,29 @@ export const App = () => {
                   listType={activeList.type ?? 'grocery'}
                 />
               </div>
-              <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
-              <ShoppingList
-                getEffectiveChecked={getEffectiveChecked}
-                items={activeList.items}
-                isLoading={activeList.isLoadingItems}
-                stores={state.stores}
-                sortConfig={effectiveSortConfig(activeList)}
-                listType={activeList.type}
-                listCategories={listCategories}
-                onToggle={handleToggleItem}
-                onRemove={handleRemoveItem}
-                onUpdateCategory={handleUpdateCategory}
-                onUpdateStore={handleUpdateStore}
-                onUpdateItem={handleUpdateItem}
-                onClearChecked={handleClearChecked}
-                restoredItemIds={restoredItemIds}
-                onRestoreAnimationDone={handleRestoreAnimationDone}
-                onNavigateToSettings={handleNavigateToSettings}
-              />
-              <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
-            </>
+              <div className={styles.listCardBody}>
+                <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
+                <ShoppingList
+                  getEffectiveChecked={getEffectiveChecked}
+                  items={activeList.items}
+                  isLoading={activeList.isLoadingItems}
+                  stores={state.stores}
+                  sortConfig={effectiveSortConfig(activeList)}
+                  listType={activeList.type}
+                  listCategories={listCategories}
+                  onToggle={handleToggleItem}
+                  onRemove={handleRemoveItem}
+                  onUpdateCategory={handleUpdateCategory}
+                  onUpdateStore={handleUpdateStore}
+                  onUpdateItem={handleUpdateItem}
+                  onClearChecked={handleClearChecked}
+                  restoredItemIds={restoredItemIds}
+                  onRestoreAnimationDone={handleRestoreAnimationDone}
+                  onNavigateToSettings={handleNavigateToSettings}
+                />
+                <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
+              </div>
+            </div>
           ) : (
             <div className={styles.noList}>
               <h2>Welcome to Gather Lists</h2>

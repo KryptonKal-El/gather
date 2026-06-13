@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
@@ -44,13 +44,32 @@ export const UserStoreDefaultsManager = ({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
+  const [confirmingDeleteAll, setConfirmingDeleteAll] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const menuRef = useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { distance: 8 }),
     useSensor(TouchSensor, { delay: 250, tolerance: 5 }),
   );
 
+  useEffect(() => {
+    if (!menuOpenId) return;
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpenId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpenId]);
+
   const defaults = userStoreDefaults.filter((d) => d.listType === listType).sort((a, b) => a.sortOrder - b.sortOrder);
+  const filteredDefaults = defaults.filter((d) =>
+    d.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  const isSearching = searchQuery.trim() !== '';
 
   const handleCreate = (e) => {
     e.preventDefault();
@@ -71,6 +90,11 @@ export const UserStoreDefaultsManager = ({
     setConfirmingDeleteId(null);
   }, [onDeleteDefault]);
 
+  const handleDeleteAll = () => {
+    defaults.forEach((def) => onDeleteDefault(def.id));
+    setConfirmingDeleteAll(false);
+  };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -82,24 +106,30 @@ export const UserStoreDefaultsManager = ({
     onReorderDefaults(persistedOnly);
   };
 
-  if (defaults.length === 0 && !isCreating) {
-    return (
-      <div className={styles.emptyState}>
-        <p className={styles.emptyMessage}>No default stores yet. Add one to have it appear on every new {listType} list.</p>
-        <button
-          type="button"
-          className={styles.addBtn}
-          onClick={() => setIsCreating(true)}
-        >
-          + Add Store Default
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.container}>
+      <div className={styles.headerRow}>
+        <h4 className={styles.sectionTitle}>Stores ({defaults.length})</h4>
+        <button
+          type="button"
+          className={styles.newBtn}
+          onClick={() => { setIsCreating(!isCreating); setNewName(''); }}
+        >
+          {isCreating ? 'Cancel' : '+ New'}
+        </button>
+      </div>
+
       <p className={styles.description}>These stores are added to every new {listType} list you create.</p>
+
+      <div className={styles.searchBarWrapper}>
+        <input
+          type="text"
+          className={styles.searchBar}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search stores..."
+        />
+      </div>
 
       {isCreating && (
         <form className={styles.createForm} onSubmit={handleCreate}>
@@ -123,27 +153,41 @@ export const UserStoreDefaultsManager = ({
               />
             ))}
           </div>
-          <div className={styles.formButtons}>
-            <button type="submit" className={styles.saveBtn}>Save</button>
-            <button
-              type="button"
-              className={styles.cancelBtn}
-              onClick={() => { setIsCreating(false); setNewName(''); }}
-            >
-              Cancel
-            </button>
-          </div>
+          <button type="submit" className={styles.createBtn} disabled={!newName.trim()}>
+            Create
+          </button>
         </form>
       )}
 
+      {defaults.length === 0 && !isCreating && (
+        <p className={styles.emptyMessage}>No default stores yet. Add one to have it appear on every new {listType} list.</p>
+      )}
+
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis]}>
-        <SortableContext items={defaults.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+        <SortableContext items={filteredDefaults.map((d) => d.id)} strategy={verticalListSortingStrategy}>
           <ul className={styles.list}>
-            {defaults.map((def) => (
+            {filteredDefaults.map((def) => (
               <SortableItem key={def.id} id={def.id}>
                 {({ attributes, listeners }) => (
                   <li className={styles.item}>
-                    <div className={styles.dragHandle} {...attributes} {...listeners}>⋮</div>
+                    {!isSearching && (
+                      <button
+                        type="button"
+                        className={styles.dragHandle}
+                        {...attributes}
+                        {...listeners}
+                        aria-label="Drag to reorder"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <circle cx="9" cy="5" r="1.5" />
+                          <circle cx="15" cy="5" r="1.5" />
+                          <circle cx="9" cy="12" r="1.5" />
+                          <circle cx="15" cy="12" r="1.5" />
+                          <circle cx="9" cy="19" r="1.5" />
+                          <circle cx="15" cy="19" r="1.5" />
+                        </svg>
+                      </button>
+                    )}
                     <div className={styles.color} style={{ backgroundColor: def.color }} />
                     {editingId === def.id ? (
                       <div className={styles.editForm}>
@@ -174,20 +218,42 @@ export const UserStoreDefaultsManager = ({
                     ) : (
                       <>
                         <span className={styles.name}>{def.name}</span>
-                        <button
-                          type="button"
-                          className={styles.editBtn}
-                          onClick={() => { setEditingId(def.id); setEditName(def.name); setEditColor(def.color); }}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.deleteBtn}
-                          onClick={() => setConfirmingDeleteId(def.id)}
-                        >
-                          Delete
-                        </button>
+                        <div className={styles.menuWrap} ref={menuOpenId === def.id ? menuRef : null}>
+                          <button
+                            type="button"
+                            className={styles.menuBtn}
+                            onClick={() => setMenuOpenId(menuOpenId === def.id ? null : def.id)}
+                            aria-label="Store options"
+                          >
+                            ⋯
+                          </button>
+                          {menuOpenId === def.id && (
+                            <div className={styles.menuDropdown}>
+                              <button
+                                type="button"
+                                className={styles.menuItem}
+                                onClick={() => {
+                                  setEditingId(def.id);
+                                  setEditName(def.name);
+                                  setEditColor(def.color);
+                                  setMenuOpenId(null);
+                                }}
+                              >
+                                Edit Store
+                              </button>
+                              <button
+                                type="button"
+                                className={`${styles.menuItem} ${styles.menuDanger}`}
+                                onClick={() => {
+                                  setConfirmingDeleteId(def.id);
+                                  setMenuOpenId(null);
+                                }}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </>
                     )}
                   </li>
@@ -198,14 +264,40 @@ export const UserStoreDefaultsManager = ({
         </SortableContext>
       </DndContext>
 
-      {!isCreating && (
-        <button
-          type="button"
-          className={styles.addBtn}
-          onClick={() => setIsCreating(true)}
-        >
-          + Add Store Default
-        </button>
+      {defaults.length > 0 && (
+        <div className={styles.deleteAllSection}>
+          <button
+            type="button"
+            className={styles.deleteAllButton}
+            onClick={() => setConfirmingDeleteAll(true)}
+          >
+            Delete All
+          </button>
+        </div>
+      )}
+
+      {confirmingDeleteAll && (
+        <div className={styles.confirmOverlay}>
+          <div className={styles.confirmDialog}>
+            <p>Delete all store defaults for {listType} lists?</p>
+            <div className={styles.confirmButtons}>
+              <button
+                type="button"
+                className={styles.cancelBtn}
+                onClick={() => setConfirmingDeleteAll(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className={styles.confirmBtn}
+                onClick={handleDeleteAll}
+              >
+                Delete All
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {confirmingDeleteId && (

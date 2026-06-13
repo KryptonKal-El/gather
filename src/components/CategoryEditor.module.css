@@ -532,6 +532,12 @@
   margin-bottom: 0.75rem;
 }
 
+.description {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem 0;
+}
+
 .sectionTitle {
   font-size: 0.8rem;
   font-weight: 700;

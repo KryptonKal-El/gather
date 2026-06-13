@@ -189,10 +189,10 @@ describe('MobileSettings store defaults manager wiring', () => {
     render(<MobileSettings user={makeUser()} onSignOut={vi.fn()} />);
 
     await user.click(screen.getAllByRole('button', { name: /grocery/i }).at(-1));
-    await user.click(screen.getByRole('button', { name: /\+ add store default/i }));
+    await user.click(screen.getAllByRole('button', { name: /\+ new/i })[0]);
     await user.type(screen.getByPlaceholderText(/store name/i), 'Walmart');
     await user.click(screen.getByTitle('#FDCFE8'));
-    await user.click(screen.getByRole('button', { name: /^save$/i }));
+    await user.click(screen.getByRole('button', { name: /^create$/i }));
 
     expect(createUserStoreDefault).toHaveBeenCalledWith('grocery', 'Walmart', '#FDCFE8');
   });
@@ -202,8 +202,9 @@ describe('MobileSettings store defaults manager wiring', () => {
     render(<MobileSettings user={makeUser()} onSignOut={vi.fn()} />);
 
     await user.click(screen.getAllByRole('button', { name: /grocery/i }).at(-1));
-    await user.click(screen.getAllByRole('button', { name: /^delete$/i })[0]);
-    await user.click(screen.getAllByRole('button', { name: /^delete$/i }).at(-1));
+    await user.click(screen.getAllByRole('button', { name: /store options/i })[0]);
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
 
     expect(deleteUserStoreDefault).toHaveBeenCalledWith('grocery-1');
   });

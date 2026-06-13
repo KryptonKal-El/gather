@@ -351,19 +351,19 @@
 
 /* Reset defaults button */
 .resetDefaultsButton {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  background: none;
   color: var(--text-secondary);
-  border: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-  text-align: center;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
 
 .resetDefaultsButton:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+  border-color: var(--text-secondary);
 }

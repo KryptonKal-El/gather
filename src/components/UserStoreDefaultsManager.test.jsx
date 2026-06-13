@@ -74,9 +74,9 @@ describe('UserStoreDefaultsManager callbacks', () => {
     const user = userEvent.setup();
     renderManager();
 
-    await user.click(screen.getByRole('button', { name: /add store default/i }));
-    await user.type(screen.getByRole('textbox'), 'Walmart');
-    await user.click(screen.getByRole('button', { name: /^save$/i }));
+    await user.click(screen.getByRole('button', { name: /\+ new/i }));
+    await user.type(screen.getByPlaceholderText(/store name/i), 'Walmart');
+    await user.click(screen.getByRole('button', { name: /^create$/i }));
 
     expect(defaultProps.onCreateDefault).toHaveBeenCalledWith('grocery', 'Walmart', '#B5E8C8');
   });
@@ -85,9 +85,11 @@ describe('UserStoreDefaultsManager callbacks', () => {
     const user = userEvent.setup();
     renderManager();
 
-    await user.click(screen.getAllByRole('button', { name: /^edit$/i })[0]);
-    await user.clear(screen.getByRole('textbox'));
-    await user.type(screen.getByRole('textbox'), 'Costco Business');
+    await user.click(screen.getAllByRole('button', { name: /store options/i })[0]);
+    await user.click(screen.getByRole('button', { name: /edit store/i }));
+    const editInput = screen.getByDisplayValue('Costco');
+    await user.clear(editInput);
+    await user.type(editInput, 'Costco Business');
     await user.click(screen.getByRole('button', { name: /^save$/i }));
 
     expect(defaultProps.onUpdateDefault).toHaveBeenCalledWith('default-1', 'Costco Business', '#B5E8C8');
@@ -97,8 +99,9 @@ describe('UserStoreDefaultsManager callbacks', () => {
     const user = userEvent.setup();
     renderManager();
 
-    await user.click(screen.getAllByRole('button', { name: /^delete$/i })[0]);
-    await user.click(screen.getAllByRole('button', { name: /^delete$/i })[2]);
+    await user.click(screen.getAllByRole('button', { name: /store options/i })[0]);
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
+    await user.click(screen.getByRole('button', { name: /^delete$/i }));
 
     expect(defaultProps.onDeleteDefault).toHaveBeenCalledWith('default-1');
   });

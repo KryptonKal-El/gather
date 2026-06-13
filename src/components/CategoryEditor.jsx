@@ -409,8 +409,10 @@ const SortableCategoryRow = ({
  * @param {Function} [props.onClose] - Called when the close button is clicked
  * @param {boolean} [props.showHeader=true] - Whether to show the header bar
  * @param {boolean} [props.embedded=false] - Strips the card chrome when hosted inside another container
+ * @param {string} [props.title='Your Categories'] - Label shown in the section header row
+ * @param {string} [props.description] - Optional subtext shown under the section header row
  */
-export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true, embedded = false }) => {
+export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, onClose, showHeader = true, embedded = false, title = 'Your Categories', description }) => {
   const [localCategories, setLocalCategories] = useState(categories);
   const [newName, setNewName] = useState('');
   const [newColor, setNewColor] = useState(CATEGORY_COLORS[0]);
@@ -531,7 +533,7 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
       )}
 
       <div className={styles.headerRow}>
-        <h4 className={styles.sectionTitle}>Your Categories ({localCategories.length})</h4>
+        <h4 className={styles.sectionTitle}>{title} ({localCategories.length})</h4>
         <button
           type="button"
           className={styles.newBtn}
@@ -540,6 +542,8 @@ export const CategoryEditor = ({ categories, listType, onSave, onSaveAsDefault, 
           {isCreating ? 'Cancel' : '+ New'}
         </button>
       </div>
+
+      {description && <p className={styles.description}>{description}</p>}
 
       <div className={styles.searchBarWrapper}>
         <input
@@ -701,4 +705,6 @@ CategoryEditor.propTypes = {
   onClose: PropTypes.func,
   showHeader: PropTypes.bool,
   embedded: PropTypes.bool,
+  title: PropTypes.string,
+  description: PropTypes.string,
 };

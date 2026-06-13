@@ -5,11 +5,90 @@
   gap: 0.75rem;
 }
 
+/* Section header row */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.newBtn {
+  font-size: 0.8rem;
+  color: var(--primary);
+  background: none;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s;
+}
+
+.newBtn:hover {
+  background: var(--primary);
+  color: var(--bg-card);
+}
+
 /* Description text */
 .description {
   font-size: 0.85rem;
   color: var(--text-muted);
   margin: 0 0 0.5rem 0;
+}
+
+/* Search bar */
+.searchBarWrapper {
+  padding: 0 0 0.25rem 0;
+}
+
+.searchBar {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.searchBar:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Delete all */
+.deleteAllSection {
+  display: flex;
+  padding-top: 0.75rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.deleteAllButton {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--danger);
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.deleteAllButton:hover {
+  background: rgba(229, 57, 53, 0.1);
+  border-color: var(--danger);
 }
 
 /* Create form */
@@ -68,9 +147,27 @@
 }
 
 /* Form buttons */
-.formButtons {
-  display: flex;
-  gap: 0.5rem;
+.createBtn {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.createBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.createBtn:disabled {
+  background: var(--disabled-bg);
+  cursor: not-allowed;
 }
 
 .saveBtn {
@@ -99,7 +196,7 @@
   border: 1px solid var(--border-medium);
   border-radius: 6px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 400;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, color 0.15s;
@@ -147,10 +244,12 @@
   justify-content: center;
   width: 24px;
   height: 24px;
+  padding: 0;
   flex-shrink: 0;
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  touch-action: none;
   cursor: grab;
   padding: 0;
   font-size: 0.9rem;
@@ -185,10 +284,12 @@
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0;
 }
 
 .editForm input {
   flex: 1;
+  min-width: 0;
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--border-light);
   border-radius: 4px;
@@ -203,64 +304,78 @@
   border-color: var(--primary);
 }
 
+.editForm .cancelBtn,
+.editForm .saveBtn {
+  flex: 0 0 auto;
+}
+
 /* Item buttons */
-.editBtn,
-.deleteBtn {
-  padding: 0.3rem 0.6rem;
+/* Row options menu */
+.menuWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuBtn {
   background: none;
-  border: 1px solid var(--border-light);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-  color: var(--text-primary);
-}
-
-.editBtn:hover {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-.deleteBtn:hover {
-  background: var(--danger);
-  color: white;
-  border-color: var(--danger);
-}
-
-/* Add button */
-.addBtn {
-  padding: 0.5rem 1rem;
-  background: var(--primary);
-  color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
   cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
+  padding: 0.3rem 0.45rem;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+  line-height: 1;
 }
 
-.addBtn:hover {
-  background: var(--primary-hover);
+.menuBtn:hover {
+  color: var(--text-primary);
+  background: var(--border-default);
+  border-radius: 6px;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: 0;
+  z-index: 100;
+  min-width: 170px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px var(--overlay-light);
+  padding: 0.25rem 0;
+  overflow: hidden;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  background: none;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.menuItem:hover {
+  background: var(--bg-hover);
+}
+
+.menuDanger {
+  color: var(--danger);
+}
+
+.menuDanger:hover {
+  background: var(--danger-tint);
 }
 
 /* Empty state */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem 1rem;
-  background: var(--bg-input);
-  border: 1px dashed var(--border-light);
-  border-radius: 8px;
-  text-align: center;
-}
-
 .emptyMessage {
   font-size: 0.85rem;
   color: var(--text-muted);

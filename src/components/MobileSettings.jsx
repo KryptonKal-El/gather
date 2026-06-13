@@ -14,6 +14,7 @@ import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
+import { getTypeConfig } from '../utils/listTypes.js';
 import styles from './MobileSettings.module.css';
 
 const DEFAULT_IMAGE_SEARCH_SETTINGS = {
@@ -25,9 +26,9 @@ const DEFAULT_IMAGE_SEARCH_SETTINGS = {
 
 const IMAGE_SEARCH_SOURCES = [
   { key: 'walmart', label: 'Walmart' },
+  { key: 'serpapi', label: 'Google Images' },
   { key: 'spoonacular', label: 'Spoonacular' },
   { key: 'openfoodfacts', label: 'Open Food Facts' },
-  { key: 'serpapi', label: 'Google Images' },
 ];
 
 /**
@@ -44,8 +45,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
    const [uploadError, setUploadError] = useState(null);
    const [imageSearchError, setImageSearchError] = useState(null);
    const [localImageSearchSettings, setLocalImageSearchSettings] = useState(null);
-   const [expandedCategoryType, setExpandedCategoryType] = useState(null);
-   const [expandedStoreType, setExpandedStoreType] = useState(null);
+   const [expandedListType, setExpandedListType] = useState(null);
    const [showResetConfirm, setShowResetConfirm] = useState(false);
    const fileInputRef = useRef(null);
 
@@ -55,28 +55,16 @@ export const MobileSettings = ({ user, onSignOut }) => {
     ?? user?.profile?.imageSearchSettings
     ?? DEFAULT_IMAGE_SEARCH_SETTINGS;
 
-   const categoryTypes = [
+   const listTypes = [
      { value: 'grocery', label: 'Grocery' },
      { value: 'todo', label: 'To-Do' },
      { value: 'packing', label: 'Packing' },
      { value: 'project', label: 'Project' },
    ];
 
-   const storeTypes = [
-     { value: 'grocery', label: 'Grocery' },
-     { value: 'packing', label: 'Packing' },
-     { value: 'project', label: 'Project' },
-   ];
-
-   const CATEGORY_TYPE_ICONS = {
+   const LIST_TYPE_ICONS = {
      grocery: GroceryIcon,
      todo: TodoIcon,
-     packing: PackingIcon,
-     project: ProjectIcon,
-   };
-
-   const STORE_TYPE_ICONS = {
-     grocery: GroceryIcon,
      packing: PackingIcon,
      project: ProjectIcon,
    };
@@ -273,25 +261,25 @@ export const MobileSettings = ({ user, onSignOut }) => {
         )}
       </div>
 
-      <h3 className={styles.sectionHeader}>Category Defaults</h3>
+      <h3 className={styles.sectionHeader}>List Type Defaults</h3>
       <div className={styles.section}>
-        {categoryTypes.map(type => {
-          const IconComponent = CATEGORY_TYPE_ICONS[type.value];
+        {listTypes.map(type => {
+          const IconComponent = LIST_TYPE_ICONS[type.value];
+          const usesStores = getTypeConfig(type.value).fields.store;
           const cats = getCurrentDefaults(type.value);
-          const isExpanded = expandedCategoryType === type.value;
+          const isExpanded = expandedListType === type.value;
           return (
             <div key={type.value}>
               <button
                 type="button"
                 className={styles.categoryDefaultRow}
-                onClick={() => setExpandedCategoryType(isExpanded ? null : type.value)}
+                onClick={() => setExpandedListType(isExpanded ? null : type.value)}
               >
                 <span className={styles.categoryDefaultRowLeft}>
                   {IconComponent && <IconComponent size={20} />}
                   <span className={styles.categoryDefaultLabel}>{type.label}</span>
                 </span>
                 <span className={styles.categoryDefaultRowRight}>
-                  <span className={styles.categoryDefaultCount}>{cats.length}</span>
                   <span className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}>
                     ›
                   </span>
@@ -299,8 +287,22 @@ export const MobileSettings = ({ user, onSignOut }) => {
               </button>
               {isExpanded && (
                 <div className={styles.categoryEditorWrapper}>
+                  {usesStores && (
+                    <>
+                      <UserStoreDefaultsManager
+                        listType={type.value}
+                        userStoreDefaults={state.userStoreDefaults}
+                        onCreateDefault={handleCreateStoreDefault}
+                        onUpdateDefault={handleUpdateStoreDefault}
+                        onDeleteDefault={handleDeleteStoreDefault}
+                        onReorderDefaults={handleReorderStoreDefaults}
+                      />
+                    </>
+                  )}
                   <CategoryEditor
                     categories={cats}
+                    title="Categories"
+                    description={`These categories are added to every new ${type.value} list you create.`}
                     listType={type.value}
                     onSave={(updatedCats) => actions.saveUserCategoryDefault(type.value, updatedCats)}
                     showHeader={false}
@@ -323,59 +325,18 @@ export const MobileSettings = ({ user, onSignOut }) => {
 
        {showResetConfirm && (
          <ConfirmDialog
-           message={`This will replace your ${categoryTypes.find(t => t.value === expandedCategoryType)?.label} category defaults with the system defaults. Continue?`}
+           message={`This will replace your ${listTypes.find(t => t.value === expandedListType)?.label} category defaults with the system defaults. Continue?`}
            confirmLabel="Reset"
            onConfirm={() => {
-             const systemDefaults = getSystemDefaultCategories(expandedCategoryType);
+             const systemDefaults = getSystemDefaultCategories(expandedListType);
              if (systemDefaults) {
-               actions.saveUserCategoryDefault(expandedCategoryType, systemDefaults);
+               actions.saveUserCategoryDefault(expandedListType, systemDefaults);
              }
              setShowResetConfirm(false);
            }}
            onCancel={() => setShowResetConfirm(false)}
          />
        )}
-
-       <h3 className={styles.sectionHeader}>Store Defaults</h3>
-       <div className={styles.section}>
-         {storeTypes.map(type => {
-           const IconComponent = STORE_TYPE_ICONS[type.value];
-           const storesForType = state.userStoreDefaults.filter(d => d.listType === type.value);
-           const isExpanded = expandedStoreType === type.value;
-           return (
-             <div key={type.value}>
-               <button
-                 type="button"
-                 className={styles.categoryDefaultRow}
-                 onClick={() => setExpandedStoreType(isExpanded ? null : type.value)}
-               >
-                 <span className={styles.categoryDefaultRowLeft}>
-                   {IconComponent && <IconComponent size={20} />}
-                   <span className={styles.categoryDefaultLabel}>{type.label}</span>
-                 </span>
-                 <span className={styles.categoryDefaultRowRight}>
-                   <span className={styles.categoryDefaultCount}>{storesForType.length}</span>
-                   <span className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ''}`}>
-                     ›
-                   </span>
-                 </span>
-               </button>
-                {isExpanded && (
-                  <div className={styles.categoryEditorWrapper}>
-                    <UserStoreDefaultsManager
-                      listType={type.value}
-                      userStoreDefaults={state.userStoreDefaults}
-                      onCreateDefault={handleCreateStoreDefault}
-                      onUpdateDefault={handleUpdateStoreDefault}
-                      onDeleteDefault={handleDeleteStoreDefault}
-                      onReorderDefaults={handleReorderStoreDefaults}
-                    />
-                  </div>
-                )}
-             </div>
-           );
-         })}
-       </div>
 
        <h3 className={styles.sectionHeader}>Account Actions</h3>
       <div className={styles.section}>
