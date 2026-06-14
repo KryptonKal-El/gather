@@ -146,6 +146,49 @@
   transform: scale(1.15);
 }
 
+.customColorWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customColorInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.customColorBtn {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2px dashed var(--border-default);
+  background: var(--bg-card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: border-color 0.15s, color 0.15s, transform 0.1s;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.customColorBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: scale(1.15);
+}
+
+.customColorBtnActive {
+  border-style: solid;
+  border-color: var(--text-primary);
+  transform: scale(1.15);
+}
+
 /* Form buttons */
 .createBtn {
   width: 100%;
@@ -279,17 +322,20 @@
 }
 
 /* Edit form in item */
+.item.itemEditing {
+  align-items: stretch;
+}
+
 .editForm {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   flex: 1;
   min-width: 0;
 }
 
-.editForm input {
-  flex: 1;
-  min-width: 0;
+.editNameInput {
+  width: 100%;
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--border-light);
   border-radius: 4px;
@@ -297,16 +343,17 @@
   background: var(--bg-input);
   color: var(--text-primary);
   font-family: inherit;
+  box-sizing: border-box;
 }
 
-.editForm input:focus {
+.editNameInput:focus {
   outline: none;
   border-color: var(--primary);
 }
 
-.editForm .cancelBtn,
-.editForm .saveBtn {
-  flex: 0 0 auto;
+.editFormActions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 /* Item buttons */

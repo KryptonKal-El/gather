@@ -226,7 +226,7 @@ struct ListDetailView: View {
                 stores: detailViewModel?.stores ?? [],
                 listCategories: detailViewModel?.listCategories ?? [],
                 listType: detailViewModel?.listType ?? "grocery",
-                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore in
+                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore, note in
                     Task {
                         let clearDueDate = item.dueDate != nil && dueDate == nil
                         let clearRecurrenceRule = item.recurrenceRule != nil && recurrenceRule == nil
@@ -234,6 +234,8 @@ struct ListDetailView: View {
                         await detailViewModel?.updateItem(
                             item.id,
                             name: name,
+                            note: note.isEmpty ? nil : note,
+                            clearNote: note.isEmpty,
                             category: category,
                             storeId: storeId,
                             clearStoreId: clearStoreId,
@@ -687,10 +689,18 @@ struct ListDetailView: View {
                     itemThumbnail(item: item)
                 }
                 
-                Text(item.name)
-                    .strikethrough(effectiveIsChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
-                    .foregroundStyle(effectiveIsChecked ? .secondary : .primary)
-                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.name)
+                        .strikethrough(effectiveIsChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
+                        .foregroundStyle(effectiveIsChecked ? .secondary : .primary)
+                    if let note = item.note, !note.isEmpty {
+                        Text(note)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+
                 if detailViewModel?.typeConfig.fields.quantity == true {
                     if item.unit != "each" {
                         Text("\(item.quantity) \(item.unit)")

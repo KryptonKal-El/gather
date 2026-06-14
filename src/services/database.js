@@ -405,6 +405,7 @@ export const addItem = async (userId, listId, item) => {
         quantity: item.quantity ?? 1,
         price: item.price ?? null,
         image_url: item.imageUrl ?? null,
+        note: item.note ?? null,
         unit: item.unit ?? 'each',
         rsvp_status: item.rsvpStatus ?? null,
         due_date: item.dueDate ?? null,
@@ -443,6 +444,7 @@ export const addItems = async (userId, listId, items) => {
       quantity: item.quantity ?? 1,
       price: item.price ?? null,
       image_url: item.imageUrl ?? null,
+      note: item.note ?? null,
       unit: item.unit ?? 'each',
       rsvp_status: item.rsvpStatus ?? null,
       due_date: item.dueDate ?? null,
@@ -474,6 +476,7 @@ export const updateItem = async (userId, listId, itemId, updates) => {
     // Map camelCase to snake_case
     const mapped = {};
     if (updates.name !== undefined) mapped.name = updates.name;
+    if (updates.note !== undefined) mapped.note = updates.note;
     if (updates.category !== undefined) mapped.category = updates.category;
     if (updates.isChecked !== undefined) mapped.is_checked = updates.isChecked;
     if (updates.is_checked !== undefined) mapped.is_checked = updates.is_checked;
@@ -606,6 +609,7 @@ export const subscribeItems = (userId, listId, callback) => {
           quantity: row.quantity,
           price: row.price,
           imageUrl: row.image_url,
+          note: row.note ?? null,
           unit: row.unit ?? 'each',
           addedAt: row.added_at,
           rsvpStatus: row.rsvp_status,

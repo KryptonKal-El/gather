@@ -580,6 +580,14 @@ export const ShoppingListProvider = ({ children }) => {
     if (updates.color !== undefined) allowed.color = updates.color;
     if (updates.type !== undefined) allowed.type = updates.type;
     if (updates.categories !== undefined) allowed.categories = updates.categories;
+
+    // Optimistically apply to local state so the change shows immediately,
+    // without waiting on the realtime subscription to re-fetch.
+    setLists((prev) => prev.map((l) => (l.id === id ? { ...l, ...allowed } : l)));
+    setSharedListMetas((prev) => (
+      prev[id] ? { ...prev, [id]: { ...prev[id], ...allowed } } : prev
+    ));
+
     await dbUpdateList(ownerUid, id, allowed);
   }, [userId, getListOwnerUid]);
 
@@ -696,6 +704,7 @@ export const ShoppingListProvider = ({ children }) => {
       quantity: itemData.quantity ?? 1,
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
+      note: itemData.note ?? null,
       rsvpStatus: itemData.rsvpStatus ?? null,
     });
     return newId;
@@ -719,6 +728,7 @@ export const ShoppingListProvider = ({ children }) => {
       quantity: itemData.quantity ?? 1,
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
+      note: itemData.note ?? null,
       rsvpStatus: itemData.rsvpStatus ?? null,
     })));
   }, [userId, getListOwnerUid]);

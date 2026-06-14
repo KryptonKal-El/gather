@@ -48,6 +48,8 @@ export const UserStoreDefaultsManager = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [menuOpenId, setMenuOpenId] = useState(null);
   const menuRef = useRef(null);
+  const newColorInputRef = useRef(null);
+  const editColorInputRef = useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { distance: 8 }),
@@ -152,6 +154,33 @@ export const UserStoreDefaultsManager = ({
                 title={color}
               />
             ))}
+            <div className={styles.customColorWrapper}>
+              <input
+                ref={newColorInputRef}
+                type="color"
+                value={newColor}
+                onChange={(e) => setNewColor(e.target.value)}
+                className={styles.customColorInput}
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+              <button
+                type="button"
+                className={`${styles.customColorBtn} ${!PRESET_COLORS.includes(newColor) ? styles.customColorBtnActive : ''}`}
+                style={!PRESET_COLORS.includes(newColor) ? { backgroundColor: newColor } : undefined}
+                onClick={() => newColorInputRef.current?.click()}
+                aria-label="Choose custom color"
+                title="Custom color"
+              >
+                {PRESET_COLORS.includes(newColor) && (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="16" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
           <button type="submit" className={styles.createBtn} disabled={!newName.trim()}>
             Create
@@ -169,54 +198,96 @@ export const UserStoreDefaultsManager = ({
             {filteredDefaults.map((def) => (
               <SortableItem key={def.id} id={def.id}>
                 {({ attributes, listeners }) => (
-                  <li className={styles.item}>
-                    {!isSearching && (
-                      <button
-                        type="button"
-                        className={styles.dragHandle}
-                        {...attributes}
-                        {...listeners}
-                        aria-label="Drag to reorder"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                          <circle cx="9" cy="5" r="1.5" />
-                          <circle cx="15" cy="5" r="1.5" />
-                          <circle cx="9" cy="12" r="1.5" />
-                          <circle cx="15" cy="12" r="1.5" />
-                          <circle cx="9" cy="19" r="1.5" />
-                          <circle cx="15" cy="19" r="1.5" />
-                        </svg>
-                      </button>
-                    )}
-                    <div className={styles.color} style={{ backgroundColor: def.color }} />
+                  <li className={`${styles.item} ${editingId === def.id ? styles.itemEditing : ''}`}>
                     {editingId === def.id ? (
                       <div className={styles.editForm}>
                         <input
                           type="text"
+                          className={styles.editNameInput}
                           value={editName}
                           onChange={(e) => setEditName(e.target.value)}
                           autoFocus
                         />
-                        <button
-                          type="button"
-                          className={styles.cancelBtn}
-                          onClick={() => setEditingId(null)}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.saveBtn}
-                          onClick={() => {
-                            handleUpdateDefault(def.id, { name: editName.trim(), color: editColor });
-                            setEditingId(null);
-                          }}
-                        >
-                          Save
-                        </button>
+                        <div className={styles.colorPicker}>
+                          {PRESET_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              className={`${styles.colorOption} ${editColor === color ? styles.colorSelected : ''}`}
+                              style={{ backgroundColor: color }}
+                              onClick={() => setEditColor(color)}
+                              title={color}
+                            />
+                          ))}
+                          <div className={styles.customColorWrapper}>
+                            <input
+                              ref={editColorInputRef}
+                              type="color"
+                              value={editColor || '#B5E8C8'}
+                              onChange={(e) => setEditColor(e.target.value)}
+                              className={styles.customColorInput}
+                              tabIndex={-1}
+                              aria-hidden="true"
+                            />
+                            <button
+                              type="button"
+                              className={`${styles.customColorBtn} ${!PRESET_COLORS.includes(editColor) ? styles.customColorBtnActive : ''}`}
+                              style={!PRESET_COLORS.includes(editColor) ? { backgroundColor: editColor } : undefined}
+                              onClick={() => editColorInputRef.current?.click()}
+                              aria-label="Choose custom color"
+                              title="Custom color"
+                            >
+                              {PRESET_COLORS.includes(editColor) && (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <circle cx="12" cy="12" r="10" />
+                                  <line x1="12" y1="8" x2="12" y2="16" />
+                                  <line x1="8" y1="12" x2="16" y2="12" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                        <div className={styles.editFormActions}>
+                          <button
+                            type="button"
+                            className={styles.cancelBtn}
+                            onClick={() => setEditingId(null)}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.saveBtn}
+                            onClick={() => {
+                              handleUpdateDefault(def.id, { name: editName.trim(), color: editColor });
+                              setEditingId(null);
+                            }}
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <>
+                        {!isSearching && (
+                          <button
+                            type="button"
+                            className={styles.dragHandle}
+                            {...attributes}
+                            {...listeners}
+                            aria-label="Drag to reorder"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <circle cx="9" cy="5" r="1.5" />
+                              <circle cx="15" cy="5" r="1.5" />
+                              <circle cx="9" cy="12" r="1.5" />
+                              <circle cx="15" cy="12" r="1.5" />
+                              <circle cx="9" cy="19" r="1.5" />
+                              <circle cx="15" cy="19" r="1.5" />
+                            </svg>
+                          </button>
+                        )}
+                        <div className={styles.color} style={{ backgroundColor: def.color }} />
                         <span className={styles.name}>{def.name}</span>
                         <div className={styles.menuWrap} ref={menuOpenId === def.id ? menuRef : null}>
                           <button

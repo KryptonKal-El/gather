@@ -35,6 +35,7 @@ struct ItemService {
     static func addItem(
         listId: UUID,
         name: String,
+        note: String? = nil,
         category: String?,
         storeId: UUID?,
         listCategories: [CategoryDef],
@@ -59,6 +60,7 @@ struct ItemService {
         let newItem = NewItem(
             listId: listId,
             name: capitalizedName,
+            note: note,
             category: resolvedCategory,
             storeId: storeId,
             quantity: quantity,
@@ -85,6 +87,8 @@ struct ItemService {
     static func updateItem(
         itemId: UUID,
         name: String? = nil,
+        note: String? = nil,
+        clearNote: Bool = false,
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
@@ -106,6 +110,8 @@ struct ItemService {
     ) async throws {
         let update = ItemUpdate(
             name: name,
+            note: note,
+            clearNote: clearNote,
             category: category,
             isChecked: isChecked,
             storeId: storeId,
@@ -175,6 +181,7 @@ struct ItemService {
     static func restoreItem(
         listId: UUID,
         name: String,
+        note: String? = nil,
         category: String?,
         storeId: UUID?,
         quantity: Int,
@@ -193,6 +200,7 @@ struct ItemService {
         let restoreData = RestoreItem(
             listId: listId,
             name: name,
+            note: note,
             category: category,
             storeId: storeId,
             quantity: quantity,
@@ -225,6 +233,7 @@ struct ItemService {
             let restoredItem = try await restoreItem(
                 listId: listId,
                 name: item.name,
+                note: item.note,
                 category: item.category,
                 storeId: item.storeId,
                 quantity: item.quantity,
@@ -304,6 +313,7 @@ struct ItemService {
 private struct NewItem: Encodable {
     let listId: UUID
     let name: String
+    let note: String?
     let category: String
     let storeId: UUID?
     let quantity: Int
@@ -317,6 +327,7 @@ private struct NewItem: Encodable {
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
         case name
+        case note
         case category
         case storeId = "store_id"
         case quantity
@@ -327,12 +338,13 @@ private struct NewItem: Encodable {
         case rsvpStatus = "rsvp_status"
         case createdBy = "created_by"
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(listId, forKey: .listId)
         try container.encode(name, forKey: .name)
         try container.encode(category, forKey: .category)
+        if let note { try container.encode(note, forKey: .note) }
         try container.encode(quantity, forKey: .quantity)
         try container.encode(isChecked, forKey: .isChecked)
         try container.encode(unit, forKey: .unit)
@@ -346,6 +358,8 @@ private struct NewItem: Encodable {
 
 private struct ItemUpdate: Encodable {
     var name: String?
+    var note: String?
+    var clearNote: Bool = false
     var category: String?
     var isChecked: Bool?
     var storeId: UUID?
@@ -367,6 +381,7 @@ private struct ItemUpdate: Encodable {
     
     enum CodingKeys: String, CodingKey {
         case name
+        case note
         case category
         case isChecked = "is_checked"
         case storeId = "store_id"
@@ -379,10 +394,15 @@ private struct ItemUpdate: Encodable {
         case recurrenceRule = "recurrence_rule"
         case reminderDaysBefore = "reminder_days_before"
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         if let name = name { try container.encode(name, forKey: .name) }
+        if clearNote {
+            try container.encodeNil(forKey: .note)
+        } else if let note = note {
+            try container.encode(note, forKey: .note)
+        }
         if let category = category { try container.encode(category, forKey: .category) }
         if let isChecked = isChecked { try container.encode(isChecked, forKey: .isChecked) }
         if clearStoreId {
@@ -436,6 +456,7 @@ private struct ToggleUpdate: Encodable {
 private struct RestoreItem: Encodable {
     let listId: UUID
     let name: String
+    let note: String?
     let category: String?
     let storeId: UUID?
     let quantity: Int
@@ -454,6 +475,7 @@ private struct RestoreItem: Encodable {
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
         case name
+        case note
         case category
         case storeId = "store_id"
         case quantity

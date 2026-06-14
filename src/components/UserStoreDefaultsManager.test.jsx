@@ -95,6 +95,26 @@ describe('UserStoreDefaultsManager callbacks', () => {
     expect(defaultProps.onUpdateDefault).toHaveBeenCalledWith('default-1', 'Costco Business', '#B5E8C8');
   });
 
+  it('renders the custom color picker in the create form', async () => {
+    const user = userEvent.setup();
+    renderManager();
+
+    await user.click(screen.getByRole('button', { name: /\+ new/i }));
+
+    expect(screen.getByRole('button', { name: /choose custom color/i })).toBeInTheDocument();
+  });
+
+  it('renders preset swatches and the custom color picker in the edit form', async () => {
+    const user = userEvent.setup();
+    renderManager();
+
+    await user.click(screen.getAllByRole('button', { name: /store options/i })[0]);
+    await user.click(screen.getByRole('button', { name: /edit store/i }));
+
+    expect(screen.getByRole('button', { name: /choose custom color/i })).toBeInTheDocument();
+    expect(screen.getByTitle('#B5E8C8')).toBeInTheDocument();
+  });
+
   it('calls onDeleteDefault with the selected default ID', async () => {
     const user = userEvent.setup();
     renderManager();

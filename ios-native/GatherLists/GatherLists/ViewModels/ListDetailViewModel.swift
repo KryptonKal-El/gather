@@ -422,6 +422,8 @@ final class ListDetailViewModel {
     func updateItem(
         _ itemId: UUID,
         name: String? = nil,
+        note: String? = nil,
+        clearNote: Bool = false,
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
@@ -444,6 +446,8 @@ final class ListDetailViewModel {
             try await ItemService.updateItem(
                 itemId: itemId,
                 name: name,
+                note: note,
+                clearNote: clearNote,
                 category: category,
                 isChecked: isChecked,
                 storeId: storeId,
@@ -466,6 +470,11 @@ final class ListDetailViewModel {
             // Update local state for instant feedback
             if let index = items.firstIndex(where: { $0.id == itemId }) {
                 if let name = name { items[index].name = name }
+                if clearNote {
+                    items[index].note = nil
+                } else if let note = note {
+                    items[index].note = note
+                }
                 if let category = category { items[index].category = category }
                 if let isChecked = isChecked { items[index].isChecked = isChecked }
                 if clearStoreId {

@@ -111,6 +111,8 @@ export const ListSelector = ({
   const [showStorePreview, setShowStorePreview] = useState(false);
   const [customStores, setCustomStores] = useState(null);
   const menuRef = useRef(null);
+  const newColorInputRef = useRef(null);
+  const editColorInputRef = useRef(null);
   const isMobile = useIsMobile();
   const { state, actions } = useShoppingList();
   const reorderLists = actions.reorderLists;
@@ -822,6 +824,33 @@ export const ListSelector = ({
                     aria-label={`Select color ${c}`}
                   />
                 ))}
+                <div className={styles.customColorWrapper}>
+                  <input
+                    ref={newColorInputRef}
+                    type="color"
+                    value={newColor}
+                    onChange={(e) => setNewColor(e.target.value)}
+                    className={styles.customColorInput}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    className={`${styles.customColorBtn} ${!LIST_PRESET_COLORS.includes(newColor) ? styles.customColorBtnActive : ''}`}
+                    style={!LIST_PRESET_COLORS.includes(newColor) ? { backgroundColor: newColor } : undefined}
+                    onClick={() => newColorInputRef.current?.click()}
+                    aria-label="Choose custom color"
+                    title="Custom color"
+                  >
+                    {LIST_PRESET_COLORS.includes(newColor) && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
               <div className={styles.editTypeSection}>
                 <div className={styles.editSectionLabel}>List Type</div>
@@ -943,6 +972,33 @@ export const ListSelector = ({
                     aria-label={`Select color ${c}`}
                   />
                 ))}
+                <div className={styles.customColorWrapper}>
+                  <input
+                    ref={editColorInputRef}
+                    type="color"
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    className={styles.customColorInput}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+                  <button
+                    type="button"
+                    className={`${styles.customColorBtn} ${!LIST_PRESET_COLORS.includes(editColor) ? styles.customColorBtnActive : ''}`}
+                    style={!LIST_PRESET_COLORS.includes(editColor) ? { backgroundColor: editColor } : undefined}
+                    onClick={() => editColorInputRef.current?.click()}
+                    aria-label="Choose custom color"
+                    title="Custom color"
+                  >
+                    {LIST_PRESET_COLORS.includes(editColor) && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
               </div>
               {!editingList._isShared && (
                 <div className={styles.editTypeSection}>

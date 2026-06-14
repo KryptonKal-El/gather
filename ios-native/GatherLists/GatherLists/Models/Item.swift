@@ -20,6 +20,7 @@ struct Item: Codable, Identifiable, Hashable {
     let id: UUID
     let listId: UUID
     var name: String
+    var note: String?
     var category: String?
     var isChecked: Bool
     var storeId: UUID?
@@ -43,6 +44,7 @@ struct Item: Codable, Identifiable, Hashable {
         id: UUID = UUID(),
         listId: UUID,
         name: String,
+        note: String? = nil,
         category: String? = nil,
         isChecked: Bool = false,
         storeId: UUID? = nil,
@@ -63,6 +65,7 @@ struct Item: Codable, Identifiable, Hashable {
         self.id = id
         self.listId = listId
         self.name = name
+        self.note = note
         self.category = category
         self.isChecked = isChecked
         self.storeId = storeId
@@ -85,6 +88,7 @@ struct Item: Codable, Identifiable, Hashable {
         case id
         case listId = "list_id"
         case name
+        case note
         case category
         case isChecked = "is_checked"
         case storeId = "store_id"
@@ -113,6 +117,7 @@ struct Item: Codable, Identifiable, Hashable {
         addedAt = try container.decode(Date.self, forKey: .addedAt)
         
         // Optional fields with safe defaults
+        note = try container.decodeIfPresent(String.self, forKey: .note)
         category = try container.decodeIfPresent(String.self, forKey: .category)
         isChecked = try container.decodeIfPresent(Bool.self, forKey: .isChecked) ?? false
         storeId = try container.decodeIfPresent(UUID.self, forKey: .storeId)

@@ -55,6 +55,7 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [priceValue, setPriceValue] = useState('');
   const [nameValue, setNameValue] = useState('');
+  const [noteValue, setNoteValue] = useState('');
   const [unitValue, setUnitValue] = useState('each');
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -200,6 +201,13 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
     }
   };
 
+  const commitNote = () => {
+    const trimmed = noteValue.trim();
+    if (trimmed !== (item.note ?? '')) {
+      onUpdateItem(item.id, { note: trimmed || null });
+    }
+  };
+
   const handleUnitChange = (e) => {
     const newUnit = e.target.value;
     setUnitValue(newUnit);
@@ -213,13 +221,22 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
     }
   };
 
+  const handleNoteKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      commitNote();
+      e.target.blur();
+    }
+  };
+
   const handleEditToggle = () => {
     if (isEditOpen) {
       commitName();
+      commitNote();
       commitPrice();
       setIsEditOpen(false);
     } else {
       setNameValue(item.name);
+      setNoteValue(item.note ?? '');
       setPriceValue(price !== null ? price.toFixed(2) : '');
       setUnitValue(item.unit ?? 'each');
       // Initialize custom recurrence state from existing rule
@@ -525,6 +542,7 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                     )}
                   </span>
                 </span>
+                {item.note && <span className={styles.note}>{item.note}</span>}
                 <div className={styles.badges}>
                   {fields.store && assignedStore && (
                     <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
@@ -582,6 +600,18 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
               onChange={(e) => setNameValue(e.target.value)}
               onBlur={commitName}
               onKeyDown={handleNameKeyDown}
+            />
+          </div>
+          <div className={styles.editRow}>
+            <span className={styles.editLabel}>Note</span>
+            <input
+              className={styles.nameEditInput}
+              type="text"
+              value={noteValue}
+              onChange={(e) => setNoteValue(e.target.value)}
+              onBlur={commitNote}
+              onKeyDown={handleNoteKeyDown}
+              placeholder="Add a note"
             />
           </div>
           {fields.quantity && (
@@ -926,6 +956,7 @@ ShoppingItem.propTypes = {
     quantity: PropTypes.number,
     price: PropTypes.number,
     imageUrl: PropTypes.string,
+    note: PropTypes.string,
     unit: PropTypes.string,
     rsvpStatus: PropTypes.string,
     dueDate: PropTypes.string,

@@ -5,13 +5,14 @@ struct EditItemSheet: View {
     let stores: [Store]
     let listCategories: [CategoryDef]
     let listType: String
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
     @Environment(NotificationService.self) private var notificationService
     
     @State private var name: String
+    @State private var note: String
     @State private var quantity: Int
     @State private var priceText: String
     @State private var selectedStoreId: UUID?
@@ -71,7 +72,7 @@ struct EditItemSheet: View {
         stores: [Store],
         listCategories: [CategoryDef],
         listType: String = "grocery",
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -82,6 +83,7 @@ struct EditItemSheet: View {
         self.onImageTap = onImageTap
         
         _name = State(initialValue: item.name)
+        _note = State(initialValue: item.note ?? "")
         _quantity = State(initialValue: item.quantity)
         _priceText = State(initialValue: item.price.map { "\($0)" } ?? "")
         _selectedStoreId = State(initialValue: item.storeId)
@@ -138,9 +140,11 @@ struct EditItemSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                // Name — always shown
+                // Name & Note — always shown
                 Section {
                     TextField("Item name", text: $name)
+                    TextField("Note", text: $note, axis: .vertical)
+                        .lineLimit(1...4)
                 }
                 
                 // Quantity & Unit & Price — conditional
@@ -371,7 +375,7 @@ struct EditItemSheet: View {
                         let clearRsvp = item.rsvpStatus != nil && selectedRsvpStatus == nil
                         let recurrenceRule = buildRecurrenceRule()
                         let reminderDays = hasDueDate ? selectedReminderDays : nil
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule, reminderDays)
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule, reminderDays, note.trimmingCharacters(in: .whitespacesAndNewlines))
                         dismiss()
                     }
                     .disabled(isSaveDisabled)
