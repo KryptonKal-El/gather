@@ -251,6 +251,7 @@ export const MobileListDetail = ({
           stores={stores}
           sortConfig={sortConfig}
           listType={listType}
+          listId={list.id}
           listCategories={listCategories}
           onToggle={onToggle}
           onRemove={onRemove}

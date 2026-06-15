@@ -263,12 +263,16 @@ struct ListDetailView: View {
             ListNotificationSheet(list: list)
         }
         .task {
+            loadCollapseState()
+            viewModel.selectList(id: list.id)
             await initializeDetailViewModel()
             await loadShareInfo()
             await loadSortPreferences()
             await subscribeToPreferences()
             await loadNotificationStatus()
         }
+        .onChange(of: collapsedStores) { _, _ in saveCollapseState() }
+        .onChange(of: isCheckedCollapsed) { _, _ in saveCollapseState() }
         .onChange(of: showNotificationSheet) { _, isShowing in
             if !isShowing {
                 Task {
@@ -529,6 +533,24 @@ struct ListDetailView: View {
     
     // MARK: - Level 1 Header
     
+    // Persists collapse/expand state per list so it's remembered across visits.
+    private var collapseStateKey: String { "collapsedStores.\(list.id.uuidString)" }
+    private var checkedCollapseStateKey: String { "checkedCollapsed.\(list.id.uuidString)" }
+
+    private func loadCollapseState() {
+        let defaults = UserDefaults.standard
+        if let saved = defaults.array(forKey: collapseStateKey) as? [String] {
+            collapsedStores = Set(saved)
+        }
+        isCheckedCollapsed = defaults.bool(forKey: checkedCollapseStateKey)
+    }
+
+    private func saveCollapseState() {
+        let defaults = UserDefaults.standard
+        defaults.set(Array(collapsedStores), forKey: collapseStateKey)
+        defaults.set(isCheckedCollapsed, forKey: checkedCollapseStateKey)
+    }
+
     @ViewBuilder
     private func level1Header(group: SortPipeline.SortGroup) -> some View {
         let groupKey = group.key

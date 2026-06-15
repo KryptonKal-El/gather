@@ -1,10 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { applySortPipeline, SYSTEM_DEFAULT_SORT_CONFIG } from '../utils/sortPipeline.js';
 import { formatPrice } from '../utils/formatPrice.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ShoppingItem } from './ShoppingItem.jsx';
 import styles from './ShoppingList.module.css';
+
+const COLLAPSED_GROUPS_PREFIX = 'gather:collapsedGroups:';
+
+/** Loads the persisted set of collapsed group keys for a list. */
+const loadCollapsedGroups = (listId) => {
+  if (!listId) return new Set();
+  try {
+    const raw = localStorage.getItem(COLLAPSED_GROUPS_PREFIX + listId);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+};
+
+/** Persists the set of collapsed group keys for a list. */
+const saveCollapsedGroups = (listId, collapsed) => {
+  if (!listId) return;
+  try {
+    localStorage.setItem(COLLAPSED_GROUPS_PREFIX + listId, JSON.stringify([...collapsed]));
+  } catch {
+    // ignore storage write failures (e.g. private mode / quota)
+  }
+};
 
 /** Helper to compute subtotal for a set of items. */
 const computeSubtotal = (items) => {
@@ -122,6 +145,7 @@ export const ShoppingList = ({
   stores = [],
   sortConfig = null,
   listType = 'grocery',
+  listId = null,
   listCategories = null,
   getEffectiveChecked = (item) => item.isChecked,
   onToggle,
@@ -135,7 +159,12 @@ export const ShoppingList = ({
   onNavigateToSettings = null,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = useState(new Set());
+  const [collapsedGroups, setCollapsedGroups] = useState(() => loadCollapsedGroups(listId));
+
+  // Reload the persisted collapsed state when switching to a different list.
+  useEffect(() => {
+    setCollapsedGroups(loadCollapsedGroups(listId));
+  }, [listId]);
 
   const handleToggleGroup = (groupKey) => {
     setCollapsedGroups((prev) => {
@@ -145,6 +174,7 @@ export const ShoppingList = ({
       } else {
         next.add(groupKey);
       }
+      saveCollapsedGroups(listId, next);
       return next;
     });
   };
@@ -295,6 +325,7 @@ ShoppingList.propTypes = {
   stores: PropTypes.array,
   sortConfig: PropTypes.arrayOf(PropTypes.string),
   listType: PropTypes.string,
+  listId: PropTypes.string,
   listCategories: PropTypes.array,
   getEffectiveChecked: PropTypes.func,
   onToggle: PropTypes.func.isRequired,

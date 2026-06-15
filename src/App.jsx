@@ -793,6 +793,7 @@ export const App = () => {
                   stores={state.stores}
                   sortConfig={effectiveSortConfig(activeList)}
                   listType={activeList.type}
+                  listId={activeList.id}
                   listCategories={listCategories}
                   onToggle={handleToggleItem}
                   onRemove={handleRemoveItem}
