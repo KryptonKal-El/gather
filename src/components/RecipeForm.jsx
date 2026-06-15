@@ -19,7 +19,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import styles from './RecipeForm.module.css';
-import { parseRecipeText } from '../services/recipes.js';
+import { parseRecipeFromText } from '../services/recipes.js';
 
 const SortableIngredientRow = ({ ing, onUpdate, onRemove }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ing.id });
@@ -170,6 +170,7 @@ export const RecipeForm = ({
 
   const [showImportOverlay, setShowImportOverlay] = useState(false);
   const [importText, setImportText] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -260,23 +261,45 @@ export const RecipeForm = ({
     });
   };
 
-  const handleImportIngredients = () => {
-    const parsed = parseRecipeText(importText);
-    if (parsed.length === 0) return;
+  const handleImportRecipe = async () => {
+    if (!importText.trim() || isImporting) return;
+    setIsImporting(true);
+    try {
+      const parsed = await parseRecipeFromText(importText);
 
-    const imported = parsed.map((item) => ({
-      id: crypto.randomUUID(),
-      quantity: '',
-      name: item.name,
-    }));
+      if (parsed.ingredients.length > 0) {
+        const importedIngredients = parsed.ingredients.map((ing) => ({
+          id: crypto.randomUUID(),
+          quantity: ing.quantity ?? '',
+          name: ing.name,
+        }));
+        setIngredients((prev) => {
+          const nonEmpty = prev.filter((ing) => ing.name.trim() || ing.quantity.trim());
+          return [...nonEmpty, ...importedIngredients];
+        });
+      }
 
-    setIngredients((prev) => {
-      const nonEmpty = prev.filter((ing) => ing.name.trim());
-      return [...nonEmpty, ...imported];
-    });
+      if (parsed.steps.length > 0) {
+        const importedSteps = parsed.steps.map((instruction) => ({
+          id: crypto.randomUUID(),
+          instruction,
+        }));
+        setSteps((prev) => {
+          const nonEmpty = prev.filter((step) => step.instruction.trim());
+          return [...nonEmpty, ...importedSteps];
+        });
+      }
 
-    setShowImportOverlay(false);
-    setImportText('');
+      // Only fill the name if the user hasn't already entered one.
+      if (parsed.name && !name.trim()) {
+        setName(parsed.name);
+      }
+
+      setShowImportOverlay(false);
+      setImportText('');
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   const handleSave = async () => {
@@ -548,42 +571,45 @@ export const RecipeForm = ({
           <div className={styles.importOverlay}>
             <div className={styles.importPanel}>
               <div className={styles.importHeader}>
-                <h3 className={styles.importTitle}>Import Ingredients</h3>
+                <h3 className={styles.importTitle}>Import from Text</h3>
                 <button
                   type="button"
                   className={styles.importCloseBtn}
-                  onClick={() => { setShowImportOverlay(false); setImportText(''); }}
+                  onClick={() => { if (!isImporting) { setShowImportOverlay(false); setImportText(''); } }}
                   aria-label="Close"
+                  disabled={isImporting}
                 >
                   ×
                 </button>
               </div>
               <p className={styles.importHint}>
-                Paste your ingredient list below (one per line):
+                Paste a whole recipe — the ingredients and steps are detected automatically.
               </p>
               <textarea
                 className={styles.importTextarea}
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
-                placeholder={"2 cups flour\n1 lb ground beef\n3 cloves garlic\n1 can tomato sauce"}
+                placeholder={"Grandma's Chili\n\nIngredients\n2 cups flour\n1 lb ground beef\n3 cloves garlic, minced\n\nInstructions\n1. Brown the beef in a large pot.\n2. Add the garlic and cook until fragrant.\n3. Stir in the remaining ingredients and simmer 30 minutes."}
                 rows={8}
                 autoFocus
+                disabled={isImporting}
               />
               <div className={styles.importActions}>
                 <button
                   type="button"
                   className={styles.importCancelBtn}
                   onClick={() => { setShowImportOverlay(false); setImportText(''); }}
+                  disabled={isImporting}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   className={styles.importConfirmBtn}
-                  onClick={handleImportIngredients}
-                  disabled={!importText.trim()}
+                  onClick={handleImportRecipe}
+                  disabled={!importText.trim() || isImporting}
                 >
-                  Import
+                  {isImporting ? 'Importing…' : 'Import'}
                 </button>
               </div>
             </div>

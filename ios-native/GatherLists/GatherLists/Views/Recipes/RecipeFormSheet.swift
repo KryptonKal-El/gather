@@ -27,7 +27,8 @@ struct RecipeFormSheet: View {
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imageSource: ImageSource = .none
     @State private var clipboardFeedback: String?
-    
+    @State private var isImporting = false
+
     private enum ImageSource {
         case none, file, url
     }
@@ -353,11 +354,16 @@ struct RecipeFormSheet: View {
                 Text("Ingredients")
                 Spacer()
                 Button {
-                    importFromClipboard()
+                    Task { await importFromClipboard() }
                 } label: {
-                    Image(systemName: "doc.on.clipboard")
-                        .foregroundStyle(.blue)
+                    if isImporting {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "doc.on.clipboard")
+                            .foregroundStyle(.blue)
+                    }
                 }
+                .disabled(isImporting)
                 Button {
                     ingredients.append(IngredientRow(id: UUID(), name: "", quantity: ""))
                 } label: {
@@ -411,40 +417,69 @@ struct RecipeFormSheet: View {
         ingredients.move(fromOffsets: source, toOffset: destination)
     }
     
-    private func importFromClipboard() {
+    @MainActor
+    private func importFromClipboard() async {
         clipboardFeedback = nil
-        
+
         guard let clipboardText = UIPasteboard.general.string,
               !clipboardText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             clipboardFeedback = "Nothing on clipboard"
             clearFeedbackAfterDelay()
             return
         }
-        
+
+        isImporting = true
+        defer { isImporting = false }
+
+        // Prefer the AI parser (ingredients with quantities + steps); fall back
+        // to the local line parser if it's unavailable or returns nothing.
+        if let parsed = await RecipeTextParseService.parse(text: clipboardText),
+           !(parsed.ingredients.isEmpty && parsed.steps.isEmpty) {
+            applyParsedRecipe(parsed)
+            var summary = "Added \(parsed.ingredients.count) ingredient\(parsed.ingredients.count == 1 ? "" : "s")"
+            if !parsed.steps.isEmpty {
+                summary += " and \(parsed.steps.count) step\(parsed.steps.count == 1 ? "" : "s")"
+            }
+            clipboardFeedback = summary
+            clearFeedbackAfterDelay()
+            return
+        }
+
+        // Fallback: local ingredient-only parser.
         let parsed = RecipeTextParser.parseRecipeText(clipboardText)
-        
         if parsed.isEmpty {
             clipboardFeedback = "No ingredients found in clipboard text"
             clearFeedbackAfterDelay()
             return
         }
-        
-        let existingNonEmpty = ingredients.filter {
-            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }
-        
-        let newIngredients = parsed.map {
-            IngredientRow(id: UUID(), name: $0.name, quantity: "")
-        }
-        
-        if existingNonEmpty.isEmpty {
-            ingredients = newIngredients
-        } else {
-            ingredients = existingNonEmpty + newIngredients
-        }
-        
+        mergeIngredients(parsed.map { IngredientRow(id: UUID(), name: $0.name, quantity: "") })
         clipboardFeedback = "Added \(parsed.count) ingredients from clipboard"
         clearFeedbackAfterDelay()
+    }
+
+    private func applyParsedRecipe(_ parsed: ParsedRecipe) {
+        mergeIngredients(parsed.ingredients.map { IngredientRow(id: UUID(), name: $0.name, quantity: $0.quantity) })
+
+        if !parsed.steps.isEmpty {
+            let newSteps = parsed.steps.map { StepRow(id: UUID(), instruction: $0) }
+            let existingSteps = steps.filter {
+                !$0.instruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }
+            steps = existingSteps.isEmpty ? newSteps : existingSteps + newSteps
+        }
+
+        // Only fill the name if the user hasn't already entered one.
+        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !parsed.name.isEmpty {
+            name = parsed.name
+        }
+    }
+
+    private func mergeIngredients(_ newIngredients: [IngredientRow]) {
+        let existingNonEmpty = ingredients.filter {
+            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            || !$0.quantity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        ingredients = existingNonEmpty.isEmpty ? newIngredients : existingNonEmpty + newIngredients
     }
     
     private func clearFeedbackAfterDelay() {

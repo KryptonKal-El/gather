@@ -92,3 +92,78 @@ export const parseRecipeText = (recipeText, listType) => {
 
   return items;
 };
+
+/**
+ * Builds the structured fallback result from the local line parser.
+ * @param {string} recipeText
+ * @returns {{ name: string, ingredients: Array<{quantity: string, name: string}>, steps: string[], source: 'local' }}
+ */
+const localFallbackParse = (recipeText) => ({
+  name: '',
+  ingredients: parseRecipeText(recipeText).map((item) => ({ quantity: '', name: item.name })),
+  steps: [],
+  source: 'local',
+});
+
+/**
+ * Parses freeform recipe text into structured fields (name, ingredients with
+ * quantities, and ordered steps) using the parse-recipe Edge Function (Claude).
+ * Falls back to the local line parser if the function is unavailable or fails,
+ * so import always returns something usable.
+ * @param {string} recipeText - Raw pasted recipe text
+ * @returns {Promise<{ name: string, ingredients: Array<{quantity: string, name: string}>, steps: string[], source: 'ai' | 'local' }>}
+ */
+export const parseRecipeFromText = async (recipeText) => {
+  const text = recipeText?.trim();
+  if (!text) return { name: '', ingredients: [], steps: [], source: 'local' };
+
+  const baseUrl = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL;
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  if (!baseUrl || !anonKey) {
+    return localFallbackParse(text);
+  }
+
+  try {
+    const res = await fetch(`${baseUrl}/parse-recipe`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${anonKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!res.ok) {
+      // 503 = key not configured; any other error -> fall back gracefully.
+      return localFallbackParse(text);
+    }
+
+    const data = await res.json();
+    const ingredients = Array.isArray(data.ingredients)
+      ? data.ingredients
+          .map((ing) => ({
+            quantity: typeof ing?.quantity === 'string' ? ing.quantity : '',
+            name: typeof ing?.name === 'string' ? ing.name.trim() : '',
+          }))
+          .filter((ing) => ing.name)
+      : [];
+    const steps = Array.isArray(data.steps)
+      ? data.steps.filter((s) => typeof s === 'string' && s.trim())
+      : [];
+
+    // If the model returned nothing useful, fall back rather than import an empty recipe.
+    if (ingredients.length === 0 && steps.length === 0) {
+      return localFallbackParse(text);
+    }
+
+    return {
+      name: typeof data.name === 'string' ? data.name.trim() : '',
+      ingredients,
+      steps,
+      source: 'ai',
+    };
+  } catch (err) {
+    console.error('Recipe text parse failed, using local fallback:', err);
+    return localFallbackParse(text);
+  }
+};

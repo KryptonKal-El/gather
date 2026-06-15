@@ -115,3 +115,61 @@ struct RecipeSearchService {
 private struct SearchResponse: Codable {
     let results: [SpoonacularSearchResult]
 }
+
+/// A recipe parsed from freeform text by the parse-recipe edge function.
+struct ParsedRecipe {
+    let name: String
+    let ingredients: [(quantity: String, name: String)]
+    let steps: [String]
+}
+
+/// Client for the parse-recipe Supabase edge function, which uses Claude to
+/// turn pasted recipe text into structured ingredients (with quantities) and
+/// ordered steps. Returns nil on any failure so callers can fall back to the
+/// local line parser.
+struct RecipeTextParseService {
+    @MainActor
+    static func parse(text: String) async -> ParsedRecipe? {
+        let manager = SupabaseManager.shared
+        let baseURL = manager.supabaseURL.absoluteString
+        let anonKey = manager.anonKey
+
+        guard let url = URL(string: "\(baseURL)/functions/v1/parse-recipe") else { return nil }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try? JSONEncoder().encode(["text": text])
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse,
+                  (200...299).contains(http.statusCode) else {
+                // 503 (no API key configured) or any error -> caller falls back.
+                return nil
+            }
+            let decoded = try JSONDecoder().decode(ParseRecipeResponse.self, from: data)
+            let ingredients = (decoded.ingredients ?? [])
+                .map { (quantity: $0.quantity ?? "", name: ($0.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)) }
+                .filter { !$0.name.isEmpty }
+            let steps = (decoded.steps ?? [])
+                .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            return ParsedRecipe(name: decoded.name ?? "", ingredients: ingredients, steps: steps)
+        } catch {
+            print("[RecipeTextParseService] Parse failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
+}
+
+private struct ParseRecipeResponse: Decodable {
+    let name: String?
+    let ingredients: [ParsedIngredient]?
+    let steps: [String]?
+}
+
+private struct ParsedIngredient: Decodable {
+    let quantity: String?
+    let name: String?
+}
