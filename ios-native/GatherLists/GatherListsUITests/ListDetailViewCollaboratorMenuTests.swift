@@ -72,9 +72,8 @@ final class ListDetailViewCollaboratorMenuTests: XCTestCase {
     private func waitForListsViewToLoad() throws {
         // Wait for the lists view to appear by checking for the first list
         // or the empty state. The app should show either a list of lists or an empty state.
-        let expectation = XCTestExpectation(description: "Lists view loaded")
         var found = false
-        
+
         // Give up to 10 seconds for the view to load
         for _ in 0..<10 {
             if app.staticTexts.containing(NSPredicate(format: "label CONTAINS 'items'")).count > 0 ||
@@ -84,8 +83,8 @@ final class ListDetailViewCollaboratorMenuTests: XCTestCase {
             }
             Thread.sleep(forTimeInterval: 1)
         }
-        
-        guard found else {
+
+        if !found {
             // If lists aren't found, the user may still be on LoginView
             // Attempt to authenticate if needed
             let emailField = app.textFields.firstMatch

@@ -135,6 +135,8 @@
 		WIDGETSHAREDDEF0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
 		WIDGETSTORE0000000000002 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
 		WIDGETSUPABASECLIENT0002 /* WidgetSupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */; };
+		UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */; };
+		UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000002 /* LastListRestorationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -144,6 +146,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = WIDGETTARGET0000000000001;
 			remoteInfo = GatherListsWidgetsExtension;
+		};
+		UITESTCONTAINERPROXY0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A1B2C3D4E5F6A7B8C9D0E205;
+			remoteInfo = GatherLists;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -162,6 +171,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewCollaboratorMenuTests.swift; sourceTree = "<group>"; };
+		UITESTFILEREF00000000002 /* LastListRestorationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastListRestorationTests.swift; sourceTree = "<group>"; };
+		UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherListsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -306,6 +318,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		UITESTFRAMEWORKS00000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -314,8 +333,18 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E202 /* GatherLists */,
 				WIDGETGROUP0000000000001 /* GatherListsWidgets */,
+				UITESTGROUP0000000000001 /* GatherListsUITests */,
 				A1B2C3D4E5F6A7B8C9D0E203 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		UITESTGROUP0000000000001 /* GatherListsUITests */ = {
+			isa = PBXGroup;
+			children = (
+				UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */,
+				UITESTFILEREF00000000002 /* LastListRestorationTests.swift */,
+			);
+			path = GatherListsUITests;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F6A7B8C9D0E202 /* GatherLists */ = {
@@ -343,6 +372,7 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E1F8 /* GatherLists.app */,
 				WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */,
+				UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -619,7 +649,6 @@
 				A1B2C3D4E5F6A7B8C9D0E207 /* Sources */,
 				A1B2C3D4E5F6A7B8C9D0E200 /* Frameworks */,
 				A1B2C3D4E5F6A7B8C9D0E208 /* Resources */,
-				A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */,
 				WIDGETCOPYFILES0000000001 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -652,6 +681,24 @@
 			productReference = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		UITESTTARGET000000000001 /* GatherListsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = UITESTCONFIGLIST00000001 /* Build configuration list for PBXNativeTarget "GatherListsUITests" */;
+			buildPhases = (
+				UITESTSOURCES00000000001 /* Sources */,
+				UITESTFRAMEWORKS00000001 /* Frameworks */,
+				UITESTRESOURCES000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				UITESTTARGETDEP000000001 /* PBXTargetDependency */,
+			);
+			name = GatherListsUITests;
+			productName = GatherListsUITests;
+			productReference = UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -667,6 +714,10 @@
 					};
 					WIDGETTARGET0000000000001 = {
 						CreatedOnToolsVersion = 15.4;
+					};
+					UITESTTARGET000000000001 = {
+						CreatedOnToolsVersion = 15.4;
+						TestTargetID = A1B2C3D4E5F6A7B8C9D0E205;
 					};
 				};
 			};
@@ -688,6 +739,7 @@
 			targets = (
 				A1B2C3D4E5F6A7B8C9D0E205 /* GatherLists */,
 				WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */,
+				UITESTTARGET000000000001 /* GatherListsUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -712,27 +764,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		A1B2C3D4E5F6A7B8C9D0E2B0 /* Increment Build Number (Archive Only) */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
+		UITESTRESOURCES000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-			);
-			name = "Increment Build Number (Archive Only)";
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ] && [ \"${ACTION}\" = \"install\" ]; then\n  cd \"${PROJECT_DIR}\"\n  buildNumber=$(xcrun agvtool what-version -terse 2>/dev/null)\n  if [ -z \"$buildNumber\" ] || ! [ \"$buildNumber\" -eq \"$buildNumber\" ] 2>/dev/null; then\n    buildNumber=0\n  fi\n  buildNumber=$((buildNumber + 1))\n  xcrun agvtool new-version -all \"$buildNumber\" > /dev/null 2>&1\n  # Also update the already-built plist so this archive gets the new number\n  PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n  if [ -f \"$PLIST\" ]; then\n    /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"$PLIST\"\n  fi\n  echo \"Build number incremented to $buildNumber\"\nfi\n";
 		};
-/* End PBXShellScriptBuildPhase section */
+/* End PBXResourcesBuildPhase section */
+
 
 /* Begin PBXSourcesBuildPhase section */
+		UITESTSOURCES00000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */,
+				UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A1B2C3D4E5F6A7B8C9D0E207 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -876,6 +927,11 @@
 			target = WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */;
 			targetProxy = WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */;
 		};
+		UITESTTARGETDEP000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A1B2C3D4E5F6A7B8C9D0E205 /* GatherLists */;
+			targetProxy = UITESTCONTAINERPROXY0001 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -913,7 +969,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 52;
+				CURRENT_PROJECT_VERSION = 57;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = 53L3M4444A;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -980,7 +1036,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 52;
+				CURRENT_PROJECT_VERSION = 57;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = 53L3M4444A;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1116,6 +1172,42 @@
 			};
 			name = Release;
 		};
+		UITESTCONFIGDEBUG0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GatherLists;
+			};
+			name = Debug;
+		};
+		UITESTCONFIGRELEASE00001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 57;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GatherLists;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1142,6 +1234,15 @@
 			buildConfigurations = (
 				WIDGETCONFIG0000000DEBUG /* Debug */,
 				WIDGETCONFIG000000RELEASE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		UITESTCONFIGLIST00000001 /* Build configuration list for PBXNativeTarget "GatherListsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				UITESTCONFIGDEBUG0000001 /* Debug */,
+				UITESTCONFIGRELEASE00001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
