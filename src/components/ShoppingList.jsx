@@ -8,6 +8,9 @@ import styles from './ShoppingList.module.css';
 
 const COLLAPSED_GROUPS_PREFIX = 'gather:collapsedGroups:';
 
+/** Reserved collapse key for the bottom "Crossed" section. */
+const CROSSED_GROUP_KEY = '__crossed__';
+
 /** Loads the persisted set of collapsed group keys for a list. */
 const loadCollapsedGroups = (listId) => {
   if (!listId) return new Set();
@@ -212,7 +215,12 @@ export const ShoppingList = ({
 
   const config = sortConfig ?? SYSTEM_DEFAULT_SORT_CONFIG;
   const uncheckedResult = applySortPipeline(unchecked, config, stores, listType, listCategories);
+
+  // Crossed items render as a single flat list (matching iOS): run the same
+  // pipeline to preserve ordering, then flatten the groups so no sub-headers show.
   const checkedResult = applySortPipeline(checkedItems, config, stores, listType, listCategories);
+  const checkedFlat = checkedResult.items
+    ?? [...checkedResult.groups.flatMap(collectGroupItems), ...(checkedResult.ungrouped ?? [])];
 
   const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
@@ -281,16 +289,33 @@ export const ShoppingList = ({
         <ItemList items={uncheckedResult.items} {...itemProps} />
       )}
 
-      {/* Checked items section */}
-      {checkedItems.length > 0 && (
-        <div className={styles.checkedSection}>
-          <div className={styles.checkedHeader}>
-            <h3 className={styles.groupTitle}>
-              Crossed ({checkedItems.length})
-            </h3>
-            <button className={styles.clearBtn} onClick={() => setIsConfirmingClear(true)}>
-              Clear crossed
-            </button>
+      {/* Checked items section — a single collapsible group, never sub-grouped (matches iOS) */}
+      {checkedItems.length > 0 && (() => {
+        const isCrossedCollapsed = collapsedGroups.has(CROSSED_GROUP_KEY);
+        return (
+          <div className={styles.checkedSection}>
+            <div
+              className={`${styles.checkedHeader} ${isCrossedCollapsed ? styles.checkedHeaderCollapsed : ''}`}
+              onClick={() => handleToggleGroup(CROSSED_GROUP_KEY)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleToggleGroup(CROSSED_GROUP_KEY);
+                }
+              }}
+            >
+              <span className={`${styles.chevron} ${isCrossedCollapsed ? '' : styles.chevronExpanded}`} />
+              <span className={styles.crossedTitle}>Crossed</span>
+              <span className={styles.count}>{checkedItems.length}</span>
+              <button
+                className={styles.clearBtn}
+                onClick={(e) => { e.stopPropagation(); setIsConfirmingClear(true); }}
+              >
+                Clear crossed
+              </button>
+            </div>
             {isConfirmingClear && (
               <ConfirmDialog
                 message={`Clear all ${checkedItems.length} checked items?`}
@@ -302,19 +327,14 @@ export const ShoppingList = ({
                 onCancel={() => setIsConfirmingClear(false)}
               />
             )}
+            {!isCrossedCollapsed && (
+              <div className={styles.topLevelBody}>
+                <ItemList items={checkedFlat} {...itemProps} />
+              </div>
+            )}
           </div>
-          {/* Checked items use the same pipeline */}
-          {checkedResult.groups.map((group) => (
-            <GroupRenderer key={group.key} group={group} depth={0} {...groupProps} />
-          ))}
-          {checkedResult.ungrouped?.length > 0 && (
-            <ItemList items={checkedResult.ungrouped} {...itemProps} />
-          )}
-          {checkedResult.items?.length > 0 && (
-            <ItemList items={checkedResult.items} {...itemProps} />
-          )}
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
