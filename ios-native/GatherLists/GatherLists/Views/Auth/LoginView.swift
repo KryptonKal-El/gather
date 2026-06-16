@@ -17,7 +17,6 @@ struct LoginView: View {
         case email, password
     }
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private var isEmailValid: Bool {
         email.contains("@") && email.contains(".")
@@ -117,7 +116,7 @@ struct LoginView: View {
                                 .frame(height: 50)
                         }
                     }
-                    .background(isFormValid ? brandGreen : brandGreen.opacity(0.5))
+                    .background(isFormValid ? Color.brandGreen : Color.brandGreen.opacity(0.5))
                     .cornerRadius(10)
                     .disabled(!isFormValid || isEmailSigningIn)
                     
@@ -129,7 +128,7 @@ struct LoginView: View {
                     } label: {
                         Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
                             .font(.subheadline)
-                            .foregroundColor(brandGreen)
+                            .foregroundColor(Color.brandGreen)
                     }
                 }
                 .frame(maxWidth: 360)

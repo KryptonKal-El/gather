@@ -48,8 +48,6 @@ struct DuplicateListSheet: View {
                     Button("Cancel") {
                         onCancel()
                     }
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.blue)
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
@@ -57,12 +55,13 @@ struct DuplicateListSheet: View {
                         onDuplicate(trimmedName, isGuestList ? resetRsvp : false)
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(.blue)
                     .disabled(trimmedName.isEmpty)
                 }
             }
         }
+        .tint(Color.brandGreen)
         .presentationDetents([.medium])
+        .presentationBackground(Color(.systemGroupedBackground))
         .task {
             try? await Task.sleep(nanoseconds: 250_000_000)
             nameFocused = true

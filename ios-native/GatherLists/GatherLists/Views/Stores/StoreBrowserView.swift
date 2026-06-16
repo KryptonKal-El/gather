@@ -23,7 +23,6 @@ struct StoreBrowserView: View {
     }
     
     @State private var searchQuery = ""
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     var body: some View {
         NavigationStack {
@@ -72,7 +71,7 @@ struct StoreBrowserView: View {
                 Text("Delete \"\(store.name)\"? Items assigned to this store will become unassigned.")
             }
         }
-        .tint(brandGreen)
+        .tint(Color.brandGreen)
         .background(Color(.systemGroupedBackground))
         .task {
             await viewModel.start()

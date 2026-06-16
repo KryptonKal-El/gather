@@ -21,7 +21,6 @@ struct CreateListSheet: View {
     @State private var selectedCategoryForEdit: CategoryDef? = nil
     @State private var pendingNewCategory: CategoryDef?
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
@@ -83,11 +82,11 @@ struct CreateListSheet: View {
                                 .frame(height: 72)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(isSelected ? brandGreen.opacity(0.1) : Color.clear)
+                                        .fill(isSelected ? Color.brandGreen.opacity(0.1) : Color.clear)
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .strokeBorder(isSelected ? brandGreen : Color.secondary.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                                        .strokeBorder(isSelected ? Color.brandGreen : Color.secondary.opacity(0.3), lineWidth: isSelected ? 2 : 1)
                                 )
                             }
                             .buttonStyle(.plain)
@@ -231,7 +230,7 @@ struct CreateListSheet: View {
                         createList()
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                     .disabled(!canCreate)
                 }
             }

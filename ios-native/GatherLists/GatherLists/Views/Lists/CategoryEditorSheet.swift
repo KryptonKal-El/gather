@@ -19,7 +19,6 @@ struct CategoryEditorSheet: View {
     @State private var searchText = ""
     @State private var showDeleteAllConfirm = false
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
@@ -81,7 +80,7 @@ struct CategoryEditorSheet: View {
                     } label: {
                         Text("Save as Default for \(listType.capitalized)")
                             .frame(maxWidth: .infinity, alignment: .center)
-                            .foregroundStyle(brandGreen)
+                            .foregroundStyle(Color.brandGreen)
                     }
                 }
             }
@@ -97,7 +96,7 @@ struct CategoryEditorSheet: View {
                     } label: {
                         Image(systemName: "xmark")
                     }
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                 }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -105,7 +104,7 @@ struct CategoryEditorSheet: View {
                     } label: {
                         Image(systemName: "plus")
                     }
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                 }
             }
             .sheet(item: $selectedCategory) { category in
@@ -273,8 +272,8 @@ struct CategoryDetailEditor: View {
     @State private var selectedColor: String
     @State private var keywordsText: String
     @State private var customColor: Color
-    
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
+    @FocusState private var isNameFieldFocused: Bool
+
     
     init(category: CategoryDef, isAddMode: Bool, presetColors: [String], existingKeys: Set<String>, onSave: @escaping (CategoryDef) -> Void) {
         self.category = category
@@ -325,6 +324,7 @@ struct CategoryDetailEditor: View {
                 Section("Name") {
                     TextField("Category name", text: $name)
                         .textInputAutocapitalization(.words)
+                        .focused($isNameFieldFocused)
                 }
                 
                 Section("Color") {
@@ -368,12 +368,17 @@ struct CategoryDetailEditor: View {
             }
             .navigationTitle(isAddMode ? "New Category" : "Edit Category")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                if isAddMode {
+                    isNameFieldFocused = true
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -387,7 +392,7 @@ struct CategoryDetailEditor: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                     .disabled(!canSave)
                 }
             }

@@ -12,7 +12,6 @@ struct SortConfigSheet: View {
     @State private var groupLevels: [SortLevel] = []
     @State private var sortOnlyLevels: [SortLevel] = []
     @State private var formId = UUID()
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private static let levelLabels: [SortLevel: String] = [
         .store: "Store",
@@ -79,7 +78,7 @@ struct SortConfigSheet: View {
                                 Image(systemName: "arrow.uturn.backward")
                                 Text("Use Default")
                             }
-                            .foregroundStyle(brandGreen)
+                            .foregroundStyle(Color.brandGreen)
                         }
                         .buttonStyle(.plain)
                     }
@@ -93,7 +92,7 @@ struct SortConfigSheet: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Done") { dismiss() }
                         .fontWeight(.semibold)
-                        .foregroundStyle(brandGreen)
+                        .foregroundStyle(Color.brandGreen)
                 }
             }
             .onAppear {

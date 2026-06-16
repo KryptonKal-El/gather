@@ -8,7 +8,6 @@ struct EmojiPickerView: View {
     @State private var searchQuery = ""
     
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 8), count: 7)
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     private var filteredCategories: [(name: String, emojis: [String])] {
         if searchQuery.isEmpty {
@@ -78,7 +77,7 @@ struct EmojiPickerView: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                 }
                 ToolbarItem(placement: .primaryAction) {
                     if selectedEmoji != nil {
@@ -87,7 +86,7 @@ struct EmojiPickerView: View {
                             dismiss()
                         }
                         .fontWeight(.semibold)
-                        .foregroundStyle(brandGreen)
+                        .foregroundStyle(Color.brandGreen)
                     }
                 }
             }

@@ -12,7 +12,6 @@ struct DefaultStoreEditorView: View {
     @State private var storeToDelete: UserStoreDefault?
     @State private var searchText = ""
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     private let presetColors = [
         "#B5E8C8", "#A8D8EA", "#85BFA8", "#FFD6A5", "#FDCFE8", "#B4C7E7", "#D4E09B",
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
@@ -60,7 +59,7 @@ struct DefaultStoreEditorView: View {
             }
         }
         .searchable(text: $searchText, prompt: "Search stores")
-        .tint(brandGreen)
+        .tint(Color.brandGreen)
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

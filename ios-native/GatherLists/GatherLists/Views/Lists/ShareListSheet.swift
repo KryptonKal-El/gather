@@ -19,7 +19,6 @@ struct ShareListSheet: View {
     @State private var isEmailFieldFocused = false
     @FocusState private var emailFieldFocus: Bool
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     private static let emailHistoryKey = "share_email_history"
     private static let maxEmailHistory = 20
     
@@ -43,7 +42,7 @@ struct ShareListSheet: View {
                         dismiss()
                     }
                     .fontWeight(.semibold)
-                    .foregroundStyle(brandGreen)
+                    .foregroundStyle(Color.brandGreen)
                 }
             }
             .task {
@@ -106,7 +105,7 @@ struct ShareListSheet: View {
                 .background(
                     emailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAddingCollaborator
                         ? Color.gray.opacity(0.3)
-                        : brandGreen
+                        : Color.brandGreen
                 )
                 .cornerRadius(8)
                 .disabled(emailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAddingCollaborator)
