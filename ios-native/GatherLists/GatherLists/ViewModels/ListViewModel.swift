@@ -33,6 +33,11 @@ final class ListViewModel {
     nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
     nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
     nonisolated(unsafe) private var listOrderSyncTask: Task<Void, Never>?
+
+    /// True once the user has selected a list this session. Guards reconcileServerPreferences
+    /// from clobbering the local cache with a stale server value while the debounced upsert
+    /// for the new selection is still in flight.
+    private var hasPersistedSelectionThisSession = false
     
     /// Filtered lists based on search query matching name or emoji.
     var filteredLists: [GatherList] {
@@ -211,8 +216,10 @@ final class ListViewModel {
             if let serverId = serverLastListId, !allLists.contains(where: { $0.id == serverId }) {
                 // Clear invalid ID from both UserDefaults and Supabase
                 clearInvalidLastListId()
-            } else if serverLastListId != cachedLastListId {
-                // Update UserDefaults cache with server value (for next launch)
+            } else if serverLastListId != cachedLastListId, !hasPersistedSelectionThisSession {
+                // Update UserDefaults cache with server value (for next launch).
+                // Skipped once the user selects a list this session — the local value is
+                // newer and the debounced upsert will bring the server in line instead.
                 PreferenceService.setCachedLastListId(serverLastListId)
             }
         } catch {
@@ -483,12 +490,17 @@ final class ListViewModel {
     private func persistLastListIdDebounced(_ listId: UUID?) {
         // Update UserDefaults cache immediately for fast launch restore
         PreferenceService.setCachedLastListId(listId)
-        
+        hasPersistedSelectionThisSession = true
+
         persistListIdTask?.cancel()
         persistListIdTask = Task {
             try? await Task.sleep(for: .milliseconds(500))
             guard !Task.isCancelled else { return }
             try? await PreferenceService.updateLastListId(listId)
+            // Re-assert the cache: reconcileServerPreferences may have pulled a stale
+            // server value into UserDefaults while this upsert was pending.
+            guard !Task.isCancelled else { return }
+            PreferenceService.setCachedLastListId(listId)
         }
     }
     
