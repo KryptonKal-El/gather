@@ -17,9 +17,9 @@ struct CollectionBrowserView: View {
     // Expansion state
     @State private var expandedCollectionIds: Set<UUID> = []
     @State private var didInitExpansion = false
-    @State private var expandedSharedId: UUID?
-    @State private var sharedRecipes: [Recipe] = []
-    @State private var loadingSharedId: UUID?
+    @State private var expandedSharedIds: Set<UUID> = []
+    @State private var sharedRecipesByCollection: [UUID: [Recipe]] = [:]
+    @State private var loadingSharedIds: Set<UUID> = []
 
     // New-recipe flow
     @State private var showMethodChooser = false
@@ -261,14 +261,15 @@ struct CollectionBrowserView: View {
     @ViewBuilder
     private func sharedDisclosure(_ collection: RecipeCollection) -> some View {
         DisclosureGroup(isExpanded: sharedBinding(collection.id)) {
-            if loadingSharedId == collection.id {
+            let loaded = sharedRecipesByCollection[collection.id]
+            if loaded == nil && loadingSharedIds.contains(collection.id) {
                 HStack { Spacer(); ProgressView(); Spacer() }
-            } else if sharedRecipes.isEmpty {
+            } else if let loaded, loaded.isEmpty {
                 Text("No recipes in this collection")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(sharedRecipes) { recipe in
+                ForEach(loaded ?? []) { recipe in
                     recipeNavLink(recipe, owned: false)
                 }
             }
@@ -448,14 +449,13 @@ struct CollectionBrowserView: View {
 
     private func sharedBinding(_ id: UUID) -> Binding<Bool> {
         Binding(
-            get: { expandedSharedId == id },
+            get: { expandedSharedIds.contains(id) },
             set: { isOpen in
                 if isOpen {
-                    expandedSharedId = id
+                    expandedSharedIds.insert(id)
                     Task { await loadSharedRecipes(collectionId: id) }
-                } else if expandedSharedId == id {
-                    expandedSharedId = nil
-                    sharedRecipes = []
+                } else {
+                    expandedSharedIds.remove(id)
                 }
             }
         )
@@ -463,12 +463,12 @@ struct CollectionBrowserView: View {
 
     @MainActor
     private func loadSharedRecipes(collectionId: UUID) async {
-        loadingSharedId = collectionId
-        defer { loadingSharedId = nil }
+        loadingSharedIds.insert(collectionId)
+        defer { loadingSharedIds.remove(collectionId) }
         do {
-            sharedRecipes = try await RecipeService.fetchRecipesForCollection(collectionId: collectionId)
+            sharedRecipesByCollection[collectionId] = try await RecipeService.fetchRecipesForCollection(collectionId: collectionId)
         } catch {
-            sharedRecipes = []
+            sharedRecipesByCollection[collectionId] = []
             print("[CollectionBrowserView] Failed to load shared recipes: \(error.localizedDescription)")
         }
     }
