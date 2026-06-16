@@ -186,6 +186,14 @@ struct CollectionBrowserView: View {
                 } label: {
                     Label("Search recipes online", systemImage: "globe")
                 }
+
+                if let vm = viewModel {
+                    NavigationLink {
+                        RecipeImportView(viewModel: vm)
+                    } label: {
+                        Label("Import from text", systemImage: "doc.on.clipboard")
+                    }
+                }
             }
             
             if ownedFiltered.isEmpty && sharedFiltered.isEmpty && !vm.searchQuery.isEmpty {

@@ -10,14 +10,18 @@ struct RecipeFormSheet: View {
     let editRecipe: Recipe?
     let editIngredients: [RecipeIngredient]
     let editSteps: [RecipeStep]
-    
+    let saveButtonTitle: String
+    let onComplete: (() -> Void)?
+    let showCollectionPicker: Bool
+
     @State private var name: String
     @State private var descriptionText: String
     @State private var ingredients: [IngredientRow]
     @State private var steps: [StepRow]
+    @State private var selectedCollectionId: UUID?
     @State private var isSaving = false
     @State private var attemptedSave = false
-    
+
     @State private var imageData: Data?
     @State private var imageUrlString: String = ""
     @State private var showingImageMenu = false
@@ -26,8 +30,6 @@ struct RecipeFormSheet: View {
     @State private var showingUrlInput = false
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imageSource: ImageSource = .none
-    @State private var clipboardFeedback: String?
-    @State private var isImporting = false
 
     private enum ImageSource {
         case none, file, url
@@ -63,32 +65,50 @@ struct RecipeFormSheet: View {
         viewModel: RecipeViewModel,
         editRecipe: Recipe? = nil,
         editIngredients: [RecipeIngredient] = [],
-        editSteps: [RecipeStep] = []
+        editSteps: [RecipeStep] = [],
+        prefillName: String = "",
+        prefillIngredients: [(name: String, quantity: String)] = [],
+        prefillSteps: [String] = [],
+        saveButtonTitle: String = "Save",
+        onComplete: (() -> Void)? = nil,
+        showCollectionPicker: Bool = false
     ) {
         self.viewModel = viewModel
         self.editRecipe = editRecipe
         self.editIngredients = editIngredients
         self.editSteps = editSteps
-        
-        _name = State(initialValue: editRecipe?.name ?? "")
+        self.saveButtonTitle = saveButtonTitle
+        self.onComplete = onComplete
+        self.showCollectionPicker = showCollectionPicker
+
+        _name = State(initialValue: editRecipe?.name ?? prefillName)
         _descriptionText = State(initialValue: editRecipe?.description ?? "")
-        
+        _selectedCollectionId = State(initialValue: viewModel.activeCollectionId ?? viewModel.collections.first?.id)
+
         if !editIngredients.isEmpty {
             _ingredients = State(initialValue: editIngredients.map {
                 IngredientRow(id: UUID(), name: $0.name, quantity: $0.quantity ?? "")
             })
+        } else if !prefillIngredients.isEmpty {
+            _ingredients = State(initialValue: prefillIngredients.map {
+                IngredientRow(id: UUID(), name: $0.name, quantity: $0.quantity)
+            })
         } else {
             _ingredients = State(initialValue: [IngredientRow(id: UUID(), name: "", quantity: "")])
         }
-        
+
         if !editSteps.isEmpty {
             _steps = State(initialValue: editSteps.map {
                 StepRow(id: UUID(), instruction: $0.instruction)
             })
+        } else if !prefillSteps.isEmpty {
+            _steps = State(initialValue: prefillSteps.map {
+                StepRow(id: UUID(), instruction: $0)
+            })
         } else {
             _steps = State(initialValue: [StepRow(id: UUID(), instruction: "")])
         }
-        
+
         if let existingUrl = editRecipe?.imageUrl, !existingUrl.isEmpty {
             _imageUrlString = State(initialValue: existingUrl)
             _imageSource = State(initialValue: .url)
@@ -100,6 +120,7 @@ struct RecipeFormSheet: View {
             Form {
                 imageSection
                 recipeInfoSection
+                collectionSection
                 ingredientsSection
                 stepsSection
             }
@@ -113,7 +134,7 @@ struct RecipeFormSheet: View {
                     .disabled(isSaving)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button(saveButtonTitle) {
                         saveRecipe()
                     }
                     .fontWeight(.semibold)
@@ -323,6 +344,21 @@ struct RecipeFormSheet: View {
     }
     
     @ViewBuilder
+    private var collectionSection: some View {
+        if showCollectionPicker, !viewModel.collections.isEmpty {
+            Section("Collection") {
+                Picker("Collection", selection: $selectedCollectionId) {
+                    ForEach(viewModel.collections) { collection in
+                        Text((collection.emoji?.containsVisualEmoji == true ? "\(collection.emoji ?? "") " : "") + collection.name)
+                            .tag(Optional(collection.id))
+                    }
+                }
+                .labelsHidden()
+            }
+        }
+    }
+
+    @ViewBuilder
     private var ingredientsSection: some View {
         Section {
             ForEach($ingredients) { $ingredient in
@@ -343,27 +379,10 @@ struct RecipeFormSheet: View {
                     .font(.caption)
                     .foregroundStyle(.red)
             }
-            
-            if let feedback = clipboardFeedback {
-                Text(feedback)
-                    .font(.caption)
-                    .foregroundStyle(feedback.starts(with: "Added") ? .green : .secondary)
-            }
         } header: {
             HStack {
                 Text("Ingredients")
                 Spacer()
-                Button {
-                    Task { await importFromClipboard() }
-                } label: {
-                    if isImporting {
-                        ProgressView()
-                    } else {
-                        Image(systemName: "doc.on.clipboard")
-                            .foregroundStyle(.blue)
-                    }
-                }
-                .disabled(isImporting)
                 Button {
                     ingredients.append(IngredientRow(id: UUID(), name: "", quantity: ""))
                 } label: {
@@ -417,80 +436,6 @@ struct RecipeFormSheet: View {
         ingredients.move(fromOffsets: source, toOffset: destination)
     }
     
-    @MainActor
-    private func importFromClipboard() async {
-        clipboardFeedback = nil
-
-        guard let clipboardText = UIPasteboard.general.string,
-              !clipboardText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            clipboardFeedback = "Nothing on clipboard"
-            clearFeedbackAfterDelay()
-            return
-        }
-
-        isImporting = true
-        defer { isImporting = false }
-
-        // Prefer the AI parser (ingredients with quantities + steps); fall back
-        // to the local line parser if it's unavailable or returns nothing.
-        if let parsed = await RecipeTextParseService.parse(text: clipboardText),
-           !(parsed.ingredients.isEmpty && parsed.steps.isEmpty) {
-            applyParsedRecipe(parsed)
-            var summary = "Added \(parsed.ingredients.count) ingredient\(parsed.ingredients.count == 1 ? "" : "s")"
-            if !parsed.steps.isEmpty {
-                summary += " and \(parsed.steps.count) step\(parsed.steps.count == 1 ? "" : "s")"
-            }
-            clipboardFeedback = summary
-            clearFeedbackAfterDelay()
-            return
-        }
-
-        // Fallback: local ingredient-only parser.
-        let parsed = RecipeTextParser.parseRecipeText(clipboardText)
-        if parsed.isEmpty {
-            clipboardFeedback = "No ingredients found in clipboard text"
-            clearFeedbackAfterDelay()
-            return
-        }
-        mergeIngredients(parsed.map { IngredientRow(id: UUID(), name: $0.name, quantity: "") })
-        clipboardFeedback = "Added \(parsed.count) ingredients from clipboard"
-        clearFeedbackAfterDelay()
-    }
-
-    private func applyParsedRecipe(_ parsed: ParsedRecipe) {
-        mergeIngredients(parsed.ingredients.map { IngredientRow(id: UUID(), name: $0.name, quantity: $0.quantity) })
-
-        if !parsed.steps.isEmpty {
-            let newSteps = parsed.steps.map { StepRow(id: UUID(), instruction: $0) }
-            let existingSteps = steps.filter {
-                !$0.instruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            }
-            steps = existingSteps.isEmpty ? newSteps : existingSteps + newSteps
-        }
-
-        // Only fill the name if the user hasn't already entered one.
-        if name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !parsed.name.isEmpty {
-            name = parsed.name
-        }
-    }
-
-    private func mergeIngredients(_ newIngredients: [IngredientRow]) {
-        let existingNonEmpty = ingredients.filter {
-            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || !$0.quantity.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        }
-        ingredients = existingNonEmpty.isEmpty ? newIngredients : existingNonEmpty + newIngredients
-    }
-    
-    private func clearFeedbackAfterDelay() {
-        Task {
-            try? await Task.sleep(for: .seconds(3))
-            await MainActor.run {
-                clipboardFeedback = nil
-            }
-        }
-    }
-    
     private func deleteStep(at offsets: IndexSet) {
         steps.remove(atOffsets: offsets)
         if steps.isEmpty {
@@ -526,7 +471,8 @@ struct RecipeFormSheet: View {
                     name: trimmedName,
                     description: desc.isEmpty ? nil : desc,
                     ingredients: validIngredients,
-                    steps: validSteps
+                    steps: validSteps,
+                    collectionId: showCollectionPicker ? selectedCollectionId : nil
                 )
                 
                 if let recipeId = viewModel.activeRecipeId {
@@ -534,6 +480,7 @@ struct RecipeFormSheet: View {
                 }
             }
             dismiss()
+            onComplete?()
         }
     }
     

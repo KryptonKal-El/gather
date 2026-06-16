@@ -304,9 +304,10 @@ final class RecipeViewModel {
         name: String,
         description: String?,
         ingredients: [(name: String, quantity: String?)],
-        steps: [String]
+        steps: [String],
+        collectionId overrideCollectionId: UUID? = nil
     ) async {
-        guard let collectionId = activeCollectionId else {
+        guard let collectionId = overrideCollectionId ?? activeCollectionId else {
             error = "No collection selected"
             return
         }

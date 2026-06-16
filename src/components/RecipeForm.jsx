@@ -19,7 +19,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import styles from './RecipeForm.module.css';
-import { parseRecipeFromText } from '../services/recipes.js';
 
 const SortableIngredientRow = ({ ing, onUpdate, onRemove }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: ing.id });
@@ -131,12 +130,21 @@ const SortableStepRow = ({ step, idx, onUpdate, onRemove }) => {
  */
 export const RecipeForm = ({
   recipe,
+  initialData,
+  saveLabel = 'Save',
+  titleOverride,
+  collections,
+  defaultCollectionId,
   onSave,
   onBack,
 }) => {
   const isEditMode = Boolean(recipe);
+  const showCollectionPicker = !isEditMode && Array.isArray(collections) && collections.length > 0;
 
-  const [name, setName] = useState(recipe?.name ?? '');
+  const [name, setName] = useState(recipe?.name ?? initialData?.name ?? '');
+  const [collectionId, setCollectionId] = useState(
+    defaultCollectionId ?? collections?.[0]?.id ?? ''
+  );
   const [imageUrl, setImageUrl] = useState(recipe?.imageUrl ?? '');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(recipe?.imageUrl ?? '');
@@ -144,8 +152,9 @@ export const RecipeForm = ({
   const [urlInputValue, setUrlInputValue] = useState('');
 
   const [ingredients, setIngredients] = useState(() => {
-    if (recipe?.ingredients?.length) {
-      return recipe.ingredients.map((ing) => ({
+    const source = recipe?.ingredients ?? initialData?.ingredients;
+    if (source?.length) {
+      return source.map((ing) => ({
         id: ing.id ?? crypto.randomUUID(),
         quantity: ing.quantity ?? '',
         name: ing.name ?? '',
@@ -161,16 +170,18 @@ export const RecipeForm = ({
         instruction: step.instruction ?? '',
       }));
     }
+    if (initialData?.steps?.length) {
+      return initialData.steps.map((step) => ({
+        id: crypto.randomUUID(),
+        instruction: typeof step === 'string' ? step : step?.instruction ?? '',
+      }));
+    }
     return [{ id: crypto.randomUUID(), instruction: '' }];
   });
 
   const [nameError, setNameError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-
-  const [showImportOverlay, setShowImportOverlay] = useState(false);
-  const [importText, setImportText] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -261,47 +272,6 @@ export const RecipeForm = ({
     });
   };
 
-  const handleImportRecipe = async () => {
-    if (!importText.trim() || isImporting) return;
-    setIsImporting(true);
-    try {
-      const parsed = await parseRecipeFromText(importText);
-
-      if (parsed.ingredients.length > 0) {
-        const importedIngredients = parsed.ingredients.map((ing) => ({
-          id: crypto.randomUUID(),
-          quantity: ing.quantity ?? '',
-          name: ing.name,
-        }));
-        setIngredients((prev) => {
-          const nonEmpty = prev.filter((ing) => ing.name.trim() || ing.quantity.trim());
-          return [...nonEmpty, ...importedIngredients];
-        });
-      }
-
-      if (parsed.steps.length > 0) {
-        const importedSteps = parsed.steps.map((instruction) => ({
-          id: crypto.randomUUID(),
-          instruction,
-        }));
-        setSteps((prev) => {
-          const nonEmpty = prev.filter((step) => step.instruction.trim());
-          return [...nonEmpty, ...importedSteps];
-        });
-      }
-
-      // Only fill the name if the user hasn't already entered one.
-      if (parsed.name && !name.trim()) {
-        setName(parsed.name);
-      }
-
-      setShowImportOverlay(false);
-      setImportText('');
-    } finally {
-      setIsImporting(false);
-    }
-  };
-
   const handleSave = async () => {
     setNameError('');
     setSaveError('');
@@ -323,6 +293,7 @@ export const RecipeForm = ({
       const recipeData = {
         name: trimmedName,
         description: '',
+        ...(showCollectionPicker && collectionId ? { collectionId } : {}),
         imageUrl: imageFile ? '' : imageUrl,
         imageFile: imageFile ?? null,
         ingredients: filledIngredients.map((ing, idx) => ({
@@ -372,7 +343,7 @@ export const RecipeForm = ({
           </svg>
         </button>
         <h1 className={styles.navTitle}>
-          {isEditMode ? 'Edit Recipe' : 'New Recipe'}
+          {titleOverride ?? (isEditMode ? 'Edit Recipe' : 'New Recipe')}
         </h1>
         <button
           type="button"
@@ -380,7 +351,7 @@ export const RecipeForm = ({
           onClick={handleSave}
           disabled={isSaving}
         >
-          {isSaving ? 'Saving...' : 'Save'}
+          {isSaving ? 'Saving...' : saveLabel}
         </button>
       </nav>
 
@@ -506,6 +477,27 @@ export const RecipeForm = ({
           {nameError && <p className={styles.errorText}>{nameError}</p>}
         </div>
 
+        {/* Collection picker (new recipes only) */}
+        {showCollectionPicker && (
+          <div className={styles.formGroup}>
+            <label className={styles.fieldLabel} htmlFor="recipe-collection">
+              Collection
+            </label>
+            <select
+              id="recipe-collection"
+              className={styles.collectionSelect}
+              value={collectionId}
+              onChange={(e) => setCollectionId(e.target.value)}
+            >
+              {collections.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.emoji ? `${c.emoji} ${c.name}` : c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Ingredients Section */}
         <div className={styles.formGroup}>
           <h2 className={styles.sectionHeader}>Ingredients</h2>
@@ -529,13 +521,6 @@ export const RecipeForm = ({
               onClick={handleAddIngredient}
             >
               + Add ingredient
-            </button>
-            <button
-              type="button"
-              className={styles.importBtn}
-              onClick={() => setShowImportOverlay(true)}
-            >
-              📋 Import from Text
             </button>
           </div>
         </div>
@@ -566,55 +551,6 @@ export const RecipeForm = ({
         </div>
 
         {saveError && <p className={styles.errorText}>{saveError}</p>}
-
-        {showImportOverlay && (
-          <div className={styles.importOverlay}>
-            <div className={styles.importPanel}>
-              <div className={styles.importHeader}>
-                <h3 className={styles.importTitle}>Import from Text</h3>
-                <button
-                  type="button"
-                  className={styles.importCloseBtn}
-                  onClick={() => { if (!isImporting) { setShowImportOverlay(false); setImportText(''); } }}
-                  aria-label="Close"
-                  disabled={isImporting}
-                >
-                  ×
-                </button>
-              </div>
-              <p className={styles.importHint}>
-                Paste a whole recipe — the ingredients and steps are detected automatically.
-              </p>
-              <textarea
-                className={styles.importTextarea}
-                value={importText}
-                onChange={(e) => setImportText(e.target.value)}
-                placeholder={"Grandma's Chili\n\nIngredients\n2 cups flour\n1 lb ground beef\n3 cloves garlic, minced\n\nInstructions\n1. Brown the beef in a large pot.\n2. Add the garlic and cook until fragrant.\n3. Stir in the remaining ingredients and simmer 30 minutes."}
-                rows={8}
-                autoFocus
-                disabled={isImporting}
-              />
-              <div className={styles.importActions}>
-                <button
-                  type="button"
-                  className={styles.importCancelBtn}
-                  onClick={() => { setShowImportOverlay(false); setImportText(''); }}
-                  disabled={isImporting}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className={styles.importConfirmBtn}
-                  onClick={handleImportRecipe}
-                  disabled={!importText.trim() || isImporting}
-                >
-                  {isImporting ? 'Importing…' : 'Import'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -622,6 +558,21 @@ export const RecipeForm = ({
 
 RecipeForm.propTypes = {
   recipe: PropTypes.object,
+  initialData: PropTypes.shape({
+    name: PropTypes.string,
+    ingredients: PropTypes.array,
+    steps: PropTypes.array,
+  }),
+  saveLabel: PropTypes.string,
+  titleOverride: PropTypes.string,
+  collections: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      name: PropTypes.string,
+      emoji: PropTypes.string,
+    })
+  ),
+  defaultCollectionId: PropTypes.string,
   onSave: PropTypes.func.isRequired,
   onBack: PropTypes.func.isRequired,
 };

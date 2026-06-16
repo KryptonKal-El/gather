@@ -29,6 +29,7 @@ import { MobileSettings } from './components/MobileSettings.jsx';
 import { RecipeSelector } from './components/RecipeSelector.jsx';
 import { MobileRecipeDetail } from './components/MobileRecipeDetail.jsx';
 import { RecipeForm } from './components/RecipeForm.jsx';
+import { RecipeImport } from './components/RecipeImport.jsx';
 import { AddToListModal } from './components/AddToListModal.jsx';
 import { ShareCollectionModal } from './components/ShareCollectionModal.jsx';
 import { OnlineRecipeSearch } from './components/OnlineRecipeSearch.jsx';
@@ -85,6 +86,8 @@ export const App = () => {
   } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
   const [showRecipeForm, setShowRecipeForm] = useState(null);
+  const [showImportPaste, setShowImportPaste] = useState(false);
+  const [importDraft, setImportDraft] = useState(null);
   const [addToListIngredients, setAddToListIngredients] = useState(null);
   const [desktopView, setDesktopView] = useState('lists');
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
@@ -535,6 +538,7 @@ export const App = () => {
           const newId = await recipeActions.createRecipe({
             name: recipeData.name,
             description: recipeData.description,
+            collectionId: recipeData.collectionId,
             ingredients: recipeData.ingredients,
             steps: recipeData.steps,
           });
@@ -555,7 +559,24 @@ export const App = () => {
           }
         }
         setShowRecipeForm(null);
+        setImportDraft(null);
       };
+
+      // Step 1 of "Import from Text": paste screen.
+      if (showImportPaste) {
+        return (
+          <div className={styles.mobileFullScreen}>
+            <RecipeImport
+              onParsed={(parsed) => {
+                setImportDraft(parsed);
+                setShowImportPaste(false);
+                setShowRecipeForm('create');
+              }}
+              onCancel={() => setShowImportPaste(false)}
+            />
+          </div>
+        );
+      }
 
       if (showRecipeForm) {
         const editRecipe =
@@ -563,9 +584,15 @@ export const App = () => {
         return (
           <div className={styles.mobileFullScreen}>
             <RecipeForm
+              key={importDraft ? 'import' : showRecipeForm}
               recipe={editRecipe}
+              initialData={showRecipeForm === 'create' ? importDraft : null}
+              saveLabel={importDraft ? 'Import' : 'Save'}
+              titleOverride={importDraft ? 'Review & Import' : undefined}
+              collections={importDraft ? recipeState.collections : undefined}
+              defaultCollectionId={recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
               onSave={handleRecipeSave}
-              onBack={() => setShowRecipeForm(null)}
+              onBack={() => { setShowRecipeForm(null); setImportDraft(null); }}
             />
           </div>
         );
@@ -668,6 +695,7 @@ export const App = () => {
                   onMoveRecipe={handleMoveRecipe}
                   onCollectionBack={handleMobileCollectionBack}
                   onSearchOnline={() => setShowOnlineSearch(true)}
+                  onImportFromText={() => { setImportDraft(null); setShowImportPaste(true); }}
                 />
               </div>
             </section>
@@ -721,6 +749,7 @@ export const App = () => {
       const newId = await recipeActions.createRecipe({
         name: recipeData.name,
         description: recipeData.description,
+        collectionId: recipeData.collectionId,
         ingredients: recipeData.ingredients,
         steps: recipeData.steps,
       });
@@ -741,6 +770,7 @@ export const App = () => {
       }
     }
     setDesktopRecipeFormId(null);
+    setImportDraft(null);
   };
 
   const renderDesktopContent = () => {
@@ -861,16 +891,32 @@ export const App = () => {
               onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
               onMoveRecipe={handleMoveRecipe}
               onSearchOnline={() => setShowOnlineSearch(true)}
+              onImportFromText={() => { setImportDraft(null); setShowImportPaste(true); }}
             />
           )}
         </aside>
 
         <section className={styles.content}>
-          {desktopRecipeFormId ? (
+          {showImportPaste ? (
+            <RecipeImport
+              onParsed={(parsed) => {
+                setImportDraft(parsed);
+                setShowImportPaste(false);
+                setDesktopRecipeFormId('create');
+              }}
+              onCancel={() => setShowImportPaste(false)}
+            />
+          ) : desktopRecipeFormId ? (
             <RecipeForm
+              key={importDraft ? 'import' : desktopRecipeFormId}
               recipe={desktopRecipeFormId !== 'create' ? recipeState.activeRecipe : null}
+              initialData={desktopRecipeFormId === 'create' ? importDraft : null}
+              saveLabel={importDraft ? 'Import' : 'Save'}
+              titleOverride={importDraft ? 'Review & Import' : undefined}
+              collections={importDraft ? recipeState.collections : undefined}
+              defaultCollectionId={recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
               onSave={handleDesktopRecipeSave}
-              onBack={() => setDesktopRecipeFormId(null)}
+              onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); }}
             />
           ) : recipeState.activeRecipe ? (
             <MobileRecipeDetail

@@ -37,6 +37,8 @@ export const RecipeSelector = ({
   onCollectionBack,
   // US-002: Online recipe search
   onSearchOnline,
+  // Import a recipe from pasted text (AI-assisted)
+  onImportFromText,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -687,6 +689,35 @@ export const RecipeSelector = ({
             <span className={styles.chevron}>›</span>
           </button>
         </div>
+        {onImportFromText && (
+          <div className={styles.listItem}>
+            <button
+              className={styles.listBtn}
+              onClick={onImportFromText}
+              type="button"
+            >
+              <div className={styles.findRecipesIcon}>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                </svg>
+              </div>
+              <span className={styles.listText}>
+                <span className={styles.listName}>Import from text</span>
+              </span>
+              <span className={styles.chevron}>›</span>
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
@@ -1402,4 +1433,6 @@ RecipeSelector.propTypes = {
   onCollectionBack: PropTypes.func,
   // US-002: Online recipe search
   onSearchOnline: PropTypes.func,
+  // Import a recipe from pasted text (AI-assisted)
+  onImportFromText: PropTypes.func,
 };

@@ -196,7 +196,8 @@ export const RecipeProvider = ({ children }) => {
 
   const createRecipeAction = useCallback(async (recipe) => {
     if (!userId) return null;
-    const newId = await dbCreateRecipe(userId, { ...recipe, collectionId: activeCollectionId });
+    const collectionId = recipe.collectionId ?? activeCollectionId;
+    const newId = await dbCreateRecipe(userId, { ...recipe, collectionId });
     return newId;
   }, [userId, activeCollectionId]);
 
