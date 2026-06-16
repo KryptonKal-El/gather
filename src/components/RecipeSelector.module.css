@@ -1150,3 +1150,171 @@
     min-height: 56px;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Collection accordions (expandable collections with inline recipes)
+   ------------------------------------------------------------------------- */
+
+.accordionList {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  padding-right: 0.25rem;
+}
+
+.accordionToggle {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.25rem 0.6rem 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.accordionToggle:hover {
+  background: var(--bg-hover);
+}
+
+.accordionChevron {
+  flex-shrink: 0;
+  width: 18px;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  transition: transform 0.18s ease;
+  transform: rotate(0deg);
+  text-align: center;
+}
+
+.accordionChevronOpen {
+  transform: rotate(90deg);
+}
+
+.accordionName {
+  flex: 1;
+  min-width: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.accordionRenameRow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+}
+
+.collectionAddBtn {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--primary);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.collectionAddBtn:hover {
+  background: var(--bg-hover);
+}
+
+.accordionBody {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-subtle, rgba(0, 0, 0, 0.02));
+}
+
+.recipeSubRow {
+  padding-left: 1.25rem;
+}
+
+.accordionEmpty {
+  padding: 0.75rem 1rem 0.75rem 1.75rem;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.accordionEmpty:hover {
+  background: var(--bg-hover);
+}
+
+.accordionEmptyText {
+  padding: 0.75rem 1rem 0.75rem 1.75rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------------------
+   New-recipe method chooser (reuses the move-picker panel styles)
+   ------------------------------------------------------------------------- */
+
+.methodItem {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: none;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.methodItem:hover {
+  background: var(--bg-hover);
+}
+
+.methodIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.methodText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.methodName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.methodHint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

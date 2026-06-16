@@ -145,6 +145,13 @@
   overflow: hidden;
 }
 
+.recipeCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .listCardHeader {
   display: flex;
   align-items: center;

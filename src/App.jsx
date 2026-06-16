@@ -89,6 +89,8 @@ export const App = () => {
   const [showRecipeForm, setShowRecipeForm] = useState(null);
   const [showImportPaste, setShowImportPaste] = useState(false);
   const [importDraft, setImportDraft] = useState(null);
+  // Collection a new recipe should be filed into (from a per-collection add button).
+  const [pendingCollectionId, setPendingCollectionId] = useState(null);
   const [addToListIngredients, setAddToListIngredients] = useState(null);
   const [desktopView, setDesktopView] = useState(() => {
     try {
@@ -588,6 +590,7 @@ export const App = () => {
         }
         setShowRecipeForm(null);
         setImportDraft(null);
+        setPendingCollectionId(null);
       };
 
       // Step 1 of "Import from Text": paste screen.
@@ -617,10 +620,10 @@ export const App = () => {
               initialData={showRecipeForm === 'create' ? importDraft : null}
               saveLabel={importDraft ? 'Import' : 'Save'}
               titleOverride={importDraft ? 'Review & Import' : undefined}
-              collections={importDraft ? recipeState.collections : undefined}
-              defaultCollectionId={recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
+              collections={showRecipeForm === 'create' ? recipeState.collections : undefined}
+              defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
               onSave={handleRecipeSave}
-              onBack={() => { setShowRecipeForm(null); setImportDraft(null); }}
+              onBack={() => { setShowRecipeForm(null); setImportDraft(null); setPendingCollectionId(null); }}
             />
           </div>
         );
@@ -704,26 +707,25 @@ export const App = () => {
             <section className={getRecipeListScreenClass()}>
               <div className={styles.mobileFullScreen}>
                 <RecipeSelector
-                  recipes={recipeState.recipes}
                   collections={recipeState.collections}
                   sharedCollections={recipeState.sharedCollections}
+                  sharedCollectionRecipes={recipeState.sharedCollectionRecipes}
                   activeCollectionId={recipeState.activeCollectionId}
                   allRecipes={recipeState.allRecipes}
                   currentUserId={user.id}
                   onSelect={handleRecipeSelect}
-                  onCreate={() => setShowRecipeForm('create')}
+                  onCreate={(collectionId) => { setPendingCollectionId(collectionId ?? null); setShowRecipeForm('create'); }}
                   onEdit={handleRecipeEdit}
                   onDelete={recipeActions.deleteRecipe}
-                  onSelectCollection={handleMobileSelectCollection}
+                  onSelectCollection={(collectionId) => recipeActions.selectCollection(collectionId)}
                   onCreateCollection={recipeActions.createCollection}
                   onUpdateCollection={recipeActions.updateCollection}
                   onDeleteCollection={recipeActions.deleteCollection}
                   onShareCollection={(collectionId) => setSharingCollectionId(collectionId)}
                   onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
                   onMoveRecipe={handleMoveRecipe}
-                  onCollectionBack={handleMobileCollectionBack}
                   onSearchOnline={() => setShowOnlineSearch(true)}
-                  onImportFromText={() => { setImportDraft(null); setShowImportPaste(true); }}
+                  onImportFromText={(collectionId) => { setPendingCollectionId(collectionId ?? null); setImportDraft(null); setShowImportPaste(true); }}
                 />
               </div>
             </section>
@@ -799,6 +801,7 @@ export const App = () => {
     }
     setDesktopRecipeFormId(null);
     setImportDraft(null);
+    setPendingCollectionId(null);
   };
 
   const renderDesktopContent = () => {
@@ -895,9 +898,9 @@ export const App = () => {
             />
           ) : (
             <RecipeSelector
-              recipes={recipeState.recipes}
               collections={recipeState.collections}
               sharedCollections={recipeState.sharedCollections}
+              sharedCollectionRecipes={recipeState.sharedCollectionRecipes}
               activeCollectionId={recipeState.activeCollectionId}
               allRecipes={recipeState.allRecipes}
               currentUserId={user.id}
@@ -905,7 +908,7 @@ export const App = () => {
                 recipeActions.selectRecipe(recipeId);
                 setDesktopRecipeFormId(null);
               }}
-              onCreate={() => setDesktopRecipeFormId('create')}
+              onCreate={(collectionId) => { setPendingCollectionId(collectionId ?? null); setDesktopRecipeFormId('create'); }}
               onEdit={(recipeId) => {
                 recipeActions.selectRecipe(recipeId);
                 setDesktopRecipeFormId(recipeId);
@@ -919,7 +922,7 @@ export const App = () => {
               onLeaveCollection={(collectionId) => recipeActions.unshareCollection(collectionId, user.email)}
               onMoveRecipe={handleMoveRecipe}
               onSearchOnline={() => setShowOnlineSearch(true)}
-              onImportFromText={() => { setImportDraft(null); setShowImportPaste(true); }}
+              onImportFromText={(collectionId) => { setPendingCollectionId(collectionId ?? null); setImportDraft(null); setShowImportPaste(true); }}
             />
           )}
         </aside>
@@ -941,29 +944,31 @@ export const App = () => {
               initialData={desktopRecipeFormId === 'create' ? importDraft : null}
               saveLabel={importDraft ? 'Import' : 'Save'}
               titleOverride={importDraft ? 'Review & Import' : undefined}
-              collections={importDraft ? recipeState.collections : undefined}
-              defaultCollectionId={recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
+              collections={desktopRecipeFormId === 'create' ? recipeState.collections : undefined}
+              defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
               onSave={handleDesktopRecipeSave}
-              onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); }}
+              onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); setPendingCollectionId(null); }}
             />
           ) : recipeState.activeRecipe ? (
-            <MobileRecipeDetail
-              recipe={recipeState.activeRecipe}
-              isOwner={recipeState.activeRecipe.ownerId === user.id}
-              collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
-              collections={recipeState.collections}
-              activeCollectionId={recipeState.activeCollectionId}
-              onMoveRecipe={handleMoveRecipe}
-              onBack={() => recipeActions.selectRecipe(null)}
-              onEdit={(recipeId) => {
-                recipeActions.selectRecipe(recipeId);
-                setDesktopRecipeFormId(recipeId);
-              }}
-              onDelete={(recipeId) => {
-                recipeActions.deleteRecipe(recipeId);
-              }}
-              onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
-            />
+            <div className={styles.recipeCard}>
+              <MobileRecipeDetail
+                recipe={recipeState.activeRecipe}
+                isOwner={recipeState.activeRecipe.ownerId === user.id}
+                collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
+                collections={recipeState.collections}
+                activeCollectionId={recipeState.activeCollectionId}
+                onMoveRecipe={handleMoveRecipe}
+                onBack={() => recipeActions.selectRecipe(null)}
+                onEdit={(recipeId) => {
+                  recipeActions.selectRecipe(recipeId);
+                  setDesktopRecipeFormId(recipeId);
+                }}
+                onDelete={(recipeId) => {
+                  recipeActions.deleteRecipe(recipeId);
+                }}
+                onAddToList={(selectedIngredients) => setAddToListIngredients(selectedIngredients)}
+              />
+            </div>
           ) : (
             <div className={styles.noList}>
               <h2>Recipes</h2>
