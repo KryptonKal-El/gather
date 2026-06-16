@@ -11,6 +11,7 @@ struct CreateCollectionSheet: View {
     @State private var descriptionText = ""
     @State private var showEmojiPicker = false
     @State private var isCreating = false
+    @FocusState private var isNameFocused: Bool
     
     private var canCreate: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isCreating
@@ -22,6 +23,7 @@ struct CreateCollectionSheet: View {
                 Section {
                     TextField("Collection name", text: $name)
                         .textInputAutocapitalization(.words)
+                        .focused($isNameFocused)
                 }
                 
                 Section("Emoji") {
@@ -75,6 +77,9 @@ struct CreateCollectionSheet: View {
             }
             .sheet(isPresented: $showEmojiPicker) {
                 EmojiPickerView(selectedEmoji: $selectedEmoji)
+            }
+            .onAppear {
+                isNameFocused = true
             }
         }
         .interactiveDismissDisabled(isCreating)
