@@ -13,9 +13,14 @@ struct ListBrowserView: View {
     @State private var showDeleteConfirm = false
     @State private var navigationPath = NavigationPath()
     @State private var pendingDeepLinkId: UUID?
+    // Remembers whether the user left off inside a list detail (vs the browser),
+    // so a relaunch restores the same screen.
+    @AppStorage("gather.listDetailOpen") private var listDetailOpen = true
     @State private var listToDuplicate: GatherList?
     @State private var showResetItemsConfirm = false
     @State private var listToResetItems: GatherList?
+    @State private var listToManageStores: GatherList?
+    @State private var listToManageCategories: GatherList?
     
     private var allFiltered: [GatherList] {
         guard let vm = viewModel else { return [] }
@@ -70,8 +75,36 @@ struct ListBrowserView: View {
             }
             .sheet(item: $listToEdit) { list in
                 if let vm = viewModel {
-                    EditListSheet(list: list, viewModel: vm)
+                    EditListSheet(
+                        list: list,
+                        viewModel: vm,
+                        isOwned: vm.ownedLists.contains { $0.id == list.id }
+                    )
                 }
+            }
+            .sheet(item: $listToManageStores) { list in
+                StoreBrowserView(listId: list.id)
+                    .environment(authViewModel)
+            }
+            .sheet(item: $listToManageCategories) { list in
+                CategoryEditorSheet(
+                    listId: list.id,
+                    listType: list.type,
+                    initialCategories: list.categories ?? [],
+                    onSave: { updatedCategories in
+                        Task {
+                            await viewModel?.updateList(
+                                id: list.id,
+                                name: nil,
+                                emoji: nil,
+                                color: nil,
+                                type: nil,
+                                categories: updatedCategories
+                            )
+                        }
+                    }
+                )
+                .environment(authViewModel)
             }
             .sheet(item: $listToShare) { list in
                 if let vm = viewModel {
@@ -140,13 +173,18 @@ struct ListBrowserView: View {
             }
         }
         .onChange(of: viewModel?.activeListId) { oldId, newId in
-            guard let newId,
+            guard listDetailOpen,
+                  let newId,
                   newId != oldId,
                   let vm = viewModel,
                   vm.allLists.contains(where: { $0.id == newId }),
                   navigationPath.count == 0
             else { return }
             navigateToList(id: newId)
+        }
+        .onChange(of: navigationPath.count) { _, newCount in
+            // Track whether a list detail is open so the choice survives relaunch.
+            listDetailOpen = newCount > 0
         }
     }
     
@@ -168,43 +206,56 @@ struct ListBrowserView: View {
                             ListRowView(list: list, isShared: !isOwned, collaborators: collaborators)
                         }
                         .contextMenu {
-                            if isOwned {
+                            Button {
+                                listToEdit = list
+                            } label: {
+                                Label("Name, Icon & Color", systemImage: "pencil")
+                            }
+
+                            if ListTypes.getConfig(list.type).fields.store {
                                 Button {
-                                    listToEdit = list
+                                    listToManageStores = list
                                 } label: {
-                                    Label("Edit", systemImage: "pencil")
+                                    Label("Manage Stores", systemImage: "storefront")
                                 }
-                                
+                            }
+
+                            if EditListSheet.categorySupportedTypes.contains(list.type) {
+                                Button {
+                                    listToManageCategories = list
+                                } label: {
+                                    Label("Manage Categories", systemImage: "tag")
+                                }
+                            }
+
+                            if isOwned {
                                 Button {
                                     listToShare = list
                                 } label: {
                                     Label("Share Settings", systemImage: "person.badge.plus")
                                 }
-                            }
-                            
-                             Button {
-                                 listToDuplicate = list
-                             } label: {
-                                 Label("Duplicate", systemImage: "doc.on.doc")
-                             }
 
-                             if isOwned && list.type == "guest_list" {
-                                  Button {
-                                      // Browser rows do not load item RSVP data, so this view always
-                                      // shows the confirmation alert and lets the detail screen handle
-                                      // the already-reset edge case when item data is available.
-                                      listToResetItems = list
-                                      showResetItemsConfirm = true
-                                  } label: {
-                                     Label("Reset items", systemImage: "arrow.counterclockwise")
-                                 }
-                                 .disabled(list.itemCount == 0)
-                                 // US-002: confirmation alert; disabled-when-empty handled at dialog/action level.
-                             }
-                            
-                            if isOwned {
+                                Button {
+                                    listToDuplicate = list
+                                } label: {
+                                    Label("Duplicate", systemImage: "doc.on.doc")
+                                }
+
+                                if list.type == "guest_list" {
+                                    Button {
+                                        // Browser rows do not load item RSVP data, so this view always
+                                        // shows the confirmation alert and lets the detail screen handle
+                                        // the already-reset edge case when item data is available.
+                                        listToResetItems = list
+                                        showResetItemsConfirm = true
+                                    } label: {
+                                        Label("Reset items", systemImage: "arrow.counterclockwise")
+                                    }
+                                    .disabled(list.itemCount == 0)
+                                }
+
                                 Divider()
-                                
+
                                 Button(role: .destructive) {
                                     listToDelete = list
                                     showDeleteConfirm = true

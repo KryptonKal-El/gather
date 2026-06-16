@@ -5,9 +5,9 @@ struct MainTabView: View {
     @Environment(NetworkMonitor.self) private var networkMonitor
     @Environment(NotificationService.self) private var notificationService
     @Environment(ToastController.self) private var toastController
-    @State private var selectedTab = 0
+    // Persist the selected tab so a relaunch returns to the same section.
+    @AppStorage("gather.selectedTab") private var selectedTab = 0
     
-    private let brandGreen = Color(red: 0x3D/255, green: 0x7A/255, blue: 0x63/255)
     
     var body: some View {
         VStack(spacing: 0) {
@@ -46,7 +46,7 @@ struct MainTabView: View {
                     }
                     .tag(2)
             }
-            .tint(brandGreen)
+            .tint(Color.brandGreen)
         }
         .animation(.easeInOut, value: networkMonitor.isConnected)
         .safeAreaInset(edge: .bottom) {

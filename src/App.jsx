@@ -83,13 +83,30 @@ export const App = () => {
     handleBack,
     handleRecipeBack,
     handleCollectionBack,
+    dismissListDetail,
   } = useMobileNav(state.lists, recipeState.recipes);
   const { showBanner, platform, promptInstall, dismissBanner } = usePWAInstall();
   const [showRecipeForm, setShowRecipeForm] = useState(null);
   const [showImportPaste, setShowImportPaste] = useState(false);
   const [importDraft, setImportDraft] = useState(null);
   const [addToListIngredients, setAddToListIngredients] = useState(null);
-  const [desktopView, setDesktopView] = useState('lists');
+  const [desktopView, setDesktopView] = useState(() => {
+    try {
+      return localStorage.getItem('gather_active_tab') === 'recipes' ? 'recipes' : 'lists';
+    } catch {
+      return 'lists';
+    }
+  });
+  // Persist the desktop tab to the same key the mobile nav uses, so the chosen
+  // section (Lists/Recipes) is restored on the next reload.
+  const handleDesktopViewChange = useCallback((view) => {
+    setDesktopView(view);
+    try {
+      localStorage.setItem('gather_active_tab', view);
+    } catch {
+      // Ignore localStorage errors (e.g. private mode).
+    }
+  }, []);
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
   const [restoredItemIds, setRestoredItemIds] = useState(new Set());
   const [showOnlineSearch, setShowOnlineSearch] = useState(false);
@@ -112,6 +129,15 @@ export const App = () => {
       actions.selectList(openListId);
     }
   }, [isMobile, openListId, actions]);
+
+  // If a restored open list no longer exists (deleted, or access removed), drop
+  // back to the Lists browser instead of getting stuck on a missing detail.
+  useEffect(() => {
+    if (!isMobile || !openListId) return;
+    if (state.lists.length > 0 && !state.lists.some((l) => l.id === openListId)) {
+      dismissListDetail();
+    }
+  }, [isMobile, openListId, state.lists, dismissListDetail]);
 
   // US-010: Sync openCollectionId with recipe context when browser back clears collection
   useEffect(() => {
@@ -457,7 +483,9 @@ export const App = () => {
   const renderMobileContent = () => {
     if (activeTab === 'lists') {
       const showDetail = openListId && activeList;
-      const showListScreen = !openListId || transition;
+      // Fall back to the browser whenever there's no list to show yet (e.g. a
+      // restored list still loading) so we never render a blank screen.
+      const showListScreen = !openListId || transition || !activeList;
       const showDetailScreen = showDetail || transition === 'popping';
       
       const detailList = activeList ?? poppingListData;
@@ -952,14 +980,14 @@ export const App = () => {
            <button
              type="button"
              className={`${styles.desktopTab} ${desktopView === 'lists' ? styles.desktopTabActive : ''}`}
-             onClick={() => setDesktopView('lists')}
+             onClick={() => handleDesktopViewChange('lists')}
            >
              Lists
            </button>
            <button
              type="button"
              className={`${styles.desktopTab} ${desktopView === 'recipes' ? styles.desktopTabActive : ''}`}
-             onClick={() => setDesktopView('recipes')}
+             onClick={() => handleDesktopViewChange('recipes')}
            >
              Recipes
            </button>

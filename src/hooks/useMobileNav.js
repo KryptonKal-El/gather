@@ -2,6 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const TRANSITION_DURATION = 300;
 
+/** localStorage keys for restoring the user's last navigation location. */
+const TAB_KEY = 'gather_active_tab';
+const OPEN_LIST_KEY = 'gather_open_list_id';
+
+const readPersisted = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Hook that manages mobile navigation state for iOS-style tab/detail navigation.
  * Tracks the active tab and which list/recipe/collection (if any) is open in detail view.
@@ -25,11 +37,12 @@ const TRANSITION_DURATION = 300;
  *   handleBack: () => void,
  *   handleRecipeBack: () => void,
  *   handleCollectionBack: () => void,
+ *   dismissListDetail: () => void,
  * }}
  */
 export const useMobileNav = (lists = [], recipes = []) => {
-  const [activeTab, setActiveTab] = useState('lists');
-  const [openListId, setOpenListId] = useState(null);
+  const [activeTab, setActiveTab] = useState(() => readPersisted(TAB_KEY) || 'lists');
+  const [openListId, setOpenListId] = useState(() => readPersisted(OPEN_LIST_KEY) || null);
   const [openRecipeId, setOpenRecipeId] = useState(null);
   const [openCollectionId, setOpenCollectionId] = useState(null);
   const [transition, setTransition] = useState(null);
@@ -84,6 +97,14 @@ export const useMobileNav = (lists = [], recipes = []) => {
   const handleBack = useCallback(() => {
     startPopTransition(openListId, lists);
   }, [startPopTransition, openListId, lists]);
+
+  /** Closes the list detail immediately, without a pop animation (used when a restored list is no longer valid). */
+  const dismissListDetail = useCallback(() => {
+    clearTransitionTimeout();
+    setTransition(null);
+    setPoppingListData(null);
+    setOpenListId(null);
+  }, [clearTransitionTimeout]);
 
   const startRecipePopTransition = useCallback((currentRecipeId, currentRecipes) => {
     clearTransitionTimeout();
@@ -160,6 +181,29 @@ export const useMobileNav = (lists = [], recipes = []) => {
     return () => clearTransitionTimeout();
   }, [clearTransitionTimeout]);
 
+  // Persist the active tab so a reload returns to the same tab (Lists/Recipes/Settings).
+  useEffect(() => {
+    try {
+      localStorage.setItem(TAB_KEY, activeTab);
+    } catch {
+      // Ignore localStorage errors (e.g. private mode).
+    }
+  }, [activeTab]);
+
+  // Persist whether a list detail is open so a reload returns either into that
+  // list or to the Lists browser, matching where the user left off.
+  useEffect(() => {
+    try {
+      if (openListId) {
+        localStorage.setItem(OPEN_LIST_KEY, openListId);
+      } else {
+        localStorage.removeItem(OPEN_LIST_KEY);
+      }
+    } catch {
+      // Ignore localStorage errors (e.g. private mode).
+    }
+  }, [openListId]);
+
   return {
     activeTab,
     openListId,
@@ -175,5 +219,6 @@ export const useMobileNav = (lists = [], recipes = []) => {
     handleBack,
     handleRecipeBack,
     handleCollectionBack,
+    dismissListDetail,
   };
 };
