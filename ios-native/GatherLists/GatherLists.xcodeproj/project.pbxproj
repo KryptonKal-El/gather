@@ -651,6 +651,7 @@
 				A1B2C3D4E5F6A7B8C9D0E200 /* Frameworks */,
 				A1B2C3D4E5F6A7B8C9D0E208 /* Resources */,
 				WIDGETCOPYFILES0000000001 /* Embed Foundation Extensions */,
+				BUMPBUILDPHASE0000000001 /* Bump Build Number */,
 			);
 			buildRules = (
 			);
@@ -773,6 +774,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		BUMPBUILDPHASE0000000001 /* Bump Build Number */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Bump Build Number (Archive Only)";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"$CONFIGURATION\" = \"Release\" ] && [ \"$ACTION\" = \"install\" ]; then\n  XCCONFIG=\"$SRCROOT/Version.xcconfig\"\n  current=$(grep -m1 -oE 'CURRENT_PROJECT_VERSION = [0-9]+' \"$XCCONFIG\" | grep -oE '[0-9]+')\n  if [ -z \"$current\" ]; then current=0; fi\n  next=$((current + 1))\n  /usr/bin/sed -i '' \"s/CURRENT_PROJECT_VERSION = [0-9][0-9]*/CURRENT_PROJECT_VERSION = ${next}/\" \"$XCCONFIG\"\n  /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${next}\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n  for appex in \"${TARGET_BUILD_DIR}/${WRAPPER_NAME}/PlugIns/\"*.appex; do\n    if [ -f \"$appex/Info.plist\" ]; then\n      /usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${next}\" \"$appex/Info.plist\"\n    fi\n  done\n  echo \"Bumped build number to ${next} for archive\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 
 /* Begin PBXSourcesBuildPhase section */

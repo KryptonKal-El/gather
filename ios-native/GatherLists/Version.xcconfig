@@ -1,7 +1,9 @@
 // Single source of truth for the iOS build number (CFBundleVersion).
 //
-// This is bumped automatically before each archive by the "Bump Build Number"
-// pre-action on the GatherLists scheme's Archive action, and by `make bump`.
+// This is bumped automatically during a Release archive by the "Bump Build
+// Number" build phase on the GatherLists app target, and by `make bump`. The
+// build phase also patches the freshly-built app/appex Info.plists, so the
+// archive that triggers the bump already carries the new number (no off-by-one).
 // It lives here (not in the .pbxproj) so it can be edited while Xcode is open
 // without conflicts, and so bumping never mutates the project mid-build.
 CURRENT_PROJECT_VERSION = 57
