@@ -11,7 +11,7 @@ struct CategoryDef: Codable, Hashable {
 /// A user-defined store for item grouping, mapped to the `stores` Supabase table.
 struct Store: Codable, Identifiable, Hashable {
     let id: UUID
-    let userId: UUID
+    let listId: UUID
     var name: String
     var color: String?
     var sortOrder: Int
@@ -19,14 +19,14 @@ struct Store: Codable, Identifiable, Hashable {
     
     init(
         id: UUID = UUID(),
-        userId: UUID,
+        listId: UUID,
         name: String,
         color: String? = nil,
         sortOrder: Int = 0,
         createdAt: Date = Date()
     ) {
         self.id = id
-        self.userId = userId
+        self.listId = listId
         self.name = name
         self.color = color
         self.sortOrder = sortOrder
@@ -35,7 +35,7 @@ struct Store: Codable, Identifiable, Hashable {
     
     enum CodingKeys: String, CodingKey {
         case id
-        case userId = "user_id"
+        case listId = "list_id"
         case name
         case color
         case sortOrder = "sort_order"

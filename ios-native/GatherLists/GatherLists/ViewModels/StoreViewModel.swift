@@ -13,18 +13,19 @@ final class StoreViewModel {
     var isShowingCachedData = false
     var cachedAt: Date?
     
-    private let userId: UUID
+    private let listId: UUID
     
     nonisolated(unsafe) private var storesChannel: RealtimeChannelV2?
     nonisolated(unsafe) private var storesTask: Task<Void, Never>?
     
-    init(userId: UUID) {
-        self.userId = userId
-        
-        Task {
-            await loadData()
-            await setupRealtimeSubscription()
-        }
+    init(listId: UUID) {
+        self.listId = listId
+    }
+    
+    /// Call this from the view's `.task` modifier to begin loading.
+    func start() async {
+        await loadData()
+        await setupRealtimeSubscription()
     }
     
     // MARK: - Data Loading
@@ -34,17 +35,17 @@ final class StoreViewModel {
         error = nil
         
         // Load cached data first for instant display
-        if let cached: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(userId.uuidString)") {
+        if let cached: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(listId.uuidString)") {
             stores = cached.data
             cachedAt = cached.cachedAt
         }
         
         // Fetch fresh data from Supabase
         do {
-            stores = try await StoreService.fetchStores(userId: userId)
+            stores = try await StoreService.fetchStores(listId: listId)
             isShowingCachedData = false
             cachedAt = nil
-            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
+            await OfflineCache.shared.save(stores, forKey: "stores-\(listId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !stores.isEmpty
@@ -60,14 +61,14 @@ final class StoreViewModel {
         guard storesChannel == nil else { return }
         
         let client = SupabaseManager.shared.client
-        let channel = client.realtimeV2.channel("stores-tab-\(userId.uuidString)")
+        let channel = client.realtimeV2.channel("stores-list-\(listId.uuidString)")
         storesChannel = channel
         
         let changes = channel.postgresChange(
             AnyAction.self,
             schema: "public",
             table: "stores",
-            filter: .eq("user_id", value: userId)
+            filter: .eq("list_id", value: listId)
         )
         
         storesTask = Task {
@@ -85,10 +86,10 @@ final class StoreViewModel {
     
     private func refetchStores() async {
         do {
-            stores = try await StoreService.fetchStores(userId: userId)
+            stores = try await StoreService.fetchStores(listId: listId)
             isShowingCachedData = false
             cachedAt = nil
-            await OfflineCache.shared.save(stores, forKey: "stores-\(userId.uuidString)")
+            await OfflineCache.shared.save(stores, forKey: "stores-\(listId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[StoreViewModel] Failed to refetch stores: \(error.localizedDescription)")
@@ -106,7 +107,7 @@ final class StoreViewModel {
         error = nil
         do {
             let newStore = try await StoreService.createStore(
-                userId: userId,
+                listId: listId,
                 name: name,
                 color: color
             )
@@ -147,11 +148,11 @@ final class StoreViewModel {
     func moveStore(from source: IndexSet, to destination: Int) {
         stores.move(fromOffsets: source, toOffset: destination)
         
-        let userId = self.userId
+        let listId = self.listId
         let currentStores = self.stores
         Task {
             do {
-                try await StoreService.saveStoreOrder(userId: userId, stores: currentStores)
+                try await StoreService.saveStoreOrder(listId: listId, stores: currentStores)
             } catch {
                 await MainActor.run {
                     self.error = error.localizedDescription

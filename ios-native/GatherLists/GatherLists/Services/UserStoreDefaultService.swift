@@ -1,14 +1,14 @@
 import Foundation
 import Supabase
 
-struct UserStoreDefault: Codable {
-    let id: UUID
-    let userId: UUID
+struct UserStoreDefault: Codable, Identifiable, Hashable {
+    var id: UUID
+    var userId: UUID
     let listType: String
-    let name: String
-    let color: String?
-    let sortOrder: Int
-    let createdAt: Date
+    var name: String
+    var color: String?
+    var sortOrder: Int
+    var createdAt: Date
     
     enum CodingKeys: String, CodingKey {
         case id
