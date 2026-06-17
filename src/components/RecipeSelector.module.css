@@ -1252,15 +1252,14 @@
 .accordionBody {
   display: flex;
   flex-direction: column;
-  background: var(--bg-subtle, rgba(0, 0, 0, 0.02));
 }
 
 .recipeSubRow {
-  padding-left: 1.25rem;
+  padding-left: 2.25rem;
 }
 
 .accordionEmpty {
-  padding: 0.75rem 1rem 0.75rem 1.75rem;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
   text-align: left;
   font-size: 0.9rem;
   color: var(--primary);
@@ -1274,7 +1273,7 @@
 }
 
 .accordionEmptyText {
-  padding: 0.75rem 1rem 0.75rem 1.75rem;
+  padding: 0.75rem 1rem 0.75rem 2.75rem;
   font-size: 0.88rem;
   color: var(--text-muted);
 }
