@@ -1243,8 +1243,10 @@
   cursor: pointer;
 }
 
+/* Brand tint so the "+" still reads as its own target on top of the row's
+   neutral hover background. */
 .collectionAddBtn:hover {
-  background: var(--bg-hover);
+  background: var(--primary-tint);
 }
 
 .accordionBody {
