@@ -39,9 +39,23 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 - For a single-tab PWA, cross-tab lock synchronization isn't needed
 - Session restores in ~50ms instead of ~5000ms
 
-### Previous fix (still in place, still helpful)
+### Previous fix (now removed — see below)
 
-Added an explicit `getSession()` call as a fallback after registering `onAuthStateChange`. This is the Supabase-recommended pattern and provides fast session resolution even without the lock fix.
+An explicit `getSession()` fallback was added after registering `onAuthStateChange`. This was later removed: supabase-js v2 already delivers the current session via the `INITIAL_SESSION` event, so the extra call was redundant and added lock churn.
+
+## The real remaining bug: deadlock inside `onAuthStateChange` (fixed 2026-06)
+
+Even with `processLock`, the app still got stuck on "Loading..." intermittently, needing 2–3 refreshes. Root cause: the `onAuthStateChange` callback was `async` and `await`ed `fetchProfile()` (a `supabase.from('profiles')` query) **inside the callback**. supabase-js invokes that callback *while holding the auth lock* during `INITIAL_SESSION`/token refresh; the profile query then needs the same lock to read the token → re-entrant acquire on the non-reentrant `processLock` → **deadlock**. The callback never returns, so `setIsLoading(false)` never runs.
+
+Intermittent because it only deadlocks when the stored token needs refreshing on load (e.g. after idle). Fresh token → no lock held during the callback → loads fine.
+
+### Fix (the rule: never call Supabase inside `onAuthStateChange`)
+- Keep the `onAuthStateChange` callback **synchronous** — set a base user from the `session` object and flip `isLoading` false; do not await anything.
+- Fetch the profile in a **separate `useEffect`** keyed on `user.id` (outside the lock), then merge it in.
+- Dropped the redundant `getSession()` (rely on `INITIAL_SESSION`).
+- Added a 5s loading failsafe so the app can never hang on the loading screen permanently.
+
+This same deadlock is also why DB **writes** wedged after the tab sat idle (token refresh on next op contended the lock). See `AuthContext.jsx`.
 
 ## Tradeoff
 

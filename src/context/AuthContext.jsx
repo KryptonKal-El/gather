@@ -57,11 +57,19 @@ export const AuthProvider = ({ children }) => {
   const [sessionVersion, setSessionVersion] = useState(0);
   const lastAccessTokenRef = useRef(null);
 
+  // Auth state subscription. The callback MUST stay synchronous and MUST NOT
+  // call other Supabase methods (e.g. a profiles query): supabase-js invokes
+  // this callback while holding the auth lock during INITIAL_SESSION / token
+  // refresh, and a re-entrant Supabase call deadlocks the (non-reentrant)
+  // processLock — which left the app stuck on "Loading..." until a lucky
+  // refresh won the race. The current session arrives via the INITIAL_SESSION
+  // event, so no explicit getSession() is needed. Profile data is fetched in a
+  // separate effect below, outside the lock.
   useEffect(() => {
     let isMounted = true;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         if (!isMounted) return;
 
         if (session?.user) {
@@ -72,43 +80,50 @@ export const AuthProvider = ({ children }) => {
             setSessionVersion((v) => v + 1);
           }
           lastAccessTokenRef.current = currentToken;
-
-          const profile = await fetchProfile(session.user.id);
-          if (!isMounted) return;
-          setUser(mergeUserWithProfile(session.user, profile));
-          setIsLoading(false);
-        } else if (event === 'SIGNED_OUT') {
+          setUser((prev) => (
+            // Preserve an already-loaded profile across token refreshes; otherwise
+            // set a base user now and let the profile effect below enrich it.
+            prev?.id === session.user.id && prev.profile?.id
+              ? { ...session.user, profile: prev.profile }
+              : mergeUserWithProfile(session.user, null)
+          ));
+        } else {
           lastAccessTokenRef.current = null;
           setUser(null);
-          setIsLoading(false);
         }
-      }
-    );
-
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!isMounted) return;
-        if (session?.user) {
-          lastAccessTokenRef.current = session.access_token;
-          const profile = await fetchProfile(session.user.id);
-          if (!isMounted) return;
-          setUser(mergeUserWithProfile(session.user, profile));
-        }
-      } catch (err) {
-        console.error('Failed to check session:', err);
-      }
-      if (isMounted) {
         setIsLoading(false);
       }
-    };
-    checkSession();
+    );
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
     };
   }, []);
+
+  // Failsafe: never let the app hang on the loading screen indefinitely, even
+  // if the auth subscription somehow fails to emit.
+  useEffect(() => {
+    if (!isLoading) return undefined;
+    const timeout = setTimeout(() => setIsLoading(false), 5000);
+    return () => clearTimeout(timeout);
+  }, [isLoading]);
+
+  // Enrich the signed-in user with their profile. Runs outside the auth lock
+  // (unlike the onAuthStateChange callback), so it cannot deadlock token refresh.
+  const userId = user?.id ?? null;
+  const hasProfile = !!user?.profile?.id;
+  useEffect(() => {
+    if (!userId || hasProfile) return undefined;
+    let cancelled = false;
+    fetchProfile(userId).then((profile) => {
+      if (cancelled || !profile) return;
+      setUser((prev) => (prev?.id === userId ? mergeUserWithProfile(prev, profile) : prev));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, hasProfile]);
 
   /**
    * Signs in with Apple via OAuth redirect flow.
