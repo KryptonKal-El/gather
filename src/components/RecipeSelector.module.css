@@ -1171,6 +1171,12 @@
   padding-right: 0.25rem;
 }
 
+/* Hover spans the whole row, not just the toggle button (which stops before
+   the "+" and menu buttons). */
+.accordionHeader:hover {
+  background: var(--bg-hover);
+}
+
 .accordionToggle {
   flex: 1;
   min-width: 0;
@@ -1183,10 +1189,6 @@
   cursor: pointer;
   text-align: left;
   color: var(--text-primary);
-}
-
-.accordionToggle:hover {
-  background: var(--bg-hover);
 }
 
 .accordionChevron {
