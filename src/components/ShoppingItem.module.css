@@ -418,7 +418,10 @@
 .picker {
   position: absolute;
   top: calc(100% + 4px);
-  right: 0;
+  /* Open rightward from the badge. The store/category badges sit on the left
+     of their row, so opening left (right: 0) would push the dropdown past the
+     list card's left edge, where the card's overflow:hidden clips it. */
+  left: 0;
   z-index: 20;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
