@@ -123,6 +123,12 @@
   gap: 0.5rem;
 }
 
+/* The header "+ Add" reuses .menuWrap (for its dropdown), whose row-menu
+   margin-right would otherwise push it left of the Lists tab's "+ New". */
+.headerActions .menuWrap {
+  margin-right: 0;
+}
+
 /* Search Online button (mobile) */
 .searchOnlineBtn {
   width: 28px;
