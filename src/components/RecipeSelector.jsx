@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { DeleteCollectionDialog } from './DeleteCollectionDialog.jsx';
@@ -614,7 +615,9 @@ export const RecipeSelector = ({
   const renderMethodChooser = () => {
     if (!methodChooser) return null;
     const target = collections?.find((c) => c.id === methodChooser.collectionId);
-    return (
+    // Portal to body so the centered modal escapes the sticky sidebar's stacking
+    // context and overlays the right content panel.
+    return createPortal(
       <>
         <div className={styles.movePickerBackdrop} onClick={() => setMethodChooser(null)} />
         <div className={styles.movePickerPanel}>
@@ -640,7 +643,8 @@ export const RecipeSelector = ({
           </div>
           <button type="button" className={styles.movePickerCancel} onClick={() => setMethodChooser(null)}>Cancel</button>
         </div>
-      </>
+      </>,
+      document.body,
     );
   };
 
@@ -668,7 +672,7 @@ export const RecipeSelector = ({
     if (!movePickerRecipeId) return null;
     const current = allRecipes?.find((r) => r.id === movePickerRecipeId);
     const targetCollections = collections?.filter((c) => c.id !== current?.collectionId) ?? [];
-    return (
+    return createPortal(
       <>
         <div className={styles.movePickerBackdrop} onClick={() => setMovePickerRecipeId(null)} />
         <div className={styles.movePickerPanel}>
@@ -690,7 +694,8 @@ export const RecipeSelector = ({
           </div>
           <button type="button" className={styles.movePickerCancel} onClick={() => setMovePickerRecipeId(null)}>Cancel</button>
         </div>
-      </>
+      </>,
+      document.body,
     );
   };
 

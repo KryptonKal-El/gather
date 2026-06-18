@@ -882,21 +882,7 @@ export const App = () => {
     const renderRecipesView = () => (
       <>
         <aside className={styles.sidebar}>
-          {onlinePreviewRecipe ? (
-            <OnlineRecipePreview
-              recipe={onlinePreviewRecipe}
-              onSaveAsRecipe={(detail) => setSaveRecipeDetail(detail)}
-              onAddToList={(ingredients) => {
-                setAddToListIngredients(ingredients);
-              }}
-              onBack={() => setOnlinePreviewRecipe(null)}
-            />
-          ) : showOnlineSearch ? (
-            <OnlineRecipeSearch
-              onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
-              onBack={() => setShowOnlineSearch(false)}
-            />
-          ) : (
+          {(
             <RecipeSelector
               collections={recipeState.collections}
               sharedCollections={recipeState.sharedCollections}
@@ -928,27 +914,47 @@ export const App = () => {
         </aside>
 
         <section className={styles.content}>
-          {showImportPaste ? (
-            <RecipeImport
-              onParsed={(parsed) => {
-                setImportDraft(parsed);
-                setShowImportPaste(false);
-                setDesktopRecipeFormId('create');
-              }}
-              onCancel={() => setShowImportPaste(false)}
-            />
+          {onlinePreviewRecipe ? (
+            <div className={styles.recipeCard}>
+              <OnlineRecipePreview
+                recipe={onlinePreviewRecipe}
+                onSaveAsRecipe={(detail) => setSaveRecipeDetail(detail)}
+                onAddToList={(ingredients) => setAddToListIngredients(ingredients)}
+                onBack={() => setOnlinePreviewRecipe(null)}
+              />
+            </div>
+          ) : showOnlineSearch ? (
+            <div className={styles.recipeCard}>
+              <OnlineRecipeSearch
+                onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
+                onBack={() => setShowOnlineSearch(false)}
+              />
+            </div>
+          ) : showImportPaste ? (
+            <div className={styles.recipeCard}>
+              <RecipeImport
+                onParsed={(parsed) => {
+                  setImportDraft(parsed);
+                  setShowImportPaste(false);
+                  setDesktopRecipeFormId('create');
+                }}
+                onCancel={() => setShowImportPaste(false)}
+              />
+            </div>
           ) : desktopRecipeFormId ? (
-            <RecipeForm
-              key={importDraft ? 'import' : desktopRecipeFormId}
-              recipe={desktopRecipeFormId !== 'create' ? recipeState.activeRecipe : null}
-              initialData={desktopRecipeFormId === 'create' ? importDraft : null}
-              saveLabel={importDraft ? 'Import' : 'Save'}
-              titleOverride={importDraft ? 'Review & Import' : undefined}
-              collections={desktopRecipeFormId === 'create' ? recipeState.collections : undefined}
-              defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
-              onSave={handleDesktopRecipeSave}
-              onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); setPendingCollectionId(null); }}
-            />
+            <div className={styles.recipeCard}>
+              <RecipeForm
+                key={importDraft ? 'import' : desktopRecipeFormId}
+                recipe={desktopRecipeFormId !== 'create' ? recipeState.activeRecipe : null}
+                initialData={desktopRecipeFormId === 'create' ? importDraft : null}
+                saveLabel={importDraft ? 'Import' : 'Save'}
+                titleOverride={importDraft ? 'Review & Import' : undefined}
+                collections={desktopRecipeFormId === 'create' ? recipeState.collections : undefined}
+                defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
+                onSave={handleDesktopRecipeSave}
+                onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); setPendingCollectionId(null); }}
+              />
+            </div>
           ) : recipeState.activeRecipe ? (
             <div className={styles.recipeCard}>
               <MobileRecipeDetail
