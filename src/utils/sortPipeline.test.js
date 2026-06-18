@@ -121,3 +121,26 @@ describe('applySortPipeline store grouping', () => {
     expect(result.ungrouped).toEqual([]);
   });
 });
+
+describe('applySortPipeline category grouping with custom categories', () => {
+  it('labels custom categories on typed lists instead of falling back to Other', () => {
+    // A project list customized with a "Garage" category. Grouping by category
+    // must use the list's categories (not the hardcoded project defaults), so
+    // the Garage item gets its own labeled group rather than landing in "Other".
+    const projectCategories = [
+      { key: 'garage', name: 'Garage', color: '#8d6e63' },
+      { key: 'other', name: 'Other', color: '#9e9e9e' },
+    ];
+    const items = [
+      { id: 'garage-floor', name: 'Garage Floor', store: null, category: 'garage' },
+      { id: 'misc', name: 'Fence', store: null, category: 'other' },
+    ];
+
+    const result = applySortPipeline(items, ['category'], [], 'project', projectCategories);
+
+    expect(getGroupLabels(result.groups)).toEqual(['Garage', 'Other']);
+    const garageGroup = result.groups.find((g) => g.label === 'Garage');
+    expect(garageGroup.key).toBe('category-garage');
+    expect(garageGroup.items.map((i) => i.id)).toEqual(['garage-floor']);
+  });
+});

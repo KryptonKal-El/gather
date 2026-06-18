@@ -317,6 +317,19 @@ const groupByStore = (items, stores, remainingLevels, listType, listCategories) 
  * @returns {Object} Category labels, colors, and ordered keys
  */
 const getCategoryInfo = (listCategories, listType) => {
+  // Prefer the list's resolved categories for every typed list. They already
+  // include any customizations (e.g. a custom "Garage" category on a project
+  // list), so group headings show the real category name instead of falling
+  // back to "Other". The hardcoded per-type constants are only used when a
+  // list has no resolved categories at all.
+  if (listCategories?.length > 0) {
+    return {
+      labels: getAllCategoryLabels(listCategories),
+      colors: getAllCategoryColors(listCategories),
+      orderedKeys: getAllCategoryKeys(listCategories),
+    };
+  }
+
   if (listType === 'packing') {
     return {
       labels: Object.fromEntries(PACKING_CATEGORIES.map((c) => [c.key, c.name])),
@@ -339,12 +352,10 @@ const getCategoryInfo = (listCategories, listType) => {
     };
   }
 
-  const categories = listCategories?.length > 0 ? listCategories : DEFAULT_CATEGORIES;
-
   return {
-    labels: getAllCategoryLabels(categories),
-    colors: getAllCategoryColors(categories),
-    orderedKeys: getAllCategoryKeys(categories),
+    labels: getAllCategoryLabels(DEFAULT_CATEGORIES),
+    colors: getAllCategoryColors(DEFAULT_CATEGORIES),
+    orderedKeys: getAllCategoryKeys(DEFAULT_CATEGORIES),
   };
 };
 
