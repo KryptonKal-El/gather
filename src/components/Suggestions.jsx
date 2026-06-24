@@ -32,7 +32,7 @@ export const Suggestions = ({ suggestions, onAdd, collapsible = false }) => {
           <button
             key={suggestion.name}
             className={styles.chip}
-            onClick={() => onAdd(suggestion.name)}
+            onClick={() => onAdd(suggestion.name, null, suggestion.imageUrl)}
           >
             <span
               className={styles.dot}

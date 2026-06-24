@@ -680,11 +680,13 @@ export const subscribeSharedItems = (ownerUid, listId, callback) => {
  * @param {string} userId - User ID
  * @param {string} name - Item name to record
  */
-export const addHistoryEntry = async (userId, name) => {
+export const addHistoryEntry = async (userId, listId, name, imageUrl = null) => {
   try {
     const { error } = await supabase.from('history').insert({
       user_id: userId,
+      list_id: listId,
       name,
+      image_url: imageUrl,
     });
 
     if (error) throw error;
@@ -696,14 +698,35 @@ export const addHistoryEntry = async (userId, name) => {
 /**
  * Adds multiple history entries in a single batch insert.
  * @param {string} userId - The authenticated user's ID
+ * @param {string} listId - The list these items were added to
  * @param {string[]} names - Array of item names to add to history
  */
-export const addHistoryEntries = async (userId, names) => {
+export const addHistoryEntries = async (userId, listId, names) => {
   if (!names.length) return;
-  const rows = names.map((name) => ({ user_id: userId, name }));
+  const rows = names.map((name) => ({ user_id: userId, list_id: listId, name }));
   const { error } = await supabase.from('history').insert(rows);
   if (error) {
     throw new Error('Failed to add history entries', { cause: error });
+  }
+};
+
+/**
+ * Records an item's image on its list-scoped history rows so the image carries
+ * over when the item is later re-added from suggestions. Matches by list and
+ * (case-sensitive) name; names are normalized via capitalize() at add time.
+ * @param {string} listId - The list the item belongs to
+ * @param {string} name - The item name
+ * @param {string|null} imageUrl - The image URL to record (null clears it)
+ */
+export const setHistoryImageForItem = async (listId, name, imageUrl) => {
+  if (!listId || !name) return;
+  const { error } = await supabase
+    .from('history')
+    .update({ image_url: imageUrl })
+    .eq('list_id', listId)
+    .eq('name', name);
+  if (error) {
+    throw new Error(`Failed to sync history image: name=${name}`, { cause: error });
   }
 };
 
@@ -717,10 +740,12 @@ export const addHistoryEntries = async (userId, names) => {
 export const subscribeHistory = (userId, callback) => {
   const fetchHistory = async () => {
     try {
+      // No user_id filter: RLS returns the user's legacy (list-less) rows plus
+      // every collaborator's rows for lists the user can access, so suggestions
+      // reflect items added by anyone on a shared list.
       const { data, error } = await supabase
         .from('history')
         .select('*')
-        .eq('user_id', userId)
         .order('added_at', { ascending: true });
 
       if (error) {
@@ -732,6 +757,8 @@ export const subscribeHistory = (userId, callback) => {
         data.map((row) => ({
           id: row.id,
           name: row.name,
+          listId: row.list_id,
+          imageUrl: row.image_url,
           addedAt: row.added_at,
         }))
       );

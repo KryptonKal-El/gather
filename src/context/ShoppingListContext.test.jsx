@@ -45,6 +45,7 @@ vi.mock('../services/database.js', () => ({
   resetGuestListRsvp: vi.fn(),
   addHistoryEntry: vi.fn(),
   addHistoryEntries: vi.fn(),
+  setHistoryImageForItem: vi.fn(),
   createStore: vi.fn(),
   updateStore: vi.fn(),
   deleteStore: vi.fn(),

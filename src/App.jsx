@@ -148,9 +148,14 @@ export const App = () => {
     }
   }, [openCollectionId, recipeState.activeCollectionId, recipeActions, isMobile]);
 
-  const suggestions = getSuggestions(
-    state.history,
-    activeList?.items ?? [],
+  const suggestions = useMemo(
+    () => getSuggestions(
+      (state.history ?? []).filter((h) => h.listId === activeList?.id),
+      activeList?.items ?? [],
+      8,
+      activeList?.type,
+    ),
+    [state.history, activeList],
   );
 
   const listCategories = useMemo(() => {
@@ -167,9 +172,9 @@ export const App = () => {
     onCommitToggle: handleCommitToggleItem,
   });
 
-  const handleAddItem = (name, storeId = null) => {
+  const handleAddItem = (name, storeId = null, imageUrl = null) => {
     if (!activeList) return;
-    actions.addItem(activeList.id, name, storeId);
+    actions.addItem(activeList.id, name, storeId, imageUrl);
   };
 
   const handleToggleItem = (item) => {

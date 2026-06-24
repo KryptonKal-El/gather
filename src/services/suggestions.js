@@ -66,15 +66,33 @@ const getPairingSuggestions = (currentItems) => {
 };
 
 /**
+ * Builds a map of item name (lowercased) to its most recent image URL.
+ * History is ordered oldest-first, so later entries overwrite earlier ones,
+ * leaving the latest known image per name.
+ * @param {Array<{name: string, imageUrl?: string|null}>} history - Past items
+ * @returns {Map<string, string>} Lowercased name -> image URL
+ */
+const getLatestImages = (history) => {
+  const images = new Map();
+  for (const item of history) {
+    if (item.imageUrl) {
+      images.set(item.name.toLowerCase(), item.imageUrl);
+    }
+  }
+  return images;
+};
+
+/**
  * Generates AI-powered suggestions based on history and current list.
- * @param {Array<{name: string, addedAt: string}>} history - Past shopping items
+ * @param {Array<{name: string, addedAt: string, imageUrl?: string|null}>} history - Past shopping items
  * @param {Array<{name: string}>} currentItems - Items currently in the list
  * @param {number} [maxSuggestions=8] - Maximum number of suggestions to return
  * @param {string} [listType] - The list type for auto-categorization (e.g., 'grocery', 'packing')
- * @returns {Array<{name: string, reason: string, category: string}>} Suggested items
+ * @returns {Array<{name: string, reason: string, category: string, imageUrl: string|null}>} Suggested items
  */
 export const getSuggestions = (history, currentItems, maxSuggestions = 8, listType) => {
   const currentNames = new Set(currentItems.map((i) => i.name.toLowerCase()));
+  const images = getLatestImages(history);
   const suggestions = [];
   const seen = new Set();
 
@@ -88,6 +106,7 @@ export const getSuggestions = (history, currentItems, maxSuggestions = 8, listTy
       name,
       reason,
       category: categorizeItem(name, undefined, listType),
+      imageUrl: images.get(key) ?? null,
     });
   };
 

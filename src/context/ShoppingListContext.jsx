@@ -28,6 +28,7 @@ import {
   resetGuestListRsvp,
   addHistoryEntry,
   addHistoryEntries,
+  setHistoryImageForItem,
   createStore as dbCreateStore,
   updateStore as dbUpdateStore,
   deleteStore as dbDeleteStore,
@@ -595,7 +596,7 @@ export const ShoppingListProvider = ({ children }) => {
     setActiveListId(id);
   }, []);
 
-  const addItemAction = useCallback(async (listId, rawName, storeId = null) => {
+  const addItemAction = useCallback(async (listId, rawName, storeId = null, imageUrl = null) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     const name = capitalize(rawName.trim());
@@ -610,10 +611,10 @@ export const ShoppingListProvider = ({ children }) => {
       store: storeId,
       quantity: 1,
       price: null,
-      imageUrl: null,
+      imageUrl,
     };
     await dbAddItem(ownerUid, listId, item);
-    await addHistoryEntry(userId, name);
+    await addHistoryEntry(userId, listId, name, imageUrl);
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
   const addItemsAction = useCallback(async (listId, items) => {
@@ -638,7 +639,7 @@ export const ShoppingListProvider = ({ children }) => {
     });
     await dbAddItems(ownerUid, listId, prepared);
     const itemNames = prepared.map((item) => item.name);
-    await addHistoryEntries(userId, itemNames);
+    await addHistoryEntries(userId, listId, itemNames);
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
   const toggleItemAction = useCallback(async (listId, itemId, explicitChecked = null) => {
@@ -668,7 +669,15 @@ export const ShoppingListProvider = ({ children }) => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     await dbUpdateItem(ownerUid, listId, itemId, updates);
-  }, [userId, getListOwnerUid]);
+    // Keep the item's suggestion history image in sync so it carries over when
+    // the item is later re-added from suggestions.
+    if (updates.imageUrl !== undefined) {
+      const item = activeItems.find((i) => i.id === itemId);
+      if (item?.name) {
+        await setHistoryImageForItem(listId, item.name, updates.imageUrl);
+      }
+    }
+  }, [userId, activeItems, getListOwnerUid]);
 
   const clearCheckedAction = useCallback(async (listId) => {
     if (!userId) return;
