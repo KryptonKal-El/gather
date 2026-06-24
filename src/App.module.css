@@ -142,7 +142,9 @@
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: 12px;
-  overflow: hidden;
+  /* No `overflow: hidden`: it would clip nothing important but blocks
+     position: sticky on the category headers inside the list. The header's
+     rounded top corners are preserved via .listCardHeader's border-radius. */
 }
 
 .recipeCard {
@@ -159,6 +161,7 @@
   padding: 1rem;
   background: var(--list-color, var(--bg-card));
   border-bottom: 1px solid var(--border-default);
+  border-radius: 12px 12px 0 0;
   --sort-trigger-color: var(--list-header-text, var(--text-primary));
 }
 
