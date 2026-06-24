@@ -122,7 +122,7 @@ final class ListDetailViewModel {
         if let cachedStores: CachedEntry<[Store]> = await OfflineCache.shared.load(forKey: "stores-\(listId.uuidString)") {
             stores = cachedStores.data
         }
-        if let cachedHistory: CachedEntry<[HistoryEntry]> = await OfflineCache.shared.load(forKey: "history-\(userId.uuidString)") {
+        if let cachedHistory: CachedEntry<[HistoryEntry]> = await OfflineCache.shared.load(forKey: "history-\(listId.uuidString)") {
             historyEntries = cachedHistory.data
         }
         
@@ -130,7 +130,7 @@ final class ListDetailViewModel {
          do {
              async let fetchedItems = ItemService.fetchItems(listId: listId)
              async let fetchedStores = StoreService.fetchStores(listId: listId)
-             async let fetchedHistory = HistoryService.fetchHistory(userId: userId)
+             async let fetchedHistory = HistoryService.fetchHistory(listId: listId)
              
              let (itemsResult, storesResult, historyResult) = try await (fetchedItems, fetchedStores, fetchedHistory)
              items = itemsResult
@@ -143,7 +143,7 @@ final class ListDetailViewModel {
              // Cache the fresh data
              await OfflineCache.shared.save(itemsResult, forKey: "items-\(listId.uuidString)")
              await OfflineCache.shared.save(storesResult, forKey: "stores-\(listId.uuidString)")
-             await OfflineCache.shared.save(historyResult, forKey: "history-\(userId.uuidString)")
+             await OfflineCache.shared.save(historyResult, forKey: "history-\(listId.uuidString)")
             
             // Sync items to shared container for widget access
             await SharedDataStore.shared.saveItems(itemsResult, for: listId)
@@ -214,7 +214,7 @@ final class ListDetailViewModel {
          }
          
          // Channel for history
-        let historyCh = client.realtimeV2.channel("user-history-\(userId.uuidString)")
+        let historyCh = client.realtimeV2.channel("list-history-\(listId.uuidString)")
         runtime.historyChannel = historyCh
         
         let historyChanges = historyCh.postgresChange(
@@ -268,8 +268,8 @@ final class ListDetailViewModel {
     
     private func refetchHistory() async {
         do {
-            historyEntries = try await HistoryService.fetchHistory(userId: userId)
-            await OfflineCache.shared.save(historyEntries, forKey: "history-\(userId.uuidString)")
+            historyEntries = try await HistoryService.fetchHistory(listId: listId)
+            await OfflineCache.shared.save(historyEntries, forKey: "history-\(listId.uuidString)")
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to refetch history: \(error.localizedDescription)")
@@ -299,18 +299,34 @@ final class ListDetailViewModel {
             lastAddedItemId = newItem.id
             
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
-            try await HistoryService.addHistoryEntry(userId: userId, name: capitalizedName)
+            try await HistoryService.addHistoryEntry(userId: userId, listId: listId, name: capitalizedName)
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to add item: \(error.localizedDescription)")
         }
+    }
+
+    /// Most recent non-empty image recorded in this list's history for a name.
+    private func latestHistoryImage(for name: String) -> String? {
+        let key = name.lowercased()
+        var image: String?
+        for entry in historyEntries where entry.name.lowercased() == key {
+            if let entryImage = entry.imageUrl, !entryImage.isEmpty {
+                image = entryImage
+            }
+        }
+        return image
     }
     
     /// Adds an item from a history suggestion, carrying over data from the most recent past item.
     func addItemFromSuggestion(name: String, fallbackStoreId: UUID?) async {
         do {
             let pastItem = try await ItemService.fetchLastItemByName(name, userId: userId)
-            
+            // Prefer the list-scoped history image: it survives the item being
+            // removed and is shared across collaborators, unlike fetchLastItemByName
+            // (which only sees the user's own lists' current items).
+            let carriedImage = latestHistoryImage(for: name) ?? pastItem?.imageUrl
+
             let storeId = pastItem?.storeId ?? fallbackStoreId
             let rsvpDefault: String? = pastItem?.rsvpStatus ?? (listType == "guest_list" ? "invited" : nil)
             let newItem = try await ItemService.addItem(
@@ -322,15 +338,15 @@ final class ListDetailViewModel {
                 listType: listType,
                 quantity: pastItem?.quantity ?? 1,
                 price: pastItem?.price,
-                imageUrl: pastItem?.imageUrl,
+                imageUrl: carriedImage,
                 unit: pastItem?.unit ?? "each",
                 rsvpStatus: rsvpDefault
             )
             items.append(newItem)
             lastAddedItemId = newItem.id
-            
+
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
-            try await HistoryService.addHistoryEntry(userId: userId, name: capitalizedName)
+            try await HistoryService.addHistoryEntry(userId: userId, listId: listId, name: capitalizedName, imageUrl: carriedImage)
         } catch {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to add item from suggestion: \(error.localizedDescription)")
@@ -510,6 +526,12 @@ final class ListDetailViewModel {
                 } else if let reminderDaysBefore = reminderDaysBefore {
                     items[index].reminderDaysBefore = reminderDaysBefore
                 }
+            }
+
+            // Keep the item's suggestion-history image in sync so it carries over
+            // when the item is later re-added from suggestions.
+            if let imageUrl = imageUrl, let itemName = items.first(where: { $0.id == itemId })?.name {
+                try? await HistoryService.setHistoryImageForItem(listId: listId, name: itemName, imageUrl: imageUrl)
             }
         } catch {
             self.error = error.localizedDescription

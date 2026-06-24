@@ -386,7 +386,7 @@ struct AddToListSheet: View {
         Task {
             do {
                 async let existingTask = ItemService.fetchItems(listId: listId)
-                async let historyTask = HistoryService.fetchHistory(userId: userId)
+                async let historyTask = HistoryService.fetchHistory(listId: listId)
                 
                 let existingItems = try await existingTask
                 let historyEntries = try await historyTask

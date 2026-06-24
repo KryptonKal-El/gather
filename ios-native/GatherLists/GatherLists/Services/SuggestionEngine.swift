@@ -42,7 +42,16 @@ enum SuggestionEngine {
         let currentNames = Set(currentItems.map { $0.name.lowercased() })
         var suggestions: [ItemSuggestion] = []
         var seen = Set<String>()
-        
+
+        // Latest known image per item name. History is ordered oldest-first, so
+        // later entries overwrite earlier ones, leaving the most recent image.
+        var latestImages: [String: String] = [:]
+        for entry in history {
+            if let image = entry.imageUrl, !image.isEmpty {
+                latestImages[entry.name.lowercased()] = image
+            }
+        }
+
         func addSuggestion(name: String, reason: String) {
             let key = name.lowercased()
             guard !currentNames.contains(key), !seen.contains(key) else { return }
@@ -50,7 +59,8 @@ enum SuggestionEngine {
             suggestions.append(ItemSuggestion(
                 name: name,
                 reason: reason,
-                category: CategoryDefinitions.categorizeItem(name, listType: listType, categories: listCategories)
+                category: CategoryDefinitions.categorizeItem(name, listType: listType, categories: listCategories),
+                imageUrl: latestImages[key]
             ))
         }
         
