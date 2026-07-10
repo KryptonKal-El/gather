@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- destination "upload" sends the build straight to App Store Connect
+	     during -exportArchive; no separate altool/Transporter step needed. -->
+	<key>method</key>
+	<string>app-store-connect</string>
+	<key>destination</key>
+	<string>upload</string>
+	<key>teamID</key>
+	<string>53L3M4444A</string>
+	<key>uploadSymbols</key>
+	<true/>
+	<!-- Build numbers are owned by Version.xcconfig, not App Store Connect. -->
+	<key>manageAppVersionAndBuildNumber</key>
+	<false/>
+</dict>
+</plist>
