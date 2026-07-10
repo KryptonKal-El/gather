@@ -378,6 +378,23 @@ struct RecipeService {
         return shares
     }
     
+    /// Fetches the collaborators (owner + share recipients, excluding the caller)
+    /// for a collection via the `get_collection_collaborators` RPC.
+    static func fetchCollectionCollaborators(collectionId: UUID) async throws -> [Profile] {
+        let response: [CollectionCollaboratorResponse] = try await client
+            .rpc("get_collection_collaborators", params: ["p_collection_id": collectionId])
+            .execute()
+            .value
+
+        return response.map { collaborator in
+            Profile(
+                id: collaborator.userId,
+                avatarUrl: collaborator.avatarUrl,
+                displayName: collaborator.displayName
+            )
+        }
+    }
+
     /// Fetches all collections shared with a user by email.
     static func fetchSharedCollections(email: String) async throws -> [RecipeCollection] {
         let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -396,6 +413,19 @@ struct RecipeService {
             .execute()
             .value
         return collections
+    }
+}
+
+/// Response struct for the `get_collection_collaborators` RPC.
+private struct CollectionCollaboratorResponse: Decodable {
+    let userId: UUID
+    let displayName: String?
+    let avatarUrl: String?
+
+    enum CodingKeys: String, CodingKey {
+        case userId = "user_id"
+        case displayName = "display_name"
+        case avatarUrl = "avatar_url"
     }
 }
 

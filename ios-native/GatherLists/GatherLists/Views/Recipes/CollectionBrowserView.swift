@@ -72,6 +72,12 @@ struct CollectionBrowserView: View {
         recipes(in: collection).count
     }
 
+    /// Recipe count for the header row. Shared collections load their recipes
+    /// lazily, so the count is hidden (nil) until they have been fetched.
+    private func displayedRecipeCount(for collection: RecipeCollection, isShared: Bool) -> Int? {
+        isShared ? sharedRecipesByCollection[collection.id]?.count : recipeCount(for: collection)
+    }
+
     private var defaultCollectionName: String {
         viewModel?.collections.first(where: { $0.isDefault })?.name ?? "My Recipes"
     }
@@ -194,12 +200,8 @@ struct CollectionBrowserView: View {
                 collectionDisclosure(collection)
             }
 
-            if !sharedFiltered.isEmpty {
-                Section("Shared with Me") {
-                    ForEach(sharedFiltered) { collection in
-                        sharedDisclosure(collection)
-                    }
-                }
+            ForEach(sharedFiltered) { collection in
+                sharedDisclosure(collection)
             }
 
             if ownedFiltered.isEmpty && sharedFiltered.isEmpty && !vm.searchQuery.isEmpty {
@@ -298,9 +300,18 @@ struct CollectionBrowserView: View {
                 .fontWeight(.medium)
                 .lineLimit(1)
             Spacer(minLength: 8)
-            Text("\(recipeCount(for: collection))")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            if let collaborators = viewModel?.collaboratorsByCollectionId[collection.id], !collaborators.isEmpty {
+                AvatarGroupView(
+                    collaborators: collaborators,
+                    size: 28,
+                    color: Color.brandGreen
+                )
+            }
+            if let count = displayedRecipeCount(for: collection, isShared: isShared) {
+                Text("\(count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
             if !isShared {
                 Button {
                     startNewRecipe(into: collection.id)

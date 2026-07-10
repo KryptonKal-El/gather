@@ -9,6 +9,7 @@ final class RecipeViewModel {
     // MARK: - Published State
     var collections: [RecipeCollection] = []
     var sharedCollections: [RecipeCollection] = []
+    private(set) var collaboratorsByCollectionId: [UUID: [Profile]] = [:]
     var recipes: [Recipe] = []
     var activeCollectionId: UUID?
     var activeRecipeId: UUID?
@@ -107,6 +108,8 @@ final class RecipeViewModel {
             await OfflineCache.shared.save(ownedResult, forKey: "collections-owned-\(userId.uuidString)")
             await OfflineCache.shared.save(sharedResult, forKey: "collections-shared-\(userId.uuidString)")
             await OfflineCache.shared.save(recipesResult, forKey: "recipes-\(userId.uuidString)")
+
+            await loadCollaborators()
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !collections.isEmpty || !sharedCollections.isEmpty || !recipes.isEmpty
@@ -214,9 +217,36 @@ final class RecipeViewModel {
             await OfflineCache.shared.save(recipesResult, forKey: "recipes-\(userId.uuidString)")
             isShowingCachedData = false
             cachedAt = nil
+
+            await loadCollaborators()
         } catch {
             self.error = error.localizedDescription
             print("[RecipeViewModel] Failed to refetch data: \(error.localizedDescription)")
+        }
+    }
+
+    /// Batch-fetches collaborators for all owned and shared collections.
+    private func loadCollaborators() async {
+        let collectionIds = collections.map(\.id) + sharedCollections.map(\.id)
+        guard !collectionIds.isEmpty else { return }
+
+        await withTaskGroup(of: (UUID, [Profile]?).self) { group in
+            for collectionId in collectionIds {
+                group.addTask {
+                    do {
+                        let collaborators = try await RecipeService.fetchCollectionCollaborators(collectionId: collectionId)
+                        return (collectionId, collaborators)
+                    } catch {
+                        return (collectionId, nil)
+                    }
+                }
+            }
+
+            for await (collectionId, collaborators) in group {
+                if let collaborators {
+                    collaboratorsByCollectionId[collectionId] = collaborators
+                }
+            }
         }
     }
     
