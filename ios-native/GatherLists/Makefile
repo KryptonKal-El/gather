@@ -22,7 +22,7 @@ ARCHIVE_PATH = $(ARCHIVE_DIR)/GatherLists-$(shell date +%H.%M.%S).xcarchive
 
 # App Store Connect API auth. The .p8 private key lives outside the repo and
 # must never be committed; the key/issuer IDs are not secret without it.
-ASC_KEY_ID    = 9MJZ4C3YXR
+ASC_KEY_ID    = FF3D577Z7A
 ASC_ISSUER_ID = 69a6de78-0662-47e3-e053-5b8c7c11a4d1
 ASC_KEY_PATH  = $(HOME)/.appstoreconnect/private_keys/AuthKey_$(ASC_KEY_ID).p8
 
