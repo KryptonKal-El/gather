@@ -6,4 +6,4 @@
 // archive that triggers the bump already carries the new number (no off-by-one).
 // It lives here (not in the .pbxproj) so it can be edited while Xcode is open
 // without conflicts, and so bumping never mutates the project mid-build.
-CURRENT_PROJECT_VERSION = 63
+CURRENT_PROJECT_VERSION = 64
