@@ -57,3 +57,4 @@ ios-native/**/Secrets.plist
 ai-tmp/
 .tmp/
 docs/builder-config.json
+.claude/settings.local.json

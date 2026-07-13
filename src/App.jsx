@@ -244,6 +244,23 @@ export const App = () => {
     actions.clearChecked(activeList.id);
   };
 
+  /** Owned collections plus shared collections the user can write to, for the recipe form's collection picker. */
+  const getWritableCollections = () => [
+    ...(recipeState.collections ?? []),
+    ...(recipeState.sharedCollections ?? [])
+      .filter((sc) => sc.permission === 'write' && sc.collection)
+      .map((sc) => sc.collection),
+  ];
+
+  /** Whether the current user can edit a recipe: they own it, or it lives in a collection shared with them with write permission. */
+  const canEditRecipe = (recipe) =>
+    !!recipe && (
+      recipe.ownerId === user?.id ||
+      (recipeState.sharedCollections ?? []).some(
+        (sc) => sc.collectionId === recipe.collectionId && sc.permission === 'write'
+      )
+    );
+
   const handleMoveRecipe = async (recipeId, targetCollectionId) => {
     const recipe = recipeState.allRecipes.find((r) => r.id === recipeId);
     if (recipe) {
@@ -625,7 +642,7 @@ export const App = () => {
               initialData={showRecipeForm === 'create' ? importDraft : null}
               saveLabel={importDraft ? 'Import' : 'Save'}
               titleOverride={importDraft ? 'Review & Import' : undefined}
-              collections={showRecipeForm === 'create' ? recipeState.collections : undefined}
+              collections={showRecipeForm === 'create' ? getWritableCollections() : undefined}
               defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
               onSave={handleRecipeSave}
               onBack={() => { setShowRecipeForm(null); setImportDraft(null); setPendingCollectionId(null); }}
@@ -717,7 +734,6 @@ export const App = () => {
                   sharedCollectionRecipes={recipeState.sharedCollectionRecipes}
                   activeCollectionId={recipeState.activeCollectionId}
                   allRecipes={recipeState.allRecipes}
-                  currentUserId={user.id}
                   onSelect={handleRecipeSelect}
                   onCreate={(collectionId) => { setPendingCollectionId(collectionId ?? null); setShowRecipeForm('create'); }}
                   onEdit={handleRecipeEdit}
@@ -741,6 +757,7 @@ export const App = () => {
                 <MobileRecipeDetail
                   recipe={detailRecipe}
                   isOwner={detailRecipe.ownerId === user.id}
+                  canEdit={canEditRecipe(detailRecipe)}
                   collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
                   collections={recipeState.collections}
                   activeCollectionId={recipeState.activeCollectionId}
@@ -894,7 +911,6 @@ export const App = () => {
               sharedCollectionRecipes={recipeState.sharedCollectionRecipes}
               activeCollectionId={recipeState.activeCollectionId}
               allRecipes={recipeState.allRecipes}
-              currentUserId={user.id}
               onSelect={(recipeId) => {
                 recipeActions.selectRecipe(recipeId);
                 setDesktopRecipeFormId(null);
@@ -954,7 +970,7 @@ export const App = () => {
                 initialData={desktopRecipeFormId === 'create' ? importDraft : null}
                 saveLabel={importDraft ? 'Import' : 'Save'}
                 titleOverride={importDraft ? 'Review & Import' : undefined}
-                collections={desktopRecipeFormId === 'create' ? recipeState.collections : undefined}
+                collections={desktopRecipeFormId === 'create' ? getWritableCollections() : undefined}
                 defaultCollectionId={pendingCollectionId ?? recipeState.activeCollectionId ?? recipeState.collections?.[0]?.id}
                 onSave={handleDesktopRecipeSave}
                 onBack={() => { setDesktopRecipeFormId(null); setImportDraft(null); setPendingCollectionId(null); }}
@@ -965,6 +981,7 @@ export const App = () => {
               <MobileRecipeDetail
                 recipe={recipeState.activeRecipe}
                 isOwner={recipeState.activeRecipe.ownerId === user.id}
+                canEdit={canEditRecipe(recipeState.activeRecipe)}
                 collectionName={recipeState.collections?.find((c) => c.id === recipeState.activeCollectionId)?.name}
                 collections={recipeState.collections}
                 activeCollectionId={recipeState.activeCollectionId}

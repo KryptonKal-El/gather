@@ -12,6 +12,7 @@ import styles from './MobileRecipeDetail.module.css';
 export const MobileRecipeDetail = ({
   recipe,
   isOwner,
+  canEdit,
   collectionName,
   collections,
   activeCollectionId,
@@ -21,6 +22,9 @@ export const MobileRecipeDetail = ({
   onDelete,
   onAddToList,
 }) => {
+  // Collaborators on a write-shared collection can edit/delete without owning
+  // the recipe; callers that don't pass canEdit keep the owner-only behavior.
+  const allowEdit = canEdit ?? isOwner;
   const [checkedIngredients, setCheckedIngredients] = useState(new Set());
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -108,7 +112,7 @@ export const MobileRecipeDetail = ({
           <div className={styles.actionSheet}>
             <div className={styles.actionSheetGroup}>
               <div className={styles.actionSheetTitle}>{recipe.name}</div>
-              {isOwner && (
+              {allowEdit && (
                 <button
                   type="button"
                   className={styles.actionSheetItem}
@@ -144,7 +148,7 @@ export const MobileRecipeDetail = ({
                   Move to Collection
                 </button>
               )}
-              {isOwner && (
+              {allowEdit && (
                 <button
                   type="button"
                   className={`${styles.actionSheetItem} ${styles.actionSheetDanger}`}
@@ -171,7 +175,7 @@ export const MobileRecipeDetail = ({
 
     return (
       <div className={styles.menuDropdown} ref={menuRef}>
-        {isOwner && (
+        {allowEdit && (
           <button
             type="button"
             className={styles.menuItem}
@@ -210,7 +214,7 @@ export const MobileRecipeDetail = ({
             Move to Collection
           </button>
         )}
-        {isOwner && (
+        {allowEdit && (
           <button
             type="button"
             className={`${styles.menuItem} ${styles.menuDanger}`}
@@ -415,6 +419,7 @@ MobileRecipeDetail.propTypes = {
     ),
   }).isRequired,
   isOwner: PropTypes.bool.isRequired,
+  canEdit: PropTypes.bool,
   collectionName: PropTypes.string,
   collections: PropTypes.array,
   activeCollectionId: PropTypes.string,

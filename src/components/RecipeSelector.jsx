@@ -41,7 +41,6 @@ export const RecipeSelector = ({
   onEdit,
   onDelete,
   onMoveRecipe,
-  currentUserId,
   onSearchOnline,
   onImportFromText,
 }) => {
@@ -282,21 +281,23 @@ export const RecipeSelector = ({
     );
   };
 
-  const renderRecipeRow = (recipe, { shared = false } = {}) => {
+  // Collaborators on a write-shared collection can edit and delete any recipe
+  // in it; moving stays owner-collection-only since it can pull a recipe out
+  // of the shared collection.
+  const renderRecipeRow = (recipe, { shared = false, canWrite = true } = {}) => {
     const menuId = `recipe-${recipe.id}`;
     const isMenuOpen = menuOpenId === menuId;
-    const isUsersRecipe = currentUserId && recipe.ownerId === currentUserId;
-    const canEdit = !shared || isUsersRecipe;
+    const canEdit = !shared || canWrite;
     const canMove = !shared && onMoveRecipe;
-    const canDelete = !shared || isUsersRecipe;
-    const isViewOnly = shared && !isUsersRecipe;
+    const canDelete = !shared || canWrite;
+    const isViewOnly = shared && !canWrite;
 
     const menuActions = isViewOnly
       ? [{ label: 'View', onClick: () => onSelect(recipe.id) }]
       : [
           canEdit && { label: 'Edit', icon: '✏️', onClick: () => onEdit(recipe.id) },
           canMove && { label: 'Move to Collection', icon: '📂', onClick: () => setMovePickerRecipeId(recipe.id) },
-          canDelete && { label: shared ? 'Remove' : 'Delete', icon: '🗑️', danger: true, onClick: () => setConfirmingDeleteId(recipe.id) },
+          canDelete && { label: 'Delete', icon: '🗑️', danger: true, onClick: () => setConfirmingDeleteId(recipe.id) },
         ].filter(Boolean);
 
     return (
@@ -364,7 +365,7 @@ export const RecipeSelector = ({
 
         {confirmingDeleteId === recipe.id && (
           <ConfirmDialog
-            message={shared ? `Remove "${recipe.name}" from this collection?` : `Delete "${recipe.name}" and all its contents?`}
+            message={`Delete "${recipe.name}" and all its contents?`}
             onConfirm={() => { onDelete(recipe.id); setConfirmingDeleteId(null); }}
             onCancel={() => setConfirmingDeleteId(null)}
           />
@@ -496,6 +497,7 @@ export const RecipeSelector = ({
     const menuId = `shared-col-${sc.collectionId}`;
     const isMenuOpen = menuOpenId === menuId;
     const recipes = open ? (sharedCollectionRecipes ?? []) : [];
+    const canWrite = sc.permission === 'write';
 
     return (
       <div key={sc.collectionId} className={styles.accordion}>
@@ -514,6 +516,16 @@ export const RecipeSelector = ({
             </span>
             <span className={styles.collectionCount}>{count}</span>
           </button>
+          {canWrite && (
+            <button
+              type="button"
+              className={styles.collectionAddBtn}
+              onClick={() => openMethodChooser(sc.collectionId)}
+              aria-label={`Add recipe to ${sc.collection?.name ?? 'Shared Collection'}`}
+            >
+              +
+            </button>
+          )}
           <div className={styles.menuWrap} ref={isMenuOpen && !isMobile ? menuRef : null}>
             <button
               type="button"
@@ -548,9 +560,15 @@ export const RecipeSelector = ({
         {open && (
           <div className={styles.accordionBody}>
             {recipes.length === 0 ? (
-              <div className={styles.accordionEmptyText}>No recipes in this collection</div>
+              canWrite ? (
+                <button type="button" className={styles.accordionEmpty} onClick={() => openMethodChooser(sc.collectionId)}>
+                  + Add a recipe
+                </button>
+              ) : (
+                <div className={styles.accordionEmptyText}>No recipes in this collection</div>
+              )
             ) : (
-              recipes.map((r) => renderRecipeRow(r, { shared: true }))
+              recipes.map((r) => renderRecipeRow(r, { shared: true, canWrite }))
             )}
           </div>
         )}
@@ -800,7 +818,6 @@ RecipeSelector.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onMoveRecipe: PropTypes.func,
-  currentUserId: PropTypes.string,
   onSearchOnline: PropTypes.func,
   onImportFromText: PropTypes.func,
 };
