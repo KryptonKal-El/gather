@@ -126,13 +126,13 @@ export const RecipeSelector = ({
   }, [collections]);
 
   const toggleSharedExpanded = useCallback((collectionId) => {
-    setExpandedSharedId((prev) => {
-      const next = prev === collectionId ? null : collectionId;
-      // Loading shared-collection recipes requires making it the active collection.
-      if (next) onSelectCollection?.(next);
-      return next;
-    });
-  }, [onSelectCollection]);
+    const next = expandedSharedId === collectionId ? null : collectionId;
+    setExpandedSharedId(next);
+    // Loading shared-collection recipes requires making it the active
+    // collection. Called outside the state updater — updaters can run during
+    // render, and updating RecipeProvider state there is illegal.
+    if (next) onSelectCollection?.(next);
+  }, [expandedSharedId, onSelectCollection]);
 
   // Focus management
   useEffect(() => {
