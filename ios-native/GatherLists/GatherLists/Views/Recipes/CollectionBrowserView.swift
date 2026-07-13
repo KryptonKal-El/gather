@@ -32,6 +32,7 @@ struct CollectionBrowserView: View {
     @State private var recipeToEdit: Recipe?
     @State private var editIngredients: [RecipeIngredient] = []
     @State private var editSteps: [RecipeStep] = []
+    @State private var editedCollectionId: UUID?
     @State private var recipeToDelete: Recipe?
     @State private var showRecipeDeleteDialog = false
     @State private var recipeToMove: Recipe?
@@ -135,7 +136,7 @@ struct CollectionBrowserView: View {
                     OnlineRecipeSearchView(
                         userId: vm.userId,
                         userEmail: vm.userEmail,
-                        collections: vm.collections,
+                        collections: vm.allCollections,
                         activeCollectionId: vm.activeCollectionId
                     )
                 }
@@ -143,10 +144,15 @@ struct CollectionBrowserView: View {
             .sheet(isPresented: $showCreateCollectionSheet) {
                 if let vm = viewModel { CreateCollectionSheet(viewModel: vm) }
             }
-            .sheet(isPresented: $showScratchForm) {
+            .sheet(isPresented: $showScratchForm, onDismiss: {
+                reloadSharedRecipesIfNeeded(pendingCreateCollectionId)
+            }) {
                 if let vm = viewModel { RecipeFormSheet(viewModel: vm, showCollectionPicker: true) }
             }
-            .sheet(item: $recipeToEdit) { recipe in
+            .sheet(item: $recipeToEdit, onDismiss: {
+                reloadSharedRecipesIfNeeded(editedCollectionId)
+                editedCollectionId = nil
+            }) { recipe in
                 if let vm = viewModel {
                     RecipeFormSheet(viewModel: vm, editRecipe: recipe, editIngredients: editIngredients, editSteps: editSteps)
                 }
@@ -175,7 +181,10 @@ struct CollectionBrowserView: View {
             }
             .alert("Delete Recipe?", isPresented: $showRecipeDeleteDialog, presenting: recipeToDelete) { recipe in
                 Button("Delete", role: .destructive) {
-                    Task { await viewModel?.deleteRecipe(id: recipe.id) }
+                    Task {
+                        await viewModel?.deleteRecipe(id: recipe.id)
+                        sharedRecipesByCollection[recipe.collectionId]?.removeAll { $0.id == recipe.id }
+                    }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: { recipe in
@@ -188,6 +197,12 @@ struct CollectionBrowserView: View {
         }
         .onChange(of: viewModel?.collections.count ?? 0) { _, _ in
             initExpansionIfNeeded()
+        }
+        .onChange(of: showImport) { _, isShowing in
+            if !isShowing { reloadSharedRecipesIfNeeded(viewModel?.activeCollectionId) }
+        }
+        .onChange(of: showSearch) { _, isShowing in
+            if !isShowing { reloadSharedRecipesIfNeeded(viewModel?.activeCollectionId) }
         }
     }
 
@@ -267,9 +282,12 @@ struct CollectionBrowserView: View {
             if loaded == nil && loadingSharedIds.contains(collection.id) {
                 HStack { Spacer(); ProgressView(); Spacer() }
             } else if let loaded, loaded.isEmpty {
-                Text("No recipes in this collection")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                Button {
+                    startNewRecipe(into: collection.id)
+                } label: {
+                    Label("Add a recipe", systemImage: "plus")
+                        .font(.subheadline)
+                }
             } else {
                 ForEach(loaded ?? []) { recipe in
                     recipeNavLink(recipe, owned: false)
@@ -312,40 +330,40 @@ struct CollectionBrowserView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            if !isShared {
-                Button {
-                    startNewRecipe(into: collection.id)
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.body)
-                        .foregroundStyle(Color.brandGreen)
-                        .frame(width: 28, height: 28)
-                }
-                .buttonStyle(.borderless)
-                .accessibilityLabel("Add recipe to \(collection.name)")
+            Button {
+                startNewRecipe(into: collection.id)
+            } label: {
+                Image(systemName: "plus")
+                    .font(.body)
+                    .foregroundStyle(Color.brandGreen)
+                    .frame(width: 28, height: 28)
             }
+            .buttonStyle(.borderless)
+            .accessibilityLabel("Add recipe to \(collection.name)")
         }
     }
 
     // MARK: - Recipe row
 
+    /// `owned` means the enclosing collection is owned by the user. Rows in
+    /// shared collections still get Edit and Delete (collaborators have write
+    /// access); Move stays owner-only since it can pull a recipe out of the
+    /// shared collection.
     @ViewBuilder
     private func recipeNavLink(_ recipe: Recipe, owned: Bool) -> some View {
         NavigationLink(value: recipe) {
             recipeRow(recipe)
         }
         .contextMenu {
+            Button { beginEdit(recipe) } label: { Label("Edit", systemImage: "pencil") }
             if owned {
-                Button { beginEdit(recipe) } label: { Label("Edit", systemImage: "pencil") }
                 Button { recipeToMove = recipe; showMoveSheet = true } label: { Label("Move to Collection", systemImage: "folder") }
-                Divider()
-                Button(role: .destructive) { recipeToDelete = recipe; showRecipeDeleteDialog = true } label: { Label("Delete", systemImage: "trash") }
             }
+            Divider()
+            Button(role: .destructive) { recipeToDelete = recipe; showRecipeDeleteDialog = true } label: { Label("Delete", systemImage: "trash") }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            if owned {
-                Button(role: .destructive) { recipeToDelete = recipe; showRecipeDeleteDialog = true } label: { Label("Delete", systemImage: "trash") }
-            }
+            Button(role: .destructive) { recipeToDelete = recipe; showRecipeDeleteDialog = true } label: { Label("Delete", systemImage: "trash") }
         }
     }
 
@@ -508,8 +526,19 @@ struct CollectionBrowserView: View {
                 editIngredients = []
                 editSteps = []
             }
+            editedCollectionId = recipe.collectionId
             recipeToEdit = recipe
         }
+    }
+
+    /// Refetches a shared collection's lazily-loaded recipes after a mutation,
+    /// so collaborator adds/edits show up without collapsing and re-expanding.
+    private func reloadSharedRecipesIfNeeded(_ collectionId: UUID?) {
+        guard let collectionId,
+              viewModel?.sharedCollections.contains(where: { $0.id == collectionId }) == true,
+              sharedRecipesByCollection[collectionId] != nil || expandedSharedIds.contains(collectionId)
+        else { return }
+        Task { await loadSharedRecipes(collectionId: collectionId) }
     }
 
     private func initExpansionIfNeeded() {

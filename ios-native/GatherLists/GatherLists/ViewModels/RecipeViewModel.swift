@@ -50,6 +50,21 @@ final class RecipeViewModel {
             (c.emoji?.lowercased().contains(query) ?? false)
         }
     }
+
+    /// Whether the current user can add and edit recipes in the collection.
+    /// All collection shares are currently created with write permission, so
+    /// any shared collection is writable by its collaborators.
+    func canWriteCollection(_ collectionId: UUID?) -> Bool {
+        guard let collectionId else { return false }
+        return collections.contains { $0.id == collectionId } ||
+            sharedCollections.contains { $0.id == collectionId }
+    }
+
+    /// Whether the current user can edit or delete the recipe: they own it, or
+    /// it lives in a collection they can write to.
+    func canEditRecipe(_ recipe: Recipe) -> Bool {
+        recipe.ownerId == userId || canWriteCollection(recipe.collectionId)
+    }
     
     // MARK: - Init
     

@@ -345,10 +345,10 @@ struct RecipeFormSheet: View {
     
     @ViewBuilder
     private var collectionSection: some View {
-        if showCollectionPicker, !viewModel.collections.isEmpty {
+        if showCollectionPicker, !viewModel.allCollections.isEmpty {
             Section("Collection") {
                 Picker("Collection", selection: $selectedCollectionId) {
-                    ForEach(viewModel.collections) { collection in
+                    ForEach(viewModel.allCollections) { collection in
                         Text((collection.emoji?.containsVisualEmoji == true ? "\(collection.emoji ?? "") " : "") + collection.name)
                             .tag(Optional(collection.id))
                     }

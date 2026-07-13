@@ -38,7 +38,7 @@ struct RecipeDetailView: View {
                         Label("Add to List", systemImage: "cart.badge.plus")
                     }
                     
-                    if recipe.ownerId == userId {
+                    if viewModel.canEditRecipe(recipe) {
                         Button {
                             Task {
                                 await viewModel.selectRecipe(id: recipe.id)
@@ -51,15 +51,19 @@ struct RecipeDetailView: View {
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
-                        
-                        Button {
-                            showMoveSheet = true
-                        } label: {
-                            Label("Move to Collection", systemImage: "folder")
+
+                        // Moving can pull a recipe out of a shared collection,
+                        // so it stays limited to the recipe's owner.
+                        if recipe.ownerId == userId {
+                            Button {
+                                showMoveSheet = true
+                            } label: {
+                                Label("Move to Collection", systemImage: "folder")
+                            }
                         }
-                        
+
                         Divider()
-                        
+
                         Button(role: .destructive) {
                             showDeleteConfirm = true
                         } label: {
