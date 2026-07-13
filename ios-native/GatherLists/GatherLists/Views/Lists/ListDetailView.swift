@@ -103,22 +103,24 @@ struct ListDetailView: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            VStack(spacing: 0) {
-                if detailViewModel?.isShowingCachedData == true {
-                    CachedDataBanner(cachedAt: detailViewModel?.cachedAt)
-                }
-                
-                if detailViewModel == nil || detailViewModel?.isLoading == true {
-                    loadingState
-                } else if detailViewModel?.items.isEmpty ?? true {
-                    emptyState
-                } else {
-                    itemListContent
-                }
+        VStack(spacing: 0) {
+            if detailViewModel?.isShowingCachedData == true {
+                CachedDataBanner(cachedAt: detailViewModel?.cachedAt)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+
+            if detailViewModel == nil || detailViewModel?.isLoading == true {
+                loadingState
+            } else if detailViewModel?.items.isEmpty ?? true {
+                emptyState
+            } else {
+                itemListContent
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // The add-item bar lives in the bottom safe area so the list's content
+        // region ends above it. This keeps auto-scroll-to-new-item (anchor:
+        // .bottom) from parking the new row underneath the input.
+        .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
                 if showSuggestions {
                     suggestionsOverlay
@@ -423,7 +425,6 @@ struct ListDetailView: View {
             }
             .listStyle(.plain)
             .environment(\.defaultMinListRowHeight, 0)
-            .contentMargins(.bottom, 80, for: .scrollContent)
             .refreshable {
                 await detailViewModel?.refresh()
             }
@@ -481,6 +482,7 @@ struct ListDetailView: View {
                                         } label: {
                                             Label("Delete", systemImage: "trash")
                                         }
+                                        .tint(.red)
                                     }
                                     .listRowInsets(EdgeInsets())
                                     .listRowSeparator(.hidden)
@@ -521,6 +523,7 @@ struct ListDetailView: View {
                             } label: {
                                 Label("Delete", systemImage: "trash")
                             }
+                            .tint(.red)
                         }
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
@@ -668,13 +671,14 @@ struct ListDetailView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
+                    .tint(.red)
                 }
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
         }
     }
-    
+
     // MARK: - Category Header
     
     private func categoryHeader(label: String, color: String, itemCount: Int) -> some View {
@@ -1177,6 +1181,7 @@ struct ListDetailView: View {
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
+                                .tint(.red)
                             }
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
@@ -1615,7 +1620,9 @@ struct ListDetailView: View {
             print("[ListDetailView] No authenticated user, cannot create detail view model")
             return
         }
-        detailViewModel = ListDetailViewModel(list: list, userId: userId)
+        let vm = ListDetailViewModel(list: list, userId: userId)
+        vm.undoManager = undoManager
+        detailViewModel = vm
     }
     
     private func loadShareInfo() async {

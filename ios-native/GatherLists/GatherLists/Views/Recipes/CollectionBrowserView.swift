@@ -259,6 +259,15 @@ struct CollectionBrowserView: View {
             }
         } label: {
             collectionHeader(collection, isShared: false)
+                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                    if !collection.isDefault {
+                        Button(role: .destructive) {
+                            collectionToDelete = collection
+                            showDeleteDialog = true
+                        } label: { Label("Delete", systemImage: "trash") }
+                            .tint(.red)
+                    }
+                }
                 .contextMenu {
                     Button { collectionToRename = collection } label: { Label("Rename", systemImage: "pencil") }
                     Button { collectionToShare = collection } label: { Label("Share", systemImage: "person.badge.plus") }
@@ -364,6 +373,7 @@ struct CollectionBrowserView: View {
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) { recipeToDelete = recipe; showRecipeDeleteDialog = true } label: { Label("Delete", systemImage: "trash") }
+                .tint(.red)
         }
     }
 
