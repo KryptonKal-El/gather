@@ -79,6 +79,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AB /* CachedDataBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2F1 /* ZoomableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */; };
 		A1B2C3D4E5F6A7B8C9D0E2B2 /* EditItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2B4 /* ItemUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */; };
@@ -259,6 +260,7 @@
 		A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedDataBanner.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedLogoView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemUnit.swift; sourceTree = "<group>"; };
@@ -576,6 +578,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2A6 /* SuggestionsView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */,
+				A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */,
 				TOASTBANNER000000000001 /* ToastBanner.swift */,
 			);
 			path = Components;
@@ -917,6 +920,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2AB /* CachedDataBanner.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */,
+				A1B2C3D4E5F6A7B8C9D0E2F1 /* ZoomableContainer.swift in Sources */,
 				TOASTBANNER000000000002 /* ToastBanner.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2BE /* UserPreferences.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C0 /* PreferenceService.swift in Sources */,

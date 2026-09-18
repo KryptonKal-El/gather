@@ -25,7 +25,11 @@ struct ItemImagePickerSheet: View {
     @State private var showCamera = false
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var shouldTriggerSearch = false
-    
+    @State private var pinchStartColumns: Int?
+    @AppStorage("imageSearchGridColumns") private var gridColumns = 3
+
+    private static let gridColumnRange = 1...5
+
     init(
         item: Item,
         userId: UUID,
@@ -100,9 +104,11 @@ struct ItemImagePickerSheet: View {
             AsyncImage(url: URL(string: imageUrl)) { phase in
                 switch phase {
                 case .success(let image):
-                    image
-                        .resizable()
-                        .scaledToFit()
+                    ZoomableContainer {
+                        image
+                            .resizable()
+                            .scaledToFit()
+                    }
                 case .failure:
                     Image(systemName: "photo")
                         .font(.quicksand(size: 60))
@@ -195,11 +201,10 @@ struct ItemImagePickerSheet: View {
                                     .foregroundStyle(.secondary)
                                 
                                 LazyVGrid(
-                                    columns: [
-                                        GridItem(.flexible()),
-                                        GridItem(.flexible()),
-                                        GridItem(.flexible())
-                                    ],
+                                    columns: Array(
+                                        repeating: GridItem(.flexible(), spacing: 8),
+                                        count: gridColumns
+                                    ),
                                     spacing: 8
                                 ) {
                                     ForEach(group.results, id: \.url) { result in
@@ -222,7 +227,7 @@ struct ItemImagePickerSheet: View {
                                             }
                                             .padding(3)
                                         }
-                                        .frame(width: 100, height: 100)
+                                        .aspectRatio(1, contentMode: .fit)
                                         .clipShape(RoundedRectangle(cornerRadius: 8))
                                         .onTapGesture {
                                             selectSearchResult(result)
@@ -233,6 +238,8 @@ struct ItemImagePickerSheet: View {
                         }
                     }
                 }
+                .simultaneousGesture(gridPinchGesture)
+                .sensoryFeedback(.selection, trigger: gridColumns)
             } else if hasSearched {
                 Text("No images found")
                     .foregroundStyle(.secondary)
@@ -240,6 +247,26 @@ struct ItemImagePickerSheet: View {
         }
     }
     
+    /// Photos-style resize: pinching out shows fewer, larger thumbnails; pinching in shows more, smaller ones.
+    private var gridPinchGesture: some Gesture {
+        MagnifyGesture()
+            .onChanged { value in
+                let startColumns = pinchStartColumns ?? gridColumns
+                pinchStartColumns = startColumns
+                let ideal = Double(startColumns) / value.magnification
+                // Hysteresis so the grid doesn't flicker between two counts near a boundary.
+                guard abs(ideal - Double(gridColumns)) >= 0.65 else { return }
+                let target = min(max(Int(ideal.rounded()), Self.gridColumnRange.lowerBound), Self.gridColumnRange.upperBound)
+                guard target != gridColumns else { return }
+                withAnimation(.snappy) {
+                    gridColumns = target
+                }
+            }
+            .onEnded { _ in
+                pinchStartColumns = nil
+            }
+    }
+
     @ViewBuilder
     private var uploadTabContent: some View {
         if isUploading {
