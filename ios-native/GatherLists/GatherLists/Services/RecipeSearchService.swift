@@ -1,4 +1,5 @@
 import Foundation
+import FoundationModels
 
 /// Search result from the Spoonacular API via edge function.
 struct SpoonacularSearchResult: Codable, Identifiable {
@@ -116,60 +117,136 @@ private struct SearchResponse: Codable {
     let results: [SpoonacularSearchResult]
 }
 
-/// A recipe parsed from freeform text by the parse-recipe edge function.
+/// A recipe parsed from freeform text by the on-device language model.
 struct ParsedRecipe {
     let name: String
     let ingredients: [(quantity: String, name: String)]
     let steps: [String]
 }
 
-/// Client for the parse-recipe Supabase edge function, which uses Claude to
-/// turn pasted recipe text into structured ingredients (with quantities) and
-/// ordered steps. Returns nil on any failure so callers can fall back to the
-/// local line parser.
+/// Why an on-device recipe parse produced no result.
+enum RecipeParseError: Error {
+    case tooLong
+    case failed
+}
+
+/// Turns pasted recipe text into structured ingredients (with quantities) and
+/// ordered steps using Apple's on-device language model. Nothing leaves the
+/// device. Callers must hide the import option when `isAvailable` is false.
 struct RecipeTextParseService {
-    @MainActor
-    static func parse(text: String) async -> ParsedRecipe? {
-        let manager = SupabaseManager.shared
-        let baseURL = manager.supabaseURL.absoluteString
-        let anonKey = manager.anonKey
+    private static let instructions = """
+        You parse pasted recipe text into structured data. The text is raw and possibly \
+        messy, copied from a website, note, or message.
 
-        guard let url = URL(string: "\(baseURL)/functions/v1/parse-recipe") else { return nil }
+        Extract:
+        - name: the recipe's title. Use an empty string if the text has no clear title.
+        - ingredients: every ingredient, in order. Split each line into a quantity and a name. \
+        The quantity is only the leading amount, size, and unit as written; the name is \
+        everything after it, including preparation notes. Examples: \
+        "2 cups all-purpose flour" -> quantity "2 cups", name "all-purpose flour". \
+        "1 large yellow onion, diced" -> quantity "1 large", name "yellow onion, diced". \
+        "1 (15 oz) can black beans, drained" -> quantity "1 (15 oz) can", name "black beans, drained". \
+        "6 garlic cloves, smashed" -> quantity "6", name "garlic cloves, smashed". \
+        "500g baby potatoes" -> quantity "500g", name "baby potatoes". \
+        "salt and pepper" -> quantity "", name "salt and pepper".
+        - steps: the ordered instructions, one entry per step. Strip leading numbers and \
+        bullets. Combine wrapped lines that belong to the same step.
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONEncoder().encode(["text": text])
+        Rules:
+        - Only use information present in the text. Never invent ingredients, steps, or amounts.
+        - Drop section headers like "Ingredients", "Directions", "For the sauce:" from the \
+        lists, but if a header gives important context (e.g. "For the topping"), you may \
+        prefix the relevant ingredient names with it in parentheses.
+        - Ignore anything that is not part of the recipe, such as stories, ads, and comments.
+        - Preserve the original order.
+        """
+
+    /// Whether the on-device model can run right now: a supported device, with
+    /// Apple Intelligence turned on and its model downloaded.
+    static var isAvailable: Bool {
+        guard #available(iOS 26.0, *) else { return false }
+        return SystemLanguageModel.default.isAvailable
+    }
+
+    /// Parses `text` on-device. Throws `RecipeParseError.tooLong` when the text
+    /// can't fit the model's context window, `.failed` for anything else.
+    static func parse(text: String) async throws -> ParsedRecipe {
+        guard #available(iOS 26.0, *) else { throw RecipeParseError.failed }
+
+        let model = SystemLanguageModel.default
+        guard model.isAvailable else { throw RecipeParseError.failed }
+
+        if #available(iOS 26.4, *), try await exceedsContext(text, model: model) {
+            throw RecipeParseError.tooLong
+        }
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let http = response as? HTTPURLResponse,
-                  (200...299).contains(http.statusCode) else {
-                // 503 (no API key configured) or any error -> caller falls back.
-                return nil
-            }
-            let decoded = try JSONDecoder().decode(ParseRecipeResponse.self, from: data)
-            let ingredients = (decoded.ingredients ?? [])
-                .map { (quantity: $0.quantity ?? "", name: ($0.name ?? "").trimmingCharacters(in: .whitespacesAndNewlines)) }
+            let session = LanguageModelSession(model: model, instructions: instructions)
+            let response = try await session.respond(
+                to: text,
+                generating: GeneratedRecipe.self,
+                options: GenerationOptions(samplingMode: .greedy)
+            )
+            let recipe = response.content
+            let ingredients = recipe.ingredients
+                .map { (quantity: $0.quantity.trimmed, name: $0.name.trimmed) }
                 .filter { !$0.name.isEmpty }
-            let steps = (decoded.steps ?? [])
-                .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-            return ParsedRecipe(name: decoded.name ?? "", ingredients: ingredients, steps: steps)
+            let steps = recipe.steps.map(\.trimmed).filter { !$0.isEmpty }
+            guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeParseError.failed }
+            return ParsedRecipe(name: recipe.name.trimmed, ingredients: ingredients, steps: steps)
+        } catch let error as RecipeParseError {
+            throw error
         } catch {
             print("[RecipeTextParseService] Parse failed: \(error.localizedDescription)")
-            return nil
+            throw isContextOverflow(error) ? RecipeParseError.tooLong : RecipeParseError.failed
         }
+    }
+
+    @available(iOS 26.4, *)
+    private static func exceedsContext(_ text: String, model: SystemLanguageModel) async throws -> Bool {
+        do {
+            let fixed = try await model.tokenCount(for: Instructions(instructions))
+                + model.tokenCount(for: GeneratedRecipe.generationSchema)
+            // The response restates nearly all of the input, so the input is budgeted twice.
+            return try await fixed + model.tokenCount(for: text) * 2 > model.contextSize
+        } catch {
+            print("[RecipeTextParseService] Token count failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    @available(iOS 26.0, *)
+    private static func isContextOverflow(_ error: Error) -> Bool {
+        if #available(iOS 27.0, *), case LanguageModelError.contextSizeExceeded = error {
+            return true
+        }
+        if case LanguageModelSession.GenerationError.exceededContextWindowSize = error {
+            return true
+        }
+        return false
     }
 }
 
-private struct ParseRecipeResponse: Decodable {
-    let name: String?
-    let ingredients: [ParsedIngredient]?
-    let steps: [String]?
+@available(iOS 26.0, *)
+@Generable
+private struct GeneratedRecipe {
+    @Guide(description: "The recipe's title, or an empty string if the text has no clear title.")
+    let name: String
+    @Guide(description: "Every ingredient, in the original order.")
+    let ingredients: [GeneratedIngredient]
+    @Guide(description: "The ordered instructions, one entry per step.")
+    let steps: [String]
 }
 
-private struct ParsedIngredient: Decodable {
-    let quantity: String?
-    let name: String?
+@available(iOS 26.0, *)
+@Generable
+private struct GeneratedIngredient {
+    @Guide(description: "Only the leading amount, size, and unit, e.g. '2 cups' or '1 (15 oz) can'. Never the ingredient itself. Empty string if none.")
+    let quantity: String
+    @Guide(description: "The ingredient and any preparation notes, without the quantity, e.g. 'yellow onion, diced'.")
+    let name: String
+}
+
+private extension String {
+    var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
 }

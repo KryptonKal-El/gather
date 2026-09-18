@@ -2,9 +2,9 @@ import SwiftUI
 import UIKit
 
 /// Step 1 of the "Import from Text" flow. The user pastes or types raw recipe
-/// text and taps Next, which runs the AI parser. The structured result is then
-/// reviewed in a pre-filled `RecipeFormSheet` before it's imported as a new
-/// recipe. Falls back to the local line parser if the AI parser is unavailable.
+/// text and taps Next, which runs the on-device parser. The structured result
+/// is then reviewed in a pre-filled `RecipeFormSheet` before it's imported as a
+/// new recipe. Only reachable when `RecipeTextParseService.isAvailable`.
 struct RecipeImportView: View {
     let viewModel: RecipeViewModel
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +13,7 @@ struct RecipeImportView: View {
     @State private var isParsing = false
     @State private var draft: ParsedRecipe?
     @State private var showForm = false
+    @State private var errorMessage: String?
 
     private var trimmedText: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -66,6 +67,14 @@ struct RecipeImportView: View {
             }
         }
         .interactiveDismissDisabled(isParsing)
+        .alert("Couldn't Import", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "")
+        }
         .sheet(isPresented: $showForm) {
             if let draft {
                 RecipeFormSheet(
@@ -89,19 +98,13 @@ struct RecipeImportView: View {
         isParsing = true
         defer { isParsing = false }
 
-        // Prefer the AI parser (ingredients with quantities + steps); fall back
-        // to the local ingredient-only parser if it's unavailable or empty.
-        if let parsed = await RecipeTextParseService.parse(text: raw),
-           !(parsed.ingredients.isEmpty && parsed.steps.isEmpty) {
-            draft = parsed
-        } else {
-            let local = RecipeTextParser.parseRecipeText(raw)
-            draft = ParsedRecipe(
-                name: "",
-                ingredients: local.map { (quantity: "", name: $0.name) },
-                steps: []
-            )
+        do {
+            draft = try await RecipeTextParseService.parse(text: raw)
+            showForm = true
+        } catch RecipeParseError.tooLong {
+            errorMessage = "That's too much text to read on this device. Trim it down to just the ingredients and steps, then try again."
+        } catch {
+            errorMessage = "We couldn't find a recipe in that text. Check it and try again."
         }
-        showForm = true
     }
 }

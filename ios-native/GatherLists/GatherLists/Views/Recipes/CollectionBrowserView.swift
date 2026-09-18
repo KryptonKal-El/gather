@@ -142,7 +142,9 @@ struct CollectionBrowserView: View {
             }
             .confirmationDialog("New Recipe", isPresented: $showMethodChooser, titleVisibility: .visible) {
                 Button("Start from Scratch") { beginCreate { showScratchForm = true } }
-                Button("Import from Text") { beginCreate { showImport = true } }
+                if RecipeTextParseService.isAvailable {
+                    Button("Import from Text") { beginCreate { showImport = true } }
+                }
                 Button("Search Online") { showSearch = true }
                 Button("Cancel", role: .cancel) {}
             }

@@ -41,7 +41,6 @@ export const RecipeSelector = ({
   onDelete,
   onMoveRecipe,
   onSearchOnline,
-  onImportFromText,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmingDeleteId, setConfirmingDeleteId] = useState(null);
@@ -293,9 +292,8 @@ export const RecipeSelector = ({
     const collectionId = methodChooser?.collectionId ?? null;
     setMethodChooser(null);
     if (method === 'scratch') onCreate?.(collectionId);
-    else if (method === 'import') onImportFromText?.(collectionId);
     else if (method === 'search') onSearchOnline?.();
-  }, [methodChooser, onCreate, onImportFromText, onSearchOnline]);
+  }, [methodChooser, onCreate, onSearchOnline]);
 
   // -------------------------------------------------------------------------
   // Renderers
@@ -649,10 +647,6 @@ export const RecipeSelector = ({
               <span className={styles.methodIcon}>✏️</span>
               <span className={styles.methodText}><span className={styles.methodName}>Start from scratch</span><span className={styles.methodHint}>Build it ingredient by ingredient</span></span>
             </button>
-            <button type="button" className={styles.methodItem} onClick={() => chooseMethod('import')}>
-              <span className={styles.methodIcon}>📋</span>
-              <span className={styles.methodText}><span className={styles.methodName}>Import from text</span><span className={styles.methodHint}>Paste a recipe and auto-detect it</span></span>
-            </button>
             <button type="button" className={styles.methodItem} onClick={() => chooseMethod('search')}>
               <span className={styles.methodIcon}>🌐</span>
               <span className={styles.methodText}><span className={styles.methodName}>Search online</span><span className={styles.methodHint}>Find a recipe on the web</span></span>
@@ -804,5 +798,4 @@ RecipeSelector.propTypes = {
   onDelete: PropTypes.func.isRequired,
   onMoveRecipe: PropTypes.func,
   onSearchOnline: PropTypes.func,
-  onImportFromText: PropTypes.func,
 };
