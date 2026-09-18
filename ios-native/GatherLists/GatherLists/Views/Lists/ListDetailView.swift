@@ -102,7 +102,89 @@ struct ListDetailView: View {
         !(detailViewModel?.historyEntries.isEmpty ?? true) && !aiSuggestions.isEmpty
     }
     
+    // `body` is split in two so each modifier chain stays within the compiler's type-check budget.
     var body: some View {
+        listContentWithAlerts
+         .sheet(item: $imagePickerItem) { item in
+             ItemImagePickerSheet(
+                 item: item,
+                 userId: authViewModel.currentUser?.id ?? UUID(),
+                 imageSearchSettings: authViewModel.profile?.imageSearchSettings ?? .defaultSettings,
+                 onImageUrlSet: { url in
+                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                         detailViewModel?.items[index].imageUrl = url
+                     }
+                 },
+                 onImageRemoved: {
+                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
+                         detailViewModel?.items[index].imageUrl = nil
+                     }
+                 }
+             )
+         }
+        .sheet(item: $editSheetItem) { item in
+            editItemSheet(for: item)
+        }
+        .sheet(isPresented: $showNotificationSheet) {
+            ListNotificationSheet(list: list)
+        }
+        .task {
+            loadCollapseState()
+            viewModel.selectList(id: list.id)
+            await initializeDetailViewModel()
+            await loadShareInfo()
+            await loadSortPreferences()
+            await subscribeToPreferences()
+            await loadNotificationStatus()
+        }
+        .onChange(of: collapsedStores) { _, _ in saveCollapseState() }
+        .onChange(of: isCheckedCollapsed) { _, _ in saveCollapseState() }
+        .onChange(of: showNotificationSheet) { _, isShowing in
+            if !isShowing {
+                Task {
+                    await loadNotificationStatus()
+                }
+            }
+        }
+        .onChange(of: viewModel.ownedLists.first(where: { $0.id == list.id })?.categories) { _, newCategories in
+            if let cats = newCategories {
+                detailViewModel?.updateCategories(cats)
+            }
+        }
+        .onDisappear {
+            preferencesTask?.cancel()
+            preferencesTask = nil
+        }
+        .sheet(isPresented: $showEditSheet) {
+            EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
+        }
+        .sheet(isPresented: $showManageStoresSheet) {
+            StoreBrowserView(listId: list.id)
+                .environment(authViewModel)
+        }
+        .sheet(isPresented: $showManageCategoriesSheet) {
+            CategoryEditorSheet(
+                listId: list.id,
+                listType: list.type,
+                initialCategories: detailViewModel?.listCategories ?? list.categories ?? [],
+                onSave: { updatedCategories in
+                    Task {
+                        await viewModel.updateList(
+                            id: list.id,
+                            name: nil,
+                            emoji: nil,
+                            color: nil,
+                            type: nil,
+                            categories: updatedCategories
+                        )
+                    }
+                }
+            )
+            .environment(authViewModel)
+        }
+    }
+    
+    private var listContentWithAlerts: some View {
         VStack(spacing: 0) {
             if detailViewModel?.isShowingCachedData == true {
                 CachedDataBanner(cachedAt: detailViewModel?.cachedAt)
@@ -205,123 +287,51 @@ struct ListDetailView: View {
                 }
             }
         }
-         .sheet(item: $imagePickerItem) { item in
-             ItemImagePickerSheet(
-                 item: item,
-                 userId: authViewModel.currentUser?.id ?? UUID(),
-                 imageSearchSettings: authViewModel.profile?.imageSearchSettings ?? .defaultSettings,
-                 onImageUrlSet: { url in
-                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
-                         detailViewModel?.items[index].imageUrl = url
-                     }
-                 },
-                 onImageRemoved: {
-                     if let index = detailViewModel?.items.firstIndex(where: { $0.id == item.id }) {
-                         detailViewModel?.items[index].imageUrl = nil
-                     }
-                 }
-             )
-         }
-        .sheet(item: $editSheetItem) { item in
-            EditItemSheet(
-                item: item,
-                stores: detailViewModel?.stores ?? [],
-                listCategories: detailViewModel?.listCategories ?? [],
-                listType: detailViewModel?.listType ?? "grocery",
-                onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore, note in
-                    Task {
-                        let clearDueDate = item.dueDate != nil && dueDate == nil
-                        let clearRecurrenceRule = item.recurrenceRule != nil && recurrenceRule == nil
-                        let clearReminderDaysBefore = item.reminderDaysBefore != nil && reminderDaysBefore == nil
-                        await detailViewModel?.updateItem(
-                            item.id,
-                            name: name,
-                            note: note.isEmpty ? nil : note,
-                            clearNote: note.isEmpty,
-                            category: category,
-                            storeId: storeId,
-                            clearStoreId: clearStoreId,
-                            quantity: quantity,
-                            price: price,
-                            clearPrice: item.price != nil && price == nil,
-                            unit: unit,
-                            rsvpStatus: rsvpStatus,
-                            clearRsvpStatus: clearRsvpStatus,
-                            dueDate: dueDate,
-                            clearDueDate: clearDueDate,
-                            recurrenceRule: recurrenceRule,
-                            clearRecurrenceRule: clearRecurrenceRule,
-                            reminderDaysBefore: reminderDaysBefore,
-                            clearReminderDaysBefore: clearReminderDaysBefore
-                        )
-                    }
-                },
-                onImageTap: {
-                    imagePickerItem = item
-                }
-            )
-        }
-        .sheet(isPresented: $showNotificationSheet) {
-            ListNotificationSheet(list: list)
-        }
-        .task {
-            loadCollapseState()
-            viewModel.selectList(id: list.id)
-            await initializeDetailViewModel()
-            await loadShareInfo()
-            await loadSortPreferences()
-            await subscribeToPreferences()
-            await loadNotificationStatus()
-        }
-        .onChange(of: collapsedStores) { _, _ in saveCollapseState() }
-        .onChange(of: isCheckedCollapsed) { _, _ in saveCollapseState() }
-        .onChange(of: showNotificationSheet) { _, isShowing in
-            if !isShowing {
-                Task {
-                    await loadNotificationStatus()
-                }
-            }
-        }
-        .onChange(of: viewModel.ownedLists.first(where: { $0.id == list.id })?.categories) { _, newCategories in
-            if let cats = newCategories {
-                detailViewModel?.updateCategories(cats)
-            }
-        }
-        .onDisappear {
-            preferencesTask?.cancel()
-            preferencesTask = nil
-        }
-        .sheet(isPresented: $showEditSheet) {
-            EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
-        }
-        .sheet(isPresented: $showManageStoresSheet) {
-            StoreBrowserView(listId: list.id)
-                .environment(authViewModel)
-        }
-        .sheet(isPresented: $showManageCategoriesSheet) {
-            CategoryEditorSheet(
-                listId: list.id,
-                listType: list.type,
-                initialCategories: detailViewModel?.listCategories ?? list.categories ?? [],
-                onSave: { updatedCategories in
-                    Task {
-                        await viewModel.updateList(
-                            id: list.id,
-                            name: nil,
-                            emoji: nil,
-                            color: nil,
-                            type: nil,
-                            categories: updatedCategories
-                        )
-                    }
-                }
-            )
-            .environment(authViewModel)
-        }
     }
     
     // MARK: - Loading State
     
+    // Kept out of `body` so its modifier chain stays within the compiler's type-check budget.
+    private func editItemSheet(for item: Item) -> some View {
+        EditItemSheet(
+            item: item,
+            stores: detailViewModel?.stores ?? [],
+            listCategories: detailViewModel?.listCategories ?? [],
+            listType: detailViewModel?.listType ?? "grocery",
+            onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore, note in
+                Task {
+                    let clearDueDate = item.dueDate != nil && dueDate == nil
+                    let clearRecurrenceRule = item.recurrenceRule != nil && recurrenceRule == nil
+                    let clearReminderDaysBefore = item.reminderDaysBefore != nil && reminderDaysBefore == nil
+                    await detailViewModel?.updateItem(
+                        item.id,
+                        name: name,
+                        note: note.isEmpty ? nil : note,
+                        clearNote: note.isEmpty,
+                        category: category,
+                        storeId: storeId,
+                        clearStoreId: clearStoreId,
+                        quantity: quantity,
+                        price: price,
+                        clearPrice: item.price != nil && price == nil,
+                        unit: unit,
+                        rsvpStatus: rsvpStatus,
+                        clearRsvpStatus: clearRsvpStatus,
+                        dueDate: dueDate,
+                        clearDueDate: clearDueDate,
+                        recurrenceRule: recurrenceRule,
+                        clearRecurrenceRule: clearRecurrenceRule,
+                        reminderDaysBefore: reminderDaysBefore,
+                        clearReminderDaysBefore: clearReminderDaysBefore
+                    )
+                }
+            },
+            onImageTap: {
+                imagePickerItem = item
+            }
+        )
+    }
+
     private var loadingState: some View {
         VStack {
             ProgressView()
