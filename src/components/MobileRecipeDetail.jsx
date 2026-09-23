@@ -13,6 +13,7 @@ import {
 } from '../services/cookSessionDatabase.js';
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './MobileRecipeDetail.module.css';
+import { RecipeAttributesSection } from './RecipeAttributesSection.jsx';
 
 /**
  * Full-screen mobile recipe detail view.
@@ -416,6 +417,15 @@ export const MobileRecipeDetail = ({
           >
             {activeCookSession ? '↻ Continue Cooking' : '🍳 Start Cooking'}
           </button>
+        )}
+
+        {userId && (
+          <RecipeAttributesSection
+            recipeId={recipe.id}
+            recipeName={recipe.name}
+            canEdit={Boolean(allowEdit)}
+            userId={userId}
+          />
         )}
 
         <div className={styles.section}>

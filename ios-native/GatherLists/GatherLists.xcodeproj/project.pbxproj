@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */; };
+		RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */; };
+		RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */; };
+		RECIPEAUTOTAG00000000002 /* RecipeAutoTagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */; };
+		RECIPEATTRSECTION0000002 /* RecipeAttributesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */; };
+		RECIPEATTRSHEET000000002 /* RecipeAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */; };
 		MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANMODEL00000000001 /* MealPlan.swift */; };
 		MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANSVC0000000000001 /* MealPlanService.swift */; };
 		MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVM00000000000001 /* MealPlanViewModel.swift */; };
@@ -190,6 +196,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributes.swift; sourceTree = "<group>"; };
+		RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributeService.swift; sourceTree = "<group>"; };
+		RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTaggingService.swift; sourceTree = "<group>"; };
+		RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAutoTagger.swift; sourceTree = "<group>"; };
+		RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSection.swift; sourceTree = "<group>"; };
+		RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSheet.swift; sourceTree = "<group>"; };
 		MEALPLANMODEL00000000001 /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
 		MEALPLANSVC0000000000001 /* MealPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanService.swift; sourceTree = "<group>"; };
 		MEALPLANVM00000000000001 /* MealPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanViewModel.swift; sourceTree = "<group>"; };
@@ -433,6 +445,7 @@
 		A1B2C3D4E5F6A7B8C9D0E211 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */,
 				MEALPLANMODEL00000000001 /* MealPlan.swift */,
 				A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */,
@@ -459,6 +472,9 @@
 		A1B2C3D4E5F6A7B8C9D0E212 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */,
+				RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */,
+				RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */,
 				MEALPLANSVC0000000000001 /* MealPlanService.swift */,
 				B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */,
@@ -555,6 +571,8 @@
 		A1B2C3D4E5F6A7B8C9D0E217 /* Recipes */ = {
 			isa = PBXGroup;
 			children = (
+				RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */,
+				RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */,
 				A1B2C3D4E5F6A7B8C9D0E275 /* CollectionBrowserView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */,
@@ -914,6 +932,12 @@
 				COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */,
 				COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */,
+				RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */,
+				RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */,
+				RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */,
+				RECIPEAUTOTAG00000000002 /* RecipeAutoTagger.swift in Sources */,
+				RECIPEATTRSECTION0000002 /* RecipeAttributesSection.swift in Sources */,
+				RECIPEATTRSHEET000000002 /* RecipeAttributesSheet.swift in Sources */,
 				MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */,
 				MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */,
 				MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */,

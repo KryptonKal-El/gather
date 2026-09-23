@@ -105,18 +105,6 @@ struct MealPlanService {
             .value
     }
 
-    /// Fetches the ingredients for a set of recipes, in recipe order.
-    static func fetchIngredients(recipeIds: [UUID]) async throws -> [RecipeIngredient] {
-        guard !recipeIds.isEmpty else { return [] }
-        return try await client
-            .from("recipe_ingredients")
-            .select()
-            .in("recipe_id", values: recipeIds)
-            .order("sort_order", ascending: true)
-            .execute()
-            .value
-    }
-
     // MARK: - Sharing
 
     static func fetchShares(planId: UUID) async throws -> [MealPlanShare] {

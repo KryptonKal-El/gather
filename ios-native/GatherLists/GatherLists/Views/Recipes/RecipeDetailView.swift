@@ -162,6 +162,7 @@ struct RecipeDetailView: View {
                 }
                 
                 startCookingButton
+                RecipeAttributesSection(recipe: recipe, canEdit: viewModel.canEditRecipe(recipe), userId: userId)
                 ingredientsSection
                 stepsSection
                 cookHistorySection

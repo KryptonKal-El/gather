@@ -115,6 +115,7 @@ final class RecipeViewModel {
             recipes = recipesResult
             isShowingCachedData = false
             cachedAt = nil
+            RecipeAutoTagger.shared.run(recipes: recipesResult, userId: userId)
             
             if activeCollectionId == nil {
                 activeCollectionId = defaultCollection.id
@@ -222,6 +223,7 @@ final class RecipeViewModel {
             collections = ownedResult
             sharedCollections = sharedResult
             recipes = recipesResult
+            RecipeAutoTagger.shared.run(recipes: recipesResult, userId: userId)
             
             if let activeId = activeCollectionId, !allCollections.contains(where: { $0.id == activeId }) {
                 activeCollectionId = collections.first?.id

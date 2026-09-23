@@ -307,6 +307,18 @@ struct RecipeService {
         return (recipe, ingredients, steps)
     }
     
+    /// Fetches the ingredients for a set of recipes in one query, ordered by sort_order.
+    static func fetchIngredients(recipeIds: [UUID]) async throws -> [RecipeIngredient] {
+        guard !recipeIds.isEmpty else { return [] }
+        return try await client
+            .from("recipe_ingredients")
+            .select()
+            .in("recipe_id", values: recipeIds)
+            .order("sort_order", ascending: true)
+            .execute()
+            .value
+    }
+
     /// Moves a recipe to a different collection.
     static func moveRecipeToCollection(recipeId: UUID, collectionId: UUID) async throws {
         let update = RecipeMoveUpdate(collectionId: collectionId)

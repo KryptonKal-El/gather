@@ -408,7 +408,7 @@ final class MealPlanViewModel {
     /// several recipes is counted once per recipe so the list quantity reflects the week.
     func weekIngredients() async throws -> [(name: String, quantity: String?, amount: Double?, unit: String?)] {
         let recipeIds = plannedRecipeEntries.compactMap(\.recipeId)
-        let ingredients = try await MealPlanService.fetchIngredients(recipeIds: Array(Set(recipeIds)))
+        let ingredients = try await RecipeService.fetchIngredients(recipeIds: Array(Set(recipeIds)))
         let byRecipe = Dictionary(grouping: ingredients, by: \.recipeId)
 
         var order: [String] = []
