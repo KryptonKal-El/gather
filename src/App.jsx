@@ -36,6 +36,8 @@ import { OnlineRecipePreview } from './components/OnlineRecipePreview.jsx';
 import { SaveRecipeModal } from './components/SaveRecipeModal.jsx';
 import { SortPicker } from './components/SortPicker.jsx';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
+import { MealPlanView } from './components/MealPlanView.jsx';
+import { useMealPlan } from './hooks/useMealPlan.js';
 import styles from './App.module.css';
 
 const isLightColor = (hex) => {
@@ -58,6 +60,8 @@ export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
+  const { state: mealPlanState, actions: mealPlanActions } = useMealPlan(user?.id ?? null, user?.email ?? null);
+  const [isSharingMealPlan, setIsSharingMealPlan] = useState(false);
   const { effectiveSortConfig, updateListSort } = useSortPreferences();
   const { pushUndo } = useUndo();
   const { showToast } = useToast();
@@ -91,13 +95,14 @@ export const App = () => {
   const [addToListIngredients, setAddToListIngredients] = useState(null);
   const [desktopView, setDesktopView] = useState(() => {
     try {
-      return localStorage.getItem('gather_active_tab') === 'recipes' ? 'recipes' : 'lists';
+      const stored = localStorage.getItem('gather_active_tab');
+      return stored === 'recipes' || stored === 'plan' ? stored : 'lists';
     } catch {
       return 'lists';
     }
   });
   // Persist the desktop tab to the same key the mobile nav uses, so the chosen
-  // section (Lists/Recipes) is restored on the next reload.
+  // section (Lists/Recipes/Plan) is restored on the next reload.
   const handleDesktopViewChange = useCallback((view) => {
     setDesktopView(view);
     try {
@@ -501,6 +506,27 @@ export const App = () => {
     }
   };
 
+  const handleViewPlannedRecipe = (recipeId) => {
+    recipeActions.selectRecipe(recipeId);
+    if (isMobile) {
+      handleTabChange('recipes');
+      handleOpenRecipe(recipeId);
+    } else {
+      handleDesktopViewChange('recipes');
+    }
+  };
+
+  const renderMealPlan = () => (
+    <MealPlanView
+      state={mealPlanState}
+      actions={mealPlanActions}
+      userId={user.id}
+      onViewRecipe={handleViewPlannedRecipe}
+      onAddWeekToList={(ingredients) => setAddToListIngredients(ingredients)}
+      onManageSharing={() => setIsSharingMealPlan(true)}
+    />
+  );
+
   const renderMobileContent = () => {
     if (activeTab === 'lists') {
       const showDetail = openListId && activeList;
@@ -756,6 +782,19 @@ export const App = () => {
       );
     }
 
+    if (activeTab === 'plan') {
+      return (
+        <section className={styles.mobileScreen}>
+          <div className={styles.mobileHeader}>
+            <h2 className={styles.mobileHeaderTitle}>Plan</h2>
+          </div>
+          <div className={styles.mobileScrollContent}>
+            {renderMealPlan()}
+          </div>
+        </section>
+      );
+    }
+
     if (activeTab === 'settings') {
       return (
         <section className={styles.mobileScreen}>
@@ -984,10 +1023,18 @@ export const App = () => {
            >
              Recipes
            </button>
+           <button
+             type="button"
+             className={`${styles.desktopTab} ${desktopView === 'plan' ? styles.desktopTabActive : ''}`}
+             onClick={() => handleDesktopViewChange('plan')}
+           >
+             Plan
+           </button>
          </div>
          <div className={styles.desktopBody}>
            {desktopView === 'lists' && renderListsView()}
            {desktopView === 'recipes' && renderRecipesView()}
+           {desktopView === 'plan' && <section className={styles.content}>{renderMealPlan()}</section>}
          </div>
        </div>
      );
@@ -1089,6 +1136,24 @@ export const App = () => {
           history={state.history}
           onAddItems={(listId, items) => actions.addItems(listId, items)}
           onClose={() => setAddToListIngredients(null)}
+        />
+      )}
+
+      {isSharingMealPlan && mealPlanState.activePlan && (
+        <ShareCollectionModal
+          collection={{ id: mealPlanState.activePlan.id, name: 'Meal Plan' }}
+          ownerEmail={mealPlanState.isOwner ? user.email : undefined}
+          ownerLabel={mealPlanState.isOwner
+            ? undefined
+            : mealPlanState.collaborators.find((c) => c.user_id === mealPlanState.activePlan.ownerId)?.display_name ?? 'Plan owner'}
+          description={mealPlanState.isOwner
+            ? 'Everyone you add sees and edits the same weekly plan.'
+            : 'Everyone on this plan sees and edits the same week.'}
+          canManage={mealPlanState.isOwner}
+          onShare={mealPlanActions.share}
+          onUnshare={mealPlanActions.unshare}
+          getShares={mealPlanActions.getShares}
+          onClose={() => setIsSharingMealPlan(false)}
         />
       )}
 

@@ -3,7 +3,7 @@ import styles from './BottomTabBar.module.css';
 
 /**
  * Fixed bottom navigation bar for mobile devices.
- * Displays three tabs: Lists, Recipes, and Settings.
+ * Displays four tabs: Lists, Recipes, Plan, and Settings.
  * Stores are managed per-list via context menu.
  * Only visible on viewports ≤700px.
  */
@@ -32,6 +32,18 @@ export const BottomTabBar = ({ activeTab, onTabChange }) => {
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
           <line x1="12" y1="6" x2="12" y2="13" />
           <line x1="9" y1="9.5" x2="15" y2="9.5" />
+        </svg>
+      ),
+    },
+    {
+      id: 'plan',
+      label: 'Plan',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
         </svg>
       ),
     },
@@ -68,6 +80,6 @@ export const BottomTabBar = ({ activeTab, onTabChange }) => {
 };
 
 BottomTabBar.propTypes = {
-  activeTab: PropTypes.oneOf(['lists', 'recipes', 'settings']).isRequired,
+  activeTab: PropTypes.oneOf(['lists', 'recipes', 'plan', 'settings']).isRequired,
   onTabChange: PropTypes.func.isRequired,
 };

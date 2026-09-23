@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANMODEL00000000001 /* MealPlan.swift */; };
+		MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANSVC0000000000001 /* MealPlanService.swift */; };
+		MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVM00000000000001 /* MealPlanViewModel.swift */; };
+		MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVIEW000000000001 /* MealPlanView.swift */; };
+		MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTROW0000000000001 /* MealSlotRow.swift */; };
+		MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */; };
+		SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */; };
 		A1B2C3D4E5F6A7B8C9D0F001 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */; };
@@ -183,6 +190,13 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		MEALPLANMODEL00000000001 /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
+		MEALPLANSVC0000000000001 /* MealPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanService.swift; sourceTree = "<group>"; };
+		MEALPLANVM00000000000001 /* MealPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanViewModel.swift; sourceTree = "<group>"; };
+		MEALPLANVIEW000000000001 /* MealPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanView.swift; sourceTree = "<group>"; };
+		MEALSLOTROW0000000000001 /* MealSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotRow.swift; sourceTree = "<group>"; };
+		MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotSheet.swift; sourceTree = "<group>"; };
+		SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMealPlanSheet.swift; sourceTree = "<group>"; };
 		UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewCollaboratorMenuTests.swift; sourceTree = "<group>"; };
 		UITESTFILEREF00000000002 /* LastListRestorationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastListRestorationTests.swift; sourceTree = "<group>"; };
 		UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherListsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -419,6 +433,7 @@
 		A1B2C3D4E5F6A7B8C9D0E211 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				MEALPLANMODEL00000000001 /* MealPlan.swift */,
 				A1B2C3D4E5F6A7B8C9D0E24A /* Item.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */,
 				A1B2C3D4E5F6A7B8C9D0E24C /* HistoryEntry.swift */,
@@ -444,6 +459,7 @@
 		A1B2C3D4E5F6A7B8C9D0E212 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				MEALPLANSVC0000000000001 /* MealPlanService.swift */,
 				B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0E234 /* ListService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E252 /* ItemService.swift */,
@@ -471,6 +487,7 @@
 		A1B2C3D4E5F6A7B8C9D0E213 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				MEALPLANVM00000000000001 /* MealPlanViewModel.swift */,
 				C2D3E4F5A6B7C8D9E0F1A2B4 /* AuthViewModel.swift */,
 				A1B2C3D4E5F6A7B8C9D0E236 /* ListViewModel.swift */,
 				A1B2C3D4E5F6A7B8C9D0E258 /* ListDetailViewModel.swift */,
@@ -488,6 +505,7 @@
 				A1B2C3D4E5F6A7B8C9D0E215 /* Auth */,
 				A1B2C3D4E5F6A7B8C9D0E216 /* Lists */,
 				A1B2C3D4E5F6A7B8C9D0E217 /* Recipes */,
+				MEALPLANGROUP00000000001 /* Plan */,
 				A1B2C3D4E5F6A7B8C9D0E218 /* Stores */,
 				A1B2C3D4E5F6A7B8C9D0E219 /* Settings */,
 				A1B2C3D4E5F6A7B8C9D0E21A /* Components */,
@@ -521,6 +539,17 @@
 				D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */,
 			);
 			path = Lists;
+			sourceTree = "<group>";
+		};
+		MEALPLANGROUP00000000001 /* Plan */ = {
+			isa = PBXGroup;
+			children = (
+				MEALPLANVIEW000000000001 /* MealPlanView.swift */,
+				MEALSLOTROW0000000000001 /* MealSlotRow.swift */,
+				MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */,
+				SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */,
+			);
+			path = Plan;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F6A7B8C9D0E217 /* Recipes */ = {
@@ -885,6 +914,13 @@
 				COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */,
 				COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */,
+				MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */,
+				MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */,
+				MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */,
+				MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */,
+				MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */,
+				MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */,
+				SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E276 /* CollectionBrowserView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E278 /* CreateCollectionSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E27C /* RecipeFormSheet.swift in Sources */,

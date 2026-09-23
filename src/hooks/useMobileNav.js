@@ -23,7 +23,7 @@ const readPersisted = (key) => {
  * @param {Array} lists - Current lists array to lookup list data during transitions
  * @param {Array} recipes - Current recipes array to lookup recipe data during transitions
  * @returns {{
- *   activeTab: 'lists' | 'recipes' | 'settings',
+ *   activeTab: 'lists' | 'recipes' | 'plan' | 'settings',
  *   openListId: string | null,
  *   openRecipeId: string | null,
  *   openCollectionId: string | null,

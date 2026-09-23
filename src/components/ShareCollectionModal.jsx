@@ -17,8 +17,21 @@ import styles from './ShareCollectionModal.module.css';
  * @param {Function} props.onUnshare - Called with (collectionId, email) to revoke
  * @param {Function} props.getShares - Called with (collectionId) to fetch shares
  * @param {Function} props.onClose - Called to close the modal
+ * @param {string} [props.description] - Explanation shown under the title
+ * @param {boolean} [props.canManage] - False shows a read-only member list (for non-owners)
+ * @param {string} [props.ownerLabel] - Name shown on the Owner row (defaults to ownerEmail)
  */
-export const ShareCollectionModal = ({ collection, ownerEmail, onShare, onUnshare, getShares, onClose }) => {
+export const ShareCollectionModal = ({
+  collection,
+  ownerEmail,
+  onShare,
+  onUnshare,
+  getShares,
+  onClose,
+  description = 'People you share with can add and view recipes in this collection.',
+  canManage = true,
+  ownerLabel,
+}) => {
   const [email, setEmail] = useState('');
   const [isSharing, setIsSharing] = useState(false);
   const [error, setError] = useState(null);
@@ -120,17 +133,15 @@ export const ShareCollectionModal = ({ collection, ownerEmail, onShare, onUnshar
     >
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h3 className={styles.title}>Share &ldquo;{collection.name}&rdquo;</h3>
+          <h3 className={styles.title}>{canManage ? <>Share &ldquo;{collection.name}&rdquo;</> : collection.name}</h3>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
             &times;
           </button>
         </div>
 
-        <p className={styles.subtitle}>
-          People you share with can add and view recipes in this collection.
-        </p>
+        <p className={styles.subtitle}>{description}</p>
 
-        <form className={styles.form} onSubmit={handleShare}>
+        {canManage && <form className={styles.form} onSubmit={handleShare}>
           <input
             className={styles.emailInput}
             type="email"
@@ -150,7 +161,7 @@ export const ShareCollectionModal = ({ collection, ownerEmail, onShare, onUnshar
           >
             {isSharing ? 'Sharing...' : 'Share'}
           </button>
-        </form>
+        </form>}
 
         {error && <p className={styles.error}>{error}</p>}
 
@@ -158,7 +169,7 @@ export const ShareCollectionModal = ({ collection, ownerEmail, onShare, onUnshar
           <h4 className={styles.subTitle}>People with access</h4>
 
           <div className={styles.owner}>
-            <span className={styles.personEmail}>{ownerEmail ?? 'You'}</span>
+            <span className={styles.personEmail}>{ownerLabel ?? ownerEmail ?? 'You'}</span>
             <span className={styles.ownerBadge}>Owner</span>
           </div>
 
@@ -170,13 +181,13 @@ export const ShareCollectionModal = ({ collection, ownerEmail, onShare, onUnshar
             shares.map((share) => (
               <div key={share.id} className={styles.person}>
                 <span className={styles.personEmail}>{share.email}</span>
-                <button
+                {canManage && <button
                   className={styles.removeBtn}
                   onClick={() => handleRemove(share.email)}
                   aria-label={`Remove ${share.email}`}
                 >
                   Remove
-                </button>
+                </button>}
               </div>
             ))
           )}
@@ -197,4 +208,7 @@ ShareCollectionModal.propTypes = {
   onUnshare: PropTypes.func.isRequired,
   getShares: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
+  description: PropTypes.string,
+  canManage: PropTypes.bool,
+  ownerLabel: PropTypes.string,
 };

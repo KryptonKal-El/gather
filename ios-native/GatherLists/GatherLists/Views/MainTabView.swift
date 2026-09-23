@@ -38,7 +38,15 @@ struct MainTabView: View {
                         Label("Recipes", systemImage: "book")
                     }
                     .tag(1)
-                
+
+                // Tag 3 (not 2) so a persisted Settings selection from older builds still opens Settings.
+                MealPlanView()
+                    .environment(authViewModel)
+                    .tabItem {
+                        Label("Plan", systemImage: "calendar")
+                    }
+                    .tag(3)
+
                 SettingsView()
                     .environment(authViewModel)
                     .tabItem {
