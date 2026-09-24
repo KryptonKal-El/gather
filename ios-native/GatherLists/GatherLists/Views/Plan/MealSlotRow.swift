@@ -5,6 +5,8 @@ struct MealSlotRow: View {
     let meal: MealType
     let entry: MealPlanEntry?
     let recipe: Recipe?
+    var onToggleLock: (() -> Void)?
+    var onSwap: (() -> Void)?
 
     private var isInactive: Bool {
         entry?.kind == .skip
@@ -29,6 +31,12 @@ struct MealSlotRow: View {
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
+                if let entry, entry.isSuggested, let reason = entry.suggestionReason {
+                    Label(reason, systemImage: "sparkles")
+                        .font(.quicksand(.caption))
+                        .foregroundStyle(Color.brandGreen)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 0)
@@ -37,11 +45,35 @@ struct MealSlotRow: View {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(Color.brandGreen)
                     .accessibilityLabel("Cooked")
+            } else if let entry, entry.isSuggested {
+                suggestionControls(entry)
             }
         }
         .padding(.vertical, 2)
         .opacity(isInactive ? 0.6 : 1)
-        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder
+    private func suggestionControls(_ entry: MealPlanEntry) -> some View {
+        HStack(spacing: 4) {
+            if let onToggleLock {
+                Button(action: onToggleLock) {
+                    Image(systemName: entry.isLocked ? "lock.fill" : "lock.open")
+                        .foregroundStyle(entry.isLocked ? Color.brandGreen : Color.secondary)
+                        .frame(width: 36, height: 36)
+                }
+                .accessibilityLabel(entry.isLocked ? "Unlock \(meal.label)" : "Keep \(meal.label)")
+            }
+            if let onSwap, !entry.isLocked {
+                Button(action: onSwap) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundStyle(Color.secondary)
+                        .frame(width: 36, height: 36)
+                }
+                .accessibilityLabel("Swap \(meal.label)")
+            }
+        }
+        .buttonStyle(.borderless)
     }
 
     @ViewBuilder

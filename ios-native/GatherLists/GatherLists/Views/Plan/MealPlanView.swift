@@ -73,6 +73,12 @@ struct MealPlanView: View {
             Section {
                 WeekSwitcherView(viewModel: viewModel)
                     .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                PlanBarView(viewModel: viewModel)
+                if let note = viewModel.libraryNote {
+                    Label(note, systemImage: "info.circle")
+                        .font(.quicksand(.subheadline))
+                        .foregroundStyle(.secondary)
+                }
                 if viewModel.isShowingCachedData {
                     CachedDataBanner(cachedAt: nil)
                 }
@@ -100,7 +106,13 @@ struct MealPlanView: View {
     private func slotRow(viewModel: MealPlanViewModel, day: Date, meal: MealType) -> some View {
         let entry = viewModel.entry(for: day, meal: meal)
         let recipe = entry?.recipeId.flatMap { viewModel.recipesById[$0] }
-        return MealSlotRow(meal: meal, entry: entry, recipe: recipe)
+        return MealSlotRow(
+            meal: meal,
+            entry: entry,
+            recipe: recipe,
+            onToggleLock: { Task { await viewModel.toggleLock(day: day, meal: meal) } },
+            onSwap: { Task { await viewModel.swap(day: day, meal: meal) } }
+        )
             .contentShape(Rectangle())
             .onTapGesture { editingSlot = SlotSelection(day: day, meal: meal) }
             .contextMenu {
@@ -332,6 +344,51 @@ private struct WeekSwitcherView: View {
         }
         .buttonStyle(.borderless)
         .tint(Color.brandGreen)
+    }
+}
+
+// MARK: - Plan Bar
+
+private struct PlanBarView: View {
+    let viewModel: MealPlanViewModel
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Button {
+                Task { await viewModel.planMyWeek() }
+            } label: {
+                HStack(spacing: 6) {
+                    if viewModel.isPlanning {
+                        ProgressView().tint(.white)
+                    } else {
+                        Image(systemName: "sparkles")
+                    }
+                    Text("Plan my week")
+                }
+                .font(.quicksand(.subheadline, weight: .semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.brandGreen, in: Capsule())
+            }
+            .disabled(viewModel.isPlanning || viewModel.activePlan == nil)
+
+            if viewModel.hasReplaceableSuggestions {
+                Button {
+                    Task { await viewModel.regenerate() }
+                } label: {
+                    Text("Regenerate")
+                        .font(.quicksand(.subheadline, weight: .semibold))
+                        .foregroundStyle(Color.brandGreen)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .overlay(Capsule().stroke(Color.brandGreen.opacity(0.5)))
+                }
+                .disabled(viewModel.isPlanning)
+            }
+            Spacer(minLength: 0)
+        }
+        .buttonStyle(.borderless)
     }
 }
 

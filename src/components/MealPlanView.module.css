@@ -341,3 +341,107 @@
     grid-template-columns: 1fr;
   }
 }
+
+.planBar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.planBtn,
+.secondaryBtn {
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.planBtn {
+  border: none;
+  background: var(--primary);
+  color: #fff;
+}
+
+.planBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.secondaryBtn {
+  border: 1px solid var(--primary-light);
+  background: var(--bg-card);
+  color: var(--primary);
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  background: var(--primary-tint);
+}
+
+.planBtn:disabled,
+.secondaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  background: var(--info-tint);
+  color: var(--info-darker);
+  font-size: 0.85rem;
+}
+
+.note span {
+  flex: 1;
+}
+
+.noteDismiss {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+}
+
+.slotRow {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.slotReason {
+  font-size: 0.75rem;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.slotActions {
+  display: flex;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  background: var(--bg-hover);
+}
+
+.iconBtnActive {
+  background: var(--primary-tint);
+}

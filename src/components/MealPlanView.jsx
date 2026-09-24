@@ -166,6 +166,31 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
         </div>
       </div>
 
+      <div className={styles.planBar}>
+        <button
+          type="button"
+          className={styles.planBtn}
+          onClick={actions.planMyWeek}
+          disabled={state.isPlanning || !state.activePlan}
+        >
+          {state.isPlanning ? 'Planning...' : '✨ Plan my week'}
+        </button>
+        {state.hasReplaceableSuggestions && (
+          <button type="button" className={styles.secondaryBtn} onClick={actions.regenerate} disabled={state.isPlanning}>
+            Regenerate
+          </button>
+        )}
+      </div>
+
+      {state.libraryNote && (
+        <div className={styles.note} role="status">
+          <span>{state.libraryNote}</span>
+          <button type="button" className={styles.noteDismiss} onClick={actions.dismissLibraryNote} aria-label="Dismiss">
+            &times;
+          </button>
+        </div>
+      )}
+
       {state.error && (
         <p className={styles.error} role="alert">
           {state.error}
@@ -191,7 +216,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                     const entry = actions.getEntry(dateKey, meal.id);
                     const recipe = entry?.recipeId ? state.recipesById.get(entry.recipeId) : null;
                     return (
-                      <li key={meal.id}>
+                      <li key={meal.id} className={styles.slotRow}>
                         <button
                           type="button"
                           className={`${styles.slot} ${entry?.kind === 'skip' ? styles.slotSkipped : ''}`}
@@ -210,9 +235,37 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                               {entry ? entryDisplayTitle(entry) : 'Add a meal'}
                             </span>
                             {entry?.note && <span className={styles.slotNote}>{entry.note}</span>}
+                            {entry?.source === 'suggested' && entry.suggestionReason && (
+                              <span className={styles.slotReason}>✨ {entry.suggestionReason}</span>
+                            )}
                           </span>
                           {entry?.cookedAt && <span className={styles.cooked} aria-label="Cooked">✓</span>}
                         </button>
+                        {entry?.source === 'suggested' && (
+                          <span className={styles.slotActions}>
+                            <button
+                              type="button"
+                              className={`${styles.iconBtn} ${entry.isLocked ? styles.iconBtnActive : ''}`}
+                              onClick={() => actions.toggleLock(dateKey, meal.id)}
+                              aria-pressed={entry.isLocked}
+                              aria-label={entry.isLocked ? `Unlock ${meal.label}` : `Keep ${meal.label}`}
+                              title={entry.isLocked ? 'Kept — Regenerate leaves it' : 'Keep this when regenerating'}
+                            >
+                              {entry.isLocked ? '🔒' : '🔓'}
+                            </button>
+                            {!entry.isLocked && (
+                              <button
+                                type="button"
+                                className={styles.iconBtn}
+                                onClick={() => actions.swapSlot(dateKey, meal.id)}
+                                aria-label={`Swap ${meal.label}`}
+                                title="Suggest something else"
+                              >
+                                ↻
+                              </button>
+                            )}
+                          </span>
+                        )}
                       </li>
                     );
                   })}
@@ -255,6 +308,9 @@ MealPlanView.propTypes = {
     plannedRecipeIds: PropTypes.array.isRequired,
     isLoading: PropTypes.bool.isRequired,
     error: PropTypes.string,
+    isPlanning: PropTypes.bool.isRequired,
+    libraryNote: PropTypes.string,
+    hasReplaceableSuggestions: PropTypes.bool.isRequired,
   }).isRequired,
   actions: PropTypes.object.isRequired,
   userId: PropTypes.string.isRequired,

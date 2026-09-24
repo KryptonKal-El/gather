@@ -18,11 +18,16 @@ final class MealPlanViewModel {
     var isLoading = false
     var error: String?
     var isShowingCachedData = false
+    var isPlanning = false
+    var libraryNote: String?
 
     let userId: UUID
     let userEmail: String
 
     private static let activePlanKey = "gather.activeMealPlanId"
+
+    /// Recipes already swapped out of each slot, so Swap keeps moving forward.
+    private var swappedOut: [String: Set<UUID>] = [:]
 
     nonisolated(unsafe) private var channel: RealtimeChannelV2?
     nonisolated(unsafe) private var realtimeTasks: [Task<Void, Never>] = []
@@ -268,6 +273,8 @@ final class MealPlanViewModel {
 
     private func changeWeek() async {
         entriesBySlot = [:]
+        libraryNote = nil
+        swappedOut = [:]
         await loadCachedWeek()
         do {
             try await refreshWeek()
@@ -344,6 +351,139 @@ final class MealPlanViewModel {
             entriesBySlot[key] = existing
             self.error = "Couldn't clear that meal. Try again."
             print("[MealPlanViewModel] Failed to clear slot: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Planning
+
+    /// Whether Regenerate has anything to replace: unlocked suggestions from today on.
+    var hasReplaceableSuggestions: Bool {
+        let todayKey = MealPlanWeek.key(for: Date())
+        return entriesBySlot.values.contains { $0.isSuggested && !$0.isLocked && $0.date >= todayKey }
+    }
+
+    /// Enabled slots from today onward, in day → meal order.
+    private var upcomingSlots: [MealPlanner.Slot] {
+        let todayKey = MealPlanWeek.key(for: Date())
+        return days.flatMap { day in
+            enabledMeals.map { MealPlanner.Slot(date: MealPlanWeek.key(for: day), meal: $0) }
+        }
+        .filter { $0.date >= todayKey }
+    }
+
+    private func filled(from entries: [String: MealPlanEntry]) -> [MealPlanner.Filled] {
+        entries.values.map { MealPlanner.Filled(date: $0.date, meal: $0.meal, recipeId: $0.kind == .recipe ? $0.recipeId : nil) }
+    }
+
+    /// Runs the planner for `slots` and saves the result as suggested slots. Returns how many were saved.
+    private func runPlanner(slots: [MealPlanner.Slot], entries: [String: MealPlanEntry], excluded: [String: Set<UUID>]) async throws -> Int {
+        guard let planId = activePlanId else { return 0 }
+        let lookbackStart = MealPlanWeek.shift(weekStart, byWeeks: -5)
+        let dayBefore = MealPlanWeek.calendar.date(byAdding: .day, value: -1, to: weekStart) ?? weekStart
+        let yearAgo = MealPlanWeek.calendar.date(byAdding: .year, value: -1, to: weekStart) ?? weekStart
+
+        async let attributesResult = RecipeAttributeService.fetchAll()
+        async let cooksResult = MealPlanService.fetchCookDates(since: yearAgo)
+        async let plannedResult = MealPlanService.fetchPlannedRecipeDates(
+            planId: planId,
+            fromKey: MealPlanWeek.key(for: lookbackStart),
+            toKey: MealPlanWeek.key(for: dayBefore)
+        )
+        let (attributes, cooks, planned) = try await (attributesResult, cooksResult, plannedResult)
+
+        var cookDates: [UUID: [String]] = [:]
+        for cook in cooks { cookDates[cook.recipeId, default: []].append(MealPlanWeek.key(for: cook.completedAt)) }
+        var lastPlanned: [UUID: String] = [:]
+        for item in planned where (lastPlanned[item.recipeId] ?? "") < item.date { lastPlanned[item.recipeId] = item.date }
+
+        let result = MealPlanner.planWeek(MealPlanner.Input(
+            slots: slots,
+            filled: filled(from: entries),
+            recipes: recipes,
+            attributes: Dictionary(attributes.map { ($0.recipeId, $0) }, uniquingKeysWith: { first, _ in first }),
+            cookDates: cookDates,
+            lastPlanned: lastPlanned,
+            excluded: excluded
+        ))
+        let titles = Dictionary(recipes.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
+        let saved = try await MealPlanService.saveSuggestions(planId: planId, suggestions: result.suggestions, titles: titles, userId: userId)
+        for entry in saved { entriesBySlot[Self.slotKey(entry.date, entry.meal)] = entry }
+        libraryNote = result.libraryNote
+        return saved.count
+    }
+
+    /// Fills every empty upcoming slot with a suggestion.
+    func planMyWeek() async {
+        isPlanning = true
+        error = nil
+        defer { isPlanning = false }
+        let slots = upcomingSlots.filter { entriesBySlot[$0.key] == nil }
+        guard !slots.isEmpty else { return }
+        do {
+            _ = try await runPlanner(slots: slots, entries: entriesBySlot, excluded: [:])
+        } catch {
+            self.error = "Couldn't plan the week. Try again."
+            print("[MealPlanViewModel] Failed to plan: \(error.localizedDescription)")
+        }
+    }
+
+    /// Replaces every unlocked suggestion from today on, keeping manual and locked meals.
+    func regenerate() async {
+        isPlanning = true
+        error = nil
+        defer { isPlanning = false }
+        let todayKey = MealPlanWeek.key(for: Date())
+        let replaceable = entriesBySlot.values.filter { $0.isSuggested && !$0.isLocked && $0.date >= todayKey }
+        // Previously suggested recipes step aside this round so Regenerate really changes things.
+        var excluded: [String: Set<UUID>] = [:]
+        for entry in replaceable {
+            if let recipeId = entry.recipeId { excluded[Self.slotKey(entry.date, entry.meal)] = [recipeId] }
+        }
+        do {
+            try await MealPlanService.deleteEntries(ids: replaceable.map(\.id))
+            for entry in replaceable { entriesBySlot[Self.slotKey(entry.date, entry.meal)] = nil }
+            let slots = upcomingSlots.filter { entriesBySlot[$0.key] == nil }
+            _ = try await runPlanner(slots: slots, entries: entriesBySlot, excluded: excluded)
+        } catch {
+            self.error = "Couldn't regenerate suggestions. Try again."
+            print("[MealPlanViewModel] Failed to regenerate: \(error.localizedDescription)")
+        }
+    }
+
+    /// Replaces one slot with the next-best suggestion, never repeating one already swapped out.
+    func swap(day: Date, meal: MealType) async {
+        let key = Self.slotKey(MealPlanWeek.key(for: day), meal)
+        var seen = swappedOut[key] ?? []
+        if let current = entriesBySlot[key]?.recipeId { seen.insert(current) }
+        swappedOut[key] = seen
+        var others = entriesBySlot
+        others[key] = nil
+        error = nil
+        do {
+            let count = try await runPlanner(
+                slots: [MealPlanner.Slot(date: MealPlanWeek.key(for: day), meal: meal)],
+                entries: others,
+                excluded: [key: seen]
+            )
+            if count == 0 { error = "No other recipes fit this meal right now." }
+        } catch {
+            self.error = "Couldn't swap that meal. Try again."
+            print("[MealPlanViewModel] Failed to swap: \(error.localizedDescription)")
+        }
+    }
+
+    func toggleLock(day: Date, meal: MealType) async {
+        let key = Self.slotKey(MealPlanWeek.key(for: day), meal)
+        guard var entry = entriesBySlot[key] else { return }
+        let original = entry
+        entry.isLocked.toggle()
+        entriesBySlot[key] = entry
+        do {
+            entriesBySlot[key] = try await MealPlanService.setLocked(entryId: entry.id, isLocked: entry.isLocked)
+        } catch {
+            entriesBySlot[key] = original
+            self.error = "Couldn't update that meal."
+            print("[MealPlanViewModel] Failed to toggle lock: \(error.localizedDescription)")
         }
     }
 

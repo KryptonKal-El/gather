@@ -6,6 +6,11 @@ import {
   fetchMealPlanEntries,
   upsertMealPlanEntry,
   deleteMealPlanEntry,
+  saveSuggestedEntries,
+  deleteMealPlanEntries,
+  setMealPlanEntryLocked,
+  fetchPlannedRecipeDates,
+  fetchCookDates,
   fetchPlannableRecipes,
   fetchIngredientsForRecipes,
   shareMealPlan,
@@ -14,6 +19,8 @@ import {
   getMealPlanCollaborators,
   subscribeMealPlans,
 } from '../services/mealPlanDatabase.js';
+import { fetchAllRecipeAttributes } from '../services/recipeAttributesDatabase.js';
+import { planWeek } from '../utils/mealPlanner.js';
 import {
   MEAL_TYPES,
   startOfWeek,
@@ -69,6 +76,10 @@ export const useMealPlan = (userId, userEmail) => {
   const [collaborators, setCollaborators] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isPlanning, setIsPlanning] = useState(false);
+  const [libraryNote, setLibraryNote] = useState(null);
+  // Recipes already swapped out of each slot this session, so Swap keeps moving forward.
+  const swappedOutRef = useRef(new Map());
 
   const activePlanIdRef = useRef(null);
   const weekStartRef = useRef(weekStart);
@@ -172,6 +183,8 @@ export const useMealPlan = (userId, userEmail) => {
     weekStartRef.current = nextStart;
     setEntries({});
     setError(null);
+    setLibraryNote(null);
+    swappedOutRef.current = new Map();
     try {
       await loadWeek(activePlanIdRef.current, nextStart);
     } catch (err) {
@@ -288,6 +301,145 @@ export const useMealPlan = (userId, userEmail) => {
     }
   }, [isOwner, userEmail, loadPlans, loadWeek, loadCollaborators]);
 
+  /**
+   * Gathers everything the planner reads: recipe details, cook history for the past year,
+   * and what was planned in the five weeks before this one (recent plans count as recent).
+   */
+  const loadPlannerContext = useCallback(async (planId) => {
+    const start = weekStartRef.current;
+    const lookbackStart = shiftWeek(start, -5);
+    const dayBefore = new Date(start.getFullYear(), start.getMonth(), start.getDate() - 1);
+    const yearAgo = new Date(start.getFullYear() - 1, start.getMonth(), start.getDate()).toISOString();
+    const [attributes, cooks, planned] = await Promise.all([
+      fetchAllRecipeAttributes(),
+      fetchCookDates(yearAgo),
+      fetchPlannedRecipeDates(planId, toDateKey(lookbackStart), toDateKey(dayBefore)),
+    ]);
+    const cookDates = new Map();
+    for (const { recipeId, date } of cooks) {
+      cookDates.set(recipeId, [...(cookDates.get(recipeId) ?? []), date]);
+    }
+    const lastPlanned = new Map();
+    for (const { recipeId, date } of planned) {
+      if (!lastPlanned.has(recipeId) || lastPlanned.get(recipeId) < date) lastPlanned.set(recipeId, date);
+    }
+    return { attributes, cookDates, lastPlanned };
+  }, []);
+
+  /** Slots from today onward, in day→meal order, for the visible week's enabled meals. */
+  const upcomingSlots = useCallback(() => {
+    const todayKey = toDateKey(new Date());
+    return days.flatMap((day) => enabledMeals.map((meal) => ({ date: toDateKey(day), meal: meal.id })))
+      .filter((slot) => slot.date >= todayKey);
+  }, [days, enabledMeals]);
+
+  const runPlanner = useCallback(async ({ slots, filled, excluded }) => {
+    const planId = activePlanIdRef.current;
+    const context = await loadPlannerContext(planId);
+    const result = planWeek({ slots, filled, recipes, excluded, ...context });
+    const saved = await saveSuggestedEntries(
+      planId,
+      result.suggestions.map((s) => ({ ...s, title: recipesById.get(s.recipeId)?.name ?? null })),
+      userId,
+    );
+    setEntries((prev) => {
+      const next = { ...prev };
+      for (const entry of saved) next[slotKey(entry.date, entry.meal)] = entry;
+      return next;
+    });
+    setLibraryNote(result.libraryNote);
+    return saved.length;
+  }, [loadPlannerContext, recipes, recipesById, userId]);
+
+  const filledSlots = (entryMap) => Object.values(entryMap)
+    .map((e) => ({ date: e.date, meal: e.meal, recipeId: e.kind === 'recipe' ? e.recipeId : null }));
+
+  /** Fills every empty upcoming slot with a suggestion. */
+  const planMyWeek = useCallback(async () => {
+    if (!activePlanIdRef.current) return;
+    setIsPlanning(true);
+    setError(null);
+    try {
+      const slots = upcomingSlots().filter((slot) => !entries[slotKey(slot.date, slot.meal)]);
+      if (slots.length === 0) {
+        setLibraryNote(null);
+        return;
+      }
+      await runPlanner({ slots, filled: filledSlots(entries) });
+    } catch (err) {
+      console.error('[useMealPlan] Failed to plan the week:', err);
+      setError("Couldn't plan the week. Try again.");
+    } finally {
+      setIsPlanning(false);
+    }
+  }, [entries, upcomingSlots, runPlanner]);
+
+  /** Replaces every unlocked suggestion from today on, keeping manual and locked meals. */
+  const regenerate = useCallback(async () => {
+    if (!activePlanIdRef.current) return;
+    setIsPlanning(true);
+    setError(null);
+    try {
+      const todayKey = toDateKey(new Date());
+      const replaceable = Object.values(entries)
+        .filter((e) => e.source === 'suggested' && !e.isLocked && e.date >= todayKey);
+      // Previously suggested recipes step aside this round so Regenerate really changes things.
+      const excluded = new Map(replaceable.map((e) => [slotKey(e.date, e.meal), new Set([e.recipeId])]));
+      const remaining = { ...entries };
+      for (const e of replaceable) delete remaining[slotKey(e.date, e.meal)];
+      await deleteMealPlanEntries(replaceable.map((e) => e.id));
+      setEntries(remaining);
+      const slots = upcomingSlots().filter((slot) => !remaining[slotKey(slot.date, slot.meal)]);
+      await runPlanner({ slots, filled: filledSlots(remaining), excluded });
+    } catch (err) {
+      console.error('[useMealPlan] Failed to regenerate:', err);
+      setError("Couldn't regenerate suggestions. Try again.");
+    } finally {
+      setIsPlanning(false);
+    }
+  }, [entries, upcomingSlots, runPlanner]);
+
+  /** Replaces one slot with the next-best suggestion, never repeating one already swapped out. */
+  const swapSlot = useCallback(async (dateKey, meal) => {
+    const key = slotKey(dateKey, meal);
+    const current = entries[key];
+    const seen = swappedOutRef.current.get(key) ?? new Set();
+    if (current?.recipeId) seen.add(current.recipeId);
+    swappedOutRef.current.set(key, seen);
+    const others = { ...entries };
+    delete others[key];
+    setError(null);
+    try {
+      const count = await runPlanner({
+        slots: [{ date: dateKey, meal }],
+        filled: filledSlots(others),
+        excluded: new Map([[key, seen]]),
+      });
+      if (count === 0) setError('No other recipes fit this meal right now.');
+    } catch (err) {
+      console.error('[useMealPlan] Failed to swap:', err);
+      setError("Couldn't swap that meal. Try again.");
+    }
+  }, [entries, runPlanner]);
+
+  const toggleLock = useCallback(async (dateKey, meal) => {
+    const key = slotKey(dateKey, meal);
+    const entry = entries[key];
+    if (!entry) return;
+    setEntries((prev) => ({ ...prev, [key]: { ...entry, isLocked: !entry.isLocked } }));
+    try {
+      const saved = await setMealPlanEntryLocked(entry.id, !entry.isLocked);
+      setEntries((prev) => ({ ...prev, [key]: saved }));
+    } catch (err) {
+      console.error('[useMealPlan] Failed to toggle lock:', err);
+      setEntries((prev) => ({ ...prev, [key]: entry }));
+      setError("Couldn't update that meal.");
+    }
+  }, [entries]);
+
+  const hasReplaceableSuggestions = Object.values(entries)
+    .some((e) => e.source === 'suggested' && !e.isLocked && e.date >= toDateKey(new Date()));
+
   /** Recipe ids for each planned recipe slot this week, in day then meal order. */
   const plannedRecipeIds = useMemo(
     () => days.flatMap((day) => MEAL_TYPES.map((m) => entries[slotKey(toDateKey(day), m.id)]))
@@ -317,6 +469,9 @@ export const useMealPlan = (userId, userEmail) => {
       plannedRecipeIds,
       isLoading,
       error,
+      isPlanning,
+      libraryNote,
+      hasReplaceableSuggestions,
     },
     actions: {
       getEntry,
@@ -331,6 +486,11 @@ export const useMealPlan = (userId, userEmail) => {
       getShares: getMealPlanShares,
       leavePlan,
       getWeekIngredients,
+      planMyWeek,
+      regenerate,
+      swapSlot,
+      toggleLock,
+      dismissLibraryNote: () => setLibraryNote(null),
       refresh: loadAll,
       clearError: () => setError(null),
     },

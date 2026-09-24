@@ -35,6 +35,16 @@ export const fetchRecipeAttributes = async (recipeId) => {
 };
 
 /**
+ * Fetches attributes for every recipe the user can see, keyed by recipe id.
+ * @returns {Promise<Map<string, object>>}
+ */
+export const fetchAllRecipeAttributes = async () => {
+  const { data, error } = await supabase.from('recipe_attributes').select('*');
+  if (error) throw new Error(`Failed to load recipe details: ${error.message}`, { cause: error });
+  return new Map(data.map((row) => [row.recipe_id, mapAttributes(row)]));
+};
+
+/**
  * Creates or replaces a recipe's attributes.
  * @param {object} attributes - Camel-cased attributes (see mapAttributes)
  * @param {string} userId - The editor

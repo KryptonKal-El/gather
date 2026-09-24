@@ -26,6 +26,7 @@ const mapEntry = (row) => ({
   isLocked: row.is_locked,
   source: row.source,
   cookedAt: row.cooked_at,
+  suggestionReason: row.suggestion_reason,
   createdBy: row.created_by,
   updatedAt: row.updated_at,
 });
@@ -104,7 +105,8 @@ export const fetchMealPlanEntries = async (planId, fromKey, toKey) => {
 };
 
 /**
- * Creates or replaces the slot for (plan, date, meal).
+ * Creates or replaces the slot for (plan, date, meal) as set by a person: it becomes a
+ * manual entry and loses any suggestion reason.
  * @param {object} slot
  * @param {string} slot.planId
  * @param {string} slot.date - `YYYY-MM-DD`
@@ -130,6 +132,8 @@ export const upsertMealPlanEntry = async ({ planId, date, meal, kind, recipeId, 
         title,
         note,
         cooked_at: cookedAt,
+        source: 'manual',
+        suggestion_reason: null,
         created_by: userId,
         updated_at: new Date().toISOString(),
       },
@@ -139,6 +143,104 @@ export const upsertMealPlanEntry = async ({ planId, date, meal, kind, recipeId, 
     .single();
   if (error) fail('save that meal', error);
   return mapEntry(data);
+};
+
+/**
+ * Saves planner suggestions in one request. Each replaces whatever was in its slot.
+ * @param {string} planId
+ * @param {Array<{date: string, meal: string, recipeId: string, title: string, reason: string}>} suggestions
+ * @param {string} userId
+ * @returns {Promise<Array<object>>}
+ */
+export const saveSuggestedEntries = async (planId, suggestions, userId) => {
+  if (suggestions.length === 0) return [];
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('meal_plan_entries')
+    .upsert(
+      suggestions.map((s) => ({
+        meal_plan_id: planId,
+        date: s.date,
+        meal: s.meal,
+        kind: 'recipe',
+        recipe_id: s.recipeId,
+        title: s.title,
+        note: null,
+        cooked_at: null,
+        is_locked: false,
+        source: 'suggested',
+        suggestion_reason: s.reason,
+        created_by: userId,
+        updated_at: now,
+      })),
+      { onConflict: 'meal_plan_id,date,meal' },
+    )
+    .select();
+  if (error) fail('save suggestions', error);
+  return data.map(mapEntry);
+};
+
+/**
+ * Removes several slots at once (used by Regenerate).
+ * @param {string[]} entryIds
+ */
+export const deleteMealPlanEntries = async (entryIds) => {
+  if (entryIds.length === 0) return;
+  const { error } = await supabase.from('meal_plan_entries').delete().in('id', entryIds);
+  if (error) fail('clear suggestions', error);
+};
+
+/**
+ * Locks or unlocks a slot so Regenerate leaves it alone.
+ * @param {string} entryId
+ * @param {boolean} isLocked
+ * @returns {Promise<object>}
+ */
+export const setMealPlanEntryLocked = async (entryId, isLocked) => {
+  const { data, error } = await supabase
+    .from('meal_plan_entries')
+    .update({ is_locked: isLocked, updated_at: new Date().toISOString() })
+    .eq('id', entryId)
+    .select()
+    .single();
+  if (error) fail(isLocked ? 'lock that meal' : 'unlock that meal', error);
+  return mapEntry(data);
+};
+
+/**
+ * Fetches recipe slots planned in a date range (for the planner's recency signal).
+ * @param {string} planId
+ * @param {string} fromKey
+ * @param {string} toKey
+ * @returns {Promise<Array<{recipeId: string, date: string}>>}
+ */
+export const fetchPlannedRecipeDates = async (planId, fromKey, toKey) => {
+  const { data, error } = await supabase
+    .from('meal_plan_entries')
+    .select('recipe_id, date')
+    .eq('meal_plan_id', planId)
+    .eq('kind', 'recipe')
+    .not('recipe_id', 'is', null)
+    .gte('date', fromKey)
+    .lte('date', toKey);
+  if (error) fail('load recent plans', error);
+  return data.map((row) => ({ recipeId: row.recipe_id, date: row.date }));
+};
+
+/**
+ * Fetches completed cook dates (local-agnostic `YYYY-MM-DD` of completed_at) since a date.
+ * RLS limits rows to recipes the user can see.
+ * @param {string} sinceIso
+ * @returns {Promise<Array<{recipeId: string, date: string}>>}
+ */
+export const fetchCookDates = async (sinceIso) => {
+  const { data, error } = await supabase
+    .from('cook_sessions')
+    .select('recipe_id, completed_at')
+    .not('completed_at', 'is', null)
+    .gte('completed_at', sinceIso);
+  if (error) fail('load cook history', error);
+  return data.map((row) => ({ recipeId: row.recipe_id, date: row.completed_at.slice(0, 10) }));
 };
 
 /**

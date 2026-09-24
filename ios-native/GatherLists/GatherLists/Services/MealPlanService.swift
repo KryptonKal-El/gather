@@ -51,7 +51,8 @@ struct MealPlanService {
             .value
     }
 
-    /// Creates or replaces the slot for (plan, date, meal) and returns the saved row.
+    /// Creates or replaces the slot for (plan, date, meal) as set by a person, and returns the
+    /// saved row. It becomes a manual slot and loses any suggestion reason.
     static func upsertEntry(
         planId: UUID,
         dateKey: String,
@@ -82,6 +83,79 @@ struct MealPlanService {
             .single()
             .execute()
             .value
+    }
+
+    /// Saves planner suggestions in one request; each replaces whatever was in its slot.
+    static func saveSuggestions(planId: UUID, suggestions: [MealPlanner.Suggestion], titles: [UUID: String], userId: UUID) async throws -> [MealPlanEntry] {
+        guard !suggestions.isEmpty else { return [] }
+        let now = Date()
+        let rows = suggestions.map {
+            SuggestedEntryUpsert(
+                mealPlanId: planId,
+                date: $0.date,
+                meal: $0.meal.rawValue,
+                recipeId: $0.recipeId,
+                title: titles[$0.recipeId],
+                suggestionReason: $0.reason,
+                createdBy: userId,
+                updatedAt: now
+            )
+        }
+        return try await client
+            .from("meal_plan_entries")
+            .upsert(rows, onConflict: "meal_plan_id,date,meal")
+            .select()
+            .execute()
+            .value
+    }
+
+    /// Removes several slots at once (used by Regenerate).
+    static func deleteEntries(ids: [UUID]) async throws {
+        guard !ids.isEmpty else { return }
+        try await client
+            .from("meal_plan_entries")
+            .delete()
+            .in("id", values: ids)
+            .execute()
+    }
+
+    /// Locks or unlocks a slot so Regenerate leaves it alone.
+    static func setLocked(entryId: UUID, isLocked: Bool) async throws -> MealPlanEntry {
+        try await client
+            .from("meal_plan_entries")
+            .update(LockUpdate(isLocked: isLocked, updatedAt: Date()))
+            .eq("id", value: entryId)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
+
+    /// Recipe slots planned between two date keys, for the planner's recency signal.
+    static func fetchPlannedRecipeDates(planId: UUID, fromKey: String, toKey: String) async throws -> [(recipeId: UUID, date: String)] {
+        let rows: [PlannedRecipeRow] = try await client
+            .from("meal_plan_entries")
+            .select("recipe_id, date")
+            .eq("meal_plan_id", value: planId)
+            .eq("kind", value: MealEntryKind.recipe.rawValue)
+            .not("recipe_id", operator: .is, value: "null")
+            .gte("date", value: fromKey)
+            .lte("date", value: toKey)
+            .execute()
+            .value
+        return rows.compactMap { row in row.recipeId.map { ($0, row.date) } }
+    }
+
+    /// Completed cook dates since `since`, for recipes the user can see.
+    static func fetchCookDates(since: Date) async throws -> [(recipeId: UUID, completedAt: Date)] {
+        let rows: [CookDateRow] = try await client
+            .from("cook_sessions")
+            .select("recipe_id, completed_at")
+            .not("completed_at", operator: .is, value: "null")
+            .gte("completed_at", value: since)
+            .execute()
+            .value
+        return rows.compactMap { row in row.completedAt.map { (row.recipeId, $0) } }
     }
 
     /// Clears a slot.
@@ -199,6 +273,8 @@ private struct MealPlanEntryUpsert: Encodable {
         case title
         case note
         case cookedAt = "cooked_at"
+        case source
+        case suggestionReason = "suggestion_reason"
         case createdBy = "created_by"
         case updatedAt = "updated_at"
     }
@@ -214,6 +290,8 @@ private struct MealPlanEntryUpsert: Encodable {
         try container.encode(title, forKey: .title)
         try container.encode(note, forKey: .note)
         try container.encode(cookedAt, forKey: .cookedAt)
+        try container.encode("manual", forKey: .source)
+        try container.encodeNil(forKey: .suggestionReason)
         try container.encode(createdBy, forKey: .createdBy)
         try container.encode(updatedAt, forKey: .updatedAt)
     }
@@ -230,5 +308,74 @@ private struct NewMealPlanShare: Encodable {
         case sharedWithEmail = "shared_with_email"
         case sharedBy = "shared_by"
         case permission
+    }
+}
+
+private struct SuggestedEntryUpsert: Encodable {
+    let mealPlanId: UUID
+    let date: String
+    let meal: String
+    let recipeId: UUID
+    let title: String?
+    let suggestionReason: String
+    let createdBy: UUID
+    let updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case mealPlanId = "meal_plan_id"
+        case date, meal, kind, title, note, source
+        case recipeId = "recipe_id"
+        case cookedAt = "cooked_at"
+        case isLocked = "is_locked"
+        case suggestionReason = "suggestion_reason"
+        case createdBy = "created_by"
+        case updatedAt = "updated_at"
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(mealPlanId, forKey: .mealPlanId)
+        try container.encode(date, forKey: .date)
+        try container.encode(meal, forKey: .meal)
+        try container.encode(MealEntryKind.recipe.rawValue, forKey: .kind)
+        try container.encode(recipeId, forKey: .recipeId)
+        try container.encode(title, forKey: .title)
+        try container.encodeNil(forKey: .note)
+        try container.encodeNil(forKey: .cookedAt)
+        try container.encode(false, forKey: .isLocked)
+        try container.encode("suggested", forKey: .source)
+        try container.encode(suggestionReason, forKey: .suggestionReason)
+        try container.encode(createdBy, forKey: .createdBy)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+}
+
+private struct LockUpdate: Encodable {
+    let isLocked: Bool
+    let updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case isLocked = "is_locked"
+        case updatedAt = "updated_at"
+    }
+}
+
+private struct PlannedRecipeRow: Decodable {
+    let recipeId: UUID?
+    let date: String
+
+    enum CodingKeys: String, CodingKey {
+        case recipeId = "recipe_id"
+        case date
+    }
+}
+
+private struct CookDateRow: Decodable {
+    let recipeId: UUID
+    let completedAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case recipeId = "recipe_id"
+        case completedAt = "completed_at"
     }
 }

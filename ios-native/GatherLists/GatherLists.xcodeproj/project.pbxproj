@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANNERSVC0000000001 /* MealPlanner.swift */; };
 		RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */; };
 		RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */; };
 		RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */; };
@@ -196,6 +197,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		MEALPLANNERSVC0000000001 /* MealPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanner.swift; sourceTree = "<group>"; };
 		RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributes.swift; sourceTree = "<group>"; };
 		RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributeService.swift; sourceTree = "<group>"; };
 		RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTaggingService.swift; sourceTree = "<group>"; };
@@ -472,6 +474,7 @@
 		A1B2C3D4E5F6A7B8C9D0E212 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				MEALPLANNERSVC0000000001 /* MealPlanner.swift */,
 				RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */,
 				RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */,
 				RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */,
@@ -932,6 +935,7 @@
 				COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */,
 				COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */,
+				MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */,
 				RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */,
 				RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */,
 				RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */,

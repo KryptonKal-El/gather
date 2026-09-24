@@ -111,9 +111,13 @@ struct MealPlanEntry: Codable, Identifiable, Hashable {
     var isLocked: Bool
     var source: String
     var cookedAt: Date?
+    /// Why the planner picked this recipe; only set on `source == "suggested"` slots.
+    var suggestionReason: String?
     let createdBy: UUID?
     let createdAt: Date
     var updatedAt: Date
+
+    var isSuggested: Bool { source == "suggested" }
 
     /// Text shown for the slot: the recipe name snapshot, or the kind's label.
     var displayTitle: String {
@@ -133,6 +137,7 @@ struct MealPlanEntry: Codable, Identifiable, Hashable {
         case isLocked = "is_locked"
         case source
         case cookedAt = "cooked_at"
+        case suggestionReason = "suggestion_reason"
         case createdBy = "created_by"
         case createdAt = "created_at"
         case updatedAt = "updated_at"
