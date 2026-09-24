@@ -92,10 +92,13 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const [libraryNote, setLibraryNote] = useState(null);
   // Recipes already swapped out of each slot this session, so Swap keeps moving forward.
   const swappedOutRef = useRef(new Map());
-  // This device's writes: how many have started and how many are still running. A week
-  // refetch that overlaps a write may predate it, so its result is dropped and the week
-  // reloads once the writes settle; otherwise a cleared meal could reappear locally.
+  // This device's writes: how many have started and how many are still running. A refetch
+  // that overlaps a write may predate it, so its result is dropped and the plan reloads once
+  // the writes settle; otherwise a cleared meal or a hidden meal type could come back locally.
   const writesRef = useRef({ started: 0, inFlight: 0, needsReload: false });
+  // Meals-shown saves run one at a time: two quick toggles sent in parallel can land in
+  // either order, and the earlier one would win.
+  const mealsSaveRef = useRef(Promise.resolve());
 
   const activePlanIdRef = useRef(null);
   const weekStartRef = useRef(weekStart);
@@ -136,23 +139,6 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     }
   }, []);
 
-  /** Runs a write to this plan so overlapping week refetches can't undo it locally. */
-  const trackWrite = useCallback(async (write) => {
-    const writes = writesRef.current;
-    writes.started += 1;
-    writes.inFlight += 1;
-    try {
-      return await write();
-    } finally {
-      writes.inFlight -= 1;
-      if (writes.inFlight === 0 && writes.needsReload) {
-        writes.needsReload = false;
-        loadWeek(activePlanIdRef.current, weekStartRef.current).catch((err) =>
-          console.error('[useMealPlan] Failed to refresh week:', err));
-      }
-    }
-  }, [loadWeek]);
-
   const loadCollaborators = useCallback(async (planId) => {
     if (!planId) return;
     try {
@@ -163,22 +149,52 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   }, []);
 
   const loadPlans = useCallback(async () => {
-    let fetched = await fetchMealPlans();
-    if (fetched.length === 0) {
-      try {
-        fetched = [await createMealPlan(userId)];
-      } catch (err) {
-        // Another device may have just created it (one owned plan per user); use theirs.
-        fetched = await fetchMealPlans();
-        if (fetched.length === 0) throw err;
+    const writes = writesRef.current;
+    for (;;) {
+      const startedBefore = writes.started;
+      const wasWriting = writes.inFlight > 0;
+      let fetched = await fetchMealPlans();
+      if (fetched.length === 0) {
+        try {
+          fetched = [await createMealPlan(userId)];
+        } catch (err) {
+          // Another device may have just created it (one owned plan per user); use theirs.
+          fetched = await fetchMealPlans();
+          if (fetched.length === 0) throw err;
+        }
+      }
+      const nextId = chooseActivePlan(fetched, activePlanIdRef.current, userId);
+      // Same rule as loadWeek: plans fetched across a write (e.g. Meals shown) may predate it.
+      if (!wasWriting && writes.started === startedBefore) {
+        setPlans(fetched);
+        setActivePlanId(nextId);
+        activePlanIdRef.current = nextId;
+        return nextId;
+      }
+      if (writes.inFlight > 0) {
+        writes.needsReload = true;
+        return activePlanIdRef.current ?? nextId;
       }
     }
-    const nextId = chooseActivePlan(fetched, activePlanIdRef.current, userId);
-    setPlans(fetched);
-    setActivePlanId(nextId);
-    activePlanIdRef.current = nextId;
-    return nextId;
   }, [userId]);
+
+  /** Runs a write to this plan so overlapping refetches can't undo it locally. */
+  const trackWrite = useCallback(async (write) => {
+    const writes = writesRef.current;
+    writes.started += 1;
+    writes.inFlight += 1;
+    try {
+      return await write();
+    } finally {
+      writes.inFlight -= 1;
+      if (writes.inFlight === 0 && writes.needsReload) {
+        writes.needsReload = false;
+        loadPlans()
+          .then((planId) => loadWeek(planId, weekStartRef.current))
+          .catch((err) => console.error('[useMealPlan] Failed to refresh plan:', err));
+      }
+    }
+  }, [loadPlans, loadWeek]);
 
   const loadAll = useCallback(async () => {
     if (!isActive) return;
@@ -322,13 +338,15 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     if (next.length === 0) return;
     setPlans((prev) => prev.map((p) => (p.id === activePlan.id ? { ...p, enabledMeals: next } : p)));
     try {
-      await updateEnabledMeals(activePlan.id, next);
+      const save = mealsSaveRef.current.then(() => updateEnabledMeals(activePlan.id, next));
+      mealsSaveRef.current = save.catch(() => {});
+      await trackWrite(() => save);
     } catch (err) {
       console.error('[useMealPlan] Failed to update meals:', err);
       setPlans((prev) => prev.map((p) => (p.id === activePlan.id ? { ...p, enabledMeals: current } : p)));
       setError("Couldn't update the meals shown.");
     }
-  }, [activePlan]);
+  }, [activePlan, trackWrite]);
 
   const share = useCallback(async (planId, email) => {
     await shareMealPlan(planId, email, userId);

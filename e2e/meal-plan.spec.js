@@ -55,6 +55,16 @@ test.describe.serial('Meal plan', () => {
     await expect(dinnerSlot(dayIndex)).toHaveAccessibleName('Dinner: add a meal', { timeout: 5000 });
   };
 
+  // Clears every planned meal in the visible week, whichever meals are shown.
+  const clearWeek = async () => {
+    const planned = page.getByRole('button', { name: /^(Breakfast|Lunch|Dinner): (?!add a meal$)/ });
+    for (let count = await planned.count(); count > 0; count -= 1) {
+      await planned.first().click();
+      await page.getByRole('button', { name: 'Clear meal' }).click();
+      await expect(planned).toHaveCount(count - 1, { timeout: 5000 });
+    }
+  };
+
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
     page.on('request', (req) => {
@@ -80,8 +90,8 @@ test.describe.serial('Meal plan', () => {
     test.setTimeout(120000);
     try {
       await openTab('Plan');
-      for (let i = 0; i < 7; i += 1) await clearDinner(i);
       for (const meal of MEALS) await setMealShown(meal, true);
+      await clearWeek();
     } catch {
       // Swallow errors during cleanup
     }
@@ -150,6 +160,9 @@ test.describe.serial('Meal plan', () => {
 
     await page.getByRole('button', { name: 'Next week' }).click();
     await expect(page.getByRole('button', { name: 'Back to this week' })).toBeVisible();
+    // Start from an empty week even if an earlier run stopped part-way
+    for (const meal of MEALS) await setMealShown(meal, true);
+    await clearWeek();
 
     await setMealShown('Breakfast', false);
     await setMealShown('Lunch', false);
@@ -191,6 +204,8 @@ test.describe.serial('Meal plan', () => {
   });
 
   test('plans the week using every recipe before repeating one', async () => {
+    // Hidden meals stay hidden, so only dinners get planned
+    await expect(page.getByRole('button', { name: /^(Breakfast|Lunch): / })).toHaveCount(0);
     await page.getByRole('button', { name: /Plan my week/ }).click();
     await expect(page.getByRole('button', { name: /Plan my week/ })).toBeEnabled({ timeout: 15000 });
 
@@ -239,13 +254,15 @@ test.describe.serial('Meal plan', () => {
     await expect(dinnerSlot(0)).toHaveAccessibleName(`Dinner: ${kept}`);
     await expect(dinnerSlot(1)).toHaveAccessibleName(/^Dinner: Eating out/);
     await expect.poll(() => feedbackEvents).toContain('regenerated');
+    await expect(page.getByRole('button', { name: /^(Breakfast|Lunch): / })).toHaveCount(0);
   });
 
   test('clears the week', async () => {
     for (let i = 0; i < 7; i += 1) await clearDinner(i);
     await expect(page.getByRole('button', { name: 'Dinner: add a meal' })).toHaveCount(7);
     for (const meal of MEALS) await setMealShown(meal, true);
-    await expect(page.getByRole('button', { name: /^Breakfast: / })).toHaveCount(7);
+    // Nothing was planned into the hidden meals
+    await expect(page.getByRole('button', { name: /^(Breakfast|Lunch|Dinner): add a meal$/ })).toHaveCount(21);
   });
 
   test('removes the scratch library', async () => {
