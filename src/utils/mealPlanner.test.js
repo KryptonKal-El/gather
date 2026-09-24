@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { planWeek, typicalGapDays, daysBetween, weekdayIndex } from './mealPlanner.js';
+import { planWeek, typicalGapDays, daysBetween, weekdayIndex, buildPreferences, learnQuickWeekdays } from './mealPlanner.js';
 
 const WEEK = ['2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04'];
 const dinners = WEEK.map((date) => ({ date, meal: 'dinner' }));
@@ -120,7 +120,7 @@ describe('planWeek', () => {
     const attrs = { quick: tags({ effort: 'quick' }), project: tags({ effort: 'project' }) };
     const input = baseInput(recipes, attrs, { slots: [{ date: WEEK[1], meal: 'dinner' }] });
     const [pick] = planWeek(input).suggestions;
-    expect(pick).toEqual(expect.objectContaining({ recipeId: 'quick', reason: 'Quick for a weeknight' }));
+    expect(pick).toEqual(expect.objectContaining({ recipeId: 'quick', reason: 'Quick for a busy day' }));
   });
 
   it('nudges recipes that share fresh ingredients onto nearby days', () => {
@@ -147,5 +147,88 @@ describe('planWeek', () => {
     const { suggestions, libraryNote } = planWeek(baseInput(few));
     expect(suggestions.length).toBeGreaterThan(0);
     expect(libraryNote).toMatch(/You have 2 recipes for main meals/);
+  });
+
+  it('suggests a recipe the household keeps swapping away less often', () => {
+    const recipes = [recipe('swapped', { cookCount: 1, lastCookedAt: '2026-06-01' }), recipe('neutral', { cookCount: 1, lastCookedAt: '2026-06-01' })];
+    const feedback = ['2026-09-01', '2026-09-08', '2026-09-15', '2026-09-20']
+      .map((date) => ({ recipeId: 'swapped', event: 'swapped', date }));
+    const preferences = buildPreferences({ todayKey: '2026-09-27', feedback });
+    const winsFor = (prefs) => {
+      let wins = 0;
+      for (let i = 0; i < 20; i += 1) {
+        for (let j = 0; j < 20; j += 1) {
+          const draws = [(i + 0.5) / 20, (j + 0.5) / 20];
+          let n = 0;
+          const random = () => draws[n++ % 2];
+          const input = baseInput(recipes, {}, { slots: [{ date: WEEK[5], meal: 'dinner' }], preferences: prefs, random });
+          if (planWeek(input).suggestions[0].recipeId === 'swapped') wins += 1;
+        }
+      }
+      return wins;
+    };
+    const baseline = winsFor(new Map());
+    const learned = winsFor(preferences);
+    expect(baseline).toBeGreaterThan(150);
+    expect(learned).toBeLessThan(baseline / 2);
+  });
+
+  it('favours a recipe the household keeps and cooks, but still rests it', () => {
+    const recipes = [recipe('loved', { cookCount: 3, lastCookedAt: '2026-09-01' }), recipe('neutral', { cookCount: 1, lastCookedAt: '2026-06-01' })];
+    const cooks = ['2026-07-06', '2026-08-03', '2026-09-01'].map((date) => ({ recipeId: 'loved', date }));
+    const feedback = [{ recipeId: 'loved', event: 'kept', date: '2026-09-10' }];
+    const preferences = buildPreferences({ todayKey: '2026-09-27', cooks, feedback });
+    const cookDates = new Map([['loved', cooks.map((c) => c.date)]]);
+    const input = baseInput(recipes, {}, { slots: [{ date: WEEK[5], meal: 'dinner' }], preferences, cookDates });
+    const [pick] = planWeek(input).suggestions;
+    expect(pick.recipeId).toBe('loved');
+    expect(pick.reason).toBe('A household favourite');
+
+    const resting = baseInput([recipe('loved', { cookCount: 4, lastCookedAt: '2026-09-25' }), recipes[1]], {}, {
+      slots: [{ date: WEEK[0], meal: 'dinner' }],
+      preferences,
+      cookDates,
+    });
+    expect(planWeek(resting).suggestions[0].recipeId).toBe('neutral');
+  });
+
+  it('fades old reactions', () => {
+    const recent = buildPreferences({ todayKey: '2026-09-27', feedback: [{ recipeId: 'x', event: 'swapped', date: '2026-09-27' }] });
+    const old = buildPreferences({ todayKey: '2026-09-27', feedback: [{ recipeId: 'x', event: 'swapped', date: '2026-05-30' }] });
+    expect(recent.get('x').negative).toBeCloseTo(1);
+    expect(old.get('x').negative).toBeLessThan(0.3);
+  });
+
+  it('counts planned meals that were never cooked gently against a recipe', () => {
+    const prefs = buildPreferences({
+      todayKey: '2026-09-27',
+      planned: [
+        { recipeId: 'a', date: '2026-09-20', cooked: false },
+        { recipeId: 'b', date: '2026-09-20', cooked: true },
+        { recipeId: 'c', date: '2026-09-30', cooked: false },
+      ],
+    });
+    expect(prefs.get('a').negative).toBeGreaterThan(0);
+    expect(prefs.has('b')).toBe(false);
+    expect(prefs.has('c')).toBe(false);
+  });
+});
+
+describe('learnQuickWeekdays', () => {
+  it('uses Monday–Thursday until there is enough history', () => {
+    expect([...learnQuickWeekdays([])].sort()).toEqual([0, 1, 2, 3]);
+  });
+
+  it('learns busy days from how long cooks take', () => {
+    const sessions = [
+      ...[0, 0, 0].map((weekday) => ({ weekday, minutes: 25 })),
+      ...[2, 2, 2].map((weekday) => ({ weekday, minutes: 75 })),
+      ...[5, 5, 6, 6].map((weekday) => ({ weekday, minutes: 90 })),
+    ];
+    const quick = learnQuickWeekdays(sessions);
+    expect(quick.has(0)).toBe(true);
+    expect(quick.has(2)).toBe(false);
+    expect(quick.has(1)).toBe(true);
+    expect(quick.has(5)).toBe(false);
   });
 });

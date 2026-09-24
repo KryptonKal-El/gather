@@ -131,11 +131,12 @@ struct MealPlanService {
             .value
     }
 
-    /// Recipe slots planned between two date keys, for the planner's recency signal.
-    static func fetchPlannedRecipeDates(planId: UUID, fromKey: String, toKey: String) async throws -> [(recipeId: UUID, date: String)] {
+    /// Recipe slots planned between two date keys, for the planner's recency and
+    /// "planned but not cooked" signals.
+    static func fetchPlannedRecipeDates(planId: UUID, fromKey: String, toKey: String) async throws -> [(recipeId: UUID, date: String, cooked: Bool)] {
         let rows: [PlannedRecipeRow] = try await client
             .from("meal_plan_entries")
-            .select("recipe_id, date")
+            .select("recipe_id, date, cooked_at")
             .eq("meal_plan_id", value: planId)
             .eq("kind", value: MealEntryKind.recipe.rawValue)
             .not("recipe_id", operator: .is, value: "null")
@@ -143,19 +144,42 @@ struct MealPlanService {
             .lte("date", value: toKey)
             .execute()
             .value
-        return rows.compactMap { row in row.recipeId.map { ($0, row.date) } }
+        return rows.compactMap { row in row.recipeId.map { ($0, row.date, row.cookedAt != nil) } }
     }
 
-    /// Completed cook dates since `since`, for recipes the user can see.
-    static func fetchCookDates(since: Date) async throws -> [(recipeId: UUID, completedAt: Date)] {
+    /// Completed cooks since `since`, for recipes the user can see.
+    static func fetchCookDates(since: Date) async throws -> [(recipeId: UUID, startedAt: Date, completedAt: Date)] {
         let rows: [CookDateRow] = try await client
             .from("cook_sessions")
-            .select("recipe_id, completed_at")
+            .select("recipe_id, started_at, completed_at")
             .not("completed_at", operator: .is, value: "null")
             .gte("completed_at", value: since)
             .execute()
             .value
-        return rows.compactMap { row in row.completedAt.map { (row.recipeId, $0) } }
+        return rows.compactMap { row in row.completedAt.map { (row.recipeId, row.startedAt, $0) } }
+    }
+
+    /// The household's reactions to suggestions since `since`.
+    static func fetchFeedback(planId: UUID, since: Date) async throws -> [(recipeId: UUID, event: MealPlanner.FeedbackEvent, createdAt: Date)] {
+        let rows: [FeedbackRow] = try await client
+            .from("meal_plan_feedback")
+            .select("recipe_id, event, created_at")
+            .eq("meal_plan_id", value: planId)
+            .gte("created_at", value: since)
+            .execute()
+            .value
+        return rows.compactMap { row in
+            MealPlanner.FeedbackEvent(rawValue: row.event).map { (row.recipeId, $0, row.createdAt) }
+        }
+    }
+
+    /// Records reactions to suggestions so the planner learns.
+    static func recordFeedback(planId: UUID, events: [(recipeId: UUID, event: MealPlanner.FeedbackEvent)], userId: UUID) async throws {
+        guard !events.isEmpty else { return }
+        try await client
+            .from("meal_plan_feedback")
+            .insert(events.map { NewFeedback(mealPlanId: planId, recipeId: $0.recipeId, event: $0.event.rawValue, createdBy: userId) })
+            .execute()
     }
 
     /// Clears a slot.
@@ -363,19 +387,49 @@ private struct LockUpdate: Encodable {
 private struct PlannedRecipeRow: Decodable {
     let recipeId: UUID?
     let date: String
+    let cookedAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case recipeId = "recipe_id"
         case date
+        case cookedAt = "cooked_at"
     }
 }
 
 private struct CookDateRow: Decodable {
     let recipeId: UUID
+    let startedAt: Date
     let completedAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case recipeId = "recipe_id"
+        case startedAt = "started_at"
         case completedAt = "completed_at"
+    }
+}
+
+private struct FeedbackRow: Decodable {
+    let recipeId: UUID
+    let event: String
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case recipeId = "recipe_id"
+        case event
+        case createdAt = "created_at"
+    }
+}
+
+private struct NewFeedback: Encodable {
+    let mealPlanId: UUID
+    let recipeId: UUID
+    let event: String
+    let createdBy: UUID
+
+    enum CodingKeys: String, CodingKey {
+        case mealPlanId = "meal_plan_id"
+        case recipeId = "recipe_id"
+        case event
+        case createdBy = "created_by"
     }
 }

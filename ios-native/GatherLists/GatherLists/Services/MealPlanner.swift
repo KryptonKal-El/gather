@@ -6,7 +6,8 @@ import Foundation
 /// Variety comes from a per-recipe rest period scaled to how often it's usually made, weekly
 /// caps on the same protein / cuisine, one "something new" slot, resurfacing long-forgotten
 /// favourites, quick meals on weeknights, nudging recipes that share fresh ingredients onto
-/// nearby days, and a little randomness between equal candidates.
+/// nearby days, and learned household preference (Thompson-style: kept/cooked vs swapped/skipped,
+/// fading over time), which also supplies the randomness between equal candidates.
 enum MealPlanner {
     struct Slot: Hashable {
         let date: String
@@ -38,7 +39,20 @@ enum MealPlanner {
         var lastPlanned: [UUID: String]
         /// Recipe ids not to suggest per slot key (swaps / regenerate).
         var excluded: [String: Set<UUID>] = [:]
+        var preferences: [UUID: Preference] = [:]
+        /// Weekdays that need quick meals (Monday = 0), from `learnQuickWeekdays`.
+        var quickWeekdays: Set<Int> = MealPlanner.defaultQuickWeekdays
         var random: () -> Double = { Double.random(in: 0..<1) }
+    }
+
+    /// Learned liking for a recipe: decayed weights of positive and negative reactions.
+    struct Preference {
+        var positive: Double = 0
+        var negative: Double = 0
+    }
+
+    enum FeedbackEvent: String {
+        case kept, swapped, regenerated
     }
 
     struct Result {
@@ -47,6 +61,8 @@ enum MealPlanner {
     }
 
     private static let defaultGapDays = 21.0
+    static let defaultQuickWeekdays: Set<Int> = [0, 1, 2, 3]
+    private static let feedbackHalfLifeDays = 60.0
     private static let weekdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
     private struct Profile {
@@ -99,6 +115,65 @@ enum MealPlanner {
         let mid = gaps.count / 2
         let median = gaps.count % 2 == 1 ? Double(gaps[mid]) : Double(gaps[mid - 1] + gaps[mid]) / 2
         return min(90, max(7, median))
+    }
+
+    // MARK: - Learning
+
+    /// Builds each recipe's learned preference; a reaction loses half its weight every 60 days.
+    static func buildPreferences(
+        todayKey: String,
+        cooks: [(recipeId: UUID, date: String)],
+        feedback: [(recipeId: UUID, event: FeedbackEvent, date: String)],
+        planned: [(recipeId: UUID, date: String, cooked: Bool)]
+    ) -> [UUID: Preference] {
+        var prefs: [UUID: Preference] = [:]
+        func add(_ recipeId: UUID, _ date: String, _ weight: Double) {
+            let age = Double(max(0, daysBetween(date, todayKey)))
+            let decayed = weight * pow(0.5, age / feedbackHalfLifeDays)
+            if decayed > 0 {
+                prefs[recipeId, default: Preference()].positive += decayed
+            } else {
+                prefs[recipeId, default: Preference()].negative -= decayed
+            }
+        }
+        for cook in cooks { add(cook.recipeId, cook.date, 1) }
+        for item in feedback {
+            switch item.event {
+            case .kept: add(item.recipeId, item.date, 0.75)
+            case .swapped: add(item.recipeId, item.date, -1)
+            case .regenerated: add(item.recipeId, item.date, -0.5)
+            }
+        }
+        for item in planned where !item.cooked && item.date < todayKey {
+            add(item.recipeId, item.date, -0.3)
+        }
+        return prefs
+    }
+
+    /// Multiplier in 0.7…1.3 sampled around the Beta(1+liked, 1+disliked) mean, spread by its uncertainty.
+    private static func preferenceFactor(_ pref: Preference?, random: () -> Double) -> Double {
+        let a = 1 + (pref?.positive ?? 0)
+        let b = 1 + (pref?.negative ?? 0)
+        let mean = a / (a + b)
+        let sd = sqrt((a * b) / (pow(a + b, 2) * (a + b + 1)))
+        let sample = min(1, max(0, mean + (random() - 0.5) * 3.4 * sd))
+        return 0.7 + 0.6 * sample
+    }
+
+    /// Learns busy weekdays from cook durations: with 8+ cooks, a day is quick if its median cook
+    /// is 40 minutes or less, or it's a weekday (Mon–Fri) the household rarely cooks on.
+    static func learnQuickWeekdays(_ sessions: [(weekday: Int, minutes: Double)]) -> Set<Int> {
+        guard sessions.count >= 8 else { return defaultQuickWeekdays }
+        var quick: Set<Int> = []
+        for day in 0..<7 {
+            let durations = sessions.filter { $0.weekday == day }.map(\.minutes).sorted()
+            if durations.count <= 1 {
+                if day <= 4 { quick.insert(day) }
+                continue
+            }
+            if durations[durations.count / 2] <= 40 { quick.insert(day) }
+        }
+        return quick
     }
 
     private static func isEligible(_ attrs: RecipeAttributes?, for meal: MealType) -> Bool {
@@ -191,13 +266,13 @@ enum MealPlanner {
             value *= pow(0.75, Double(cuisineCount))
 
             let weekday = weekdayIndex(slot.date)
-            let isWeeknight = weekday <= 3 && slot.meal != .breakfast
+            let isBusyDay = input.quickWeekdays.contains(weekday) && slot.meal != .breakfast
             if attrs?.effort == RecipeEffort.project.rawValue {
-                value *= isWeeknight ? 0.4 : (weekday >= 5 ? 1.1 : 1)
+                value *= isBusyDay ? 0.4 : (weekday >= 5 ? 1.1 : 1)
             }
-            if attrs?.effort == RecipeEffort.quick.rawValue && isWeeknight {
+            if attrs?.effort == RecipeEffort.quick.rawValue && isBusyDay {
                 value *= 1.15
-                reasons.append(Reason(weight: 1, text: "Quick for a weeknight"))
+                reasons.append(Reason(weight: 1, text: "Quick for a busy day"))
             }
 
             if let method = attrs?.method {
@@ -223,11 +298,15 @@ enum MealPlanner {
                 }
             }
 
+            let pref = input.preferences[p.recipe.id]
+            if let pref, pref.positive >= 2, (1 + pref.positive) / (2 + pref.positive + pref.negative) >= 0.75 {
+                reasons.append(Reason(weight: 1.5, text: "A household favourite"))
+            }
             if p.cookCount >= 3 { reasons.append(Reason(weight: 0.5, text: "A regular — made \(p.cookCount) times")) }
             if let daysSince, daysSince >= 14 { reasons.append(Reason(weight: 0.25, text: "Last made \(weeksText(daysSince)) ago")) }
 
             if relaxed { value *= 0.3 }
-            value *= 0.85 + 0.3 * input.random()
+            value *= preferenceFactor(pref, random: input.random)
 
             let reason = reasons.max { $0.weight < $1.weight }?.text ?? "Good for \(slot.meal.rawValue)"
             return (value, reason)

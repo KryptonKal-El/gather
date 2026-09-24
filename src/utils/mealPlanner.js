@@ -9,13 +9,17 @@
  *  - resurfacing favourites that haven't been made in a long while,
  *  - quick meals on weeknights, bigger cooks at the weekend,
  *  - nudging recipes that share fresh ingredients onto nearby days,
- *  - a little randomness so equal candidates don't always win in the same order.
+ *  - learned household preference (Thompson-style: kept/cooked vs swapped/skipped,
+ *    fading over time), which also supplies the randomness between equal candidates.
  */
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_GAP_DAYS = 21;
 const WEEKDAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const MAIN_COURSES = new Set([null, undefined, 'main']);
+const DEFAULT_QUICK_WEEKDAYS = new Set([0, 1, 2, 3]);
+const FEEDBACK_HALF_LIFE_DAYS = 60;
+const FEEDBACK_WEIGHTS = { cooked: 1, kept: 0.75, swapped: -1, regenerated: -0.5, uncooked: -0.3 };
 
 const keyToUtc = (key) => {
   const [y, m, d] = key.split('-').map(Number);
@@ -48,6 +52,69 @@ export const typicalGapDays = (cookKeys) => {
   return Math.min(90, Math.max(7, median));
 };
 
+/**
+ * Builds each recipe's learned preference from reactions, weighted so that a reaction loses
+ * half its weight every 60 days.
+ * @param {object} input
+ * @param {string} input.todayKey
+ * @param {Array<{recipeId: string, date: string}>} [input.cooks] - Completed cooks
+ * @param {Array<{recipeId: string, event: 'kept'|'swapped'|'regenerated', date: string}>} [input.feedback]
+ * @param {Array<{recipeId: string, date: string, cooked: boolean}>} [input.planned] - Past planned recipe slots
+ * @returns {Map<string, {positive: number, negative: number}>}
+ */
+export const buildPreferences = ({ todayKey, cooks = [], feedback = [], planned = [] }) => {
+  const prefs = new Map();
+  const add = (recipeId, date, weight) => {
+    const age = Math.max(0, daysBetween(date, todayKey));
+    const decayed = weight * 0.5 ** (age / FEEDBACK_HALF_LIFE_DAYS);
+    const pref = prefs.get(recipeId) ?? { positive: 0, negative: 0 };
+    if (decayed > 0) pref.positive += decayed;
+    else pref.negative -= decayed;
+    prefs.set(recipeId, pref);
+  };
+  for (const c of cooks) add(c.recipeId, c.date, FEEDBACK_WEIGHTS.cooked);
+  for (const f of feedback) add(f.recipeId, f.date, FEEDBACK_WEIGHTS[f.event] ?? 0);
+  for (const p of planned) {
+    if (!p.cooked && p.date < todayKey) add(p.recipeId, p.date, FEEDBACK_WEIGHTS.uncooked);
+  }
+  return prefs;
+};
+
+/**
+ * Samples a preference multiplier in [0.7, 1.3] around the recipe's Beta(1+liked, 1+disliked)
+ * mean, spread by its uncertainty — unknown recipes vary most, well-known ones least.
+ */
+const preferenceFactor = (pref, random) => {
+  const a = 1 + (pref?.positive ?? 0);
+  const b = 1 + (pref?.negative ?? 0);
+  const mean = a / (a + b);
+  const sd = Math.sqrt((a * b) / ((a + b) ** 2 * (a + b + 1)));
+  const sample = Math.min(1, Math.max(0, mean + (random() - 0.5) * 3.4 * sd));
+  return 0.7 + 0.6 * sample;
+};
+
+/**
+ * Learns which weekdays need quick meals from how long cooks started on each day take.
+ * With at least 8 cooks: a weekday is "quick" if its median cook is 40 minutes or less, or
+ * if it's a weekday (Mon–Fri) the household rarely cooks on. Otherwise Monday–Thursday.
+ * @param {Array<{weekday: number, minutes: number}>} sessions - Monday = 0
+ * @returns {Set<number>}
+ */
+export const learnQuickWeekdays = (sessions) => {
+  if (!sessions || sessions.length < 8) return new Set(DEFAULT_QUICK_WEEKDAYS);
+  const quick = new Set();
+  for (let day = 0; day < 7; day += 1) {
+    const durations = sessions.filter((s) => s.weekday === day).map((s) => s.minutes).sort((x, y) => x - y);
+    if (durations.length <= 1) {
+      if (day <= 4) quick.add(day);
+      continue;
+    }
+    const median = durations[Math.floor(durations.length / 2)];
+    if (median <= 40) quick.add(day);
+  }
+  return quick;
+};
+
 const isEligibleForMeal = (attrs, meal) => {
   if (attrs && !MAIN_COURSES.has(attrs.course) && !(meal === 'breakfast' && attrs.course === 'snack')) return false;
   if (attrs?.mealTypes?.length) return attrs.mealTypes.includes(meal);
@@ -74,6 +141,8 @@ const weeksText = (days) => {
  * @param {Map<string, string[]>} input.cookDates - recipeId → date keys of completed cooks
  * @param {Map<string, string>} input.lastPlanned - recipeId → latest date key it was planned before this week
  * @param {Map<string, Set<string>>} [input.excluded] - `date|meal` → recipe ids not to suggest there (swaps)
+ * @param {Map<string, {positive: number, negative: number}>} [input.preferences] - From buildPreferences
+ * @param {Set<number>} [input.quickWeekdays] - From learnQuickWeekdays (Monday = 0)
  * @param {() => number} [input.random] - Returns [0, 1); injectable for tests
  * @returns {{suggestions: Array<{date: string, meal: string, recipeId: string, reason: string}>, libraryNote: string|null}}
  */
@@ -85,6 +154,8 @@ export const planWeek = ({
   cookDates,
   lastPlanned,
   excluded = new Map(),
+  preferences = new Map(),
+  quickWeekdays = DEFAULT_QUICK_WEEKDAYS,
   random = Math.random,
 }) => {
   const chosen = filled
@@ -158,11 +229,11 @@ export const planWeek = ({
     score *= 0.75 ** cuisineCount;
 
     const weekday = weekdayIndex(slot.date);
-    const isWeeknight = weekday <= 3 && slot.meal !== 'breakfast';
-    if (attrs?.effort === 'project') score *= isWeeknight ? 0.4 : (weekday >= 5 ? 1.1 : 1);
-    if (attrs?.effort === 'quick' && isWeeknight) {
+    const isBusyDay = quickWeekdays.has(weekday) && slot.meal !== 'breakfast';
+    if (attrs?.effort === 'project') score *= isBusyDay ? 0.4 : (weekday >= 5 ? 1.1 : 1);
+    if (attrs?.effort === 'quick' && isBusyDay) {
       score *= 1.15;
-      reasons.push({ weight: 1, text: 'Quick for a weeknight' });
+      reasons.push({ weight: 1, text: 'Quick for a busy day' });
     }
 
     if (attrs?.method) {
@@ -187,11 +258,15 @@ export const planWeek = ({
       }
     }
 
+    const pref = preferences.get(p.recipe.id);
+    if (pref && pref.positive >= 2 && (1 + pref.positive) / (2 + pref.positive + pref.negative) >= 0.75) {
+      reasons.push({ weight: 1.5, text: 'A household favourite' });
+    }
     if (p.cookCount >= 3) reasons.push({ weight: 0.5, text: `A regular — made ${p.cookCount} times` });
     if (daysSince !== null && daysSince >= 14) reasons.push({ weight: 0.25, text: `Last made ${weeksText(daysSince)} ago` });
 
     if (relaxed) score *= 0.3;
-    score *= 0.85 + 0.3 * random();
+    score *= preferenceFactor(pref, random);
 
     const reason = reasons.sort((a, b) => b.weight - a.weight)[0]?.text ?? `Good for ${slot.meal}`;
     return { score, reason };

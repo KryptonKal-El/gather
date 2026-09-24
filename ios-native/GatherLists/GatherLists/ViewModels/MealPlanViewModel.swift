@@ -333,7 +333,11 @@ final class MealPlanViewModel {
                 cookedAt: cookedAt,
                 userId: userId
             )
+            let previous = entriesBySlot[Self.slotKey(dateKey, meal)]
             entriesBySlot[Self.slotKey(dateKey, meal)] = saved
+            if let previous, previous.isSuggested, let replaced = previous.recipeId, saved.recipeId != replaced {
+                recordFeedback([(replaced, .swapped)])
+            }
         } catch {
             self.error = "Couldn't save that meal. Try again."
             print("[MealPlanViewModel] Failed to save slot: \(error.localizedDescription)")
@@ -381,6 +385,7 @@ final class MealPlanViewModel {
         let lookbackStart = MealPlanWeek.shift(weekStart, byWeeks: -5)
         let dayBefore = MealPlanWeek.calendar.date(byAdding: .day, value: -1, to: weekStart) ?? weekStart
         let yearAgo = MealPlanWeek.calendar.date(byAdding: .year, value: -1, to: weekStart) ?? weekStart
+        let halfYearAgo = MealPlanWeek.calendar.date(byAdding: .month, value: -6, to: weekStart) ?? weekStart
 
         async let attributesResult = RecipeAttributeService.fetchAll()
         async let cooksResult = MealPlanService.fetchCookDates(since: yearAgo)
@@ -389,12 +394,25 @@ final class MealPlanViewModel {
             fromKey: MealPlanWeek.key(for: lookbackStart),
             toKey: MealPlanWeek.key(for: dayBefore)
         )
-        let (attributes, cooks, planned) = try await (attributesResult, cooksResult, plannedResult)
+        async let feedbackResult = MealPlanService.fetchFeedback(planId: planId, since: halfYearAgo)
+        let (attributes, cooks, planned, feedback) = try await (attributesResult, cooksResult, plannedResult, feedbackResult)
 
         var cookDates: [UUID: [String]] = [:]
         for cook in cooks { cookDates[cook.recipeId, default: []].append(MealPlanWeek.key(for: cook.completedAt)) }
         var lastPlanned: [UUID: String] = [:]
         for item in planned where (lastPlanned[item.recipeId] ?? "") < item.date { lastPlanned[item.recipeId] = item.date }
+
+        let preferences = MealPlanner.buildPreferences(
+            todayKey: MealPlanWeek.key(for: Date()),
+            cooks: cooks.map { ($0.recipeId, MealPlanWeek.key(for: $0.completedAt)) },
+            feedback: feedback.map { ($0.recipeId, $0.event, MealPlanWeek.key(for: $0.createdAt)) },
+            planned: planned
+        )
+        let calendar = MealPlanWeek.calendar
+        let quickWeekdays = MealPlanner.learnQuickWeekdays(cooks.map { cook in
+            let weekday = (calendar.component(.weekday, from: cook.startedAt) + 5) % 7
+            return (weekday, cook.completedAt.timeIntervalSince(cook.startedAt) / 60)
+        })
 
         let result = MealPlanner.planWeek(MealPlanner.Input(
             slots: slots,
@@ -403,13 +421,29 @@ final class MealPlanViewModel {
             attributes: Dictionary(attributes.map { ($0.recipeId, $0) }, uniquingKeysWith: { first, _ in first }),
             cookDates: cookDates,
             lastPlanned: lastPlanned,
-            excluded: excluded
+            excluded: excluded,
+            preferences: preferences,
+            quickWeekdays: quickWeekdays
         ))
         let titles = Dictionary(recipes.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
         let saved = try await MealPlanService.saveSuggestions(planId: planId, suggestions: result.suggestions, titles: titles, userId: userId)
         for entry in saved { entriesBySlot[Self.slotKey(entry.date, entry.meal)] = entry }
         libraryNote = result.libraryNote
         return saved.count
+    }
+
+    /// Records reactions to suggestions so the planner learns. Best-effort: the user's action
+    /// already succeeded, so a failure is only logged.
+    private func recordFeedback(_ events: [(recipeId: UUID, event: MealPlanner.FeedbackEvent)]) {
+        guard let planId = activePlanId, !events.isEmpty else { return }
+        let userId = userId
+        Task {
+            do {
+                try await MealPlanService.recordFeedback(planId: planId, events: events, userId: userId)
+            } catch {
+                print("[MealPlanViewModel] Failed to record feedback: \(error.localizedDescription)")
+            }
+        }
     }
 
     /// Fills every empty upcoming slot with a suggestion.
@@ -441,6 +475,7 @@ final class MealPlanViewModel {
         }
         do {
             try await MealPlanService.deleteEntries(ids: replaceable.map(\.id))
+            recordFeedback(replaceable.compactMap { entry in entry.recipeId.map { ($0, .regenerated) } })
             for entry in replaceable { entriesBySlot[Self.slotKey(entry.date, entry.meal)] = nil }
             let slots = upcomingSlots.filter { entriesBySlot[$0.key] == nil }
             _ = try await runPlanner(slots: slots, entries: entriesBySlot, excluded: excluded)
@@ -459,6 +494,7 @@ final class MealPlanViewModel {
         var others = entriesBySlot
         others[key] = nil
         error = nil
+        if let current = entriesBySlot[key]?.recipeId { recordFeedback([(current, .swapped)]) }
         do {
             let count = try await runPlanner(
                 slots: [MealPlanner.Slot(date: MealPlanWeek.key(for: day), meal: meal)],
@@ -479,7 +515,9 @@ final class MealPlanViewModel {
         entry.isLocked.toggle()
         entriesBySlot[key] = entry
         do {
-            entriesBySlot[key] = try await MealPlanService.setLocked(entryId: entry.id, isLocked: entry.isLocked)
+            let saved = try await MealPlanService.setLocked(entryId: entry.id, isLocked: entry.isLocked)
+            entriesBySlot[key] = saved
+            if saved.isLocked, let recipeId = saved.recipeId { recordFeedback([(recipeId, .kept)]) }
         } catch {
             entriesBySlot[key] = original
             self.error = "Couldn't update that meal."

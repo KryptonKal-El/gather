@@ -208,39 +208,76 @@ export const setMealPlanEntryLocked = async (entryId, isLocked) => {
 };
 
 /**
- * Fetches recipe slots planned in a date range (for the planner's recency signal).
+ * Fetches recipe slots planned in a date range (the planner's recency and "planned but not
+ * cooked" signals).
  * @param {string} planId
  * @param {string} fromKey
  * @param {string} toKey
- * @returns {Promise<Array<{recipeId: string, date: string}>>}
+ * @returns {Promise<Array<{recipeId: string, date: string, cooked: boolean}>>}
  */
 export const fetchPlannedRecipeDates = async (planId, fromKey, toKey) => {
   const { data, error } = await supabase
     .from('meal_plan_entries')
-    .select('recipe_id, date')
+    .select('recipe_id, date, cooked_at')
     .eq('meal_plan_id', planId)
     .eq('kind', 'recipe')
     .not('recipe_id', 'is', null)
     .gte('date', fromKey)
     .lte('date', toKey);
   if (error) fail('load recent plans', error);
-  return data.map((row) => ({ recipeId: row.recipe_id, date: row.date }));
+  return data.map((row) => ({ recipeId: row.recipe_id, date: row.date, cooked: Boolean(row.cooked_at) }));
 };
 
 /**
  * Fetches completed cook dates (local-agnostic `YYYY-MM-DD` of completed_at) since a date.
  * RLS limits rows to recipes the user can see.
  * @param {string} sinceIso
- * @returns {Promise<Array<{recipeId: string, date: string}>>}
+ * @returns {Promise<Array<{recipeId: string, date: string, startedAt: string, completedAt: string}>>}
  */
 export const fetchCookDates = async (sinceIso) => {
   const { data, error } = await supabase
     .from('cook_sessions')
-    .select('recipe_id, completed_at')
+    .select('recipe_id, started_at, completed_at')
     .not('completed_at', 'is', null)
     .gte('completed_at', sinceIso);
   if (error) fail('load cook history', error);
-  return data.map((row) => ({ recipeId: row.recipe_id, date: row.completed_at.slice(0, 10) }));
+  return data.map((row) => ({
+    recipeId: row.recipe_id,
+    date: row.completed_at.slice(0, 10),
+    startedAt: row.started_at,
+    completedAt: row.completed_at,
+  }));
+};
+
+/**
+ * Fetches the household's reactions to suggestions since a date.
+ * @param {string} planId
+ * @param {string} sinceIso
+ * @returns {Promise<Array<{recipeId: string, event: string, date: string}>>}
+ */
+export const fetchMealPlanFeedback = async (planId, sinceIso) => {
+  const { data, error } = await supabase
+    .from('meal_plan_feedback')
+    .select('recipe_id, event, created_at')
+    .eq('meal_plan_id', planId)
+    .gte('created_at', sinceIso);
+  if (error) fail('load plan history', error);
+  return data.map((row) => ({ recipeId: row.recipe_id, event: row.event, date: row.created_at.slice(0, 10) }));
+};
+
+/**
+ * Records reactions to suggestions (kept / swapped / regenerated). Best-effort: a failure is
+ * logged, never shown, because the user's action itself already succeeded.
+ * @param {string} planId
+ * @param {Array<{recipeId: string, event: 'kept'|'swapped'|'regenerated'}>} events
+ * @param {string} userId
+ */
+export const recordMealPlanFeedback = async (planId, events, userId) => {
+  if (events.length === 0) return;
+  const { error } = await supabase.from('meal_plan_feedback').insert(
+    events.map((e) => ({ meal_plan_id: planId, recipe_id: e.recipeId, event: e.event, created_by: userId })),
+  );
+  if (error) console.error('[recordMealPlanFeedback] Failed to record feedback:', error);
 };
 
 /**
