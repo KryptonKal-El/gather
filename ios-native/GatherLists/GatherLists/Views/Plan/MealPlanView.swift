@@ -138,7 +138,9 @@ struct MealPlanView: View {
             }
             .swipeActions(edge: .trailing) {
                 if entry != nil {
-                    Button(role: .destructive) {
+                    // Not role: .destructive — that makes List animate the row away, but the
+                    // slot stays (it just becomes empty), so the row would vanish until reload.
+                    Button {
                         Task { await viewModel.clearSlot(day: day, meal: meal) }
                     } label: {
                         Label("Clear", systemImage: "xmark.circle")
