@@ -154,8 +154,11 @@ export const RecipeSelector = ({
         ? sharedByCollection[selectedCollection.id] ?? []
         : recipesByCollection[selectedCollection.id] ?? [];
     } else {
+      // A recipe you created inside someone else's shared collection is both one of your
+      // recipes and one of that collection's, so de-duplicate by id.
       const shared = (sharedCollections ?? []).flatMap((sc) => sharedByCollection[sc.collectionId] ?? []);
-      result = [...(allRecipes ?? []), ...shared];
+      const seenIds = new Set();
+      result = [...(allRecipes ?? []), ...shared].filter((r) => !seenIds.has(r.id) && seenIds.add(r.id));
     }
     if (!query) return result;
     return result.filter((r) => {
