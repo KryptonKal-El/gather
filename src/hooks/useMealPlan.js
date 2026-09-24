@@ -92,6 +92,10 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const [libraryNote, setLibraryNote] = useState(null);
   // Recipes already swapped out of each slot this session, so Swap keeps moving forward.
   const swappedOutRef = useRef(new Map());
+  // This device's writes: how many have started and how many are still running. A week
+  // refetch that overlaps a write may predate it, so its result is dropped and the week
+  // reloads once the writes settle; otherwise a cleared meal could reappear locally.
+  const writesRef = useRef({ started: 0, inFlight: 0, needsReload: false });
 
   const activePlanIdRef = useRef(null);
   const weekStartRef = useRef(weekStart);
@@ -114,11 +118,40 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       return;
     }
     const range = weekDays(start);
-    const rows = await fetchMealPlanEntries(planId, toDateKey(range[0]), toDateKey(range[6]));
-    // Ignore a stale response if the user moved to another week or plan meanwhile.
-    if (planId !== activePlanIdRef.current || toDateKey(start) !== toDateKey(weekStartRef.current)) return;
-    setEntries(Object.fromEntries(rows.map((row) => [slotKey(row.date, row.meal), row])));
+    const writes = writesRef.current;
+    for (;;) {
+      const startedBefore = writes.started;
+      const wasWriting = writes.inFlight > 0;
+      const rows = await fetchMealPlanEntries(planId, toDateKey(range[0]), toDateKey(range[6]));
+      // Ignore a stale response if the user moved to another week or plan meanwhile.
+      if (planId !== activePlanIdRef.current || toDateKey(start) !== toDateKey(weekStartRef.current)) return;
+      if (!wasWriting && writes.started === startedBefore) {
+        setEntries(Object.fromEntries(rows.map((row) => [slotKey(row.date, row.meal), row])));
+        return;
+      }
+      if (writes.inFlight > 0) {
+        writes.needsReload = true;
+        return;
+      }
+    }
   }, []);
+
+  /** Runs a write to this plan so overlapping week refetches can't undo it locally. */
+  const trackWrite = useCallback(async (write) => {
+    const writes = writesRef.current;
+    writes.started += 1;
+    writes.inFlight += 1;
+    try {
+      return await write();
+    } finally {
+      writes.inFlight -= 1;
+      if (writes.inFlight === 0 && writes.needsReload) {
+        writes.needsReload = false;
+        loadWeek(activePlanIdRef.current, weekStartRef.current).catch((err) =>
+          console.error('[useMealPlan] Failed to refresh week:', err));
+      }
+    }
+  }, [loadWeek]);
 
   const loadCollaborators = useCallback(async (planId) => {
     if (!planId) return;
@@ -240,7 +273,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     const isRecipe = kind === 'recipe';
     setError(null);
     try {
-      const saved = await upsertMealPlanEntry({
+      const saved = await trackWrite(() => upsertMealPlanEntry({
         planId,
         date: dateKey,
         meal,
@@ -250,7 +283,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
         note: trimmedNote,
         cookedAt: isRecipe && existing?.recipeId === recipe.id ? existing.cookedAt : null,
         userId,
-      });
+      }));
       setEntries((prev) => ({ ...prev, [slotKey(dateKey, meal)]: saved }));
       if (existing?.source === 'suggested' && existing.recipeId && saved.recipeId !== existing.recipeId) {
         recordFeedback([{ recipeId: existing.recipeId, event: 'swapped' }]);
@@ -261,7 +294,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       setError("Couldn't save that meal. Try again.");
       return false;
     }
-  }, [entries, userId, recordFeedback]);
+  }, [entries, userId, recordFeedback, trackWrite]);
 
   const clearSlot = useCallback(async (dateKey, meal) => {
     const key = slotKey(dateKey, meal);
@@ -274,13 +307,13 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       return next;
     });
     try {
-      await deleteMealPlanEntry(existing.id);
+      await trackWrite(() => deleteMealPlanEntry(existing.id));
     } catch (err) {
       console.error('[useMealPlan] Failed to clear slot:', err);
       setEntries((prev) => ({ ...prev, [key]: existing }));
       setError("Couldn't clear that meal. Try again.");
     }
-  }, [entries]);
+  }, [entries, trackWrite]);
 
   const setMealEnabled = useCallback(async (meal, enabled) => {
     if (!activePlan) return;
@@ -371,11 +404,11 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     const planId = activePlanIdRef.current;
     const context = await loadPlannerContext(planId);
     const result = planWeek({ slots, filled, recipes, excluded, ...context });
-    const saved = await saveSuggestedEntries(
+    const saved = await trackWrite(() => saveSuggestedEntries(
       planId,
       result.suggestions.map((s) => ({ ...s, title: recipesById.get(s.recipeId)?.name ?? null })),
       userId,
-    );
+    ));
     setEntries((prev) => {
       const next = { ...prev };
       for (const entry of saved) next[slotKey(entry.date, entry.meal)] = entry;
@@ -383,7 +416,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     });
     setLibraryNote(result.libraryNote);
     return saved.length;
-  }, [loadPlannerContext, recipes, recipesById, userId]);
+  }, [loadPlannerContext, recipes, recipesById, userId, trackWrite]);
 
   const filledSlots = (entryMap) => Object.values(entryMap)
     .map((e) => ({ date: e.date, meal: e.meal, recipeId: e.kind === 'recipe' ? e.recipeId : null }));
@@ -421,7 +454,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       const excluded = new Map(replaceable.map((e) => [slotKey(e.date, e.meal), new Set([e.recipeId])]));
       const remaining = { ...entries };
       for (const e of replaceable) delete remaining[slotKey(e.date, e.meal)];
-      await deleteMealPlanEntries(replaceable.map((e) => e.id));
+      await trackWrite(() => deleteMealPlanEntries(replaceable.map((e) => e.id)));
       recordFeedback(replaceable.map((e) => ({ recipeId: e.recipeId, event: 'regenerated' })));
       setEntries(remaining);
       const slots = upcomingSlots().filter((slot) => !remaining[slotKey(slot.date, slot.meal)]);
@@ -432,7 +465,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     } finally {
       setIsPlanning(false);
     }
-  }, [entries, upcomingSlots, runPlanner, recordFeedback]);
+  }, [entries, upcomingSlots, runPlanner, recordFeedback, trackWrite]);
 
   /** Replaces one slot with the next-best suggestion, never repeating one already swapped out. */
   const swapSlot = useCallback(async (dateKey, meal) => {
@@ -464,7 +497,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     if (!entry) return;
     setEntries((prev) => ({ ...prev, [key]: { ...entry, isLocked: !entry.isLocked } }));
     try {
-      const saved = await setMealPlanEntryLocked(entry.id, !entry.isLocked);
+      const saved = await trackWrite(() => setMealPlanEntryLocked(entry.id, !entry.isLocked));
       setEntries((prev) => ({ ...prev, [key]: saved }));
       if (saved.isLocked && saved.recipeId) recordFeedback([{ recipeId: saved.recipeId, event: 'kept' }]);
     } catch (err) {
@@ -472,7 +505,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       setEntries((prev) => ({ ...prev, [key]: entry }));
       setError("Couldn't update that meal.");
     }
-  }, [entries, recordFeedback]);
+  }, [entries, recordFeedback, trackWrite]);
 
   const hasReplaceableSuggestions = Object.values(entries)
     .some((e) => e.source === 'suggested' && !e.isLocked && e.date >= toDateKey(new Date()));
