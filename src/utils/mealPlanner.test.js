@@ -232,3 +232,22 @@ describe('learnQuickWeekdays', () => {
     expect(quick.has(5)).toBe(false);
   });
 });
+
+describe('week note adjustments', () => {
+  const recipes = ['a', 'b', 'c'].map((id) => recipe(id, { cookCount: 1, lastCookedAt: '2026-06-01' }));
+
+  it('boosts recipes from the note and explains why', () => {
+    const input = baseInput(recipes, {}, {
+      slots: [{ date: WEEK[5], meal: 'dinner' }],
+      boosts: new Map([['c', { factor: 2, reason: 'Uses up your spinach' }]]),
+    });
+    expect(planWeek(input).suggestions[0]).toEqual(expect.objectContaining({ recipeId: 'c', reason: 'Uses up your spinach' }));
+  });
+
+  it('never suggests avoided recipes, even when short of options', () => {
+    const input = baseInput(recipes, {}, { avoided: new Set(['a', 'b']) });
+    const ids = planWeek(input).suggestions.map((s) => s.recipeId);
+    expect(ids.every((id) => id === 'c')).toBe(true);
+  });
+});
+

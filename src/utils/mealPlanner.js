@@ -143,6 +143,9 @@ const weeksText = (days) => {
  * @param {Map<string, Set<string>>} [input.excluded] - `date|meal` → recipe ids not to suggest there (swaps)
  * @param {Map<string, {positive: number, negative: number}>} [input.preferences] - From buildPreferences
  * @param {Set<number>} [input.quickWeekdays] - From learnQuickWeekdays (Monday = 0)
+ * @param {Map<string, {factor: number, reason: string}>} [input.boosts] - Per-recipe nudges from a
+ *   week note (e.g. "use up the spinach"); the reason wins over the planner's own
+ * @param {Set<string>} [input.avoided] - Recipes never to suggest this time (e.g. "no pork this week")
  * @param {() => number} [input.random] - Returns [0, 1); injectable for tests
  * @returns {{suggestions: Array<{date: string, meal: string, recipeId: string, reason: string}>, libraryNote: string|null}}
  */
@@ -156,6 +159,8 @@ export const planWeek = ({
   excluded = new Map(),
   preferences = new Map(),
   quickWeekdays = DEFAULT_QUICK_WEEKDAYS,
+  boosts = new Map(),
+  avoided = new Set(),
   random = Math.random,
 }) => {
   const chosen = filled
@@ -189,7 +194,7 @@ export const planWeek = ({
     const { attrs } = p;
     if (!isEligibleForMeal(attrs, slot.meal)) return null;
     const blocked = excluded.get(`${slot.date}|${slot.meal}`);
-    if (blocked?.has(p.recipe.id)) return null;
+    if (blocked?.has(p.recipe.id) || avoided.has(p.recipe.id)) return null;
 
     const weekChosen = chosen.map((c) => ({ ...c, p: profile.get(c.recipeId) })).filter((c) => c.p);
     const alreadyThisWeek = weekChosen.some((c) => c.recipeId === p.recipe.id);
@@ -264,6 +269,12 @@ export const planWeek = ({
     }
     if (p.cookCount >= 3) reasons.push({ weight: 0.5, text: `A regular — made ${p.cookCount} times` });
     if (daysSince !== null && daysSince >= 14) reasons.push({ weight: 0.25, text: `Last made ${weeksText(daysSince)} ago` });
+
+    const boost = boosts.get(p.recipe.id);
+    if (boost) {
+      score *= boost.factor;
+      reasons.push({ weight: 3.5, text: boost.reason });
+    }
 
     if (relaxed) score *= 0.3;
     score *= preferenceFactor(pref, random);

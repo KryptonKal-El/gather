@@ -42,6 +42,10 @@ enum MealPlanner {
         var preferences: [UUID: Preference] = [:]
         /// Weekdays that need quick meals (Monday = 0), from `learnQuickWeekdays`.
         var quickWeekdays: Set<Int> = MealPlanner.defaultQuickWeekdays
+        /// Per-recipe nudges from a week note; the reason wins over the planner's own.
+        var boosts: [UUID: (factor: Double, reason: String)] = [:]
+        /// Recipes never to suggest this time.
+        var avoided: Set<UUID> = []
         var random: () -> Double = { Double.random(in: 0..<1) }
     }
 
@@ -224,7 +228,7 @@ enum MealPlanner {
         func score(_ p: Profile, _ slot: Slot, relaxed: Bool) -> (score: Double, reason: String)? {
             let attrs = p.attrs
             guard isEligible(attrs, for: slot.meal) else { return nil }
-            if input.excluded[slot.key]?.contains(p.recipe.id) == true { return nil }
+            if input.excluded[slot.key]?.contains(p.recipe.id) == true || input.avoided.contains(p.recipe.id) { return nil }
 
             let weekChosen = chosen.compactMap { c -> (Filled, Profile)? in
                 guard let id = c.recipeId, let profile = profiles[id] else { return nil }
@@ -304,6 +308,11 @@ enum MealPlanner {
             }
             if p.cookCount >= 3 { reasons.append(Reason(weight: 0.5, text: "A regular — made \(p.cookCount) times")) }
             if let daysSince, daysSince >= 14 { reasons.append(Reason(weight: 0.25, text: "Last made \(weeksText(daysSince)) ago")) }
+
+            if let boost = input.boosts[p.recipe.id] {
+                value *= boost.factor
+                reasons.append(Reason(weight: 3.5, text: boost.reason))
+            }
 
             if relaxed { value *= 0.3 }
             value *= preferenceFactor(pref, random: input.random)

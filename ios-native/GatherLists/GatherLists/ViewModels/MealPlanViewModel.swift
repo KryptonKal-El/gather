@@ -380,7 +380,13 @@ final class MealPlanViewModel {
     }
 
     /// Runs the planner for `slots` and saves the result as suggested slots. Returns how many were saved.
-    private func runPlanner(slots: [MealPlanner.Slot], entries: [String: MealPlanEntry], excluded: [String: Set<UUID>]) async throws -> Int {
+    private func runPlanner(
+        slots: [MealPlanner.Slot],
+        entries: [String: MealPlanEntry],
+        excluded: [String: Set<UUID>],
+        brief: WeekBrief? = nil,
+        note: String? = nil
+    ) async throws -> Int {
         guard let planId = activePlanId else { return 0 }
         let lookbackStart = MealPlanWeek.shift(weekStart, byWeeks: -5)
         let dayBefore = MealPlanWeek.calendar.date(byAdding: .day, value: -1, to: weekStart) ?? weekStart
@@ -409,24 +415,47 @@ final class MealPlanViewModel {
             planned: planned
         )
         let calendar = MealPlanWeek.calendar
-        let quickWeekdays = MealPlanner.learnQuickWeekdays(cooks.map { cook in
+        var quickWeekdays = MealPlanner.learnQuickWeekdays(cooks.map { cook in
             let weekday = (calendar.component(.weekday, from: cook.startedAt) + 5) % 7
             return (weekday, cook.completedAt.timeIntervalSince(cook.startedAt) / 60)
         })
+        let attributesById = Dictionary(attributes.map { ($0.recipeId, $0) }, uniquingKeysWith: { first, _ in first })
+        var boosts: [UUID: (factor: Double, reason: String)] = [:]
+        var avoided: Set<UUID> = []
+        if let brief {
+            let adjustments = try await briefAdjustments(brief, attributes: attributesById)
+            boosts = adjustments.boosts
+            avoided = adjustments.avoided
+            quickWeekdays.formUnion(adjustments.quickWeekdays)
+        }
 
         let result = MealPlanner.planWeek(MealPlanner.Input(
             slots: slots,
             filled: filled(from: entries),
             recipes: recipes,
-            attributes: Dictionary(attributes.map { ($0.recipeId, $0) }, uniquingKeysWith: { first, _ in first }),
+            attributes: attributesById,
             cookDates: cookDates,
             lastPlanned: lastPlanned,
             excluded: excluded,
             preferences: preferences,
-            quickWeekdays: quickWeekdays
+            quickWeekdays: quickWeekdays,
+            boosts: boosts,
+            avoided: avoided
         ))
         let titles = Dictionary(recipes.map { ($0.id, $0.name) }, uniquingKeysWith: { first, _ in first })
-        let saved = try await MealPlanService.saveSuggestions(planId: planId, suggestions: result.suggestions, titles: titles, userId: userId)
+        var suggestions = result.suggestions
+        if let note, !suggestions.isEmpty {
+            let meals = suggestions.map { suggestion -> (title: String, slot: String, reason: String) in
+                let day = MealPlanWeek.date(fromKey: suggestion.date)?.formatted(.dateTime.weekday(.wide)) ?? suggestion.date
+                return (titles[suggestion.recipeId] ?? "", "\(day) \(suggestion.meal.rawValue)", suggestion.reason)
+            }
+            if let friendlier = await WeekBriefService.friendlierReasons(note: note, meals: meals) {
+                suggestions = zip(suggestions, friendlier).map {
+                    MealPlanner.Suggestion(date: $0.date, meal: $0.meal, recipeId: $0.recipeId, reason: $1)
+                }
+            }
+        }
+        let saved = try await MealPlanService.saveSuggestions(planId: planId, suggestions: suggestions, titles: titles, userId: userId)
         for entry in saved { entriesBySlot[Self.slotKey(entry.date, entry.meal)] = entry }
         libraryNote = result.libraryNote
         return saved.count
@@ -446,18 +475,89 @@ final class MealPlanViewModel {
         }
     }
 
+    /// Turns the switched-on parts of a week note into planner inputs: recipes to nudge (with the
+    /// reason shown), recipes to leave out, and extra quick days.
+    private func briefAdjustments(
+        _ brief: WeekBrief,
+        attributes: [UUID: RecipeAttributes]
+    ) async throws -> (boosts: [UUID: (factor: Double, reason: String)], avoided: Set<UUID>, quickWeekdays: Set<Int>) {
+        let useUp = brief.useUp.filter(\.isOn).map(\.text)
+        let avoid = brief.avoid.filter(\.isOn).map(\.text)
+        let cuisines = Set(brief.cuisines.filter(\.isOn).map(\.text))
+
+        var ingredientsByRecipe: [UUID: [String]] = [:]
+        if !useUp.isEmpty || !avoid.isEmpty {
+            let ingredients = try await RecipeService.fetchIngredients(recipeIds: recipes.map(\.id))
+            for ingredient in ingredients {
+                ingredientsByRecipe[ingredient.recipeId, default: []].append(ingredient.name.lowercased())
+            }
+        }
+        func mentions(_ recipe: Recipe, _ term: String) -> Bool {
+            recipe.name.lowercased().contains(term)
+                || (ingredientsByRecipe[recipe.id] ?? []).contains { $0.contains(term) }
+        }
+
+        var boosts: [UUID: (factor: Double, reason: String)] = [:]
+        var avoided: Set<UUID> = []
+        for recipe in recipes {
+            let attrs = attributes[recipe.id]
+            if avoid.contains(where: { term in mentions(recipe, term) || attrs?.protein == term || attrs?.proteinValue?.label.lowercased() == term }) {
+                avoided.insert(recipe.id)
+                continue
+            }
+            if let term = useUp.first(where: { mentions(recipe, $0) }) {
+                boosts[recipe.id] = (1.5, "Uses up your \(term)")
+            } else if let cuisine = attrs?.cuisineValue?.label, cuisines.contains(cuisine) {
+                boosts[recipe.id] = (1.3, "You're in the mood for \(cuisine)")
+            }
+        }
+
+        var quick = Set(brief.dayNotes.filter { $0.isOn && $0.plan == .quick }.map(\.weekday))
+        if brief.lightWeek { quick.formUnion(0..<7) }
+        return (boosts, avoided, quick)
+    }
+
     /// Fills every empty upcoming slot with a suggestion.
     func planMyWeek() async {
+        await planMyWeek(brief: nil, note: nil)
+    }
+
+    /// Plans the week using a note the household wrote about it: marks the days they're out or
+    /// having leftovers, then fills the rest with suggestions shaped by the note.
+    func planMyWeek(brief: WeekBrief?, note: String?) async {
         isPlanning = true
         error = nil
         defer { isPlanning = false }
+        if let brief { await applyDayNotes(brief) }
         let slots = upcomingSlots.filter { entriesBySlot[$0.key] == nil }
         guard !slots.isEmpty else { return }
         do {
-            _ = try await runPlanner(slots: slots, entries: entriesBySlot, excluded: [:])
+            _ = try await runPlanner(slots: slots, entries: entriesBySlot, excluded: [:], brief: brief, note: note)
         } catch {
             self.error = "Couldn't plan the week. Try again."
             print("[MealPlanViewModel] Failed to plan: \(error.localizedDescription)")
+        }
+    }
+
+    /// Marks empty upcoming slots the note says are eating out, leftovers or skipped. Slots that
+    /// already hold something are left as they are.
+    private func applyDayNotes(_ brief: WeekBrief) async {
+        let todayKey = MealPlanWeek.key(for: Date())
+        let weekDays = days
+        for note in brief.dayNotes where note.isOn && note.plan != .quick && weekDays.indices.contains(note.weekday) {
+            let day = weekDays[note.weekday]
+            guard MealPlanWeek.key(for: day) >= todayKey else { continue }
+            let kind: MealEntryKind
+            switch note.plan {
+            case .eatingOut: kind = .eatingOut
+            case .leftovers: kind = .leftovers
+            case .skip: kind = .skip
+            case .quick: continue
+            }
+            let meals = note.meal.map { [$0] } ?? enabledMeals
+            for meal in meals where enabledMeals.contains(meal) && entry(for: day, meal: meal) == nil {
+                await setMarker(kind, title: nil, day: day, meal: meal, note: nil)
+            }
         }
     }
 

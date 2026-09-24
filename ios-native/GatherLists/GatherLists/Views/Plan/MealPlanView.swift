@@ -20,6 +20,7 @@ struct MealPlanView: View {
     @State private var weekIngredients: [(name: String, quantity: String?, amount: Double?, unit: String?)] = []
     @State private var isPreparingList = false
     @State private var showLeaveConfirm = false
+    @State private var showDescribeWeek = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -41,6 +42,11 @@ struct MealPlanView: View {
         .onAppear(perform: initializeViewModelsIfNeeded)
         .sheet(item: $editingSlot) { slot in
             slotSheet(slot)
+        }
+        .sheet(isPresented: $showDescribeWeek) {
+            if let viewModel {
+                DescribeWeekSheet(viewModel: viewModel)
+            }
         }
         .sheet(isPresented: $showShareSheet) {
             if let viewModel {
@@ -73,7 +79,7 @@ struct MealPlanView: View {
             Section {
                 WeekSwitcherView(viewModel: viewModel)
                     .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-                PlanBarView(viewModel: viewModel)
+                PlanBarView(viewModel: viewModel, onDescribe: { showDescribeWeek = true })
                 if let note = viewModel.libraryNote {
                     Label(note, systemImage: "info.circle")
                         .font(.quicksand(.subheadline))
@@ -353,8 +359,25 @@ private struct WeekSwitcherView: View {
 
 private struct PlanBarView: View {
     let viewModel: MealPlanViewModel
+    var onDescribe: () -> Void
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            buttons
+            // Only where the on-device model can read the note; elsewhere planning works as before.
+            if WeekBriefService.isAvailable {
+                Button(action: onDescribe) {
+                    Label("Describe your week", systemImage: "text.bubble")
+                        .font(.quicksand(.subheadline, weight: .semibold))
+                        .foregroundStyle(Color.brandGreen)
+                }
+                .disabled(viewModel.isPlanning || viewModel.activePlan == nil)
+            }
+        }
+        .buttonStyle(.borderless)
+    }
+
+    private var buttons: some View {
         HStack(spacing: 10) {
             Button {
                 Task { await viewModel.planMyWeek() }

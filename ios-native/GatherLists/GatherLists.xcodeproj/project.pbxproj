@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		WEEKBRIEFSVC000000000002 /* WeekBriefService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */; };
+		DESCRIBEWEEKSHEET0000002 /* DescribeWeekSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */; };
 		MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANNERSVC0000000001 /* MealPlanner.swift */; };
 		RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */; };
 		RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */; };
@@ -197,6 +199,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekBriefService.swift; sourceTree = "<group>"; };
+		DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescribeWeekSheet.swift; sourceTree = "<group>"; };
 		MEALPLANNERSVC0000000001 /* MealPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanner.swift; sourceTree = "<group>"; };
 		RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributes.swift; sourceTree = "<group>"; };
 		RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributeService.swift; sourceTree = "<group>"; };
@@ -474,6 +478,7 @@
 		A1B2C3D4E5F6A7B8C9D0E212 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */,
 				MEALPLANNERSVC0000000001 /* MealPlanner.swift */,
 				RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */,
 				RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */,
@@ -563,6 +568,7 @@
 		MEALPLANGROUP00000000001 /* Plan */ = {
 			isa = PBXGroup;
 			children = (
+				DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */,
 				MEALPLANVIEW000000000001 /* MealPlanView.swift */,
 				MEALSLOTROW0000000000001 /* MealSlotRow.swift */,
 				MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */,
@@ -935,6 +941,8 @@
 				COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */,
 				COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */,
+				WEEKBRIEFSVC000000000002 /* WeekBriefService.swift in Sources */,
+				DESCRIBEWEEKSHEET0000002 /* DescribeWeekSheet.swift in Sources */,
 				MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */,
 				RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */,
 				RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */,
