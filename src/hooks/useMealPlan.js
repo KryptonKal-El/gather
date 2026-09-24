@@ -66,10 +66,20 @@ const chooseActivePlan = (plans, currentId, userId) => {
 /**
  * State and actions for the Plan tab: the active shared meal plan, the visible week's
  * slots, plannable recipes, sharing, and building the week's shopping ingredients.
+ *
+ * Nothing loads (and no plan is created) until the Plan tab is first opened for the signed-in
+ * user; after that the plan stays loaded and live for the rest of the visit, matching iOS.
  * @param {string|null} userId
  * @param {string|null} userEmail
+ * @param {boolean} isOpen - Whether the Plan tab is currently showing
  */
-export const useMealPlan = (userId, userEmail) => {
+export const useMealPlan = (userId, userEmail, isOpen) => {
+  const [openedForUserId, setOpenedForUserId] = useState(null);
+  if (isOpen && userId && openedForUserId !== userId) {
+    setOpenedForUserId(userId);
+  }
+  const isActive = Boolean(userId) && openedForUserId === userId;
+
   const [plans, setPlans] = useState([]);
   const [activePlanId, setActivePlanId] = useState(null);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
@@ -138,7 +148,7 @@ export const useMealPlan = (userId, userEmail) => {
   }, [userId]);
 
   const loadAll = useCallback(async () => {
-    if (!userId) return;
+    if (!isActive) return;
     setIsLoading(true);
     setError(null);
     try {
@@ -155,14 +165,14 @@ export const useMealPlan = (userId, userEmail) => {
     } finally {
       setIsLoading(false);
     }
-  }, [userId, loadPlans, loadWeek, loadCollaborators]);
+  }, [isActive, loadPlans, loadWeek, loadCollaborators]);
 
   useEffect(() => {
     loadAll();
   }, [loadAll]);
 
   useEffect(() => {
-    if (!userId) return undefined;
+    if (!isActive) return undefined;
     return subscribeMealPlans(userId, {
       onEntries: () => {
         loadWeek(activePlanIdRef.current, weekStartRef.current).catch((err) =>
@@ -178,7 +188,7 @@ export const useMealPlan = (userId, userEmail) => {
         }
       },
     });
-  }, [userId, loadPlans, loadWeek, loadCollaborators]);
+  }, [isActive, userId, loadPlans, loadWeek, loadCollaborators]);
 
   const changeWeek = useCallback(async (nextStart) => {
     setWeekStart(nextStart);

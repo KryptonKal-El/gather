@@ -60,7 +60,6 @@ export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const { state: recipeState, actions: recipeActions } = useRecipes();
-  const { state: mealPlanState, actions: mealPlanActions } = useMealPlan(user?.id ?? null, user?.email ?? null);
   const [isSharingMealPlan, setIsSharingMealPlan] = useState(false);
   const { effectiveSortConfig, updateListSort } = useSortPreferences();
   const { pushUndo } = useUndo();
@@ -101,6 +100,8 @@ export const App = () => {
       return 'lists';
     }
   });
+  const isPlanTabOpen = isMobile ? activeTab === 'plan' : desktopView === 'plan';
+  const { state: mealPlanState, actions: mealPlanActions } = useMealPlan(user?.id ?? null, user?.email ?? null, isPlanTabOpen);
   // Persist the desktop tab to the same key the mobile nav uses, so the chosen
   // section (Lists/Recipes/Plan) is restored on the next reload.
   const handleDesktopViewChange = useCallback((view) => {
