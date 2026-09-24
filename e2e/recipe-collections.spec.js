@@ -101,6 +101,13 @@ test.describe.serial('Recipe collections', () => {
     await expect(recipeCard).toContainText('1 ingredients');
   });
 
+  test('lists the recipe once in the All grid', async () => {
+    await page.locator('[class*="_chip_"]').filter({ hasText: /^All$/ }).click();
+    await expect(page.locator('[class*="_chipActive_"]').filter({ hasText: 'All' })).toBeVisible();
+    await expect(page.getByRole('button', { name: `Options for ${RECIPE_NAME}` })).toHaveCount(1);
+    await collectionChip().click();
+  });
+
   test('deletes the test recipe', async () => {
     await page.getByRole('button', { name: `Options for ${RECIPE_NAME}` }).click();
 
