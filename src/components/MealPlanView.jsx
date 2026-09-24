@@ -21,6 +21,23 @@ const LockIcon = ({ isLocked }) => (
 
 LockIcon.propTypes = { isLocked: PropTypes.bool.isRequired };
 
+// SVG rather than ‹ › ⋯ characters: font glyphs sit off-centre in their line box.
+const Chevron = ({ direction }) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={direction === 'left' ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
+  </svg>
+);
+
+Chevron.propTypes = { direction: PropTypes.oneOf(['left', 'right']).isRequired };
+
+const MoreIcon = () => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+    <circle cx="5" cy="12" r="2" />
+    <circle cx="12" cy="12" r="2" />
+    <circle cx="19" cy="12" r="2" />
+  </svg>
+);
+
 const formatRange = (days) => {
   const fmt = { month: 'short', day: 'numeric' };
   return `${days[0].toLocaleDateString(undefined, fmt)} – ${days[6].toLocaleDateString(undefined, fmt)}`;
@@ -72,7 +89,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
       <div className={styles.toolbar}>
         <div className={styles.weekSwitcher}>
           <button type="button" className={styles.navBtn} onClick={() => actions.goToWeek(-1)} aria-label="Previous week">
-            ‹
+            <Chevron direction="left" />
           </button>
           <div className={styles.weekLabel}>
             <span className={styles.range}>{formatRange(state.days)}</span>
@@ -85,7 +102,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
             )}
           </div>
           <button type="button" className={styles.navBtn} onClick={() => actions.goToWeek(1)} aria-label="Next week">
-            ›
+            <Chevron direction="right" />
           </button>
         </div>
 
@@ -104,7 +121,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
               aria-expanded={isMenuOpen}
               aria-label="Plan options"
             >
-              {isPreparingList ? '…' : '⋯'}
+              {isPreparingList ? '…' : <MoreIcon />}
             </button>
             {isMenuOpen && (
               <div className={styles.menu} role="menu">

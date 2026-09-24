@@ -23,6 +23,10 @@
   width: 36px;
   height: 36px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border: 1px solid var(--border-default);
   border-radius: 50%;
   background: var(--bg-card);
@@ -87,6 +91,10 @@
 .menuBtn {
   width: 36px;
   height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   border: 1px solid var(--border-default);
   border-radius: 50%;
   background: var(--bg-card);
