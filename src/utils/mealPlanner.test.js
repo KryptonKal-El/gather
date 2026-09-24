@@ -251,3 +251,14 @@ describe('week note adjustments', () => {
   });
 });
 
+describe('small libraries', () => {
+  it('spreads unavoidable repeats across recipes instead of piling onto one', () => {
+    const recipes = ['a', 'b', 'c'].map((id) => recipe(id, { cookCount: 1, lastCookedAt: '2026-06-01' }));
+    const slots = WEEK.flatMap((date) => [{ date, meal: 'lunch' }, { date, meal: 'dinner' }]);
+    const { suggestions } = planWeek(baseInput(recipes, {}, { slots }));
+    const counts = suggestions.reduce((acc, s) => ({ ...acc, [s.recipeId]: (acc[s.recipeId] ?? 0) + 1 }), {});
+    expect(suggestions).toHaveLength(14);
+    expect(Math.max(...Object.values(counts)) - Math.min(...Object.values(counts))).toBeLessThanOrEqual(2);
+  });
+});
+

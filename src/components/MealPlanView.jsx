@@ -12,6 +12,15 @@ import styles from './MealPlanView.module.css';
 
 const KIND_ICONS = Object.fromEntries(ENTRY_KINDS.map((k) => [k.id, k.icon]));
 
+const LockIcon = ({ isLocked }) => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill={isLocked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="4" y="11" width="16" height="10" rx="2" />
+    <path d={isLocked ? 'M8 11V7a4 4 0 0 1 8 0v4' : 'M8 11V7a4 4 0 0 1 7.5-1.9'} fill="none" />
+  </svg>
+);
+
+LockIcon.propTypes = { isLocked: PropTypes.bool.isRequired };
+
 const formatRange = (days) => {
   const fmt = { month: 'short', day: 'numeric' };
   return `${days[0].toLocaleDateString(undefined, fmt)} – ${days[6].toLocaleDateString(undefined, fmt)}`;
@@ -221,6 +230,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                           type="button"
                           className={`${styles.slot} ${entry?.kind === 'skip' ? styles.slotSkipped : ''}`}
                           onClick={() => setEditing({ day, dateKey, meal })}
+                          aria-label={`${meal.label}: ${entry ? entryDisplayTitle(entry) : 'add a meal'}`}
                         >
                           {recipe?.imageUrl ? (
                             <img className={styles.thumb} src={recipe.imageUrl} alt="" />
@@ -251,7 +261,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                               aria-label={entry.isLocked ? `Unlock ${meal.label}` : `Keep ${meal.label}`}
                               title={entry.isLocked ? 'Kept — Regenerate leaves it' : 'Keep this when regenerating'}
                             >
-                              {entry.isLocked ? '🔒' : '🔓'}
+                              <LockIcon isLocked={entry.isLocked} />
                             </button>
                             {!entry.isLocked && (
                               <button

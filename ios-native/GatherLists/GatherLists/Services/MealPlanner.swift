@@ -314,7 +314,10 @@ enum MealPlanner {
                 reasons.append(Reason(weight: 3.5, text: boost.reason))
             }
 
-            if relaxed { value *= 0.3 }
+            // In the fallback pass, spread unavoidable repeats instead of piling onto one recipe.
+            if relaxed {
+                value *= 0.3 * pow(0.4, Double(weekChosen.filter { $0.0.recipeId == p.recipe.id }.count))
+            }
             value *= preferenceFactor(pref, random: input.random)
 
             let reason = reasons.max { $0.weight < $1.weight }?.text ?? "Good for \(slot.meal.rawValue)"

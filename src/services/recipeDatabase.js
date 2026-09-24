@@ -373,6 +373,7 @@ export const subscribeRecipeDetail = (recipeId, callback) => {
         ingredientCount: recipe.ingredient_count,
         stepCount: recipe.step_count,
         ownerId: recipe.owner_id,
+        collectionId: recipe.collection_id,
         createdAt: recipe.created_at,
         updatedAt: recipe.updated_at,
         ingredients: ingredients.map((row) => ({

@@ -276,7 +276,8 @@ export const planWeek = ({
       reasons.push({ weight: 3.5, text: boost.reason });
     }
 
-    if (relaxed) score *= 0.3;
+    // In the fallback pass, spread unavoidable repeats instead of piling onto one recipe.
+    if (relaxed) score *= 0.3 * 0.4 ** weekChosen.filter((c) => c.recipeId === p.recipe.id).length;
     score *= preferenceFactor(pref, random);
 
     const reason = reasons.sort((a, b) => b.weight - a.weight)[0]?.text ?? `Good for ${slot.meal}`;
