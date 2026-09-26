@@ -160,6 +160,11 @@ struct RecipeFormSheet: View {
             Button("Choose from Library") {
                 showingPhotoPicker = true
             }
+            if UIPasteboard.general.hasImages {
+                Button("Paste Image") {
+                    pasteImageFromClipboard()
+                }
+            }
             Button("Paste Image URL") {
                 showingUrlInput = true
             }
@@ -323,7 +328,17 @@ struct RecipeFormSheet: View {
         imageSource = .none
         showingUrlInput = false
     }
-    
+
+    /// Uses the most recent image on the clipboard as the recipe photo.
+    private func pasteImageFromClipboard() {
+        guard let image = UIPasteboard.general.image,
+              let data = image.jpegData(compressionQuality: 0.9) else { return }
+        imageData = data
+        imageSource = .file
+        imageUrlString = ""
+        showingUrlInput = false
+    }
+
     // MARK: - Sections
     
     @ViewBuilder

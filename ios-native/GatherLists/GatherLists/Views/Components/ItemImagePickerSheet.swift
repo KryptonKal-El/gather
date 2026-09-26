@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UniformTypeIdentifiers
 
 /// Sheet for selecting or uploading an image for a shopping list item.
 /// When an image exists, shows view-only mode with large preview and remove button.
@@ -289,6 +290,20 @@ struct ItemImagePickerSheet: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+
+                // Paste an image straight from the clipboard. PasteButton auto-disables
+                // when the clipboard holds no image and needs no paste permission prompt.
+                PasteButton(supportedContentTypes: [.image]) { providers in
+                    guard let provider = providers.first,
+                          provider.canLoadObject(ofClass: UIImage.self) else { return }
+                    provider.loadObject(ofClass: UIImage.self) { object, _ in
+                        guard let image = object as? UIImage,
+                              let data = image.jpegData(compressionQuality: 0.9) else { return }
+                        Task { @MainActor in handleImageData(data) }
+                    }
+                }
+                .buttonStyle(.bordered)
+                .frame(maxWidth: .infinity)
             }
         }
     }
