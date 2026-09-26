@@ -11,6 +11,7 @@ struct ListDetailView: View {
     
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.undoManager) private var undoManager
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(ToastController.self) private var toastController
     
     @State private var detailViewModel: ListDetailViewModel?
@@ -621,6 +622,9 @@ struct ListDetailView: View {
         .buttonStyle(.plain)
         .textCase(nil)
         .listRowInsets(EdgeInsets())
+        // Pinned headers slide under the nav bar and inherit its forced-dark
+        // toolbarColorScheme; keep them on the screen's actual scheme.
+        .environment(\.colorScheme, colorScheme)
     }
     
     // MARK: - Group Helpers
@@ -1235,6 +1239,7 @@ struct ListDetailView: View {
                 .buttonStyle(.plain)
                 .textCase(nil)
                 .listRowInsets(EdgeInsets())
+                .environment(\.colorScheme, colorScheme)
             }
         }
     }
