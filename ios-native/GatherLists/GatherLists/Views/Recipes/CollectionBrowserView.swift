@@ -87,26 +87,43 @@ struct CollectionBrowserView: View {
         viewModel?.collections.contains(where: { $0.id == recipe.collectionId }) ?? false
     }
 
-    /// The cards currently in the grid: the selected collection's recipes, or
-    /// every recipe (owned + loaded shared) for "All" — filtered by the search
-    /// query against recipe and collection names.
+    /// The cards for the selected collection, filtered by the search query and
+    /// ordered by that collection's sort preference. Only used when a collection
+    /// chip is active; the "All" view groups by collection instead (see
+    /// `groupedRecipes`).
     private var displayedRecipes: [Recipe] {
-        guard let vm = viewModel else { return [] }
-        var result: [Recipe]
-        if let selected = selectedCollection {
-            result = recipes(in: selected)
-        } else {
-            let shared = vm.sharedCollections.flatMap { sharedRecipesByCollection[$0.id] ?? [] }
-            result = vm.recipes + shared
-        }
-        let query = vm.searchQuery.lowercased()
+        guard let selected = selectedCollection else { return [] }
+        var result = recipes(in: selected)
+        let query = viewModel?.searchQuery.lowercased() ?? ""
         if !query.isEmpty {
             result = result.filter { recipe in
                 recipe.name.lowercased().contains(query) ||
-                (collection(for: recipe)?.name.lowercased().contains(query) ?? false)
+                selected.name.lowercased().contains(query)
             }
         }
-        return sortOption(for: selectedCollectionId).sorted(result)
+        return sortOption(for: selected.id).sorted(result)
+    }
+
+    /// The "All" view, grouped by collection: each collection (owned + shared)
+    /// that has matching recipes becomes a section, the groups ordered
+    /// alphabetically by collection name, and the recipes inside each group
+    /// ordered by that collection's own sort preference. Filtered by the search
+    /// query against recipe names and the collection name.
+    private var groupedRecipes: [(collection: RecipeCollection, recipes: [Recipe])] {
+        guard let vm = viewModel else { return [] }
+        let query = vm.searchQuery.lowercased()
+        let collections = vm.allCollections.sorted {
+            $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+        }
+        return collections.compactMap { collection in
+            var items = recipes(in: collection)
+            if !query.isEmpty {
+                let collectionMatches = collection.name.lowercased().contains(query)
+                items = items.filter { $0.name.lowercased().contains(query) || collectionMatches }
+            }
+            guard !items.isEmpty else { return nil }
+            return (collection, sortOption(for: collection.id).sorted(items))
+        }
     }
 
     private var defaultCollectionName: String {
@@ -253,21 +270,28 @@ struct CollectionBrowserView: View {
                 if let selected = selectedCollection {
                     collectionHeaderCard(selected)
                         .padding(.horizontal, 16)
-                }
 
-                if let selected = selectedCollection, loadingSharedIds.contains(selected.id),
-                   sharedRecipesByCollection[selected.id] == nil {
-                    HStack { Spacer(); ProgressView(); Spacer() }
-                        .padding(.vertical, 32)
-                } else if displayedRecipes.isEmpty {
-                    gridEmptyState(vm: vm)
+                    if loadingSharedIds.contains(selected.id), sharedRecipesByCollection[selected.id] == nil {
+                        HStack { Spacer(); ProgressView(); Spacer() }
+                            .padding(.vertical, 32)
+                    } else if displayedRecipes.isEmpty {
+                        gridEmptyState(vm: vm)
+                    } else {
+                        recipeGrid(displayedRecipes)
+                    }
                 } else {
-                    LazyVGrid(columns: gridColumns, spacing: 14) {
-                        ForEach(displayedRecipes) { recipe in
-                            recipeCardLink(recipe)
+                    // "All": group every collection's recipes under its own header,
+                    // groups ordered A–Z, each group in its collection's sort order.
+                    let groups = groupedRecipes
+                    if groups.isEmpty {
+                        gridEmptyState(vm: vm)
+                    } else {
+                        ForEach(groups, id: \.collection.id) { group in
+                            collectionHeaderCard(group.collection)
+                                .padding(.horizontal, 16)
+                            recipeGrid(group.recipes)
                         }
                     }
-                    .padding(.horizontal, 16)
                 }
             }
             .padding(.vertical, 8)
@@ -416,6 +440,16 @@ struct CollectionBrowserView: View {
     // MARK: - Recipe cards
 
     @ViewBuilder
+    private func recipeGrid(_ recipes: [Recipe]) -> some View {
+        LazyVGrid(columns: gridColumns, spacing: 14) {
+            ForEach(recipes) { recipe in
+                recipeCardLink(recipe)
+            }
+        }
+        .padding(.horizontal, 16)
+    }
+
+    @ViewBuilder
     private func recipeCardLink(_ recipe: Recipe) -> some View {
         NavigationLink(value: recipe) {
             recipeCard(recipe)
@@ -449,16 +483,6 @@ struct CollectionBrowserView: View {
                 .frame(height: 104)
                 .frame(maxWidth: .infinity)
                 .clipped()
-
-                // Collection marker, shown in the "All" view where the grid mixes collections.
-                if selectedCollectionId == nil, let collection = collection(for: recipe) {
-                    Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
-                        .font(.quicksand(.caption))
-                        .padding(.horizontal, 7)
-                        .padding(.vertical, 2)
-                        .background(.thinMaterial, in: Capsule())
-                        .padding(8)
-                }
             }
             .overlay(alignment: .topTrailing) {
                 if let collaborators = viewModel?.collaboratorsByCollectionId[recipe.collectionId], !collaborators.isEmpty {
