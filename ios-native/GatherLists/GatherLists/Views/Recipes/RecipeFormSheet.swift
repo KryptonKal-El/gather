@@ -69,6 +69,7 @@ struct RecipeFormSheet: View {
         prefillName: String = "",
         prefillIngredients: [(name: String, quantity: String)] = [],
         prefillSteps: [String] = [],
+        prefillImageUrl: String = "",
         saveButtonTitle: String = "Save",
         onComplete: (() -> Void)? = nil,
         showCollectionPicker: Bool = false
@@ -112,6 +113,9 @@ struct RecipeFormSheet: View {
         if let existingUrl = editRecipe?.imageUrl, !existingUrl.isEmpty {
             _imageUrlString = State(initialValue: existingUrl)
             _imageSource = State(initialValue: .url)
+        } else if !prefillImageUrl.isEmpty {
+            _imageUrlString = State(initialValue: prefillImageUrl)
+            _imageSource = State(initialValue: .url)
         }
     }
     
@@ -143,14 +147,23 @@ struct RecipeFormSheet: View {
             }
             .overlay {
                 if isSaving {
-                    Color.black.opacity(0.2)
-                        .ignoresSafeArea()
-                        .overlay {
+                    ZStack {
+                        Color.black.opacity(0.35).ignoresSafeArea()
+                        VStack(spacing: 14) {
                             ProgressView()
-                                .scaleEffect(1.2)
+                                .controlSize(.large)
+                                .tint(.white)
+                            Text(saveButtonTitle == "Import" ? "Importing…" : "Saving…")
+                                .font(.quicksand(.subheadline, weight: .medium))
+                                .foregroundStyle(.white)
                         }
+                        .padding(28)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
+                    }
+                    .transition(.opacity)
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: isSaving)
         }
         .interactiveDismissDisabled(isSaving)
         .confirmationDialog("Add Photo", isPresented: $showingImageMenu, titleVisibility: .visible) {

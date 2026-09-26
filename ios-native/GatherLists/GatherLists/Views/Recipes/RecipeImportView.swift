@@ -44,14 +44,17 @@ struct RecipeImportView: View {
             .disabled(isParsing)
 
             if isParsing {
-                Color.black.opacity(0.2).ignoresSafeArea()
-                VStack(spacing: 12) {
+                Color.black.opacity(0.35).ignoresSafeArea()
+                VStack(spacing: 14) {
                     ProgressView()
-                        .scaleEffect(1.2)
+                        .controlSize(.large)
+                        .tint(.white)
                     Text("Reading your recipe…")
-                        .font(.quicksand(.subheadline))
-                        .foregroundStyle(.secondary)
+                        .font(.quicksand(.subheadline, weight: .medium))
+                        .foregroundStyle(.white)
                 }
+                .padding(28)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18))
             }
         }
         .navigationTitle("Import from Text")

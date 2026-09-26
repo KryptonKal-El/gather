@@ -32,6 +32,7 @@ struct CollectionBrowserView: View {
     @State private var pendingCreateCollectionId: UUID?
     @State private var showScratchForm = false
     @State private var showImport = false
+    @State private var showUrlImport = false
     @State private var showSearch = false
 
     // Recipe card actions
@@ -161,16 +162,27 @@ struct CollectionBrowserView: View {
                         }
                     } label: {
                         Image(systemName: "plus")
+                            .foregroundStyle(Color.brandGreen)
                     }
+                    // The app-wide brand-green tint renders menu text too low-contrast
+                    // to read; force standard high-contrast label text in the popup.
+                    .tint(.primary)
                 }
             }
-            .confirmationDialog("New Recipe", isPresented: $showMethodChooser, titleVisibility: .visible) {
-                Button("Start from Scratch") { beginCreate { showScratchForm = true } }
-                if RecipeTextParseService.isAvailable {
-                    Button("Import from Text") { beginCreate { showImport = true } }
-                }
-                Button("Search Online") { showSearch = true }
-                Button("Cancel", role: .cancel) {}
+            .background {
+                // Hidden anchor so the method chooser inherits a readable tint
+                // instead of the brand-green that made its options hard to see.
+                Color.clear
+                    .tint(.primary)
+                    .confirmationDialog("New Recipe", isPresented: $showMethodChooser, titleVisibility: .visible) {
+                        Button("Start from Scratch") { beginCreate { showScratchForm = true } }
+                        if RecipeTextParseService.isAvailable {
+                            Button("Import from Text") { beginCreate { showImport = true } }
+                        }
+                        Button("Import from URL") { beginCreate { showUrlImport = true } }
+                        Button("Search Online") { showSearch = true }
+                        Button("Cancel", role: .cancel) {}
+                    }
             }
             .navigationDestination(for: Recipe.self) { recipe in
                 if let vm = viewModel {
@@ -179,6 +191,9 @@ struct CollectionBrowserView: View {
             }
             .navigationDestination(isPresented: $showImport) {
                 if let vm = viewModel { RecipeImportView(viewModel: vm) }
+            }
+            .navigationDestination(isPresented: $showUrlImport) {
+                if let vm = viewModel { RecipeUrlImportView(viewModel: vm) }
             }
             .navigationDestination(isPresented: $showSearch) {
                 if let vm = viewModel {
@@ -252,6 +267,9 @@ struct CollectionBrowserView: View {
             validateSelection()
         }
         .onChange(of: showImport) { _, isShowing in
+            if !isShowing { reloadSharedRecipesIfNeeded(viewModel?.activeCollectionId) }
+        }
+        .onChange(of: showUrlImport) { _, isShowing in
             if !isShowing { reloadSharedRecipesIfNeeded(viewModel?.activeCollectionId) }
         }
         .onChange(of: showSearch) { _, isShowing in

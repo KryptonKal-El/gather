@@ -130,6 +130,84 @@ enum RecipeParseError: Error {
     case failed
 }
 
+/// A recipe fetched and parsed from a web page by the import-recipe-url function.
+struct ImportedRecipe {
+    let name: String
+    let ingredients: [(quantity: String, name: String)]
+    let steps: [String]
+    let imageUrl: String?
+}
+
+/// Why a URL recipe import failed, mapped to a friendly message for the user.
+enum RecipeUrlImportError: Error {
+    case invalidUrl
+    case noRecipeFound
+    case network
+}
+
+/// Client for the import-recipe-url Supabase edge function, which fetches a
+/// recipe web page and extracts its schema.org/Recipe data server-side.
+struct RecipeUrlImportService {
+    private struct Payload: Decodable {
+        let name: String
+        let imageUrl: String
+        let ingredients: [String]
+        let steps: [String]
+    }
+
+    /// Fetches and parses the recipe at `urlString`. Throws `RecipeUrlImportError`
+    /// for a bad URL, a page with no detectable recipe, or a network failure.
+    @MainActor
+    static func importRecipe(from urlString: String) async throws -> ImportedRecipe {
+        let manager = SupabaseManager.shared
+        let baseURL = manager.supabaseURL.absoluteString
+        let anonKey = manager.anonKey
+        let trimmed = urlString.trimmed
+
+        guard !trimmed.isEmpty, URL(string: trimmed) != nil,
+              let endpoint = URL(string: "\(baseURL)/functions/v1/import-recipe-url") else {
+            throw RecipeUrlImportError.invalidUrl
+        }
+
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: ["url": trimmed])
+        request.timeoutInterval = 20
+
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse else { throw RecipeUrlImportError.network }
+            guard (200...299).contains(http.statusCode) else {
+                switch http.statusCode {
+                case 422: throw RecipeUrlImportError.noRecipeFound
+                case 400: throw RecipeUrlImportError.invalidUrl
+                default: throw RecipeUrlImportError.network
+                }
+            }
+            let payload = try JSONDecoder().decode(Payload.self, from: data)
+            let ingredients = payload.ingredients
+                .map { (quantity: "", name: $0.trimmed) }
+                .filter { !$0.name.isEmpty }
+            let steps = payload.steps.map(\.trimmed).filter { !$0.isEmpty }
+            guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeUrlImportError.noRecipeFound }
+            let image = payload.imageUrl.trimmed
+            return ImportedRecipe(
+                name: payload.name.trimmed,
+                ingredients: ingredients,
+                steps: steps,
+                imageUrl: image.isEmpty ? nil : image
+            )
+        } catch let error as RecipeUrlImportError {
+            throw error
+        } catch {
+            print("[RecipeUrlImportService] Import failed: \(error.localizedDescription)")
+            throw RecipeUrlImportError.network
+        }
+    }
+}
+
 /// Turns pasted recipe text into structured ingredients (with quantities) and
 /// ordered steps using Apple's on-device language model. Nothing leaves the
 /// device. Callers must hide the import option when `isAvailable` is false.
@@ -189,7 +267,7 @@ struct RecipeTextParseService {
             )
             let recipe = response.content
             let ingredients = recipe.ingredients
-                .map { (quantity: $0.quantity.trimmed, name: $0.name.trimmed) }
+                .map { (quantity: $0.quantity.trimmed, name: $0.name.trimmed.capitalizedFirstLetter) }
                 .filter { !$0.name.isEmpty }
             let steps = recipe.steps.map(\.trimmed).filter { !$0.isEmpty }
             guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeParseError.failed }
@@ -249,4 +327,11 @@ private struct GeneratedIngredient {
 
 private extension String {
     var trimmed: String { trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    /// Uppercases only the first character, leaving the rest untouched so names
+    /// like "all-purpose flour" become "All-purpose flour", not "All-Purpose Flour".
+    var capitalizedFirstLetter: String {
+        guard let first else { return self }
+        return first.uppercased() + dropFirst()
+    }
 }
