@@ -36,9 +36,8 @@ struct RecipeImportView: View {
                 }
 
                 Section("Recipe text") {
-                    TextEditor(text: $text)
+                    ScrollingTextEditor(text: $text)
                         .frame(minHeight: 220)
-                        .textInputAutocapitalization(.sentences)
                 }
             }
             .scrollDismissesKeyboard(.interactively)
@@ -105,6 +104,65 @@ struct RecipeImportView: View {
             errorMessage = "That's too much text to read on this device. Trim it down to just the ingredients and steps, then try again."
         } catch {
             errorMessage = "We couldn't find a recipe in that text. Check it and try again."
+        }
+    }
+}
+
+/// A multiline text editor backed by UITextView that keeps the caret visible
+/// while typing. SwiftUI's `TextEditor` fails to auto-scroll to the cursor when
+/// embedded in a `Form`, so a long recipe would leave the current line hidden
+/// below the visible area.
+private struct ScrollingTextEditor: UIViewRepresentable {
+    @Binding var text: String
+
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        textView.delegate = context.coordinator
+        textView.font = .preferredFont(forTextStyle: .body)
+        textView.adjustsFontForContentSizeCategory = true
+        textView.autocapitalizationType = .sentences
+        textView.backgroundColor = .clear
+        textView.isScrollEnabled = true
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
+        textView.textContainer.lineFragmentPadding = 0
+        return textView
+    }
+
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        if uiView.text != text {
+            uiView.text = text
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(text: $text)
+    }
+
+    final class Coordinator: NSObject, UITextViewDelegate {
+        private let text: Binding<String>
+
+        init(text: Binding<String>) {
+            self.text = text
+        }
+
+        func textViewDidChange(_ textView: UITextView) {
+            text.wrappedValue = textView.text
+            scrollCaretToVisible(textView)
+        }
+
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            scrollCaretToVisible(textView)
+        }
+
+        /// Keeps the caret in view; deferred so it runs after the text view has
+        /// laid out the change.
+        private func scrollCaretToVisible(_ textView: UITextView) {
+            guard let range = textView.selectedTextRange else { return }
+            let caretRect = textView.caretRect(for: range.end)
+            guard caretRect.origin.y.isFinite else { return }
+            DispatchQueue.main.async {
+                textView.scrollRectToVisible(caretRect, animated: false)
+            }
         }
     }
 }
