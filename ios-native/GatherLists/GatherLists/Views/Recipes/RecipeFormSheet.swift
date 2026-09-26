@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import UIKit
+import UniformTypeIdentifiers
 
 /// A dual-mode sheet for creating or editing a recipe with name, description, ingredients, steps, and image.
 struct RecipeFormSheet: View {
@@ -173,7 +174,7 @@ struct RecipeFormSheet: View {
             Button("Choose from Library") {
                 showingPhotoPicker = true
             }
-            if UIPasteboard.general.hasImages {
+            if clipboardHasImage {
                 Button("Paste Image") {
                     pasteImageFromClipboard()
                 }
@@ -342,14 +343,37 @@ struct RecipeFormSheet: View {
         showingUrlInput = false
     }
 
+    /// Whether the clipboard holds an image. `UIPasteboard.hasImages` misses
+    /// formats absent from its fixed type list (e.g. WebP), so also check for
+    /// any pasteboard type that conforms to `public.image`.
+    private var clipboardHasImage: Bool {
+        let pasteboard = UIPasteboard.general
+        if pasteboard.hasImages { return true }
+        return pasteboard.types.contains { UTType($0)?.conforms(to: .image) == true }
+    }
+
     /// Uses the most recent image on the clipboard as the recipe photo.
     private func pasteImageFromClipboard() {
-        guard let image = UIPasteboard.general.image,
+        guard let image = clipboardImage(),
               let data = image.jpegData(compressionQuality: 0.9) else { return }
         imageData = data
         imageSource = .file
         imageUrlString = ""
         showingUrlInput = false
+    }
+
+    /// Reads an image from the clipboard, falling back to decoding raw data for
+    /// formats `UIPasteboard.image` doesn't recognize (e.g. WebP). `UIImage(data:)`
+    /// decodes WebP via ImageIO on modern iOS.
+    private func clipboardImage() -> UIImage? {
+        let pasteboard = UIPasteboard.general
+        if let image = pasteboard.image { return image }
+        for type in pasteboard.types where UTType(type)?.conforms(to: .image) == true {
+            if let data = pasteboard.data(forPasteboardType: type), let image = UIImage(data: data) {
+                return image
+            }
+        }
+        return nil
     }
 
     // MARK: - Sections

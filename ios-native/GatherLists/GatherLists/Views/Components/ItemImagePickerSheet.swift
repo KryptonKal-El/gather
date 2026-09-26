@@ -294,13 +294,8 @@ struct ItemImagePickerSheet: View {
                 // Paste an image straight from the clipboard. PasteButton auto-disables
                 // when the clipboard holds no image and needs no paste permission prompt.
                 PasteButton(supportedContentTypes: [.image]) { providers in
-                    guard let provider = providers.first,
-                          provider.canLoadObject(ofClass: UIImage.self) else { return }
-                    provider.loadObject(ofClass: UIImage.self) { object, _ in
-                        guard let image = object as? UIImage,
-                              let data = image.jpegData(compressionQuality: 0.9) else { return }
-                        Task { @MainActor in handleImageData(data) }
-                    }
+                    guard let provider = providers.first else { return }
+                    loadPastedImage(from: provider)
                 }
                 .buttonStyle(.bordered)
                 .frame(maxWidth: .infinity)
@@ -333,6 +328,26 @@ struct ItemImagePickerSheet: View {
         }
     }
     
+    /// Loads a pasted image from the provider. It reads the concrete image
+    /// type's raw data and decodes it with `UIImage(data:)`, which handles
+    /// formats such as WebP that `UIImage`'s NSItemProvider reader doesn't list
+    /// (so `loadObject(ofClass: UIImage.self)` would silently fail on them).
+    private func loadPastedImage(from provider: NSItemProvider) {
+        if let imageType = provider.registeredContentTypes(conformingTo: .image).first {
+            provider.loadDataRepresentation(for: imageType) { data, _ in
+                guard let data, let image = UIImage(data: data),
+                      let jpeg = image.jpegData(compressionQuality: 0.9) else { return }
+                Task { @MainActor in handleImageData(jpeg) }
+            }
+        } else if provider.canLoadObject(ofClass: UIImage.self) {
+            provider.loadObject(ofClass: UIImage.self) { object, _ in
+                guard let image = object as? UIImage,
+                      let jpeg = image.jpegData(compressionQuality: 0.9) else { return }
+                Task { @MainActor in handleImageData(jpeg) }
+            }
+        }
+    }
+
     private func handleImageData(_ data: Data) {
         errorMessage = nil
         isUploading = true
