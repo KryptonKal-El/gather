@@ -19,6 +19,10 @@ struct CollectionBrowserView: View {
     @State private var selectedCollectionId: UUID?
     @State private var didInitSelection = false
 
+    // Per-collection sort preference, backed by UserDefaults. Mutating the map
+    // re-renders the grid; the "All" view is always alphabetical.
+    @State private var sortByCollection: [UUID: RecipeSortOption] = [:]
+
     // Shared-collection recipes, fetched eagerly so "All" really shows everything.
     @State private var sharedRecipesByCollection: [UUID: [Recipe]] = [:]
     @State private var loadingSharedIds: Set<UUID> = []
@@ -41,6 +45,7 @@ struct CollectionBrowserView: View {
     @State private var showMoveSheet = false
 
     private static let selectedKey = "gather.recipeSelectedCollection"
+    private static let sortKeyPrefix = "gather.recipeSort."
 
     private let gridColumns = [
         GridItem(.flexible(), spacing: 14),
@@ -95,11 +100,13 @@ struct CollectionBrowserView: View {
             result = vm.recipes + shared
         }
         let query = vm.searchQuery.lowercased()
-        guard !query.isEmpty else { return result }
-        return result.filter { recipe in
-            recipe.name.lowercased().contains(query) ||
-            (collection(for: recipe)?.name.lowercased().contains(query) ?? false)
+        if !query.isEmpty {
+            result = result.filter { recipe in
+                recipe.name.lowercased().contains(query) ||
+                (collection(for: recipe)?.name.lowercased().contains(query) ?? false)
+            }
         }
+        return sortOption(for: selectedCollectionId).sorted(result)
     }
 
     private var defaultCollectionName: String {
@@ -332,6 +339,16 @@ struct CollectionBrowserView: View {
 
     @ViewBuilder
     private func collectionMenuItems(_ collection: RecipeCollection) -> some View {
+        Menu {
+            Picker("Sort By", selection: sortBinding(for: collection.id)) {
+                ForEach(RecipeSortOption.allCases) { option in
+                    Label(option.label, systemImage: option.systemImage).tag(option)
+                }
+            }
+        } label: {
+            Label("Sort By", systemImage: "arrow.up.arrow.down")
+        }
+        Divider()
         if isShared(collection) {
             Button(role: .destructive) {
                 leaveCollection(collection)
@@ -593,6 +610,32 @@ struct CollectionBrowserView: View {
                 Task { await loadSharedRecipes(collectionId: collectionId) }
             }
         }
+    }
+
+    // MARK: - Sort
+
+    /// The active sort for a collection (or the alphabetical default for "All"),
+    /// reading the in-memory map first and falling back to the persisted value.
+    private func sortOption(for collectionId: UUID?) -> RecipeSortOption {
+        guard let collectionId else { return .default }
+        if let cached = sortByCollection[collectionId] { return cached }
+        if let raw = UserDefaults.standard.string(forKey: Self.sortKeyPrefix + collectionId.uuidString),
+           let option = RecipeSortOption(rawValue: raw) {
+            return option
+        }
+        return .default
+    }
+
+    private func setSortOption(_ option: RecipeSortOption, for collectionId: UUID) {
+        sortByCollection[collectionId] = option
+        UserDefaults.standard.set(option.rawValue, forKey: Self.sortKeyPrefix + collectionId.uuidString)
+    }
+
+    private func sortBinding(for collectionId: UUID) -> Binding<RecipeSortOption> {
+        Binding(
+            get: { sortOption(for: collectionId) },
+            set: { setSortOption($0, for: collectionId) }
+        )
     }
 
     private func initSelectionIfNeeded() {
