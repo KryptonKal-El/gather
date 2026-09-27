@@ -110,12 +110,15 @@ struct RecipeService {
     
     // MARK: - Recipe Operations
     
-    /// Fetches all recipes for a user, ordered by created_at descending.
+    /// Fetches every recipe the user can see, ordered by created_at descending.
+    /// No owner filter: RLS returns recipes they own plus recipes in collections
+    /// they own or that are shared with them, so a collection owner also sees
+    /// recipes a collaborator added to their collection. `userId` is retained
+    /// for call-site symmetry with the other fetches.
     static func fetchRecipes(userId: UUID) async throws -> [Recipe] {
         let recipes: [Recipe] = try await client
             .from("recipes")
             .select()
-            .eq("owner_id", value: userId)
             .order("created_at", ascending: false)
             .execute()
             .value

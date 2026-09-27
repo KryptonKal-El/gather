@@ -53,30 +53,19 @@ struct CookModeView: View {
                             .foregroundStyle(.primary)
                     }
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        Button(role: .destructive) {
-                            showDiscardConfirm = true
-                        } label: {
-                            Label("Discard Cook", systemImage: "trash")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis")
-                    }
-                }
             }
             .confirmationDialog(
-                "Discard this cook?",
+                "Cancel this cook?",
                 isPresented: $showDiscardConfirm,
                 titleVisibility: .visible
             ) {
-                Button("Discard", role: .destructive) {
+                Button("Cancel Cooking", role: .destructive) {
                     Task {
                         await cookViewModel.cancelCook()
                         dismiss()
                     }
                 }
-                Button("Cancel", role: .cancel) {}
+                Button("Keep Cooking", role: .cancel) {}
             } message: {
                 Text("This cook won't be recorded in the recipe's history.")
             }
@@ -127,18 +116,21 @@ struct CookModeView: View {
             }
 
             bottomBar {
-                Button {
-                    showIngredientPhase = false
-                } label: {
-                    Text(gatheredIngredients.count == ingredients.count
-                         ? "Begin Cooking"
-                         : "Begin Cooking (\(gatheredIngredients.count)/\(ingredients.count) gathered)")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.brandGreen)
-                        .foregroundStyle(.white)
-                        .fontWeight(.semibold)
-                        .cornerRadius(14)
+                VStack(spacing: 10) {
+                    Button {
+                        showIngredientPhase = false
+                    } label: {
+                        Text(gatheredIngredients.count == ingredients.count
+                             ? "Begin Cooking"
+                             : "Begin Cooking (\(gatheredIngredients.count)/\(ingredients.count) gathered)")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(Color.brandGreen)
+                            .foregroundStyle(.white)
+                            .fontWeight(.semibold)
+                            .cornerRadius(14)
+                    }
+                    cancelCookingButton
                 }
             }
         }
@@ -181,38 +173,41 @@ struct CookModeView: View {
             }
 
             bottomBar {
-                HStack(spacing: 12) {
-                    if currentStepIndex > 0 {
+                VStack(spacing: 10) {
+                    HStack(spacing: 12) {
+                        if currentStepIndex > 0 {
+                            Button {
+                                goToStep(currentStepIndex - 1)
+                            } label: {
+                                Image(systemName: "chevron.left")
+                                    .font(.quicksand(.title3))
+                                    .fontWeight(.semibold)
+                                    .padding(.vertical, 16)
+                                    .padding(.horizontal, 20)
+                                    .background(Color(.systemGray5))
+                                    .foregroundStyle(.primary)
+                                    .cornerRadius(14)
+                            }
+                        }
+
                         Button {
-                            goToStep(currentStepIndex - 1)
+                            Task { await cookViewModel.setStepCompleted(step, completed: true) }
+                            if currentStepIndex < steps.count - 1 {
+                                goToStep(currentStepIndex + 1)
+                            } else {
+                                showFinishScreen = true
+                            }
                         } label: {
-                            Image(systemName: "chevron.left")
-                                .font(.quicksand(.title3))
-                                .fontWeight(.semibold)
+                            Text(currentStepIndex < steps.count - 1 ? "Next Step" : "All Steps Done")
+                                .frame(maxWidth: .infinity)
                                 .padding(.vertical, 16)
-                                .padding(.horizontal, 20)
-                                .background(Color(.systemGray5))
-                                .foregroundStyle(.primary)
+                                .background(Color.brandGreen)
+                                .foregroundStyle(.white)
+                                .fontWeight(.semibold)
                                 .cornerRadius(14)
                         }
                     }
-
-                    Button {
-                        Task { await cookViewModel.setStepCompleted(step, completed: true) }
-                        if currentStepIndex < steps.count - 1 {
-                            goToStep(currentStepIndex + 1)
-                        } else {
-                            showFinishScreen = true
-                        }
-                    } label: {
-                        Text(currentStepIndex < steps.count - 1 ? "Next Step" : "All Steps Done")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(Color.brandGreen)
-                            .foregroundStyle(.white)
-                            .fontWeight(.semibold)
-                            .cornerRadius(14)
-                    }
+                    cancelCookingButton
                 }
             }
         }
@@ -272,6 +267,20 @@ struct CookModeView: View {
     }
 
     // MARK: - Helpers
+
+    /// Visible "Cancel Cooking" affordance shown while cooking, so a cook can be
+    /// ended part-way without completing every step. Confirms before discarding.
+    private var cancelCookingButton: some View {
+        Button(role: .destructive) {
+            showDiscardConfirm = true
+        } label: {
+            Text("Cancel Cooking")
+                .font(.quicksand(.subheadline, weight: .medium))
+                .foregroundStyle(.red)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+        }
+    }
 
     @ViewBuilder
     private func bottomBar<Content: View>(@ViewBuilder content: () -> Content) -> some View {

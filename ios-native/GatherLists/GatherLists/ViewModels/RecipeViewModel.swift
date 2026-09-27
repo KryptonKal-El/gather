@@ -115,8 +115,11 @@ final class RecipeViewModel {
             recipes = recipesResult
             isShowingCachedData = false
             cachedAt = nil
-            RecipeAutoTagger.shared.run(recipes: recipesResult, userId: userId)
-            
+            // Only auto-tag recipes the user owns; the fetch now also returns
+            // collaborators' recipes in shared/owned collections, which the user
+            // can't write to.
+            RecipeAutoTagger.shared.run(recipes: recipesResult.filter { $0.ownerId == userId }, userId: userId)
+
             if activeCollectionId == nil {
                 activeCollectionId = defaultCollection.id
             }
@@ -223,8 +226,8 @@ final class RecipeViewModel {
             collections = ownedResult
             sharedCollections = sharedResult
             recipes = recipesResult
-            RecipeAutoTagger.shared.run(recipes: recipesResult, userId: userId)
-            
+            RecipeAutoTagger.shared.run(recipes: recipesResult.filter { $0.ownerId == userId }, userId: userId)
+
             if let activeId = activeCollectionId, !allCollections.contains(where: { $0.id == activeId }) {
                 activeCollectionId = collections.first?.id
             }
@@ -447,6 +450,8 @@ final class RecipeViewModel {
     
     // MARK: - Image Actions
     
+    /// Uploads the image to storage, persists its URL to the recipe row, and
+    /// updates in-memory state so the grid/detail reflect it without a refetch.
     func uploadRecipeImage(recipeId: UUID, imageData: Data, fileExtension: String) async throws {
         error = nil
         do {
@@ -456,6 +461,7 @@ final class RecipeViewModel {
                 imageData: imageData,
                 fileExtension: fileExtension
             )
+            try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: imageUrl)
             if let index = recipes.firstIndex(where: { $0.id == recipeId }) {
                 recipes[index].imageUrl = imageUrl
             }

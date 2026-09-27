@@ -11,6 +11,9 @@ final class NotificationService: NSObject {
     
     /// List ID from a tapped notification, consumed by ListBrowserView for deep linking.
     var pendingListId: UUID?
+
+    /// Recipe ID from a tapped cook Live Activity, consumed by CollectionBrowserView for deep linking.
+    var pendingRecipeId: UUID?
     
     private var client: SupabaseClient { SupabaseManager.shared.client }
     

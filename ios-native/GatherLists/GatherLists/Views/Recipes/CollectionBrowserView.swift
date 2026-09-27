@@ -7,7 +7,13 @@ import SwiftUI
 /// actions. A single "+" adds a recipe (via a method chooser) or a collection.
 struct CollectionBrowserView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(NotificationService.self) private var notificationService
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel: RecipeViewModel?
+
+    // Programmatic navigation, used to deep-link into a recipe from the cook Live Activity.
+    @State private var navigationPath = NavigationPath()
+    @State private var pendingRecipeDeepLinkId: UUID?
 
     @State private var showCreateCollectionSheet = false
     @State private var collectionToDelete: RecipeCollection?
@@ -132,7 +138,7 @@ struct CollectionBrowserView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             Group {
                 if let vm = viewModel {
                     if vm.isLoading && hasNoCollections {
@@ -258,6 +264,22 @@ struct CollectionBrowserView: View {
         .onAppear {
             initializeViewModelIfNeeded()
             initSelectionIfNeeded()
+            handlePendingRecipeDeepLink()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            // Foreground refresh so recipes a collaborator added to a collection
+            // the user owns/shares show up without a manual pull-to-refresh.
+            if newPhase == .active {
+                Task { await viewModel?.refresh() }
+                Task { await loadAllSharedRecipes() }
+            }
+        }
+        .onChange(of: notificationService.pendingRecipeId) { _, recipeId in
+            guard recipeId != nil else { return }
+            handlePendingRecipeDeepLink()
+        }
+        .onChange(of: viewModel?.recipes.count ?? 0) { _, _ in
+            if pendingRecipeDeepLinkId != nil { handlePendingRecipeDeepLink() }
         }
         .onChange(of: viewModel?.sharedCollections.count ?? 0) { _, _ in
             Task { await loadAllSharedRecipes() }
@@ -793,5 +815,38 @@ struct CollectionBrowserView: View {
         guard viewModel == nil else { return }
         guard let user = authViewModel.currentUser else { return }
         viewModel = RecipeViewModel(userId: user.id, userEmail: user.email ?? "")
+    }
+
+    // MARK: - Recipe deep link (cook Live Activity tap)
+
+    /// Consumes a pending recipe deep link (from tapping the cook Live Activity)
+    /// and navigates to it, deferring until the recipe has loaded.
+    private func handlePendingRecipeDeepLink() {
+        if let id = notificationService.pendingRecipeId {
+            notificationService.pendingRecipeId = nil
+            navigateToRecipe(id: id)
+        } else if let deferred = pendingRecipeDeepLinkId {
+            navigateToRecipe(id: deferred)
+        }
+    }
+
+    private func navigateToRecipe(id: UUID) {
+        guard let recipe = findRecipe(id: id) else {
+            pendingRecipeDeepLinkId = id
+            return
+        }
+        pendingRecipeDeepLinkId = nil
+        navigationPath = NavigationPath()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            navigationPath.append(recipe)
+        }
+    }
+
+    private func findRecipe(id: UUID) -> Recipe? {
+        if let recipe = viewModel?.recipes.first(where: { $0.id == id }) { return recipe }
+        for recipes in sharedRecipesByCollection.values {
+            if let recipe = recipes.first(where: { $0.id == id }) { return recipe }
+        }
+        return nil
     }
 }

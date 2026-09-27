@@ -537,18 +537,14 @@ struct RecipeFormSheet: View {
     }
     
     private func handleImageUpload(recipeId: UUID) async {
+        // Routed through the view model so its in-memory recipe list gets the new
+        // image URL and the recipes grid reflects it without a manual refresh.
         switch imageSource {
         case .file:
             guard let data = imageData else { return }
             let compressed = ImageCompressor.compress(imageData: data) ?? data
             do {
-                let url = try await StorageService.uploadRecipeImage(
-                    userId: viewModel.userId,
-                    recipeId: recipeId,
-                    imageData: compressed,
-                    fileExtension: "jpeg"
-                )
-                try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: url)
+                try await viewModel.uploadRecipeImage(recipeId: recipeId, imageData: compressed, fileExtension: "jpeg")
             } catch {
                 print("[RecipeFormSheet] Failed to upload image: \(error.localizedDescription)")
             }
@@ -556,7 +552,7 @@ struct RecipeFormSheet: View {
             let trimmedUrl = imageUrlString.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmedUrl.isEmpty else { return }
             do {
-                try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: trimmedUrl)
+                try await viewModel.updateRecipeImageUrl(recipeId: recipeId, imageUrl: trimmedUrl)
             } catch {
                 print("[RecipeFormSheet] Failed to set image URL: \(error.localizedDescription)")
             }
@@ -568,18 +564,13 @@ struct RecipeFormSheet: View {
     private func handleImageUpdate(recipeId: UUID, existingImageUrl: String?) async {
         let hadImage = existingImageUrl != nil && !(existingImageUrl?.isEmpty ?? true)
         
+        // Routed through the view model so the recipes grid updates in memory.
         switch imageSource {
         case .file:
             guard let data = imageData else { return }
             let compressed = ImageCompressor.compress(imageData: data) ?? data
             do {
-                let url = try await StorageService.uploadRecipeImage(
-                    userId: viewModel.userId,
-                    recipeId: recipeId,
-                    imageData: compressed,
-                    fileExtension: "jpeg"
-                )
-                try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: url)
+                try await viewModel.uploadRecipeImage(recipeId: recipeId, imageData: compressed, fileExtension: "jpeg")
             } catch {
                 print("[RecipeFormSheet] Failed to upload image: \(error.localizedDescription)")
             }
@@ -588,7 +579,7 @@ struct RecipeFormSheet: View {
             guard !trimmedUrl.isEmpty else { return }
             if trimmedUrl != existingImageUrl {
                 do {
-                    try await RecipeService.updateRecipeImage(recipeId: recipeId, imageUrl: trimmedUrl)
+                    try await viewModel.updateRecipeImageUrl(recipeId: recipeId, imageUrl: trimmedUrl)
                 } catch {
                     print("[RecipeFormSheet] Failed to set image URL: \(error.localizedDescription)")
                 }
@@ -596,7 +587,7 @@ struct RecipeFormSheet: View {
         case .none:
             if hadImage {
                 do {
-                    try await RecipeService.removeRecipeImage(recipeId: recipeId)
+                    try await viewModel.removeRecipeImage(recipeId: recipeId)
                 } catch {
                     print("[RecipeFormSheet] Failed to remove image: \(error.localizedDescription)")
                 }

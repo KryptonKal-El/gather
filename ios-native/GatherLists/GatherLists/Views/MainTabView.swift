@@ -72,6 +72,11 @@ struct MainTabView: View {
                 selectedTab = 0
             }
         }
+        .onChange(of: notificationService.pendingRecipeId) { _, recipeId in
+            if recipeId != nil {
+                selectedTab = 1
+            }
+        }
     }
 }
 

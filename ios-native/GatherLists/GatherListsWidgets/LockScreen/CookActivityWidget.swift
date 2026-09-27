@@ -7,9 +7,15 @@ import WidgetKit
 struct CookActivityWidget: Widget {
     private static let brandGreen = Color(hex: "3D7A63")
 
+    /// Deep link that opens the recipe when the Live Activity is tapped.
+    private func recipeURL(_ context: ActivityViewContext<CookActivityAttributes>) -> URL? {
+        URL(string: "gatherlists://recipe/\(context.attributes.recipeId.uuidString)")
+    }
+
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: CookActivityAttributes.self) { context in
             lockScreenView(context)
+                .widgetURL(recipeURL(context))
                 .activityBackgroundTint(Color.black.opacity(0.6))
                 .activitySystemActionForegroundColor(.white)
         } dynamicIsland: { context in
@@ -39,6 +45,7 @@ struct CookActivityWidget: Widget {
                         progressBar(context)
                     }
                     .padding(.horizontal, 4)
+                    .widgetURL(recipeURL(context))
                 }
             } compactLeading: {
                 Image(systemName: "frying.pan.fill")

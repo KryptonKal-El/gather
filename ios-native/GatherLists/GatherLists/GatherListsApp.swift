@@ -116,7 +116,23 @@ struct GatherListsApp: App {
     private func handleWidgetDeepLink(_ url: URL) {
         let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let components = path.split(separator: "/")
-        
+
+        // Handle gatherlists://recipe/{recipeId} (tapping the cook Live Activity)
+        if url.host == "recipe" || (components.count >= 1 && components[0] == "recipe") {
+            let recipeIdString: String
+            if url.host == "recipe" {
+                recipeIdString = path
+            } else if components.count >= 2 {
+                recipeIdString = String(components[1])
+            } else {
+                return
+            }
+            if let recipeId = UUID(uuidString: recipeIdString) {
+                notificationService.pendingRecipeId = recipeId
+            }
+            return
+        }
+
         // Handle gatherlists://list/{listId}
         if url.host == "list" || (components.count >= 1 && components[0] == "list") {
             let listIdString: String
