@@ -55,11 +55,9 @@ test.describe.serial('Recipe All-view grouping', () => {
         await chip.click();
         await page.getByRole('button', { name: `Options for ${COLLECTION_NAME}` }).click();
         await page.getByRole('button', { name: 'Delete' }).click();
-        const deleteBtn = page.locator('[class*="deleteBtn"]');
-        if (await deleteBtn.isVisible({ timeout: 2000 })) {
-          // Deleting a non-empty collection offers "delete recipes too"; take it.
-          await deleteBtn.last().click();
-        }
+        // Deleting a non-empty collection offers "delete recipes too"; take it.
+        await page.getByRole('button', { name: /^Delete collection/ }).click();
+        await expect(collectionChip()).toHaveCount(0, { timeout: 5000 });
       }
     } catch {
       // Swallow errors during cleanup
