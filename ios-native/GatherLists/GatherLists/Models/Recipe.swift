@@ -32,6 +32,29 @@ struct Recipe: Codable, Identifiable, Hashable {
     }
 }
 
+/// How the Recipes "All" view lays out its cards: under collection headers
+/// (the default) or as one flat grid.
+enum RecipeGrouping: String, CaseIterable, Identifiable {
+    case collection
+    case ungrouped
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .collection: return "Collection"
+        case .ungrouped: return "None"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .collection: return "folder"
+        case .ungrouped: return "square.grid.2x2"
+        }
+    }
+}
+
 /// The order recipes are listed in within a collection. The user picks one per
 /// collection from the collection's overflow menu; `alphabetical` is the default.
 enum RecipeSortOption: String, CaseIterable, Identifiable {

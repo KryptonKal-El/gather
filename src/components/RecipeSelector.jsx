@@ -8,6 +8,13 @@ import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './RecipeSelector.module.css';
 
 const SELECTED_KEY = 'gather_recipe_selected_collection';
+const GROUPING_KEY = 'gather_recipe_all_grouping';
+const COLLAPSED_KEY = 'gather_recipe_collapsed_collections';
+
+const GROUPING_OPTIONS = [
+  { value: 'collection', label: 'Collection' },
+  { value: 'none', label: 'None' },
+];
 
 const readSelected = () => {
   try {
@@ -17,10 +24,38 @@ const readSelected = () => {
   }
 };
 
+const readGrouping = () => {
+  try {
+    return localStorage.getItem(GROUPING_KEY) === 'none' ? 'none' : 'collection';
+  } catch {
+    return 'collection';
+  }
+};
+
+const readCollapsed = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '[]');
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+};
+
+const writeStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore localStorage errors.
+  }
+};
+
+const byName = (a, b) => (a.name ?? '').localeCompare(b.name ?? '', undefined, { sensitivity: 'base' });
+
 /**
  * Recipe browsing screen. Recipes render as photo cards in a two-column grid;
  * collections are a horizontal row of filter chips above it. "All" shows every
- * recipe (each card carries its collection's emoji marker), and selecting a
+ * recipe, grouped under collapsible collection headers by default or as one
+ * flat grid (each card carrying its collection's emoji marker); selecting a
  * collection chip filters the grid and shows that collection's header with its
  * actions. A single "+" adds a recipe (via a method chooser) or a collection.
  */
@@ -58,6 +93,9 @@ export const RecipeSelector = ({
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   // { collectionId: string | null } when the new-recipe method chooser is open.
   const [methodChooser, setMethodChooser] = useState(null);
+  // "All" layout: 'collection' groups cards under collection headers, 'none' is one flat grid.
+  const [grouping, setGrouping] = useState(readGrouping);
+  const [collapsedIds, setCollapsedIds] = useState(readCollapsed);
 
   const menuRef = useRef(null);
   const renameInputRef = useRef(null);
@@ -167,6 +205,40 @@ export const RecipeSelector = ({
       return (c?.name ?? '').toLowerCase().includes(query);
     });
   }, [selectedCollection, sharedByCollection, recipesByCollection, sharedCollections, allRecipes, query, collectionById]);
+
+  const isGrouped = !selectedCollection && grouping === 'collection';
+
+  /// The grouped "All" view: each collection with matching recipes becomes a
+  /// section, sections ordered A–Z by collection name.
+  const groupedRecipes = useMemo(() => {
+    if (!isGrouped) return [];
+    return [...chipCollections].sort(byName).flatMap((collection) => {
+      const source = collection.shared ? sharedByCollection[collection.id] : recipesByCollection[collection.id];
+      const collectionMatches = collection.name.toLowerCase().includes(query);
+      const recipes = (source ?? []).filter(
+        (r) => !query || collectionMatches || (r.name ?? '').toLowerCase().includes(query),
+      );
+      return recipes.length > 0 ? [{ collection, recipes }] : [];
+    });
+  }, [isGrouped, chipCollections, sharedByCollection, recipesByCollection, query]);
+
+  const handleGroupingChange = useCallback((value) => {
+    setGrouping(value);
+    writeStorage(GROUPING_KEY, value);
+  }, []);
+
+  const handleToggleCollapsed = useCallback((collectionId) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(collectionId)) next.delete(collectionId);
+      else next.add(collectionId);
+      writeStorage(COLLAPSED_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }, []);
+
+  // Collapse is ignored while searching so matches are never hidden.
+  const isCollapsed = (collectionId) => !query && collapsedIds.has(collectionId);
 
   // Focus management
   useEffect(() => {
@@ -303,7 +375,7 @@ export const RecipeSelector = ({
   // -------------------------------------------------------------------------
 
   const renderCardImage = (recipe) => {
-    const marker = !selectedCollection ? collectionById[recipe.collectionId] : null;
+    const marker = !selectedCollection && !isGrouped ? collectionById[recipe.collectionId] : null;
     return (
       <div className={styles.cardImageWrap}>
         {recipe.imageUrl ? (
@@ -510,7 +582,7 @@ export const RecipeSelector = ({
     </div>
   );
 
-  const renderCollectionHeader = (collection) => {
+  const renderCollectionHeader = (collection, { collapsible = false } = {}) => {
     const isRenaming = renamingId === collection.id;
     if (isRenaming) {
       return (
@@ -530,8 +602,8 @@ export const RecipeSelector = ({
         </div>
       );
     }
-    return (
-      <div className={styles.collectionHeaderCard}>
+    const title = (
+      <>
         <span className={styles.collectionEmoji}>{collection.emoji}</span>
         <span className={styles.collectionHeaderName}>
           {collection.name}
@@ -539,6 +611,22 @@ export const RecipeSelector = ({
         </span>
         <span className={styles.collectionCount}>{countFor(collection)}</span>
         <span className={styles.collectionHeaderSpacer} />
+      </>
+    );
+    const collapsed = collapsible && isCollapsed(collection.id);
+    return (
+      <div className={styles.collectionHeaderCard}>
+        {collapsible ? (
+          <button
+            type="button"
+            className={styles.collapseToggle}
+            onClick={() => handleToggleCollapsed(collection.id)}
+            aria-expanded={!collapsed}
+          >
+            <span className={`${styles.collapseChevron} ${collapsed ? '' : styles.collapseChevronOpen}`} aria-hidden="true">›</span>
+            {title}
+          </button>
+        ) : title}
         {collection.canWrite && (
           <button
             type="button"
@@ -573,8 +661,38 @@ export const RecipeSelector = ({
         </div>
       );
     }
+    if (isGrouped) {
+      return groupedRecipes.map(({ collection, recipes }) => (
+        <section key={collection.id} className={styles.collectionGroup}>
+          {renderCollectionHeader(collection, { collapsible: true })}
+          {!isCollapsed(collection.id) && (
+            <div className={styles.recipeGrid}>{recipes.map(renderRecipeCard)}</div>
+          )}
+        </section>
+      ));
+    }
     return <div className={styles.recipeGrid}>{displayedRecipes.map(renderRecipeCard)}</div>;
   };
+
+  const renderGroupByControl = () => (
+    <div className={styles.groupByRow}>
+      <span className={styles.groupByLabel} id="recipe-group-by-label">Group by</span>
+      <div className={styles.groupBySegmented} role="radiogroup" aria-labelledby="recipe-group-by-label">
+        {GROUPING_OPTIONS.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={grouping === option.value}
+            className={`${styles.groupBySegment} ${grouping === option.value ? styles.groupBySegmentActive : ''}`}
+            onClick={() => handleGroupingChange(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderSearchBar = () => (
     <div className={styles.searchBar}>
@@ -725,6 +843,7 @@ export const RecipeSelector = ({
         <>
           {renderChipRow()}
           {selectedCollection && renderCollectionHeader(selectedCollection)}
+          {!selectedCollection && displayedRecipes.length > 0 && renderGroupByControl()}
           {renderGrid()}
         </>
       )}

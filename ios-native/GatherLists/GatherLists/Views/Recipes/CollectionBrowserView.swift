@@ -2,7 +2,8 @@ import SwiftUI
 
 /// Recipes home screen. Recipes render as photo cards in a two-column grid;
 /// collections are a horizontal row of filter chips above it. "All" shows every
-/// recipe (each card carries its collection's emoji marker), and selecting a
+/// recipe, grouped under collapsible collection headers by default or as one
+/// flat grid (each card carrying its collection's emoji marker); selecting a
 /// collection chip filters the grid and shows that collection's header with its
 /// actions. A single "+" adds a recipe (via a method chooser) or a collection.
 struct CollectionBrowserView: View {
@@ -28,6 +29,11 @@ struct CollectionBrowserView: View {
     // Per-collection sort preference, backed by UserDefaults. Mutating the map
     // re-renders the grid; the "All" view is always alphabetical.
     @State private var sortByCollection: [UUID: RecipeSortOption] = [:]
+
+    // "All" view layout: grouped under collection headers (default) or one flat grid.
+    @AppStorage("gather.recipeAllGrouping") private var allGrouping: RecipeGrouping = .collection
+    // Comma-separated ids of collections collapsed in the grouped "All" view.
+    @AppStorage("gather.recipeCollapsedCollections") private var collapsedCollectionsRaw = ""
 
     // Shared-collection recipes, fetched eagerly so "All" really shows everything.
     @State private var sharedRecipesByCollection: [UUID: [Recipe]] = [:]
@@ -130,6 +136,35 @@ struct CollectionBrowserView: View {
             }
             guard !items.isEmpty else { return nil }
             return (collection, sortOption(for: collection.id).sorted(items))
+        }
+    }
+
+    /// The ungrouped "All" view: every recipe from the grouped sections in one
+    /// alphabetical grid.
+    private var flatRecipes: [Recipe] {
+        var seenIds = Set<UUID>()
+        let all = groupedRecipes.flatMap(\.recipes).filter { seenIds.insert($0.id).inserted }
+        return RecipeSortOption.alphabetical.sorted(all)
+    }
+
+    private var collapsedCollectionIds: Set<UUID> {
+        Set(collapsedCollectionsRaw.split(separator: ",").compactMap { UUID(uuidString: String($0)) })
+    }
+
+    /// Collapse is ignored while searching so matches are never hidden.
+    private func isCollapsed(_ collection: RecipeCollection) -> Bool {
+        (viewModel?.searchQuery.isEmpty ?? true) && collapsedCollectionIds.contains(collection.id)
+    }
+
+    private func toggleCollapsed(_ collection: RecipeCollection) {
+        var ids = collapsedCollectionIds
+        if ids.contains(collection.id) {
+            ids.remove(collection.id)
+        } else {
+            ids.insert(collection.id)
+        }
+        withAnimation(.easeInOut(duration: 0.2)) {
+            collapsedCollectionsRaw = ids.map(\.uuidString).sorted().joined(separator: ",")
         }
     }
 
@@ -320,16 +355,22 @@ struct CollectionBrowserView: View {
                         recipeGrid(displayedRecipes)
                     }
                 } else {
-                    // "All": group every collection's recipes under its own header,
-                    // groups ordered A–Z, each group in its collection's sort order.
                     let groups = groupedRecipes
                     if groups.isEmpty {
                         gridEmptyState(vm: vm)
                     } else {
-                        ForEach(groups, id: \.collection.id) { group in
-                            collectionHeaderCard(group.collection)
-                                .padding(.horizontal, 16)
-                            recipeGrid(group.recipes)
+                        groupByRow
+                        if allGrouping == .collection {
+                            // Groups ordered A–Z, each in its collection's sort order.
+                            ForEach(groups, id: \.collection.id) { group in
+                                collectionHeaderCard(group.collection, isCollapsible: true)
+                                    .padding(.horizontal, 16)
+                                if !isCollapsed(group.collection) {
+                                    recipeGrid(group.recipes)
+                                }
+                            }
+                        } else {
+                            recipeGrid(flatRecipes, showsCollectionMarker: true)
                         }
                     }
                 }
@@ -430,20 +471,50 @@ struct CollectionBrowserView: View {
         }
     }
 
-    // MARK: - Selected collection header
+    // MARK: - Group-by control
+
+    private var groupByRow: some View {
+        HStack {
+            Spacer()
+            Menu {
+                Picker("Group By", selection: $allGrouping) {
+                    ForEach(RecipeGrouping.allCases) { option in
+                        Label(option.label, systemImage: option.systemImage).tag(option)
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Text("Group: \(allGrouping.label)")
+                    Image(systemName: "chevron.down")
+                        .font(.quicksand(.caption2))
+                }
+                .font(.quicksand(.subheadline, weight: .medium))
+                .foregroundStyle(Color.brandGreen)
+            }
+            .tint(.primary)
+            .accessibilityLabel("Group by \(allGrouping.label)")
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Collection header
 
     @ViewBuilder
-    private func collectionHeaderCard(_ collection: RecipeCollection) -> some View {
+    private func collectionHeaderCard(_ collection: RecipeCollection, isCollapsible: Bool = false) -> some View {
         HStack(spacing: 10) {
-            Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
-                .font(.quicksand(.title3))
-            Text(collection.name)
-                .font(.quicksand(.headline))
-                .lineLimit(1)
-            Text("\(recipeCount(for: collection))")
-                .font(.quicksand(.subheadline))
-                .foregroundStyle(.secondary)
-            Spacer(minLength: 8)
+            if isCollapsible {
+                Button {
+                    toggleCollapsed(collection)
+                } label: {
+                    collectionHeaderTitle(collection, collapsed: isCollapsed(collection))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(collection.name)
+                .accessibilityValue(isCollapsed(collection) ? "Collapsed" : "Expanded")
+                .accessibilityHint(isCollapsed(collection) ? "Shows this collection's recipes" : "Hides this collection's recipes")
+            } else {
+                collectionHeaderTitle(collection, collapsed: nil)
+            }
             if let collaborators = viewModel?.collaboratorsByCollectionId[collection.id], !collaborators.isEmpty {
                 AvatarGroupView(
                     collaborators: collaborators,
@@ -477,22 +548,47 @@ struct CollectionBrowserView: View {
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
+    /// Emoji, name and count; `collapsed` non-nil adds a disclosure chevron and
+    /// stretches the row so the whole title area is tappable.
+    @ViewBuilder
+    private func collectionHeaderTitle(_ collection: RecipeCollection, collapsed: Bool?) -> some View {
+        HStack(spacing: 10) {
+            if let collapsed {
+                Image(systemName: "chevron.right")
+                    .font(.quicksand(.caption, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(collapsed ? 0 : 90))
+            }
+            Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
+                .font(.quicksand(.title3))
+            Text(collection.name)
+                .font(.quicksand(.headline))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            Text("\(recipeCount(for: collection))")
+                .font(.quicksand(.subheadline))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 8)
+        }
+        .contentShape(Rectangle())
+    }
+
     // MARK: - Recipe cards
 
     @ViewBuilder
-    private func recipeGrid(_ recipes: [Recipe]) -> some View {
+    private func recipeGrid(_ recipes: [Recipe], showsCollectionMarker: Bool = false) -> some View {
         LazyVGrid(columns: gridColumns, spacing: 14) {
             ForEach(recipes) { recipe in
-                recipeCardLink(recipe)
+                recipeCardLink(recipe, showsCollectionMarker: showsCollectionMarker)
             }
         }
         .padding(.horizontal, 16)
     }
 
     @ViewBuilder
-    private func recipeCardLink(_ recipe: Recipe) -> some View {
+    private func recipeCardLink(_ recipe: Recipe, showsCollectionMarker: Bool) -> some View {
         NavigationLink(value: recipe) {
-            recipeCard(recipe)
+            recipeCard(recipe, showsCollectionMarker: showsCollectionMarker)
         }
         .buttonStyle(.plain)
         .contextMenu {
@@ -506,7 +602,7 @@ struct CollectionBrowserView: View {
     }
 
     @ViewBuilder
-    private func recipeCard(_ recipe: Recipe) -> some View {
+    private func recipeCard(_ recipe: Recipe, showsCollectionMarker: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topLeading) {
                 Group {
@@ -523,6 +619,16 @@ struct CollectionBrowserView: View {
                 .frame(height: 104)
                 .frame(maxWidth: .infinity)
                 .clipped()
+
+                if showsCollectionMarker, let collection = collection(for: recipe) {
+                    Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
+                        .font(.quicksand(.caption))
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 3)
+                        .background(.regularMaterial, in: Capsule())
+                        .padding(8)
+                        .accessibilityLabel("In \(collection.name)")
+                }
             }
             .overlay(alignment: .topTrailing) {
                 if let collaborators = viewModel?.collaboratorsByCollectionId[recipe.collectionId], !collaborators.isEmpty {
