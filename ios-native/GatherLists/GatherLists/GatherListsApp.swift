@@ -129,6 +129,8 @@ struct GatherListsApp: App {
             }
             if let recipeId = UUID(uuidString: recipeIdString) {
                 notificationService.pendingRecipeId = recipeId
+                // Also resume the in-progress cook so the user lands in cook mode.
+                notificationService.pendingCookRecipeId = recipeId
             }
             return
         }

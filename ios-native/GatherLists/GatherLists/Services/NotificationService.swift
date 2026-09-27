@@ -14,6 +14,10 @@ final class NotificationService: NSObject {
 
     /// Recipe ID from a tapped cook Live Activity, consumed by CollectionBrowserView for deep linking.
     var pendingRecipeId: UUID?
+
+    /// Recipe ID whose in-progress cook should be resumed on arrival (from the cook
+    /// Live Activity), consumed by RecipeDetailView to reopen cook mode.
+    var pendingCookRecipeId: UUID?
     
     private var client: SupabaseClient { SupabaseManager.shared.client }
     

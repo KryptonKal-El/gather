@@ -3,7 +3,8 @@ import SwiftUI
 /// A pushed view showing full recipe details with ingredients, steps, and actions.
 struct RecipeDetailView: View {
     @Environment(\.dismiss) private var dismiss
-    
+    @Environment(NotificationService.self) private var notificationService
+
     let recipe: Recipe
     let viewModel: RecipeViewModel
     let userId: UUID
@@ -131,7 +132,21 @@ struct RecipeDetailView: View {
             Task {
                 await viewModel.selectRecipe(id: recipe.id)
                 await cookViewModel?.loadState()
+                resumeCookIfRequested()
             }
+        }
+        .onChange(of: notificationService.pendingCookRecipeId) { _, _ in
+            resumeCookIfRequested()
+        }
+    }
+
+    /// If the user arrived from tapping the cook Live Activity, reopen cook mode
+    /// for this recipe's in-progress session so the ⋯ menu (Discard Cook) is at hand.
+    private func resumeCookIfRequested() {
+        guard notificationService.pendingCookRecipeId == recipe.id else { return }
+        notificationService.pendingCookRecipeId = nil
+        if cookViewModel?.activeSession != nil {
+            showCookMode = true
         }
     }
     
