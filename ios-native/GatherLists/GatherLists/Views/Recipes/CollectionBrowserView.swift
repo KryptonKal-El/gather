@@ -13,7 +13,7 @@ struct CollectionBrowserView: View {
     @State private var viewModel: RecipeViewModel?
 
     // Programmatic navigation, used to deep-link into a recipe from the cook Live Activity.
-    @State private var navigationPath = NavigationPath()
+    @State private var navigationPath: [Recipe] = []
     @State private var pendingRecipeDeepLinkId: UUID?
 
     @State private var showCreateCollectionSheet = false
@@ -942,7 +942,11 @@ struct CollectionBrowserView: View {
             return
         }
         pendingRecipeDeepLinkId = nil
-        navigationPath = NavigationPath()
+        // Already on this recipe (often with cook mode open over it): leave the
+        // stack alone. Rebuilding it would tear down cook mode, and the detail
+        // view resumes the cook itself.
+        if navigationPath.last?.id == id { return }
+        navigationPath = []
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             navigationPath.append(recipe)
         }

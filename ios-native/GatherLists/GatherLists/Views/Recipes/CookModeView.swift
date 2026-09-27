@@ -3,6 +3,7 @@ import SwiftUI
 /// Full-screen guided cooking mode: an ingredient checklist first, then one
 /// step per screen in large text with next/back controls and a progress bar.
 /// Closing the view keeps the session in progress so it can be resumed later.
+/// While open, the screen stays awake unless the user switches that off.
 struct CookModeView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -15,6 +16,7 @@ struct CookModeView: View {
     @State private var gatheredIngredients: Set<UUID> = []
     @State private var showDiscardConfirm = false
     @State private var showFinishScreen = false
+    @AppStorage("gather.cookKeepScreenOn") private var keepScreenOn = true
 
     init(recipe: Recipe, ingredients: [RecipeIngredient], cookViewModel: CookSessionViewModel) {
         self.recipe = recipe
@@ -54,6 +56,16 @@ struct CookModeView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        keepScreenOn.toggle()
+                    } label: {
+                        Image(systemName: keepScreenOn ? "sun.max.fill" : "sun.max")
+                            .foregroundStyle(keepScreenOn ? Color.brandGreen : Color.secondary)
+                    }
+                    .accessibilityLabel("Keep Screen On")
+                    .accessibilityValue(keepScreenOn ? "On" : "Off")
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button(role: .destructive) {
                             showDiscardConfirm = true
@@ -83,6 +95,11 @@ struct CookModeView: View {
         }
         .tint(Color.brandGreen)
         .interactiveDismissDisabled()
+        // Stop auto-lock only while cook mode is on screen, so the phone sleeps
+        // normally again once the user leaves it.
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = keepScreenOn }
+        .onChange(of: keepScreenOn) { _, isOn in UIApplication.shared.isIdleTimerDisabled = isOn }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }
 
     // MARK: - Ingredient Phase
