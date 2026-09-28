@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { ingredientsForStep } from '../utils/stepIngredients.js';
 import styles from './CookMode.module.css';
 
 /**
  * Full-screen guided cooking mode: an ingredient checklist first, then one
  * step per screen in large text with next/back controls and a progress bar.
- * Closing keeps the session in progress so it can be resumed later.
+ * Each step lists the ingredients it mentions, and an Ingredients panel shows
+ * the full list at any time. Closing keeps the session in progress so it can
+ * be resumed later.
  */
 export const CookMode = ({
   recipe,
@@ -33,6 +36,16 @@ export const CookMode = ({
   const [gathered, setGathered] = useState(new Set());
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
   const [durationLabel, setDurationLabel] = useState('under a minute');
+  const [showIngredientsPanel, setShowIngredientsPanel] = useState(false);
+
+  useEffect(() => {
+    if (!showIngredientsPanel) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setShowIngredientsPanel(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showIngredientsPanel]);
 
   const completedCount = steps.filter((s) => s.completedAt).length;
 
@@ -73,36 +86,38 @@ export const CookMode = ({
     }
   };
 
+  const renderIngredientChecklist = () => (
+    <div className={styles.ingredientList}>
+      {ingredients.map((ingredient) => {
+        const isGathered = gathered.has(ingredient.id);
+        return (
+          <label
+            key={ingredient.id}
+            className={`${styles.ingredientRow} ${isGathered ? styles.ingredientGathered : ''}`}
+          >
+            <input
+              type="checkbox"
+              className={styles.ingredientCheckbox}
+              checked={isGathered}
+              onChange={() => handleToggleGathered(ingredient.id)}
+            />
+            <span className={styles.ingredientText}>
+              <span className={styles.ingredientName}>{ingredient.name}</span>
+              {ingredient.quantity && (
+                <span className={styles.ingredientQuantity}>{ingredient.quantity}</span>
+              )}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+
   const renderIngredientPhase = () => (
     <>
       <div className={styles.scrollArea}>
         <h2 className={styles.phaseTitle}>Gather your ingredients</h2>
-        <div className={styles.ingredientList}>
-          {ingredients.map((ingredient) => {
-            const isGathered = gathered.has(ingredient.id);
-            return (
-              <label
-                key={ingredient.id}
-                className={`${styles.ingredientRow} ${isGathered ? styles.ingredientGathered : ''}`}
-              >
-                <input
-                  type="checkbox"
-                  className={styles.ingredientCheckbox}
-                  checked={isGathered}
-                  onChange={() => handleToggleGathered(ingredient.id)}
-                />
-                <span className={styles.ingredientText}>
-                  <span className={styles.ingredientName}>{ingredient.name}</span>
-                  {ingredient.quantity && (
-                    <span className={styles.ingredientQuantity}>
-                      {ingredient.quantity}
-                    </span>
-                  )}
-                </span>
-              </label>
-            );
-          })}
-        </div>
+        {renderIngredientChecklist()}
       </div>
       <div className={styles.bottomBar}>
         <button
@@ -120,6 +135,7 @@ export const CookMode = ({
 
   const renderStepPhase = () => {
     const step = steps[Math.min(currentStepIndex, steps.length - 1)];
+    const stepIngredients = ingredientsForStep(step.instruction, ingredients);
     return (
       <>
         <div className={styles.progressWrap}>
@@ -136,6 +152,21 @@ export const CookMode = ({
         <div className={styles.scrollArea}>
           {step.completedAt && <span className={styles.stepDoneBadge}>✓ Done</span>}
           <p className={styles.stepInstruction}>{step.instruction}</p>
+          {stepIngredients.length > 0 && (
+            <section className={styles.stepIngredients} aria-label="Ingredients for this step">
+              <h3 className={styles.stepIngredientsTitle}>For this step</h3>
+              <ul className={styles.stepIngredientsList}>
+                {stepIngredients.map((ingredient) => (
+                  <li key={ingredient.id} className={styles.stepIngredientRow}>
+                    <span className={styles.stepIngredientName}>{ingredient.name}</span>
+                    {ingredient.quantity && (
+                      <span className={styles.stepIngredientQuantity}>{ingredient.quantity}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
         <div className={styles.bottomBar}>
           {currentStepIndex > 0 && (
@@ -146,6 +177,15 @@ export const CookMode = ({
               aria-label="Previous step"
             >
               ‹
+            </button>
+          )}
+          {ingredients.length > 0 && (
+            <button
+              type="button"
+              className={styles.backStepButton}
+              onClick={() => setShowIngredientsPanel(true)}
+            >
+              Ingredients
             </button>
           )}
           <button type="button" className={styles.primaryButton} onClick={handleNext}>
@@ -205,6 +245,26 @@ export const CookMode = ({
       {phase === 'steps' && steps.length > 0 && renderStepPhase()}
       {(phase === 'finish' || (phase === 'steps' && steps.length === 0)) &&
         renderFinishPhase()}
+
+      {showIngredientsPanel && (
+        <>
+          <div className={styles.panelBackdrop} onClick={() => setShowIngredientsPanel(false)} />
+          <div className={styles.ingredientsPanel} role="dialog" aria-label="Ingredients">
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>Ingredients</h2>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={() => setShowIngredientsPanel(false)}
+                aria-label="Close ingredients"
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.panelBody}>{renderIngredientChecklist()}</div>
+          </div>
+        </>
+      )}
 
       {confirmingDiscard && (
         <ConfirmDialog

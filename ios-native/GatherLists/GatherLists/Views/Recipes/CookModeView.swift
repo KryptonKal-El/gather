@@ -3,7 +3,9 @@ import SwiftUI
 /// Full-screen guided cooking mode: an ingredient checklist first, then one
 /// step per screen in large text with next/back controls and a progress bar.
 /// Closing the view keeps the session in progress so it can be resumed later.
-/// While open, the screen stays awake unless the user switches that off.
+/// While open, the screen stays awake unless the user switches that off. Each
+/// step lists the ingredients it mentions, and an Ingredients sheet shows the
+/// full list at any time.
 struct CookModeView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -16,6 +18,7 @@ struct CookModeView: View {
     @State private var gatheredIngredients: Set<UUID> = []
     @State private var showDiscardConfirm = false
     @State private var showFinishScreen = false
+    @State private var showIngredientsSheet = false
     @AppStorage("gather.cookKeepScreenOn") private var keepScreenOn = true
 
     init(recipe: Recipe, ingredients: [RecipeIngredient], cookViewModel: CookSessionViewModel) {
@@ -77,6 +80,9 @@ struct CookModeView: View {
                     }
                 }
             }
+            .sheet(isPresented: $showIngredientsSheet) {
+                ingredientsSheet
+            }
             .confirmationDialog(
                 "Discard this cook?",
                 isPresented: $showDiscardConfirm,
@@ -115,29 +121,7 @@ struct CookModeView: View {
                         .padding(.top, 8)
 
                     ForEach(ingredients) { ingredient in
-                        Button {
-                            toggleGathered(ingredient.id)
-                        } label: {
-                            HStack(spacing: 14) {
-                                Image(systemName: gatheredIngredients.contains(ingredient.id) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(gatheredIngredients.contains(ingredient.id) ? .green : .secondary)
-                                    .font(.quicksand(.title2))
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(ingredient.name)
-                                        .font(.quicksand(.title3))
-                                        .strikethrough(gatheredIngredients.contains(ingredient.id))
-                                        .foregroundStyle(gatheredIngredients.contains(ingredient.id) ? .secondary : .primary)
-                                    if let qty = ingredient.quantity, !qty.isEmpty {
-                                        Text(qty)
-                                            .font(.quicksand(.subheadline))
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                            }
-                            .contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
+                        ingredientChecklistRow(ingredient)
                     }
                 }
                 .padding()
@@ -193,6 +177,7 @@ struct CookModeView: View {
                         .fontWeight(.medium)
                         .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                    stepIngredientsCard(ingredients.mentioned(in: step.instruction))
                 }
                 .padding()
             }
@@ -214,6 +199,24 @@ struct CookModeView: View {
                         }
                     }
 
+                    if !ingredients.isEmpty {
+                        Button {
+                            showIngredientsSheet = true
+                        } label: {
+                            // Icon-only so it fits beside the back and next buttons.
+                            Image(systemName: "list.bullet.clipboard")
+                                .font(.quicksand(.title3))
+                                .fontWeight(.semibold)
+                                .frame(height: 22)
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 20)
+                                .background(Color(.systemGray5))
+                                .foregroundStyle(.primary)
+                                .cornerRadius(14)
+                        }
+                        .accessibilityLabel("Ingredients")
+                    }
+
                     Button {
                         Task { await cookViewModel.setStepCompleted(step, completed: true) }
                         if currentStepIndex < steps.count - 1 {
@@ -233,6 +236,95 @@ struct CookModeView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Ingredient references
+
+    /// The ingredients the current step mentions, with their amounts. Hidden
+    /// when the step names none.
+    @ViewBuilder
+    private func stepIngredientsCard(_ stepIngredients: [RecipeIngredient]) -> some View {
+        if !stepIngredients.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                Text("For this step")
+                    .font(.quicksand(.footnote))
+                    .fontWeight(.semibold)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 6)
+                ForEach(Array(stepIngredients.enumerated()), id: \.element.id) { index, ingredient in
+                    if index > 0 { Divider() }
+                    HStack(alignment: .firstTextBaseline, spacing: 16) {
+                        Text(ingredient.name)
+                            .font(.quicksand(.title3))
+                        Spacer(minLength: 8)
+                        if let qty = ingredient.quantity, !qty.isEmpty {
+                            Text(qty)
+                                .font(.quicksand(.title3))
+                                .fontWeight(.semibold)
+                                .multilineTextAlignment(.trailing)
+                        }
+                    }
+                    .padding(.vertical, 8)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+            .padding(16)
+            .background(Color(.secondarySystemBackground))
+            .clipShape(RoundedRectangle(cornerRadius: 14))
+            .padding(.top, 8)
+        }
+    }
+
+    private var ingredientsSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    ForEach(ingredients) { ingredient in
+                        ingredientChecklistRow(ingredient)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Ingredients")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showIngredientsSheet = false }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .tint(Color.brandGreen)
+    }
+
+    /// A tappable ingredient row with a gathered checkmark, shared by the
+    /// gather phase and the Ingredients sheet so checkmarks carry over.
+    private func ingredientChecklistRow(_ ingredient: RecipeIngredient) -> some View {
+        let isGathered = gatheredIngredients.contains(ingredient.id)
+        return Button {
+            toggleGathered(ingredient.id)
+        } label: {
+            HStack(spacing: 14) {
+                Image(systemName: isGathered ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(isGathered ? .green : .secondary)
+                    .font(.quicksand(.title2))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(ingredient.name)
+                        .font(.quicksand(.title3))
+                        .strikethrough(isGathered)
+                        .foregroundStyle(isGathered ? .secondary : .primary)
+                    if let qty = ingredient.quantity, !qty.isEmpty {
+                        Text(qty)
+                            .font(.quicksand(.subheadline))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Finish Screen

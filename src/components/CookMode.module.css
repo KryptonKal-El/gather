@@ -220,3 +220,93 @@
   background: var(--bg-hover);
   cursor: pointer;
 }
+
+/* Ingredients the current step mentions */
+.stepIngredients {
+  margin-top: 28px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  background: var(--bg-card);
+}
+
+.stepIngredientsTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.stepIngredientsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepIngredientRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 19px;
+}
+
+.stepIngredientRow + .stepIngredientRow {
+  border-top: 1px solid var(--border-light);
+}
+
+.stepIngredientName {
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.stepIngredientQuantity {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Full ingredient list, slid up over the current step */
+.panelBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.ingredientsPanel {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 640px);
+  max-height: 70vh;
+  transform: translateX(-50%);
+  border-radius: 18px 18px 0 0;
+  background: var(--bg-card);
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 6px 20px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.panelBody {
+  overflow-y: auto;
+  padding: 0 12px calc(16px + env(safe-area-inset-bottom));
+}
