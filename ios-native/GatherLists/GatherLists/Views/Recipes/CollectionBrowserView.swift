@@ -80,10 +80,15 @@ struct CollectionBrowserView: View {
     }
 
     private func recipes(in collection: RecipeCollection) -> [Recipe] {
-        if isShared(collection) {
-            return sharedRecipesByCollection[collection.id] ?? []
-        }
-        return viewModel?.recipes.filter { $0.collectionId == collection.id } ?? []
+        let fromViewModel = viewModel?.recipes.filter { $0.collectionId == collection.id } ?? []
+        guard isShared(collection) else { return fromViewModel }
+        // The view model's copy is authoritative for rows it has (it stays in sync
+        // with in-session edits like a newly added photo); the separately-fetched
+        // shared list only fills in rows the main fetch hasn't returned yet.
+        let fromShared = sharedRecipesByCollection[collection.id] ?? []
+        guard !fromViewModel.isEmpty else { return fromShared }
+        let knownIds = Set(fromViewModel.map(\.id))
+        return fromViewModel + fromShared.filter { !knownIds.contains($0.id) }
     }
 
     private func recipeCount(for collection: RecipeCollection) -> Int {

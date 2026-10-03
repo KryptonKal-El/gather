@@ -9,6 +9,15 @@ struct RecipeDetailView: View {
     let viewModel: RecipeViewModel
     let userId: UUID
     let userEmail: String
+
+    /// The recipe as it currently exists in the view model, so edits made this
+    /// session (e.g. a newly added photo) are reflected here without a relaunch.
+    /// Falls back to the value passed in at navigation time.
+    private var liveRecipe: Recipe {
+        viewModel.recipes.first(where: { $0.id == recipe.id })
+            ?? viewModel.activeRecipeDetail?.recipe
+            ?? recipe
+    }
     
     @State private var checkedIngredients: Set<UUID> = []
     @State private var showEditSheet = false
@@ -31,7 +40,7 @@ struct RecipeDetailView: View {
                 scrollContent
             }
         }
-        .navigationTitle(recipe.name)
+        .navigationTitle(liveRecipe.name)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -82,7 +91,7 @@ struct RecipeDetailView: View {
         .sheet(isPresented: $showEditSheet) {
             RecipeFormSheet(
                 viewModel: viewModel,
-                editRecipe: recipe,
+                editRecipe: liveRecipe,
                 editIngredients: editIngredients,
                 editSteps: editSteps
             )
@@ -154,7 +163,7 @@ struct RecipeDetailView: View {
     private var scrollContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                if let imageUrl = recipe.imageUrl, let url = URL(string: imageUrl) {
+                if let imageUrl = liveRecipe.imageUrl, let url = URL(string: imageUrl) {
                     AsyncImage(url: url) { image in
                         image
                             .resizable()
@@ -170,7 +179,7 @@ struct RecipeDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 
-                if let description = recipe.description, !description.isEmpty {
+                if let description = liveRecipe.description, !description.isEmpty {
                     Text(description)
                         .font(.quicksand(.body))
                         .foregroundStyle(.secondary)
