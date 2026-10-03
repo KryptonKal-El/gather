@@ -21,26 +21,32 @@ struct RecipeImportView: View {
 
     var body: some View {
         ZStack {
-            Form {
-                Section {
-                    Button {
-                        if let clip = UIPasteboard.general.string,
-                           !clip.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            text = clip
-                        }
-                    } label: {
-                        Label("Paste from clipboard", systemImage: "doc.on.clipboard")
+            // A VStack (not a Form) so the editor can grow to fill all the space
+            // below the paste button, giving the user maximum room for long text.
+            VStack(alignment: .leading, spacing: 12) {
+                Button {
+                    if let clip = UIPasteboard.general.string,
+                       !clip.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        text = clip
                     }
-                } footer: {
-                    Text("Paste a whole recipe — the ingredients and steps are detected automatically. You can review and edit everything on the next screen before importing.")
+                } label: {
+                    Label("Paste from clipboard", systemImage: "doc.on.clipboard")
+                        .font(.quicksand(.subheadline, weight: .medium))
                 }
 
-                Section("Recipe text") {
-                    ScrollingTextEditor(text: $text)
-                        .frame(minHeight: 220)
-                }
+                Text("Paste a whole recipe — the ingredients and steps are detected automatically. You can review and edit everything on the next screen before importing.")
+                    .font(.quicksand(.caption))
+                    .foregroundStyle(.secondary)
+
+                ScrollingTextEditor(text: $text)
+                    .padding(10)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .scrollDismissesKeyboard(.interactively)
+            .padding(16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color(.systemGroupedBackground))
             .disabled(isParsing)
 
             if isParsing {
@@ -111,10 +117,10 @@ struct RecipeImportView: View {
     }
 }
 
-/// A multiline text editor backed by UITextView that keeps the caret visible
-/// while typing. SwiftUI's `TextEditor` fails to auto-scroll to the cursor when
-/// embedded in a `Form`, so a long recipe would leave the current line hidden
-/// below the visible area.
+/// A multiline, fill-the-space text editor backed by UITextView that keeps the
+/// caret visible while typing. Used instead of SwiftUI's `TextEditor`, which
+/// doesn't reliably auto-scroll to the cursor, so a long recipe would leave the
+/// current line hidden below the visible area.
 private struct ScrollingTextEditor: UIViewRepresentable {
     @Binding var text: String
 
@@ -126,6 +132,7 @@ private struct ScrollingTextEditor: UIViewRepresentable {
         textView.autocapitalizationType = .sentences
         textView.backgroundColor = .clear
         textView.isScrollEnabled = true
+        textView.keyboardDismissMode = .interactive
         textView.textContainerInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
         textView.textContainer.lineFragmentPadding = 0
         return textView
