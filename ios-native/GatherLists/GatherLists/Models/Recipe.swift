@@ -13,6 +13,12 @@ struct Recipe: Codable, Identifiable, Hashable {
     // Optional so recipes cached by builds that predate the cook log still decode.
     var cookCount: Int?
     var lastCookedAt: Date?
+    // Optional metadata; absent on recipes (and caches) created before these fields.
+    var sourceName: String?
+    var sourceUrl: String?
+    var prepTime: String?
+    var cookTime: String?
+    var servings: Int?
     let createdAt: Date
     let updatedAt: Date
 
@@ -27,6 +33,11 @@ struct Recipe: Codable, Identifiable, Hashable {
         case collectionId = "collection_id"
         case cookCount = "cook_count"
         case lastCookedAt = "last_cooked_at"
+        case sourceName = "source_name"
+        case sourceUrl = "source_url"
+        case prepTime = "prep_time"
+        case cookTime = "cook_time"
+        case servings
         case createdAt = "created_at"
         case updatedAt = "updated_at"
     }

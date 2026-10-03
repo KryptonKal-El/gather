@@ -96,6 +96,11 @@ struct RecipeUrlImportView: View {
                     prefillIngredients: draft.ingredients.map { (name: $0.name, quantity: $0.quantity) },
                     prefillSteps: draft.steps,
                     prefillImageUrl: draft.imageUrl ?? "",
+                    prefillSourceName: draft.sourceName ?? "",
+                    prefillSourceUrl: draft.sourceUrl ?? "",
+                    prefillPrepTime: draft.prepTime ?? "",
+                    prefillCookTime: draft.cookTime ?? "",
+                    prefillServings: draft.servings,
                     saveButtonTitle: "Import",
                     onComplete: { dismiss() },
                     showCollectionPicker: true

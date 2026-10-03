@@ -145,19 +145,29 @@ struct RecipeService {
         collectionId: UUID,
         ingredients: [(name: String, quantity: String?)],
         steps: [String],
-        imageUrl: String? = nil
+        imageUrl: String? = nil,
+        sourceName: String? = nil,
+        sourceUrl: String? = nil,
+        prepTime: String? = nil,
+        cookTime: String? = nil,
+        servings: Int? = nil
     ) async throws -> Recipe {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw RecipeServiceError.emptyName
         }
-        
+
         let newRecipe = NewRecipe(
             ownerId: userId,
             name: trimmedName,
             description: description,
             collectionId: collectionId,
-            imageUrl: imageUrl
+            imageUrl: imageUrl,
+            sourceName: sourceName,
+            sourceUrl: sourceUrl,
+            prepTime: prepTime,
+            cookTime: cookTime,
+            servings: servings
         )
         
         let recipe: Recipe = try await client
@@ -208,13 +218,28 @@ struct RecipeService {
         return updatedRecipe
     }
     
-    /// Partially updates a recipe. Only non-nil fields are sent.
+    /// Updates a recipe. name/description are sent only when non-nil; the
+    /// metadata fields (source, prep/cook time, servings) are always written
+    /// from the edit form's state, so clearing one persists as null.
     static func updateRecipe(
         recipeId: UUID,
         name: String? = nil,
-        description: String? = nil
+        description: String? = nil,
+        sourceName: String? = nil,
+        sourceUrl: String? = nil,
+        prepTime: String? = nil,
+        cookTime: String? = nil,
+        servings: Int? = nil
     ) async throws {
-        let update = RecipeUpdate(name: name, description: description)
+        let update = RecipeUpdate(
+            name: name,
+            description: description,
+            sourceName: sourceName,
+            sourceUrl: sourceUrl,
+            prepTime: prepTime,
+            cookTime: cookTime,
+            servings: servings
+        )
         try await client
             .from("recipes")
             .update(update)
@@ -500,29 +525,56 @@ private struct NewRecipe: Encodable {
     let description: String?
     let collectionId: UUID
     let imageUrl: String?
-    
+    let sourceName: String?
+    let sourceUrl: String?
+    let prepTime: String?
+    let cookTime: String?
+    let servings: Int?
+
     enum CodingKeys: String, CodingKey {
         case ownerId = "owner_id"
         case name
         case description
         case collectionId = "collection_id"
         case imageUrl = "image_url"
+        case sourceName = "source_name"
+        case sourceUrl = "source_url"
+        case prepTime = "prep_time"
+        case cookTime = "cook_time"
+        case servings
     }
 }
 
 private struct RecipeUpdate: Encodable {
     var name: String?
     var description: String?
-    
+    // Metadata fields the edit form owns in full; always written (nil → SQL null)
+    // so clearing a field in the form persists, rather than being skipped.
+    var sourceName: String?
+    var sourceUrl: String?
+    var prepTime: String?
+    var cookTime: String?
+    var servings: Int?
+
     enum CodingKeys: String, CodingKey {
         case name
         case description
+        case sourceName = "source_name"
+        case sourceUrl = "source_url"
+        case prepTime = "prep_time"
+        case cookTime = "cook_time"
+        case servings
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         if let name = name { try container.encode(name, forKey: .name) }
         if let description = description { try container.encode(description, forKey: .description) }
+        try container.encode(sourceName, forKey: .sourceName)
+        try container.encode(sourceUrl, forKey: .sourceUrl)
+        try container.encode(prepTime, forKey: .prepTime)
+        try container.encode(cookTime, forKey: .cookTime)
+        try container.encode(servings, forKey: .servings)
     }
 }
 

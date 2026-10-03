@@ -20,6 +20,11 @@ struct RecipeFormSheet: View {
     @State private var ingredients: [IngredientRow]
     @State private var steps: [StepRow]
     @State private var selectedCollectionId: UUID?
+    @State private var sourceName: String
+    @State private var sourceURL: String
+    @State private var prepTime: String
+    @State private var cookTime: String
+    @State private var servingsText: String
     @State private var isSaving = false
     @State private var attemptedSave = false
 
@@ -61,6 +66,15 @@ struct RecipeFormSheet: View {
     private var canSave: Bool {
         !trimmedName.isEmpty && !validIngredients.isEmpty && !isSaving
     }
+
+    private func nilIfBlank(_ value: String) -> String? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private var servingsValue: Int? {
+        Int(servingsText.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
     
     init(
         viewModel: RecipeViewModel,
@@ -71,6 +85,11 @@ struct RecipeFormSheet: View {
         prefillIngredients: [(name: String, quantity: String)] = [],
         prefillSteps: [String] = [],
         prefillImageUrl: String = "",
+        prefillSourceName: String = "",
+        prefillSourceUrl: String = "",
+        prefillPrepTime: String = "",
+        prefillCookTime: String = "",
+        prefillServings: Int? = nil,
         saveButtonTitle: String = "Save",
         onComplete: (() -> Void)? = nil,
         showCollectionPicker: Bool = false
@@ -86,6 +105,12 @@ struct RecipeFormSheet: View {
         _name = State(initialValue: editRecipe?.name ?? prefillName)
         _descriptionText = State(initialValue: editRecipe?.description ?? "")
         _selectedCollectionId = State(initialValue: viewModel.activeCollectionId ?? viewModel.collections.first?.id)
+        _sourceName = State(initialValue: editRecipe?.sourceName ?? prefillSourceName)
+        _sourceURL = State(initialValue: editRecipe?.sourceUrl ?? prefillSourceUrl)
+        _prepTime = State(initialValue: editRecipe?.prepTime ?? prefillPrepTime)
+        _cookTime = State(initialValue: editRecipe?.cookTime ?? prefillCookTime)
+        let initialServings = editRecipe?.servings ?? prefillServings
+        _servingsText = State(initialValue: initialServings.map(String.init) ?? "")
 
         if !editIngredients.isEmpty {
             _ingredients = State(initialValue: editIngredients.map {
@@ -125,6 +150,7 @@ struct RecipeFormSheet: View {
             Form {
                 imageSection
                 recipeInfoSection
+                detailsSection
                 collectionSection
                 ingredientsSection
                 stepsSection
@@ -396,6 +422,21 @@ struct RecipeFormSheet: View {
     }
     
     @ViewBuilder
+    private var detailsSection: some View {
+        Section("Details") {
+            TextField("Source name (optional)", text: $sourceName)
+            TextField("Source URL (optional)", text: $sourceURL)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .keyboardType(.URL)
+            TextField("Prep time, e.g. 15 min", text: $prepTime)
+            TextField("Cook time, e.g. 30 min", text: $cookTime)
+            TextField("Servings, e.g. 4", text: $servingsText)
+                .keyboardType(.numberPad)
+        }
+    }
+
+    @ViewBuilder
     private var collectionSection: some View {
         if showCollectionPicker, !viewModel.allCollections.isEmpty {
             Section("Collection") {
@@ -511,11 +552,16 @@ struct RecipeFormSheet: View {
                 await viewModel.updateRecipe(
                     id: recipe.id,
                     name: trimmedName,
-                    description: desc.isEmpty ? nil : desc
+                    description: desc.isEmpty ? nil : desc,
+                    sourceName: nilIfBlank(sourceName),
+                    sourceUrl: nilIfBlank(sourceURL),
+                    prepTime: nilIfBlank(prepTime),
+                    cookTime: nilIfBlank(cookTime),
+                    servings: servingsValue
                 )
                 await viewModel.updateIngredients(recipeId: recipe.id, ingredients: validIngredients)
                 await viewModel.updateSteps(recipeId: recipe.id, steps: validSteps)
-                
+
                 await handleImageUpdate(recipeId: recipe.id, existingImageUrl: recipe.imageUrl)
             } else {
                 let desc = descriptionText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -524,7 +570,12 @@ struct RecipeFormSheet: View {
                     description: desc.isEmpty ? nil : desc,
                     ingredients: validIngredients,
                     steps: validSteps,
-                    collectionId: showCollectionPicker ? selectedCollectionId : nil
+                    collectionId: showCollectionPicker ? selectedCollectionId : nil,
+                    sourceName: nilIfBlank(sourceName),
+                    sourceUrl: nilIfBlank(sourceURL),
+                    prepTime: nilIfBlank(prepTime),
+                    cookTime: nilIfBlank(cookTime),
+                    servings: servingsValue
                 )
                 
                 if let recipeId = viewModel.activeRecipeId {

@@ -184,7 +184,10 @@ struct RecipeDetailView: View {
                         .font(.quicksand(.body))
                         .foregroundStyle(.secondary)
                 }
-                
+
+                sourceRow
+                metaChipsRow
+
                 startCookingButton
                 RecipeAttributesSection(recipe: recipe, canEdit: viewModel.canEditRecipe(recipe), userId: userId)
                 ingredientsSection
@@ -193,6 +196,78 @@ struct RecipeDetailView: View {
             }
             .padding()
         }
+    }
+
+    /// "Source: <name>", where the name is a tappable link when a URL is set.
+    /// Shows nothing when neither a source name nor URL exists.
+    @ViewBuilder
+    private var sourceRow: some View {
+        let name = liveRecipe.sourceName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let urlString = liveRecipe.sourceUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let url = urlString.flatMap { $0.isEmpty ? nil : URL(string: $0) }
+        let hasName = !(name ?? "").isEmpty
+
+        if hasName || url != nil {
+            HStack(spacing: 6) {
+                Image(systemName: "safari")
+                    .font(.quicksand(.subheadline))
+                    .foregroundStyle(.secondary)
+                Text("Source:")
+                    .font(.quicksand(.subheadline))
+                    .foregroundStyle(.secondary)
+                if hasName, let name {
+                    if let url {
+                        Link(name, destination: url)
+                            .font(.quicksand(.subheadline, weight: .medium))
+                            .tint(Color.brandGreen)
+                    } else {
+                        Text(name)
+                            .font(.quicksand(.subheadline, weight: .medium))
+                    }
+                } else if let url {
+                    Link(url.host ?? url.absoluteString, destination: url)
+                        .font(.quicksand(.subheadline, weight: .medium))
+                        .tint(Color.brandGreen)
+                }
+            }
+        }
+    }
+
+    /// Compact row of prep time / cook time / servings chips; only present fields show.
+    @ViewBuilder
+    private var metaChipsRow: some View {
+        let prep = liveRecipe.prepTime?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cook = liveRecipe.cookTime?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let servings = liveRecipe.servings
+
+        if !(prep ?? "").isEmpty || !(cook ?? "").isEmpty || servings != nil {
+            HStack(spacing: 8) {
+                if let prep, !prep.isEmpty {
+                    metaChip(icon: "clock", text: "Prep \(prep)")
+                }
+                if let cook, !cook.isEmpty {
+                    metaChip(icon: "flame", text: "Cook \(cook)")
+                }
+                if let servings {
+                    metaChip(icon: "person.2", text: "\(servings) serving\(servings == 1 ? "" : "s")")
+                }
+            }
+        }
+    }
+
+    private func metaChip(icon: String, text: String) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.quicksand(.caption))
+                .foregroundStyle(Color.brandGreen)
+            Text(text)
+                .font(.quicksand(.caption, weight: .medium))
+                .foregroundStyle(.primary)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(Capsule())
     }
 
     @ViewBuilder

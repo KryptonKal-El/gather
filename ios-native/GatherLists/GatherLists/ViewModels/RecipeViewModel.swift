@@ -355,13 +355,18 @@ final class RecipeViewModel {
         description: String?,
         ingredients: [(name: String, quantity: String?)],
         steps: [String],
-        collectionId overrideCollectionId: UUID? = nil
+        collectionId overrideCollectionId: UUID? = nil,
+        sourceName: String? = nil,
+        sourceUrl: String? = nil,
+        prepTime: String? = nil,
+        cookTime: String? = nil,
+        servings: Int? = nil
     ) async {
         guard let collectionId = overrideCollectionId ?? activeCollectionId else {
             error = "No collection selected"
             return
         }
-        
+
         error = nil
         do {
             let newRecipe = try await RecipeService.createRecipe(
@@ -370,7 +375,12 @@ final class RecipeViewModel {
                 description: description,
                 collectionId: collectionId,
                 ingredients: ingredients,
-                steps: steps
+                steps: steps,
+                sourceName: sourceName,
+                sourceUrl: sourceUrl,
+                prepTime: prepTime,
+                cookTime: cookTime,
+                servings: servings
             )
             recipes.append(newRecipe)
             activeRecipeId = newRecipe.id
@@ -380,13 +390,41 @@ final class RecipeViewModel {
         }
     }
     
-    func updateRecipe(id: UUID, name: String?, description: String?) async {
+    func updateRecipe(
+        id: UUID,
+        name: String?,
+        description: String?,
+        sourceName: String? = nil,
+        sourceUrl: String? = nil,
+        prepTime: String? = nil,
+        cookTime: String? = nil,
+        servings: Int? = nil
+    ) async {
         error = nil
         do {
-            try await RecipeService.updateRecipe(recipeId: id, name: name, description: description)
-            if let index = recipes.firstIndex(where: { $0.id == id }) {
-                if let name { recipes[index].name = name }
-                if let description { recipes[index].description = description }
+            try await RecipeService.updateRecipe(
+                recipeId: id,
+                name: name,
+                description: description,
+                sourceName: sourceName,
+                sourceUrl: sourceUrl,
+                prepTime: prepTime,
+                cookTime: cookTime,
+                servings: servings
+            )
+            // Mirror into local state so the detail/grid reflect edits immediately.
+            func apply(_ update: (inout Recipe) -> Void) {
+                if let index = recipes.firstIndex(where: { $0.id == id }) { update(&recipes[index]) }
+                if activeRecipeDetail?.recipe.id == id { update(&activeRecipeDetail!.recipe) }
+            }
+            apply { recipe in
+                if let name { recipe.name = name }
+                if let description { recipe.description = description }
+                recipe.sourceName = sourceName
+                recipe.sourceUrl = sourceUrl
+                recipe.prepTime = prepTime
+                recipe.cookTime = cookTime
+                recipe.servings = servings
             }
         } catch {
             self.error = error.localizedDescription

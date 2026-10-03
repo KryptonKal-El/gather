@@ -136,6 +136,11 @@ struct ImportedRecipe {
     let ingredients: [(quantity: String, name: String)]
     let steps: [String]
     let imageUrl: String?
+    let sourceName: String?
+    let sourceUrl: String?
+    let prepTime: String?
+    let cookTime: String?
+    let servings: Int?
 }
 
 /// Why a URL recipe import failed, mapped to a friendly message for the user.
@@ -153,6 +158,11 @@ struct RecipeUrlImportService {
         let imageUrl: String
         let ingredients: [String]
         let steps: [String]
+        let sourceName: String?
+        let sourceUrl: String?
+        let prepTime: String?
+        let cookTime: String?
+        let servings: Int?
     }
 
     /// Fetches and parses the recipe at `urlString`. Throws `RecipeUrlImportError`
@@ -193,11 +203,20 @@ struct RecipeUrlImportService {
             let steps = payload.steps.map(\.trimmed).filter { !$0.isEmpty }
             guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeUrlImportError.noRecipeFound }
             let image = payload.imageUrl.trimmed
+            func cleaned(_ value: String?) -> String? {
+                let trimmed = value?.trimmed ?? ""
+                return trimmed.isEmpty ? nil : trimmed
+            }
             return ImportedRecipe(
                 name: payload.name.trimmed,
                 ingredients: ingredients,
                 steps: steps,
-                imageUrl: image.isEmpty ? nil : image
+                imageUrl: image.isEmpty ? nil : image,
+                sourceName: cleaned(payload.sourceName),
+                sourceUrl: cleaned(payload.sourceUrl),
+                prepTime: cleaned(payload.prepTime),
+                cookTime: cleaned(payload.cookTime),
+                servings: payload.servings
             )
         } catch let error as RecipeUrlImportError {
             throw error

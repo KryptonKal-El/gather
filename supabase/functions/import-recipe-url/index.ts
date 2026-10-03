@@ -12,6 +12,11 @@ interface ParsedRecipe {
   imageUrl: string;
   ingredients: string[];
   steps: string[];
+  sourceName: string;
+  sourceUrl: string;
+  prepTime: string;
+  cookTime: string;
+  servings: number | null;
 }
 
 const ALLOWED_ORIGINS = [
@@ -87,6 +92,74 @@ function extractSteps(instructions: unknown): string[] {
   return [];
 }
 
+/** The display name of a schema.org author/publisher (string | {name} | array). */
+function extractName(value: unknown): string {
+  if (!value) return '';
+  if (typeof value === 'string') return value.trim();
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const name = extractName(item);
+      if (name) return name;
+    }
+    return '';
+  }
+  const name = (value as Record<string, unknown>).name;
+  return typeof name === 'string' ? name.trim() : '';
+}
+
+/** The canonical page URL for the recipe, falling back to the fetched URL. */
+function extractSourceUrl(recipe: Record<string, unknown>, fetchedUrl: string): string {
+  const main = recipe.mainEntityOfPage;
+  if (typeof main === 'string') return main;
+  if (main && typeof main === 'object') {
+    const id = (main as Record<string, unknown>)['@id'];
+    if (typeof id === 'string') return id;
+  }
+  if (typeof recipe.url === 'string') return recipe.url;
+  return fetchedUrl;
+}
+
+/** Hostname (without www.) of a URL string, or '' if it can't be parsed. */
+function hostnameOf(urlString: string): string {
+  try {
+    return new URL(urlString).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Turns an ISO 8601 duration (e.g. "PT1H30M") into human text ("1 hr 30 min").
+ * Values that aren't ISO durations (e.g. "15 minutes") are returned trimmed, as-is.
+ */
+function durationToText(value: unknown): string {
+  const raw = asText(value);
+  if (!raw) return '';
+  const match = raw.match(/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/i);
+  if (!match) return raw;
+  const days = parseInt(match[1] ?? '0', 10);
+  const hours = parseInt(match[2] ?? '0', 10) + days * 24;
+  const minutes = parseInt(match[3] ?? '0', 10);
+  const parts: string[] = [];
+  if (hours > 0) parts.push(`${hours} hr`);
+  if (minutes > 0) parts.push(`${minutes} min`);
+  return parts.join(' ');
+}
+
+/** First whole number in a schema.org recipeYield (number | string | array). */
+function extractServings(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return Math.round(value);
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const n = extractServings(item);
+      if (n != null) return n;
+    }
+    return null;
+  }
+  const match = asText(value).match(/\d+/);
+  return match ? parseInt(match[0], 10) : null;
+}
+
 /** Depth-first search for the first schema.org Recipe node in parsed JSON-LD. */
 function findRecipeNode(node: unknown, depth = 0): Record<string, unknown> | null {
   if (!node || typeof node !== 'object' || depth > 6) return null;
@@ -106,7 +179,7 @@ function findRecipeNode(node: unknown, depth = 0): Record<string, unknown> | nul
 }
 
 /** Pulls every JSON-LD block out of the HTML and returns the first Recipe found. */
-function parseRecipeFromHtml(html: string): ParsedRecipe | null {
+function parseRecipeFromHtml(html: string, pageUrl: string): ParsedRecipe | null {
   // Quotes around the type are optional: Yoast and other common plugins emit
   // an unquoted `type=application/ld+json`.
   const scriptRegex = /<script[^>]*type=["']?application\/ld\+json["']?[^>]*>([\s\S]*?)<\/script>/gi;
@@ -130,11 +203,20 @@ function parseRecipeFromHtml(html: string): ParsedRecipe | null {
 
     if (ingredients.length === 0 && steps.length === 0) continue;
 
+    const sourceUrl = extractSourceUrl(recipe, pageUrl);
+    const sourceName =
+      extractName(recipe.author) || extractName(recipe.publisher) || hostnameOf(sourceUrl);
+
     return {
       name: asText(recipe.name),
       imageUrl: extractImage(recipe.image),
       ingredients,
       steps,
+      sourceName,
+      sourceUrl,
+      prepTime: durationToText(recipe.prepTime),
+      cookTime: durationToText(recipe.cookTime),
+      servings: extractServings(recipe.recipeYield),
     };
   }
   return null;
@@ -200,7 +282,7 @@ Deno.serve(async (req) => {
     }
 
     const html = await response.text();
-    const recipe = parseRecipeFromHtml(html);
+    const recipe = parseRecipeFromHtml(html, parsedUrl.toString());
     if (!recipe) {
       return json({ error: 'NO_RECIPE_FOUND' }, 422);
     }
