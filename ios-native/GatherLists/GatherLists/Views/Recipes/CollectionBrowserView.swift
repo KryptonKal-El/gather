@@ -344,20 +344,23 @@ struct CollectionBrowserView: View {
     @ViewBuilder
     private func gridContent(vm: RecipeViewModel) -> some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
+            // pinnedViews keeps each collection's header stuck to the top while
+            // its recipes scroll under it (single-level, grouped-list style).
+            LazyVStack(alignment: .leading, spacing: 12, pinnedViews: [.sectionHeaders]) {
                 chipRow(vm: vm)
 
                 if let selected = selectedCollection {
-                    collectionHeaderCard(selected)
-                        .padding(.horizontal, 16)
-
-                    if loadingSharedIds.contains(selected.id), sharedRecipesByCollection[selected.id] == nil {
-                        HStack { Spacer(); ProgressView(); Spacer() }
-                            .padding(.vertical, 32)
-                    } else if displayedRecipes.isEmpty {
-                        gridEmptyState(vm: vm)
-                    } else {
-                        recipeGrid(displayedRecipes)
+                    Section {
+                        if loadingSharedIds.contains(selected.id), sharedRecipesByCollection[selected.id] == nil {
+                            HStack { Spacer(); ProgressView(); Spacer() }
+                                .padding(.vertical, 32)
+                        } else if displayedRecipes.isEmpty {
+                            gridEmptyState(vm: vm)
+                        } else {
+                            recipeGrid(displayedRecipes)
+                        }
+                    } header: {
+                        stickyCollectionHeader(selected, isCollapsible: false)
                     }
                 } else {
                     let groups = groupedRecipes
@@ -368,10 +371,12 @@ struct CollectionBrowserView: View {
                         if allGrouping == .collection {
                             // Groups ordered A–Z, each in its collection's sort order.
                             ForEach(groups, id: \.collection.id) { group in
-                                collectionHeaderCard(group.collection, isCollapsible: true)
-                                    .padding(.horizontal, 16)
-                                if !isCollapsed(group.collection) {
-                                    recipeGrid(group.recipes)
+                                Section {
+                                    if !isCollapsed(group.collection) {
+                                        recipeGrid(group.recipes)
+                                    }
+                                } header: {
+                                    stickyCollectionHeader(group.collection, isCollapsible: true)
                                 }
                             }
                         } else {
@@ -503,6 +508,18 @@ struct CollectionBrowserView: View {
     }
 
     // MARK: - Collection header
+
+    /// A collection header wrapped in a full-width opaque band so that, when it
+    /// pins to the top, recipes scrolling underneath don't show through the gaps
+    /// around the inset card. The band matches the scroll view's background.
+    @ViewBuilder
+    private func stickyCollectionHeader(_ collection: RecipeCollection, isCollapsible: Bool) -> some View {
+        collectionHeaderCard(collection, isCollapsible: isCollapsible)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(.systemGroupedBackground))
+    }
 
     @ViewBuilder
     private func collectionHeaderCard(_ collection: RecipeCollection, isCollapsible: Bool = false) -> some View {
