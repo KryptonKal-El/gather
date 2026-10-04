@@ -68,13 +68,12 @@ final class RecipeViewModel {
         recipe.ownerId == userId || canWriteCollection(recipe.collectionId)
     }
 
-    /// Whether the recipe is missing details the meal planner needs: no
-    /// ingredients, or its attributes (course / meal types / protein / cuisine /
-    /// effort) aren't fully set. Returns false until attributes have loaded, so
-    /// cards don't flash a badge during the initial fetch.
+    /// Whether the recipe is missing meal-plan tags — its attributes (course /
+    /// meal types / protein / cuisine / effort) aren't fully set. This is the
+    /// only condition for the badge. Returns false until attributes have loaded,
+    /// so cards don't flash a badge during the initial fetch.
     func mealPlanIncomplete(_ recipe: Recipe) -> Bool {
         guard attributesLoaded else { return false }
-        if recipe.ingredientCount == 0 { return true }
         guard let attrs = attributesByRecipeId[recipe.id] else { return true }
         return !attrs.isMealPlanComplete
     }

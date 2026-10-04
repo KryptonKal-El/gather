@@ -14,7 +14,7 @@ struct RecipeAttributesSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Details")
+                Text("Tags")
                     .font(.quicksand(.headline, weight: .bold))
                 Spacer()
                 if canEdit && didLoad {
