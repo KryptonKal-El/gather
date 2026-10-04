@@ -155,6 +155,7 @@ struct RecipeFormSheet: View {
                 imageSection
                 recipeInfoSection
                 detailsSection
+                tagsSection
                 collectionSection
                 ingredientsSection
                 stepsSection
@@ -510,6 +511,22 @@ struct RecipeFormSheet: View {
                 TextField("4", text: $servingsText)
                     .multilineTextAlignment(.trailing)
                     .keyboardType(.numberPad)
+            }
+        }
+    }
+
+    /// The meal-plan tags (course, meal types, protein, cuisine, effort),
+    /// reusing the same editor as the recipe page. Edit mode only: new recipes
+    /// have no id to attach attributes to yet (they're auto-tagged after save).
+    @ViewBuilder
+    private var tagsSection: some View {
+        if let recipe = editRecipe {
+            Section {
+                RecipeAttributesSection(
+                    recipe: recipe,
+                    canEdit: viewModel.canEditRecipe(recipe),
+                    userId: viewModel.userId
+                )
             }
         }
     }
