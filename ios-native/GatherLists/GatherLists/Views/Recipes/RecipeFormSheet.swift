@@ -154,9 +154,9 @@ struct RecipeFormSheet: View {
             Form {
                 imageSection
                 recipeInfoSection
+                collectionSection
                 detailsSection
                 tagsSection
-                collectionSection
                 ingredientsSection
                 stepsSection
             }
