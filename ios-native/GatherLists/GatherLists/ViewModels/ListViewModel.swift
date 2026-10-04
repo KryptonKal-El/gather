@@ -384,15 +384,16 @@ final class ListViewModel {
         error = nil
         do {
             try await ListService.updateList(listId: id, name: name, emoji: emoji, color: color, type: type, categories: categories)
-            
-            // Update local state
+
+            // Update local state in whichever collection holds the list. A
+            // collaborator's list lives in `sharedLists`, not `ownedLists`, so
+            // updating only the latter left shared-list edits (e.g. adding a
+            // category) invisible even though the DB write succeeded.
             if let index = ownedLists.firstIndex(where: { $0.id == id }) {
-                if let name { ownedLists[index].name = name }
-                // Always update emoji (allows clearing by passing empty string)
-                ownedLists[index].emoji = emoji
-                if let color { ownedLists[index].color = color }
-                if let type { ownedLists[index].type = type }
-                if let categories { ownedLists[index].categories = categories }
+                applyLocalUpdate(to: &ownedLists[index], name: name, emoji: emoji, color: color, type: type, categories: categories)
+                rebuildAllLists()
+            } else if let index = sharedLists.firstIndex(where: { $0.id == id }) {
+                applyLocalUpdate(to: &sharedLists[index], name: name, emoji: emoji, color: color, type: type, categories: categories)
                 rebuildAllLists()
             }
         } catch {
@@ -400,7 +401,25 @@ final class ListViewModel {
             print("[ListViewModel] Failed to update list: \(error.localizedDescription)")
         }
     }
-    
+
+    /// Applies the non-nil fields of an update to a local list copy. A nil field
+    /// means "unchanged", matching the service layer, which omits nil fields from
+    /// the PATCH (so e.g. saving categories never blanks the list's emoji).
+    private func applyLocalUpdate(
+        to list: inout GatherList,
+        name: String?,
+        emoji: String?,
+        color: String?,
+        type: String?,
+        categories: [CategoryDef]?
+    ) {
+        if let name { list.name = name }
+        if let emoji { list.emoji = emoji }
+        if let color { list.color = color }
+        if let type { list.type = type }
+        if let categories { list.categories = categories }
+    }
+
     func deleteList(id: UUID) async {
         // Only allow deleting owned lists
         guard ownedLists.contains(where: { $0.id == id }) else {

@@ -147,7 +147,7 @@ struct ListDetailView: View {
                 }
             }
         }
-        .onChange(of: viewModel.ownedLists.first(where: { $0.id == list.id })?.categories) { _, newCategories in
+        .onChange(of: viewModel.allLists.first(where: { $0.id == list.id })?.categories) { _, newCategories in
             if let cats = newCategories {
                 detailViewModel?.updateCategories(cats)
             }
