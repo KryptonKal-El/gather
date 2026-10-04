@@ -658,6 +658,18 @@ struct CollectionBrowserView: View {
                     .padding(8)
                 }
             }
+            .overlay(alignment: .bottomTrailing) {
+                // Subtle nudge that the recipe is missing details the meal planner needs.
+                if viewModel?.mealPlanIncomplete(recipe) == true {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.quicksand(.caption2))
+                        .foregroundStyle(.orange)
+                        .padding(4)
+                        .background(.regularMaterial, in: Circle())
+                        .padding(6)
+                        .accessibilityLabel("Missing details for meal planning")
+                }
+            }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(recipe.name)

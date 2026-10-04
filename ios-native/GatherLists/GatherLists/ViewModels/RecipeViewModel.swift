@@ -10,6 +10,8 @@ final class RecipeViewModel {
     var collections: [RecipeCollection] = []
     var sharedCollections: [RecipeCollection] = []
     private(set) var collaboratorsByCollectionId: [UUID: [Profile]] = [:]
+    private(set) var attributesByRecipeId: [UUID: RecipeAttributes] = [:]
+    private(set) var attributesLoaded = false
     var recipes: [Recipe] = []
     var activeCollectionId: UUID?
     var activeRecipeId: UUID?
@@ -64,6 +66,17 @@ final class RecipeViewModel {
     /// it lives in a collection they can write to.
     func canEditRecipe(_ recipe: Recipe) -> Bool {
         recipe.ownerId == userId || canWriteCollection(recipe.collectionId)
+    }
+
+    /// Whether the recipe is missing details the meal planner needs: no
+    /// ingredients, or its attributes (course / meal types / protein / cuisine /
+    /// effort) aren't fully set. Returns false until attributes have loaded, so
+    /// cards don't flash a badge during the initial fetch.
+    func mealPlanIncomplete(_ recipe: Recipe) -> Bool {
+        guard attributesLoaded else { return false }
+        if recipe.ingredientCount == 0 { return true }
+        guard let attrs = attributesByRecipeId[recipe.id] else { return true }
+        return !attrs.isMealPlanComplete
     }
     
     // MARK: - Init
@@ -129,6 +142,7 @@ final class RecipeViewModel {
             await OfflineCache.shared.save(recipesResult, forKey: "recipes-\(userId.uuidString)")
 
             await loadCollaborators()
+            await loadAttributes()
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !collections.isEmpty || !sharedCollections.isEmpty || !recipes.isEmpty
@@ -239,9 +253,22 @@ final class RecipeViewModel {
             cachedAt = nil
 
             await loadCollaborators()
+            await loadAttributes()
         } catch {
             self.error = error.localizedDescription
             print("[RecipeViewModel] Failed to refetch data: \(error.localizedDescription)")
+        }
+    }
+
+    /// Loads every visible recipe's meal-plan attributes, for the "incomplete
+    /// for meal planning" badge on recipe cards.
+    private func loadAttributes() async {
+        do {
+            let all = try await RecipeAttributeService.fetchAll()
+            attributesByRecipeId = Dictionary(all.map { ($0.recipeId, $0) }, uniquingKeysWith: { first, _ in first })
+            attributesLoaded = true
+        } catch {
+            print("[RecipeViewModel] Failed to load recipe attributes: \(error.localizedDescription)")
         }
     }
 
