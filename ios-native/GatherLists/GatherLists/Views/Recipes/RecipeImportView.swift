@@ -90,6 +90,8 @@ struct RecipeImportView: View {
                     prefillName: draft.name,
                     prefillIngredients: draft.ingredients.map { (name: $0.name, quantity: $0.quantity) },
                     prefillSteps: draft.steps,
+                    prefillSourceName: draft.sourceName ?? "",
+                    prefillSourceUrl: draft.sourceUrl ?? "",
                     prefillPrepTime: draft.prepTime ?? "",
                     prefillCookTime: draft.cookTime ?? "",
                     prefillServings: draft.servings,

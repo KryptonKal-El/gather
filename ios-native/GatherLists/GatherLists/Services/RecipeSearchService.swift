@@ -125,6 +125,8 @@ struct ParsedRecipe {
     let prepTime: String?
     let cookTime: String?
     let servings: Int?
+    let sourceName: String?
+    let sourceUrl: String?
 }
 
 /// Why an on-device recipe parse produced no result.
@@ -258,6 +260,12 @@ struct RecipeTextParseService {
         without the label. Empty string if not stated.
         - servings: the number of servings or yield if stated (e.g. "SERVINGS: 8", \
         "Serves 4", "Makes 12"), as an integer. Use 0 if not stated.
+        - sourceName: the recipe's source or author if stated (e.g. a line like \
+        "Source: Minimalist Baker", "From: NYT Cooking", "Recipe by Jane Doe"), without \
+        the label. If only a source URL is given with no name, use an empty string. \
+        Empty string if not stated.
+        - sourceUrl: the source web link if the text contains one (e.g. "From: \
+        https://example.com/recipe" or a bare URL), copied exactly. Empty string if none.
 
         Rules:
         - Only use information present in the text. Never invent ingredients, steps, or amounts.
@@ -302,13 +310,17 @@ struct RecipeTextParseService {
             guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeParseError.failed }
             let prep = recipe.prepTime.trimmed
             let cook = recipe.cookTime.trimmed
+            let sourceName = recipe.sourceName.trimmed
+            let sourceUrl = recipe.sourceUrl.trimmed
             return ParsedRecipe(
                 name: recipe.name.trimmed,
                 ingredients: ingredients,
                 steps: steps,
                 prepTime: prep.isEmpty ? nil : prep,
                 cookTime: cook.isEmpty ? nil : cook,
-                servings: recipe.servings > 0 ? recipe.servings : nil
+                servings: recipe.servings > 0 ? recipe.servings : nil,
+                sourceName: sourceName.isEmpty ? nil : sourceName,
+                sourceUrl: sourceUrl.isEmpty ? nil : sourceUrl
             )
         } catch let error as RecipeParseError {
             throw error
@@ -358,6 +370,10 @@ private struct GeneratedRecipe {
     let cookTime: String
     @Guide(description: "The number of servings or yield as an integer, e.g. 8. Use 0 if not stated.")
     let servings: Int
+    @Guide(description: "The recipe's source or author without its label, e.g. 'Minimalist Baker'. Empty string if not stated.")
+    let sourceName: String
+    @Guide(description: "The source web link copied exactly, e.g. 'https://example.com/recipe'. Empty string if none.")
+    let sourceUrl: String
 }
 
 @available(iOS 26.0, *)
