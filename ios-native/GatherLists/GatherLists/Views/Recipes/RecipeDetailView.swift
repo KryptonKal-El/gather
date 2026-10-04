@@ -30,7 +30,14 @@ struct RecipeDetailView: View {
     @State private var editSteps: [RecipeStep] = []
     @State private var cookViewModel: CookSessionViewModel?
     @State private var showCookMode = false
-    @State private var showCookHistorySheet = false
+    @State private var selectedTab: DetailTab = .ingredients
+
+    /// The three sections of the recipe detail, shown one at a time under a sticky tab bar.
+    private enum DetailTab: String, CaseIterable {
+        case ingredients = "Ingredients"
+        case steps = "Steps"
+        case history = "Cook History"
+    }
 
     var body: some View {
         Group {
@@ -122,9 +129,6 @@ struct RecipeDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
-        .sheet(isPresented: $showCookHistorySheet) {
-            cookHistorySheet
-        }
         .fullScreenCover(isPresented: $showCookMode, onDismiss: {
             Task { await cookViewModel?.loadState() }
         }) {
@@ -164,39 +168,88 @@ struct RecipeDetailView: View {
     @ViewBuilder
     private var scrollContent: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                titleHeader
+            // pinnedViews keeps the tab bar stuck to the top once the header
+            // above it scrolls off (single-level pinning).
+            LazyVStack(alignment: .leading, spacing: 16, pinnedViews: [.sectionHeaders]) {
+                Group {
+                    titleHeader
 
-                if let imageUrl = liveRecipe.imageUrl, let url = URL(string: imageUrl) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(Color(.systemGray5))
-                            .overlay {
-                                ProgressView()
-                            }
+                    if let imageUrl = liveRecipe.imageUrl, let url = URL(string: imageUrl) {
+                        AsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Rectangle()
+                                .fill(Color(.systemGray5))
+                                .overlay {
+                                    ProgressView()
+                                }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: 250)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
-                    .frame(maxWidth: .infinity, maxHeight: 250)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
 
-                if let description = liveRecipe.description, !description.isEmpty {
-                    Text(description)
-                        .font(.quicksand(.body))
-                        .foregroundStyle(.secondary)
-                }
+                    if let description = liveRecipe.description, !description.isEmpty {
+                        Text(description)
+                            .font(.quicksand(.body))
+                            .foregroundStyle(.secondary)
+                    }
 
-                startCookingButton
-                metaRow
-                RecipeAttributesSection(recipe: recipe, canEdit: viewModel.canEditRecipe(recipe), userId: userId)
-                ingredientsSection
-                stepsSection
-                cookHistorySection
+                    startCookingButton
+                    metaRow
+                    RecipeAttributesSection(recipe: recipe, canEdit: viewModel.canEditRecipe(recipe), userId: userId)
+                }
+                .padding(.horizontal, 16)
+
+                Section {
+                    tabContent
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                } header: {
+                    tabBar
+                }
             }
-            .padding()
+            .padding(.vertical, 16)
+        }
+    }
+
+    /// Sticky three-tab selector. Full-width opaque background + bottom divider so
+    /// content doesn't show through when it's pinned to the top.
+    @ViewBuilder
+    private var tabBar: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ForEach(DetailTab.allCases, id: \.self) { tab in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) { selectedTab = tab }
+                    } label: {
+                        VStack(spacing: 6) {
+                            Text(tab.rawValue)
+                                .font(.quicksand(.subheadline, weight: selectedTab == tab ? .semibold : .regular))
+                                .foregroundStyle(selectedTab == tab ? Color.brandGreen : .secondary)
+                            Rectangle()
+                                .fill(selectedTab == tab ? Color.brandGreen : Color.clear)
+                                .frame(height: 2)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.top, 8)
+            Divider()
+        }
+        .background(Color(.systemBackground))
+    }
+
+    @ViewBuilder
+    private var tabContent: some View {
+        switch selectedTab {
+        case .ingredients: ingredientsTab
+        case .steps: stepsTab
+        case .history: cookHistoryTab
         }
     }
 
@@ -295,78 +348,50 @@ struct RecipeDetailView: View {
         }
     }
 
+    /// Cook History tab: the completed cook sessions for this recipe (date, time,
+    /// and duration), with an empty state before the recipe has been cooked.
     @ViewBuilder
-    private var cookHistorySection: some View {
+    private var cookHistoryTab: some View {
         let history = cookViewModel?.history ?? []
 
-        if !history.isEmpty {
-            Button {
-                showCookHistorySheet = true
-            } label: {
-                HStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.quicksand(.title3))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(history.count == 1 ? "Cooked once" : "Cooked \(history.count) times")
-                            .font(.quicksand(.body))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.primary)
-                        if let lastCooked = history.first?.completedAt {
-                            Text("Last cooked \(lastCooked.formatted(.relative(presentation: .named)))")
+        if history.isEmpty {
+            VStack(spacing: 8) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.quicksand(.title))
+                    .foregroundStyle(.secondary)
+                Text("No cooks yet")
+                    .font(.quicksand(.subheadline, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Text("Cook this recipe and it'll show up here.")
+                    .font(.quicksand(.caption))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 40)
+        } else {
+            VStack(alignment: .leading, spacing: 14) {
+                ForEach(history) { session in
+                    HStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .font(.quicksand(.title3))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text((session.completedAt ?? session.startedAt).formatted(date: .abbreviated, time: .shortened))
+                                .font(.quicksand(.body))
+                            Text(historyDuration(session))
                                 .font(.quicksand(.caption))
                                 .foregroundStyle(.secondary)
                         }
-                    }
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .font(.quicksand(.caption))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(14)
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    @ViewBuilder
-    private var cookHistorySheet: some View {
-        let history = cookViewModel?.history ?? []
-
-        NavigationStack {
-            List(history) { session in
-                HStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.quicksand(.title3))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(session.completedAt ?? session.startedAt, style: .date)
-                            .font(.quicksand(.body))
-                        Text(historyDuration(session))
+                        Spacer()
+                        Text(session.completedAt ?? session.startedAt, style: .relative)
                             .font(.quicksand(.caption))
                             .foregroundStyle(.secondary)
                     }
-                    Spacer()
-                    Text(session.completedAt ?? session.startedAt, style: .relative)
-                        .font(.quicksand(.caption))
-                        .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Cook History")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { showCookHistorySheet = false }
-                        .fontWeight(.semibold)
-                }
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        // Medium-detent sheets render the translucent glass material on iOS 26;
-        // an explicit background keeps the list readable.
-        .presentationBackground(Color(.systemGroupedBackground))
-        .presentationDetents([.medium, .large])
     }
 
     private func historyDuration(_ session: CookSession) -> String {
@@ -379,22 +404,10 @@ struct RecipeDetailView: View {
     }
     
     @ViewBuilder
-    private var ingredientsSection: some View {
+    private var ingredientsTab: some View {
         let ingredients = viewModel.activeRecipeDetail?.ingredients ?? []
-        
+
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Ingredients")
-                    .font(.quicksand(.title2))
-                    .fontWeight(.bold)
-                Text("\(ingredients.count)")
-                    .font(.quicksand(.caption))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color(.systemGray5))
-                    .clipShape(Capsule())
-            }
-            
             ForEach(ingredients) { ingredient in
                 HStack(spacing: 12) {
                     Button {
@@ -443,22 +456,10 @@ struct RecipeDetailView: View {
     }
     
     @ViewBuilder
-    private var stepsSection: some View {
+    private var stepsTab: some View {
         let steps = viewModel.activeRecipeDetail?.steps ?? []
-        
+
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Steps")
-                    .font(.quicksand(.title2))
-                    .fontWeight(.bold)
-                Text("\(steps.count)")
-                    .font(.quicksand(.caption))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(Color(.systemGray5))
-                    .clipShape(Capsule())
-            }
-            
             ForEach(Array(steps.enumerated()), id: \.element.id) { index, step in
                 HStack(alignment: .top, spacing: 12) {
                     Text("\(index + 1)")
