@@ -195,9 +195,30 @@ struct RecipeDetailView: View {
                 } header: {
                     tabBar
                 }
+
+                recordInfoFooter
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
             }
             .padding(.vertical, 16)
         }
+    }
+
+    /// Understated record info at the very bottom: when the recipe was added and,
+    /// if it's since changed, when it was last updated.
+    @ViewBuilder
+    private var recordInfoFooter: some View {
+        let created = liveRecipe.createdAt
+        let updated = liveRecipe.updatedAt
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Added \(created.formatted(date: .abbreviated, time: .omitted))")
+            if updated.timeIntervalSince(created) > 60 {
+                Text("Updated \(updated.formatted(date: .abbreviated, time: .omitted))")
+            }
+        }
+        .font(.quicksand(.caption2))
+        .foregroundStyle(.tertiary)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Sticky three-tab selector. Full-width opaque background + bottom divider so
