@@ -152,6 +152,8 @@ struct ImportedRecipe {
 enum RecipeUrlImportError: Error {
     case invalidUrl
     case noRecipeFound
+    /// The site is behind bot protection (e.g. Cloudflare) and can't be fetched.
+    case blocked
     case network
 }
 
@@ -168,6 +170,28 @@ struct RecipeUrlImportService {
         let prepTime: String?
         let cookTime: String?
         let servings: Int?
+    }
+
+    private struct ErrorPayload: Decodable {
+        let error: String
+    }
+
+    /// Maps the edge function's error body to a typed error, falling back to `statusCode`.
+    private static func mappedError(data: Data, statusCode: Int) -> RecipeUrlImportError {
+        if let payload = try? JSONDecoder().decode(ErrorPayload.self, from: data) {
+            switch payload.error {
+            case "BLOCKED": return .blocked
+            case "NO_RECIPE_FOUND": return .noRecipeFound
+            case "INVALID_URL": return .invalidUrl
+            default: break
+            }
+        }
+        switch statusCode {
+        case 403: return .blocked
+        case 422: return .noRecipeFound
+        case 400: return .invalidUrl
+        default: return .network
+        }
     }
 
     /// Fetches and parses the recipe at `urlString`. Throws `RecipeUrlImportError`
@@ -195,11 +219,7 @@ struct RecipeUrlImportService {
             let (data, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse else { throw RecipeUrlImportError.network }
             guard (200...299).contains(http.statusCode) else {
-                switch http.statusCode {
-                case 422: throw RecipeUrlImportError.noRecipeFound
-                case 400: throw RecipeUrlImportError.invalidUrl
-                default: throw RecipeUrlImportError.network
-                }
+                throw mappedError(data: data, statusCode: http.statusCode)
             }
             let payload = try JSONDecoder().decode(Payload.self, from: data)
             let ingredients = payload.ingredients

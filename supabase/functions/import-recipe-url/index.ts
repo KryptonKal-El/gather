@@ -178,6 +178,22 @@ function findRecipeNode(node: unknown, depth = 0): Record<string, unknown> | nul
   return null;
 }
 
+/**
+ * Detects a bot-protection interstitial (e.g. Cloudflare's "Just a moment…"
+ * JS challenge) returned with a 200 status in place of the real page.
+ */
+function looksBlocked(html: string): boolean {
+  const head = html.slice(0, 4000).toLowerCase();
+  return (
+    head.includes('just a moment') ||
+    head.includes('cf-browser-verification') ||
+    head.includes('challenge-platform') ||
+    head.includes('__cf_chl') ||
+    head.includes('cf-mitigated') ||
+    head.includes('enable javascript and cookies to continue')
+  );
+}
+
 /** Pulls every JSON-LD block out of the HTML and returns the first Recipe found. */
 function parseRecipeFromHtml(html: string, pageUrl: string): ParsedRecipe | null {
   // Quotes around the type are optional: Yoast and other common plugins emit
@@ -267,10 +283,17 @@ Deno.serve(async (req) => {
     const response = await fetch(parsedUrl.toString(), {
       method: 'GET',
       headers: {
-        // Some sites serve minimal markup to unknown agents; present as a browser.
+        // Present as a real browser; some sites serve minimal markup to unknown
+        // agents or lightly gate bots on the User-Agent / Sec-Fetch headers.
         'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
-        Accept: 'text/html,application/xhtml+xml',
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
       },
       signal: controller.signal,
     });
@@ -278,10 +301,16 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       console.error(`Fetch failed: ${response.status} for ${parsedUrl}`);
-      return json({ error: 'FETCH_FAILED' }, 502);
+      // 403/429/503 from a site typically means bot protection (e.g. Cloudflare).
+      const blocked = response.status === 403 || response.status === 429 || response.status === 503;
+      return json({ error: blocked ? 'BLOCKED' : 'FETCH_FAILED' }, blocked ? 403 : 502);
     }
 
     const html = await response.text();
+    // Some protected sites answer 200 with a challenge interstitial instead of the page.
+    if (looksBlocked(html)) {
+      return json({ error: 'BLOCKED' }, 403);
+    }
     const recipe = parseRecipeFromHtml(html, parsedUrl.toString());
     if (!recipe) {
       return json({ error: 'NO_RECIPE_FOUND' }, 422);

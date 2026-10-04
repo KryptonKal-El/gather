@@ -122,6 +122,8 @@ struct RecipeUrlImportView: View {
             errorMessage = "That doesn't look like a valid recipe link. Check the address and try again."
         } catch RecipeUrlImportError.noRecipeFound {
             errorMessage = "We couldn't find a recipe on that page. Some sites don't publish a readable recipe — try the \"Import from Text\" option instead."
+        } catch RecipeUrlImportError.blocked {
+            errorMessage = "This site blocks automated recipe imports. Open the recipe in your browser, copy the text, and use the \"Import from Text\" option instead."
         } catch {
             errorMessage = "We couldn't reach that page. Check your connection and try again."
         }
