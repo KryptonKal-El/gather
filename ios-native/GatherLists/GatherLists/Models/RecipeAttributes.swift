@@ -128,14 +128,14 @@ struct RecipeAttributes: Codable, Hashable {
         manualFields.contains(field.rawValue)
     }
 
-    /// Whether the categorisation the meal planner needs is fully set: course,
-    /// at least one meal type, protein, cuisine, and effort.
-    var isMealPlanComplete: Bool {
-        course != nil
-            && !mealTypes.isEmpty
-            && protein != nil
-            && cuisine != nil
-            && effort != nil
+    /// Whether no meal-plan tag is set at all — none of course, meal types,
+    /// protein, cuisine, or effort. Used to flag completely-untagged recipes.
+    var hasNoMealPlanTags: Bool {
+        course == nil
+            && mealTypes.isEmpty
+            && protein == nil
+            && cuisine == nil
+            && effort == nil
     }
 
     /// Short labels for display chips, in a stable order.

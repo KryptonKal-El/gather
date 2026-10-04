@@ -29,6 +29,7 @@ struct RecipeDetailView: View {
     @State private var editSteps: [RecipeStep] = []
     @State private var cookViewModel: CookSessionViewModel?
     @State private var showCookMode = false
+    @State private var ownerName: String?
     @State private var selectedTab: DetailTab = .ingredients
 
     /// The three sections of the recipe detail, shown one at a time under a sticky tab bar.
@@ -135,9 +136,20 @@ struct RecipeDetailView: View {
                 await cookViewModel?.loadState()
                 resumeCookIfRequested()
             }
+            Task { await resolveOwnerName() }
         }
         .onChange(of: notificationService.pendingCookRecipeId) { _, _ in
             resumeCookIfRequested()
+        }
+    }
+
+    /// Resolves who created the recipe for the footer: "you" when it's the
+    /// current user, otherwise their profile display name.
+    private func resolveOwnerName() async {
+        if liveRecipe.ownerId == userId {
+            ownerName = "you"
+        } else if let profile = try? await ProfileService.fetchProfile(userId: liveRecipe.ownerId) {
+            ownerName = profile.displayName
         }
     }
 
@@ -210,8 +222,13 @@ struct RecipeDetailView: View {
     private var recordInfoFooter: some View {
         let created = liveRecipe.createdAt
         let updated = liveRecipe.updatedAt
+        let addedDate = created.formatted(date: .abbreviated, time: .omitted)
         VStack(alignment: .leading, spacing: 2) {
-            Text("Added \(created.formatted(date: .abbreviated, time: .omitted))")
+            if let ownerName, !ownerName.isEmpty {
+                Text("Added \(addedDate)  ·  Created by \(ownerName)")
+            } else {
+                Text("Added \(addedDate)")
+            }
             if updated.timeIntervalSince(created) > 60 {
                 Text("Updated \(updated.formatted(date: .abbreviated, time: .omitted))")
             }
