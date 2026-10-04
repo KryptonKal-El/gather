@@ -189,9 +189,8 @@ struct RecipeDetailView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                metaChipsRow
-
                 startCookingButton
+                metaRow
                 RecipeAttributesSection(recipe: recipe, canEdit: viewModel.canEditRecipe(recipe), userId: userId)
                 ingredientsSection
                 stepsSection
@@ -242,41 +241,29 @@ struct RecipeDetailView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// Compact row of prep time / cook time / servings chips; only present fields show.
-    @ViewBuilder
-    private var metaChipsRow: some View {
+    /// The prep / cook / servings values joined into one line, or nil if none set.
+    private var metaSummary: String? {
         let prep = liveRecipe.prepTime?.trimmingCharacters(in: .whitespacesAndNewlines)
         let cook = liveRecipe.cookTime?.trimmingCharacters(in: .whitespacesAndNewlines)
         let servings = liveRecipe.servings
 
-        if !(prep ?? "").isEmpty || !(cook ?? "").isEmpty || servings != nil {
-            HStack(spacing: 8) {
-                if let prep, !prep.isEmpty {
-                    metaChip(icon: "clock", text: "Prep \(prep)")
-                }
-                if let cook, !cook.isEmpty {
-                    metaChip(icon: "flame", text: "Cook \(cook)")
-                }
-                if let servings {
-                    metaChip(icon: "person.2", text: "\(servings) serving\(servings == 1 ? "" : "s")")
-                }
-            }
-        }
+        var parts: [String] = []
+        if let prep, !prep.isEmpty { parts.append("Prep \(prep)") }
+        if let cook, !cook.isEmpty { parts.append("Cook \(cook)") }
+        if let servings { parts.append("\(servings) serving\(servings == 1 ? "" : "s")") }
+        return parts.isEmpty ? nil : parts.joined(separator: "  ·  ")
     }
 
-    private func metaChip(icon: String, text: String) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: icon)
+    /// Subtle one-line metadata (prep / cook / servings) under the Start Cooking
+    /// button. Only shown when at least one value exists, listing only those set.
+    @ViewBuilder
+    private var metaRow: some View {
+        if let metaSummary {
+            Text(metaSummary)
                 .font(.quicksand(.caption))
-                .foregroundStyle(Color.brandGreen)
-            Text(text)
-                .font(.quicksand(.caption, weight: .medium))
-                .foregroundStyle(.primary)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(Capsule())
     }
 
     @ViewBuilder
