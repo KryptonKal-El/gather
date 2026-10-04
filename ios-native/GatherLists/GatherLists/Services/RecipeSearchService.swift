@@ -122,6 +122,9 @@ struct ParsedRecipe {
     let name: String
     let ingredients: [(quantity: String, name: String)]
     let steps: [String]
+    let prepTime: String?
+    let cookTime: String?
+    let servings: Int?
 }
 
 /// Why an on-device recipe parse produced no result.
@@ -248,6 +251,13 @@ struct RecipeTextParseService {
         "salt and pepper" -> quantity "", name "salt and pepper".
         - steps: the ordered instructions, one entry per step. Strip leading numbers and \
         bullets. Combine wrapped lines that belong to the same step.
+        - prepTime: the preparation time if the text states one (e.g. a line like \
+        "PREP TIME: 2 min" or "Prep: 15 minutes"), copied as written without the label \
+        (e.g. "2 min"). Empty string if not stated.
+        - cookTime: the cooking time if stated (e.g. "COOK TIME: 5 min"), copied as written \
+        without the label. Empty string if not stated.
+        - servings: the number of servings or yield if stated (e.g. "SERVINGS: 8", \
+        "Serves 4", "Makes 12"), as an integer. Use 0 if not stated.
 
         Rules:
         - Only use information present in the text. Never invent ingredients, steps, or amounts.
@@ -290,7 +300,16 @@ struct RecipeTextParseService {
                 .filter { !$0.name.isEmpty }
             let steps = recipe.steps.map(\.trimmed).filter { !$0.isEmpty }
             guard !(ingredients.isEmpty && steps.isEmpty) else { throw RecipeParseError.failed }
-            return ParsedRecipe(name: recipe.name.trimmed, ingredients: ingredients, steps: steps)
+            let prep = recipe.prepTime.trimmed
+            let cook = recipe.cookTime.trimmed
+            return ParsedRecipe(
+                name: recipe.name.trimmed,
+                ingredients: ingredients,
+                steps: steps,
+                prepTime: prep.isEmpty ? nil : prep,
+                cookTime: cook.isEmpty ? nil : cook,
+                servings: recipe.servings > 0 ? recipe.servings : nil
+            )
         } catch let error as RecipeParseError {
             throw error
         } catch {
@@ -333,6 +352,12 @@ private struct GeneratedRecipe {
     let ingredients: [GeneratedIngredient]
     @Guide(description: "The ordered instructions, one entry per step.")
     let steps: [String]
+    @Guide(description: "The prep time as written without its label, e.g. '2 min'. Empty string if not stated.")
+    let prepTime: String
+    @Guide(description: "The cook time as written without its label, e.g. '5 min'. Empty string if not stated.")
+    let cookTime: String
+    @Guide(description: "The number of servings or yield as an integer, e.g. 8. Use 0 if not stated.")
+    let servings: Int
 }
 
 @available(iOS 26.0, *)

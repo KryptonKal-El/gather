@@ -90,6 +90,9 @@ struct RecipeImportView: View {
                     prefillName: draft.name,
                     prefillIngredients: draft.ingredients.map { (name: $0.name, quantity: $0.quantity) },
                     prefillSteps: draft.steps,
+                    prefillPrepTime: draft.prepTime ?? "",
+                    prefillCookTime: draft.cookTime ?? "",
+                    prefillServings: draft.servings,
                     saveButtonTitle: "Import",
                     onComplete: { dismiss() },
                     showCollectionPicker: true
