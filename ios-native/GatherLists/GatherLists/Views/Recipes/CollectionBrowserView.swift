@@ -42,10 +42,14 @@ struct CollectionBrowserView: View {
     // New-recipe flow
     @State private var showMethodChooser = false
     @State private var pendingCreateCollectionId: UUID?
+    @State private var pendingMethod: NewRecipeMethod?
     @State private var showScratchForm = false
     @State private var showImport = false
     @State private var showUrlImport = false
     @State private var showSearch = false
+
+    /// How a new recipe is started, chosen in the New Recipe sheet.
+    private enum NewRecipeMethod { case scratch, text, url, search }
 
     // Recipe card actions
     @State private var recipeToEdit: Recipe?
@@ -215,20 +219,12 @@ struct CollectionBrowserView: View {
                     .tint(.primary)
                 }
             }
-            .background {
-                // Hidden anchor so the method chooser inherits a readable tint
-                // instead of the brand-green that made its options hard to see.
-                Color.clear
-                    .tint(.primary)
-                    .confirmationDialog("New Recipe", isPresented: $showMethodChooser, titleVisibility: .visible) {
-                        Button("Start from Scratch") { beginCreate { showScratchForm = true } }
-                        if RecipeTextParseService.isAvailable {
-                            Button("Import from Text") { beginCreate { showImport = true } }
-                        }
-                        Button("Import from URL") { beginCreate { showUrlImport = true } }
-                        Button("Search Online") { showSearch = true }
-                        Button("Cancel", role: .cancel) {}
-                    }
+            // Custom sheet (not a confirmationDialog): a UIKit action sheet takes
+            // its tint from the window — the app-wide brand green — which made the
+            // option text low-contrast. This renders the labels in the primary
+            // label color so they're clearly legible in light and dark mode.
+            .sheet(isPresented: $showMethodChooser, onDismiss: runPendingMethod) {
+                newRecipeMethodSheet
             }
             .navigationDestination(for: Recipe.self) { recipe in
                 if let vm = viewModel {
@@ -910,6 +906,76 @@ struct CollectionBrowserView: View {
             viewModel?.selectCollection(id: target)
         }
         present()
+    }
+
+    // MARK: - New Recipe method chooser
+
+    @ViewBuilder
+    private var newRecipeMethodSheet: some View {
+        let rows = RecipeTextParseService.isAvailable ? 4 : 3
+        VStack(spacing: 0) {
+            Text("New Recipe")
+                .font(.quicksand(.headline))
+                .foregroundStyle(.primary)
+                .padding(.top, 20)
+                .padding(.bottom, 8)
+
+            methodRow(icon: "square.and.pencil", title: "Start from Scratch") { selectMethod(.scratch) }
+            if RecipeTextParseService.isAvailable {
+                methodDivider
+                methodRow(icon: "doc.plaintext", title: "Import from Text") { selectMethod(.text) }
+            }
+            methodDivider
+            methodRow(icon: "link", title: "Import from URL") { selectMethod(.url) }
+            methodDivider
+            methodRow(icon: "magnifyingglass", title: "Search Online") { selectMethod(.search) }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .presentationDetents([.height(CGFloat(rows) * 60 + 92)])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var methodDivider: some View {
+        Divider().padding(.leading, 60)
+    }
+
+    private func methodRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .font(.quicksand(.title3))
+                    .foregroundStyle(Color.brandGreen)
+                    .frame(width: 28)
+                Text(title)
+                    .font(.quicksand(.body, weight: .medium))
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Records the choice and dismisses the sheet; the action runs from the
+    /// sheet's onDismiss so the next screen presents cleanly after it closes.
+    private func selectMethod(_ method: NewRecipeMethod) {
+        pendingMethod = method
+        showMethodChooser = false
+    }
+
+    private func runPendingMethod() {
+        guard let method = pendingMethod else { return }
+        pendingMethod = nil
+        switch method {
+        case .scratch: beginCreate { showScratchForm = true }
+        case .text: beginCreate { showImport = true }
+        case .url: beginCreate { showUrlImport = true }
+        case .search: showSearch = true
+        }
     }
 
     private func beginEdit(_ recipe: Recipe) {
