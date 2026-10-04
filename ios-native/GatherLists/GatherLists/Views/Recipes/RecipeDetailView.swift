@@ -23,7 +23,6 @@ struct RecipeDetailView: View {
     @State private var checkedIngredients: Set<UUID> = []
     @State private var showEditSheet = false
     @State private var showDeleteConfirm = false
-    @State private var showMoveSheet = false
     @State private var showAddToListSheet = false
     @State private var addAllToList = false
     @State private var editIngredients: [RecipeIngredient] = []
@@ -74,16 +73,6 @@ struct RecipeDetailView: View {
                             Label("Edit", systemImage: "pencil")
                         }
 
-                        // Moving can pull a recipe out of a shared collection,
-                        // so it stays limited to the recipe's owner.
-                        if recipe.ownerId == userId {
-                            Button {
-                                showMoveSheet = true
-                            } label: {
-                                Label("Move to Collection", systemImage: "folder")
-                            }
-                        }
-
                         Divider()
 
                         Button(role: .destructive) {
@@ -104,9 +93,6 @@ struct RecipeDetailView: View {
                 editIngredients: editIngredients,
                 editSteps: editSteps
             )
-        }
-        .sheet(isPresented: $showMoveSheet) {
-            moveToCollectionSheet
         }
         .sheet(isPresented: $showAddToListSheet) {
             AddToListSheet(
@@ -472,40 +458,6 @@ struct RecipeDetailView: View {
                     
                     Text(step.instruction)
                         .font(.quicksand(.body))
-                }
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private var moveToCollectionSheet: some View {
-        NavigationStack {
-            List {
-                ForEach(viewModel.collections.filter { $0.id != recipe.collectionId }) { targetCollection in
-                    Button {
-                        Task {
-                            await viewModel.moveRecipe(recipeId: recipe.id, toCollectionId: targetCollection.id)
-                            showMoveSheet = false
-                        }
-                    } label: {
-                        HStack(spacing: 12) {
-                            Text((targetCollection.emoji?.containsVisualEmoji == true ? targetCollection.emoji : nil) ?? "📁")
-                                .font(.quicksand(.title2))
-                            Text(targetCollection.name)
-                                .font(.quicksand(.body))
-                            Spacer()
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .navigationTitle("Move to Collection")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        showMoveSheet = false
-                    }
                 }
             }
         }

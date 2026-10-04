@@ -104,7 +104,7 @@ struct RecipeFormSheet: View {
 
         _name = State(initialValue: editRecipe?.name ?? prefillName)
         _descriptionText = State(initialValue: editRecipe?.description ?? "")
-        _selectedCollectionId = State(initialValue: viewModel.activeCollectionId ?? viewModel.collections.first?.id)
+        _selectedCollectionId = State(initialValue: editRecipe?.collectionId ?? viewModel.activeCollectionId ?? viewModel.collections.first?.id)
         _sourceName = State(initialValue: editRecipe?.sourceName ?? prefillSourceName)
         _sourceURL = State(initialValue: editRecipe?.sourceUrl ?? prefillSourceUrl)
         _prepTime = State(initialValue: editRecipe?.prepTime ?? prefillPrepTime)
@@ -424,21 +424,42 @@ struct RecipeFormSheet: View {
     @ViewBuilder
     private var detailsSection: some View {
         Section("Details") {
-            TextField("Source name (optional)", text: $sourceName)
-            TextField("Source URL (optional)", text: $sourceURL)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .keyboardType(.URL)
-            TextField("Prep time, e.g. 15 min", text: $prepTime)
-            TextField("Cook time, e.g. 30 min", text: $cookTime)
-            TextField("Servings, e.g. 4", text: $servingsText)
-                .keyboardType(.numberPad)
+            LabeledContent("Source") {
+                TextField("e.g. NYT Cooking", text: $sourceName)
+                    .multilineTextAlignment(.trailing)
+            }
+            LabeledContent("Link") {
+                TextField("https://…", text: $sourceURL)
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .keyboardType(.URL)
+            }
+            LabeledContent("Prep time") {
+                TextField("15 min", text: $prepTime)
+                    .multilineTextAlignment(.trailing)
+            }
+            LabeledContent("Cook time") {
+                TextField("30 min", text: $cookTime)
+                    .multilineTextAlignment(.trailing)
+            }
+            LabeledContent("Servings") {
+                TextField("4", text: $servingsText)
+                    .multilineTextAlignment(.trailing)
+                    .keyboardType(.numberPad)
+            }
         }
+    }
+
+    /// The collection picker is shown for new recipes (to choose where they go)
+    /// and in edit mode (to move the recipe between collections).
+    private var collectionPickerVisible: Bool {
+        (showCollectionPicker || isEditMode) && !viewModel.allCollections.isEmpty
     }
 
     @ViewBuilder
     private var collectionSection: some View {
-        if showCollectionPicker, !viewModel.allCollections.isEmpty {
+        if collectionPickerVisible {
             Section("Collection") {
                 Picker("Collection", selection: $selectedCollectionId) {
                     ForEach(viewModel.allCollections) { collection in
@@ -561,6 +582,10 @@ struct RecipeFormSheet: View {
                 )
                 await viewModel.updateIngredients(recipeId: recipe.id, ingredients: validIngredients)
                 await viewModel.updateSteps(recipeId: recipe.id, steps: validSteps)
+
+                if let newCollectionId = selectedCollectionId, newCollectionId != recipe.collectionId {
+                    await viewModel.moveRecipe(recipeId: recipe.id, toCollectionId: newCollectionId)
+                }
 
                 await handleImageUpdate(recipeId: recipe.id, existingImageUrl: recipe.imageUrl)
             } else {
