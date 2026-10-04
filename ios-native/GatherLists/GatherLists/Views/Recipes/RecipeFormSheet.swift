@@ -31,9 +31,13 @@ struct RecipeFormSheet: View {
     @State private var imageData: Data?
     @State private var imageUrlString: String = ""
     @State private var showingImageMenu = false
+    @State private var pendingImageAction: AddPhotoAction?
     @State private var showingCamera = false
     @State private var showingPhotoPicker = false
     @State private var showingUrlInput = false
+
+    /// How the user chose to add a photo, from the Add Photo sheet.
+    private enum AddPhotoAction { case camera, library, paste, pasteURL }
     @State private var selectedPhotoItem: PhotosPickerItem?
     @State private var imageSource: ImageSource = .none
 
@@ -193,22 +197,11 @@ struct RecipeFormSheet: View {
             .animation(.easeInOut(duration: 0.2), value: isSaving)
         }
         .interactiveDismissDisabled(isSaving)
-        .confirmationDialog("Add Photo", isPresented: $showingImageMenu, titleVisibility: .visible) {
-            Button("Take Photo") {
-                showingCamera = true
-            }
-            Button("Choose from Library") {
-                showingPhotoPicker = true
-            }
-            if clipboardHasImage {
-                Button("Paste Image") {
-                    pasteImageFromClipboard()
-                }
-            }
-            Button("Paste Image URL") {
-                showingUrlInput = true
-            }
-            Button("Cancel", role: .cancel) {}
+        // Custom sheet (not a confirmationDialog): a UIKit action sheet takes its
+        // tint from the window — the app-wide brand green — which made the option
+        // text low-contrast. This renders the options in the primary label color.
+        .sheet(isPresented: $showingImageMenu, onDismiss: runPendingImageAction) {
+            addPhotoSheet
         }
         .fullScreenCover(isPresented: $showingCamera) {
             CameraPicker { data in
@@ -367,6 +360,76 @@ struct RecipeFormSheet: View {
         imageUrlString = ""
         imageSource = .none
         showingUrlInput = false
+    }
+
+    // MARK: - Add Photo chooser
+
+    @ViewBuilder
+    private var addPhotoSheet: some View {
+        let rows = clipboardHasImage ? 4 : 3
+        VStack(spacing: 0) {
+            Text("Add Photo")
+                .font(.quicksand(.headline))
+                .foregroundStyle(.primary)
+                .padding(.top, 20)
+                .padding(.bottom, 8)
+
+            photoRow(icon: "camera", title: "Take Photo") { selectImageAction(.camera) }
+            photoDivider
+            photoRow(icon: "photo.on.rectangle", title: "Choose from Library") { selectImageAction(.library) }
+            if clipboardHasImage {
+                photoDivider
+                photoRow(icon: "doc.on.clipboard", title: "Paste Image") { selectImageAction(.paste) }
+            }
+            photoDivider
+            photoRow(icon: "link", title: "Paste Image URL") { selectImageAction(.pasteURL) }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .presentationDetents([.height(CGFloat(rows) * 60 + 92)])
+        .presentationDragIndicator(.visible)
+    }
+
+    private var photoDivider: some View {
+        Divider().padding(.leading, 60)
+    }
+
+    private func photoRow(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .font(.quicksand(.title3))
+                    .foregroundStyle(Color.brandGreen)
+                    .frame(width: 28)
+                Text(title)
+                    .font(.quicksand(.body, weight: .medium))
+                    .foregroundStyle(.primary)
+                Spacer()
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    /// Records the choice and closes the sheet; the action runs from the sheet's
+    /// onDismiss so the camera / photo picker presents cleanly after it closes.
+    private func selectImageAction(_ action: AddPhotoAction) {
+        pendingImageAction = action
+        showingImageMenu = false
+    }
+
+    private func runPendingImageAction() {
+        guard let action = pendingImageAction else { return }
+        pendingImageAction = nil
+        switch action {
+        case .camera: showingCamera = true
+        case .library: showingPhotoPicker = true
+        case .paste: pasteImageFromClipboard()
+        case .pasteURL: showingUrlInput = true
+        }
     }
 
     /// Whether the clipboard holds an image. `UIPasteboard.hasImages` misses
