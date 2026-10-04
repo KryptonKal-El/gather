@@ -676,7 +676,7 @@ struct CollectionBrowserView: View {
                     .font(.quicksand(.subheadline))
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)
-                    .lineLimit(1)
+                    .lineLimit(2)
                 Text("\(recipe.ingredientCount) ingredients · \(recipe.stepCount) steps")
                     .font(.quicksand(.caption))
                     .foregroundStyle(.secondary)
