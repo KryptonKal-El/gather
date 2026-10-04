@@ -3,6 +3,7 @@ import SwiftUI
 /// A pushed view showing full recipe details with ingredients, steps, and actions.
 struct RecipeDetailView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Environment(NotificationService.self) private var notificationService
 
     let recipe: Recipe
@@ -41,6 +42,7 @@ struct RecipeDetailView: View {
             }
         }
         .navigationTitle(liveRecipe.name)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -163,6 +165,8 @@ struct RecipeDetailView: View {
     private var scrollContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                titleHeader
+
                 if let imageUrl = liveRecipe.imageUrl, let url = URL(string: imageUrl) {
                     AsyncImage(url: url) { image in
                         image
@@ -178,14 +182,13 @@ struct RecipeDetailView: View {
                     .frame(maxWidth: .infinity, maxHeight: 250)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                
+
                 if let description = liveRecipe.description, !description.isEmpty {
                     Text(description)
                         .font(.quicksand(.body))
                         .foregroundStyle(.secondary)
                 }
 
-                sourceRow
                 metaChipsRow
 
                 startCookingButton
@@ -198,39 +201,45 @@ struct RecipeDetailView: View {
         }
     }
 
-    /// "Source: <name>", where the name is a tappable link when a URL is set.
-    /// Shows nothing when neither a source name nor URL exists.
+    /// The recipe title (one step smaller than the nav large title, wrapping to
+    /// as many lines as needed so it's never truncated) with the source name as
+    /// a subtext line directly beneath. The source name is a tappable link that
+    /// opens in the default browser when a URL is set, otherwise plain text.
     @ViewBuilder
-    private var sourceRow: some View {
-        let name = liveRecipe.sourceName?.trimmingCharacters(in: .whitespacesAndNewlines)
+    private var titleHeader: some View {
+        let source = liveRecipe.sourceName?.trimmingCharacters(in: .whitespacesAndNewlines)
         let urlString = liveRecipe.sourceUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
         let url = urlString.flatMap { $0.isEmpty ? nil : URL(string: $0) }
-        let hasName = !(name ?? "").isEmpty
 
-        if hasName || url != nil {
-            HStack(spacing: 6) {
-                Image(systemName: "safari")
-                    .font(.quicksand(.subheadline))
-                    .foregroundStyle(.secondary)
-                Text("Source:")
-                    .font(.quicksand(.subheadline))
-                    .foregroundStyle(.secondary)
-                if hasName, let name {
-                    if let url {
-                        Link(name, destination: url)
+        VStack(alignment: .leading, spacing: 4) {
+            Text(liveRecipe.name)
+                .font(.quicksand(.title, weight: .bold))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            if let source, !source.isEmpty {
+                if let url {
+                    Button {
+                        openURL(url)
+                    } label: {
+                        Text(source)
                             .font(.quicksand(.subheadline, weight: .medium))
-                            .tint(Color.brandGreen)
-                    } else {
-                        Text(name)
-                            .font(.quicksand(.subheadline, weight: .medium))
+                            .foregroundStyle(Color.brandGreen)
+                            .underline()
+                            .multilineTextAlignment(.leading)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                } else if let url {
-                    Link(url.host ?? url.absoluteString, destination: url)
-                        .font(.quicksand(.subheadline, weight: .medium))
-                        .tint(Color.brandGreen)
+                    .buttonStyle(.plain)
+                } else {
+                    Text(source)
+                        .font(.quicksand(.subheadline))
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Compact row of prep time / cook time / servings chips; only present fields show.
