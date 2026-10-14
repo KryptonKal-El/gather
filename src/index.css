@@ -75,6 +75,10 @@
   --danger-hover: #c62828;
   --danger-tint: #ffebee;
 
+  /* Eat-out deal orange */
+  --deal: #B4570F;
+  --deal-tint: #FDF0E4;
+
   /* Info blue */
   --info: #1976d2;
   --info-dark: #1565c0;
@@ -165,6 +169,10 @@
   --danger: #ef5350;
   --danger-hover: #e53935;
   --danger-tint: #3d1c1c;
+
+  /* Eat-out deal orange */
+  --deal: #F5A25D;
+  --deal-tint: #3A2615;
 
   /* Info blue */
   --info: #42a5f5;

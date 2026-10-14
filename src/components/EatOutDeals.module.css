@@ -1,0 +1,277 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--overlay-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal {
+  background: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px var(--overlay-strong);
+  width: 100%;
+  max-width: 460px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.intro {
+  margin: 0;
+  padding: 0 1.25rem 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-hint);
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.75rem;
+}
+
+.dealBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-width: 0;
+}
+
+.dealBtn:hover {
+  background: var(--bg-hover);
+}
+
+.dealIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--deal-tint);
+  font-size: 1.1rem;
+}
+
+.dealIconOff {
+  background: var(--bg-hover-strong);
+  filter: grayscale(1);
+}
+
+.dealText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.dealName {
+  font-weight: 600;
+}
+
+.dealMeta {
+  font-size: 0.8rem;
+  color: var(--text-hint);
+}
+
+.dealWarn {
+  font-size: 0.78rem;
+  color: var(--deal);
+}
+
+.empty {
+  padding: 1rem 1.25rem;
+  text-align: center;
+  color: var(--text-hint);
+  font-size: 0.9rem;
+}
+
+.section {
+  padding: 0.5rem 1.25rem;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-bottom: 0.4rem;
+  padding: 0;
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--text-hint);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.input + .input {
+  margin-top: 0.5rem;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow-subtle);
+}
+
+.chips {
+  border: none;
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  border: 1px solid var(--border-default);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.chip:hover {
+  background: var(--bg-hover);
+}
+
+.chipActive,
+.chipActive:hover {
+  background: var(--primary-tint);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.checkedRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.linkBtn {
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.dangerLink {
+  color: var(--danger);
+}
+
+.error {
+  margin: 0.25rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 0;
+}
+
+.cancelBtn,
+.saveBtn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background: var(--cancel-bg);
+  color: var(--text-primary);
+}
+
+.cancelBtn:hover {
+  background: var(--cancel-hover);
+}
+
+.saveBtn {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+.saveBtn:disabled {
+  background: var(--disabled-bg);
+  cursor: not-allowed;
+}

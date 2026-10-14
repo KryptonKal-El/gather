@@ -31,6 +31,20 @@ const mapEntry = (row) => ({
   updatedAt: row.updated_at,
 });
 
+const mapDeal = (row) => ({
+  id: row.id,
+  mealPlanId: row.meal_plan_id,
+  restaurant: row.restaurant,
+  details: row.details,
+  address: row.address,
+  weekdays: row.weekdays ?? [],
+  meals: row.meals ?? [],
+  isActive: row.is_active,
+  lastCheckedOn: row.last_checked_on,
+  createdBy: row.created_by,
+  updatedAt: row.updated_at,
+});
+
 const mapRecipe = (row) => ({
   id: row.id,
   name: row.name,
@@ -386,12 +400,66 @@ export const getMealPlanCollaborators = async (planId) => {
  * @param {{onEntries: Function, onPlans: Function}} handlers
  * @returns {Function} Unsubscribe
  */
-export const subscribeMealPlans = (userId, { onEntries, onPlans }) => {
+/**
+ * Fetches a plan's eat-out deals, by restaurant name.
+ * @param {string} planId
+ * @returns {Promise<Array<object>>}
+ */
+export const fetchMealPlanDeals = async (planId) => {
+  const { data, error } = await supabase
+    .from('meal_plan_deals')
+    .select('*')
+    .eq('meal_plan_id', planId)
+    .order('restaurant', { ascending: true });
+  if (error) fail('load eat-out deals', error);
+  return data.map(mapDeal);
+};
+
+/**
+ * Creates a deal, or saves changes to an existing one when `id` is set.
+ * @param {Object} params
+ * @param {string|null} params.id
+ * @param {string} params.planId
+ * @param {{restaurant: string, details: string|null, address: string|null, weekdays: number[], meals: string[], isActive: boolean, lastCheckedOn: string|null}} params.deal
+ * @param {string} params.userId
+ * @returns {Promise<object>}
+ */
+export const saveMealPlanDeal = async ({ id, planId, deal, userId }) => {
+  const row = {
+    meal_plan_id: planId,
+    restaurant: deal.restaurant,
+    details: deal.details,
+    address: deal.address,
+    weekdays: [...deal.weekdays].sort((a, b) => a - b),
+    meals: deal.meals,
+    is_active: deal.isActive,
+    last_checked_on: deal.lastCheckedOn,
+    updated_at: new Date().toISOString(),
+  };
+  const query = id
+    ? supabase.from('meal_plan_deals').update(row).eq('id', id)
+    : supabase.from('meal_plan_deals').insert({ ...row, created_by: userId });
+  const { data, error } = await query.select().single();
+  if (error) fail('save eat-out deal', error);
+  return mapDeal(data);
+};
+
+/**
+ * Deletes a deal.
+ * @param {string} id
+ */
+export const deleteMealPlanDeal = async (id) => {
+  const { error } = await supabase.from('meal_plan_deals').delete().eq('id', id);
+  if (error) fail('delete eat-out deal', error);
+};
+
+export const subscribeMealPlans = (userId, { onEntries, onPlans, onDeals }) => {
   const channel = supabase
     .channel(`meal-plans-${userId}`)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'meal_plan_entries' }, () => onEntries())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'meal_plans' }, () => onPlans())
     .on('postgres_changes', { event: '*', schema: 'public', table: 'meal_plan_shares' }, () => onPlans())
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'meal_plan_deals' }, () => onDeals?.())
     .subscribe((status, err) => {
       if (status === 'CHANNEL_ERROR') {
         console.error('[subscribeMealPlans] Realtime subscription error:', err);

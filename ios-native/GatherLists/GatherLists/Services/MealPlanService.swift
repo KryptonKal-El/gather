@@ -191,6 +191,59 @@ struct MealPlanService {
             .execute()
     }
 
+    // MARK: - Eat-out Deals
+
+    static func fetchDeals(planId: UUID) async throws -> [MealPlanDeal] {
+        try await client
+            .from("meal_plan_deals")
+            .select()
+            .eq("meal_plan_id", value: planId)
+            .order("restaurant", ascending: true)
+            .execute()
+            .value
+    }
+
+    /// Creates a deal, or saves changes to an existing one when `id` is set.
+    static func saveDeal(_ draft: MealPlanDealDraft, id: UUID?, planId: UUID, userId: UUID) async throws -> MealPlanDeal {
+        let row = MealPlanDealWrite(
+            mealPlanId: planId,
+            restaurant: draft.restaurant,
+            details: draft.details,
+            address: draft.address,
+            weekdays: draft.weekdays.sorted(),
+            meals: MealType.allCases.filter { draft.meals.contains($0) }.map(\.rawValue),
+            isActive: draft.isActive,
+            lastCheckedOn: draft.lastCheckedOn,
+            createdBy: id == nil ? userId : nil,
+            updatedAt: Date()
+        )
+        if let id {
+            return try await client
+                .from("meal_plan_deals")
+                .update(row)
+                .eq("id", value: id)
+                .select()
+                .single()
+                .execute()
+                .value
+        }
+        return try await client
+            .from("meal_plan_deals")
+            .insert(row)
+            .select()
+            .single()
+            .execute()
+            .value
+    }
+
+    static func deleteDeal(id: UUID) async throws {
+        try await client
+            .from("meal_plan_deals")
+            .delete()
+            .eq("id", value: id)
+            .execute()
+    }
+
     // MARK: - Recipes
 
     /// Fetches every recipe the user can see: their own, shared collections, and ones planned in their plans.
@@ -244,7 +297,56 @@ struct MealPlanService {
     }
 }
 
+/// The editable fields of an eat-out deal, already trimmed.
+struct MealPlanDealDraft {
+    var restaurant: String
+    var details: String?
+    var address: String?
+    var weekdays: Set<Int>
+    var meals: Set<MealType>
+    var isActive: Bool
+    var lastCheckedOn: String?
+}
+
 // MARK: - DTOs
+
+private struct MealPlanDealWrite: Encodable {
+    let mealPlanId: UUID
+    let restaurant: String
+    let details: String?
+    let address: String?
+    let weekdays: [Int]
+    let meals: [String]
+    let isActive: Bool
+    let lastCheckedOn: String?
+    /// Only sent on insert; RLS requires it to be the caller.
+    let createdBy: UUID?
+    let updatedAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case mealPlanId = "meal_plan_id"
+        case restaurant, details, address, weekdays, meals
+        case isActive = "is_active"
+        case lastCheckedOn = "last_checked_on"
+        case createdBy = "created_by"
+        case updatedAt = "updated_at"
+    }
+
+    // Encode nils explicitly so clearing details or address actually clears them.
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(mealPlanId, forKey: .mealPlanId)
+        try container.encode(restaurant, forKey: .restaurant)
+        try container.encode(details, forKey: .details)
+        try container.encode(address, forKey: .address)
+        try container.encode(weekdays, forKey: .weekdays)
+        try container.encode(meals, forKey: .meals)
+        try container.encode(isActive, forKey: .isActive)
+        try container.encode(lastCheckedOn, forKey: .lastCheckedOn)
+        try container.encodeIfPresent(createdBy, forKey: .createdBy)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+}
 
 private struct MealPlanCollaboratorResponse: Decodable {
     let userId: UUID

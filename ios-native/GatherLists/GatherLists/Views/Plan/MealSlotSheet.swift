@@ -22,6 +22,15 @@ struct MealSlotSheet: View {
         viewModel.entry(for: day, meal: meal)
     }
 
+    private var dealsHere: [MealPlanDeal] {
+        viewModel.deals(for: day, meal: meal)
+    }
+
+    /// Eating out and custom meals both keep a free-text title (where, or what).
+    private var usesTitle: Bool {
+        kind == .custom || kind == .eatingOut
+    }
+
     private var canSave: Bool {
         switch kind {
         case .recipe: return selectedRecipe != nil
@@ -107,6 +116,32 @@ struct MealSlotSheet: View {
             Section("Meal") {
                 TextField("e.g. Sandwiches", text: $customTitle)
             }
+        } else if kind == .eatingOut {
+            Section("Where") {
+                TextField("Optional, e.g. Chili's", text: $customTitle)
+            }
+            if !dealsHere.isEmpty {
+                Section("Deals today") {
+                    ForEach(dealsHere) { deal in
+                        Button {
+                            customTitle = deal.restaurant
+                            note = deal.details ?? note
+                        } label: {
+                            HStack {
+                                Label(deal.badgeText, systemImage: "tag")
+                                    .foregroundStyle(Color.primary)
+                                Spacer()
+                                if customTitle == deal.restaurant {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(Color.brandGreen)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
         }
     }
 
@@ -155,7 +190,7 @@ struct MealSlotSheet: View {
         if existing.kind == .recipe, let recipeId = existing.recipeId {
             selectedRecipe = viewModel.recipesById[recipeId]
         }
-        if existing.kind == .custom {
+        if existing.kind == .custom || existing.kind == .eatingOut {
             customTitle = existing.title ?? ""
         }
     }
@@ -165,7 +200,7 @@ struct MealSlotSheet: View {
         if kind == .recipe, let selectedRecipe {
             await viewModel.setRecipe(selectedRecipe, day: day, meal: meal, note: note)
         } else {
-            await viewModel.setMarker(kind, title: kind == .custom ? customTitle : nil, day: day, meal: meal, note: note)
+            await viewModel.setMarker(kind, title: usesTitle ? customTitle : nil, day: day, meal: meal, note: note)
         }
         isSaving = false
         if viewModel.error == nil {

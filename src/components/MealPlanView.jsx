@@ -7,7 +7,8 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { AvatarGroup } from './AvatarGroup.jsx';
 import { MealSlotEditor } from './MealSlotEditor.jsx';
-import { MEAL_TYPES, ENTRY_KINDS, toDateKey, entryDisplayTitle } from '../utils/mealPlan.js';
+import { EatOutDealsDialog } from './EatOutDealsDialog.jsx';
+import { MEAL_TYPES, ENTRY_KINDS, toDateKey, entryDisplayTitle, dealBadgeText } from '../utils/mealPlan.js';
 import styles from './MealPlanView.module.css';
 
 const KIND_ICONS = Object.fromEntries(ENTRY_KINDS.map((k) => [k.id, k.icon]));
@@ -58,6 +59,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
   const [editing, setEditing] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPreparingList, setIsPreparingList] = useState(false);
+  const [isShowingDeals, setIsShowingDeals] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -141,6 +143,14 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                   onClick={() => { setIsMenuOpen(false); onManageSharing(); }}
                 >
                   {state.isOwner ? 'Share plan' : 'Plan members'}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles.menuItem}
+                  onClick={() => { setIsMenuOpen(false); setIsShowingDeals(true); }}
+                >
+                  Eat-out deals
                 </button>
                 <div className={styles.menuGroup}>
                   <span className={styles.menuGroupLabel}>Meals shown</span>
@@ -241,6 +251,8 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                   {state.enabledMeals.map((meal) => {
                     const entry = actions.getEntry(dateKey, meal.id);
                     const recipe = entry?.recipeId ? state.recipesById.get(entry.recipeId) : null;
+                    // No deal offer once the slot is already eating out or skipped.
+                    const slotDeals = ['eating_out', 'skip'].includes(entry?.kind) ? [] : actions.getDealsForSlot(dateKey, meal.id);
                     return (
                       <li key={meal.id} className={styles.slotRow}>
                         <button
@@ -293,6 +305,19 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                             )}
                           </span>
                         )}
+                        {slotDeals.map((deal) => (
+                          <span key={deal.id} className={styles.dealBadge}>
+                            <span className={styles.dealBadgeText}>🏷️ {dealBadgeText(deal)}</span>
+                            <button
+                              type="button"
+                              className={styles.dealBadgeBtn}
+                              onClick={() => actions.eatHere(deal, dateKey, meal.id)}
+                              aria-label={`Eat at ${deal.restaurant} instead for ${meal.label}`}
+                            >
+                              Eat here instead
+                            </button>
+                          </span>
+                        ))}
                       </li>
                     );
                   })}
@@ -310,10 +335,20 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
           mealLabel={editing.meal.label}
           entry={editingEntry}
           recipes={state.recipes}
+          deals={actions.getDealsForSlot(editing.dateKey, editing.meal.id)}
           onSave={(slot) => actions.saveSlot({ dateKey: editing.dateKey, meal: editing.meal.id, ...slot })}
           onClear={() => actions.clearSlot(editing.dateKey, editing.meal.id)}
           onViewRecipe={(recipeId) => { setEditing(null); onViewRecipe(recipeId); }}
           onClose={() => setEditing(null)}
+        />
+      )}
+
+      {isShowingDeals && (
+        <EatOutDealsDialog
+          deals={state.deals}
+          onSave={actions.saveDeal}
+          onDelete={actions.deleteDeal}
+          onClose={() => setIsShowingDeals(false)}
         />
       )}
     </div>
@@ -332,6 +367,7 @@ MealPlanView.propTypes = {
     recipes: PropTypes.array.isRequired,
     recipesById: PropTypes.instanceOf(Map).isRequired,
     collaborators: PropTypes.array.isRequired,
+    deals: PropTypes.array.isRequired,
     plannedRecipeIds: PropTypes.array.isRequired,
     isLoading: PropTypes.bool.isRequired,
     error: PropTypes.string,

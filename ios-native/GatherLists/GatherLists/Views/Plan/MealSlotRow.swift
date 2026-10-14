@@ -5,11 +5,20 @@ struct MealSlotRow: View {
     let meal: MealType
     let entry: MealPlanEntry?
     let recipe: Recipe?
+    /// Switched-on eat-out deals for this day and meal.
+    var deals: [MealPlanDeal] = []
+    var onEatHere: ((MealPlanDeal) -> Void)?
     var onToggleLock: (() -> Void)?
     var onSwap: (() -> Void)?
 
     private var isInactive: Bool {
         entry?.kind == .skip
+    }
+
+    /// Deals worth offering: none once the slot is already eating out or skipped.
+    private var offeredDeals: [MealPlanDeal] {
+        guard entry?.kind != .eatingOut, entry?.kind != .skip else { return [] }
+        return deals
     }
 
     var body: some View {
@@ -37,6 +46,9 @@ struct MealSlotRow: View {
                         .foregroundStyle(Color.brandGreen)
                         .lineLimit(1)
                 }
+                if !offeredDeals.isEmpty {
+                    dealBadge
+                }
             }
 
             Spacer(minLength: 0)
@@ -51,6 +63,34 @@ struct MealSlotRow: View {
         }
         .padding(.vertical, 2)
         .opacity(isInactive ? 0.6 : 1)
+    }
+
+    /// Tapping offers to eat at the deal's restaurant instead of what's planned.
+    private var dealBadge: some View {
+        Menu {
+            ForEach(offeredDeals) { deal in
+                Button {
+                    onEatHere?(deal)
+                } label: {
+                    Label("Eat at \(deal.restaurant) Instead", systemImage: "fork.knife")
+                }
+            }
+        } label: {
+            // HStack, not Label: a Menu's label gets list-row icon spacing, which looks detached here.
+            HStack(spacing: 4) {
+                Image(systemName: "tag.fill")
+                    .font(.caption2)
+                Text(offeredDeals.count == 1 ? offeredDeals[0].badgeText : "\(offeredDeals.count) eat-out deals today")
+                    .font(.quicksand(.caption, weight: .semibold))
+                    .lineLimit(1)
+                Image(systemName: "chevron.down")
+                    .font(.caption2.weight(.semibold))
+            }
+            .foregroundStyle(Color.dealOrange)
+        }
+        .buttonStyle(.borderless)
+        .disabled(onEatHere == nil)
+        .accessibilityHint("Shows the option to eat out here instead")
     }
 
     @ViewBuilder

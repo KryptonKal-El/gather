@@ -144,6 +144,63 @@ struct MealPlanEntry: Codable, Identifiable, Hashable {
     }
 }
 
+/// A restaurant with a recurring deal on certain days, mapped to the `meal_plan_deals` Supabase
+/// table. Deals belong to the plan, so every member sees the same ones.
+struct MealPlanDeal: Codable, Identifiable, Hashable {
+    let id: UUID
+    let mealPlanId: UUID
+    var restaurant: String
+    var details: String?
+    var address: String?
+    /// Monday = 0 … Sunday = 6, matching the planner.
+    var weekdays: [Int]
+    var meals: [String]
+    var isActive: Bool
+    /// Calendar day (`yyyy-MM-dd`) someone last confirmed the deal still runs.
+    var lastCheckedOn: String?
+    let createdBy: UUID?
+    let createdAt: Date
+    var updatedAt: Date
+
+    var mealTypes: [MealType] {
+        MealType.allCases.filter { meals.contains($0.rawValue) }
+    }
+
+    /// What the badge says, e.g. "Kids eat free at Chili's".
+    var badgeText: String {
+        if let details, !details.isEmpty { return "\(details) at \(restaurant)" }
+        return "Deal at \(restaurant)"
+    }
+
+    /// Whether the deal is on for this meal on this calendar day.
+    func applies(toDateKey dateKey: String, meal: MealType) -> Bool {
+        isActive && meals.contains(meal.rawValue) && weekdays.contains(MealPlanner.weekdayIndex(dateKey))
+    }
+
+    /// Days in Monday-first order, e.g. "Tue, Thu" or "Every day".
+    var weekdaysText: String {
+        let names = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        let sorted = Set(weekdays).sorted().filter { names.indices.contains($0) }
+        if sorted.count == 7 { return "Every day" }
+        return sorted.map { names[$0] }.joined(separator: ", ")
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case mealPlanId = "meal_plan_id"
+        case restaurant
+        case details
+        case address
+        case weekdays
+        case meals
+        case isActive = "is_active"
+        case lastCheckedOn = "last_checked_on"
+        case createdBy = "created_by"
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+}
+
 /// Calendar helpers for Monday-start meal plan weeks. Plan dates are local
 /// calendar days, stored as `yyyy-MM-dd`.
 enum MealPlanWeek {

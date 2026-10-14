@@ -5,7 +5,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { ENTRY_KINDS } from '../utils/mealPlan.js';
+import { ENTRY_KINDS, dealBadgeText } from '../utils/mealPlan.js';
 import styles from './MealSlotEditor.module.css';
 
 /**
@@ -14,15 +14,17 @@ import styles from './MealSlotEditor.module.css';
  * @param {string} props.mealLabel - e.g. "Dinner"
  * @param {Object|null} props.entry - The slot's current entry, if any
  * @param {Array<{id: string, name: string, lastCookedAt?: string}>} props.recipes - Plannable recipes
+ * @param {Array<{id: string, restaurant: string, details?: string|null}>} [props.deals] - Eat-out deals running for this slot
  * @param {Function} props.onSave - Called with ({kind, recipe, title, note}); resolves to whether it saved
  * @param {Function} props.onClear - Clears the slot
  * @param {Function} props.onViewRecipe - Called with a recipe id
  * @param {Function} props.onClose
  */
-export const MealSlotEditor = ({ heading, mealLabel, entry, recipes, onSave, onClear, onViewRecipe, onClose }) => {
+export const MealSlotEditor = ({ heading, mealLabel, entry, recipes, deals = [], onSave, onClear, onViewRecipe, onClose }) => {
   const [kind, setKind] = useState(entry?.kind ?? 'recipe');
   const [recipeId, setRecipeId] = useState(entry?.kind === 'recipe' ? entry.recipeId : null);
-  const [customTitle, setCustomTitle] = useState(entry?.kind === 'custom' ? entry.title ?? '' : '');
+  // Custom meals and eating out both keep a free-text title (what, or where).
+  const [customTitle, setCustomTitle] = useState(['custom', 'eating_out'].includes(entry?.kind) ? entry.title ?? '' : '');
   const [note, setNote] = useState(entry?.note ?? '');
   const [query, setQuery] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -51,7 +53,8 @@ export const MealSlotEditor = ({ heading, mealLabel, entry, recipes, onSave, onC
     e.preventDefault();
     if (!canSave || isSaving) return;
     setIsSaving(true);
-    const saved = await onSave({ kind, recipe: selectedRecipe, title: customTitle, note });
+    const title = ['custom', 'eating_out'].includes(kind) ? customTitle : null;
+    const saved = await onSave({ kind, recipe: selectedRecipe, title, note });
     setIsSaving(false);
     if (saved) onClose();
   };
@@ -134,6 +137,37 @@ export const MealSlotEditor = ({ heading, mealLabel, entry, recipes, onSave, onC
           </div>
         )}
 
+        {kind === 'eating_out' && (
+          <div className={styles.section}>
+            <label className={styles.label} htmlFor="meal-slot-where">Where</label>
+            <input
+              id="meal-slot-where"
+              className={styles.input}
+              value={customTitle}
+              onChange={(e) => setCustomTitle(e.target.value)}
+              placeholder="Optional, e.g. Chili's"
+            />
+            {deals.length > 0 && (
+              <div className={styles.dealPicks} role="group" aria-label="Deals today">
+                {deals.map((deal) => (
+                  <button
+                    key={deal.id}
+                    type="button"
+                    className={`${styles.kindBtn} ${customTitle === deal.restaurant ? styles.kindBtnActive : ''}`}
+                    aria-pressed={customTitle === deal.restaurant}
+                    onClick={() => {
+                      setCustomTitle(deal.restaurant);
+                      if (deal.details) setNote(deal.details);
+                    }}
+                  >
+                    🏷️ {dealBadgeText(deal)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className={styles.section}>
           <label className={styles.label} htmlFor="meal-slot-note">Note</label>
           <input
@@ -193,6 +227,11 @@ MealSlotEditor.propTypes = {
     name: PropTypes.string.isRequired,
     lastCookedAt: PropTypes.string,
   })).isRequired,
+  deals: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    restaurant: PropTypes.string.isRequired,
+    details: PropTypes.string,
+  })),
   onSave: PropTypes.func.isRequired,
   onClear: PropTypes.func.isRequired,
   onViewRecipe: PropTypes.func.isRequired,

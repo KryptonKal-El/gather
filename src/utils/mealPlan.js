@@ -117,3 +117,42 @@ export const mergeWeekIngredients = (plannedRecipeIds, ingredients) => {
   }
   return [...merged.values()];
 };
+
+const SHORT_WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+/**
+ * Monday = 0 … Sunday = 6 for a `YYYY-MM-DD` key, matching the planner and `meal_plan_deals.weekdays`.
+ * @param {string} dateKey
+ * @returns {number}
+ */
+export const dealWeekday = (dateKey) => (fromDateKey(dateKey).getDay() + 6) % 7;
+
+/**
+ * Switched-on eat-out deals that run for this meal on this day.
+ * @param {Array<{isActive: boolean, weekdays: number[], meals: string[]}>} deals
+ * @param {string} dateKey
+ * @param {string} meal
+ * @returns {Array<object>}
+ */
+export const dealsForSlot = (deals, dateKey, meal) => {
+  const weekday = dealWeekday(dateKey);
+  return deals.filter((d) => d.isActive && d.meals.includes(meal) && d.weekdays.includes(weekday));
+};
+
+/**
+ * What a deal's badge says, e.g. "Kids eat free at Chili's".
+ * @param {{restaurant: string, details?: string|null}} deal
+ * @returns {string}
+ */
+export const dealBadgeText = (deal) => (deal.details ? `${deal.details} at ${deal.restaurant}` : `Deal at ${deal.restaurant}`);
+
+/**
+ * A deal's days in Monday-first order, e.g. "Tue, Thu" or "Every day".
+ * @param {number[]} weekdays
+ * @returns {string}
+ */
+export const dealWeekdaysText = (weekdays) => {
+  const sorted = [...new Set(weekdays)].filter((d) => d >= 0 && d <= 6).sort((a, b) => a - b);
+  if (sorted.length === 7) return 'Every day';
+  return sorted.map((d) => SHORT_WEEKDAYS[d]).join(', ');
+};

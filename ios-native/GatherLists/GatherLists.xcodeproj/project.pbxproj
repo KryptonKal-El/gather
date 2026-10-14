@@ -20,6 +20,7 @@
 		MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANSVC0000000000001 /* MealPlanService.swift */; };
 		MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVM00000000000001 /* MealPlanViewModel.swift */; };
 		MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVIEW000000000001 /* MealPlanView.swift */; };
+		EATOUTDEALSSHEET00000002 /* EatOutDealsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */; };
 		MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTROW0000000000001 /* MealSlotRow.swift */; };
 		MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */; };
 		SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */; };
@@ -213,6 +214,7 @@
 		MEALPLANSVC0000000000001 /* MealPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanService.swift; sourceTree = "<group>"; };
 		MEALPLANVM00000000000001 /* MealPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanViewModel.swift; sourceTree = "<group>"; };
 		MEALPLANVIEW000000000001 /* MealPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanView.swift; sourceTree = "<group>"; };
+		EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EatOutDealsSheet.swift; sourceTree = "<group>"; };
 		MEALSLOTROW0000000000001 /* MealSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotRow.swift; sourceTree = "<group>"; };
 		MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotSheet.swift; sourceTree = "<group>"; };
 		SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMealPlanSheet.swift; sourceTree = "<group>"; };
@@ -572,6 +574,7 @@
 			children = (
 				DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */,
 				MEALPLANVIEW000000000001 /* MealPlanView.swift */,
+				EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */,
 				MEALSLOTROW0000000000001 /* MealSlotRow.swift */,
 				MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */,
 				SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */,
@@ -957,6 +960,7 @@
 				MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */,
 				MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */,
 				MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */,
+				EATOUTDEALSSHEET00000002 /* EatOutDealsSheet.swift in Sources */,
 				MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */,
 				MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */,
 				SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */,

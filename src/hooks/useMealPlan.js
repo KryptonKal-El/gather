@@ -20,6 +20,9 @@ import {
   getMealPlanShares,
   getMealPlanCollaborators,
   subscribeMealPlans,
+  fetchMealPlanDeals,
+  saveMealPlanDeal,
+  deleteMealPlanDeal,
 } from '../services/mealPlanDatabase.js';
 import { fetchAllRecipeAttributes } from '../services/recipeAttributesDatabase.js';
 import { planWeek, buildPreferences, learnQuickWeekdays } from '../utils/mealPlanner.js';
@@ -31,6 +34,7 @@ import {
   toDateKey,
   slotKey,
   mergeWeekIngredients,
+  dealsForSlot,
 } from '../utils/mealPlan.js';
 
 const ACTIVE_PLAN_KEY = 'gather_active_meal_plan_id';
@@ -86,6 +90,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const [entries, setEntries] = useState({});
   const [recipes, setRecipes] = useState([]);
   const [collaborators, setCollaborators] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPlanning, setIsPlanning] = useState(false);
@@ -148,6 +153,20 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     }
   }, []);
 
+  /** Best-effort: the plan still works without deals, so a failure is only logged. */
+  const loadDeals = useCallback(async (planId) => {
+    if (!planId) {
+      setDeals([]);
+      return;
+    }
+    try {
+      const rows = await fetchMealPlanDeals(planId);
+      if (planId === activePlanIdRef.current) setDeals(rows);
+    } catch (err) {
+      console.error('[useMealPlan] Failed to load deals:', err);
+    }
+  }, []);
+
   const loadPlans = useCallback(async () => {
     const writes = writesRef.current;
     for (;;) {
@@ -207,14 +226,14 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
         loadWeek(planId, weekStartRef.current),
       ]);
       setRecipes(recipeRows);
-      await loadCollaborators(planId);
+      await Promise.all([loadCollaborators(planId), loadDeals(planId)]);
     } catch (err) {
       console.error('[useMealPlan] Failed to load:', err);
       setError("Couldn't load your meal plan.");
     } finally {
       setIsLoading(false);
     }
-  }, [isActive, loadPlans, loadWeek, loadCollaborators]);
+  }, [isActive, loadPlans, loadWeek, loadCollaborators, loadDeals]);
 
   useEffect(() => {
     loadAll();
@@ -231,13 +250,14 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
         try {
           const planId = await loadPlans();
           await loadWeek(planId, weekStartRef.current);
-          await loadCollaborators(planId);
+          await Promise.all([loadCollaborators(planId), loadDeals(planId)]);
         } catch (err) {
           console.error('[useMealPlan] Failed to refresh plans:', err);
         }
       },
+      onDeals: () => loadDeals(activePlanIdRef.current),
     });
-  }, [isActive, userId, loadPlans, loadWeek, loadCollaborators]);
+  }, [isActive, userId, loadPlans, loadWeek, loadCollaborators, loadDeals]);
 
   const changeWeek = useCallback(async (nextStart) => {
     setWeekStart(nextStart);
@@ -263,9 +283,10 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     activePlanIdRef.current = planId;
     storePlanId(planId);
     setCollaborators([]);
+    setDeals([]);
     await changeWeek(weekStartRef.current);
-    await loadCollaborators(planId);
-  }, [changeWeek, loadCollaborators]);
+    await Promise.all([loadCollaborators(planId), loadDeals(planId)]);
+  }, [changeWeek, loadCollaborators, loadDeals]);
 
   /** Records reactions to suggestions so the planner learns (best-effort, never blocks the UI). */
   const recordFeedback = useCallback((events) => {
@@ -366,13 +387,41 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       storePlanId(null);
       activePlanIdRef.current = null;
       const nextId = await loadPlans();
+      setDeals([]);
       await loadWeek(nextId, weekStartRef.current);
-      await loadCollaborators(nextId);
+      await Promise.all([loadCollaborators(nextId), loadDeals(nextId)]);
     } catch (err) {
       console.error('[useMealPlan] Failed to leave plan:', err);
       setError("Couldn't leave this plan.");
     }
-  }, [isOwner, userEmail, loadPlans, loadWeek, loadCollaborators]);
+  }, [isOwner, userEmail, loadPlans, loadWeek, loadCollaborators, loadDeals]);
+
+  const getDealsForSlot = useCallback((dateKey, meal) => dealsForSlot(deals, dateKey, meal), [deals]);
+
+  /**
+   * Creates a deal, or updates the one with `id`. Throws so the editor can stay open on failure.
+   * @param {string|null} id
+   * @param {object} deal
+   */
+  const saveDeal = useCallback(async (id, deal) => {
+    const planId = activePlanIdRef.current;
+    if (!planId) return;
+    const saved = await saveMealPlanDeal({ id, planId, deal, userId });
+    setDeals((prev) => [...prev.filter((d) => d.id !== saved.id), saved]
+      .sort((a, b) => a.restaurant.localeCompare(b.restaurant, undefined, { sensitivity: 'base' })));
+  }, [userId]);
+
+  const deleteDeal = useCallback(async (deal) => {
+    setDeals((prev) => prev.filter((d) => d.id !== deal.id));
+    try {
+      await deleteMealPlanDeal(deal.id);
+    } catch (err) {
+      console.error('[useMealPlan] Failed to delete deal:', err);
+      setDeals((prev) => [...prev, deal]
+        .sort((a, b) => a.restaurant.localeCompare(b.restaurant, undefined, { sensitivity: 'base' })));
+      setError("Couldn't delete that deal.");
+    }
+  }, []);
 
   /**
    * Gathers everything the planner reads: recipe details, a year of cook history, what was
@@ -554,6 +603,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       recipes,
       recipesById,
       collaborators,
+      deals,
       plannedRecipeIds,
       isLoading,
       error,
@@ -565,6 +615,10 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       getEntry,
       saveSlot,
       clearSlot,
+      getDealsForSlot,
+      saveDeal,
+      deleteDeal,
+      eatHere: (deal, dateKey, meal) => saveSlot({ dateKey, meal, kind: 'eating_out', title: deal.restaurant, note: deal.details }),
       goToWeek,
       goToCurrentWeek,
       selectPlan,

@@ -15,6 +15,8 @@ final class MealPlanViewModel {
     private(set) var entriesBySlot: [String: MealPlanEntry] = [:]
     var recipes: [Recipe] = []
     private(set) var collaborators: [Profile] = []
+    /// The active plan's eat-out deals, by restaurant name.
+    private(set) var deals: [MealPlanDeal] = []
     var isLoading = false
     var error: String?
     var isShowingCachedData = false
@@ -72,6 +74,12 @@ final class MealPlanViewModel {
         entriesBySlot[Self.slotKey(MealPlanWeek.key(for: day), meal)]
     }
 
+    /// Switched-on deals that run for this meal on this day.
+    func deals(for day: Date, meal: MealType) -> [MealPlanDeal] {
+        let dateKey = MealPlanWeek.key(for: day)
+        return deals.filter { $0.applies(toDateKey: dateKey, meal: meal) }
+    }
+
     private static func slotKey(_ dateKey: String, _ meal: MealType) -> String {
         "\(dateKey)|\(meal.rawValue)"
     }
@@ -110,6 +118,7 @@ final class MealPlanViewModel {
             }
             if let cachedRecipes { recipes = cachedRecipes.data }
             await loadCachedWeek()
+            await loadCachedDeals()
         }
 
         do {
@@ -121,6 +130,7 @@ final class MealPlanViewModel {
             isShowingCachedData = false
             await OfflineCache.shared.save(recipes, forKey: "\(cacheKeyPrefix)-recipes")
             await loadCollaborators()
+            await refreshDeals()
         } catch {
             self.error = "Couldn't load your meal plan."
             isShowingCachedData = !plans.isEmpty
@@ -208,6 +218,34 @@ final class MealPlanViewModel {
         }
     }
 
+    private var dealsCacheKey: String? {
+        activePlanId.map { "\(cacheKeyPrefix)-\($0.uuidString)-deals" }
+    }
+
+    private func loadCachedDeals() async {
+        guard let key = dealsCacheKey else { return }
+        let cached: CachedEntry<[MealPlanDeal]>? = await OfflineCache.shared.load(forKey: key)
+        if let cached { deals = cached.data }
+    }
+
+    /// Best-effort: the plan still works without deals, so a failure is only logged.
+    private func refreshDeals() async {
+        guard let planId = activePlanId else {
+            deals = []
+            return
+        }
+        do {
+            let fetched = try await MealPlanService.fetchDeals(planId: planId)
+            guard planId == activePlanId else { return }
+            deals = fetched
+            if let key = dealsCacheKey {
+                await OfflineCache.shared.save(fetched, forKey: key)
+            }
+        } catch {
+            print("[MealPlanViewModel] Failed to load deals: \(error.localizedDescription)")
+        }
+    }
+
     func refresh() async {
         await load()
     }
@@ -224,6 +262,7 @@ final class MealPlanViewModel {
         let entryChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_entries")
         let planChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plans")
         let shareChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_shares")
+        let dealChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_deals")
 
         do {
             try await newChannel.subscribeWithError()
@@ -247,6 +286,11 @@ final class MealPlanViewModel {
                 await self?.reloadPlansAndWeek()
             }
         })
+        realtimeTasks.append(Task { [weak self] in
+            for await _ in dealChanges {
+                await self?.refreshDeals()
+            }
+        })
     }
 
     private func reloadPlansAndWeek() async {
@@ -254,6 +298,7 @@ final class MealPlanViewModel {
             try await refreshPlans()
             try await refreshWeek()
             await loadCollaborators()
+            await refreshDeals()
         } catch {
             print("[MealPlanViewModel] Failed to reload plans: \(error.localizedDescription)")
         }
@@ -289,8 +334,11 @@ final class MealPlanViewModel {
         activePlanId = planId
         UserDefaults.standard.set(planId.uuidString, forKey: Self.activePlanKey)
         collaborators = []
+        deals = []
+        await loadCachedDeals()
         await changeWeek()
         await loadCollaborators()
+        await refreshDeals()
     }
 
     // MARK: - Slot Actions
@@ -649,6 +697,34 @@ final class MealPlanViewModel {
         }
     }
 
+    // MARK: - Eat-out Deals
+
+    /// Creates a deal, or updates `existing`. Throws so the editor can stay open on failure.
+    func saveDeal(_ draft: MealPlanDealDraft, existing: MealPlanDeal?) async throws {
+        guard let planId = activePlanId else { return }
+        let saved = try await MealPlanService.saveDeal(draft, id: existing?.id, planId: planId, userId: userId)
+        deals.removeAll { $0.id == saved.id }
+        deals.append(saved)
+        deals.sort { $0.restaurant.localizedCaseInsensitiveCompare($1.restaurant) == .orderedAscending }
+    }
+
+    func deleteDeal(_ deal: MealPlanDeal) async {
+        let previous = deals
+        deals.removeAll { $0.id == deal.id }
+        do {
+            try await MealPlanService.deleteDeal(id: deal.id)
+        } catch {
+            deals = previous
+            self.error = "Couldn't delete that deal."
+            print("[MealPlanViewModel] Failed to delete deal: \(error.localizedDescription)")
+        }
+    }
+
+    /// Turns a slot into eating out at the deal's restaurant.
+    func eatHere(_ deal: MealPlanDeal, day: Date, meal: MealType) async {
+        await setMarker(.eatingOut, title: deal.restaurant, day: day, meal: meal, note: deal.details)
+    }
+
     // MARK: - Sharing
 
     func share(email: String) async throws {
@@ -672,8 +748,10 @@ final class MealPlanViewModel {
             UserDefaults.standard.removeObject(forKey: Self.activePlanKey)
             try await refreshPlans()
             entriesBySlot = [:]
+            deals = []
             try await refreshWeek()
             await loadCollaborators()
+            await refreshDeals()
         } catch {
             self.error = "Couldn't leave this plan."
             print("[MealPlanViewModel] Failed to leave plan: \(error.localizedDescription)")

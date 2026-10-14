@@ -7,6 +7,10 @@ import {
   shiftWeek,
   mergeWeekIngredients,
   entryDisplayTitle,
+  dealWeekday,
+  dealsForSlot,
+  dealBadgeText,
+  dealWeekdaysText,
 } from './mealPlan.js';
 
 describe('meal plan week math', () => {
@@ -57,5 +61,33 @@ describe('entryDisplayTitle', () => {
   it('prefers the title and falls back to the kind label', () => {
     expect(entryDisplayTitle({ kind: 'recipe', title: 'Tacos' })).toBe('Tacos');
     expect(entryDisplayTitle({ kind: 'eating_out', title: null })).toBe('Eating out');
+  });
+});
+
+describe('eat-out deals', () => {
+  const tuesdayDinner = { id: 'a', restaurant: "Chili's", details: 'Kids eat free', weekdays: [1], meals: ['dinner'], isActive: true };
+  const weekendBreakfast = { id: 'b', restaurant: 'IHOP', details: null, weekdays: [5, 6], meals: ['breakfast', 'lunch'], isActive: true };
+  const switchedOff = { ...tuesdayDinner, id: 'c', isActive: false };
+  const deals = [tuesdayDinner, weekendBreakfast, switchedOff];
+
+  it('numbers weekdays from Monday', () => {
+    expect(dealWeekday('2026-10-12')).toBe(0); // Monday
+    expect(dealWeekday('2026-10-13')).toBe(1); // Tuesday
+    expect(dealWeekday('2026-10-18')).toBe(6); // Sunday
+  });
+
+  it('matches only switched-on deals for the day and meal', () => {
+    expect(dealsForSlot(deals, '2026-10-13', 'dinner').map((d) => d.id)).toEqual(['a']);
+    expect(dealsForSlot(deals, '2026-10-13', 'lunch')).toEqual([]);
+    expect(dealsForSlot(deals, '2026-10-17', 'breakfast').map((d) => d.id)).toEqual(['b']);
+    expect(dealsForSlot(deals, '2026-10-18', 'lunch').map((d) => d.id)).toEqual(['b']);
+    expect(dealsForSlot(deals, '2026-10-14', 'dinner')).toEqual([]);
+  });
+
+  it('describes deals for badges and lists', () => {
+    expect(dealBadgeText(tuesdayDinner)).toBe("Kids eat free at Chili's");
+    expect(dealBadgeText(weekendBreakfast)).toBe('Deal at IHOP');
+    expect(dealWeekdaysText([6, 5])).toBe('Sat, Sun');
+    expect(dealWeekdaysText([0, 1, 2, 3, 4, 5, 6])).toBe('Every day');
   });
 });

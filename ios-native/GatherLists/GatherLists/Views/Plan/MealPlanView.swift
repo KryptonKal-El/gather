@@ -21,6 +21,7 @@ struct MealPlanView: View {
     @State private var isPreparingList = false
     @State private var showLeaveConfirm = false
     @State private var showDescribeWeek = false
+    @State private var showDeals = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -46,6 +47,11 @@ struct MealPlanView: View {
         .sheet(isPresented: $showDescribeWeek) {
             if let viewModel {
                 DescribeWeekSheet(viewModel: viewModel)
+            }
+        }
+        .sheet(isPresented: $showDeals) {
+            if let viewModel {
+                EatOutDealsSheet(viewModel: viewModel)
             }
         }
         .sheet(isPresented: $showShareSheet) {
@@ -116,6 +122,8 @@ struct MealPlanView: View {
             meal: meal,
             entry: entry,
             recipe: recipe,
+            deals: viewModel.deals(for: day, meal: meal),
+            onEatHere: { deal in Task { await viewModel.eatHere(deal, day: day, meal: meal) } },
             onToggleLock: { Task { await viewModel.toggleLock(day: day, meal: meal) } },
             onSwap: { Task { await viewModel.swap(day: day, meal: meal) } }
         )
@@ -217,6 +225,12 @@ struct MealPlanView: View {
                 showShareSheet = true
             } label: {
                 Label(viewModel.isOwner ? "Share Plan" : "Plan Members", systemImage: "person.2")
+            }
+
+            Button {
+                showDeals = true
+            } label: {
+                Label("Eat-out Deals", systemImage: "tag")
             }
 
             Menu {
