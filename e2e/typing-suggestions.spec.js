@@ -1,8 +1,7 @@
 /**
  * Typing-suggestion store label E2E tests for desktop-chrome project.
- * Bound to WorkIt Test Scenario "Typing suggestions show stores and restore
- * per-store details (web)": the same product bought at two stores appears as
- * one suggestion row per store, and picking a row adds the item under that
+ * The same product bought at two stores appears as one suggestion row per
+ * store, and picking a row adds the item under that
  * row's store even when the store picker says "No store".
  */
 import { test, expect } from '@playwright/test';
