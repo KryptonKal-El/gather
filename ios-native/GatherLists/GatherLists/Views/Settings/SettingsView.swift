@@ -149,6 +149,7 @@ struct SettingsView: View {
                     }
                 }
             }
+            .readableContentWidth()
             .navigationTitle("Settings")
             .onAppear {
                 if let settings = authViewModel.profile?.imageSearchSettings {

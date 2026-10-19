@@ -65,8 +65,7 @@ struct CollectionBrowserView: View {
     private static let sortKeyPrefix = "gather.recipeSort."
 
     private let gridColumns = [
-        GridItem(.flexible(), spacing: 14),
-        GridItem(.flexible(), spacing: 14)
+        GridItem(.adaptive(minimum: 160, maximum: 260), spacing: 14)
     ]
 
     private var hasNoCollections: Bool {
@@ -946,6 +945,7 @@ struct CollectionBrowserView: View {
         }
         .frame(maxWidth: .infinity)
         .presentationDetents([.height(CGFloat(rows) * 60 + 92)])
+        .fittedSheetSizing()
         .presentationDragIndicator(.visible)
     }
 

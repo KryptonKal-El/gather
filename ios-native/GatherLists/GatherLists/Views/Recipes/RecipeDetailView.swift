@@ -214,6 +214,7 @@ struct RecipeDetailView: View {
             }
             .padding(.vertical, 16)
         }
+        .readableContentWidth()
     }
 
     /// Understated record info at the very bottom: when the recipe was added and,

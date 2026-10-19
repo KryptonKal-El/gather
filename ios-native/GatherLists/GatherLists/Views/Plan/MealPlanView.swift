@@ -112,6 +112,7 @@ struct MealPlanView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .readableContentWidth()
         .refreshable { await viewModel.refresh() }
     }
 

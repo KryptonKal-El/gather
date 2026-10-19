@@ -296,6 +296,7 @@ struct ListBrowserView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .readableContentWidth()
         .refreshable {
             await vm.refresh()
         }

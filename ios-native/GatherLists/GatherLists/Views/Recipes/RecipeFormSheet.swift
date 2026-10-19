@@ -389,6 +389,7 @@ struct RecipeFormSheet: View {
         }
         .frame(maxWidth: .infinity)
         .presentationDetents([.height(CGFloat(rows) * 60 + 92)])
+        .fittedSheetSizing()
         .presentationDragIndicator(.visible)
     }
 
