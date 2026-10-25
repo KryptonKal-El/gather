@@ -39,6 +39,8 @@ struct CollectionBrowserView: View {
     @State private var sharedRecipesByCollection: [UUID: [Recipe]] = [:]
     @State private var loadingSharedIds: Set<UUID> = []
 
+    @FocusState private var searchFocused: Bool
+
     // New-recipe flow
     @State private var showMethodChooser = false
     @State private var pendingCreateCollectionId: UUID?
@@ -383,22 +385,63 @@ struct CollectionBrowserView: View {
             .padding(.vertical, 8)
         }
         .background(Color(.systemGroupedBackground))
+        .scrollDismissesKeyboard(.interactively)
         .refreshable {
             await vm.refresh()
             await loadAllSharedRecipes()
         }
-        .searchable(text: Binding(
-            get: { vm.searchQuery },
-            set: { vm.searchQuery = $0 }
-        ), prompt: "Search recipes & collections")
         .safeAreaInset(edge: .top, spacing: 0) {
-            if vm.isShowingCachedData {
-                CachedDataBanner(cachedAt: vm.cachedAt)
+            // A fixed top inset keeps the search bar pinned above the scrolling
+            // content — and therefore above the sticky collection headers inside
+            // the ScrollView — instead of scrolling away like a .searchable field.
+            VStack(spacing: 0) {
+                searchBar(vm: vm)
+                if vm.isShowingCachedData {
+                    CachedDataBanner(cachedAt: vm.cachedAt)
+                }
             }
+            .background(Color(.systemGroupedBackground))
         }
         .task {
             await loadAllSharedRecipes()
         }
+    }
+
+    // MARK: - Search bar
+
+    /// A persistent search field pinned at the top of the recipes tab. Lives in
+    /// the top safe-area inset so it stays visible above the sticky collection
+    /// headers while the grid scrolls underneath.
+    @ViewBuilder
+    private func searchBar(vm: RecipeViewModel) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+            TextField("Search recipes & collections", text: Binding(
+                get: { vm.searchQuery },
+                set: { vm.searchQuery = $0 }
+            ))
+            .font(.quicksand(.body))
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .submitLabel(.search)
+            .focused($searchFocused)
+            if !vm.searchQuery.isEmpty {
+                Button {
+                    vm.searchQuery = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 9)
+        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Collection chips
