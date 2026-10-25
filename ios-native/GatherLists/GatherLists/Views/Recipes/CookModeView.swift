@@ -378,6 +378,11 @@ struct CookModeView: View {
                 }
             }
         }
+        // Celebratory confetti drop that auto-plays when the finish screen
+        // appears and fades out on its own. Non-interactive — buttons stay live.
+        .overlay {
+            ConfettiView()
+        }
     }
 
     // MARK: - Helpers
