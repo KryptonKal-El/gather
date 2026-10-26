@@ -14,6 +14,7 @@ import {
   DESTRUCTIVE,
   IDEMPOTENT_WRITE,
   MAX_PAGE,
+  type GatherClient,
   type ToolContext,
   WRITE,
   capitalizeFirst,
@@ -30,8 +31,8 @@ const MAX_ENTRIES_PER_CALL = 63; // three meals a day for three weeks
 const MAX_INGREDIENTS_PER_CALL = 200;
 
 /** Reads every item on a list, paging past PostgREST's max_rows cap. */
-async function fetchAllItems(supabase: any, listId: string) {
-  const all: Array<{ id: string; name: string; quantity: number; unit: string; is_checked: boolean }> = [];
+async function fetchAllItems(supabase: GatherClient, listId: string) {
+  const all: Array<{ id: string; name: string; quantity: number | null; unit: string; is_checked: boolean | null }> = [];
   for (let from = 0; ; from += MAX_PAGE) {
     const { data, error } = await supabase
       .from('items')
@@ -47,7 +48,7 @@ async function fetchAllItems(supabase: any, listId: string) {
 }
 
 /** Fetches a cook session with its step snapshot. */
-async function loadCookSession(supabase: any, sessionId: string) {
+async function loadCookSession(supabase: GatherClient, sessionId: string) {
   const [sessionRes, stepsRes] = await Promise.all([
     supabase.from('cook_sessions').select('id, recipe_id, started_at, completed_at, current_step').eq('id', sessionId).maybeSingle(),
     supabase.from('cook_session_steps').select('id, sort_order, instruction, completed_at').eq('session_id', sessionId).order('sort_order', { ascending: true }),
@@ -80,7 +81,7 @@ export function registerPlanningTools(server: McpServer, ctx: ToolContext) {
       let { data, error } = await fetchPlans();
       if (error) return errorResult(error.message);
       let created = false;
-      if (data.length === 0) {
+      if (!data?.length) {
         const { error: insertError } = await supabase.from('meal_plans').insert({ owner_id: userId });
         // A unique index allows one owned plan; a concurrent create from another device is fine.
         if (insertError && insertError.code !== '23505') return errorResult(insertError.message);
@@ -90,7 +91,7 @@ export function registerPlanningTools(server: McpServer, ctx: ToolContext) {
       }
       return jsonResult({
         created,
-        plans: data.map((p: { owner_id: string }) => ({ ...p, is_owner: p.owner_id === userId })),
+        plans: (data ?? []).map((p) => ({ ...p, is_owner: p.owner_id === userId })),
       });
     },
   );
@@ -268,9 +269,9 @@ export function registerPlanningTools(server: McpServer, ctx: ToolContext) {
             id: existing.id,
             name: existing.name,
             unit: existing.unit,
-            was_checked: existing.is_checked,
-            current_quantity: existing.is_checked ? 0 : existing.quantity,
-            new_quantity: existing.is_checked ? ing.quantity : existing.quantity + ing.quantity,
+            was_checked: !!existing.is_checked,
+            current_quantity: existing.is_checked ? 0 : existing.quantity ?? 1,
+            new_quantity: existing.is_checked ? ing.quantity : (existing.quantity ?? 1) + ing.quantity,
           });
         } else {
           toAdd.push({

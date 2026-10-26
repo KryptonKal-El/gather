@@ -2,7 +2,12 @@
  * Shared helpers for the MCP tool modules: result wrappers, pagination
  * inputs, tool annotations, and the per-request tool context.
  */
+import type { SupabaseClient } from 'npm:@supabase/server@^1.9.2/peer/supabase-js';
 import { z } from 'npm:zod@^4.3.6';
+import type { Database } from './database.types.ts';
+
+/** RLS-scoped Supabase client typed against the generated schema. */
+export type GatherClient = SupabaseClient<Database>;
 
 // PostgREST caps responses at max_rows = 1000 (see config.toml); every list
 // tool paginates within that ceiling.
@@ -14,7 +19,7 @@ export const DEFAULT_PAGE = 200;
  * RLS-scoped client for the authenticated user — never a service-role client.
  */
 export interface ToolContext {
-  supabase: any;
+  supabase: GatherClient;
   userId: string;
   email: string | null;
 }

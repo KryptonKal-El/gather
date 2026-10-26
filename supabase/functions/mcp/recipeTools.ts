@@ -12,6 +12,7 @@ import { z } from 'npm:zod@^4.3.6';
 import {
   DESTRUCTIVE,
   IDEMPOTENT_WRITE,
+  type GatherClient,
   type ToolContext,
   WRITE,
   definedOnly,
@@ -93,7 +94,7 @@ async function ensureDefaultCollection({ supabase, userId }: ToolContext): Promi
  * Replaces a recipe's ingredients. New rows go in before old rows are removed,
  * so a failure never leaves the recipe with no ingredients.
  */
-async function replaceIngredients(supabase: any, recipeId: string, ingredients: z.infer<typeof ingredientsSchema>) {
+async function replaceIngredients(supabase: GatherClient, recipeId: string, ingredients: z.infer<typeof ingredientsSchema>) {
   const { data: old, error: oldError } = await supabase.from('recipe_ingredients').select('id').eq('recipe_id', recipeId);
   if (oldError) throw new Error(`Failed to read ingredients: recipeId=${recipeId}`, { cause: oldError });
   if (ingredients.length) {
@@ -109,7 +110,7 @@ async function replaceIngredients(supabase: any, recipeId: string, ingredients: 
 }
 
 /** Replaces a recipe's steps, insert-then-delete like {@link replaceIngredients}. */
-async function replaceSteps(supabase: any, recipeId: string, steps: string[]) {
+async function replaceSteps(supabase: GatherClient, recipeId: string, steps: string[]) {
   const { data: old, error: oldError } = await supabase.from('recipe_steps').select('id').eq('recipe_id', recipeId);
   if (oldError) throw new Error(`Failed to read steps: recipeId=${recipeId}`, { cause: oldError });
   if (steps.length) {

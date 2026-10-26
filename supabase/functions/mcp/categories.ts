@@ -13,10 +13,11 @@ export interface CategoryDef {
   keywords: string[];
 }
 
+/** `categories` is the list's raw jsonb column: a CategoryDef array or null. */
 export interface ListForCategories {
   id: string;
   type: string;
-  categories: CategoryDef[] | null;
+  categories: unknown;
 }
 
 /**
@@ -28,7 +29,8 @@ export async function resolveEffectiveCategories(
   { supabase, userId }: ToolContext,
   list: ListForCategories,
 ): Promise<CategoryDef[] | null> {
-  if (list.categories?.length) return list.categories;
+  const own = list.categories as CategoryDef[] | null;
+  if (own?.length) return own;
   const { data, error } = await supabase
     .from('user_category_defaults')
     .select('list_type, categories')

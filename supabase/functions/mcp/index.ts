@@ -12,11 +12,6 @@
  * Tools live in per-area modules: readTools (Phase 1 reads), listTools /
  * recipeTools / sharingTools (Phase 2 writes), planningTools (Phase 3 meal
  * planning, shopping, cook log).
- *
- * NOTE: `withSupabase` is used without its `<Database>` type parameter until
- * generated types are wired in (`supabase gen types typescript --linked`).
- * Queries run correctly RLS-scoped regardless; this only affects compile-time
- * column typing.
  */
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@^2.0.0';
@@ -27,11 +22,12 @@ import { registerPlanningTools } from './planningTools.ts';
 import { registerReadTools } from './readTools.ts';
 import { registerRecipeTools } from './recipeTools.ts';
 import { registerSharingTools } from './sharingTools.ts';
+import type { Database } from './database.types.ts';
 import type { ToolContext } from './shared.ts';
 
 Deno.serve(
   pipeline(
-    [withOAuthProtectedResource(), withSupabase({ auth: 'user' })],
+    [withOAuthProtectedResource(), withSupabase<Database>({ auth: 'user' })],
     // Keep the handler inline and its ctx un-annotated so the pipeline can
     // infer the context; an explicit type collapses it to `object`.
     async (req, { supabase, userClaims }) => {

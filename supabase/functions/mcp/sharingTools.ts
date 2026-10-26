@@ -29,7 +29,10 @@ const resourceInput = {
 
 /** Registers sharing tools for lists, collections, and meal plans. */
 export function registerSharingTools(server: McpServer, ctx: ToolContext) {
-  const { supabase, userId, email: myEmail } = ctx;
+  const { userId, email: myEmail } = ctx;
+  // The share table is picked at runtime, which the generated per-table types can't express.
+  // deno-lint-ignore no-explicit-any
+  const supabase: any = ctx.supabase;
 
   server.registerTool(
     'sharing_list',
@@ -47,7 +50,7 @@ export function registerSharingTools(server: McpServer, ctx: ToolContext) {
         .eq(r.fk, resource_id)
         .order('added_at', { ascending: true });
       if (error) return errorResult(error.message);
-      return jsonResult(data.map((row: { shared_with_email: string; added_at: string }) => ({
+      return jsonResult(data.map((row: { shared_with_email: string; added_at: string | null }) => ({
         email: row.shared_with_email,
         added_at: row.added_at,
       })));

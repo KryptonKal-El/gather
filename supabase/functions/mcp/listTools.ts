@@ -7,10 +7,12 @@
  */
 import { McpServer } from 'npm:@modelcontextprotocol/server@^2.0.0';
 import { z } from 'npm:zod@^4.3.6';
+import type { Json } from './database.types.ts';
 import { type CategoryDef, chooseCategory, resolveEffectiveCategories } from './categories.ts';
 import {
   DESTRUCTIVE,
   IDEMPOTENT_WRITE,
+  type GatherClient,
   type ToolContext,
   WRITE,
   capitalizeFirst,
@@ -45,7 +47,7 @@ const itemFieldsShape = {
 };
 
 /** Loads the fields of a list needed for category resolution, or null if inaccessible. */
-async function loadList(supabase: any, listId: string) {
+async function loadList(supabase: GatherClient, listId: string) {
   const { data, error } = await supabase
     .from('lists')
     .select('id, name, type, categories, owner_id')
@@ -56,8 +58,8 @@ async function loadList(supabase: any, listId: string) {
 }
 
 /** Writes `categories` onto a list, returning the saved array. */
-async function saveListCategories(supabase: any, listId: string, categories: CategoryDef[]) {
-  const { error } = await supabase.from('lists').update({ categories }).eq('id', listId);
+async function saveListCategories(supabase: GatherClient, listId: string, categories: CategoryDef[]) {
+  const { error } = await supabase.from('lists').update({ categories: categories as unknown as Json }).eq('id', listId);
   if (error) throw new Error(`Failed to save categories: listId=${listId}`, { cause: error });
   return categories;
 }
@@ -396,7 +398,7 @@ export function registerListTools(server: McpServer, ctx: ToolContext) {
       if (maxError) return errorResult(maxError.message);
       const { data, error } = await supabase
         .from('stores')
-        .insert({ list_id, name, color, sort_order: maxRow ? maxRow.sort_order + 1 : 0 })
+        .insert({ list_id, name, color, sort_order: (maxRow?.sort_order ?? -1) + 1 })
         .select('id, list_id, name, color, sort_order')
         .single();
       if (error) return errorResult(error.message);
