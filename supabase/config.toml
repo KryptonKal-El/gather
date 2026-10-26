@@ -342,13 +342,21 @@ enabled = false
 # domain = "example.clerk.accounts.dev"
 
 # OAuth server configuration
+# Enabled so Supabase Auth acts as the OAuth 2.1 authorization server for the
+# `mcp` edge function (MCP clients such as Claude connect via this flow).
 [auth.oauth_server]
 # Enable OAuth server functionality
-enabled = false
-# Path for OAuth consent flow UI
-authorization_url_path = "/oauth/consent"
-# Allow dynamic client registration
-allow_dynamic_registration = false
+enabled = true
+# Path for OAuth consent flow UI. Served by the existing React app entry
+# (/app/* routes to app.html), so the consent screen reuses the SPA + session.
+authorization_url_path = "/app/oauth/consent"
+# Allow dynamic client registration (RFC 7591) — MCP clients register this way
+allow_dynamic_registration = true
+
+# The MCP server verifies OAuth bearer tokens itself (via the Supabase auth
+# middleware), so the gateway's JWT check is disabled for this function.
+[functions.mcp]
+verify_jwt = false
 
 [edge_runtime]
 enabled = true

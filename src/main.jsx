@@ -7,22 +7,32 @@ import { ThemeProvider } from './context/ThemeContext.jsx';
 import { UndoProvider } from './context/UndoContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
 import { App } from './App.jsx';
+import { OAuthConsent } from './components/OAuthConsent.jsx';
 import './index.css';
+
+// The OAuth consent screen is served under the /app entry at /app/oauth/consent
+// (see supabase config.toml). Render it standalone — without the app's data
+// providers — so landing there never triggers a full app load.
+const isOAuthConsent = window.location.pathname.replace(/\/+$/, '') === '/app/oauth/consent';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <ShoppingListProvider>
-          <RecipeProvider>
-            <UndoProvider>
-              <ToastProvider>
-                <App />
-              </ToastProvider>
-            </UndoProvider>
-          </RecipeProvider>
-        </ShoppingListProvider>
-      </AuthProvider>
+      {isOAuthConsent ? (
+        <OAuthConsent />
+      ) : (
+        <AuthProvider>
+          <ShoppingListProvider>
+            <RecipeProvider>
+              <UndoProvider>
+                <ToastProvider>
+                  <App />
+                </ToastProvider>
+              </UndoProvider>
+            </RecipeProvider>
+          </ShoppingListProvider>
+        </AuthProvider>
+      )}
     </ThemeProvider>
   </StrictMode>,
 );
