@@ -2,6 +2,29 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase.js';
 import styles from './OAuthConsent.module.css';
 
+// Every connection can read and change the user's data (the MCP server acts
+// with their permissions), so this is listed regardless of requested scopes.
+const ACCOUNT_ACCESS = 'View and edit your lists, recipes, and meal plans';
+
+const SCOPE_LABELS = {
+  openid: 'Confirm who you are',
+  profile: 'See your name and profile picture',
+  email: 'See your email address',
+  phone: 'See your phone number',
+  offline_access: 'Stay connected until you disconnect it',
+};
+
+/**
+ * Turns the requested OAuth scopes into plain-language permission lines.
+ * Unknown scopes are shown as-is so nothing requested is hidden.
+ * @param {string} scope - Space-separated scope string
+ * @returns {string[]} Deduplicated permission labels
+ */
+const describeScopes = (scope) => {
+  const labels = (scope || '').split(/\s+/).filter(Boolean).map((s) => SCOPE_LABELS[s] ?? s);
+  return [...new Set([ACCOUNT_ACCESS, ...labels])];
+};
+
 /**
  * OAuth consent screen for the Gather Lists OAuth 2.1 server.
  *
@@ -12,7 +35,7 @@ import styles from './OAuthConsent.module.css';
  * user isn't signed in, it gates on a minimal sign-in first.
  *
  * Mounted by main.jsx at the path configured in Supabase Auth
- * (`[auth.oauth_server].authorization_url_path` = /app/oauth/consent).
+ * (the dashboard's Authorization Path `/oauth/consent`, under the `/app` site URL).
  */
 export function OAuthConsent() {
   const authorizationId = new URLSearchParams(window.location.search).get('authorization_id');
@@ -138,7 +161,7 @@ export function OAuthConsent() {
 
     // consent | submitting
     const clientName = details?.client?.name || 'An application';
-    const scopes = (details?.scope || '').split(/\s+/).filter(Boolean);
+    const permissions = describeScopes(details?.scope);
     const submitting = phase === 'submitting';
     return (
       <>
@@ -150,15 +173,11 @@ export function OAuthConsent() {
         </p>
         {errorMessage && <div className={styles.error}>{errorMessage}</div>}
         <ul className={styles.scopes}>
-          {scopes.length === 0 ? (
-            <li className={styles.scopeItem}><span className={styles.check}>✓</span> Access your lists, recipes, and meal plans</li>
-          ) : (
-            scopes.map((scope) => (
-              <li key={scope} className={styles.scopeItem}>
-                <span className={styles.check}>✓</span> {scope}
-              </li>
-            ))
-          )}
+          {permissions.map((permission) => (
+            <li key={permission} className={styles.scopeItem}>
+              <span className={styles.check}>✓</span> {permission}
+            </li>
+          ))}
         </ul>
         <div className={styles.actions}>
           <button
@@ -187,9 +206,11 @@ export function OAuthConsent() {
       <div className={styles.card}>
         <div className={styles.brand}>Gather Lists</div>
         {renderBody()}
-        <p className={styles.muted}>
-          You can revoke access at any time from your Gather Lists account settings.
-        </p>
+        {details && (
+          <p className={styles.muted}>
+            You can disconnect {details.client?.name || 'this app'} at any time from its connector settings.
+          </p>
+        )}
       </div>
     </div>
   );
