@@ -208,7 +208,7 @@ export function OAuthConsent() {
         {renderBody()}
         {details && (
           <p className={styles.muted}>
-            You can disconnect {details.client?.name || 'this app'} at any time from its connector settings.
+            You can disconnect {details.client?.name || 'this app'} at any time in Gather Lists under Settings → Connected Apps.
           </p>
         )}
       </div>

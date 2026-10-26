@@ -32,6 +32,10 @@ vi.mock('./CategoryEditor.jsx', () => ({
   CategoryEditor: () => <div>Category editor</div>,
 }));
 
+vi.mock('./ConnectedApps.jsx', () => ({
+  ConnectedApps: () => null,
+}));
+
 vi.mock('./ConfirmDialog.jsx', () => ({
   ConfirmDialog: () => <div role="dialog">Confirm reset</div>,
 }));

@@ -12,6 +12,7 @@ import { useShoppingList } from '../hooks/useShoppingList.js';
 import { CategoryEditor } from './CategoryEditor.jsx';
 import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { ConnectedApps } from './ConnectedApps.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import { getTypeConfig } from '../utils/listTypes.js';
@@ -337,6 +338,8 @@ export const MobileSettings = ({ user, onSignOut }) => {
            onCancel={() => setShowResetConfirm(false)}
          />
        )}
+
+      <ConnectedApps />
 
        <h3 className={styles.sectionHeader}>Account Actions</h3>
       <div className={styles.section}>

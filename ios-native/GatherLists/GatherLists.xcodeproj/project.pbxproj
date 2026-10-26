@@ -85,7 +85,9 @@
 		A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E297 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */; };
+		CONNAPPMODEL000000000002 /* ConnectedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPMODEL000000000001 /* ConnectedApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */; };
+		CONNAPPSVC00000000000002 /* ConnectedAppService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSVC00000000000001 /* ConnectedAppService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
 		A1B2C3D4E5F6A7B8C9D0F004 /* AppFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */; };
@@ -138,6 +140,7 @@
 		DUPLISTSHEET00000002 /* DuplicateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUPLISTSHEET00000001 /* DuplicateListSheet.swift */; };
 		E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */; };
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
+		CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */; };
 		ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */; };
 		LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */; };
 		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
@@ -287,7 +290,9 @@
 		A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
+		CONNAPPMODEL000000000001 /* ConnectedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
+		CONNAPPSVC00000000000001 /* ConnectedAppService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFont.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductSearchService.swift; sourceTree = "<group>"; };
@@ -339,6 +344,7 @@
 		DUPLISTSHEET00000001 /* DuplicateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateListSheet.swift; sourceTree = "<group>"; };
 		E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppsSection.swift; sourceTree = "<group>"; };
 		ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCountLockScreenWidget.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewLarge.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
@@ -479,6 +485,7 @@
 				A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */,
 				A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */,
 				A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */,
+				CONNAPPMODEL000000000001 /* ConnectedApp.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A2 /* ItemSuggestion.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2BD /* UserPreferences.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */,
@@ -505,6 +512,7 @@
 				COOKACTCTRL0000000000001 /* CookActivityController.swift */,
 				A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */,
+				CONNAPPSVC00000000000001 /* ConnectedAppService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B5 /* RecipeSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */,
@@ -625,6 +633,7 @@
 			isa = PBXGroup;
 			children = (
 				F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */,
+				CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */,
 			);
@@ -943,6 +952,7 @@
 				D3E4F5A6B7C8D9E0F1A2B3C4 /* LoginView.swift in Sources */,
 				E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */,
 				F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */,
+				CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E25E /* StoreBrowserView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E260 /* CreateStoreSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E262 /* EditStoreSheet.swift in Sources */,
@@ -989,7 +999,9 @@
 				A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E297 /* Profile.swift in Sources */,
+				CONNAPPMODEL000000000002 /* ConnectedApp.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */,
+				CONNAPPSVC00000000000002 /* ConnectedAppService.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0F004 /* AppFont.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */,

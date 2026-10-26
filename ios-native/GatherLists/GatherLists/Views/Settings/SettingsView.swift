@@ -135,6 +135,8 @@ struct SettingsView: View {
                     Task { await loadCategoryCounts() }
                 }
                 
+                ConnectedAppsSection()
+                
                 Section {
                     Button(role: .destructive) {
                         Task {

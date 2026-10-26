@@ -1,0 +1,93 @@
+.sectionHeader {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  padding: 0 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.section {
+  background: var(--bg-card);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.appInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.appName {
+  font-size: 1rem;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appMeta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.disconnectButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  font-size: 0.95rem;
+  color: var(--danger);
+  cursor: pointer;
+}
+
+.disconnectButton:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.linkButton {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  font-size: 0.95rem;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.message {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.errorText {
+  font-size: 0.9rem;
+  color: var(--danger);
+}
+
+.errorRow {
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--danger);
+  border-top: 1px solid var(--border-subtle);
+}

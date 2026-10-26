@@ -51,10 +51,10 @@ describe('OAuthConsent', () => {
     expect(screen.getByText('lists:admin')).toBeInTheDocument();
   });
 
-  it('points to the connecting app for disconnecting', async () => {
+  it('points to Connected Apps for disconnecting', async () => {
     await renderWithScope('openid');
 
-    expect(screen.getByText('You can disconnect Claude at any time from its connector settings.')).toBeInTheDocument();
+    expect(screen.getByText('You can disconnect Claude at any time in Gather Lists under Settings → Connected Apps.')).toBeInTheDocument();
     expect(screen.queryByText(/account settings/)).not.toBeInTheDocument();
   });
 });
