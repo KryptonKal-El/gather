@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { disconnectApp, fetchConnectedApps } from '../services/connectedApps.js';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
+import { ConnectAiAppSheet } from './ConnectAiAppSheet.jsx';
 import styles from './ConnectedApps.module.css';
 
 const formatConnectedDate = (iso) =>
@@ -17,15 +18,19 @@ export const ConnectedApps = () => {
   const [actionError, setActionError] = useState(null);
   const [pendingApp, setPendingApp] = useState(null);
   const [disconnectingId, setDisconnectingId] = useState(null);
+  const [isConnectOpen, setIsConnectOpen] = useState(false);
 
-  const loadApps = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(null);
+  const loadApps = useCallback(async ({ isSilent = false } = {}) => {
+    if (!isSilent) {
+      setIsLoading(true);
+      setLoadError(null);
+    }
     try {
       setApps(await fetchConnectedApps());
+      setLoadError(null);
     } catch (error) {
       console.error('[ConnectedApps] load failed', error);
-      setLoadError('Couldn’t load connected apps.');
+      if (!isSilent) setLoadError('Couldn’t load connected apps.');
     } finally {
       setIsLoading(false);
     }
@@ -33,6 +38,20 @@ export const ConnectedApps = () => {
 
   useEffect(() => {
     loadApps();
+  }, [loadApps]);
+
+  // Pick up an app approved in another tab (e.g. after adding it on claude.ai).
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') loadApps({ isSilent: true });
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [loadApps]);
+
+  const handleCloseConnect = useCallback(() => {
+    setIsConnectOpen(false);
+    loadApps({ isSilent: true });
   }, [loadApps]);
 
   const handleConfirmDisconnect = async () => {
@@ -59,7 +78,7 @@ export const ConnectedApps = () => {
       return (
         <div className={styles.row}>
           <span className={styles.errorText}>{loadError}</span>
-          <button type="button" className={styles.linkButton} onClick={loadApps}>
+          <button type="button" className={styles.linkButton} onClick={() => loadApps()}>
             Retry
           </button>
         </div>
@@ -96,7 +115,13 @@ export const ConnectedApps = () => {
       <div className={styles.section}>
         {renderBody()}
         {actionError && <div className={styles.errorRow}>{actionError}</div>}
+        <div className={styles.row}>
+          <button type="button" className={styles.linkButton} onClick={() => setIsConnectOpen(true)}>
+            Connect an AI app
+          </button>
+        </div>
       </div>
+      {isConnectOpen && <ConnectAiAppSheet onClose={handleCloseConnect} />}
       {pendingApp && (
         <ConfirmDialog
           title={`Disconnect ${pendingApp.name}?`}

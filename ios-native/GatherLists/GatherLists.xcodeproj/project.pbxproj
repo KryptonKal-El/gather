@@ -141,6 +141,7 @@
 		E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */; };
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
 		CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */; };
+		CONNAISHEET0000000000002 /* ConnectAiAppSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */; };
 		ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */; };
 		LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */; };
 		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
@@ -345,6 +346,7 @@
 		E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppsSection.swift; sourceTree = "<group>"; };
+		CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectAiAppSheet.swift; sourceTree = "<group>"; };
 		ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCountLockScreenWidget.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewLarge.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
@@ -634,6 +636,7 @@
 			children = (
 				F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */,
 				CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */,
+				CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */,
 			);
@@ -953,6 +956,7 @@
 				E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */,
 				F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */,
 				CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */,
+				CONNAISHEET0000000000002 /* ConnectAiAppSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E25E /* StoreBrowserView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E260 /* CreateStoreSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E262 /* EditStoreSheet.swift in Sources */,

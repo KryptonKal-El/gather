@@ -80,4 +80,17 @@ describe('ConnectedApps', () => {
 
     expect(await screen.findByText('Claude')).toBeInTheDocument();
   });
+
+  it('opens the connect sheet and refreshes the list when it closes', async () => {
+    const user = userEvent.setup();
+    fetchConnectedApps.mockResolvedValueOnce([]).mockResolvedValueOnce([CLAUDE]);
+    render(<ConnectedApps />);
+
+    await user.click(await screen.findByRole('button', { name: 'Connect an AI app' }));
+    const dialog = screen.getByRole('dialog', { name: 'Connect an AI app' });
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(await screen.findByText('Claude')).toBeInTheDocument();
+  });
 });

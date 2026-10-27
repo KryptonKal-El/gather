@@ -3,12 +3,14 @@ import SwiftUI
 /// Settings section listing apps connected to the account (such as Claude via
 /// the Gather MCP server), with a confirmed Disconnect for each.
 struct ConnectedAppsSection: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var apps: [ConnectedApp] = []
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var actionError: String?
     @State private var pendingApp: ConnectedApp?
     @State private var disconnectingId: String?
+    @State private var isConnectSheetPresented = false
 
     var body: some View {
         Section {
@@ -55,35 +57,50 @@ struct ConnectedAppsSection: View {
                     .font(.footnote)
                     .foregroundStyle(.red)
             }
+            // Section modifiers are copied onto every row, so the section's
+            // lifecycle and presentations hang off this always-present row.
+            Button("Connect an AI App") { isConnectSheetPresented = true }
+                .task { await load() }
+                // Pick up an app approved outside Gather (e.g. after adding it on claude.ai).
+                .onChange(of: scenePhase) { _, phase in
+                    if phase == .active { Task { await load(isSilent: true) } }
+                }
+                .sheet(isPresented: $isConnectSheetPresented, onDismiss: {
+                    Task { await load(isSilent: true) }
+                }) {
+                    ConnectAiAppSheet()
+                }
+                .alert(
+                    "Disconnect \(pendingApp?.name ?? "app")?",
+                    isPresented: Binding(
+                        get: { pendingApp != nil },
+                        set: { if !$0 { pendingApp = nil } }
+                    ),
+                    presenting: pendingApp
+                ) { app in
+                    Button("Cancel", role: .cancel) {}
+                    Button("Disconnect", role: .destructive) {
+                        Task { await disconnect(app) }
+                    }
+                } message: { app in
+                    Text("\(app.name) will no longer be able to see or change your lists, recipes, and meal plans. You can reconnect it later.")
+                }
         } header: {
             Text("Connected Apps")
         }
-        .task { await load() }
-        .alert(
-            "Disconnect \(pendingApp?.name ?? "app")?",
-            isPresented: Binding(
-                get: { pendingApp != nil },
-                set: { if !$0 { pendingApp = nil } }
-            ),
-            presenting: pendingApp
-        ) { app in
-            Button("Cancel", role: .cancel) {}
-            Button("Disconnect", role: .destructive) {
-                Task { await disconnect(app) }
-            }
-        } message: { app in
-            Text("\(app.name) will no longer be able to see or change your lists, recipes, and meal plans. You can reconnect it later.")
-        }
     }
 
-    private func load() async {
-        isLoading = true
-        loadError = nil
+    private func load(isSilent: Bool = false) async {
+        if !isSilent {
+            isLoading = true
+            loadError = nil
+        }
         do {
             apps = try await ConnectedAppService.fetchConnectedApps()
+            loadError = nil
         } catch {
             print("[ConnectedAppsSection] load failed: \(error)")
-            loadError = "Couldn’t load connected apps."
+            if !isSilent { loadError = "Couldn’t load connected apps." }
         }
         isLoading = false
     }
