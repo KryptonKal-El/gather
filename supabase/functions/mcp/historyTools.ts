@@ -1,12 +1,14 @@
 /**
- * Item history tools: what the user has added to lists over time.
+ * History tools: what the user has added to lists, and what they have cooked.
  *
  * `history` gets one row per item added to a list (the apps' suggestion
  * source), so counting rows by name gives how often something is added.
+ * `cook_sessions` gets one row per cook started in cooking mode.
  */
 import { McpServer } from 'npm:@modelcontextprotocol/server@^2.0.0';
 import { z } from 'npm:zod@^4.3.6';
 import {
+  DEFAULT_PAGE,
   MAX_PAGE,
   READ_ONLY,
   type ToolContext,
@@ -14,6 +16,7 @@ import {
   dateKey,
   errorResult,
   jsonResult,
+  paginationShape,
   uuid,
 } from './shared.ts';
 
@@ -51,11 +54,18 @@ type HistorySummary = {
 /** Escapes LIKE wildcards so a search term matches literally. */
 const escapeLike = (term: string) => term.replace(/[\\%_]/g, (c) => `\\${c}`);
 
+/** Adds one day to a yyyy-MM-dd key, for an exclusive upper bound. */
+const nextDay = (date: string) => {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+};
+
 /**
- * Registers the item history tools on a per-request MCP server.
+ * Registers the item and cook history tools on a per-request MCP server.
  */
 export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
-  const { supabase } = ctx;
+  const { supabase, userId } = ctx;
 
   server.registerTool(
     'history_summary',
@@ -149,6 +159,55 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
         truncated: isTruncated,
         items,
       });
+    },
+  );
+
+  server.registerTool(
+    'cook_history',
+    {
+      annotations: READ_ONLY,
+      title: 'List cook history',
+      description:
+        'List cooks logged in cooking mode, newest first: recipe, when it was started and finished, the notes saved, and whether the user or a collaborator cooked it. Covers recipes the user can see, so collaborators\' cooks on shared recipes are included unless mine_only is set. For totals per recipe, cook_count and last_cooked_at on recipes_list are quicker.',
+      inputSchema: z.object({
+        recipe_id: uuid('Only cooks of this recipe.').optional(),
+        from_date: dateKey('Only cooks finished on or after this date, yyyy-MM-dd (UTC).').optional(),
+        to_date: dateKey('Only cooks finished on or before this date, yyyy-MM-dd (UTC).').optional(),
+        include_in_progress: z.boolean().optional()
+          .describe('Also return cooks started but not finished, listed first (default false).'),
+        mine_only: z.boolean().optional().describe('Only cooks by the signed-in user (default false).'),
+        ...paginationShape,
+      }),
+    },
+    async ({ recipe_id, from_date, to_date, include_in_progress = false, mine_only = false, limit = DEFAULT_PAGE, offset = 0 }) => {
+      let query = supabase
+        .from('cook_sessions')
+        .select('id, recipe_id, user_id, started_at, completed_at, notes, recipes(name)');
+      if (recipe_id) query = query.eq('recipe_id', recipe_id);
+      if (mine_only) query = query.eq('user_id', userId);
+
+      const finishedFilters = [
+        'completed_at.not.is.null',
+        ...(from_date ? [`completed_at.gte.${from_date}T00:00:00Z`] : []),
+        ...(to_date ? [`completed_at.lt.${nextDay(to_date)}T00:00:00Z`] : []),
+      ];
+      // Date bounds apply to finished cooks only; in-progress ones have no
+      // finish date, so they're OR'd in rather than filtered out.
+      query = include_in_progress
+        ? query.or(`completed_at.is.null,and(${finishedFilters.join(',')})`)
+        : query.or(`and(${finishedFilters.join(',')})`);
+
+      const { data, error } = await query
+        .order('completed_at', { ascending: false, nullsFirst: true })
+        .order('started_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+      if (error) return errorResult(error.message);
+      return jsonResult(data.map(({ recipes, user_id, ...cook }) => ({
+        ...cook,
+        recipe_name: recipes?.name ?? null,
+        cooked_by_me: user_id === userId,
+        in_progress: cook.completed_at === null,
+      })));
     },
   );
 }
