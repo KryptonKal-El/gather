@@ -11,12 +11,13 @@
  *
  * Tools live in per-area modules: readTools (Phase 1 reads), listTools /
  * recipeTools / sharingTools (Phase 2 writes), planningTools (Phase 3 meal
- * planning, shopping, cook log).
+ * planning, shopping, cook log), historyTools (item history).
  */
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createMcpHandler, McpServer } from 'npm:@modelcontextprotocol/server@^2.0.0';
 import { pipeline } from 'npm:@supabase/middleware@1';
 import { withOAuthProtectedResource, withSupabase } from 'npm:@supabase/server@^1.9.2';
+import { registerHistoryTools } from './historyTools.ts';
 import { registerListTools } from './listTools.ts';
 import { registerPlanningTools } from './planningTools.ts';
 import { registerReadTools } from './readTools.ts';
@@ -40,6 +41,7 @@ Deno.serve(
         registerRecipeTools(server, ctx);
         registerSharingTools(server, ctx);
         registerPlanningTools(server, ctx);
+        registerHistoryTools(server, ctx);
         return server;
       }, { onerror: (error) => console.error('[mcp] request failed', error) });
       return handler.fetch(req);
