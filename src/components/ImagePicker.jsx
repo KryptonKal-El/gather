@@ -7,6 +7,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { searchImages } from '../services/imageSearch.js';
+import { ImageCropDialog } from './ImageCropDialog.jsx';
 import styles from './ImagePicker.module.css';
 
 /**
@@ -32,6 +33,7 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('search');
+  const [cropFile, setCropFile] = useState(null);
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
   const didAutoSearch = useRef(false);
@@ -82,8 +84,17 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      onUpload(file);
+      // Crop before uploading; reset the input so the same file can be re-picked later.
+      setCropFile(file);
     }
+    e.target.value = '';
+  };
+
+  const handleCropComplete = (blob) => {
+    const original = cropFile;
+    setCropFile(null);
+    if (!original) return;
+    onUpload(blob ? new File([blob], 'item.jpg', { type: 'image/jpeg' }) : original);
   };
 
   const handleBackdropClick = (e) => {
@@ -101,6 +112,7 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
   }, [onClose]);
 
   return createPortal(
+    <>
     <div className={styles.backdrop} onClick={handleBackdropClick}>
       <div className={styles.modal} ref={modalRef}>
         <div className={styles.header}>
@@ -227,7 +239,15 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
           </>
         )}
       </div>
-    </div>,
+    </div>
+    {cropFile && (
+      <ImageCropDialog
+        file={cropFile}
+        onCrop={handleCropComplete}
+        onCancel={() => setCropFile(null)}
+      />
+    )}
+    </>,
     document.body,
   );
 };

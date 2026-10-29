@@ -25,6 +25,8 @@ struct ItemImagePickerSheet: View {
     @State private var errorMessage: String?
     @State private var showCamera = false
     @State private var selectedPhoto: PhotosPickerItem?
+    /// A just-obtained local image awaiting the crop step before upload.
+    @State private var imageToCrop: CropCandidate?
     @State private var shouldTriggerSearch = false
     @State private var pinchStartColumns: Int?
     @AppStorage("imageSearchGridColumns") private var gridColumns = 3
@@ -74,14 +76,26 @@ struct ItemImagePickerSheet: View {
             }
             .fullScreenCover(isPresented: $showCamera) {
                 CameraPicker { imageData in
-                    handleImageData(imageData)
+                    presentCropper(for: imageData)
                 }
+            }
+            .fullScreenCover(item: $imageToCrop) { candidate in
+                ImageCropView(
+                    image: candidate.image,
+                    onCrop: { cropped in
+                        imageToCrop = nil
+                        if let data = cropped.jpegData(compressionQuality: 0.9) {
+                            handleImageData(data)
+                        }
+                    },
+                    onCancel: { imageToCrop = nil }
+                )
             }
             .onChange(of: selectedPhoto) { _, newValue in
                 guard let newValue else { return }
                 Task {
                     if let data = try? await newValue.loadTransferable(type: Data.self) {
-                        handleImageData(data)
+                        presentCropper(for: data)
                     }
                 }
             }
@@ -335,17 +349,26 @@ struct ItemImagePickerSheet: View {
     private func loadPastedImage(from provider: NSItemProvider) {
         if let imageType = provider.registeredContentTypes(conformingTo: .image).first {
             provider.loadDataRepresentation(for: imageType) { data, _ in
-                guard let data, let image = UIImage(data: data),
-                      let jpeg = image.jpegData(compressionQuality: 0.9) else { return }
-                Task { @MainActor in handleImageData(jpeg) }
+                guard let data, let image = UIImage(data: data) else { return }
+                Task { @MainActor in imageToCrop = CropCandidate(image: image) }
             }
         } else if provider.canLoadObject(ofClass: UIImage.self) {
             provider.loadObject(ofClass: UIImage.self) { object, _ in
-                guard let image = object as? UIImage,
-                      let jpeg = image.jpegData(compressionQuality: 0.9) else { return }
-                Task { @MainActor in handleImageData(jpeg) }
+                guard let image = object as? UIImage else { return }
+                Task { @MainActor in imageToCrop = CropCandidate(image: image) }
             }
         }
+    }
+
+    /// Shows the crop step for a just-obtained image. Decodes the raw data; if that fails it
+    /// uploads the data as-is so the user is never stuck. Deferred to the next runloop so a
+    /// presenting camera cover finishes dismissing before the crop cover appears.
+    private func presentCropper(for data: Data) {
+        guard let image = UIImage(data: data) else {
+            handleImageData(data)
+            return
+        }
+        DispatchQueue.main.async { imageToCrop = CropCandidate(image: image) }
     }
 
     private func handleImageData(_ data: Data) {
@@ -371,7 +394,7 @@ struct ItemImagePickerSheet: View {
     private func removeImage() {
         errorMessage = nil
         isRemoving = true
-        
+
         Task {
             do {
                 try await StorageService.deleteItemImage(userId: userId, itemId: item.id)
@@ -386,4 +409,10 @@ struct ItemImagePickerSheet: View {
             }
         }
     }
+}
+
+/// A local image awaiting the crop step, wrapped for `fullScreenCover(item:)`.
+private struct CropCandidate: Identifiable {
+    let id = UUID()
+    let image: UIImage
 }

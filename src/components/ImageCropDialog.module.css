@@ -1,0 +1,129 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.dialog {
+  background: var(--bg-card);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px var(--overlay-strong);
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.textBtn {
+  background: none;
+  border: none;
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.25rem 0.25rem;
+}
+
+.primaryBtn {
+  background: none;
+  border: none;
+  font: inherit;
+  font-weight: 700;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.25rem 0.25rem;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.modeToggle {
+  display: inline-flex;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.modeBtn {
+  background: var(--bg-card);
+  border: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  padding: 0.3rem 0.75rem;
+  cursor: pointer;
+}
+
+.modeBtnActive {
+  background: var(--primary);
+  color: #fff;
+}
+
+.stageWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  padding: 1rem;
+  min-height: 220px;
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.img {
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.cropBox {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid #fff;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  cursor: move;
+  touch-action: none;
+}
+
+.handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 2px;
+  touch-action: none;
+}
+
+.handle_nw { left: -8px; top: -8px; cursor: nwse-resize; }
+.handle_ne { right: -8px; top: -8px; cursor: nesw-resize; }
+.handle_sw { left: -8px; bottom: -8px; cursor: nesw-resize; }
+.handle_se { right: -8px; bottom: -8px; cursor: nwse-resize; }
+
+.hint {
+  margin: 0;
+  padding: 0.6rem 1rem 0.9rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-hint);
+}
