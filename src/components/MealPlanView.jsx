@@ -4,12 +4,15 @@
  * picks which meals show, and adds the week's ingredients to a list.
  */
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { AvatarGroup } from './AvatarGroup.jsx';
 import { MealSlotEditor } from './MealSlotEditor.jsx';
 import { EatOutDealsDialog } from './EatOutDealsDialog.jsx';
-import { MEAL_TYPES, ENTRY_KINDS, toDateKey, entryDisplayTitle, dealBadgeText } from '../utils/mealPlan.js';
+import { MEAL_TYPES, ENTRY_KINDS, toDateKey, fromDateKey, entryDisplayTitle, dealBadgeText } from '../utils/mealPlan.js';
 import styles from './MealPlanView.module.css';
+
+const MAX_DAY_COUNT = 90;
 
 const KIND_ICONS = Object.fromEntries(ENTRY_KINDS.map((k) => [k.id, k.icon]));
 
@@ -41,10 +44,113 @@ const MoreIcon = () => (
 
 const formatRange = (days) => {
   const fmt = { month: 'short', day: 'numeric' };
-  return `${days[0].toLocaleDateString(undefined, fmt)} – ${days[6].toLocaleDateString(undefined, fmt)}`;
+  return `${days[0].toLocaleDateString(undefined, fmt)} – ${days[days.length - 1].toLocaleDateString(undefined, fmt)}`;
 };
 
 const isToday = (day) => toDateKey(day) === toDateKey(new Date());
+
+/**
+ * Lets the user plan an arbitrary stretch of days from any start date, alongside the week view.
+ * @param {Object} props
+ * @param {Date} props.weekStart - Current window start, used as the default
+ * @param {number} props.dayCount - Current day count, used as the default
+ * @param {boolean} props.isCustomRange - Whether a custom range is already active
+ * @param {Function} props.onApply - Called with (startDate, count)
+ * @param {Function} props.onWeekView - Returns to the Monday-aligned week view
+ * @param {Function} props.onClose
+ */
+const RangeDialog = ({ weekStart, dayCount, isCustomRange, onApply, onWeekView, onClose }) => {
+  const [startKey, setStartKey] = useState(toDateKey(weekStart));
+  const [count, setCount] = useState(dayCount);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const clampedCount = Math.min(Math.max(Math.round(Number(count)) || 1, 1), MAX_DAY_COUNT);
+  const startDate = startKey ? fromDateKey(startKey) : null;
+  const endDate = startDate
+    ? new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate() + clampedCount - 1)
+    : null;
+
+  const handleApply = () => {
+    if (!startDate) return;
+    onApply(startDate, clampedCount);
+    onClose();
+  };
+
+  return createPortal(
+    <div
+      className={styles.backdrop}
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className={styles.rangeDialog} role="dialog" aria-modal="true" aria-label="Custom range">
+        <div className={styles.rangeHeader}>
+          <h2 className={styles.rangeTitle}>Custom range</h2>
+          <button type="button" className={styles.rangeClose} onClick={onClose} aria-label="Close">&times;</button>
+        </div>
+        <div className={styles.rangeBody}>
+          <label className={styles.rangeField}>
+            <span className={styles.rangeFieldLabel}>Start date</span>
+            <input
+              type="date"
+              className={styles.rangeInput}
+              value={startKey}
+              onChange={(e) => setStartKey(e.target.value)}
+            />
+          </label>
+          <label className={styles.rangeField}>
+            <span className={styles.rangeFieldLabel}>Days</span>
+            <input
+              type="number"
+              className={styles.rangeInput}
+              min="1"
+              max={MAX_DAY_COUNT}
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+            />
+          </label>
+          {endDate && (
+            <p className={styles.rangeEnds}>
+              Ends {endDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+            </p>
+          )}
+          <p className={styles.rangeHintText}>
+            Plan any stretch of days — a long weekend, a two-week trip, even a whole month.
+          </p>
+        </div>
+        <div className={styles.rangeActions}>
+          {isCustomRange && (
+            <button
+              type="button"
+              className={styles.secondaryBtn}
+              onClick={() => { onWeekView(); onClose(); }}
+            >
+              Week view
+            </button>
+          )}
+          <button type="button" className={styles.planBtn} onClick={handleApply} disabled={!startDate}>
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+};
+
+RangeDialog.propTypes = {
+  weekStart: PropTypes.instanceOf(Date).isRequired,
+  dayCount: PropTypes.number.isRequired,
+  isCustomRange: PropTypes.bool.isRequired,
+  onApply: PropTypes.func.isRequired,
+  onWeekView: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
 
 /**
  * @param {Object} props
@@ -60,6 +166,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isPreparingList, setIsPreparingList] = useState(false);
   const [isShowingDeals, setIsShowingDeals] = useState(false);
+  const [isRangeOpen, setIsRangeOpen] = useState(false);
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -90,12 +197,24 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
     <div className={styles.container}>
       <div className={styles.toolbar}>
         <div className={styles.weekSwitcher}>
-          <button type="button" className={styles.navBtn} onClick={() => actions.goToWeek(-1)} aria-label="Previous week">
+          <button
+            type="button"
+            className={styles.navBtn}
+            onClick={() => actions.goToWeek(-1)}
+            aria-label={state.isCustomRange ? 'Previous days' : 'Previous week'}
+          >
             <Chevron direction="left" />
           </button>
           <div className={styles.weekLabel}>
             <span className={styles.range}>{formatRange(state.days)}</span>
-            {state.isCurrentWeek ? (
+            {state.isCustomRange ? (
+              <>
+                <span className={styles.weekHint}>{state.dayCount} days</span>
+                <button type="button" className={styles.todayBtn} onClick={actions.goToCurrentWeek}>
+                  Back to week view
+                </button>
+              </>
+            ) : state.isCurrentWeek ? (
               <span className={styles.weekHint}>This week</span>
             ) : (
               <button type="button" className={styles.todayBtn} onClick={actions.goToCurrentWeek}>
@@ -103,7 +222,12 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
               </button>
             )}
           </div>
-          <button type="button" className={styles.navBtn} onClick={() => actions.goToWeek(1)} aria-label="Next week">
+          <button
+            type="button"
+            className={styles.navBtn}
+            onClick={() => actions.goToWeek(1)}
+            aria-label={state.isCustomRange ? 'Next days' : 'Next week'}
+          >
             <Chevron direction="right" />
           </button>
         </div>
@@ -134,7 +258,15 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                   onClick={handleAddWeekToList}
                   disabled={state.plannedRecipeIds.length === 0}
                 >
-                  Add week to list
+                  {state.isCustomRange ? 'Add range to list' : 'Add week to list'}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={styles.menuItem}
+                  onClick={() => { setIsMenuOpen(false); setIsRangeOpen(true); }}
+                >
+                  Custom range…
                 </button>
                 <button
                   type="button"
@@ -209,7 +341,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
           onClick={actions.planMyWeek}
           disabled={state.isPlanning || !state.activePlan}
         >
-          {state.isPlanning ? 'Planning...' : '✨ Plan my week'}
+          {state.isPlanning ? 'Planning...' : `✨ ${state.isCustomRange ? 'Plan these days' : 'Plan my week'}`}
         </button>
         {state.hasReplaceableSuggestions && (
           <button type="button" className={styles.secondaryBtn} onClick={actions.regenerate} disabled={state.isPlanning}>
@@ -351,6 +483,17 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
           onClose={() => setIsShowingDeals(false)}
         />
       )}
+
+      {isRangeOpen && (
+        <RangeDialog
+          weekStart={state.weekStart}
+          dayCount={state.dayCount}
+          isCustomRange={state.isCustomRange}
+          onApply={actions.setCustomRange}
+          onWeekView={actions.goToCurrentWeek}
+          onClose={() => setIsRangeOpen(false)}
+        />
+      )}
     </div>
   );
 };
@@ -361,7 +504,10 @@ MealPlanView.propTypes = {
     activePlan: PropTypes.object,
     activePlanId: PropTypes.string,
     isOwner: PropTypes.bool.isRequired,
+    weekStart: PropTypes.instanceOf(Date).isRequired,
     days: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
+    dayCount: PropTypes.number.isRequired,
+    isCustomRange: PropTypes.bool.isRequired,
     enabledMeals: PropTypes.array.isRequired,
     isCurrentWeek: PropTypes.bool.isRequired,
     recipes: PropTypes.array.isRequired,

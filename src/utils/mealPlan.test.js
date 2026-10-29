@@ -3,8 +3,10 @@ import {
   toDateKey,
   fromDateKey,
   startOfWeek,
+  startOfDay,
   weekDays,
   shiftWeek,
+  shiftDays,
   mergeWeekIngredients,
   entryDisplayTitle,
   dealWeekday,
@@ -31,6 +33,24 @@ describe('meal plan week math', () => {
   it('shifts by whole weeks', () => {
     expect(toDateKey(shiftWeek(fromDateKey('2026-09-21'), 1))).toBe('2026-09-28');
     expect(toDateKey(shiftWeek(fromDateKey('2026-09-21'), -1))).toBe('2026-09-14');
+  });
+
+  it('builds an arbitrary-length range for custom windows', () => {
+    expect(weekDays(fromDateKey('2026-09-30'), 1).map(toDateKey)).toEqual(['2026-09-30']);
+    expect(weekDays(fromDateKey('2026-09-30'), 3).map(toDateKey)).toEqual([
+      '2026-09-30', '2026-10-01', '2026-10-02',
+    ]);
+    // A ten-day range crosses the month boundary.
+    expect(weekDays(fromDateKey('2026-09-28'), 10)).toHaveLength(10);
+    expect(toDateKey(weekDays(fromDateKey('2026-09-28'), 10)[9])).toBe('2026-10-07');
+  });
+
+  it('shifts by a run of days and snaps to local midnight', () => {
+    expect(toDateKey(shiftDays(fromDateKey('2026-09-28'), 9))).toBe('2026-10-07');
+    expect(toDateKey(shiftDays(fromDateKey('2026-09-28'), -3))).toBe('2026-09-25');
+    const noon = new Date(2026, 8, 28, 12, 30);
+    expect(toDateKey(startOfDay(noon))).toBe('2026-09-28');
+    expect(startOfDay(noon).getHours()).toBe(0);
   });
 
   it('round-trips date keys as local days', () => {

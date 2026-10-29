@@ -231,11 +231,25 @@ enum MealPlanWeek {
 
     /// The seven days of the week starting at `weekStart`.
     static func days(from weekStart: Date) -> [Date] {
-        (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: weekStart) }
+        days(from: weekStart, count: 7)
+    }
+
+    /// `count` consecutive days starting at `start`, for arbitrary (custom-range) windows.
+    static func days(from start: Date, count: Int) -> [Date] {
+        (0..<max(0, count)).compactMap { calendar.date(byAdding: .day, value: $0, to: start) }
     }
 
     static func shift(_ weekStart: Date, byWeeks weeks: Int) -> Date {
         calendar.date(byAdding: .day, value: weeks * 7, to: weekStart) ?? weekStart
+    }
+
+    static func shift(_ start: Date, byDays days: Int) -> Date {
+        calendar.date(byAdding: .day, value: days, to: start) ?? start
+    }
+
+    /// The calendar day containing `date`, at local midnight.
+    static func startOfDay(_ date: Date) -> Date {
+        calendar.startOfDay(for: date)
     }
 
     static func key(for date: Date) -> String {

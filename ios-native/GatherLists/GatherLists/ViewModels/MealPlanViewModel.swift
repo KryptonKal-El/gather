@@ -10,7 +10,13 @@ import Realtime
 final class MealPlanViewModel {
     var plans: [MealPlan] = []
     var activePlanId: UUID?
+    /// First day of the visible window: the Monday of the week in week mode, or the user's chosen
+    /// start day in custom-range mode.
     var weekStart: Date = MealPlanWeek.startOfWeek(containing: Date())
+    /// Whether the plan shows an arbitrary date range instead of a Monday-aligned week.
+    private(set) var isCustomRange = false
+    /// Days shown: always 7 in week mode, user-chosen (1…`maxDayCount`) in custom-range mode.
+    private(set) var dayCount = 7
     /// Visible week's slots keyed by `dateKey|meal`.
     private(set) var entriesBySlot: [String: MealPlanEntry] = [:]
     var recipes: [Recipe] = []
@@ -27,6 +33,9 @@ final class MealPlanViewModel {
     let userEmail: String
 
     private static let activePlanKey = "gather.activeMealPlanId"
+
+    /// Upper bound on a custom range, keeping fetches and rendering sane (a quarter of a year).
+    static let maxDayCount = 90
 
     /// Recipes already swapped out of each slot, so Swap keeps moving forward.
     private var swappedOut: [String: Set<UUID>] = [:]
@@ -45,7 +54,7 @@ final class MealPlanViewModel {
     }
 
     var days: [Date] {
-        MealPlanWeek.days(from: weekStart)
+        MealPlanWeek.days(from: weekStart, count: dayCount)
     }
 
     var enabledMeals: [MealType] {
@@ -172,7 +181,8 @@ final class MealPlanViewModel {
 
     private var weekCacheKey: String? {
         guard let planId = activePlanId else { return nil }
-        return "\(cacheKeyPrefix)-\(planId.uuidString)-\(MealPlanWeek.key(for: weekStart))"
+        // Day count is part of the key so custom ranges sharing a start day don't collide.
+        return "\(cacheKeyPrefix)-\(planId.uuidString)-\(MealPlanWeek.key(for: weekStart))-\(dayCount)"
     }
 
     private func loadCachedWeek() async {
@@ -187,15 +197,16 @@ final class MealPlanViewModel {
             return
         }
         let requestedWeek = weekStart
-        let days = MealPlanWeek.days(from: requestedWeek)
+        let requestedCount = dayCount
+        let days = MealPlanWeek.days(from: requestedWeek, count: requestedCount)
         guard let first = days.first, let last = days.last else { return }
         let fetched = try await MealPlanService.fetchEntries(
             planId: planId,
             fromKey: MealPlanWeek.key(for: first),
             toKey: MealPlanWeek.key(for: last)
         )
-        // Drop the result if the user paged to another week or plan meanwhile.
-        guard requestedWeek == weekStart, planId == activePlanId else { return }
+        // Drop the result if the user paged to another window or plan meanwhile.
+        guard requestedWeek == weekStart, requestedCount == dayCount, planId == activePlanId else { return }
         applyEntries(fetched)
         if let key = weekCacheKey {
             await OfflineCache.shared.save(fetched, forKey: key)
@@ -306,13 +317,30 @@ final class MealPlanViewModel {
 
     // MARK: - Navigation
 
-    func goToWeek(offset: Int) async {
-        weekStart = MealPlanWeek.shift(weekStart, byWeeks: offset)
+    /// Steps the visible window: by one week in week mode, or by the window's length in days in
+    /// custom-range mode, so paging always lands on a fresh, non-overlapping block.
+    func stepWindow(_ direction: Int) async {
+        if isCustomRange {
+            weekStart = MealPlanWeek.shift(weekStart, byDays: direction * dayCount)
+        } else {
+            weekStart = MealPlanWeek.shift(weekStart, byWeeks: direction)
+        }
         await changeWeek()
     }
 
+    /// Returns to the Monday-aligned week view at the week containing today, leaving custom range.
     func goToCurrentWeek() async {
+        isCustomRange = false
+        dayCount = 7
         weekStart = MealPlanWeek.startOfWeek(containing: Date())
+        await changeWeek()
+    }
+
+    /// Shows an arbitrary window of `count` days starting on `start`'s calendar day.
+    func applyCustomRange(start: Date, dayCount count: Int) async {
+        isCustomRange = true
+        dayCount = min(max(count, 1), Self.maxDayCount)
+        weekStart = MealPlanWeek.startOfDay(start)
         await changeWeek()
     }
 

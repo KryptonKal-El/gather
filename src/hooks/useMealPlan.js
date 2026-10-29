@@ -29,13 +29,18 @@ import { planWeek, buildPreferences, learnQuickWeekdays } from '../utils/mealPla
 import {
   MEAL_TYPES,
   startOfWeek,
+  startOfDay,
   weekDays,
   shiftWeek,
+  shiftDays,
   toDateKey,
   slotKey,
   mergeWeekIngredients,
   dealsForSlot,
 } from '../utils/mealPlan.js';
+
+/** Upper bound on a custom range, keeping fetches and rendering sane (a quarter of a year). */
+const MAX_DAY_COUNT = 90;
 
 const ACTIVE_PLAN_KEY = 'gather_active_meal_plan_id';
 
@@ -87,6 +92,9 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const [plans, setPlans] = useState([]);
   const [activePlanId, setActivePlanId] = useState(null);
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
+  // Days shown (always 7 in week mode) and whether we're showing an arbitrary date range.
+  const [dayCount, setDayCount] = useState(7);
+  const [isCustomRange, setIsCustomRange] = useState(false);
   const [entries, setEntries] = useState({});
   const [recipes, setRecipes] = useState([]);
   const [collaborators, setCollaborators] = useState([]);
@@ -107,10 +115,14 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
 
   const activePlanIdRef = useRef(null);
   const weekStartRef = useRef(weekStart);
+  const dayCountRef = useRef(dayCount);
+  const isCustomRangeRef = useRef(isCustomRange);
   activePlanIdRef.current = activePlanId;
   weekStartRef.current = weekStart;
+  dayCountRef.current = dayCount;
+  isCustomRangeRef.current = isCustomRange;
 
-  const days = useMemo(() => weekDays(weekStart), [weekStart]);
+  const days = useMemo(() => weekDays(weekStart, dayCount), [weekStart, dayCount]);
   const activePlan = plans.find((p) => p.id === activePlanId) ?? null;
   const isOwner = activePlan?.ownerId === userId;
   const enabledMeals = useMemo(
@@ -120,19 +132,21 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const isCurrentWeek = toDateKey(weekStart) === toDateKey(startOfWeek(new Date()));
   const recipesById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
 
-  const loadWeek = useCallback(async (planId, start) => {
+  const loadWeek = useCallback(async (planId, start, count = dayCountRef.current) => {
     if (!planId) {
       setEntries({});
       return;
     }
-    const range = weekDays(start);
+    const range = weekDays(start, count);
     const writes = writesRef.current;
     for (;;) {
       const startedBefore = writes.started;
       const wasWriting = writes.inFlight > 0;
-      const rows = await fetchMealPlanEntries(planId, toDateKey(range[0]), toDateKey(range[6]));
-      // Ignore a stale response if the user moved to another week or plan meanwhile.
-      if (planId !== activePlanIdRef.current || toDateKey(start) !== toDateKey(weekStartRef.current)) return;
+      const rows = await fetchMealPlanEntries(planId, toDateKey(range[0]), toDateKey(range[range.length - 1]));
+      // Ignore a stale response if the user moved to another window or plan meanwhile.
+      if (planId !== activePlanIdRef.current
+        || toDateKey(start) !== toDateKey(weekStartRef.current)
+        || count !== dayCountRef.current) return;
       if (!wasWriting && writes.started === startedBefore) {
         setEntries(Object.fromEntries(rows.map((row) => [slotKey(row.date, row.meal), row])));
         return;
@@ -259,23 +273,45 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     });
   }, [isActive, userId, loadPlans, loadWeek, loadCollaborators, loadDeals]);
 
-  const changeWeek = useCallback(async (nextStart) => {
+  const changeWindow = useCallback(async (nextStart, nextCount = dayCountRef.current) => {
     setWeekStart(nextStart);
     weekStartRef.current = nextStart;
+    setDayCount(nextCount);
+    dayCountRef.current = nextCount;
     setEntries({});
     setError(null);
     setLibraryNote(null);
     swappedOutRef.current = new Map();
     try {
-      await loadWeek(activePlanIdRef.current, nextStart);
+      await loadWeek(activePlanIdRef.current, nextStart, nextCount);
     } catch (err) {
-      console.error('[useMealPlan] Failed to load week:', err);
+      console.error('[useMealPlan] Failed to load window:', err);
       setError("Couldn't load this week.");
     }
   }, [loadWeek]);
 
-  const goToWeek = useCallback((offset) => changeWeek(shiftWeek(weekStartRef.current, offset)), [changeWeek]);
-  const goToCurrentWeek = useCallback(() => changeWeek(startOfWeek(new Date())), [changeWeek]);
+  // One step: a week in week mode, or the window's length in days when showing a custom range.
+  const goToWeek = useCallback((offset) => {
+    const start = weekStartRef.current;
+    const next = isCustomRangeRef.current
+      ? shiftDays(start, offset * dayCountRef.current)
+      : shiftWeek(start, offset);
+    return changeWindow(next, dayCountRef.current);
+  }, [changeWindow]);
+
+  const goToCurrentWeek = useCallback(() => {
+    setIsCustomRange(false);
+    isCustomRangeRef.current = false;
+    return changeWindow(startOfWeek(new Date()), 7);
+  }, [changeWindow]);
+
+  /** Shows an arbitrary window of `count` days starting on `start`'s calendar day. */
+  const setCustomRange = useCallback((start, count) => {
+    const clamped = Math.min(Math.max(count, 1), MAX_DAY_COUNT);
+    setIsCustomRange(true);
+    isCustomRangeRef.current = true;
+    return changeWindow(startOfDay(start), clamped);
+  }, [changeWindow]);
 
   const selectPlan = useCallback(async (planId) => {
     if (planId === activePlanIdRef.current) return;
@@ -284,9 +320,9 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     storePlanId(planId);
     setCollaborators([]);
     setDeals([]);
-    await changeWeek(weekStartRef.current);
+    await changeWindow(weekStartRef.current);
     await Promise.all([loadCollaborators(planId), loadDeals(planId)]);
-  }, [changeWeek, loadCollaborators, loadDeals]);
+  }, [changeWindow, loadCollaborators, loadDeals]);
 
   /** Records reactions to suggestions so the planner learns (best-effort, never blocks the UI). */
   const recordFeedback = useCallback((events) => {
@@ -598,6 +634,8 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       isOwner,
       weekStart,
       days,
+      dayCount,
+      isCustomRange,
       enabledMeals,
       isCurrentWeek,
       recipes,
@@ -621,6 +659,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       eatHere: (deal, dateKey, meal) => saveSlot({ dateKey, meal, kind: 'eating_out', title: deal.restaurant, note: deal.details }),
       goToWeek,
       goToCurrentWeek,
+      setCustomRange,
       selectPlan,
       setMealEnabled,
       share,

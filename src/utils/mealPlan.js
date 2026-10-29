@@ -62,12 +62,13 @@ export const startOfWeek = (date) => {
 };
 
 /**
- * The seven days of the week starting at `weekStart`.
- * @param {Date} weekStart
+ * `count` consecutive days starting at `start` (defaults to a seven-day week).
+ * @param {Date} start
+ * @param {number} [count=7]
  * @returns {Date[]}
  */
-export const weekDays = (weekStart) =>
-  Array.from({ length: 7 }, (_, i) => new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i));
+export const weekDays = (start, count = 7) =>
+  Array.from({ length: Math.max(0, count) }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
 
 /**
  * Moves a week start by a number of weeks.
@@ -77,6 +78,22 @@ export const weekDays = (weekStart) =>
  */
 export const shiftWeek = (weekStart, weeks) =>
   new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + weeks * 7);
+
+/**
+ * Moves a date by a number of days, for stepping custom (arbitrary-length) ranges.
+ * @param {Date} start
+ * @param {number} days
+ * @returns {Date}
+ */
+export const shiftDays = (start, days) =>
+  new Date(start.getFullYear(), start.getMonth(), start.getDate() + days);
+
+/**
+ * The calendar day containing `date`, at local midnight.
+ * @param {Date} date
+ * @returns {Date}
+ */
+export const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
 /**
  * Key for a slot in an entries map.

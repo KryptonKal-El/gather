@@ -22,6 +22,7 @@ struct MealPlanView: View {
     @State private var showLeaveConfirm = false
     @State private var showDescribeWeek = false
     @State private var showDeals = false
+    @State private var showCustomRange = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -52,6 +53,11 @@ struct MealPlanView: View {
         .sheet(isPresented: $showDeals) {
             if let viewModel {
                 EatOutDealsSheet(viewModel: viewModel)
+            }
+        }
+        .sheet(isPresented: $showCustomRange) {
+            if let viewModel {
+                CustomRangeSheet(viewModel: viewModel)
             }
         }
         .sheet(isPresented: $showShareSheet) {
@@ -218,9 +224,15 @@ struct MealPlanView: View {
             Button {
                 Task { await prepareAddToList(viewModel) }
             } label: {
-                Label("Add Week to List", systemImage: "cart.badge.plus")
+                Label(viewModel.isCustomRange ? "Add Range to List" : "Add Week to List", systemImage: "cart.badge.plus")
             }
             .disabled(viewModel.plannedRecipeEntries.isEmpty || isPreparingList)
+
+            Button {
+                showCustomRange = true
+            } label: {
+                Label("Custom Range…", systemImage: "calendar")
+            }
 
             Button {
                 showShareSheet = true
@@ -331,19 +343,27 @@ private struct WeekSwitcherView: View {
     var body: some View {
         HStack {
             Button {
-                Task { await viewModel.goToWeek(offset: -1) }
+                Task { await viewModel.stepWindow(-1) }
             } label: {
                 Image(systemName: "chevron.left")
                     .frame(width: 44, height: 44)
             }
-            .accessibilityLabel("Previous week")
+            .accessibilityLabel(viewModel.isCustomRange ? "Previous days" : "Previous week")
 
             Spacer()
 
             VStack(spacing: 2) {
                 Text(rangeText)
                     .font(.quicksand(.headline, weight: .semibold))
-                if viewModel.isCurrentWeek {
+                if viewModel.isCustomRange {
+                    Text("\(viewModel.dayCount) days")
+                        .font(.quicksand(.caption))
+                        .foregroundStyle(.secondary)
+                    Button("Back to week view") {
+                        Task { await viewModel.goToCurrentWeek() }
+                    }
+                    .font(.quicksand(.caption, weight: .semibold))
+                } else if viewModel.isCurrentWeek {
                     Text("This week")
                         .font(.quicksand(.caption))
                         .foregroundStyle(.secondary)
@@ -358,12 +378,12 @@ private struct WeekSwitcherView: View {
             Spacer()
 
             Button {
-                Task { await viewModel.goToWeek(offset: 1) }
+                Task { await viewModel.stepWindow(1) }
             } label: {
                 Image(systemName: "chevron.right")
                     .frame(width: 44, height: 44)
             }
-            .accessibilityLabel("Next week")
+            .accessibilityLabel(viewModel.isCustomRange ? "Next days" : "Next week")
         }
         .buttonStyle(.borderless)
         .tint(Color.brandGreen)
@@ -379,8 +399,8 @@ private struct PlanBarView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             buttons
-            // Only where the on-device model can read the note; elsewhere planning works as before.
-            if WeekBriefService.isAvailable {
+            // Day notes map to weekdays, so the brief is a week-view feature only.
+            if WeekBriefService.isAvailable && !viewModel.isCustomRange {
                 Button(action: onDescribe) {
                     Label("Describe your week", systemImage: "text.bubble")
                         .font(.quicksand(.subheadline, weight: .semibold))
@@ -403,7 +423,7 @@ private struct PlanBarView: View {
                     } else {
                         Image(systemName: "sparkles")
                     }
-                    Text("Plan my week")
+                    Text(viewModel.isCustomRange ? "Plan these days" : "Plan my week")
                 }
                 .font(.quicksand(.subheadline, weight: .semibold))
                 .foregroundStyle(.white)
@@ -459,5 +479,80 @@ private struct DayHeaderView: View {
             }
         }
         .textCase(nil)
+    }
+}
+
+// MARK: - Custom Range
+
+/// Lets the user plan an arbitrary stretch of days starting on any date, instead of the
+/// Monday-aligned week. Sits alongside the week view; "Switch to Week View" returns to it.
+private struct CustomRangeSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    let viewModel: MealPlanViewModel
+
+    @State private var start: Date
+    @State private var dayCount: Int
+
+    init(viewModel: MealPlanViewModel) {
+        self.viewModel = viewModel
+        _start = State(initialValue: viewModel.weekStart)
+        _dayCount = State(initialValue: viewModel.dayCount)
+    }
+
+    private var endDate: Date {
+        MealPlanWeek.shift(MealPlanWeek.startOfDay(start), byDays: max(dayCount - 1, 0))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Start date") {
+                    DatePicker("Start date", selection: $start, displayedComponents: .date)
+                        .datePickerStyle(.graphical)
+                        .labelsHidden()
+                        .tint(Color.brandGreen)
+                }
+
+                Section {
+                    Stepper(value: $dayCount, in: 1...MealPlanViewModel.maxDayCount) {
+                        HStack {
+                            Text("Days")
+                            Spacer()
+                            Text("\(dayCount)").foregroundStyle(.secondary)
+                        }
+                    }
+                    LabeledContent("Ends") {
+                        Text(endDate.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day()))
+                    }
+                } footer: {
+                    Text("Plan any stretch of days — a long weekend, a two-week trip, even a whole month.")
+                        .font(.quicksand(.caption))
+                }
+
+                if viewModel.isCustomRange {
+                    Section {
+                        Button("Switch to Week View") {
+                            dismiss()
+                            Task { await viewModel.goToCurrentWeek() }
+                        }
+                        .foregroundStyle(Color.brandGreen)
+                    }
+                }
+            }
+            .navigationTitle("Custom Range")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Apply") {
+                        dismiss()
+                        Task { await viewModel.applyCustomRange(start: start, dayCount: dayCount) }
+                    }
+                    .fontWeight(.semibold)
+                }
+            }
+        }
     }
 }
