@@ -54,7 +54,7 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => (
+const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
@@ -66,6 +66,8 @@ const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, on
         listCategories={listCategories}
         isRestored={restoredItemIds?.has(item.id)}
         onRestoreAnimationDone={onRestoreAnimationDone ? () => onRestoreAnimationDone(item.id) : undefined}
+        isQuantityBumped={quantityBumpedItemIds?.has(item.id)}
+        onQuantityBumpDone={onQuantityBumpDone ? () => onQuantityBumpDone(item.id) : undefined}
         onToggle={() => onToggle(item)}
         onRemove={() => onRemove(item.id)}
         onUpdateCategory={onUpdateCategory}
@@ -80,8 +82,8 @@ const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, on
 );
 
 /** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
-const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => {
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => {
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
 
   const allItems = collectGroupItems(group);
   const count = group.type === 'rsvp' ? allItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0) : allItems.length;
@@ -161,6 +163,8 @@ export const ShoppingList = ({
   onClearChecked,
   restoredItemIds = null,
   onRestoreAnimationDone = null,
+  quantityBumpedItemIds = null,
+  onQuantityBumpDone = null,
   onNavigateToSettings = null,
 }) => {
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
@@ -230,7 +234,7 @@ export const ShoppingList = ({
   const hideStorePill = groupLevels.includes('store');
   const hideCategoryPill = groupLevels.includes('category');
 
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
@@ -365,6 +369,8 @@ ShoppingList.propTypes = {
   onClearChecked: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,
+  quantityBumpedItemIds: PropTypes.instanceOf(Set),
+  onQuantityBumpDone: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
 };
 

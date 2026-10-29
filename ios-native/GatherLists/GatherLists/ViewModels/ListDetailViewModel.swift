@@ -32,7 +32,12 @@ final class ListDetailViewModel {
     
     /// ID of the most recently added item, used for auto-scrolling.
     var lastAddedItemId: UUID?
-    
+
+    /// ID of an item whose quantity was just merged up from a re-add, used to briefly highlight
+    /// its quantity badge. Cleared automatically after the highlight plays.
+    var quantityBumpedItemId: UUID?
+    @ObservationIgnored private var quantityBumpTask: Task<Void, Never>?
+
     // List categories (resolved via CategoryService)
     private(set) var listCategories: [CategoryDef] = []
     
@@ -309,6 +314,14 @@ final class ListDetailViewModel {
     
     func addItem(name: String, storeId: UUID?) async {
         do {
+            // If the item is already on the list (unchecked), bump its quantity instead of
+            // adding a duplicate row.
+            if let existing = mergeTarget(name: name, storeId: storeId) {
+                try await bumpQuantity(of: existing, by: 1)
+                try await addMergeHistory(for: existing, name: name)
+                return
+            }
+
             let rsvpDefault: String? = listType == "guest_list" ? "invited" : nil
             let newItem = try await ItemService.addItem(
                 listId: listId,
@@ -321,7 +334,7 @@ final class ListDetailViewModel {
             )
             items.append(newItem)
             lastAddedItemId = newItem.id
-            
+
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
             try await HistoryService.addHistoryEntry(
                 userId: userId, listId: listId, name: capitalizedName,
@@ -332,6 +345,43 @@ final class ListDetailViewModel {
             self.error = error.localizedDescription
             print("[ListDetailViewModel] Failed to add item: \(error.localizedDescription)")
         }
+    }
+
+    /// An existing unchecked item to merge a re-added item into: same name (case-insensitive),
+    /// preferring one in the same store. Returns nil when the item isn't already on the list.
+    private func mergeTarget(name: String, storeId: UUID?) -> Item? {
+        let key = name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let matches = items.filter { !$0.isChecked && $0.name.lowercased() == key }
+        guard !matches.isEmpty else { return nil }
+        return matches.first(where: { $0.storeId == storeId }) ?? matches.first
+    }
+
+    /// Bumps an existing item's quantity, updates it locally, and flags it so the row's quantity
+    /// highlights and the list scrolls to it.
+    private func bumpQuantity(of existing: Item, by addQuantity: Int) async throws {
+        let newQuantity = existing.quantity + addQuantity
+        try await ItemService.updateItem(itemId: existing.id, quantity: newQuantity)
+        if let index = items.firstIndex(where: { $0.id == existing.id }) {
+            items[index].quantity = newQuantity
+        }
+        lastAddedItemId = existing.id
+        quantityBumpedItemId = existing.id
+        quantityBumpTask?.cancel()
+        quantityBumpTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1.1))
+            guard !Task.isCancelled else { return }
+            self?.quantityBumpedItemId = nil
+        }
+    }
+
+    /// Records the re-add in history, mirroring the merged item's reusable fields.
+    private func addMergeHistory(for item: Item, name: String) async throws {
+        let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
+        try await HistoryService.addHistoryEntry(
+            userId: userId, listId: listId, name: capitalizedName,
+            imageUrl: item.imageUrl, category: item.category, storeId: item.storeId,
+            quantity: item.quantity, price: item.price, unit: item.unit, note: item.note
+        )
     }
 
     /// Most recent history record for a (name, store) pair on this list — the
@@ -348,6 +398,13 @@ final class ListDetailViewModel {
     func addItemFromSuggestion(name: String, storeId: UUID?, fallbackStoreId: UUID?) async {
         do {
             let template = latestHistoryEntry(for: name, storeId: storeId)
+            // Reuse the same merge behavior so a suggestion for an item already on the list bumps
+            // its quantity instead of duplicating it.
+            if let existing = mergeTarget(name: name, storeId: template?.storeId ?? storeId ?? fallbackStoreId) {
+                try await bumpQuantity(of: existing, by: template?.quantity ?? 1)
+                try await addMergeHistory(for: existing, name: name)
+                return
+            }
             let rsvpDefault: String? = listType == "guest_list" ? "invited" : nil
             let newItem = try await ItemService.addItem(
                 listId: listId,

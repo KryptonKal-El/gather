@@ -38,6 +38,8 @@ export const MobileListDetail = ({
   onSortSelect,
   restoredItemIds = null,
   onRestoreAnimationDone = null,
+  quantityBumpedItemIds = null,
+  onQuantityBumpDone = null,
   onNavigateToSettings = null,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -261,6 +263,8 @@ export const MobileListDetail = ({
           onClearChecked={onClearChecked}
           restoredItemIds={restoredItemIds}
           onRestoreAnimationDone={onRestoreAnimationDone}
+          quantityBumpedItemIds={quantityBumpedItemIds}
+          onQuantityBumpDone={onQuantityBumpDone}
           onNavigateToSettings={onNavigateToSettings}
         />
         <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />
@@ -381,6 +385,8 @@ MobileListDetail.propTypes = {
   onSortSelect: PropTypes.func.isRequired,
   restoredItemIds: PropTypes.instanceOf(Set),
   onRestoreAnimationDone: PropTypes.func,
+  quantityBumpedItemIds: PropTypes.instanceOf(Set),
+  onQuantityBumpDone: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
 };
 

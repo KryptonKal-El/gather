@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useShoppingList } from '../hooks/useShoppingList.js';
-import { ShoppingListProvider } from './ShoppingListContext.jsx';
+import { ShoppingListProvider, findMergeTarget } from './ShoppingListContext.jsx';
 import {
   createUserStoreDefault,
   fetchListCollaborators,
@@ -247,5 +247,32 @@ describe('ShoppingListProvider store scoping and user store defaults', () => {
     expect(screen.getByText('grocery defaults: Kroger, Costco, Target')).toBeInTheDocument();
     expect(screen.getByText('packing defaults: Travel Store, Camp Store')).toBeInTheDocument();
     expect(screen.getByText('defaults count: 5')).toBeInTheDocument();
+  });
+});
+
+describe('findMergeTarget', () => {
+  const items = [
+    { id: 'a', name: 'Milk', isChecked: false, store: 's1' },
+    { id: 'b', name: 'Eggs', isChecked: false, store: null },
+    { id: 'c', name: 'milk', isChecked: true, store: 's2' }, // checked — never a target
+    { id: 'd', name: 'Milk', isChecked: false, store: 's2' },
+  ];
+
+  it('matches an unchecked item by name, case-insensitively', () => {
+    expect(findMergeTarget(items, 'eggs', null)?.id).toBe('b');
+  });
+
+  it('prefers a same-store match when several names match', () => {
+    expect(findMergeTarget(items, 'Milk', 's2')?.id).toBe('d');
+    expect(findMergeTarget(items, 'Milk', 's1')?.id).toBe('a');
+  });
+
+  it('falls back to the first unchecked match when no store matches', () => {
+    expect(findMergeTarget(items, 'Milk', 's9')?.id).toBe('a');
+  });
+
+  it('never merges into a checked item, and returns null when nothing matches', () => {
+    expect(findMergeTarget([items[2]], 'Milk', 's2')).toBeNull();
+    expect(findMergeTarget(items, 'Bread', null)).toBeNull();
   });
 });

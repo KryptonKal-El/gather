@@ -114,6 +114,7 @@ export const App = () => {
   }, []);
   const [desktopRecipeFormId, setDesktopRecipeFormId] = useState(null);
   const [restoredItemIds, setRestoredItemIds] = useState(new Set());
+  const [quantityBumpedItemIds, setQuantityBumpedItemIds] = useState(new Set());
   const [showOnlineSearch, setShowOnlineSearch] = useState(false);
   const [onlinePreviewRecipe, setOnlinePreviewRecipe] = useState(null);
   const [saveRecipeDetail, setSaveRecipeDetail] = useState(null);
@@ -175,10 +176,28 @@ export const App = () => {
     onCommitToggle: handleCommitToggleItem,
   });
 
-  const handleAddItem = (name, storeId = null, template = null) => {
+  const handleAddItem = async (name, storeId = null, template = null) => {
     if (!activeList) return;
-    actions.addItem(activeList.id, name, storeId, template);
+    const result = await actions.addItem(activeList.id, name, storeId, template);
+    // When the item was already on the list, its quantity was bumped: flag it so the row's
+    // quantity highlights, scroll it into view, and confirm with a soft toast.
+    if (result?.merged && result.itemId) {
+      setQuantityBumpedItemIds((prev) => new Set(prev).add(result.itemId));
+      showToast({ message: 'Quantity updated', variant: 'success', durationMs: 2000 });
+      requestAnimationFrame(() => {
+        document.querySelector(`[data-item-id="${result.itemId}"]`)
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
   };
+
+  const handleQuantityBumpDone = useCallback((itemId) => {
+    setQuantityBumpedItemIds((prev) => {
+      const next = new Set(prev);
+      next.delete(itemId);
+      return next;
+    });
+  }, []);
 
   const handleToggleItem = (item) => {
     const listId = item.listId ?? activeList?.id ?? null;
@@ -600,6 +619,8 @@ export const App = () => {
                  onSortSelect={handleSortSelect}
                  restoredItemIds={restoredItemIds}
                  onRestoreAnimationDone={handleRestoreAnimationDone}
+                 quantityBumpedItemIds={quantityBumpedItemIds}
+                 onQuantityBumpDone={handleQuantityBumpDone}
                  onNavigateToSettings={handleNavigateToSettings}
                />
             </section>
@@ -901,6 +922,8 @@ export const App = () => {
                   onClearChecked={handleClearChecked}
                   restoredItemIds={restoredItemIds}
                   onRestoreAnimationDone={handleRestoreAnimationDone}
+                  quantityBumpedItemIds={quantityBumpedItemIds}
+                  onQuantityBumpDone={handleQuantityBumpDone}
                   onNavigateToSettings={handleNavigateToSettings}
                 />
                 <Suggestions suggestions={suggestions} onAdd={handleAddItem} />

@@ -13,6 +13,7 @@ struct ListDetailView: View {
     @Environment(\.undoManager) private var undoManager
     @Environment(\.colorScheme) private var colorScheme
     @Environment(ToastController.self) private var toastController
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     @State private var detailViewModel: ListDetailViewModel?
     @State private var shareCount: Int = 0
@@ -447,6 +448,12 @@ struct ListDetailView: View {
                 }
                 detailViewModel?.lastAddedItemId = nil
             }
+            .onChange(of: detailViewModel?.quantityBumpedItemId) { _, newId in
+                // Fires when an add merged into an existing item (id set), not when it clears (nil).
+                if newId != nil {
+                    toastController.show("Quantity updated", variant: .success)
+                }
+            }
         }
     }
     
@@ -719,9 +726,24 @@ struct ListDetailView: View {
     
     // MARK: - Item Row
     
+    /// The quantity capsule, tinted brand-green and briefly enlarged when its item's quantity was
+    /// just merged up from a re-add.
+    private func quantityBadge(_ text: String, isBumped: Bool) -> some View {
+        Text(text)
+            .font(.quicksand(.caption))
+            .fontWeight(.medium)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Capsule().fill(isBumped ? Color.brandGreen : Color(.systemGray)))
+            .scaleEffect(isBumped && !reduceMotion ? 1.18 : 1.0)
+            .animation(.easeOut(duration: 0.45), value: isBumped)
+    }
+
     private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true, leadingBar: String? = nil) -> some View {
         let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
         let effectiveIsChecked = detailViewModel?.effectiveIsChecked(for: item) ?? item.isChecked
+        let isQuantityBumped = detailViewModel?.quantityBumpedItemId == item.id
 
         return HStack(spacing: 0) {
             // Main row content
@@ -744,27 +766,9 @@ struct ListDetailView: View {
 
                 if detailViewModel?.typeConfig.fields.quantity == true {
                     if item.unit != "each" {
-                        Text("\(item.quantity) \(item.unit)")
-                            .font(.quicksand(.caption))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color(.systemGray))
-                            )
+                        quantityBadge("\(item.quantity) \(item.unit)", isBumped: isQuantityBumped)
                     } else if item.quantity > 1 {
-                        Text("×\(item.quantity)")
-                            .font(.quicksand(.caption))
-                            .fontWeight(.medium)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(
-                                Capsule()
-                                    .fill(Color(.systemGray))
-                            )
+                        quantityBadge("×\(item.quantity)", isBumped: isQuantityBumped)
                     }
                 }
                 

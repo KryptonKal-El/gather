@@ -50,6 +50,22 @@ const LAST_LIST_ID_KEY = 'gather_last_list_id';
 /** Capitalizes the first letter of a string. */
 const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
+/**
+ * Finds an existing unchecked item in the list to merge a re-added item into, so adding a
+ * duplicate bumps its quantity instead of creating a second row. Matches by name
+ * (case-insensitive); when several match, prefers one in the same store.
+ * @param {Array<{id: string, name: string, isChecked: boolean, store: string|null}>} items
+ * @param {string} name - The new item's (already capitalized) name
+ * @param {string|null} storeId - The new item's resolved store, if any
+ * @returns {object|null} The item to merge into, or null if none
+ */
+export const findMergeTarget = (items, name, storeId) => {
+  const lower = name.trim().toLowerCase();
+  const matches = items.filter((i) => !i.isChecked && (i.name ?? '').trim().toLowerCase() === lower);
+  if (matches.length === 0) return null;
+  return matches.find((i) => (i.store ?? null) === (storeId ?? null)) ?? matches[0];
+};
+
 export const ShoppingListContext = createContext(null); // eslint-disable-line react-refresh/only-export-components
 
 /**
@@ -596,7 +612,7 @@ export const ShoppingListProvider = ({ children }) => {
   }, []);
 
   const addItemAction = useCallback(async (listId, rawName, storeId = null, template = null) => {
-    if (!userId) return;
+    if (!userId) return null;
     const ownerUid = getListOwnerUid(listId);
     const name = capitalize(rawName.trim());
     const listEntry = allLists.find((l) => l.id === listId);
@@ -604,12 +620,36 @@ export const ShoppingListProvider = ({ children }) => {
     const categories = getEffectiveCategories(listEntry, userCategoryDefaults);
     // When reusing a suggestion, restore its saved fields; otherwise derive defaults.
     const category = template?.category ?? (categories ? categorizeItem(name, categories, listType) : null);
+    const resolvedStore = storeId ?? template?.storeId ?? null;
+    const addQuantity = template?.quantity ?? 1;
+
+    // If the same item is already on the list (unchecked), bump its quantity instead of
+    // adding a duplicate row. Only the active list's items are held in memory, which is the
+    // interactive add path; other lists fall through to a normal insert.
+    const existing = listId === activeListId
+      ? findMergeTarget(activeItems, name, resolvedStore)
+      : null;
+    if (existing) {
+      const newQuantity = (existing.quantity ?? 1) + addQuantity;
+      await dbUpdateItem(ownerUid, listId, existing.id, { quantity: newQuantity });
+      await addHistoryEntry(userId, listId, name, {
+        imageUrl: template?.imageUrl ?? null,
+        category,
+        storeId: resolvedStore,
+        quantity: addQuantity,
+        price: template?.price ?? null,
+        unit: template?.unit ?? 'each',
+        note: template?.note ?? null,
+      });
+      return { merged: true, itemId: existing.id, quantity: newQuantity };
+    }
+
     const item = {
       name,
       category,
       isChecked: false,
-      store: storeId ?? template?.storeId ?? null,
-      quantity: template?.quantity ?? 1,
+      store: resolvedStore,
+      quantity: addQuantity,
       price: template?.price ?? null,
       imageUrl: template?.imageUrl ?? null,
       unit: template?.unit ?? 'each',
@@ -625,7 +665,8 @@ export const ShoppingListProvider = ({ children }) => {
       unit: item.unit,
       note: item.note,
     });
-  }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
+    return { merged: false };
+  }, [userId, allLists, userCategoryDefaults, getListOwnerUid, activeItems, activeListId]);
 
   const addItemsAction = useCallback(async (listId, items) => {
     if (!userId) return;

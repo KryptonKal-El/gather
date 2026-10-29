@@ -42,7 +42,7 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false }) => {
+export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, isQuantityBumped = false, onQuantityBumpDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false }) => {
   const { user } = useAuth();
   const imageSearchSettings = user?.profile?.imageSearchSettings;
   const typeConfig = getTypeConfig(listType);
@@ -80,6 +80,10 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
   // Restore animation state
   const [showRestoreAnimation, setShowRestoreAnimation] = useState(isRestored ?? false);
 
+  // Quantity-bump highlight: plays when an existing item's quantity was merged up from a re-add.
+  // Unlike restore, the item is already mounted, so it's driven by the prop flipping to true.
+  const [showQtyBump, setShowQtyBump] = useState(false);
+
   // Mobile detection (coarse pointer = touch device)
   const [isMobile] = useState(() => {
     if (typeof window === 'undefined') return false;
@@ -101,6 +105,17 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
     }, 1200); // 0.2s expand + 1s green fade
     return () => clearTimeout(timer);
   }, [showRestoreAnimation, onRestoreAnimationDone]);
+
+  // Play the quantity highlight when flagged, then clear it (and tell the parent to drop the flag).
+  useEffect(() => {
+    if (!isQuantityBumped) return undefined;
+    setShowQtyBump(true);
+    const timer = setTimeout(() => {
+      setShowQtyBump(false);
+      onQuantityBumpDone?.();
+    }, 1100);
+    return () => clearTimeout(timer);
+  }, [isQuantityBumped, onQuantityBumpDone]);
 
   const storeMap = {};
   for (const s of stores) {
@@ -451,6 +466,7 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
   return (
     <div
       className={`${styles.itemWrapper} ${isExiting ? styles.itemExiting : ''} ${showRestoreAnimation ? styles.itemRestored : ''}`}
+      data-item-id={item.id}
       onAnimationEnd={handleAnimationEnd}
     >
       {/* Delete zone revealed behind item during swipe */}
@@ -484,8 +500,8 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                   {item.name}
                   {fields.quantity && (
                     (item.unit && item.unit !== 'each')
-                      ? <span className={styles.qty}> ({qty} {item.unit})</span>
-                      : qty > 1 && <span className={styles.qty}> ({qty})</span>
+                      ? <span className={`${styles.qty} ${showQtyBump ? styles.qtyBump : ''}`}> ({qty} {item.unit})</span>
+                      : qty > 1 && <span className={`${styles.qty} ${showQtyBump ? styles.qtyBump : ''}`}> ({qty})</span>
                   )}
                 </span>
               </span>
@@ -537,8 +553,8 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                     {item.name}
                     {fields.quantity && (
                       (item.unit && item.unit !== 'each')
-                        ? <span className={styles.qty}> ({qty} {item.unit})</span>
-                        : qty > 1 && <span className={styles.qty}> ({qty})</span>
+                        ? <span className={`${styles.qty} ${showQtyBump ? styles.qtyBump : ''}`}> ({qty} {item.unit})</span>
+                        : qty > 1 && <span className={`${styles.qty} ${showQtyBump ? styles.qtyBump : ''}`}> ({qty})</span>
                     )}
                   </span>
                 </span>
@@ -981,6 +997,8 @@ ShoppingItem.propTypes = {
   onUpdateItem: PropTypes.func.isRequired,
   isRestored: PropTypes.bool,
   onRestoreAnimationDone: PropTypes.func,
+  isQuantityBumped: PropTypes.bool,
+  onQuantityBumpDone: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
   hideStorePill: PropTypes.bool,
   hideCategoryPill: PropTypes.bool,
