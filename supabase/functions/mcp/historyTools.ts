@@ -163,6 +163,132 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
   );
 
   server.registerTool(
+    'items_suggest',
+    {
+      annotations: READ_ONLY,
+      title: 'Suggest a previous item to reuse',
+      description:
+        'Find previously-added items matching a name so you can reuse one instead of creating a generic new item. Returns past matches ranked by how often and how recently they were added, each with its reusable details (category, store, unit, quantity, note) restored from the last time it was added — so reusing "Bread" brings back its Bakery category, not Other. Draws from the user\'s full item history across all their lists; pass list_id to prefer and correctly attach stores from the list you are adding to. Call this before items_add, then pass the chosen match\'s details into items_add.',
+      inputSchema: z.object({
+        name: z.string().trim().min(1).describe('The item name to find previous matches for.'),
+        list_id: uuid('The list you are adding to. Matches on it rank higher, and store ids are returned valid for this list.').optional(),
+        limit: z.number().int().min(1).max(50).optional().describe('Max matches to return (default 8, max 50).'),
+      }),
+    },
+    async ({ name, list_id, limit = 8 }) => {
+      const query = name.trim().toLowerCase();
+
+      // Scan the full accessible history for name matches (RLS already limits
+      // this to the user's own and shared lists). Name-filtered, so it's small.
+      const rows: HistoryRow[] = [];
+      for (let offset = 0; offset < MAX_SCAN_ROWS; offset += MAX_PAGE) {
+        const { data, error } = await supabase
+          .from('history')
+          .select('name, list_id, category, store_id, quantity, unit, price, note, added_at')
+          .ilike('name', `%${escapeLike(name.trim())}%`)
+          .order('added_at', { ascending: true })
+          .order('id', { ascending: true })
+          .range(offset, offset + MAX_PAGE - 1);
+        if (error) return errorResult(error.message);
+        rows.push(...data);
+        if (data.length < MAX_PAGE) break;
+      }
+
+      // Oldest-first, so the last row seen for a name carries its latest saved
+      // details — the template both apps restore when the item is re-added.
+      const byName = new Map<string, HistorySummary & { in_current_list: boolean }>();
+      for (const row of rows) {
+        const key = row.name.trim().toLowerCase();
+        const existing = byName.get(key);
+        const listIds = new Set(existing?.list_ids ?? []);
+        if (row.list_id) listIds.add(row.list_id);
+        byName.set(key, {
+          name: row.name,
+          times_added: (existing?.times_added ?? 0) + 1,
+          first_added_at: existing?.first_added_at ?? row.added_at,
+          last_added_at: row.added_at ?? existing?.last_added_at ?? null,
+          category: row.category,
+          store_id: row.store_id,
+          quantity: row.quantity,
+          unit: row.unit,
+          price: row.price,
+          note: row.note,
+          list_ids: [...listIds],
+          in_current_list: (existing?.in_current_list ?? false) || (!!list_id && row.list_id === list_id),
+        });
+      }
+
+      // Rank by frequency + recency, nudging exact-name and current-list
+      // matches up so the most reusable candidate comes first.
+      const now = Date.now();
+      const recencyWeight = (iso: string | null) => {
+        if (!iso) return 0;
+        const days = (now - Date.parse(iso)) / 86_400_000;
+        if (days <= 7) return 3;
+        if (days <= 30) return 2;
+        if (days <= 90) return 1;
+        return 0;
+      };
+      const matchWeight = (candidate: string) => {
+        const lower = candidate.trim().toLowerCase();
+        if (lower === query) return 2;
+        if (lower.startsWith(query)) return 1;
+        return 0;
+      };
+      const score = (item: HistorySummary & { in_current_list: boolean }) =>
+        item.times_added + recencyWeight(item.last_added_at) + (item.in_current_list ? 2 : 0) + matchWeight(item.name);
+
+      const ranked = [...byName.values()]
+        .sort((a, b) =>
+          score(b) - score(a)
+          || b.times_added - a.times_added
+          || (b.last_added_at ?? '').localeCompare(a.last_added_at ?? ''),
+        )
+        .slice(0, limit);
+
+      // Resolve store names for the matched store ids (which may belong to any
+      // list), and map them to a store on the current list so the returned
+      // store_id is valid to pass straight into items_add (stores are per-list).
+      const storeNameById = new Map<string, string>();
+      const matchedStoreIds = [...new Set(ranked.map((i) => i.store_id).filter((id): id is string => id !== null))];
+      for (const ids of chunk(matchedStoreIds, 200)) {
+        const { data, error } = await supabase.from('stores').select('id, name').in('id', ids);
+        if (error) return errorResult(error.message);
+        for (const store of data) storeNameById.set(store.id, store.name);
+      }
+      const currentListStoreByName = new Map<string, string>();
+      if (list_id) {
+        const { data, error } = await supabase.from('stores').select('id, name').eq('list_id', list_id);
+        if (error) return errorResult(error.message);
+        for (const store of data) currentListStoreByName.set(store.name.trim().toLowerCase(), store.id);
+      }
+
+      const matches = ranked.map((item) => {
+        const storeName = item.store_id ? storeNameById.get(item.store_id) ?? null : null;
+        const storeIdForList = storeName
+          ? currentListStoreByName.get(storeName.trim().toLowerCase()) ?? null
+          : null;
+        return {
+          name: item.name,
+          category: item.category,
+          store_id: storeIdForList,
+          store_name: storeName,
+          store_needs_creating: storeName !== null && storeIdForList === null,
+          unit: item.unit,
+          quantity: item.quantity,
+          note: item.note,
+          price: item.price,
+          times_added: item.times_added,
+          last_added_at: item.last_added_at,
+          in_current_list: item.in_current_list,
+        };
+      });
+
+      return jsonResult({ query: name, match_count: matches.length, matches });
+    },
+  );
+
+  server.registerTool(
     'cook_history',
     {
       annotations: READ_ONLY,

@@ -161,7 +161,7 @@ export function registerListTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'Add items to a list',
       description:
-        `Add up to ${MAX_ITEMS_PER_CALL} items to a list. Names are capitalized and, unless a category is given, auto-categorized the way the app does. Does not merge with existing items — use shopping_add_ingredients for recipe ingredients.`,
+        `Add up to ${MAX_ITEMS_PER_CALL} items to a list. Call items_suggest first with the item name to find a previous match with its category, store, unit, and other details, and pass those through here. Only call items_add directly if no suitable match is found or you want to create a new item. Names are capitalized and, unless a category is given, auto-categorized the way the app does. Does not merge with existing items — use shopping_add_ingredients for recipe ingredients.`,
       annotations: WRITE,
       inputSchema: z.object({
         list_id: uuid('The list id.'),
