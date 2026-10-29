@@ -59,6 +59,7 @@ const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
  * @param {string|null} storeId - The new item's resolved store, if any
  * @returns {object|null} The item to merge into, or null if none
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const findMergeTarget = (items, name, storeId) => {
   const lower = name.trim().toLowerCase();
   const matches = items.filter((i) => !i.isChecked && (i.name ?? '').trim().toLowerCase() === lower);
@@ -655,7 +656,7 @@ export const ShoppingListProvider = ({ children }) => {
       unit: template?.unit ?? 'each',
       note: template?.note ?? null,
     };
-    await dbAddItem(ownerUid, listId, item);
+    const newId = await dbAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, listId, name, {
       imageUrl: item.imageUrl,
       category: item.category,
@@ -665,7 +666,7 @@ export const ShoppingListProvider = ({ children }) => {
       unit: item.unit,
       note: item.note,
     });
-    return { merged: false };
+    return { merged: false, itemId: newId, quantity: item.quantity };
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid, activeItems, activeListId]);
 
   const addItemsAction = useCallback(async (listId, items) => {

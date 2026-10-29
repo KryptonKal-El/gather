@@ -449,8 +449,9 @@ struct ListDetailView: View {
                 detailViewModel?.lastAddedItemId = nil
             }
             .onChange(of: detailViewModel?.quantityBumpedItemId) { _, newId in
-                // Fires when an add merged into an existing item (id set), not when it clears (nil).
-                if newId != nil {
+                // Fires when a quantity highlight starts (id set), not when it clears (nil). Only a
+                // merge also shows the toast; a fresh add with a non-default quantity highlights only.
+                if newId != nil, detailViewModel?.quantityBumpShowsToast == true {
                     toastController.show("Quantity updated", variant: .success)
                 }
             }

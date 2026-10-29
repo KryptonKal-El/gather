@@ -179,15 +179,20 @@ export const App = () => {
   const handleAddItem = async (name, storeId = null, template = null) => {
     if (!activeList) return;
     const result = await actions.addItem(activeList.id, name, storeId, template);
-    // When the item was already on the list, its quantity was bumped: flag it so the row's
-    // quantity highlights, scroll it into view, and confirm with a soft toast.
-    if (result?.merged && result.itemId) {
+    if (!result?.itemId) return;
+    if (result.merged) {
+      // Item was already on the list: its quantity was bumped. Highlight the row's quantity,
+      // scroll it into view, and confirm with a soft toast.
       setQuantityBumpedItemIds((prev) => new Set(prev).add(result.itemId));
       showToast({ message: 'Quantity updated', variant: 'success', durationMs: 2000 });
       requestAnimationFrame(() => {
         document.querySelector(`[data-item-id="${result.itemId}"]`)
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
+    } else if (result.quantity !== 1) {
+      // Fresh add (e.g. from a suggestion) carrying a non-default quantity: flash the quantity
+      // so the set amount is noticed. No toast — nothing was merged.
+      setQuantityBumpedItemIds((prev) => new Set(prev).add(result.itemId));
     }
   };
 

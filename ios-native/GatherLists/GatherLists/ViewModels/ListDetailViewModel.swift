@@ -33,9 +33,12 @@ final class ListDetailViewModel {
     /// ID of the most recently added item, used for auto-scrolling.
     var lastAddedItemId: UUID?
 
-    /// ID of an item whose quantity was just merged up from a re-add, used to briefly highlight
-    /// its quantity badge. Cleared automatically after the highlight plays.
+    /// ID of an item whose quantity should briefly highlight — either merged up from a re-add, or
+    /// a fresh add carrying a non-default quantity. Cleared automatically after the highlight plays.
     var quantityBumpedItemId: UUID?
+    /// Whether the current highlight should also show the "Quantity updated" toast. True for a
+    /// merge, false for a fresh add (highlight only).
+    private(set) var quantityBumpShowsToast = false
     @ObservationIgnored private var quantityBumpTask: Task<Void, Never>?
 
     // List categories (resolved via CategoryService)
@@ -365,7 +368,15 @@ final class ListDetailViewModel {
             items[index].quantity = newQuantity
         }
         lastAddedItemId = existing.id
-        quantityBumpedItemId = existing.id
+        flagQuantityBump(existing.id, showToast: true)
+    }
+
+    /// Flags an item's quantity for the brief highlight and schedules the flag to clear. `showToast`
+    /// is read by the view: true for a merge (also shows the "Quantity updated" toast), false for a
+    /// fresh add carrying a non-default quantity (highlight only).
+    private func flagQuantityBump(_ id: UUID, showToast: Bool) {
+        quantityBumpShowsToast = showToast
+        quantityBumpedItemId = id
         quantityBumpTask?.cancel()
         quantityBumpTask = Task { [weak self] in
             try? await Task.sleep(for: .seconds(1.1))
@@ -422,6 +433,10 @@ final class ListDetailViewModel {
             )
             items.append(newItem)
             lastAddedItemId = newItem.id
+            // A suggestion can restore a saved quantity; flash it so a non-default amount is noticed.
+            if newItem.quantity != 1 {
+                flagQuantityBump(newItem.id, showToast: false)
+            }
 
             let capitalizedName = name.prefix(1).uppercased() + name.dropFirst()
             try await HistoryService.addHistoryEntry(
