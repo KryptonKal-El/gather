@@ -4,7 +4,7 @@
     "details": [
       {
         "appIDs": ["53L3M4444A.com.gatherlists"],
-        "paths": ["/app", "/app/*"]
+        "paths": ["NOT /app/oauth/*", "/app", "/app/*"]
       }
     ]
   },
