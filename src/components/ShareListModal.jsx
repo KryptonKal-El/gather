@@ -1,37 +1,52 @@
 /**
  * ShareListModal — modal for sharing a list with other users by email.
- * Shows current collaborators and allows adding/removing them.
- * Only the list owner can use this modal.
+ * Shows current collaborators with their role (editor/viewer) and allows
+ * adding, removing, and changing roles. Only the list owner can use this modal.
  */
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
+import { fetchListShares } from '../services/database.js';
 import styles from './ShareListModal.module.css';
 
-/**
- * Extracts collaborator emails from the list's sharedWith map.
- * @param {Object} sharedWith - Map of sanitized email keys to { email, addedAt }
- * @returns {string[]} Array of email addresses
- */
-const getCollaboratorEmails = (sharedWith) => {
-  if (!sharedWith || typeof sharedWith !== 'object') return [];
-  return Object.values(sharedWith).map((entry) => entry.email);
-};
+const ROLE_OPTIONS = [
+  { value: 'editor', label: 'Can edit' },
+  { value: 'viewer', label: 'Can view' },
+];
 
 /**
  * Modal for managing list sharing.
  * @param {Object} props
- * @param {Object} props.list - The list object (must include sharedWith, ownerEmail)
- * @param {Function} props.onShare - Called with (listId, email) to share
+ * @param {Object} props.list - The list object (id, name, type, ownerEmail)
+ * @param {Function} props.onShare - Called with (listId, email, role) to share
+ * @param {Function} props.onUpdateRole - Called with (listId, email, role) to change access
  * @param {Function} props.onUnshare - Called with (listId, email) to revoke
  * @param {Function} props.onClose - Called to close the modal
  */
-export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
+export const ShareListModal = ({ list, onShare, onUnshare, onUpdateRole, onClose }) => {
+  const isWishList = list.type === 'wish_list';
   const [email, setEmail] = useState('');
+  const [newRole, setNewRole] = useState(isWishList ? 'viewer' : 'editor');
+  const [shares, setShares] = useState([]);
+  const [isLoadingShares, setIsLoadingShares] = useState(true);
   const [isSharing, setIsSharing] = useState(false);
   const [error, setError] = useState(null);
 
-  const collaborators = getCollaboratorEmails(list.sharedWith);
+  const collaborators = shares.map((share) => share.email);
+
+  const loadShares = useCallback(async () => {
+    try {
+      setShares(await fetchListShares(list.id));
+    } catch (err) {
+      setError(`Couldn't load people with access: ${err.message}`);
+    } finally {
+      setIsLoadingShares(false);
+    }
+  }, [list.id]);
+
+  useEffect(() => {
+    loadShares();
+  }, [loadShares]);
 
   const handleShare = async (e) => {
     e.preventDefault();
@@ -59,8 +74,9 @@ export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
     setError(null);
     setIsSharing(true);
     try {
-      await onShare(list.id, trimmed);
+      await onShare(list.id, trimmed, newRole);
       setEmail('');
+      await loadShares();
     } catch (err) {
       setError(`Failed to share: ${err.message}`);
     } finally {
@@ -69,10 +85,22 @@ export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
   };
 
   const handleRemove = async (collaboratorEmail) => {
+    const role = shares.find((share) => share.email === collaboratorEmail)?.role ?? 'editor';
     try {
-      await onUnshare(list.id, collaboratorEmail);
+      await onUnshare(list.id, collaboratorEmail, role);
+      await loadShares();
     } catch (err) {
       setError(`Failed to remove: ${err.message}`);
+    }
+  };
+
+  const handleRoleChange = async (collaboratorEmail, role) => {
+    setShares((prev) => prev.map((share) => (share.email === collaboratorEmail ? { ...share, role } : share)));
+    try {
+      await onUpdateRole(list.id, collaboratorEmail, role);
+    } catch (err) {
+      setError(`Failed to change access: ${err.message}`);
+      await loadShares();
     }
   };
 
@@ -114,6 +142,17 @@ export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
             autoFocus
             disabled={isSharing}
           />
+          <select
+            className={styles.roleSelect}
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value)}
+            aria-label="Access for the new person"
+            disabled={isSharing}
+          >
+            {ROLE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
           <button
             className={styles.shareBtn}
             type="submit"
@@ -125,6 +164,12 @@ export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
 
         {error && <p className={styles.error}>{error}</p>}
 
+        {isWishList && (
+          <p className={styles.hint}>
+            People who can view can claim gifts without you seeing. Those who can edit can also change your list.
+          </p>
+        )}
+
         <div className={styles.collaborators}>
           <h4 className={styles.subTitle}>People with access</h4>
 
@@ -133,12 +178,24 @@ export const ShareListModal = ({ list, onShare, onUnshare, onClose }) => {
             <span className={styles.ownerBadge}>Owner</span>
           </div>
 
-          {collaborators.length === 0 ? (
+          {isLoadingShares ? (
+            <p className={styles.emptyMsg}>Loading…</p>
+          ) : shares.length === 0 ? (
             <p className={styles.emptyMsg}>No one else has access yet.</p>
           ) : (
-            collaborators.map((collab) => (
+            shares.map(({ email: collab, role }) => (
               <div key={collab} className={styles.person}>
                 <span className={styles.personEmail}>{collab}</span>
+                <select
+                  className={styles.roleSelect}
+                  value={role}
+                  onChange={(e) => handleRoleChange(collab, e.target.value)}
+                  aria-label={`Access for ${collab}`}
+                >
+                  {ROLE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
                 <button
                   className={styles.removeBtn}
                   onClick={() => handleRemove(collab)}
@@ -161,9 +218,10 @@ ShareListModal.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     ownerEmail: PropTypes.string,
-    sharedWith: PropTypes.object,
+    type: PropTypes.string,
   }).isRequired,
   onShare: PropTypes.func.isRequired,
   onUnshare: PropTypes.func.isRequired,
+  onUpdateRole: PropTypes.func.isRequired,
   onClose: PropTypes.func.isRequired,
 };

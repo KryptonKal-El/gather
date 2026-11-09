@@ -294,6 +294,7 @@ export const subscribeLists = (userId, callback) => {
           sortOrder: row.sort_order,
           type: row.type,
           categories: row.categories,
+          revealClaims: row.reveal_claims ?? false,
         }))
       );
     } catch (error) {
@@ -824,14 +825,16 @@ export const subscribeHistory = (userId, callback) => {
  * @param {string} listName - List name (unused in Supabase, kept for API compat)
  * @param {string} email - Email of the user to share with
  * @param {string[]|null} sortConfig - Sort config to snapshot at share time
+ * @param {'editor'|'viewer'} [role='editor'] - Editors can change the list; viewers can only read (and claim on wish lists)
  */
-export const shareList = async (ownerUid, listId, listName, email, sortConfig = null) => {
+export const shareList = async (ownerUid, listId, listName, email, sortConfig = null, role = 'editor') => {
   try {
     const normalizedEmail = email.toLowerCase().trim();
 
     const row = {
       list_id: listId,
       shared_with_email: normalizedEmail,
+      role,
     };
     if (sortConfig) {
       row.sort_config = sortConfig;
@@ -868,6 +871,118 @@ export const unshareList = async (ownerUid, listId, email) => {
 };
 
 /**
+ * Lists everyone a list is shared with, and their role. Owner only (RLS).
+ * @param {string} listId - List ID
+ * @returns {Promise<Array<{email: string, role: 'editor'|'viewer'}>>}
+ */
+export const fetchListShares = async (listId) => {
+  const { data, error } = await supabase
+    .from('list_shares')
+    .select('shared_with_email, role, added_at')
+    .eq('list_id', listId)
+    .order('added_at', { ascending: true });
+  if (error) throw new Error(`Failed to fetch list shares: listId=${listId}`, { cause: error });
+  return data.map((row) => ({ email: row.shared_with_email, role: row.role ?? 'editor' }));
+};
+
+/**
+ * Changes a collaborator's role on a list. Only the owner may do this (DB trigger).
+ * @param {string} listId - List ID
+ * @param {string} email - Collaborator's email
+ * @param {'editor'|'viewer'} role - New role
+ */
+export const updateShareRole = async (listId, email, role) => {
+  const { error } = await supabase
+    .from('list_shares')
+    .update({ role })
+    .eq('list_id', listId)
+    .eq('shared_with_email', email.toLowerCase().trim());
+  if (error) throw new Error(`Failed to update share role: listId=${listId}`, { cause: error });
+};
+
+/**
+ * Turns the owner's view of gift claims on or off for a wish list.
+ * @param {string} listId - List ID
+ * @param {boolean} reveal - Whether the owner can see claims
+ */
+export const setRevealClaims = async (listId, reveal) => {
+  const { error } = await supabase.from('lists').update({ reveal_claims: reveal }).eq('id', listId);
+  if (error) throw new Error(`Failed to update reveal_claims: listId=${listId}`, { cause: error });
+};
+
+/**
+ * Subscribes to the gift claims on a wish list. RLS decides what comes back:
+ * collaborators see every claim, the owner sees none unless reveal_claims is on.
+ * Realtime has no non-PK filter (see docs/memory/supabase-realtime-replica-identity.md),
+ * so any claim change triggers a refetch for this list.
+ * @param {string} listId - List ID
+ * @param {function} callback - Called with an array of { id, itemId, claimedBy, quantity }
+ * @returns {function} Unsubscribe function
+ */
+export const subscribeItemClaims = (listId, callback) => {
+  const fetchClaims = async () => {
+    const { data, error } = await supabase
+      .from('item_claims')
+      .select('id, item_id, claimed_by, quantity')
+      .eq('list_id', listId);
+    if (error) {
+      console.error('Failed to fetch item claims:', error);
+      return;
+    }
+    callback(data.map((row) => ({
+      id: row.id,
+      itemId: row.item_id,
+      claimedBy: row.claimed_by,
+      quantity: row.quantity,
+    })));
+  };
+
+  fetchClaims();
+
+  const channel = supabase
+    .channel(`item-claims-${listId}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'item_claims' }, () => {
+      fetchClaims();
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+};
+
+/**
+ * Claims (or changes the amount of) a wish-list item for the current user.
+ * @param {string} listId - List ID
+ * @param {string} itemId - Item ID
+ * @param {string} userId - Current user's ID
+ * @param {number} quantity - How many the user is getting
+ */
+export const claimItem = async (listId, itemId, userId, quantity = 1) => {
+  const { error } = await supabase
+    .from('item_claims')
+    .upsert(
+      { list_id: listId, item_id: itemId, claimed_by: userId, quantity },
+      { onConflict: 'item_id,claimed_by' },
+    );
+  if (error) throw new Error(`Failed to claim item: itemId=${itemId}`, { cause: error });
+};
+
+/**
+ * Removes the current user's claim on an item.
+ * @param {string} itemId - Item ID
+ * @param {string} userId - Current user's ID
+ */
+export const unclaimItem = async (itemId, userId) => {
+  const { error } = await supabase
+    .from('item_claims')
+    .delete()
+    .eq('item_id', itemId)
+    .eq('claimed_by', userId);
+  if (error) throw new Error(`Failed to unclaim item: itemId=${itemId}`, { cause: error });
+};
+
+/**
  * Subscribes to shared list references for a user (by email).
  * Returns refs for lists that others have shared with this user.
  * Performs initial fetch and subscribes to real-time changes via Supabase Realtime.
@@ -888,7 +1003,7 @@ export const subscribeSharedListRefs = (email, callback) => {
     try {
       const { data: shares, error: sharesError } = await supabase
         .from('list_shares')
-        .select('id, list_id, added_at, sort_config')
+        .select('id, list_id, added_at, sort_config, role')
         .eq('shared_with_email', normalizedEmail);
 
       if (sharesError) {
@@ -935,6 +1050,7 @@ export const subscribeSharedListRefs = (email, callback) => {
             ownerUid: list.owner_id,
             addedAt: s.added_at,
             shareSortConfig: s.sort_config ?? null,
+            shareRole: s.role ?? 'editor',
           };
         });
 
@@ -1017,6 +1133,7 @@ export const subscribeList = (ownerUid, listId, callback) => {
         sortConfig: data.sort_config,
         type: data.type,
         categories: data.categories,
+        revealClaims: data.reveal_claims ?? false,
       });
     } catch (error) {
       console.error('Failed to fetch list:', error);

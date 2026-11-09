@@ -542,3 +542,71 @@ private struct IngredientItem: Encodable {
         case createdBy = "created_by"
     }
 }
+
+
+// MARK: - Gift Claims (wish lists)
+
+/// A gift-giver's claim on a wish-list item, mapped to the `item_claims` table.
+/// RLS hides claims from the list owner unless the list's reveal_claims is on.
+struct ItemClaim: Codable, Identifiable, Hashable {
+    let id: UUID
+    let itemId: UUID
+    let listId: UUID
+    let claimedBy: UUID
+    var quantity: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case itemId = "item_id"
+        case listId = "list_id"
+        case claimedBy = "claimed_by"
+        case quantity
+    }
+}
+
+/// Reads and writes gift claims on wish lists.
+enum ClaimService {
+    private static var client: SupabaseClient { SupabaseManager.shared.client }
+
+    /// Fetches the claims on a list that the current user is allowed to see.
+    static func fetchClaims(listId: UUID) async throws -> [ItemClaim] {
+        try await client
+            .from("item_claims")
+            .select("id, item_id, list_id, claimed_by, quantity")
+            .eq("list_id", value: listId)
+            .execute()
+            .value
+    }
+
+    /// Claims an item (or changes how many) for the current user.
+    static func claim(listId: UUID, itemId: UUID, userId: UUID, quantity: Int) async throws {
+        try await client
+            .from("item_claims")
+            .upsert(NewItemClaim(itemId: itemId, listId: listId, claimedBy: userId, quantity: quantity), onConflict: "item_id,claimed_by")
+            .execute()
+    }
+
+    /// Removes the current user's claim on an item.
+    static func unclaim(itemId: UUID, userId: UUID) async throws {
+        try await client
+            .from("item_claims")
+            .delete()
+            .eq("item_id", value: itemId)
+            .eq("claimed_by", value: userId)
+            .execute()
+    }
+}
+
+private struct NewItemClaim: Encodable {
+    let itemId: UUID
+    let listId: UUID
+    let claimedBy: UUID
+    let quantity: Int
+
+    enum CodingKeys: String, CodingKey {
+        case itemId = "item_id"
+        case listId = "list_id"
+        case claimedBy = "claimed_by"
+        case quantity
+    }
+}

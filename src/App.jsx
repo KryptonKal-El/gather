@@ -39,6 +39,7 @@ import { SortPicker } from './components/SortPicker.jsx';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import { MealPlanView } from './components/MealPlanView.jsx';
 import { useMealPlan } from './hooks/useMealPlan.js';
+import { useClaimContext } from './hooks/useClaimContext.js';
 import styles from './App.module.css';
 
 const isLightColor = (hex) => {
@@ -60,6 +61,7 @@ const isLightColor = (hex) => {
 export const App = () => {
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
+  const claimContext = useClaimContext(activeList, user?.id ?? null, actions);
   const { state: recipeState, actions: recipeActions } = useRecipes();
   const [isSharingMealPlan, setIsSharingMealPlan] = useState(false);
   const { effectiveSortConfig, updateListSort } = useSortPreferences();
@@ -349,12 +351,22 @@ export const App = () => {
     setSaveRecipeDetail(null);
   };
 
-  const handleUnshareList = async (listId, email) => {
+  const [revealConfirmList, setRevealConfirmList] = useState(null);
+
+  const handleToggleRevealClaims = (list) => {
+    if (list.revealClaims) {
+      actions.setRevealClaims(list.id, false);
+    } else {
+      setRevealConfirmList(list);
+    }
+  };
+
+  const handleUnshareList = async (listId, email, role = 'editor') => {
     pushUndo({
       type: 'unshare-list',
       data: { listId, email },
       restore: async () => {
-        await actions.shareList(listId, email);
+        await actions.shareList(listId, email, null, role);
       },
     });
     await actions.unshareList(listId, email);
@@ -593,6 +605,7 @@ export const App = () => {
                   onDuplicate={handleDuplicateList}
                   onResetItems={handleResetItems}
                   onShareClick={(list) => setSharingListId(list.id)}
+                  onToggleRevealClaims={handleToggleRevealClaims}
                   onManageStores={(list) => { handleListSelect(list.id); setShowStoresModal(true); }}
                   onNavigateToSettings={handleNavigateToSettings}
                 />
@@ -619,6 +632,7 @@ export const App = () => {
                  onUpdateItem={handleUpdateItem}
                  onClearChecked={handleClearChecked}
                  onShareClick={(list) => setSharingListId(list.id)}
+                  onToggleRevealClaims={handleToggleRevealClaims}
                   onManageStores={(_list) => { setShowStoresModal(true); }}
                  onDuplicate={handleDuplicateList}
                  onResetItems={handleResetItems}
@@ -628,6 +642,7 @@ export const App = () => {
                  quantityBumpedItemIds={quantityBumpedItemIds}
                  onQuantityBumpDone={handleQuantityBumpDone}
                  onNavigateToSettings={handleNavigateToSettings}
+                 claimContext={claimContext}
                />
             </section>
           )}
@@ -883,6 +898,7 @@ export const App = () => {
             onDuplicate={handleDuplicateList}
             onResetItems={handleResetItems}
             onShareClick={(list) => setSharingListId(list.id)}
+                  onToggleRevealClaims={handleToggleRevealClaims}
             onManageStores={(list) => { actions.selectList(list.id); setShowStoresModal(true); }}
             onNavigateToSettings={handleNavigateToSettings}
           />
@@ -910,8 +926,11 @@ export const App = () => {
                 />
               </div>
               <div className={styles.listCardBody}>
-                <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
+                {activeList.canEdit && (
+                  <AddItemForm stores={state.stores} history={state.history} listType={activeList.type} onAdd={handleAddItem} />
+                )}
                 <ShoppingList
+                  claimContext={claimContext}
                   getEffectiveChecked={getEffectiveChecked}
                   items={activeList.items}
                   isLoading={activeList.isLoadingItems}
@@ -932,7 +951,7 @@ export const App = () => {
                   onQuantityBumpDone={handleQuantityBumpDone}
                   onNavigateToSettings={handleNavigateToSettings}
                 />
-                <Suggestions suggestions={suggestions} onAdd={handleAddItem} />
+                {activeList.canEdit && <Suggestions suggestions={suggestions} onAdd={handleAddItem} />}
               </div>
             </div>
           ) : (
@@ -1152,8 +1171,9 @@ export const App = () => {
         return (
           <ShareListModal
             list={listToShare}
-            onShare={(listId, email) => actions.shareList(listId, email, sortConfig)}
+            onShare={(listId, email, role) => actions.shareList(listId, email, sortConfig, role)}
             onUnshare={handleUnshareList}
+            onUpdateRole={actions.updateShareRole}
             onClose={() => setSharingListId(null)}
           />
         );
@@ -1209,6 +1229,20 @@ export const App = () => {
           activeCollectionId={recipeState.activeCollectionId}
           onSave={handleSaveOnlineRecipe}
           onClose={() => setSaveRecipeDetail(null)}
+        />
+      )}
+
+      {revealConfirmList && (
+        <ConfirmDialog
+          title="Reveal claims?"
+          message="You'll see which gifts people have claimed and who is getting them. This spoils the surprise."
+          confirmLabel="Reveal"
+          cancelLabel="Cancel"
+          onConfirm={() => {
+            actions.setRevealClaims(revealConfirmList.id, true);
+            setRevealConfirmList(null);
+          }}
+          onCancel={() => setRevealConfirmList(null)}
         />
       )}
 

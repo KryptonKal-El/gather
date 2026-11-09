@@ -206,13 +206,15 @@ struct ListBrowserView: View {
                             ListRowView(list: list, isShared: !isOwned, collaborators: collaborators)
                         }
                         .contextMenu {
-                            Button {
-                                listToEdit = list
-                            } label: {
-                                Label("Name, Icon & Color", systemImage: "pencil")
+                            if vm.canEdit(list.id) {
+                                Button {
+                                    listToEdit = list
+                                } label: {
+                                    Label("Name, Icon & Color", systemImage: "pencil")
+                                }
                             }
 
-                            if ListTypes.getConfig(list.type).fields.store {
+                            if vm.canEdit(list.id) && ListTypes.getConfig(list.type).fields.store {
                                 Button {
                                     listToManageStores = list
                                 } label: {
@@ -220,7 +222,7 @@ struct ListBrowserView: View {
                                 }
                             }
 
-                            if EditListSheet.categorySupportedTypes.contains(list.type) {
+                            if vm.canEdit(list.id) && EditListSheet.categorySupportedTypes.contains(list.type) {
                                 Button {
                                     listToManageCategories = list
                                 } label: {

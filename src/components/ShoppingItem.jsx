@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
 import { fetchCompletionHistory } from '../services/database.js';
 import { ImagePicker } from './ImagePicker.jsx';
+import { ItemClaimControls } from './ItemClaimControls.jsx';
 import { ITEM_UNITS } from '../constants/units.js';
 import styles from './ShoppingItem.module.css';
 
@@ -43,12 +44,13 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, isQuantityBumped = false, onQuantityBumpDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false, hidePriorityPill = false }) => {
+export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, isQuantityBumped = false, onQuantityBumpDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false, hidePriorityPill = false, claimContext = null }) => {
   const { user } = useAuth();
   const imageSearchSettings = user?.profile?.imageSearchSettings;
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
   const isRsvpList = fields.rsvpStatus;
+  const canEdit = claimContext?.canEdit ?? true;
   const isReceivedStyle = fields.priority && (isChecked ?? item.isChecked);
   const priorityInfo = fields.priority && !hidePriorityPill ? WISH_PRIORITIES.find((p) => p.key === item.priority) : null;
   const effectiveChecked = isChecked ?? item.isChecked;
@@ -521,9 +523,9 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
       )}
       <div
         className={`${styles.item} ${effectiveChecked ? styles.checked : ''} ${isReceivedStyle ? styles.received : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={canEdit ? handleTouchStart : undefined}
+        onTouchMove={canEdit ? handleTouchMove : undefined}
+        onTouchEnd={canEdit ? handleTouchEnd : undefined}
         style={getSwipeStyle()}
       >
         {isRsvpList ? (
@@ -568,9 +570,11 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                 type="button"
                 className={`${styles.thumbnail} ${imageUrl ? styles.thumbnailHasImage : ''} ${isUploadingImage ? styles.thumbnailLoading : ''}`}
                 onClick={() => {
+                  if (!canEdit) return;
                   setUploadError(null);
                   setIsImagePickerOpen(true);
                 }}
+                disabled={!canEdit}
                 title="Set item image"
               >
                 {imageUrl ? (
@@ -580,7 +584,7 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                 )}
               </button>
             )}
-            <div className={styles.rowBody} onDoubleClick={onToggle}>
+            <div className={styles.rowBody} onDoubleClick={canEdit ? onToggle : undefined}>
               <div className={styles.details}>
                 <span className={styles.label}>
                   <span className={styles.name}>
@@ -624,6 +628,17 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                     );
                   })()}
                 </div>
+                {claimContext?.showClaims && !effectiveChecked && (
+                  <ItemClaimControls
+                    item={item}
+                    claims={claimContext.claimsByItem.get(item.id) ?? []}
+                    currentUserId={claimContext.currentUserId}
+                    nameFor={claimContext.nameFor}
+                    isGiver={claimContext.isGiver}
+                    onClaim={claimContext.onClaim}
+                    onUnclaim={claimContext.onUnclaim}
+                  />
+                )}
               </div>
               {fields.url && item.url && (
                 <a
@@ -649,19 +664,21 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
             </div>
           </>
         )}
-        <button
-          type="button"
-          className={styles.editBtn}
-          onClick={handleEditToggle}
-          aria-label="Edit item"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11.13 1.87a1.25 1.25 0 0 1 1.77 0l1.23 1.23a1.25 1.25 0 0 1 0 1.77L5.04 13.96l-3.46.77.77-3.46L11.13 1.87Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
+        {canEdit && (
+          <button
+            type="button"
+            className={styles.editBtn}
+            onClick={handleEditToggle}
+            aria-label="Edit item"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.13 1.87a1.25 1.25 0 0 1 1.77 0l1.23 1.23a1.25 1.25 0 0 1 0 1.77L5.04 13.96l-3.46.77.77-3.46L11.13 1.87Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
-      {isEditOpen && (
+      {canEdit && isEditOpen && (
         <div className={styles.editPanel}>
           <div className={styles.editRow}>
             <span className={styles.editLabel}>Name</span>
@@ -1097,5 +1114,15 @@ ShoppingItem.propTypes = {
   hideStorePill: PropTypes.bool,
   hideCategoryPill: PropTypes.bool,
   hidePriorityPill: PropTypes.bool,
+  claimContext: PropTypes.shape({
+    canEdit: PropTypes.bool,
+    isGiver: PropTypes.bool,
+    showClaims: PropTypes.bool,
+    claimsByItem: PropTypes.instanceOf(Map),
+    currentUserId: PropTypes.string,
+    nameFor: PropTypes.func,
+    onClaim: PropTypes.func,
+    onUnclaim: PropTypes.func,
+  }),
 };
 

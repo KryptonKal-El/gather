@@ -41,6 +41,11 @@ import {
   unshareList as dbUnshareList,
   upsertUserCategoryDefault,
   fetchListCollaborators,
+  updateShareRole as dbUpdateShareRole,
+  setRevealClaims as dbSetRevealClaims,
+  subscribeItemClaims,
+  claimItem as dbClaimItem,
+  unclaimItem as dbUnclaimItem,
 } from '../services/database.js';
 import { updateLastListId, updateListOrder, getUserPreferences } from '../services/preferences.js';
 import { supabase } from '../services/supabase.js';
@@ -250,6 +255,7 @@ export const ShoppingListProvider = ({ children }) => {
               _ownerUid: ref.ownerUid,
               _isShared: true,
               shareSortConfig: ref.shareSortConfig ?? null,
+              shareRole: ref.shareRole ?? 'editor',
             },
           }));
         } else {
@@ -398,6 +404,20 @@ export const ShoppingListProvider = ({ children }) => {
       unsub();
     };
   }, [userId, activeListId, activeListOwnerUid, isActiveListShared, sessionVersion]);
+
+  // Subscribe to gift claims on the active wish list. RLS hides them from the
+  // owner unless they turned on reveal_claims, so owners normally get [].
+  const [activeClaims, setActiveClaims] = useState([]);
+  const isActiveWishList = activeListEntry?.type === 'wish_list';
+  const activeRevealClaims = activeListEntry?.revealClaims ?? false;
+  useEffect(() => {
+    if (!activeListId || !isActiveWishList) {
+      setActiveClaims([]);
+      return;
+    }
+    setActiveClaims([]);
+    return subscribeItemClaims(activeListId, setActiveClaims);
+  }, [activeListId, isActiveWishList, activeRevealClaims, sessionVersion]);
 
   // Subscribe to history
   // Re-subscribes when sessionVersion changes (token refresh after long idle)
@@ -941,15 +961,35 @@ export const ShoppingListProvider = ({ children }) => {
    // Sharing actions
    // -----------------------------------------------------------------------
 
-  const shareListAction = useCallback(async (listId, email, sortConfig = null) => {
+  const shareListAction = useCallback(async (listId, email, sortConfig = null, role = 'editor') => {
     if (!userId) return;
     const ownerUid = getListOwnerUid(listId);
     // Only owners can share
     if (ownerUid !== userId) return;
     const listEntry = allLists.find((l) => l.id === listId);
     const listName = listEntry?.name ?? 'Shared List';
-    await dbShareList(userId, listId, listName, email, sortConfig);
+    await dbShareList(userId, listId, listName, email, sortConfig, role);
   }, [userId, allLists, getListOwnerUid]);
+
+  const updateShareRoleAction = useCallback(async (listId, email, role) => {
+    if (!userId || getListOwnerUid(listId) !== userId) return;
+    await dbUpdateShareRole(listId, email, role);
+  }, [userId, getListOwnerUid]);
+
+  const setRevealClaimsAction = useCallback(async (listId, reveal) => {
+    if (!userId || getListOwnerUid(listId) !== userId) return;
+    await dbSetRevealClaims(listId, reveal);
+  }, [userId, getListOwnerUid]);
+
+  const claimItemAction = useCallback(async (listId, itemId, quantity = 1) => {
+    if (!userId) return;
+    await dbClaimItem(listId, itemId, userId, quantity);
+  }, [userId]);
+
+  const unclaimItemAction = useCallback(async (itemId) => {
+    if (!userId) return;
+    await dbUnclaimItem(itemId, userId);
+  }, [userId]);
 
   const unshareListAction = useCallback(async (listId, email) => {
     if (!userId) return;
@@ -1004,12 +1044,22 @@ export const ShoppingListProvider = ({ children }) => {
      saveStoresAsDefault: saveStoresAsDefaultAction,
      shareList: shareListAction,
      unshareList: unshareListAction,
+     updateShareRole: updateShareRoleAction,
+     setRevealClaims: setRevealClaimsAction,
+     claimItem: claimItemAction,
+     unclaimItem: unclaimItemAction,
      saveUserCategoryDefault: saveUserCategoryDefaultAction,
    };
 
   const activeListMeta = allLists.find((l) => l.id === activeListId) ?? null;
   const activeList = activeListMeta
-    ? { ...activeListMeta, items: activeItems, isLoadingItems: activeItemsLoading }
+    ? {
+      ...activeListMeta,
+      items: activeItems,
+      isLoadingItems: activeItemsLoading,
+      claims: activeClaims,
+      canEdit: !activeListMeta._isShared || activeListMeta.shareRole !== 'viewer',
+    }
     : null;
 
   return (

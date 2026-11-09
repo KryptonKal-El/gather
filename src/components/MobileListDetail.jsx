@@ -41,7 +41,10 @@ export const MobileListDetail = ({
   quantityBumpedItemIds = null,
   onQuantityBumpDone = null,
   onNavigateToSettings = null,
+  claimContext = null,
+  onToggleRevealClaims = null,
 }) => {
+  const canEdit = claimContext?.canEdit ?? true;
   const [menuOpen, setMenuOpen] = useState(false);
   const [duplicatingList, setDuplicatingList] = useState(false);
   const [duplicateName, setDuplicateName] = useState('');
@@ -132,7 +135,17 @@ export const MobileListDetail = ({
                    Share Settings
                  </button>
                )}
-               {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+               {isOwned && list.type === 'wish_list' && onToggleRevealClaims && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { onToggleRevealClaims(list); setMenuOpen(false); }}
+                 >
+                   <span className={styles.menuIcon}>🎁</span>
+                   {list.revealClaims ? 'Hide claims' : 'Reveal claims'}
+                 </button>
+               )}
+               {canEdit && LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                  <button
                    type="button"
                    className={styles.menuItem}
@@ -195,7 +208,16 @@ export const MobileListDetail = ({
                       Share Settings
                     </button>
                   )}
-                 {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                 {isOwned && list.type === 'wish_list' && onToggleRevealClaims && (
+                   <button
+                     type="button"
+                     className={styles.actionSheetItem}
+                     onClick={() => { onToggleRevealClaims(list); setMenuOpen(false); }}
+                   >
+                     {list.revealClaims ? 'Hide claims' : 'Reveal claims'}
+                   </button>
+                 )}
+                 {canEdit && LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                    <button
                      type="button"
                      className={styles.actionSheetItem}
@@ -246,8 +268,9 @@ export const MobileListDetail = ({
       </nav>
 
       <div className={styles.scrollContent}>
-        <AddItemForm stores={stores} history={history} listType={listType} onAdd={onAddItem} />
+        {canEdit && <AddItemForm stores={stores} history={history} listType={listType} onAdd={onAddItem} />}
         <ShoppingList
+          claimContext={claimContext}
           getEffectiveChecked={getEffectiveChecked}
           items={list.items}
           stores={stores}
@@ -267,7 +290,7 @@ export const MobileListDetail = ({
           onQuantityBumpDone={onQuantityBumpDone}
           onNavigateToSettings={onNavigateToSettings}
         />
-        <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />
+        {canEdit && <Suggestions suggestions={suggestions} onAdd={onAddItem} collapsible />}
       </div>
 
       {duplicatingList && createPortal(
@@ -388,5 +411,7 @@ MobileListDetail.propTypes = {
   quantityBumpedItemIds: PropTypes.instanceOf(Set),
   onQuantityBumpDone: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
+  claimContext: PropTypes.object,
+  onToggleRevealClaims: PropTypes.func,
 };
 

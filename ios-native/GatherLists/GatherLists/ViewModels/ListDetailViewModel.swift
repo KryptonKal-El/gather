@@ -17,6 +17,8 @@ final class ListDetailViewModel {
         var sharedStoresChannel: RealtimeChannelV2?
         var sharedStoresTask: Task<Void, Never>?
         var historyTask: Task<Void, Never>?
+        var claimsChannel: RealtimeChannelV2?
+        var claimsTask: Task<Void, Never>?
         var pendingToggleTasks: [UUID: Task<Void, Never>] = [:]
         var pendingToggleOriginals: [UUID: Bool] = [:]
     }
@@ -24,6 +26,11 @@ final class ListDetailViewModel {
     // Published state
     var items: [Item] = []
     var stores: [Store] = []
+    /// Gift claims on a wish list the current user may see (RLS hides them from the owner
+    /// unless reveal_claims is on).
+    var claims: [ItemClaim] = []
+    /// Display names of the people on this list, for "Claimed by Sam".
+    var collaboratorNames: [UUID: String] = [:]
     var historyEntries: [HistoryEntry] = []
     var isLoading = false
     var error: String?
@@ -57,6 +64,19 @@ final class ListDetailViewModel {
     @ObservationIgnored weak var undoManager: UndoManager?
     
     var isSharedList: Bool { ownerId != userId }
+
+    /// The signed-in user's ID.
+    var currentUserId: UUID { userId }
+
+    /// Claims on one item.
+    func claims(for itemId: UUID) -> [ItemClaim] {
+        claims.filter { $0.itemId == itemId }
+    }
+
+    /// Display name for a user on this list.
+    func displayName(for userId: UUID) -> String {
+        collaboratorNames[userId] ?? "Someone"
+    }
     
     var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
 
@@ -132,6 +152,78 @@ final class ListDetailViewModel {
         Task {
             await loadData()
             await setupRealtimeSubscriptions()
+            if list.type == "wish_list" {
+                await loadClaims()
+                await setupClaimsSubscription()
+                await loadCollaboratorNames()
+            }
+        }
+    }
+
+    // MARK: - Gift Claims
+
+    private func loadClaims() async {
+        do {
+            claims = try await ClaimService.fetchClaims(listId: listId)
+        } catch {
+            print("[ListDetailViewModel] Failed to load claims: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadCollaboratorNames() async {
+        do {
+            let profiles = try await ListService.fetchListCollaborators(listId: listId)
+            collaboratorNames = Dictionary(profiles.compactMap { profile in
+                profile.displayName.map { (profile.id, $0) }
+            }, uniquingKeysWith: { first, _ in first })
+        } catch {
+            print("[ListDetailViewModel] Failed to load collaborators: \(error.localizedDescription)")
+        }
+    }
+
+    /// Refetches on any claim change: realtime can't filter on list_id (non-PK).
+    private func setupClaimsSubscription() async {
+        guard runtime.claimsChannel == nil else { return }
+        let channel = SupabaseManager.shared.client.realtimeV2.channel("list-claims-\(listId.uuidString)")
+        runtime.claimsChannel = channel
+        let changes = channel.postgresChange(AnyAction.self, schema: "public", table: "item_claims")
+        runtime.claimsTask = Task {
+            do {
+                try await channel.subscribeWithError()
+            } catch {
+                print("[ListDetailViewModel] Claims subscription failed: \(error.localizedDescription)")
+                return
+            }
+            for await _ in changes {
+                await loadClaims()
+            }
+        }
+    }
+
+    /// Reloads claims, e.g. after the owner turns "reveal claims" on or off.
+    func reloadClaims() async {
+        await loadClaims()
+    }
+
+    /// Claims an item (or changes how many). Returns an error message on failure.
+    func claim(_ itemId: UUID, quantity: Int) async -> String? {
+        do {
+            try await ClaimService.claim(listId: listId, itemId: itemId, userId: userId, quantity: quantity)
+            await loadClaims()
+            return nil
+        } catch {
+            return (error as? PostgrestError)?.message ?? error.localizedDescription
+        }
+    }
+
+    /// Removes the current user's claim on an item. Returns an error message on failure.
+    func unclaim(_ itemId: UUID) async -> String? {
+        do {
+            try await ClaimService.unclaim(itemId: itemId, userId: userId)
+            await loadClaims()
+            return nil
+        } catch {
+            return error.localizedDescription
         }
     }
     
@@ -787,7 +879,9 @@ final class ListDetailViewModel {
         runtime.storesTask?.cancel()
         runtime.sharedStoresTask?.cancel()
         runtime.historyTask?.cancel()
+        runtime.claimsTask?.cancel()
         
+        let claimsCh = runtime.claimsChannel
         let itemsCh = runtime.itemsChannel
         let storesCh = runtime.storesChannel
         let sharedStoresCh = runtime.sharedStoresChannel
@@ -798,6 +892,7 @@ final class ListDetailViewModel {
             await storesCh?.unsubscribe()
             await sharedStoresCh?.unsubscribe()
             await historyCh?.unsubscribe()
+            await claimsCh?.unsubscribe()
         }
     }
 }

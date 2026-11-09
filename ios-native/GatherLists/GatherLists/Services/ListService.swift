@@ -5,6 +5,7 @@ import Supabase
 struct SharedListRef {
     let list: GatherList
     let shareSortConfig: [String]?
+    let shareRole: String
 }
 
 struct DuplicateListResult {
@@ -161,15 +162,35 @@ struct ListService {
     // MARK: - Share Operations
     
     /// Shares a list with a user by email (lowercased, trimmed).
-    static func shareList(listId: UUID, email: String, sortConfig: [String]? = nil) async throws {
+    static func shareList(listId: UUID, email: String, sortConfig: [String]? = nil, role: String = "editor") async throws {
         let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let newShare = NewListShare(listId: listId, sharedWithEmail: normalizedEmail, sortConfig: sortConfig)
+        let newShare = NewListShare(listId: listId, sharedWithEmail: normalizedEmail, sortConfig: sortConfig, role: role)
         try await client
             .from("list_shares")
             .insert(newShare)
             .execute()
     }
     
+    /// Changes a collaborator's role ("editor" or "viewer"). Only the owner may do this (DB trigger).
+    static func updateShareRole(listId: UUID, email: String, role: String) async throws {
+        let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        try await client
+            .from("list_shares")
+            .update(["role": role])
+            .eq("list_id", value: listId)
+            .eq("shared_with_email", value: normalizedEmail)
+            .execute()
+    }
+
+    /// Turns the owner's view of gift claims on or off for a wish list.
+    static func setRevealClaims(listId: UUID, reveal: Bool) async throws {
+        try await client
+            .from("lists")
+            .update(["reveal_claims": reveal])
+            .eq("id", value: listId)
+            .execute()
+    }
+
     /// Removes sharing for a given email from a list.
     static func unshareList(listId: UUID, email: String) async throws {
         let normalizedEmail = email.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -244,7 +265,7 @@ struct ListService {
         
         return shares.compactMap { share in
             guard let list = listMap[share.listId] else { return nil }
-            return SharedListRef(list: list, shareSortConfig: share.sortConfig)
+            return SharedListRef(list: list, shareSortConfig: share.sortConfig, shareRole: share.role ?? "editor")
         }
     }
     
@@ -315,11 +336,13 @@ private struct NewListShare: Encodable {
     let listId: UUID
     let sharedWithEmail: String
     let sortConfig: [String]?
+    let role: String
     
     enum CodingKeys: String, CodingKey {
         case listId = "list_id"
         case sharedWithEmail = "shared_with_email"
         case sortConfig = "sort_config"
+        case role
     }
 }
 

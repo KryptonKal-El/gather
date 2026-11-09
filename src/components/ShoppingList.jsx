@@ -54,7 +54,7 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill }) => (
+const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill, claimContext }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
@@ -77,14 +77,15 @@ const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, on
         hideStorePill={hideStorePill}
         hideCategoryPill={hideCategoryPill}
         hidePriorityPill={hidePriorityPill}
+        claimContext={claimContext}
       />
     ))}
   </>
 );
 
 /** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
-const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill }) => {
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill };
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill, claimContext }) => {
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill, claimContext };
 
   const allItems = collectGroupItems(group);
   const count = group.type === 'rsvp' ? allItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0) : allItems.length;
@@ -167,7 +168,9 @@ export const ShoppingList = ({
   quantityBumpedItemIds = null,
   onQuantityBumpDone = null,
   onNavigateToSettings = null,
+  claimContext = null,
 }) => {
+  const canEdit = claimContext?.canEdit ?? true;
   const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState(() => loadCollapsedGroups(listId));
 
@@ -204,17 +207,20 @@ export const ShoppingList = ({
     let wanted = 0;
     let received = 0;
     let remainingTotal = 0;
+    let unclaimed = 0;
     for (const item of items) {
       if (item.isChecked) {
         received += 1;
       } else {
         wanted += 1;
+        const claimed = (claimContext?.claimsByItem.get(item.id) ?? []).reduce((sum, c) => sum + c.quantity, 0);
+        if (claimed < (item.quantity ?? 1)) unclaimed += 1;
         if (item.price !== null && item.price !== undefined) {
           remainingTotal += item.price * (item.quantity ?? 1);
         }
       }
     }
-    return { wanted, received, remainingTotal };
+    return { wanted, received, remainingTotal, unclaimed };
   })() : null;
 
   if (isLoading) {
@@ -253,7 +259,7 @@ export const ShoppingList = ({
   const hideCategoryPill = groupLevels.includes('category');
   const hidePriorityPill = groupLevels.includes('priority');
 
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill };
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill, claimContext };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
@@ -295,6 +301,12 @@ export const ShoppingList = ({
               <span className={styles.rsvpStatCount}>{wishSummary.wanted}</span>
               <span className={styles.rsvpStatLabel}>Wished for</span>
             </span>
+            {claimContext?.showClaims && (
+              <span className={styles.rsvpSummaryStat}>
+                <span className={styles.rsvpStatCount}>{wishSummary.unclaimed}</span>
+                <span className={styles.rsvpStatLabel}>Unclaimed</span>
+              </span>
+            )}
             <span className={styles.rsvpSummaryStat}>
               <span className={styles.rsvpStatCount}>{wishSummary.received}</span>
               <span className={styles.rsvpStatLabel}>Received</span>
@@ -360,12 +372,14 @@ export const ShoppingList = ({
               <span className={`${styles.chevron} ${isCrossedCollapsed ? '' : styles.chevronExpanded}`} />
               <span className={styles.crossedTitle}>{listType === 'wish_list' ? 'Received' : 'Crossed'}</span>
               <span className={styles.count}>{checkedItems.length}</span>
-              <button
-                className={styles.clearBtn}
-                onClick={(e) => { e.stopPropagation(); setIsConfirmingClear(true); }}
-              >
-                {listType === 'wish_list' ? 'Clear received' : 'Clear crossed'}
-              </button>
+              {canEdit && (
+                <button
+                  className={styles.clearBtn}
+                  onClick={(e) => { e.stopPropagation(); setIsConfirmingClear(true); }}
+                >
+                  {listType === 'wish_list' ? 'Clear received' : 'Clear crossed'}
+                </button>
+              )}
             </div>
             {isConfirmingClear && (
               <ConfirmDialog
@@ -411,5 +425,6 @@ ShoppingList.propTypes = {
   quantityBumpedItemIds: PropTypes.instanceOf(Set),
   onQuantityBumpDone: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
+  claimContext: PropTypes.object,
 };
 

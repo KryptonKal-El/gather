@@ -11,6 +11,14 @@ final class ListViewModel {
     private(set) var ownedLists: [GatherList] = []
     private(set) var sharedLists: [GatherList] = []
     var shareSortConfigs: [UUID: [String]] = [:]
+    /// Role ("editor"/"viewer") for each list shared with the current user.
+    var shareRoles: [UUID: String] = [:]
+
+    /// Whether the current user may change this list and its items (owner or editor).
+    func canEdit(_ listId: UUID) -> Bool {
+        if ownedLists.contains(where: { $0.id == listId }) { return true }
+        return shareRoles[listId] != "viewer"
+    }
     private(set) var collaboratorsByListId: [UUID: [Profile]] = [:]
     var activeListId: UUID?
     var isLoading = false
@@ -166,6 +174,7 @@ final class ListViewModel {
                 guard let config = ref.shareSortConfig else { return nil }
                 return (ref.list.id, config)
             })
+            shareRoles = Dictionary(uniqueKeysWithValues: sharedRefs.map { ($0.list.id, $0.shareRole) })
             rebuildAllLists()
             isShowingCachedData = false
             cachedAt = nil
@@ -295,6 +304,7 @@ final class ListViewModel {
                 guard let config = ref.shareSortConfig else { return nil }
                 return (ref.list.id, config)
             })
+            shareRoles = Dictionary(uniqueKeysWithValues: sharedRefs.map { ($0.list.id, $0.shareRole) })
             rebuildAllLists()
             isShowingCachedData = false
             cachedAt = nil
@@ -567,8 +577,21 @@ final class ListViewModel {
     
     // MARK: - Share Actions
     
-    func shareList(id: UUID, email: String, sortConfig: [String]? = nil) async throws {
-        try await ListService.shareList(listId: id, email: email, sortConfig: sortConfig)
+    func shareList(id: UUID, email: String, sortConfig: [String]? = nil, role: String = "editor") async throws {
+        try await ListService.shareList(listId: id, email: email, sortConfig: sortConfig, role: role)
+    }
+
+    func updateShareRole(id: UUID, email: String, role: String) async throws {
+        try await ListService.updateShareRole(listId: id, email: email, role: role)
+    }
+
+    /// Turns the owner's view of gift claims on or off and updates local state.
+    func setRevealClaims(id: UUID, reveal: Bool) async throws {
+        try await ListService.setRevealClaims(listId: id, reveal: reveal)
+        if let index = ownedLists.firstIndex(where: { $0.id == id }) {
+            ownedLists[index].revealClaims = reveal
+            rebuildAllLists()
+        }
     }
     
     func unshareList(id: UUID, email: String) async throws {

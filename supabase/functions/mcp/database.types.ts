@@ -467,6 +467,7 @@ export type Database = {
           list_id: string
           shared_with_email: string
           sort_config: Json | null
+          role: string
         }
         Insert: {
           added_at?: string | null
@@ -474,6 +475,7 @@ export type Database = {
           list_id: string
           shared_with_email: string
           sort_config?: Json | null
+          role?: string
         }
         Update: {
           added_at?: string | null
@@ -481,6 +483,7 @@ export type Database = {
           list_id?: string
           shared_with_email?: string
           sort_config?: Json | null
+          role?: string
         }
         Relationships: [
           {
@@ -502,6 +505,7 @@ export type Database = {
           item_count: number | null
           name: string
           owner_id: string
+          reveal_claims: boolean
           sort_config: Json | null
           sort_order: number | null
           type: string
@@ -515,6 +519,7 @@ export type Database = {
           item_count?: number | null
           name: string
           owner_id: string
+          reveal_claims?: boolean
           sort_config?: Json | null
           sort_order?: number | null
           type?: string
@@ -528,6 +533,7 @@ export type Database = {
           item_count?: number | null
           name?: string
           owner_id?: string
+          reveal_claims?: boolean
           sort_config?: Json | null
           sort_order?: number | null
           type?: string

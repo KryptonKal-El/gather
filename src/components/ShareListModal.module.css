@@ -187,3 +187,33 @@
   from { transform: scale(0.92); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.roleSelect {
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.person .roleSelect {
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0 1.5rem 0.5rem;
+}
+
+.form {
+  flex-wrap: wrap;
+}
+
+.emailInput {
+  min-width: 12rem;
+}

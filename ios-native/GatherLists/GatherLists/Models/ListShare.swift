@@ -6,6 +6,8 @@ struct ListShare: Codable, Identifiable {
     let listId: UUID
     let sharedWithEmail: String
     let sortConfig: [String]?
+    /// "editor" or "viewer"; nil from older rows means editor.
+    let role: String?
     let addedAt: Date
     
     enum CodingKeys: String, CodingKey {
@@ -13,6 +15,7 @@ struct ListShare: Codable, Identifiable {
         case listId = "list_id"
         case sharedWithEmail = "shared_with_email"
         case sortConfig = "sort_config"
+        case role
         case addedAt = "added_at"
     }
 }

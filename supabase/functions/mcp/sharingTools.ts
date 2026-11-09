@@ -46,13 +46,14 @@ export function registerSharingTools(server: McpServer, ctx: ToolContext) {
       const r = RESOURCES[resource_type];
       const { data, error } = await supabase
         .from(r.table)
-        .select('shared_with_email, added_at')
+        .select(resource_type === 'list' ? 'shared_with_email, added_at, role' : 'shared_with_email, added_at')
         .eq(r.fk, resource_id)
         .order('added_at', { ascending: true });
       if (error) return errorResult(error.message);
-      return jsonResult(data.map((row: { shared_with_email: string; added_at: string | null }) => ({
+      return jsonResult(data.map((row: { shared_with_email: string; added_at: string | null; role?: string }) => ({
         email: row.shared_with_email,
         added_at: row.added_at,
+        ...(row.role ? { role: row.role } : {}),
       })));
     },
   );
@@ -62,11 +63,16 @@ export function registerSharingTools(server: McpServer, ctx: ToolContext) {
     {
       title: 'Share with someone',
       description:
-        'Share a list, recipe collection, or meal plan with someone by email (they get edit access). Only the owner can share. Confirm the email address with the user first.',
+        'Share a list, recipe collection, or meal plan with someone by email. Only the owner can share. Confirm the email address with the user first. For lists, role "viewer" gives read-only access (on wish lists, viewers can secretly claim gifts); the default "editor" can change the list.',
       annotations: IDEMPOTENT_WRITE,
-      inputSchema: z.object({ ...resourceInput, email: z.string().email().describe('Email address to share with.') }),
+      inputSchema: z.object({
+        ...resourceInput,
+        email: z.string().email().describe('Email address to share with.'),
+        role: z.enum(['editor', 'viewer']).optional().describe('Lists only: editor (default) or viewer (read-only).'),
+      }),
     },
-    async ({ resource_type, resource_id, email }) => {
+    async ({ resource_type, resource_id, email, role }) => {
+      if (role && resource_type !== 'list') return errorResult('role only applies to lists.');
       const r = RESOURCES[resource_type];
       const normalized = normalizeEmail(email);
       if (myEmail && normalized === normalizeEmail(myEmail)) return errorResult('You cannot share with yourself.');
@@ -79,6 +85,7 @@ export function registerSharingTools(server: McpServer, ctx: ToolContext) {
 
       const row: Record<string, unknown> = { [r.fk]: resource_id, shared_with_email: normalized };
       if (r.hasSharedBy) Object.assign(row, { shared_by: userId, permission: 'write' });
+      if (resource_type === 'list') row.role = role ?? 'editor';
       const { error } = await supabase.from(r.table).insert(row);
       if (error?.code === '23505') return jsonResult({ shared_with: normalized, already_shared: true });
       if (error) return errorResult(error.message);

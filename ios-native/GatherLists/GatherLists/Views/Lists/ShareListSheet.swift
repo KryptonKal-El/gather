@@ -17,6 +17,7 @@ struct ShareListSheet: View {
     @State private var userPreferences: UserPreferences?
     @State private var emailHistory: [String] = []
     @State private var isEmailFieldFocused = false
+    @State private var newRole = "editor"
     @FocusState private var emailFieldFocus: Bool
     
     private static let emailHistoryKey = "share_email_history"
@@ -46,6 +47,7 @@ struct ShareListSheet: View {
                 }
             }
             .task {
+                if list.type == "wish_list" { newRole = "viewer" }
                 loadEmailHistory()
                 await loadCollaborators()
                 do {
@@ -111,6 +113,19 @@ struct ShareListSheet: View {
                 .disabled(emailInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isAddingCollaborator)
             }
             
+            Picker("Access", selection: $newRole) {
+                Text("Can edit").tag("editor")
+                Text("Can view").tag("viewer")
+            }
+            .pickerStyle(.segmented)
+
+            if list.type == "wish_list" {
+                Text("People who can view can claim gifts without you seeing. Those who can edit can also change your list.")
+                    .font(.quicksand(.caption))
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
             if isEmailFieldFocused && !filteredSuggestions.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(filteredSuggestions, id: \.self) { suggestion in
@@ -212,6 +227,17 @@ struct ShareListSheet: View {
             }
             
             Spacer()
+
+            Menu {
+                Picker("Access", selection: roleBinding(for: share)) {
+                    Text("Can edit").tag("editor")
+                    Text("Can view").tag("viewer")
+                }
+            } label: {
+                Text((share.role ?? "editor") == "viewer" ? "Can view" : "Can edit")
+                    .font(.quicksand(.subheadline))
+                    .foregroundStyle(Color.brandGreen)
+            }
             
             if removingEmail == share.sharedWithEmail {
                 ProgressView()
@@ -229,6 +255,26 @@ struct ShareListSheet: View {
         }
     }
     
+    private func roleBinding(for share: ListShare) -> Binding<String> {
+        Binding(
+            get: { share.role ?? "editor" },
+            set: { role in
+                Task { await changeRole(email: share.sharedWithEmail, role: role) }
+            }
+        )
+    }
+
+    private func changeRole(email: String, role: String) async {
+        errorMessage = nil
+        do {
+            try await viewModel.updateShareRole(id: list.id, email: email, role: role)
+        } catch {
+            errorMessage = "Failed to change access"
+            print("[ShareListSheet] Failed to change role: \(error.localizedDescription)")
+        }
+        await loadCollaborators()
+    }
+
     private func loadCollaborators() async {
         isLoading = true
         do {
@@ -271,7 +317,7 @@ struct ShareListSheet: View {
         do {
             let effectiveConfig = PreferenceService.effectiveSortConfig(for: list, userPreferences: userPreferences)
             let configStrings = effectiveConfig.map { $0.rawValue }
-            try await viewModel.shareList(id: list.id, email: email, sortConfig: configStrings)
+            try await viewModel.shareList(id: list.id, email: email, sortConfig: configStrings, role: newRole)
             saveEmailToHistory(email)
             emailInput = ""
             await loadCollaborators()

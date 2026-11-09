@@ -87,6 +87,7 @@ export const ListSelector = ({
   onDuplicate,
   onResetItems,
   onShareClick,
+  onToggleRevealClaims = null,
   onManageStores,
   onNavigateToSettings: _onNavigateToSettings,
 }) => {
@@ -328,6 +329,7 @@ export const ListSelector = ({
 
   const renderListItem = (list, dragProps = null) => {
     const isOwned = !list._isShared;
+    const canEditList = isOwned || list.shareRole !== 'viewer';
     const isActive = list.id === activeListId;
     const isMenuOpen = menuOpenId === list.id;
 
@@ -396,15 +398,17 @@ export const ListSelector = ({
 
           {isMenuOpen && !isMobile && (
             <div className={styles.menuDropdown}>
-              <button
-                type="button"
-                className={styles.menuItem}
-                onClick={() => handleStartEdit(list)}
-              >
-                <span className={styles.menuIcon}>✏️</span>
-                Name, Icon &amp; Color
-              </button>
-               {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+              {canEditList && (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => handleStartEdit(list)}
+                >
+                  <span className={styles.menuIcon}>✏️</span>
+                  Name, Icon &amp; Color
+                </button>
+              )}
+               {canEditList && LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                  <button
                    type="button"
                    className={styles.menuItem}
@@ -414,7 +418,7 @@ export const ListSelector = ({
                    Manage Stores
                  </button>
                )}
-               {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+               {canEditList && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
                  <button
                    type="button"
                    className={styles.menuItem}
@@ -422,6 +426,16 @@ export const ListSelector = ({
                  >
                    <span className={styles.menuIcon}>🏷️</span>
                    Manage Categories
+                 </button>
+               )}
+               {isOwned && list.type === 'wish_list' && onToggleRevealClaims && (
+                 <button
+                   type="button"
+                   className={styles.menuItem}
+                   onClick={() => { onToggleRevealClaims(list); setMenuOpenId(null); }}
+                 >
+                   <span className={styles.menuIcon}>🎁</span>
+                   {list.revealClaims ? 'Hide claims' : 'Reveal claims'}
                  </button>
                )}
                {isOwned && onShareClick && (
@@ -492,14 +506,16 @@ export const ListSelector = ({
                   {list.emoji && <span>{list.emoji} </span>}
                   {list.name}
                 </div>
-                <button
-                  type="button"
-                  className={styles.actionSheetItem}
-                  onClick={() => handleStartEdit(list)}
-                >
-                  Name, Icon &amp; Color
-                </button>
-                 {LIST_TYPES[list.type]?.fields?.store && onManageStores && (
+                {canEditList && (
+                  <button
+                    type="button"
+                    className={styles.actionSheetItem}
+                    onClick={() => handleStartEdit(list)}
+                  >
+                    Name, Icon &amp; Color
+                  </button>
+                )}
+                 {canEditList && LIST_TYPES[list.type]?.fields?.store && onManageStores && (
                    <button
                      type="button"
                      className={styles.actionSheetItem}
@@ -508,13 +524,22 @@ export const ListSelector = ({
                      Manage Stores
                    </button>
                  )}
-                  {CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
+                  {canEditList && CATEGORY_SUPPORTED_TYPES.includes(list.type) && (
                     <button
                       type="button"
                       className={styles.actionSheetItem}
                       onClick={() => { setEditingCategoriesForId(list.id); setMenuOpenId(null); }}
                     >
                       Manage Categories
+                    </button>
+                  )}
+                  {isOwned && list.type === 'wish_list' && onToggleRevealClaims && (
+                    <button
+                      type="button"
+                      className={styles.actionSheetItem}
+                      onClick={() => { onToggleRevealClaims(list); setMenuOpenId(null); }}
+                    >
+                      {list.revealClaims ? 'Hide claims' : 'Reveal claims'}
                     </button>
                   )}
                  {isOwned && onShareClick && (
@@ -1157,5 +1182,6 @@ ListSelector.propTypes = {
   onResetItems: PropTypes.func,
   onShareClick: PropTypes.func,
   onManageStores: PropTypes.func,
+  onToggleRevealClaims: PropTypes.func,
   onNavigateToSettings: PropTypes.func,
 };

@@ -1,0 +1,60 @@
+.claim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.status {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.mine {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.claimBtn,
+.unclaimBtn {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  cursor: pointer;
+  min-height: 28px;
+}
+
+.claimBtn {
+  background: var(--primary);
+  color: var(--bg-card);
+  border: none;
+}
+
+.unclaimBtn {
+  background: none;
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+.claimBtn:disabled,
+.unclaimBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.qtySelect {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.error {
+  flex-basis: 100%;
+  font-size: 0.75rem;
+  color: var(--danger);
+}

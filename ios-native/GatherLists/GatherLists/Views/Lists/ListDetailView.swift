@@ -52,6 +52,7 @@ struct ListDetailView: View {
     
      // List options menu state
      @State private var showEditSheet = false
+    @State private var showRevealClaimsAlert = false
      @State private var showShareSettingsSheet = false
      @State private var showDeleteConfirm = false
      @State private var showDuplicateSheet = false
@@ -206,10 +207,12 @@ struct ListDetailView: View {
         // .bottom) from parking the new row underneath the input.
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
-                if showSuggestions {
-                    suggestionsOverlay
+                if canEdit {
+                    if showSuggestions {
+                        suggestionsOverlay
+                    }
+                    addItemToolbar
                 }
-                addItemToolbar
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -231,7 +234,7 @@ struct ListDetailView: View {
                 sortMenu
                 if isOwned {
                     listOptionsMenu
-                } else {
+                } else if canEdit {
                     collaboratorOptionsMenu
                 }
             }
@@ -410,26 +413,30 @@ struct ListDetailView: View {
         .frame(maxWidth: .infinity)
     }
     
-    private var wishSummary: (wanted: Int, received: Int, remainingTotal: Decimal)? {
-        guard detailViewModel?.typeConfig.fields.priority == true,
-              let items = detailViewModel?.items, !items.isEmpty else { return nil }
-        var wanted = 0, received = 0
+    private var wishSummary: (wanted: Int, received: Int, remainingTotal: Decimal, unclaimed: Int)? {
+        guard let vm = detailViewModel, vm.typeConfig.fields.priority, !vm.items.isEmpty else { return nil }
+        var wanted = 0, received = 0, unclaimed = 0
         var remainingTotal: Decimal = 0
-        for item in items {
+        for item in vm.items {
             if item.isChecked {
                 received += 1
             } else {
                 wanted += 1
                 if let price = item.price { remainingTotal += price * Decimal(item.quantity) }
+                let claimed = vm.claims(for: item.id).reduce(0) { $0 + $1.quantity }
+                if claimed < item.quantity { unclaimed += 1 }
             }
         }
-        return (wanted, received, remainingTotal)
+        return (wanted, received, remainingTotal, unclaimed)
     }
 
-    private func wishSummaryView(_ summary: (wanted: Int, received: Int, remainingTotal: Decimal)) -> some View {
+    private func wishSummaryView(_ summary: (wanted: Int, received: Int, remainingTotal: Decimal, unclaimed: Int)) -> some View {
         VStack(spacing: 6) {
-            HStack(spacing: 40) {
+            HStack(spacing: 32) {
                 rsvpStatLabel("\(summary.wanted)", "Wished for", .primary)
+                if showsClaims {
+                    rsvpStatLabel("\(summary.unclaimed)", "Unclaimed", .orange)
+                }
                 rsvpStatLabel("\(summary.received)", "Received", Color.brandGreen)
             }
             if summary.remainingTotal > 0 {
@@ -537,6 +544,7 @@ struct ListDetailView: View {
                                 itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
                                     .id(item.id)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+ if canEdit {
                                         Button(role: .destructive) {
                                             Task {
                                                 if await detailViewModel?.deleteItem(item) != nil {
@@ -548,6 +556,7 @@ struct ListDetailView: View {
                                         }
                                         .tint(.red)
                                     }
+}
                                     .listRowInsets(EdgeInsets())
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
@@ -578,6 +587,7 @@ struct ListDetailView: View {
                         )
                         .id(item.id)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+ if canEdit {
                             Button(role: .destructive) {
                                 Task {
                                     if await detailViewModel?.deleteItem(item) != nil {
@@ -589,6 +599,7 @@ struct ListDetailView: View {
                             }
                             .tint(.red)
                         }
+}
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
@@ -729,6 +740,7 @@ struct ListDetailView: View {
             itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
                 .id(item.id)
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+ if canEdit {
                     Button(role: .destructive) {
                         Task {
                             if await detailViewModel?.deleteItem(item) != nil {
@@ -740,6 +752,7 @@ struct ListDetailView: View {
                     }
                     .tint(.red)
                 }
+}
                 .listRowInsets(EdgeInsets())
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
@@ -786,6 +799,26 @@ struct ListDetailView: View {
     }
 
     private var isWishListType: Bool { detailViewModel?.typeConfig.fields.priority == true }
+
+    /// Whether the owner has turned on "reveal claims" for this wish list (live from the view model).
+    private var isRevealingClaims: Bool {
+        viewModel.allLists.first { $0.id == list.id }?.revealClaims ?? false
+    }
+
+    private func setRevealClaims(_ reveal: Bool) {
+        Task {
+            try? await viewModel.setRevealClaims(id: list.id, reveal: reveal)
+            await detailViewModel?.reloadClaims()
+        }
+    }
+
+    /// Gift-givers always see claims on a wish list; the owner only after revealing them.
+    private var showsClaims: Bool {
+        isWishListType && (!isOwned || isRevealingClaims)
+    }
+
+    /// Owners and editors can change the list; viewers can only read (and claim gifts).
+    private var canEdit: Bool { viewModel.canEdit(list.id) }
 
     /// "Received" (when checked) and the priority label, shown under a wish list item's name.
     @ViewBuilder
@@ -857,6 +890,17 @@ struct ListDetailView: View {
                     if isWishList {
                         wishListStatusLine(item: item, isChecked: effectiveIsChecked)
                     }
+                    if showsClaims && !effectiveIsChecked, let vm = detailViewModel {
+                        ClaimControlsView(
+                            item: item,
+                            claims: vm.claims(for: item.id),
+                            currentUserId: vm.currentUserId,
+                            nameFor: vm.displayName(for:),
+                            isGiver: !isOwned,
+                            onClaim: { quantity in await vm.claim(item.id, quantity: quantity) },
+                            onUnclaim: { await vm.unclaim(item.id) }
+                        )
+                    }
                 }
 
                 if detailViewModel?.typeConfig.fields.quantity == true {
@@ -896,7 +940,7 @@ struct ListDetailView: View {
                 }
                 
                 if detailViewModel?.typeConfig.fields.rsvpStatus == true {
-                    if !isChecked {
+                    if !isChecked && canEdit {
                         Menu {
                             ForEach(["invited", "confirmed", "declined", "maybe", "not_invited"], id: \.self) { status in
                                 Button {
@@ -935,24 +979,26 @@ struct ListDetailView: View {
             .padding(.trailing, 12)
             .padding(.vertical, 10)
             
-            // Vertical separator
-            Rectangle()
-                .fill(Color(.separator))
-                .frame(width: 1)
-                .padding(.vertical, 6)
-            
-            // Edit button zone
-            Button {
-                editSheetItem = item
-            } label: {
-                Image(systemName: "pencil")
-                    .font(.quicksand(.subheadline))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 44)
-                    .frame(maxHeight: .infinity)
-                    .contentShape(Rectangle())
+            if canEdit {
+                // Vertical separator
+                Rectangle()
+                    .fill(Color(.separator))
+                    .frame(width: 1)
+                    .padding(.vertical, 6)
+
+                // Edit button zone
+                Button {
+                    editSheetItem = item
+                } label: {
+                    Image(systemName: "pencil")
+                        .font(.quicksand(.subheadline))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44)
+                        .frame(maxHeight: .infinity)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
         }
         .padding(.leading, 16)
         .background(Color(.systemBackground))
@@ -966,6 +1012,7 @@ struct ListDetailView: View {
         }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
+            guard canEdit else { return }
             if isRsvpList {
                 Task {
                     await detailViewModel?.toggleItem(item)
@@ -975,7 +1022,9 @@ struct ListDetailView: View {
             }
         }
         .contextMenu {
-            itemContextMenu(item: item)
+            if canEdit {
+                itemContextMenu(item: item)
+            }
         }
         .overlay(alignment: .leading) {
             if let hex = leadingBar {
@@ -1016,7 +1065,7 @@ struct ListDetailView: View {
             .frame(width: 36, height: 36)
             .clipShape(RoundedRectangle(cornerRadius: 6))
             .onTapGesture {
-                imagePickerItem = item
+                if canEdit { imagePickerItem = item }
             }
         } else {
             RoundedRectangle(cornerRadius: 6)
@@ -1028,7 +1077,7 @@ struct ListDetailView: View {
                         .foregroundStyle(.secondary)
                 }
                 .onTapGesture {
-                    imagePickerItem = item
+                    if canEdit { imagePickerItem = item }
                 }
         }
     }
@@ -1290,6 +1339,7 @@ struct ListDetailView: View {
                     ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
                         itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+ if canEdit {
                                 Button(role: .destructive) {
                                     Task {
                                         if await detailViewModel?.deleteItem(item) != nil {
@@ -1301,6 +1351,7 @@ struct ListDetailView: View {
                                 }
                                 .tint(.red)
                             }
+}
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
@@ -1328,11 +1379,13 @@ struct ListDetailView: View {
                         
                         Spacer()
                         
-                        Button(isWishListType ? "Clear received" : "Clear crossed") {
-                            showClearCheckedAlert = true
+                        if canEdit {
+                            Button(isWishListType ? "Clear received" : "Clear crossed") {
+                                showClearCheckedAlert = true
+                            }
+                            .font(.quicksand(.subheadline))
+                            .foregroundStyle(.red)
                         }
-                        .font(.quicksand(.subheadline))
-                        .foregroundStyle(.red)
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
@@ -1444,7 +1497,19 @@ struct ListDetailView: View {
               } label: {
                   Label("Share Settings", systemImage: "person.badge.plus")
               }
-              .accessibilityIdentifier("ownerMenu-shareSettings")
+ .accessibilityIdentifier("ownerMenu-shareSettings")
+
+              if list.type == "wish_list" {
+                  Button {
+                      if isRevealingClaims {
+                          setRevealClaims(false)
+                      } else {
+                          showRevealClaimsAlert = true
+                      }
+                  } label: {
+                      Label(isRevealingClaims ? "Hide Claims" : "Reveal Claims", systemImage: isRevealingClaims ? "eye.slash" : "gift")
+                  }
+              }
               
                Button {
                    showDuplicateSheet = true
@@ -1486,6 +1551,12 @@ struct ListDetailView: View {
                    .accessibilityLabel("List options")
            }
            .accessibilityIdentifier("listDetail-ownerMenuButton")
+         .alert("Reveal claims?", isPresented: $showRevealClaimsAlert) {
+             Button("Cancel", role: .cancel) { }
+             Button("Reveal") { setRevealClaims(true) }
+         } message: {
+             Text("You'll see which gifts people have claimed and who is getting them. This spoils the surprise.")
+         }
          .sheet(isPresented: $showShareSettingsSheet) {
              ShareListSheet(
                  list: list,
@@ -1857,4 +1928,96 @@ struct ListDetailView: View {
 /// NSObject target for UndoManager since SwiftUI views are value types.
 final class UndoHelper: NSObject {
     static let shared = UndoHelper()
+}
+
+/// Gift-claim status and actions for one wish-list item. Givers can claim, change how
+/// many they're getting, or unclaim; the owner (with claims revealed) only sees the status.
+private struct ClaimControlsView: View {
+    let item: Item
+    let claims: [ItemClaim]
+    let currentUserId: UUID
+    let nameFor: (UUID) -> String
+    let isGiver: Bool
+    let onClaim: (Int) async -> String?
+    let onUnclaim: () async -> String?
+
+    @State private var isBusy = false
+    @State private var errorMessage: String?
+
+    private var total: Int { max(item.quantity, 1) }
+    private var claimedCount: Int { claims.reduce(0) { $0 + $1.quantity } }
+    private var mine: ItemClaim? { claims.first { $0.claimedBy == currentUserId } }
+    private var remaining: Int { max(total - claimedCount, 0) }
+
+    private var status: String? {
+        if total > 1 && claimedCount > 0 {
+            var text = "\(claimedCount) of \(total) claimed"
+            if let mine { text += " · you're getting \(mine.quantity)" }
+            return text
+        }
+        if mine != nil { return "You're getting this" }
+        let others = claims.map { nameFor($0.claimedBy) }
+        return others.isEmpty ? nil : "Claimed by \(others.joined(separator: ", "))"
+    }
+
+    var body: some View {
+        if isGiver || status != nil {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    if let status {
+                        Text(status)
+                            .foregroundStyle(mine != nil ? Color.brandGreen : .secondary)
+                            .fontWeight(mine != nil ? .semibold : .regular)
+                    }
+                    if isGiver { giverActions }
+                }
+                if let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
+                }
+            }
+            .font(.quicksand(.caption))
+            .disabled(isBusy)
+        }
+    }
+
+    @ViewBuilder
+    private var giverActions: some View {
+        if let mine {
+            if total > 1 && mine.quantity + remaining > 1 {
+                Menu {
+                    Picker("How many", selection: Binding(
+                        get: { mine.quantity },
+                        set: { count in run { await onClaim(count) } }
+                    )) {
+                        ForEach(1...(mine.quantity + remaining), id: \.self) { count in
+                            Text("\(count)").tag(count)
+                        }
+                    }
+                } label: {
+                    Text("Change")
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 4)
+                        .background(Capsule().stroke(Color.brandGreen))
+                }
+                .accessibilityLabel("Change how many \(item.name) you're getting")
+            }
+            Button("Unclaim") { run { await onUnclaim() } }
+                .buttonStyle(.bordered)
+                .controlSize(.mini)
+        } else if remaining > 0 {
+            Button(claimedCount > 0 ? "I'll get one" : "I'm getting this") { run { await onClaim(1) } }
+                .buttonStyle(.borderedProminent)
+                .tint(Color.brandGreen)
+                .controlSize(.mini)
+        }
+    }
+
+    private func run(_ action: @escaping () async -> String?) {
+        isBusy = true
+        errorMessage = nil
+        Task {
+            errorMessage = await action()
+            isBusy = false
+        }
+    }
 }

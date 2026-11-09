@@ -11,6 +11,8 @@ struct GatherList: Codable, Identifiable, Hashable {
     var sortConfig: [String]?
     var type: String
     var categories: [CategoryDef]?
+    /// Wish lists only: whether the owner can see gift claims.
+    var revealClaims: Bool?
     let createdAt: Date
     
     init(id: UUID = UUID(), ownerId: UUID, name: String, emoji: String? = nil, itemCount: Int = 0, color: String = "#1565c0", sortOrder: Int = 0, sortConfig: [String]? = nil, type: String = "grocery", categories: [CategoryDef]? = nil, createdAt: Date = Date()) {
@@ -38,6 +40,7 @@ struct GatherList: Codable, Identifiable, Hashable {
         case sortConfig = "sort_config"
         case type
         case categories
+        case revealClaims = "reveal_claims"
         case createdAt = "created_at"
     }
 }
