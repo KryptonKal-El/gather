@@ -300,16 +300,22 @@ struct ListDetailView: View {
             stores: detailViewModel?.stores ?? [],
             listCategories: detailViewModel?.listCategories ?? [],
             listType: detailViewModel?.listType ?? "grocery",
-            onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore, note in
+            onSave: { name, quantity, price, storeId, clearStoreId, category, unit, rsvpStatus, clearRsvpStatus, dueDate, recurrenceRule, reminderDaysBefore, note, url, priority in
                 Task {
                     let clearDueDate = item.dueDate != nil && dueDate == nil
                     let clearRecurrenceRule = item.recurrenceRule != nil && recurrenceRule == nil
                     let clearReminderDaysBefore = item.reminderDaysBefore != nil && reminderDaysBefore == nil
+                    let clearUrl: Bool = url == nil && item.url != nil
+                    let clearPriority: Bool = priority == nil && item.priority != nil
                     await detailViewModel?.updateItem(
                         item.id,
                         name: name,
                         note: note.isEmpty ? nil : note,
                         clearNote: note.isEmpty,
+                        url: url,
+                        clearUrl: clearUrl,
+                        priority: priority,
+                        clearPriority: clearPriority,
                         category: category,
                         storeId: storeId,
                         clearStoreId: clearStoreId,
@@ -404,6 +410,39 @@ struct ListDetailView: View {
         .frame(maxWidth: .infinity)
     }
     
+    private var wishSummary: (wanted: Int, received: Int, remainingTotal: Decimal)? {
+        guard detailViewModel?.typeConfig.fields.priority == true,
+              let items = detailViewModel?.items, !items.isEmpty else { return nil }
+        var wanted = 0, received = 0
+        var remainingTotal: Decimal = 0
+        for item in items {
+            if item.isChecked {
+                received += 1
+            } else {
+                wanted += 1
+                if let price = item.price { remainingTotal += price * Decimal(item.quantity) }
+            }
+        }
+        return (wanted, received, remainingTotal)
+    }
+
+    private func wishSummaryView(_ summary: (wanted: Int, received: Int, remainingTotal: Decimal)) -> some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 40) {
+                rsvpStatLabel("\(summary.wanted)", "Wished for", .primary)
+                rsvpStatLabel("\(summary.received)", "Received", Color.brandGreen)
+            }
+            if summary.remainingTotal > 0 {
+                Text("Still wished for: \(formatPrice(summary.remainingTotal))")
+                    .font(.quicksand(.subheadline))
+                    .fontWeight(.bold)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity)
+    }
+
     private func rsvpStatLabel(_ count: String, _ label: String, _ color: Color) -> some View {
         VStack(spacing: 1) {
             Text(count)
@@ -420,6 +459,11 @@ struct ListDetailView: View {
             List {
                 if let summary = rsvpSummary {
                     rsvpSummaryView(summary)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                }
+                if let summary = wishSummary {
+                    wishSummaryView(summary)
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
                 }
@@ -741,8 +785,46 @@ struct ListDetailView: View {
             .animation(.easeOut(duration: 0.45), value: isBumped)
     }
 
+    /// "Received" (when checked) and the priority label, shown under a wish list item's name.
+    @ViewBuilder
+    private func wishListStatusLine(item: Item, isChecked: Bool) -> some View {
+        let priority = WISH_PRIORITIES.first { $0.key == item.priority }
+        if isChecked || priority != nil {
+            HStack(spacing: 6) {
+                if isChecked {
+                    Label("Received", systemImage: "gift.fill")
+                        .foregroundStyle(Color.brandGreen)
+                }
+                if let priority {
+                    HStack(spacing: 3) {
+                        Circle()
+                            .fill(Color(hex: priority.color))
+                            .frame(width: 7, height: 7)
+                        Text(priority.label)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .font(.quicksand(.caption))
+        }
+    }
+
+    /// Opens a wish list item's product link in the browser.
+    private func itemLinkButton(_ link: URL, itemName: String) -> some View {
+        Link(destination: link) {
+            Image(systemName: "arrow.up.right.square")
+                .font(.quicksand(.body))
+                .foregroundStyle(Color.brandGreen)
+                .frame(width: 32, height: 32)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Open link for \(itemName), \(ItemLink.hostLabel(link.absoluteString))")
+    }
+
     private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true, leadingBar: String? = nil) -> some View {
         let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
+        let isWishList = detailViewModel?.typeConfig.fields.priority == true
         let effectiveIsChecked = detailViewModel?.effectiveIsChecked(for: item) ?? item.isChecked
         let isQuantityBumped = detailViewModel?.quantityBumpedItemId == item.id
 
@@ -755,13 +837,16 @@ struct ListDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.name)
-                        .strikethrough(effectiveIsChecked && detailViewModel?.typeConfig.fields.rsvpStatus != true)
+                        .strikethrough(effectiveIsChecked && !isRsvpList && !isWishList)
                         .foregroundStyle(effectiveIsChecked ? .secondary : .primary)
                     if let note = item.note, !note.isEmpty {
                         Text(note)
                             .font(.quicksand(.caption))
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
+                    }
+                    if isWishList {
+                        wishListStatusLine(item: item, isChecked: effectiveIsChecked)
                     }
                 }
 
@@ -788,6 +873,10 @@ struct ListDetailView: View {
                 }
                 
                 Spacer()
+
+                if detailViewModel?.typeConfig.fields.url == true, let link = item.url.flatMap(URL.init(string:)) {
+                    itemLinkButton(link, itemName: item.name)
+                }
                 
                 if detailViewModel?.typeConfig.fields.price == true {
                     if let price = item.price {
@@ -1220,7 +1309,7 @@ struct ListDetailView: View {
                             .foregroundStyle(.secondary)
                             .rotationEffect(.degrees(isCheckedCollapsed ? 0 : 90))
                         
-                        Text("Crossed")
+                        Text(detailViewModel?.typeConfig.fields.priority == true ? "Received" : "Crossed")
                             .font(.quicksand(.headline))
                             .foregroundStyle(.primary)
                         

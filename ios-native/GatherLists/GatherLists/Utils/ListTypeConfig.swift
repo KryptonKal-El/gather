@@ -12,6 +12,8 @@ struct ListTypeFields {
     let dueDate: Bool
     let recurrence: Bool
     let reminder: Bool
+    var url: Bool = false
+    var priority: Bool = false
 }
 
 /// Category definition for non-grocery list types.
@@ -35,7 +37,7 @@ struct ListTypeConfig {
 }
 
 /// All list type IDs in display order.
-let LIST_TYPE_IDS: [String] = ["grocery", "todo", "basic", "packing", "guest_list", "project"]
+let LIST_TYPE_IDS: [String] = ["grocery", "todo", "basic", "packing", "guest_list", "project", "wish_list"]
 
 /// Category definitions for non-grocery list types.
 enum ListTypeCategories {
@@ -106,6 +108,46 @@ enum ListTypeCategories {
         ListCategory(key: "other", name: "Other", color: "#9E9E9E", keywords: [])
     ]
     
+    static let wishList: [ListCategory] = [
+        ListCategory(
+            key: "clothing",
+            name: "Clothing",
+            color: "#5C6BC0",
+            keywords: ["shirt", "sweater", "hoodie", "jacket", "coat", "dress", "jeans", "shoes", "sneakers", "boots", "scarf", "hat", "pajamas", "socks"]
+        ),
+        ListCategory(
+            key: "tech",
+            name: "Tech",
+            color: "#42A5F5",
+            keywords: ["headphones", "earbuds", "airpods", "speaker", "phone", "tablet", "ipad", "laptop", "watch", "smartwatch", "camera", "console", "kindle", "charger", "keyboard", "mouse", "monitor"]
+        ),
+        ListCategory(
+            key: "home",
+            name: "Home",
+            color: "#AB47BC",
+            keywords: ["candle", "blanket", "pillow", "mug", "vase", "lamp", "plant", "rug", "cookware", "knife", "pan", "frame", "towels", "sheets"]
+        ),
+        ListCategory(
+            key: "books_media",
+            name: "Books & Media",
+            color: "#78909C",
+            keywords: ["book", "books", "novel", "vinyl", "record", "album", "movie", "film", "game", "video game", "comic", "magazine", "subscription"]
+        ),
+        ListCategory(
+            key: "experiences",
+            name: "Experiences",
+            color: "#FFA726",
+            keywords: ["tickets", "concert", "trip", "class", "lesson", "massage", "spa", "dinner", "show", "gift card", "membership", "workshop"]
+        ),
+        ListCategory(
+            key: "hobbies",
+            name: "Hobbies",
+            color: "#66BB6A",
+            keywords: ["lego", "puzzle", "paint", "yarn", "guitar", "bike", "tent", "skateboard", "golf", "yoga mat", "board game", "art supplies", "drone"]
+        ),
+        ListCategory(key: "other", name: "Other", color: "#9E9E9E", keywords: [])
+    ]
+
     static let project: [ListCategory] = [
         ListCategory(
             key: "research",
@@ -145,6 +187,20 @@ enum ListTypeCategories {
         )
     ]
 }
+
+/// Wish list priority levels, highest first.
+struct WishPriority: Identifiable {
+    let key: String
+    let label: String
+    let color: String
+    var id: String { key }
+}
+
+let WISH_PRIORITIES: [WishPriority] = [
+    WishPriority(key: "must", label: "Must-have", color: "#E57373"),
+    WishPriority(key: "want", label: "Would like", color: "#FFB74D"),
+    WishPriority(key: "nice", label: "Nice to have", color: "#81C784")
+]
 
 /// List type configurations and lookup.
 enum ListTypes {
@@ -208,11 +264,45 @@ enum ListTypes {
             categories: ListTypeCategories.todo,
             sortLevels: ["category", "name", "date", "dueDate"],
             defaultSort: ["category", "name"]
+        ),
+        "wish_list": ListTypeConfig(
+            id: "wish_list",
+            label: "Wish List",
+            icon: "🎁",
+            fields: ListTypeFields(store: true, category: true, price: true, quantity: true, unit: false, image: true, rsvpStatus: false, dueDate: false, recurrence: false, reminder: false, url: true, priority: true),
+            quantityLabel: "Qty",
+            categories: ListTypeCategories.wishList,
+            sortLevels: ["priority", "category", "store", "name", "date", "price"],
+            defaultSort: ["priority", "name"]
         )
     ]
     
     /// Returns the configuration for a given list type ID.
     static func getConfig(_ typeId: String) -> ListTypeConfig {
         configs[typeId] ?? configs["grocery"]!
+    }
+}
+
+
+/// Helpers for user-entered product links on wish list items.
+enum ItemLink {
+    /// Normalizes a typed link: trims it, adds `https://` when no scheme is
+    /// given, and rejects anything that isn't an http(s) URL with a dotted host.
+    /// Returns nil for empty or invalid input.
+    static func normalize(_ raw: String) -> URL? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let hasScheme = trimmed.range(of: "^[a-zA-Z][a-zA-Z0-9+.-]*:", options: .regularExpression) != nil
+        let candidate = hasScheme ? trimmed : "https://\(trimmed)"
+        guard let url = URL(string: candidate),
+              let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
+              let host = url.host, host.contains(".") else { return nil }
+        return url
+    }
+
+    /// Short label for a link: its host without a leading "www.".
+    static func hostLabel(_ urlString: String) -> String {
+        guard let host = URL(string: urlString)?.host else { return urlString }
+        return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 }

@@ -20,6 +20,7 @@ struct ListTypeIconView: View {
         case "packing": packingIcon
         case "guest_list": guestListIcon
         case "project": projectIcon
+        case "wish_list": wishListIcon
         default: groceryIcon
         }
     }
@@ -282,6 +283,42 @@ struct ListTypeIconView: View {
                 linePath.addLine(to: CGPoint(x: 26 * scale, y: y))
                 context.stroke(linePath, with: .color(.white), lineWidth: 1.5 * scale)
             }
+        }
+        .frame(width: size, height: size)
+    }
+}
+
+extension ListTypeIconView {
+    // MARK: - Wish List Icon (Gift box with bow)
+
+    fileprivate var wishListIcon: some View {
+        Canvas { context, canvasSize in
+            let scale = min(canvasSize.width, canvasSize.height) / 36
+            let pink = Color(hex: "#FDCFE8")
+
+            let base = Path(roundedRect: CGRect(x: 7 * scale, y: 16 * scale, width: 22 * scale, height: 15 * scale), cornerRadius: 2.5 * scale)
+            context.fill(base, with: .color(blush))
+
+            let lid = Path(roundedRect: CGRect(x: 5 * scale, y: 11.5 * scale, width: 26 * scale, height: 6 * scale), cornerRadius: 2 * scale)
+            context.fill(lid, with: .color(pink))
+
+            let ribbon = Path(CGRect(x: 16.25 * scale, y: 11.5 * scale, width: 3.5 * scale, height: 19.5 * scale))
+            context.fill(ribbon, with: .color(sage))
+
+            var leftLoop = Path()
+            leftLoop.move(to: CGPoint(x: 18 * scale, y: 11.5 * scale))
+            leftLoop.addQuadCurve(to: CGPoint(x: 11 * scale, y: 8 * scale), control: CGPoint(x: 14 * scale, y: 4 * scale))
+            leftLoop.addQuadCurve(to: CGPoint(x: 18 * scale, y: 11.5 * scale), control: CGPoint(x: 12 * scale, y: 12 * scale))
+            context.fill(leftLoop, with: .color(sage))
+
+            var rightLoop = Path()
+            rightLoop.move(to: CGPoint(x: 18 * scale, y: 11.5 * scale))
+            rightLoop.addQuadCurve(to: CGPoint(x: 25 * scale, y: 8 * scale), control: CGPoint(x: 22 * scale, y: 4 * scale))
+            rightLoop.addQuadCurve(to: CGPoint(x: 18 * scale, y: 11.5 * scale), control: CGPoint(x: 24 * scale, y: 12 * scale))
+            context.fill(rightLoop, with: .color(sage))
+
+            let knot = Path(ellipseIn: CGRect(x: 16.25 * scale, y: 9.75 * scale, width: 3.5 * scale, height: 3.5 * scale))
+            context.fill(knot, with: .color(forest))
         }
         .frame(width: size, height: size)
     }

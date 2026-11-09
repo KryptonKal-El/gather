@@ -5,7 +5,7 @@ struct EditItemSheet: View {
     let stores: [Store]
     let listCategories: [CategoryDef]
     let listType: String
-    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String) -> Void
+    let onSave: (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String, String?, String?) -> Void
     let onImageTap: () -> Void
     
     @Environment(\.dismiss) private var dismiss
@@ -13,6 +13,8 @@ struct EditItemSheet: View {
     
     @State private var name: String
     @State private var note: String
+    @State private var urlText: String
+    @State private var selectedPriority: String?
     @State private var quantity: Int
     @State private var priceText: String
     @State private var selectedStoreId: UUID?
@@ -72,7 +74,7 @@ struct EditItemSheet: View {
         stores: [Store],
         listCategories: [CategoryDef],
         listType: String = "grocery",
-        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String) -> Void,
+        onSave: @escaping (String, Int, Decimal?, UUID?, Bool, String?, String, String?, Bool, Date?, RecurrenceRule?, Int?, String, String?, String?) -> Void,
         onImageTap: @escaping () -> Void
     ) {
         self.item = item
@@ -84,6 +86,8 @@ struct EditItemSheet: View {
         
         _name = State(initialValue: item.name)
         _note = State(initialValue: item.note ?? "")
+        _urlText = State(initialValue: item.url ?? "")
+        _selectedPriority = State(initialValue: item.priority)
         _quantity = State(initialValue: item.quantity)
         _priceText = State(initialValue: item.price.map { "\($0)" } ?? "")
         _selectedStoreId = State(initialValue: item.storeId)
@@ -115,8 +119,43 @@ struct EditItemSheet: View {
         return CategoryDefinitions.defaults
     }
     
+    private var isUrlInvalid: Bool {
+        typeConfig.fields.url
+            && !urlText.trimmingCharacters(in: .whitespaces).isEmpty
+            && ItemLink.normalize(urlText) == nil
+    }
+
     private var isSaveDisabled: Bool {
-        name.trimmingCharacters(in: .whitespaces).isEmpty
+        name.trimmingCharacters(in: .whitespaces).isEmpty || isUrlInvalid
+    }
+
+    /// Link and priority fields, shown only for wish lists.
+    @ViewBuilder
+    private var wishListSection: some View {
+        if typeConfig.fields.url || typeConfig.fields.priority {
+            Section {
+                if typeConfig.fields.url {
+                    TextField("Product link", text: $urlText)
+                        .keyboardType(.URL)
+                        .textContentType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+                if typeConfig.fields.priority {
+                    Picker("Priority", selection: $selectedPriority) {
+                        Text("None").tag(String?.none)
+                        ForEach(WISH_PRIORITIES) { priority in
+                            Text(priority.label).tag(String?.some(priority.key))
+                        }
+                    }
+                }
+            } footer: {
+                if isUrlInvalid {
+                    Text("Enter a web link, like example.com/item")
+                        .foregroundStyle(.red)
+                }
+            }
+        }
     }
     
     private func buildRecurrenceRule() -> RecurrenceRule? {
@@ -146,6 +185,8 @@ struct EditItemSheet: View {
                     TextField("Note", text: $note, axis: .vertical)
                         .lineLimit(1...4)
                 }
+
+                wishListSection
                 
                 // Quantity & Unit & Price — conditional
                 if typeConfig.fields.quantity || typeConfig.fields.price {
@@ -375,7 +416,7 @@ struct EditItemSheet: View {
                         let clearRsvp = item.rsvpStatus != nil && selectedRsvpStatus == nil
                         let recurrenceRule = buildRecurrenceRule()
                         let reminderDays = hasDueDate ? selectedReminderDays : nil
-                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule, reminderDays, note.trimmingCharacters(in: .whitespacesAndNewlines))
+                        onSave(trimmedName, quantity, price, selectedStoreId, clearStoreId, selectedCategory, selectedUnit, selectedRsvpStatus, clearRsvp, selectedDueDate, recurrenceRule, reminderDays, note.trimmingCharacters(in: .whitespacesAndNewlines), ItemLink.normalize(urlText)?.absoluteString, selectedPriority)
                         dismiss()
                     }
                     .disabled(isSaveDisabled)

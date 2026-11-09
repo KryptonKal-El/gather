@@ -54,7 +54,7 @@ const collectGroupItems = (group) => {
 };
 
 /** Renders a flat list of ShoppingItem components. */
-const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => (
+const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill }) => (
   <>
     {items.map((item) => (
       <ShoppingItem
@@ -76,14 +76,15 @@ const ItemList = ({ items, stores, listType, listCategories, restoredItemIds, on
         onNavigateToSettings={onNavigateToSettings}
         hideStorePill={hideStorePill}
         hideCategoryPill={hideCategoryPill}
+        hidePriorityPill={hidePriorityPill}
       />
     ))}
   </>
 );
 
 /** Renders a group recursively — depth 0 = prominent collapsible card, depth 1+ = small sub-header. */
-const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill }) => {
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
+const GroupRenderer = ({ group, depth = 0, collapsedGroups, onToggleGroup, stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill }) => {
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill };
 
   const allItems = collectGroupItems(group);
   const count = group.type === 'rsvp' ? allItems.reduce((sum, item) => sum + (item.quantity ?? 1), 0) : allItems.length;
@@ -199,6 +200,23 @@ export const ShoppingList = ({
     return { counts, totalHeadCount };
   })() : null;
 
+  const wishSummary = listType === 'wish_list' ? (() => {
+    let wanted = 0;
+    let received = 0;
+    let remainingTotal = 0;
+    for (const item of items) {
+      if (item.isChecked) {
+        received += 1;
+      } else {
+        wanted += 1;
+        if (item.price !== null && item.price !== undefined) {
+          remainingTotal += item.price * (item.quantity ?? 1);
+        }
+      }
+    }
+    return { wanted, received, remainingTotal };
+  })() : null;
+
   if (isLoading) {
     return (
       <div className={styles.empty}>
@@ -233,8 +251,9 @@ export const ShoppingList = ({
   const { groupLevels } = partitionSortConfig(config);
   const hideStorePill = groupLevels.includes('store');
   const hideCategoryPill = groupLevels.includes('category');
+  const hidePriorityPill = groupLevels.includes('priority');
 
-  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill };
+  const itemProps = { stores, listType, listCategories, restoredItemIds, onRestoreAnimationDone, quantityBumpedItemIds, onQuantityBumpDone, getEffectiveChecked, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, onNavigateToSettings, hideStorePill, hideCategoryPill, hidePriorityPill };
   const groupProps = { collapsedGroups, onToggleGroup: handleToggleGroup, ...itemProps };
 
   return (
@@ -266,6 +285,26 @@ export const ShoppingList = ({
           <div className={styles.rsvpSummaryTotal}>
             Total Guests: {rsvpSummary.totalHeadCount}
           </div>
+        </div>
+      )}
+
+      {wishSummary && (
+        <div className={styles.rsvpSummary}>
+          <div className={styles.rsvpSummaryStats}>
+            <span className={styles.rsvpSummaryStat}>
+              <span className={styles.rsvpStatCount}>{wishSummary.wanted}</span>
+              <span className={styles.rsvpStatLabel}>Wished for</span>
+            </span>
+            <span className={styles.rsvpSummaryStat}>
+              <span className={styles.rsvpStatCount}>{wishSummary.received}</span>
+              <span className={styles.rsvpStatLabel}>Received</span>
+            </span>
+          </div>
+          {wishSummary.remainingTotal > 0 && (
+            <div className={styles.rsvpSummaryTotal}>
+              Still wished for: {formatPrice(wishSummary.remainingTotal)}
+            </div>
+          )}
         </div>
       )}
 
@@ -319,7 +358,7 @@ export const ShoppingList = ({
               }}
             >
               <span className={`${styles.chevron} ${isCrossedCollapsed ? '' : styles.chevronExpanded}`} />
-              <span className={styles.crossedTitle}>Crossed</span>
+              <span className={styles.crossedTitle}>{listType === 'wish_list' ? 'Received' : 'Crossed'}</span>
               <span className={styles.count}>{checkedItems.length}</span>
               <button
                 className={styles.clearBtn}
@@ -342,7 +381,7 @@ export const ShoppingList = ({
             {!isCrossedCollapsed && (
               <div className={styles.topLevelBody}>
                 {/* Crossed items are a flat list, so show every pill regardless of grouping. */}
-                <ItemList items={checkedFlat} {...itemProps} hideStorePill={false} hideCategoryPill={false} />
+                <ItemList items={checkedFlat} {...itemProps} hideStorePill={false} hideCategoryPill={false} hidePriorityPill={false} />
               </div>
             )}
           </div>

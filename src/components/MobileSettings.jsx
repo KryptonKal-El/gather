@@ -13,7 +13,7 @@ import { CategoryEditor } from './CategoryEditor.jsx';
 import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ConnectedApps } from './ConnectedApps.jsx';
-import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon } from './ListTypeIcons.jsx';
+import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon, WishListIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import { getTypeConfig } from '../utils/listTypes.js';
 import styles from './MobileSettings.module.css';
@@ -61,6 +61,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
      { value: 'todo', label: 'To-Do' },
      { value: 'packing', label: 'Packing' },
      { value: 'project', label: 'Project' },
+     { value: 'wish_list', label: 'Wish List' },
    ];
 
    const LIST_TYPE_ICONS = {
@@ -68,6 +69,7 @@ export const MobileSettings = ({ user, onSignOut }) => {
      todo: TodoIcon,
      packing: PackingIcon,
      project: ProjectIcon,
+     wish_list: WishListIcon,
    };
 
   const getCurrentDefaults = (listType) => {

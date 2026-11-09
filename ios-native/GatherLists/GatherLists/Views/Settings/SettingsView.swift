@@ -27,7 +27,8 @@ struct SettingsView: View {
         ("grocery", "Grocery"),
         ("todo", "To-Do"),
         ("packing", "Packing"),
-        ("project", "Project")
+        ("project", "Project"),
+        ("wish_list", "Wish List")
     ]
     
     var body: some View {

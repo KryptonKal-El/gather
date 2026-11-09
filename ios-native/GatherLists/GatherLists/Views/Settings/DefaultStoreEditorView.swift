@@ -22,6 +22,7 @@ struct DefaultStoreEditorView: View {
         case "grocery": return "Grocery Store Defaults"
         case "packing": return "Packing Store Defaults"
         case "project": return "Project Store Defaults"
+        case "wish_list": return "Wish List Store Defaults"
         default: return "\(listType.capitalized) Store Defaults"
         }
     }

@@ -9,6 +9,8 @@ enum CategoryService {
             return ListTypeCategories.packing.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
         case "todo":
             return ListTypeCategories.todo.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
+        case "wish_list":
+            return ListTypeCategories.wishList.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
         case "project":
             return ListTypeCategories.project.map { CategoryDef(key: $0.key, name: $0.name, color: $0.color, keywords: $0.keywords) }
         default:

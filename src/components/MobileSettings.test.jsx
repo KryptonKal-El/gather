@@ -45,6 +45,7 @@ vi.mock('./ListTypeIcons.jsx', () => ({
   TodoIcon: () => null,
   PackingIcon: () => null,
   ProjectIcon: () => null,
+  WishListIcon: () => null,
 }));
 
 const imageSearchSettings = {

@@ -9,6 +9,7 @@ enum SortLevel: String, Codable, CaseIterable {
     case price
     case rsvp
     case dueDate
+    case priority
 }
 
 /// Sort pipeline engine for shopping list items.
@@ -33,7 +34,7 @@ enum SortPipeline {
     }
     
     /// Levels that create groups (vs just sorting within existing groups).
-    static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp]
+    static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp, .priority]
     
     /// Check if a level is a grouping level.
     static func isGroupingLevel(_ level: SortLevel) -> Bool {
@@ -250,6 +251,8 @@ enum SortPipeline {
             return groupByCategory(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
         case .rsvp:
             return groupByRsvp(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
+        case .priority:
+            return groupByPriority(items: items, stores: stores, remainingLevels: nextLevels, listCategories: listCategories, listType: listType)
         default:
             return IntermediateResult(items: items)
         }
@@ -491,6 +494,38 @@ enum SortPipeline {
         return IntermediateResult(groups: groups, ungrouped: [])
     }
     
+    /// Groups wish-list items by priority: must-have first, unprioritized last.
+    private static func groupByPriority(
+        items: [Item],
+        stores: [Store],
+        remainingLevels: [SortLevel],
+        listCategories: [CategoryDef],
+        listType: String
+    ) -> IntermediateResult {
+        let order = WISH_PRIORITIES.map { ($0.key, $0.label, $0.color) } + [("none", "No Priority", "#9e9e9e")]
+        let grouped = Dictionary(grouping: items) { $0.priority ?? "none" }
+
+        var groups: [SortGroup] = []
+        for (key, label, color) in order {
+            guard let priorityItems = grouped[key], !priorityItems.isEmpty else { continue }
+            let subResult = applyRemainingLevels(
+                items: priorityItems,
+                remainingLevels: remainingLevels,
+                stores: stores,
+                listCategories: listCategories,
+                listType: listType
+            )
+            var group = SortGroup(key: "priority-\(key)", label: label, color: color, type: .priority, items: nil, subGroups: nil)
+            if let subGroups = subResult.groups {
+                group.subGroups = subGroups
+            } else {
+                group.items = subResult.items
+            }
+            groups.append(group)
+        }
+        return IntermediateResult(groups: groups, ungrouped: [])
+    }
+
     private struct CategoryInfo {
         var labels: [String: String]
         var colors: [String: String]

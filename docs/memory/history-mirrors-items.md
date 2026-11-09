@@ -24,7 +24,9 @@ attribute of the item — e.g. `brand`, `barcode`, a new default), you MUST also
 
 ## Currently mirrored
 
-`name`, `image_url`, `category`, `store_id`, `quantity`, `price`, `unit`, `note`.
+`name`, `image_url`, `category`, `store_id`, `quantity`, `price`, `unit`, `note`,
+`url`, `priority` (the last two added with the Wish List type,
+`20261109120000_add_wish_list_type.sql`, which now holds the latest trigger).
 
 ## Deliberately NOT mirrored (transient / structural / identity)
 

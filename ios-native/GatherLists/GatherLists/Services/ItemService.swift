@@ -22,6 +22,8 @@ struct ItemService {
         listId: UUID,
         name: String,
         note: String? = nil,
+        url: String? = nil,
+        priority: String? = nil,
         category: String?,
         storeId: UUID?,
         listCategories: [CategoryDef],
@@ -47,6 +49,8 @@ struct ItemService {
             listId: listId,
             name: capitalizedName,
             note: note,
+            url: url,
+            priority: priority,
             category: resolvedCategory,
             storeId: storeId,
             quantity: quantity,
@@ -75,6 +79,10 @@ struct ItemService {
         name: String? = nil,
         note: String? = nil,
         clearNote: Bool = false,
+        url: String? = nil,
+        clearUrl: Bool = false,
+        priority: String? = nil,
+        clearPriority: Bool = false,
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
@@ -98,6 +106,10 @@ struct ItemService {
             name: name,
             note: note,
             clearNote: clearNote,
+            url: url,
+            clearUrl: clearUrl,
+            priority: priority,
+            clearPriority: clearPriority,
             category: category,
             isChecked: isChecked,
             storeId: storeId,
@@ -168,6 +180,8 @@ struct ItemService {
         listId: UUID,
         name: String,
         note: String? = nil,
+        url: String? = nil,
+        priority: String? = nil,
         category: String?,
         storeId: UUID?,
         quantity: Int,
@@ -187,6 +201,8 @@ struct ItemService {
             listId: listId,
             name: name,
             note: note,
+            url: url,
+            priority: priority,
             category: category,
             storeId: storeId,
             quantity: quantity,
@@ -220,6 +236,8 @@ struct ItemService {
                 listId: listId,
                 name: item.name,
                 note: item.note,
+                url: item.url,
+                priority: item.priority,
                 category: item.category,
                 storeId: item.storeId,
                 quantity: item.quantity,
@@ -300,6 +318,8 @@ private struct NewItem: Encodable {
     let listId: UUID
     let name: String
     let note: String?
+    var url: String? = nil
+    var priority: String? = nil
     let category: String
     let storeId: UUID?
     let quantity: Int
@@ -314,6 +334,8 @@ private struct NewItem: Encodable {
         case listId = "list_id"
         case name
         case note
+        case url
+        case priority
         case category
         case storeId = "store_id"
         case quantity
@@ -331,6 +353,8 @@ private struct NewItem: Encodable {
         try container.encode(name, forKey: .name)
         try container.encode(category, forKey: .category)
         if let note { try container.encode(note, forKey: .note) }
+        if let url { try container.encode(url, forKey: .url) }
+        if let priority { try container.encode(priority, forKey: .priority) }
         try container.encode(quantity, forKey: .quantity)
         try container.encode(isChecked, forKey: .isChecked)
         try container.encode(unit, forKey: .unit)
@@ -346,6 +370,10 @@ private struct ItemUpdate: Encodable {
     var name: String?
     var note: String?
     var clearNote: Bool = false
+    var url: String?
+    var clearUrl: Bool = false
+    var priority: String?
+    var clearPriority: Bool = false
     var category: String?
     var isChecked: Bool?
     var storeId: UUID?
@@ -368,6 +396,8 @@ private struct ItemUpdate: Encodable {
     enum CodingKeys: String, CodingKey {
         case name
         case note
+        case url
+        case priority
         case category
         case isChecked = "is_checked"
         case storeId = "store_id"
@@ -388,6 +418,16 @@ private struct ItemUpdate: Encodable {
             try container.encodeNil(forKey: .note)
         } else if let note = note {
             try container.encode(note, forKey: .note)
+        }
+        if clearUrl {
+            try container.encodeNil(forKey: .url)
+        } else if let url {
+            try container.encode(url, forKey: .url)
+        }
+        if clearPriority {
+            try container.encodeNil(forKey: .priority)
+        } else if let priority {
+            try container.encode(priority, forKey: .priority)
         }
         if let category = category { try container.encode(category, forKey: .category) }
         if let isChecked = isChecked { try container.encode(isChecked, forKey: .isChecked) }
@@ -443,6 +483,8 @@ private struct RestoreItem: Encodable {
     let listId: UUID
     let name: String
     let note: String?
+    let url: String?
+    let priority: String?
     let category: String?
     let storeId: UUID?
     let quantity: Int
@@ -462,6 +504,8 @@ private struct RestoreItem: Encodable {
         case listId = "list_id"
         case name
         case note
+        case url
+        case priority
         case category
         case storeId = "store_id"
         case quantity

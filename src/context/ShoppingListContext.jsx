@@ -441,9 +441,10 @@ export const ShoppingListProvider = ({ children }) => {
       fetchUserStoreDefaults(userId, 'grocery'),
       fetchUserStoreDefaults(userId, 'packing'),
       fetchUserStoreDefaults(userId, 'project'),
+      fetchUserStoreDefaults(userId, 'wish_list'),
     ])
-      .then(([groceryDefaults, packingDefaults, projectDefaults]) => {
-        setUserStoreDefaults([...groceryDefaults, ...packingDefaults, ...projectDefaults]);
+      .then(([groceryDefaults, packingDefaults, projectDefaults, wishListDefaults]) => {
+        setUserStoreDefaults([...groceryDefaults, ...packingDefaults, ...projectDefaults, ...wishListDefaults]);
       })
       .catch(() => setUserStoreDefaults([]));
   }, [userId, sessionVersion]);
@@ -641,6 +642,8 @@ export const ShoppingListProvider = ({ children }) => {
         price: template?.price ?? null,
         unit: template?.unit ?? 'each',
         note: template?.note ?? null,
+        url: template?.url ?? null,
+        priority: template?.priority ?? null,
       });
       return { merged: true, itemId: existing.id, quantity: newQuantity };
     }
@@ -655,6 +658,8 @@ export const ShoppingListProvider = ({ children }) => {
       imageUrl: template?.imageUrl ?? null,
       unit: template?.unit ?? 'each',
       note: template?.note ?? null,
+      url: template?.url ?? null,
+      priority: template?.priority ?? null,
     };
     const newId = await dbAddItem(ownerUid, listId, item);
     await addHistoryEntry(userId, listId, name, {
@@ -665,6 +670,8 @@ export const ShoppingListProvider = ({ children }) => {
       price: item.price,
       unit: item.unit,
       note: item.note,
+      url: item.url,
+      priority: item.priority,
     });
     return { merged: false, itemId: newId, quantity: item.quantity };
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid, activeItems, activeListId]);
@@ -687,6 +694,9 @@ export const ShoppingListProvider = ({ children }) => {
         unit: item.unit ?? 'each',
         price: item.price ?? null,
         imageUrl: item.imageUrl ?? null,
+        note: item.note ?? null,
+        url: item.url ?? null,
+        priority: item.priority ?? null,
       };
     });
     await dbAddItems(ownerUid, listId, prepared);
@@ -699,6 +709,8 @@ export const ShoppingListProvider = ({ children }) => {
       price: item.price,
       unit: item.unit,
       note: item.note ?? null,
+      url: item.url ?? null,
+      priority: item.priority ?? null,
     })));
   }, [userId, allLists, userCategoryDefaults, getListOwnerUid]);
 
@@ -768,6 +780,8 @@ export const ShoppingListProvider = ({ children }) => {
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
       note: itemData.note ?? null,
+      url: itemData.url ?? null,
+      priority: itemData.priority ?? null,
       rsvpStatus: itemData.rsvpStatus ?? null,
     });
     return newId;
@@ -792,6 +806,8 @@ export const ShoppingListProvider = ({ children }) => {
       price: itemData.price ?? null,
       imageUrl: itemData.imageUrl ?? null,
       note: itemData.note ?? null,
+      url: itemData.url ?? null,
+      priority: itemData.priority ?? null,
       rsvpStatus: itemData.rsvpStatus ?? null,
     })));
   }, [userId, getListOwnerUid]);

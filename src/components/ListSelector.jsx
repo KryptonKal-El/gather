@@ -35,6 +35,7 @@ import {
   PackingIcon,
   GuestListIcon,
   ProjectIcon,
+  WishListIcon,
 } from './ListTypeIcons.jsx';
 import styles from './ListSelector.module.css';
 
@@ -50,6 +51,7 @@ const TYPE_ICON_MAP = {
   packing: PackingIcon,
   guest_list: GuestListIcon,
   project: ProjectIcon,
+  wish_list: WishListIcon,
 };
 
 const SortableListItem = ({ id, children, isMobile }) => {
@@ -66,7 +68,7 @@ const SortableListItem = ({ id, children, isMobile }) => {
   );
 };
 
-const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo', 'project'];
+const CATEGORY_SUPPORTED_TYPES = ['grocery', 'packing', 'todo', 'project', 'wish_list'];
 
 /**
  * Sidebar/dropdown for managing multiple shopping lists.

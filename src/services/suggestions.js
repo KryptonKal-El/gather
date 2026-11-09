@@ -68,7 +68,7 @@ const getPairingSuggestions = (currentItems) => {
 /**
  * Builds a map of item name (lowercased) to the most recent history record,
  * i.e. its mirrored template fields (category, image, store, quantity, price,
- * unit, note). History is ordered oldest-first, so later entries win.
+ * unit, note, url, priority). History is ordered oldest-first, so later entries win.
  * @param {Array<object>} history - Past items with mirrored fields
  * @returns {Map<string, object>} Lowercased name -> latest template
  */
@@ -88,7 +88,7 @@ const getLatestTemplates = (history) => {
  * @param {Array<{name: string}>} currentItems - Items currently in the list
  * @param {number} [maxSuggestions=8] - Maximum number of suggestions to return
  * @param {string} [listType] - The list type for auto-categorization (e.g., 'grocery', 'packing')
- * @returns {Array<{name: string, reason: string, category: string, imageUrl: string|null, storeId: string|null, quantity: number|null, price: number|null, unit: string|null, note: string|null}>} Suggested items
+ * @returns {Array<{name: string, reason: string, category: string, imageUrl: string|null, storeId: string|null, quantity: number|null, price: number|null, unit: string|null, note: string|null, url: string|null, priority: string|null}>} Suggested items
  */
 export const getSuggestions = (history, currentItems, maxSuggestions = 8, listType) => {
   const currentNames = new Set(currentItems.map((i) => i.name.toLowerCase()));
@@ -113,6 +113,8 @@ export const getSuggestions = (history, currentItems, maxSuggestions = 8, listTy
       price: t?.price ?? null,
       unit: t?.unit ?? null,
       note: t?.note ?? null,
+      url: t?.url ?? null,
+      priority: t?.priority ?? null,
     });
   };
 

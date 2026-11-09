@@ -10,10 +10,17 @@ import {
   getAllCategoryColors,
   getAllCategoryKeys,
 } from './categories.js';
-import { getTypeConfig, PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
+import {
+  getTypeConfig,
+  PACKING_CATEGORIES,
+  TODO_CATEGORIES,
+  PROJECT_CATEGORIES,
+  WISH_LIST_CATEGORIES,
+  WISH_PRIORITIES,
+} from './listTypes.js';
 
 /** Valid sort level options */
-export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp', 'dueDate'];
+export const SORT_LEVELS = ['store', 'category', 'name', 'date', 'price', 'rsvp', 'dueDate', 'priority'];
 
 /** Maximum levels for grouping (Group By section) */
 export const MAX_GROUP_LEVELS = 2;
@@ -38,7 +45,7 @@ export const getDefaultSortConfig = (listType) => {
 };
 
 /** Levels that create groups (vs just sorting within existing groups) */
-export const GROUPING_LEVELS = ['store', 'category', 'rsvp'];
+export const GROUPING_LEVELS = ['store', 'category', 'rsvp', 'priority'];
 
 /**
  * Validates a sort configuration.
@@ -195,6 +202,10 @@ const applyRemainingLevels = (items, remainingLevels, stores, parentStoreId, lis
     return groupByRsvp(items, stores, nextLevels, listType, listCategories);
   }
 
+  if (currentLevel === 'priority') {
+    return groupByPriority(items, stores, nextLevels, listType, listCategories);
+  }
+
   return { items };
 };
 
@@ -342,6 +353,13 @@ const getCategoryInfo = (listCategories, listType) => {
       labels: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.name])),
       colors: Object.fromEntries(TODO_CATEGORIES.map((c) => [c.key, c.color])),
       orderedKeys: TODO_CATEGORIES.map((c) => c.key),
+    };
+  }
+  if (listType === 'wish_list') {
+    return {
+      labels: Object.fromEntries(WISH_LIST_CATEGORIES.map((c) => [c.key, c.name])),
+      colors: Object.fromEntries(WISH_LIST_CATEGORIES.map((c) => [c.key, c.color])),
+      orderedKeys: WISH_LIST_CATEGORIES.map((c) => c.key),
     };
   }
   if (listType === 'project') {
@@ -499,6 +517,51 @@ const groupByRsvp = (items, stores, remainingLevels, listType, listCategories) =
       group.items = subResult.items;
     }
 
+    groups.push(group);
+  }
+
+  return { groups, ungrouped: [] };
+};
+
+const PRIORITY_ORDER = [
+  ...WISH_PRIORITIES,
+  { key: 'none', label: 'No Priority', color: '#9e9e9e' },
+];
+
+/**
+ * Groups items by wish-list priority (must-have first, unprioritized last).
+ * @param {Array} items - Items to group
+ * @param {Array} stores - Store objects
+ * @param {string[]} remainingLevels - Remaining sort levels after priority
+ * @param {string} listType - List type identifier
+ * @param {Array|null} listCategories - Pre-resolved categories for the list
+ * @returns {Object} Result with groups
+ */
+const groupByPriority = (items, stores, remainingLevels, listType, listCategories) => {
+  const grouped = new Map();
+  for (const item of items) {
+    const key = item.priority ?? 'none';
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(item);
+  }
+
+  const groups = [];
+  for (const priority of PRIORITY_ORDER) {
+    const priorityItems = grouped.get(priority.key);
+    if (!priorityItems || priorityItems.length === 0) continue;
+
+    const subResult = applyRemainingLevels(priorityItems, remainingLevels, stores, null, listType, listCategories);
+    const group = {
+      key: `priority-${priority.key}`,
+      label: priority.label,
+      color: priority.color,
+      type: 'priority',
+    };
+    if (subResult.groups) {
+      group.subGroups = subResult.groups;
+    } else {
+      group.items = subResult.items;
+    }
     groups.push(group);
   }
 

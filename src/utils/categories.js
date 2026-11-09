@@ -4,7 +4,7 @@
  * Items without a store use DEFAULT_CATEGORIES.
  */
 
-import { PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES } from './listTypes.js';
+import { PACKING_CATEGORIES, TODO_CATEGORIES, PROJECT_CATEGORIES, WISH_LIST_CATEGORIES } from './listTypes.js';
 
 export const CATEGORIES = {
   PRODUCE: 'produce',
@@ -146,7 +146,7 @@ export const DEFAULT_CATEGORIES = [
  * Categorizes an item name by matching against keywords in a categories array.
  * @param {string} itemName - The name of the grocery item
  * @param {Array<{key: string, keywords: string[]}>} [categories] - Categories to match against (defaults to DEFAULT_CATEGORIES)
- * @param {string} [listType] - The list type ('grocery', 'packing', 'basic', 'guest_list', 'project', 'todo')
+ * @param {string} [listType] - The list type ('grocery', 'packing', 'basic', 'guest_list', 'project', 'todo', 'wish_list')
  * @returns {string|null} The matched category key, 'other'/'miscellaneous' if no match, or null for types without auto-categorization
  */
 export const categorizeItem = (itemName, categories = DEFAULT_CATEGORIES, listType) => {
@@ -232,6 +232,7 @@ export const getSystemDefaultCategories = (listType) => {
     case 'packing': return PACKING_CATEGORIES;
     case 'todo': return TODO_CATEGORIES;
     case 'project': return PROJECT_CATEGORIES;
+    case 'wish_list': return WISH_LIST_CATEGORIES;
     default: return null;
   }
 };

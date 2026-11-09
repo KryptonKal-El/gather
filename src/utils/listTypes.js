@@ -162,6 +162,84 @@ export const PROJECT_CATEGORIES = [
 ];
 
 /**
+ * Category definitions for wish lists.
+ * @type {Array<{key: string, name: string, color: string, keywords: string[]}>}
+ */
+export const WISH_LIST_CATEGORIES = [
+  {
+    key: 'clothing',
+    name: 'Clothing',
+    color: '#5C6BC0',
+    keywords: [
+      'shirt', 'sweater', 'hoodie', 'jacket', 'coat', 'dress', 'jeans', 'shoes',
+      'sneakers', 'boots', 'scarf', 'hat', 'pajamas', 'socks',
+    ],
+  },
+  {
+    key: 'tech',
+    name: 'Tech',
+    color: '#42A5F5',
+    keywords: [
+      'headphones', 'earbuds', 'airpods', 'speaker', 'phone', 'tablet', 'ipad',
+      'laptop', 'watch', 'smartwatch', 'camera', 'console', 'kindle', 'charger',
+      'keyboard', 'mouse', 'monitor',
+    ],
+  },
+  {
+    key: 'home',
+    name: 'Home',
+    color: '#AB47BC',
+    keywords: [
+      'candle', 'blanket', 'pillow', 'mug', 'vase', 'lamp', 'plant', 'rug',
+      'cookware', 'knife', 'pan', 'frame', 'towels', 'sheets',
+    ],
+  },
+  {
+    key: 'books_media',
+    name: 'Books & Media',
+    color: '#78909C',
+    keywords: [
+      'book', 'books', 'novel', 'vinyl', 'record', 'album', 'movie', 'film',
+      'game', 'video game', 'comic', 'magazine', 'subscription',
+    ],
+  },
+  {
+    key: 'experiences',
+    name: 'Experiences',
+    color: '#FFA726',
+    keywords: [
+      'tickets', 'concert', 'trip', 'class', 'lesson', 'massage', 'spa',
+      'dinner', 'show', 'gift card', 'membership', 'workshop',
+    ],
+  },
+  {
+    key: 'hobbies',
+    name: 'Hobbies',
+    color: '#66BB6A',
+    keywords: [
+      'lego', 'puzzle', 'paint', 'yarn', 'guitar', 'bike', 'tent', 'skateboard',
+      'golf', 'yoga mat', 'board game', 'art supplies', 'drone',
+    ],
+  },
+  {
+    key: 'other',
+    name: 'Other',
+    color: '#9E9E9E',
+    keywords: [],
+  },
+];
+
+/**
+ * Wish list priority levels, highest first.
+ * @type {Array<{key: string, label: string, color: string}>}
+ */
+export const WISH_PRIORITIES = [
+  { key: 'must', label: 'Must-have', color: '#E57373' },
+  { key: 'want', label: 'Would like', color: '#FFB74D' },
+  { key: 'nice', label: 'Nice to have', color: '#81C784' },
+];
+
+/**
  * List type configuration registry.
  * Each type defines which fields are visible, available categories, and sorting options.
  * @type {Object<string, {id: string, label: string, icon: string, fields: Object, quantityLabel: string|null, categories: Array|null, sortLevels: string[], defaultSort: string[]}>}
@@ -182,6 +260,8 @@ export const LIST_TYPES = {
       dueDate: false,
       recurrence: false,
       reminder: false,
+      url: false,
+      priority: false,
     },
     quantityLabel: 'Qty',
     categories: null,
@@ -203,6 +283,8 @@ export const LIST_TYPES = {
       dueDate: true,
       recurrence: true,
       reminder: true,
+      url: false,
+      priority: false,
     },
     quantityLabel: null,
     categories: null,
@@ -224,6 +306,8 @@ export const LIST_TYPES = {
       dueDate: false,
       recurrence: false,
       reminder: false,
+      url: false,
+      priority: false,
     },
     quantityLabel: 'Head Count',
     categories: null,
@@ -245,6 +329,8 @@ export const LIST_TYPES = {
        dueDate: false,
        recurrence: false,
        reminder: false,
+       url: false,
+       priority: false,
      },
      quantityLabel: 'Qty',
      categories: PACKING_CATEGORIES,
@@ -266,6 +352,8 @@ export const LIST_TYPES = {
        dueDate: true,
        recurrence: true,
        reminder: true,
+       url: false,
+       priority: false,
      },
      quantityLabel: 'Qty',
      categories: PROJECT_CATEGORIES,
@@ -287,11 +375,36 @@ export const LIST_TYPES = {
       dueDate: true,
       recurrence: true,
       reminder: true,
+      url: false,
+      priority: false,
     },
     quantityLabel: null,
     categories: TODO_CATEGORIES,
     sortLevels: ['category', 'name', 'date', 'dueDate'],
     defaultSort: ['category', 'name'],
+  },
+  wish_list: {
+    id: 'wish_list',
+    label: 'Wish List',
+    icon: 'wish_list',
+    fields: {
+      store: true,
+      category: true,
+      price: true,
+      quantity: true,
+      unit: false,
+      image: true,
+      rsvpStatus: false,
+      dueDate: false,
+      recurrence: false,
+      reminder: false,
+      url: true,
+      priority: true,
+    },
+    quantityLabel: 'Qty',
+    categories: WISH_LIST_CATEGORIES,
+    sortLevels: ['priority', 'category', 'store', 'name', 'date', 'price'],
+    defaultSort: ['priority', 'name'],
   },
 };
 
@@ -306,6 +419,7 @@ export const LIST_TYPE_IDS = [
   'packing',
   'guest_list',
   'project',
+  'wish_list',
 ];
 
 /**

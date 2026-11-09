@@ -213,6 +213,8 @@ export type Database = {
           list_id: string | null
           name: string
           note: string | null
+          priority: string | null
+          url: string | null
           price: number | null
           quantity: number | null
           store_id: string | null
@@ -227,6 +229,8 @@ export type Database = {
           list_id?: string | null
           name: string
           note?: string | null
+          priority?: string | null
+          url?: string | null
           price?: number | null
           quantity?: number | null
           store_id?: string | null
@@ -241,6 +245,8 @@ export type Database = {
           list_id?: string | null
           name?: string
           note?: string | null
+          priority?: string | null
+          url?: string | null
           price?: number | null
           quantity?: number | null
           store_id?: string | null
@@ -284,6 +290,8 @@ export type Database = {
           list_id: string
           name: string
           note: string | null
+          priority: string | null
+          url: string | null
           parent_item_id: string | null
           price: number | null
           quantity: number | null
@@ -306,6 +314,8 @@ export type Database = {
           list_id: string
           name: string
           note?: string | null
+          priority?: string | null
+          url?: string | null
           parent_item_id?: string | null
           price?: number | null
           quantity?: number | null
@@ -328,6 +338,8 @@ export type Database = {
           list_id?: string
           name?: string
           note?: string | null
+          priority?: string | null
+          url?: string | null
           parent_item_id?: string | null
           price?: number | null
           quantity?: number | null

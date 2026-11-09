@@ -168,3 +168,25 @@ export const ProjectIcon = ({ size = 36 }) => (
 ProjectIcon.propTypes = {
   size: PropTypes.number,
 };
+
+/**
+ * Wish list icon - wrapped gift box with a bow.
+ */
+export const WishListIcon = ({ size = 36 }) => (
+  <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Box base */}
+    <rect x="7" y="18" width="26" height="17" rx="3" fill="#F9A8C9" />
+    {/* Lid */}
+    <rect x="5" y="13" width="30" height="7" rx="2" fill="#FDCFE8" />
+    {/* Vertical ribbon */}
+    <rect x="18" y="13" width="4" height="22" fill="#85BFA8" />
+    {/* Bow loops */}
+    <path d="M20 13C17 7 11 8 12.5 11.5C13.5 13 17 13 20 13Z" fill="#85BFA8" />
+    <path d="M20 13C23 7 29 8 27.5 11.5C26.5 13 23 13 20 13Z" fill="#85BFA8" />
+    <circle cx="20" cy="13" r="2" fill="#3D7A63" />
+  </svg>
+);
+
+WishListIcon.propTypes = {
+  size: PropTypes.number,
+};

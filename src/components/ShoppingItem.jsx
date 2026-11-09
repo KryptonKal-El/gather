@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { DEFAULT_CATEGORIES, getAllCategoryLabels, getAllCategoryColors, getAllCategoryKeys } from '../utils/categories.js';
-import { getTypeConfig } from '../utils/listTypes.js';
+import { normalizeItemUrl, getUrlHostLabel } from '../utils/itemLinks.js';
+import { getTypeConfig, WISH_PRIORITIES } from '../utils/listTypes.js';
 import { formatPrice, getCurrencySymbol } from '../utils/formatPrice.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadItemImage } from '../services/imageStorage.js';
@@ -42,12 +43,14 @@ const formatDueDateLabel = (dateStr) => {
  * stepper, price input, store/category pickers, and delete button.
  * Field visibility is determined by the list type configuration.
  */
-export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, isQuantityBumped = false, onQuantityBumpDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false }) => {
+export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listType = 'grocery', listCategories = null, onToggle, onRemove, onUpdateCategory, onUpdateStore, onUpdateItem, isRestored = false, onRestoreAnimationDone = null, isQuantityBumped = false, onQuantityBumpDone = null, onNavigateToSettings = null, hideStorePill = false, hideCategoryPill = false, hidePriorityPill = false }) => {
   const { user } = useAuth();
   const imageSearchSettings = user?.profile?.imageSearchSettings;
   const typeConfig = getTypeConfig(listType);
   const { fields } = typeConfig;
   const isRsvpList = fields.rsvpStatus;
+  const isReceivedStyle = fields.priority && (isChecked ?? item.isChecked);
+  const priorityInfo = fields.priority && !hidePriorityPill ? WISH_PRIORITIES.find((p) => p.key === item.priority) : null;
   const effectiveChecked = isChecked ?? item.isChecked;
 
   const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
@@ -56,6 +59,8 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
   const [priceValue, setPriceValue] = useState('');
   const [nameValue, setNameValue] = useState('');
   const [noteValue, setNoteValue] = useState('');
+  const [urlValue, setUrlValue] = useState('');
+  const [urlError, setUrlError] = useState(null);
   const [unitValue, setUnitValue] = useState('each');
   const [isImagePickerOpen, setIsImagePickerOpen] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -223,6 +228,32 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
     }
   };
 
+  const commitUrl = () => {
+    if (!fields.url) return;
+    const trimmed = urlValue.trim();
+    const normalized = normalizeItemUrl(trimmed);
+    if (trimmed && !normalized) {
+      setUrlError('Enter a web link, like example.com/item');
+      return;
+    }
+    setUrlError(null);
+    if (normalized !== (item.url ?? null)) {
+      onUpdateItem(item.id, { url: normalized });
+    }
+    setUrlValue(normalized ?? '');
+  };
+
+  const handleUrlKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      commitUrl();
+      e.target.blur();
+    }
+  };
+
+  const handlePriorityChange = (e) => {
+    onUpdateItem(item.id, { priority: e.target.value || null });
+  };
+
   const handleUnitChange = (e) => {
     const newUnit = e.target.value;
     setUnitValue(newUnit);
@@ -247,11 +278,14 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
     if (isEditOpen) {
       commitName();
       commitNote();
+      commitUrl();
       commitPrice();
       setIsEditOpen(false);
     } else {
       setNameValue(item.name);
       setNoteValue(item.note ?? '');
+      setUrlValue(item.url ?? '');
+      setUrlError(null);
       setPriceValue(price !== null ? price.toFixed(2) : '');
       setUnitValue(item.unit ?? 'each');
       // Initialize custom recurrence state from existing rule
@@ -486,7 +520,7 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
         </div>
       )}
       <div
-        className={`${styles.item} ${effectiveChecked ? styles.checked : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
+        className={`${styles.item} ${effectiveChecked ? styles.checked : ''} ${isReceivedStyle ? styles.received : ''} ${isSwiping && !isExiting ? styles.itemSwiping : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -560,6 +594,12 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                 </span>
                 {item.note && <span className={styles.note}>{item.note}</span>}
                 <div className={styles.badges}>
+                  {isReceivedStyle && <span className={styles.receivedBadge}>Received</span>}
+                  {priorityInfo && (
+                    <span className={styles.priorityBadge} style={{ backgroundColor: priorityInfo.color }}>
+                      {priorityInfo.label}
+                    </span>
+                  )}
                   {fields.store && assignedStore && !hideStorePill && (
                     <span className={styles.storeBadgeCompact} style={{ backgroundColor: assignedStore.color }}>
                       {assignedStore.name}
@@ -585,6 +625,22 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
                   })()}
                 </div>
               </div>
+              {fields.url && item.url && (
+                <a
+                  className={styles.linkBtn}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                  aria-label={`Open link for ${item.name} (${getUrlHostLabel(item.url)})`}
+                  title={getUrlHostLabel(item.url)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M9 2.5h4.5V7M13.5 2.5 7 9M12 9.5v3a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              )}
               {fields.price && lineTotal !== null && (
                 <span className={styles.price}>
                   {formatPrice(lineTotal)}
@@ -630,6 +686,42 @@ export const ShoppingItem = ({ item, isChecked = undefined, stores = [], listTyp
               placeholder="Add a note"
             />
           </div>
+          {fields.url && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Link</span>
+              <div className={styles.urlEdit}>
+                <input
+                  className={styles.nameEditInput}
+                  type="url"
+                  inputMode="url"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  value={urlValue}
+                  onChange={(e) => setUrlValue(e.target.value)}
+                  onBlur={commitUrl}
+                  onKeyDown={handleUrlKeyDown}
+                  placeholder="Paste a product link"
+                  aria-invalid={urlError ? 'true' : 'false'}
+                />
+                {urlError && <span className={styles.fieldError}>{urlError}</span>}
+              </div>
+            </div>
+          )}
+          {fields.priority && (
+            <div className={styles.editRow}>
+              <span className={styles.editLabel}>Priority</span>
+              <select
+                className={styles.unitSelect}
+                value={item.priority ?? ''}
+                onChange={handlePriorityChange}
+              >
+                <option value="">None</option>
+                {WISH_PRIORITIES.map((p) => (
+                  <option key={p.key} value={p.key}>{p.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {fields.quantity && (
             <div className={styles.editRow}>
               <span className={styles.editLabel}>{typeConfig.quantityLabel ?? 'Quantity'}</span>
@@ -973,6 +1065,8 @@ ShoppingItem.propTypes = {
     price: PropTypes.number,
     imageUrl: PropTypes.string,
     note: PropTypes.string,
+    url: PropTypes.string,
+    priority: PropTypes.string,
     unit: PropTypes.string,
     rsvpStatus: PropTypes.string,
     dueDate: PropTypes.string,
@@ -1002,5 +1096,6 @@ ShoppingItem.propTypes = {
   onNavigateToSettings: PropTypes.func,
   hideStorePill: PropTypes.bool,
   hideCategoryPill: PropTypes.bool,
+  hidePriorityPill: PropTypes.bool,
 };
 

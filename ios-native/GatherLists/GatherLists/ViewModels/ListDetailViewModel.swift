@@ -342,7 +342,8 @@ final class ListDetailViewModel {
             try await HistoryService.addHistoryEntry(
                 userId: userId, listId: listId, name: capitalizedName,
                 imageUrl: newItem.imageUrl, category: newItem.category, storeId: newItem.storeId,
-                quantity: newItem.quantity, price: newItem.price, unit: newItem.unit, note: newItem.note
+                quantity: newItem.quantity, price: newItem.price, unit: newItem.unit, note: newItem.note,
+                url: newItem.url, priority: newItem.priority
             )
         } catch {
             self.error = error.localizedDescription
@@ -391,7 +392,8 @@ final class ListDetailViewModel {
         try await HistoryService.addHistoryEntry(
             userId: userId, listId: listId, name: capitalizedName,
             imageUrl: item.imageUrl, category: item.category, storeId: item.storeId,
-            quantity: item.quantity, price: item.price, unit: item.unit, note: item.note
+            quantity: item.quantity, price: item.price, unit: item.unit, note: item.note,
+            url: item.url, priority: item.priority
         )
     }
 
@@ -421,6 +423,8 @@ final class ListDetailViewModel {
                 listId: listId,
                 name: name,
                 note: template?.note,
+                url: template?.url,
+                priority: template?.priority,
                 category: template?.category,
                 storeId: template?.storeId ?? storeId ?? fallbackStoreId,
                 listCategories: listCategories,
@@ -442,7 +446,8 @@ final class ListDetailViewModel {
             try await HistoryService.addHistoryEntry(
                 userId: userId, listId: listId, name: capitalizedName,
                 imageUrl: newItem.imageUrl, category: newItem.category, storeId: newItem.storeId,
-                quantity: newItem.quantity, price: newItem.price, unit: newItem.unit, note: newItem.note
+                quantity: newItem.quantity, price: newItem.price, unit: newItem.unit, note: newItem.note,
+                url: newItem.url, priority: newItem.priority
             )
         } catch {
             self.error = error.localizedDescription
@@ -578,6 +583,10 @@ final class ListDetailViewModel {
         name: String? = nil,
         note: String? = nil,
         clearNote: Bool = false,
+        url: String? = nil,
+        clearUrl: Bool = false,
+        priority: String? = nil,
+        clearPriority: Bool = false,
         category: String? = nil,
         isChecked: Bool? = nil,
         storeId: UUID? = nil,
@@ -602,6 +611,10 @@ final class ListDetailViewModel {
                 name: name,
                 note: note,
                 clearNote: clearNote,
+                url: url,
+                clearUrl: clearUrl,
+                priority: priority,
+                clearPriority: clearPriority,
                 category: category,
                 isChecked: isChecked,
                 storeId: storeId,
@@ -628,6 +641,16 @@ final class ListDetailViewModel {
                     items[index].note = nil
                 } else if let note = note {
                     items[index].note = note
+                }
+                if clearUrl {
+                    items[index].url = nil
+                } else if let url {
+                    items[index].url = url
+                }
+                if clearPriority {
+                    items[index].priority = nil
+                } else if let priority {
+                    items[index].priority = priority
                 }
                 if let category = category { items[index].category = category }
                 if let isChecked = isChecked { items[index].isChecked = isChecked }

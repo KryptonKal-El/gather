@@ -144,3 +144,19 @@ describe('applySortPipeline category grouping with custom categories', () => {
     expect(garageGroup.items.map((i) => i.id)).toEqual(['garage-floor']);
   });
 });
+
+describe('priority grouping', () => {
+  const wishItems = [
+    { id: '1', name: 'Zebra plush', priority: 'nice', addedAt: '2026-01-01' },
+    { id: '2', name: 'Bike', priority: 'must', addedAt: '2026-01-02' },
+    { id: '3', name: 'Apron', priority: null, addedAt: '2026-01-03' },
+    { id: '4', name: 'Atlas', priority: 'must', addedAt: '2026-01-04' },
+  ];
+
+  it('orders groups must > want > nice > none and sorts within each', () => {
+    const result = applySortPipeline(wishItems, ['priority', 'name'], [], 'wish_list');
+    expect(result.groups.map((g) => g.key)).toEqual(['priority-must', 'priority-nice', 'priority-none']);
+    expect(result.groups[0].items.map((i) => i.name)).toEqual(['Atlas', 'Bike']);
+    expect(result.groups[2].label).toBe('No Priority');
+  });
+});

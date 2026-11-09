@@ -27,7 +27,7 @@ struct CreateListSheet: View {
         "#F9A8C9", "#C5B3E6", "#F4C89E", "#A5D6D0", "#C1D5A4", "#F2B5B5", "#D0C4DF"
     ]
     
-    private let categoryPreviewTypes = ["grocery", "packing", "todo", "project"]
+    private let categoryPreviewTypes = ["grocery", "packing", "todo", "project", "wish_list"]
     
     private let typeGridColumns = [
         GridItem(.flexible()),

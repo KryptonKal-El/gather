@@ -14,6 +14,8 @@ struct HistoryEntry: Codable, Identifiable {
     let price: Decimal?
     let unit: String?
     let note: String?
+    let url: String?
+    let priority: String?
     let addedAt: Date
 
     enum CodingKeys: String, CodingKey {
@@ -28,6 +30,8 @@ struct HistoryEntry: Codable, Identifiable {
         case price
         case unit
         case note
+        case url
+        case priority
         case addedAt = "added_at"
     }
 }

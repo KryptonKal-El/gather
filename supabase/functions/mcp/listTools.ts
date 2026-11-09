@@ -24,11 +24,12 @@ import {
   uuid,
 } from './shared.ts';
 
-const LIST_TYPES = ['grocery', 'basic', 'guest_list', 'packing', 'project', 'todo'] as const;
+const LIST_TYPES = ['grocery', 'basic', 'guest_list', 'packing', 'project', 'todo', 'wish_list'] as const;
 const RSVP_STATUSES = ['invited', 'confirmed', 'declined', 'maybe', 'not_invited'] as const;
+const WISH_PRIORITIES = ['must', 'want', 'nice'] as const;
 const MAX_ITEMS_PER_CALL = 200;
 const INSERT_CHUNK = 100;
-const ITEM_COLUMNS = 'id, list_id, name, category, is_checked, store_id, quantity, price, unit, note, image_url, due_date, rsvp_status, added_at';
+const ITEM_COLUMNS = 'id, list_id, name, category, is_checked, store_id, quantity, price, unit, note, url, priority, image_url, due_date, rsvp_status, added_at';
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/).describe('Hex color, e.g. #1565c0.');
 
@@ -44,6 +45,10 @@ const itemFieldsShape = {
   image_url: z.string().url().nullable().optional().describe('Image URL.'),
   due_date: dateKey('Due date yyyy-MM-dd (todo/project lists).').nullable().optional(),
   rsvp_status: z.enum(RSVP_STATUSES).nullable().optional().describe('RSVP status (guest_list lists).'),
+  url: z.string().url().refine((v) => /^https?:\/\//i.test(v), 'Must be an http(s) link.').nullable().optional()
+    .describe('Product link (wish_list lists).'),
+  priority: z.enum(WISH_PRIORITIES).nullable().optional()
+    .describe('Wish priority: must (must-have), want (would like), nice (nice to have). wish_list lists.'),
 };
 
 /** Loads the fields of a list needed for category resolution, or null if inaccessible. */
@@ -187,6 +192,8 @@ export function registerListTools(server: McpServer, ctx: ToolContext) {
           unit: item.unit ?? 'each',
           price: item.price ?? null,
           note: item.note ?? null,
+          url: item.url ?? null,
+          priority: item.priority ?? null,
           image_url: item.image_url ?? null,
           due_date: item.due_date ?? null,
           rsvp_status: item.rsvp_status ?? null,
@@ -213,6 +220,8 @@ export function registerListTools(server: McpServer, ctx: ToolContext) {
         price: r.price,
         unit: r.unit,
         note: r.note,
+        url: r.url,
+        priority: r.priority,
       })));
       // History only feeds suggestions; the items themselves were saved.
       if (historyError) console.error('[mcp] items_add history insert failed', historyError);

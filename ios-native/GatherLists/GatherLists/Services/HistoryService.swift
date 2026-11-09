@@ -34,12 +34,14 @@ struct HistoryService {
         quantity: Int? = nil,
         price: Decimal? = nil,
         unit: String? = nil,
-        note: String? = nil
+        note: String? = nil,
+        url: String? = nil,
+        priority: String? = nil
     ) async throws {
         let entry = NewHistoryEntry(
             userId: userId, listId: listId, name: name, imageUrl: imageUrl,
             category: category, storeId: storeId, quantity: quantity,
-            price: price, unit: unit, note: note
+            price: price, unit: unit, note: note, url: url, priority: priority
         )
         try await client
             .from("history")
@@ -52,7 +54,8 @@ struct HistoryService {
         guard !names.isEmpty else { return }
         let entries = names.map {
             NewHistoryEntry(userId: userId, listId: listId, name: $0, imageUrl: nil,
-                            category: nil, storeId: nil, quantity: nil, price: nil, unit: nil, note: nil)
+                            category: nil, storeId: nil, quantity: nil, price: nil, unit: nil, note: nil,
+                            url: nil, priority: nil)
         }
         try await client
             .from("history")
@@ -74,6 +77,8 @@ private struct NewHistoryEntry: Encodable {
     let price: Decimal?
     let unit: String?
     let note: String?
+    let url: String?
+    let priority: String?
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
@@ -86,5 +91,7 @@ private struct NewHistoryEntry: Encodable {
         case price
         case unit
         case note
+        case url
+        case priority
     }
 }

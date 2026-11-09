@@ -406,6 +406,8 @@ export const addItem = async (userId, listId, item) => {
         price: item.price ?? null,
         image_url: item.imageUrl ?? null,
         note: item.note ?? null,
+        url: item.url ?? null,
+        priority: item.priority ?? null,
         unit: item.unit ?? 'each',
         rsvp_status: item.rsvpStatus ?? null,
         due_date: item.dueDate ?? null,
@@ -445,6 +447,8 @@ export const addItems = async (userId, listId, items) => {
       price: item.price ?? null,
       image_url: item.imageUrl ?? null,
       note: item.note ?? null,
+      url: item.url ?? null,
+      priority: item.priority ?? null,
       unit: item.unit ?? 'each',
       rsvp_status: item.rsvpStatus ?? null,
       due_date: item.dueDate ?? null,
@@ -477,6 +481,8 @@ export const updateItem = async (userId, listId, itemId, updates) => {
     const mapped = {};
     if (updates.name !== undefined) mapped.name = updates.name;
     if (updates.note !== undefined) mapped.note = updates.note;
+    if (updates.url !== undefined) mapped.url = updates.url;
+    if (updates.priority !== undefined) mapped.priority = updates.priority;
     if (updates.category !== undefined) mapped.category = updates.category;
     if (updates.isChecked !== undefined) mapped.is_checked = updates.isChecked;
     if (updates.is_checked !== undefined) mapped.is_checked = updates.is_checked;
@@ -610,6 +616,8 @@ export const subscribeItems = (userId, listId, callback) => {
           price: row.price,
           imageUrl: row.image_url,
           note: row.note ?? null,
+          url: row.url ?? null,
+          priority: row.priority ?? null,
           unit: row.unit ?? 'each',
           addedAt: row.added_at,
           rsvpStatus: row.rsvp_status,
@@ -682,7 +690,7 @@ export const subscribeSharedItems = (ownerUid, listId, callback) => {
  * @param {string} userId
  * @param {string} listId
  * @param {string} name
- * @param {object} [fields] - imageUrl, category, storeId, quantity, price, unit, note
+ * @param {object} [fields] - imageUrl, category, storeId, quantity, price, unit, note, url, priority
  * @returns {object} Row for insertion into `history`.
  */
 const historyRow = (userId, listId, name, fields = {}) => ({
@@ -696,6 +704,8 @@ const historyRow = (userId, listId, name, fields = {}) => ({
   price: fields.price ?? null,
   unit: fields.unit ?? null,
   note: fields.note ?? null,
+  url: fields.url ?? null,
+  priority: fields.priority ?? null,
 });
 
 /**
@@ -704,7 +714,7 @@ const historyRow = (userId, listId, name, fields = {}) => ({
  * @param {string} userId - User ID
  * @param {string} listId - List the item was added to
  * @param {string} name - Item name
- * @param {object} [fields] - Mirrored fields: imageUrl, category, storeId, quantity, price, unit, note
+ * @param {object} [fields] - Mirrored fields: imageUrl, category, storeId, quantity, price, unit, note, url, priority
  */
 export const addHistoryEntry = async (userId, listId, name, fields = {}) => {
   try {
@@ -719,7 +729,7 @@ export const addHistoryEntry = async (userId, listId, name, fields = {}) => {
  * Adds multiple history entries (mirroring each item's fields) in one insert.
  * @param {string} userId - The authenticated user's ID
  * @param {string} listId - The list these items were added to
- * @param {Array<{name: string, imageUrl?: string, category?: string, storeId?: string, quantity?: number, price?: number, unit?: string, note?: string}>} entries
+ * @param {Array<{name: string, imageUrl?: string, category?: string, storeId?: string, quantity?: number, price?: number, unit?: string, note?: string, url?: string, priority?: string}>} entries
  */
 export const addHistoryEntries = async (userId, listId, entries) => {
   if (!entries.length) return;
@@ -765,6 +775,8 @@ export const subscribeHistory = (userId, callback) => {
           price: row.price,
           unit: row.unit,
           note: row.note,
+          url: row.url ?? null,
+          priority: row.priority ?? null,
           addedAt: row.added_at,
         }))
       );
