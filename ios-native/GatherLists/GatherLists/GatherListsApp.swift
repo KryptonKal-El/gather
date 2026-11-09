@@ -24,6 +24,7 @@ struct GatherListsApp: App {
     @State private var networkMonitor = NetworkMonitor()
     @State private var notificationService = NotificationService()
     @State private var toastController = ToastController()
+    @State private var isShowingSnowfall = false
     @Environment(\.scenePhase) private var scenePhase
     private var appearanceManager = AppearanceManager.shared
 
@@ -55,7 +56,13 @@ struct GatherListsApp: App {
                 } else if authViewModel.isAuthenticated {
                     MainTabView()
                         .environment(authViewModel)
+                        .overlay {
+                            if isShowingSnowfall {
+                                SnowfallView { isShowingSnowfall = false }
+                            }
+                        }
                         .task {
+                            showHolidaySnowfallIfDue()
                             await notificationService.refreshTokenIfNeeded()
                             await updateUserTimezone()
                         }
@@ -78,6 +85,9 @@ struct GatherListsApp: App {
             .onChange(of: scenePhase) { _, newPhase in
                 if newPhase == .active {
                     notificationService.clearBadge()
+                    if authViewModel.isAuthenticated {
+                        showHolidaySnowfallIfDue()
+                    }
                 }
             }
             .onOpenURL { url in
@@ -152,6 +162,11 @@ struct GatherListsApp: App {
         }
     }
     
+    private func showHolidaySnowfallIfDue() {
+        guard !isShowingSnowfall, HolidaySeason.consumeSnowfall() else { return }
+        isShowingSnowfall = true
+    }
+
     private func updateUserTimezone() async {
         guard let userId = authViewModel.currentUser?.id else { return }
         do {

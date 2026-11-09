@@ -42,6 +42,8 @@
 		A1B2C3D4E5F6A7B8C9D0E241 /* CreateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E243 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0F102 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */; };
+		C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A001 /* SnowfallView.swift */; };
+		C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A003 /* HolidaySeason.swift */; };
 		A1B2C3D4E5F6A7B8C9D0F202 /* ImageCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */; };
@@ -250,6 +252,8 @@
 		A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000A001 /* SnowfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnowfallView.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000A003 /* HolidaySeason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidaySeason.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCropView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareListSheet.swift; sourceTree = "<group>"; };
@@ -654,6 +658,7 @@
 				A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */,
 				A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */,
 				A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */,
+				C0FFEE00000000000000A001 /* SnowfallView.swift */,
 				A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */,
@@ -673,6 +678,7 @@
 			children = (
 				A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */,
+				C0FFEE00000000000000A003 /* HolidaySeason.swift */,
 				A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */,
@@ -952,6 +958,8 @@
 				A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E243 /* EmojiPickerView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0F102 /* ConfettiView.swift in Sources */,
+				C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */,
+				C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0F202 /* ImageCropView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */,
 				B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */,
