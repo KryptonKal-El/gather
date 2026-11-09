@@ -3,7 +3,12 @@
  * Provides functions for reading/writing user sort preferences (v2 pipeline).
  */
 import { supabase } from './supabase.js';
-import { SYSTEM_DEFAULT_SORT_CONFIG, isValidSortConfig, getDefaultSortConfig } from '../utils/sortPipeline.js';
+import {
+  SYSTEM_DEFAULT_SORT_CONFIG,
+  isValidSortConfig,
+  getDefaultSortConfig,
+  hasTypeSpecificDefaultSort,
+} from '../utils/sortPipeline.js';
 
 export { SYSTEM_DEFAULT_SORT_CONFIG };
 
@@ -204,6 +209,8 @@ export const updateShareSortConfig = async (listId, email, config) => {
  * Pure function that resolves the effective sort config for a list.
  * For shared lists, shareSortConfig (from list_shares) takes highest priority.
  * Falls back to list.sort_config, then user preference, then type default.
+ * List types with their own default sort (e.g. wish_list) skip the user
+ * preference, so a new list opens in the order that type is designed for.
  * @param {object} list - List object (may have sort_config property, snake_case)
  * @param {object|null} userPreferences - User preferences object (may have default_sort_config)
  * @param {string} listType - List type identifier
@@ -211,5 +218,6 @@ export const updateShareSortConfig = async (listId, email, config) => {
  * @returns {string[]} The resolved sort config array
  */
 export const getEffectiveSortConfig = (list, userPreferences, listType, shareSortConfig = null) => {
-  return shareSortConfig ?? list.sort_config ?? userPreferences?.default_sort_config ?? getDefaultSortConfig(listType);
+  const userDefault = hasTypeSpecificDefaultSort(listType) ? null : userPreferences?.default_sort_config;
+  return shareSortConfig ?? list.sort_config ?? userDefault ?? getDefaultSortConfig(listType);
 };

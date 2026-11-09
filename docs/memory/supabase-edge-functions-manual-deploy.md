@@ -26,3 +26,11 @@ npx supabase functions deploy
 ## When to remember this
 
 Any time edge function code is changed — CORS, logic, environment variables — it needs a manual deploy. This is separate from the Vercel frontend deploy (which is automatic via git push) and the Capacitor native build.
+
+## CLI version (2026-11)
+
+Supabase CLI v3 (`npx supabase@latest`) refuses to deploy because `config.toml`
+still has an `[inbucket]` section (`CliConfigRemovedKeyError`). Deploy with the
+2.x line instead — e.g. `npx -y supabase@2 functions deploy mcp --use-api`
+(2.122.1 worked). Don't "fix" config.toml for v3 casually: it's local-dev config,
+and it must never be `config push`ed to the hosted project.

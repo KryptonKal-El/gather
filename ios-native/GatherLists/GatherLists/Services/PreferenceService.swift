@@ -136,6 +136,7 @@ struct PreferenceService {
     
     /// Resolves the effective sort config for a list.
     /// Priority: share sort config (for shared users) → per-list override → global default → type default → system default.
+    /// List types with their own default sort (e.g. wish_list) skip the global default.
     static func effectiveSortConfig(for list: GatherList, userPreferences: UserPreferences?, shareSortConfig: [String]? = nil) -> [SortLevel] {
         let configStrings: [String]
         let typeConfig = ListTypes.getConfig(list.type)
@@ -145,7 +146,7 @@ struct PreferenceService {
             configStrings = shareConfig
         } else if let listConfig = list.sortConfig {
             configStrings = listConfig
-        } else if let prefs = userPreferences {
+        } else if let prefs = userPreferences, !SortPipeline.hasTypeSpecificDefault(for: list.type) {
             configStrings = prefs.defaultSortConfig
         } else {
             return SortPipeline.getDefaultConfig(for: list.type)

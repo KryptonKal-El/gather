@@ -33,6 +33,12 @@ enum SortPipeline {
         return config.defaultSort.compactMap { SortLevel(rawValue: $0) }
     }
     
+    /// Whether a list type ships its own default sort, distinct from the system default.
+    /// Such types (e.g. wish lists grouped by priority) ignore the account-wide default sort.
+    static func hasTypeSpecificDefault(for listType: String) -> Bool {
+        getDefaultConfig(for: listType) != systemDefault
+    }
+
     /// Levels that create groups (vs just sorting within existing groups).
     static let groupingLevels: Set<SortLevel> = [.store, .category, .rsvp, .priority]
     

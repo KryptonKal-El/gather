@@ -44,6 +44,19 @@ export const getDefaultSortConfig = (listType) => {
   return config.defaultSort;
 };
 
+/**
+ * Whether a list type ships its own default sort, distinct from the system
+ * default. Such types (e.g. wish lists grouped by priority) ignore the user's
+ * account-wide default sort until the list gets its own override.
+ * @param {string} [listType='grocery'] - The list type identifier
+ * @returns {boolean} True when the type default differs from the system default
+ */
+export const hasTypeSpecificDefaultSort = (listType) => {
+  const typeDefault = getDefaultSortConfig(listType);
+  return typeDefault.length !== SYSTEM_DEFAULT_SORT_CONFIG.length
+    || typeDefault.some((level, i) => level !== SYSTEM_DEFAULT_SORT_CONFIG[i]);
+};
+
 /** Levels that create groups (vs just sorting within existing groups) */
 export const GROUPING_LEVELS = ['store', 'category', 'rsvp', 'priority'];
 
