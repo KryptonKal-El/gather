@@ -134,6 +134,17 @@ final class AuthViewModel {
         }
     }
     
+    /// Emails a one-time sign-in code, creating the account if the email is new.
+    func sendEmailCode(to email: String) async throws {
+        try await SupabaseManager.shared.client.auth.signInWithOTP(email: email, shouldCreateUser: true)
+    }
+
+    /// Signs in with a code from `sendEmailCode(to:)`.
+    func verifyEmailCode(email: String, code: String) async throws {
+        try await SupabaseManager.shared.client.auth.verifyOTP(email: email, token: code, type: .email)
+        print("[AuthViewModel] Email code sign-in successful")
+    }
+
     /// Signs in with a saved passkey. A dismissed system sheet is not treated as an error.
     func signInWithPasskey() async {
         error = nil

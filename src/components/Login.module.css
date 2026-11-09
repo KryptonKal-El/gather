@@ -178,8 +178,37 @@
   transition: color 0.15s;
 }
 
-.toggleMode:hover {
+.toggleMode:hover:not(:disabled) {
   color: var(--primary);
+}
+
+.toggleMode:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.codeHint {
+  margin: 0 0 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.codeInput {
+  text-align: center;
+  font-size: 1.25rem;
+  letter-spacing: 0.3em;
+}
+
+.codeInput::placeholder {
+  font-size: 1rem;
+  letter-spacing: normal;
+}
+
+.codeActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .divider {

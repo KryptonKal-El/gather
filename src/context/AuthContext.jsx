@@ -1,6 +1,6 @@
 /**
  * Authentication context using Supabase Auth.
- * Supports Apple sign-in, passkeys, and email/password.
+ * Supports Apple sign-in, passkeys, email one-time codes, and email/password.
  * Provides user state, loading state, and auth actions to the component tree.
  * Exposes sessionVersion to signal downstream contexts when auth/token refreshes.
  */
@@ -171,6 +171,36 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
+   * Emails a one-time sign-in code. Creates the account if the email is new.
+   * @param {string} email
+   * @returns {Promise<void>}
+   */
+  const sendEmailCode = async (email) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) {
+      console.error('Sending email code failed:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Signs in with a one-time code from {@link sendEmailCode}.
+   * @param {string} email
+   * @param {string} code
+   * @returns {Promise<void>}
+   */
+  const verifyEmailCode = async (email, code) => {
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error) {
+      console.error('Email code verification failed:', error);
+      throw error;
+    }
+  };
+
+  /**
    * Signs in with a passkey stored on this device or synced to it.
    * Throws when the user dismisses the prompt; check with `isPasskeyCancelled`.
    * @param {{ mediation?: CredentialMediationRequirement, signal?: AbortSignal }} [options]
@@ -276,6 +306,8 @@ export const AuthProvider = ({ children }) => {
       signInWithApple,
       signInWithEmail,
       signUpWithEmail,
+      sendEmailCode,
+      verifyEmailCode,
       signInWithPasskey,
       registerPasskey,
       listPasskeys,
@@ -292,7 +324,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signInWithPasskey: Function, registerPasskey: Function, listPasskeys: Function, renamePasskey: Function, deletePasskey: Function, signOut: Function, refreshUser: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, sendEmailCode: Function, verifyEmailCode: Function, signInWithPasskey: Function, registerPasskey: Function, listPasskeys: Function, renamePasskey: Function, deletePasskey: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

@@ -27,3 +27,9 @@ Gather uses Supabase Auth's built-in passkeys (beta since 2026-05). No custom We
 - Conditional UI (passkey autofill) needs `autocomplete="username webauthn"` on the email field, and must be aborted before a modal `signInWithPasskey()` call when you pass your own `signal`.
 - Beta reports: hosted config sometimes doesn't propagate on the Free plan (toggling an unrelated auth setting fixes it); third-party managers like Dashlane can fail registration with `webauthn_verification_failed`.
 - Passkeys can't create accounts; registration needs an existing confirmed user. That's why passwords can only be dropped after email-code sign-in exists.
+
+## Email one-time codes (Phase 2)
+- `signInWithOtp({ email, options: { shouldCreateUser: true } })` then `verifyOtp({ email, token, type: 'email' })`. `type: 'email'` covers both new and existing users.
+- The email only shows a code if the Dashboard templates include `{{ .Token }}`: **Magic Link** (existing users) and **Confirm signup** (new users). With the default templates users get a link, not a code.
+- Code length is a hosted setting (6 by default, up to 8), so the UIs accept 6–8 digits instead of auto-submitting at 6.
+- Wrong or expired codes come back as `otp_expired`; resending too soon is `over_email_send_rate_limit` (Supabase enforces ~60s between sends, which the UIs mirror with a countdown).

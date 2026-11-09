@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EMAILCODEVW0000000000002 /* EmailCodeSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */; };
 		PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */; };
 		PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSECT0000000000001 /* PasskeysSection.swift */; };
 		PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSVC00000000000001 /* PasskeyService.swift */; };
@@ -214,6 +215,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailCodeSignInView.swift; sourceTree = "<group>"; };
 		PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyPromptModifier.swift; sourceTree = "<group>"; };
 		PASSKEYSECT0000000000001 /* PasskeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeysSection.swift; sourceTree = "<group>"; };
 		PASSKEYSVC00000000000001 /* PasskeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyService.swift; sourceTree = "<group>"; };
@@ -575,6 +577,7 @@
 			isa = PBXGroup;
 			children = (
 				D3E4F5A6B7C8D9E0F1A2B3C5 /* LoginView.swift */,
+				EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */,
 				PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */,
 			);
 			path = Auth;
@@ -974,6 +977,7 @@
 				B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */,
 				C2D3E4F5A6B7C8D9E0F1A2B3 /* AuthViewModel.swift in Sources */,
 				D3E4F5A6B7C8D9E0F1A2B3C4 /* LoginView.swift in Sources */,
+				EMAILCODEVW0000000000002 /* EmailCodeSignInView.swift in Sources */,
 				PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */,
 				PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */,
 				PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */,

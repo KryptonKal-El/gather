@@ -12,6 +12,7 @@ struct LoginView: View {
     @State private var isSignUp = false
     @State private var isEmailSigningIn = false
     @State private var isPasskeySigningIn = false
+    @State private var isEmailCodeSheetPresented = false
     @FocusState private var focusedField: Field?
     
     private enum Field {
@@ -140,6 +141,20 @@ struct LoginView: View {
                 Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
                     .font(.quicksand(.subheadline))
                     .foregroundColor(Color.brandGreen)
+            }
+
+            Button {
+                focusedField = nil
+                authViewModel.error = nil
+                isEmailCodeSheetPresented = true
+            } label: {
+                Text("Email me a sign-in code instead")
+                    .font(.quicksand(.subheadline))
+                    .foregroundColor(Color.brandGreen)
+            }
+            .accessibilityIdentifier("emailCodeSignInButton")
+            .sheet(isPresented: $isEmailCodeSheetPresented) {
+                EmailCodeSignInView(initialEmail: email)
             }
         }
         .frame(maxWidth: 360)

@@ -1,9 +1,10 @@
 /**
- * Login screen with passkey, Apple, and email/password sign-in options.
+ * Login screen with passkey, Apple, email code, and email/password sign-in options.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { HeartfieldBackground } from './HeartfieldBackground.jsx';
+import { EmailCodeForm } from './EmailCodeForm.jsx';
 import { isPasskeyCancelled, isPasskeySupported, passkeyErrorMessage } from '../utils/passkeyErrors.js';
 import styles from './Login.module.css';
 
@@ -55,6 +56,7 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const [isCodeMode, setIsCodeMode] = useState(false);
   const autofillAbortRef = useRef(null);
   // The context recreates its actions on every render; keep the autofill effect
   // from restarting the passkey request each time.
@@ -179,41 +181,55 @@ export const Login = () => {
             <span>or</span>
           </div>
 
-          <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
-            <input
-              type="email"
-              className={styles.emailInput}
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete={isSignUpMode ? 'email' : 'username webauthn'}
-              required
+          {isCodeMode ? (
+            <EmailCodeForm
+              initialEmail={email}
+              onUsePassword={() => { setIsCodeMode(false); setError(null); }}
             />
-            <input
-              type="password"
-              className={styles.emailInput}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
-              required
-              minLength={6}
-            />
-            <button
-              type="submit"
-              className={styles.emailBtn}
-              disabled={isSigningIn}
-            >
-              {isSignUpMode ? 'Create Account' : 'Sign In'}
-            </button>
-            <button
-              type="button"
-              className={styles.toggleMode}
-              onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
-            >
-              {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
-            </button>
-          </form>
+          ) : (
+            <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
+              <input
+                type="email"
+                className={styles.emailInput}
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete={isSignUpMode ? 'email' : 'username webauthn'}
+                required
+              />
+              <input
+                type="password"
+                className={styles.emailInput}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
+                required
+                minLength={6}
+              />
+              <button
+                type="submit"
+                className={styles.emailBtn}
+                disabled={isSigningIn}
+              >
+                {isSignUpMode ? 'Create Account' : 'Sign In'}
+              </button>
+              <button
+                type="button"
+                className={styles.toggleMode}
+                onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
+              >
+                {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
+              </button>
+              <button
+                type="button"
+                className={styles.toggleMode}
+                onClick={() => { setIsCodeMode(true); setIsSignUpMode(false); setError(null); }}
+              >
+                Email me a sign-in code instead
+              </button>
+            </form>
+          )}
 
         </div>
 

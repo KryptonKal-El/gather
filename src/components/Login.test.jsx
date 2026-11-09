@@ -73,6 +73,16 @@ describe('Login passkey sign-in', () => {
     expect(screen.queryByText(/not available/)).not.toBeInTheDocument();
   });
 
+  it('switches to email-code sign-in, carrying over the typed email', async () => {
+    const user = userEvent.setup();
+    render(<Login />);
+    await user.type(screen.getByPlaceholderText('Email'), 'sam@example.com');
+    await user.click(screen.getByRole('button', { name: 'Email me a sign-in code instead' }));
+    expect(screen.getByRole('button', { name: 'Email me a sign-in code' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Email')).toHaveValue('sam@example.com');
+    expect(screen.queryByPlaceholderText('Password')).not.toBeInTheDocument();
+  });
+
   it('hides the passkey button when the browser has no passkey support', () => {
     delete window.PublicKeyCredential;
     render(<Login />);
