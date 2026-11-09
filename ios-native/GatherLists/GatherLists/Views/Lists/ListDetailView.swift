@@ -792,8 +792,12 @@ struct ListDetailView: View {
         if isChecked || priority != nil {
             HStack(spacing: 6) {
                 if isChecked {
-                    Label("Received", systemImage: "gift.fill")
-                        .foregroundStyle(Color.brandGreen)
+                    HStack(spacing: 3) {
+                        Image(systemName: "gift.fill")
+                        Text("Received")
+                    }
+                    .foregroundStyle(Color.brandGreen)
+                    .fixedSize()
                 }
                 if let priority {
                     HStack(spacing: 3) {
@@ -803,6 +807,7 @@ struct ListDetailView: View {
                         Text(priority.label)
                             .foregroundStyle(.secondary)
                     }
+                    .fixedSize()
                 }
             }
             .font(.quicksand(.caption))
