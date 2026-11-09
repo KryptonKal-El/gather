@@ -33,6 +33,8 @@ type HistoryRow = {
   unit: string | null;
   price: number | null;
   note: string | null;
+  url: string | null;
+  priority: string | null;
   added_at: string | null;
 };
 
@@ -48,6 +50,8 @@ type HistorySummary = {
   unit: string | null;
   price: number | null;
   note: string | null;
+  url: string | null;
+  priority: string | null;
   list_ids: string[];
 };
 
@@ -73,7 +77,7 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
       annotations: READ_ONLY,
       title: 'Summarize item history',
       description:
-        'Summarize what has been added to the user\'s lists over time, one row per item name: how many times it was added, when it was first and last added, which lists, and its latest saved details (category, store, quantity, unit, price, note). Covers the user\'s own lists and lists shared with them, including items collaborators added. Use it for "what do I usually buy", "when did I last get X", or building a list from staples. Being added to a list does not prove an item was bought.',
+        'Summarize what has been added to the user\'s lists over time, one row per item name: how many times it was added, when it was first and last added, which lists, and its latest saved details (category, store, quantity, unit, price, note, and for wish lists the product link and priority). Covers the user\'s own lists and lists shared with them, including items collaborators added. Use it for "what do I usually buy", "when did I last get X", or building a list from staples. Being added to a list does not prove an item was bought.',
       inputSchema: z.object({
         list_id: uuid('Only history from this list.').optional(),
         name_contains: z.string().trim().min(1).optional()
@@ -97,7 +101,7 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
         }
         let query = supabase
           .from('history')
-          .select('name, list_id, category, store_id, quantity, unit, price, note, added_at');
+          .select('name, list_id, category, store_id, quantity, unit, price, note, url, priority, added_at');
         if (list_id) query = query.eq('list_id', list_id);
         if (name_contains) query = query.ilike('name', `%${escapeLike(name_contains)}%`);
         if (since) query = query.gte('added_at', `${since}T00:00:00Z`);
@@ -129,6 +133,8 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
           unit: row.unit,
           price: row.price,
           note: row.note,
+          url: row.url,
+          priority: row.priority,
           list_ids: [...listIds],
         });
       }
@@ -168,7 +174,7 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
       annotations: READ_ONLY,
       title: 'Suggest a previous item to reuse',
       description:
-        'Find previously-added items matching a name so you can reuse one instead of creating a generic new item. Returns past matches ranked by how often and how recently they were added, each with its reusable details (category, store, unit, quantity, note) restored from the last time it was added — so reusing "Bread" brings back its Bakery category, not Other. Draws from the user\'s full item history across all their lists; pass list_id to prefer and correctly attach stores from the list you are adding to. Call this before items_add, then pass the chosen match\'s details into items_add.',
+        'Find previously-added items matching a name so you can reuse one instead of creating a generic new item. Returns past matches ranked by how often and how recently they were added, each with its reusable details (category, store, unit, quantity, note, link, priority) restored from the last time it was added — so reusing "Bread" brings back its Bakery category, not Other. Draws from the user\'s full item history across all their lists; pass list_id to prefer and correctly attach stores from the list you are adding to. Call this before items_add, then pass the chosen match\'s details into items_add.',
       inputSchema: z.object({
         name: z.string().trim().min(1).describe('The item name to find previous matches for.'),
         list_id: uuid('The list you are adding to. Matches on it rank higher, and store ids are returned valid for this list.').optional(),
@@ -184,7 +190,7 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
       for (let offset = 0; offset < MAX_SCAN_ROWS; offset += MAX_PAGE) {
         const { data, error } = await supabase
           .from('history')
-          .select('name, list_id, category, store_id, quantity, unit, price, note, added_at')
+          .select('name, list_id, category, store_id, quantity, unit, price, note, url, priority, added_at')
           .ilike('name', `%${escapeLike(name.trim())}%`)
           .order('added_at', { ascending: true })
           .order('id', { ascending: true })
@@ -213,6 +219,8 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
           unit: row.unit,
           price: row.price,
           note: row.note,
+          url: row.url,
+          priority: row.priority,
           list_ids: [...listIds],
           in_current_list: (existing?.in_current_list ?? false) || (!!list_id && row.list_id === list_id),
         });
@@ -277,6 +285,8 @@ export function registerHistoryTools(server: McpServer, ctx: ToolContext) {
           unit: item.unit,
           quantity: item.quantity,
           note: item.note,
+          url: item.url,
+          priority: item.priority,
           price: item.price,
           times_added: item.times_added,
           last_added_at: item.last_added_at,

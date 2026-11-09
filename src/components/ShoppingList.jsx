@@ -364,12 +364,12 @@ export const ShoppingList = ({
                 className={styles.clearBtn}
                 onClick={(e) => { e.stopPropagation(); setIsConfirmingClear(true); }}
               >
-                Clear crossed
+                {listType === 'wish_list' ? 'Clear received' : 'Clear crossed'}
               </button>
             </div>
             {isConfirmingClear && (
               <ConfirmDialog
-                message={`Clear all ${checkedItems.length} checked items?`}
+                message={`Clear all ${checkedItems.length} ${listType === 'wish_list' ? 'received' : 'checked'} items?`}
                 confirmLabel="Clear"
                 onConfirm={() => {
                   onClearChecked();

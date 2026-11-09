@@ -236,7 +236,7 @@ struct ListDetailView: View {
                 }
             }
         }
-        .alert("Clear crossed items?", isPresented: $showClearCheckedAlert) {
+        .alert(isWishListType ? "Clear received items?" : "Clear crossed items?", isPresented: $showClearCheckedAlert) {
             Button("Cancel", role: .cancel) { }
             Button("Clear", role: .destructive) {
                 Task {
@@ -247,7 +247,7 @@ struct ListDetailView: View {
                 }
             }
         } message: {
-            Text("This will permanently delete all crossed items.")
+            Text(isWishListType ? "This will permanently delete all received items." : "This will permanently delete all crossed items.")
         }
         .alert("Edit Name", isPresented: $showEditNameAlert) {
             TextField("Item name", text: $editNameText)
@@ -785,10 +785,14 @@ struct ListDetailView: View {
             .animation(.easeOut(duration: 0.45), value: isBumped)
     }
 
+    private var isWishListType: Bool { detailViewModel?.typeConfig.fields.priority == true }
+
     /// "Received" (when checked) and the priority label, shown under a wish list item's name.
     @ViewBuilder
     private func wishListStatusLine(item: Item, isChecked: Bool) -> some View {
-        let priority = WISH_PRIORITIES.first { $0.key == item.priority }
+        // Unchecked rows sit under a priority heading when grouped by priority, so the label would repeat it.
+        let isGroupedByPriority = !isChecked && activeSortConfig.contains(.priority)
+        let priority = isGroupedByPriority ? nil : WISH_PRIORITIES.first { $0.key == item.priority }
         if isChecked || priority != nil {
             HStack(spacing: 6) {
                 if isChecked {
@@ -1324,7 +1328,7 @@ struct ListDetailView: View {
                         
                         Spacer()
                         
-                        Button("Clear crossed") {
+                        Button(isWishListType ? "Clear received" : "Clear crossed") {
                             showClearCheckedAlert = true
                         }
                         .font(.quicksand(.subheadline))
