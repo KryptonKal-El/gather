@@ -67,6 +67,7 @@ struct MainTabView: View {
             }
         }
         .animation(.easeInOut(duration: 0.22), value: toastController.message != nil)
+        .passkeyPrompt()
         .onChange(of: notificationService.pendingListId) { _, listId in
             if listId != nil {
                 selectedTab = 0

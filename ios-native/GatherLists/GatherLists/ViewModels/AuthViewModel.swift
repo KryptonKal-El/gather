@@ -134,6 +134,25 @@ final class AuthViewModel {
         }
     }
     
+    /// Signs in with a saved passkey. A dismissed system sheet is not treated as an error.
+    func signInWithPasskey() async {
+        error = nil
+        do {
+            try await PasskeyService.signIn()
+            print("[AuthViewModel] Passkey sign-in successful")
+        } catch {
+            if PasskeyService.isCancelled(error) { return }
+            self.error = PasskeyService.message(for: error)
+            print("[AuthViewModel] Passkey sign-in failed: \(error)")
+        }
+    }
+
+    /// Whether the signed-in user has an email/password identity, and so could
+    /// benefit from adding a passkey.
+    var usesPassword: Bool {
+        currentUser?.identities?.contains { $0.provider == "email" } ?? false
+    }
+
     func signInWithEmail(email: String, password: String) async {
         error = nil
         do {

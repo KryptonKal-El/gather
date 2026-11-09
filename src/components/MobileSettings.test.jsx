@@ -36,6 +36,10 @@ vi.mock('./ConnectedApps.jsx', () => ({
   ConnectedApps: () => null,
 }));
 
+vi.mock('./PasskeysSection.jsx', () => ({
+  PasskeysSection: () => null,
+}));
+
 vi.mock('./ConfirmDialog.jsx', () => ({
   ConfirmDialog: () => <div role="dialog">Confirm reset</div>,
 }));

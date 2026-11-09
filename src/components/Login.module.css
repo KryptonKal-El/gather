@@ -53,6 +53,38 @@
   gap: 0.75rem;
 }
 
+.passkeyBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.passkeyBtn:hover:not(:disabled) {
+  background: var(--primary-hover);
+  box-shadow: 0 2px 8px var(--overlay-light);
+}
+
+.passkeyBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.passkeyIcon {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
 .appleBtn {
   display: flex;
   align-items: center;

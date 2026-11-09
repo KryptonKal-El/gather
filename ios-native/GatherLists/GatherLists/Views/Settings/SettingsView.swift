@@ -74,7 +74,9 @@ struct SettingsView: View {
                     }
                     .foregroundStyle(.primary)
                 }
-                
+
+                PasskeysSection()
+
                 Section("Appearance") {
                     Picker("Appearance", selection: $appearanceSetting) {
                         ForEach(AppearanceManager.AppearanceSetting.allCases, id: \.self) { option in

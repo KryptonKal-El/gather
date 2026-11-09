@@ -1,6 +1,6 @@
 /**
  * Authentication context using Supabase Auth.
- * Supports Apple sign-in and email/password.
+ * Supports Apple sign-in, passkeys, and email/password.
  * Provides user state, loading state, and auth actions to the component tree.
  * Exposes sessionVersion to signal downstream contexts when auth/token refreshes.
  */
@@ -171,6 +171,74 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
+   * Signs in with a passkey stored on this device or synced to it.
+   * Throws when the user dismisses the prompt; check with `isPasskeyCancelled`.
+   * @param {{ mediation?: CredentialMediationRequirement, signal?: AbortSignal }} [options]
+   *   Pass `mediation: 'conditional'` to offer passkeys through form autofill.
+   * @returns {Promise<void>}
+   */
+  const signInWithPasskey = async (options) => {
+    const { error } = await supabase.auth.signInWithPasskey(options ? { options } : undefined);
+    if (error) {
+      console.error('Passkey sign-in failed:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Registers a new passkey for the signed-in user.
+   * @returns {Promise<{ id: string, friendly_name?: string, created_at: string }>}
+   */
+  const registerPasskey = async () => {
+    const { data, error } = await supabase.auth.registerPasskey();
+    if (error) {
+      console.error('Passkey registration failed:', error);
+      throw error;
+    }
+    return data;
+  };
+
+  /**
+   * Lists the signed-in user's passkeys.
+   * @returns {Promise<Array<{ id: string, friendly_name?: string, created_at: string, last_used_at?: string }>>}
+   */
+  const listPasskeys = async () => {
+    const { data, error } = await supabase.auth.passkey.list();
+    if (error) {
+      console.error('Failed to list passkeys:', error);
+      throw error;
+    }
+    return data ?? [];
+  };
+
+  /**
+   * Renames one of the signed-in user's passkeys.
+   * @param {string} passkeyId
+   * @param {string} friendlyName - At most 120 characters
+   * @returns {Promise<void>}
+   */
+  const renamePasskey = async (passkeyId, friendlyName) => {
+    const { error } = await supabase.auth.passkey.update({ passkeyId, friendlyName });
+    if (error) {
+      console.error('Failed to rename passkey:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Removes one of the signed-in user's passkeys.
+   * @param {string} passkeyId
+   * @returns {Promise<void>}
+   */
+  const deletePasskey = async (passkeyId) => {
+    const { error } = await supabase.auth.passkey.delete({ passkeyId });
+    if (error) {
+      console.error('Failed to delete passkey:', error);
+      throw error;
+    }
+  };
+
+  /**
    * Signs out the current user.
    * @returns {Promise<void>}
    */
@@ -201,7 +269,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, sessionVersion, signInWithApple, signInWithEmail, signUpWithEmail, signOut, refreshUser }}>
+    <AuthContext.Provider value={{
+      user,
+      isLoading,
+      sessionVersion,
+      signInWithApple,
+      signInWithEmail,
+      signUpWithEmail,
+      signInWithPasskey,
+      registerPasskey,
+      listPasskeys,
+      renamePasskey,
+      deletePasskey,
+      signOut,
+      refreshUser,
+    }}>
       {children}
     </AuthContext.Provider>
   );
@@ -210,7 +292,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signOut: Function, refreshUser: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, signInWithPasskey: Function, registerPasskey: Function, listPasskeys: Function, renamePasskey: Function, deletePasskey: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

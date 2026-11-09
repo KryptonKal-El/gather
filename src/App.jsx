@@ -22,6 +22,7 @@ import { Suggestions } from './components/Suggestions.jsx';
 import { StoreManager } from './components/StoreManager.jsx';
 import { ShareListModal } from './components/ShareListModal.jsx';
 import { PWAPrompt } from './components/PWAPrompt.jsx';
+import { PasskeyPrompt } from './components/PasskeyPrompt.jsx';
 import { PWAInstallBanner } from './components/PWAInstallBanner.jsx';
 import { BottomTabBar } from './components/BottomTabBar.jsx';
 import { MobileListDetail } from './components/MobileListDetail.jsx';
@@ -1287,6 +1288,7 @@ export const App = () => {
       {isMobile && <BottomTabBar activeTab={activeTab} onTabChange={handleTabChange} />}
 
       <PWAPrompt />
+      <PasskeyPrompt />
     </div>
   );
 };

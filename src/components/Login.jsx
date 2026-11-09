@@ -1,9 +1,10 @@
 /**
- * Login screen with Apple and email/password sign-in options.
+ * Login screen with passkey, Apple, and email/password sign-in options.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { HeartfieldBackground } from './HeartfieldBackground.jsx';
+import { isPasskeyCancelled, isPasskeySupported, passkeyErrorMessage } from '../utils/passkeyErrors.js';
 import styles from './Login.module.css';
 
 /**
@@ -26,13 +27,82 @@ const friendlyError = (message) => {
   }
 };
 
+const AUTOFILL_REPORTABLE_CODES = new Set([
+  'webauthn_credential_not_found',
+  'webauthn_verification_failed',
+  'webauthn_challenge_expired',
+  'email_not_confirmed',
+  'user_banned',
+]);
+
+/**
+ * Whether the browser can offer passkeys from the email field's autofill menu.
+ * @returns {Promise<boolean>}
+ */
+const canUsePasskeyAutofill = async () => {
+  try {
+    return await window.PublicKeyCredential?.isConditionalMediationAvailable?.() === true;
+  } catch {
+    return false;
+  }
+};
+
+/** Sign-in screen shown when no user session exists. */
 export const Login = () => {
-  const { signInWithApple, signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithApple, signInWithEmail, signUpWithEmail, signInWithPasskey } = useAuth();
   const [error, setError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSignUpMode, setIsSignUpMode] = useState(false);
+  const autofillAbortRef = useRef(null);
+  // The context recreates its actions on every render; keep the autofill effect
+  // from restarting the passkey request each time.
+  const signInWithPasskeyRef = useRef(signInWithPasskey);
+  signInWithPasskeyRef.current = signInWithPasskey;
+  const hasPasskeySupport = isPasskeySupported();
+
+  // Offer saved passkeys from the email field's autofill menu. Aborted before any
+  // modal passkey prompt so the browser never has two WebAuthn requests pending.
+  useEffect(() => {
+    if (!hasPasskeySupport || isSignUpMode) return undefined;
+    let isActive = true;
+    const controller = new AbortController();
+    autofillAbortRef.current = controller;
+
+    const startAutofill = async () => {
+      if (!(await canUsePasskeyAutofill()) || !isActive) return;
+      try {
+        await signInWithPasskeyRef.current({ mediation: 'conditional', signal: controller.signal });
+      } catch (err) {
+        if (!isActive || controller.signal.aborted || isPasskeyCancelled(err)) return;
+        // Autofill runs in the background on page load, so only report failures
+        // that happen after the user actually picked a passkey.
+        if (AUTOFILL_REPORTABLE_CODES.has(err?.code)) setError(passkeyErrorMessage(err));
+      }
+    };
+    startAutofill();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [hasPasskeySupport, isSignUpMode]);
+
+  const handlePasskey = async () => {
+    autofillAbortRef.current?.abort();
+    setError(null);
+    setIsSigningIn(true);
+    try {
+      await signInWithPasskey();
+    } catch (err) {
+      if (!isPasskeyCancelled(err)) {
+        setError(passkeyErrorMessage(err));
+      }
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
 
   const handleApple = async () => {
     setError(null);
@@ -73,6 +143,23 @@ export const Login = () => {
         </div>
 
         <div className={styles.buttons}>
+          {hasPasskeySupport && (
+            <button
+              className={styles.passkeyBtn}
+              onClick={handlePasskey}
+              disabled={isSigningIn}
+              type="button"
+            >
+              <svg className={styles.passkeyIcon} viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="9" cy="7" r="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M2 21v-1a6 6 0 0 1 9.5-4.9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="18" cy="13" r="2.5" fill="none" stroke="currentColor" strokeWidth="2" />
+                <path d="M18 15.5V21m0-2h2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+              Sign in with a passkey
+            </button>
+          )}
+
           <button
             className={styles.appleBtn}
             onClick={handleApple}
@@ -99,7 +186,7 @@ export const Login = () => {
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
+              autoComplete={isSignUpMode ? 'email' : 'username webauthn'}
               required
             />
             <input

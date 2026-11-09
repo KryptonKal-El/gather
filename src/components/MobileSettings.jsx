@@ -13,6 +13,7 @@ import { CategoryEditor } from './CategoryEditor.jsx';
 import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
 import { ConfirmDialog } from './ConfirmDialog.jsx';
 import { ConnectedApps } from './ConnectedApps.jsx';
+import { PasskeysSection } from './PasskeysSection.jsx';
 import { GroceryIcon, TodoIcon, PackingIcon, ProjectIcon, WishListIcon } from './ListTypeIcons.jsx';
 import { getSystemDefaultCategories } from '../utils/categories.js';
 import { getTypeConfig } from '../utils/listTypes.js';
@@ -222,6 +223,8 @@ export const MobileSettings = ({ user, onSignOut }) => {
           </div>
         )}
       </div>
+
+      <PasskeysSection />
 
       <h3 className={styles.sectionHeader}>Appearance</h3>
       <div className={styles.section}>

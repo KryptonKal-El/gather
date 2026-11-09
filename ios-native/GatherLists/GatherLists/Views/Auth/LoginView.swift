@@ -11,6 +11,7 @@ struct LoginView: View {
     @State private var password = ""
     @State private var isSignUp = false
     @State private var isEmailSigningIn = false
+    @State private var isPasskeySigningIn = false
     @FocusState private var focusedField: Field?
     
     private enum Field {
@@ -46,6 +47,8 @@ struct LoginView: View {
                     emailForm
 
                     orDivider
+
+                    passkeySignInButton
 
                     appleSignInButton
 
@@ -155,6 +158,41 @@ struct LoginView: View {
                 .frame(height: 1)
         }
         .frame(maxWidth: 360)
+    }
+
+    private var passkeySignInButton: some View {
+        Button {
+            handlePasskeySignIn()
+        } label: {
+            HStack(spacing: 8) {
+                if isPasskeySigningIn {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: "person.badge.key.fill")
+                    Text("Sign in with a passkey")
+                        .fontWeight(.semibold)
+                }
+            }
+            .font(.quicksand(.body))
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+        }
+        .background(Color.brandGreen)
+        .cornerRadius(10)
+        .frame(maxWidth: 360)
+        .disabled(isPasskeySigningIn)
+        .accessibilityIdentifier("passkeySignInButton")
+    }
+
+    private func handlePasskeySignIn() {
+        focusedField = nil
+        isPasskeySigningIn = true
+        Task {
+            await authViewModel.signInWithPasskey()
+            isPasskeySigningIn = false
+        }
     }
 
     @ViewBuilder
