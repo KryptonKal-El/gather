@@ -2,7 +2,11 @@
  * Generate PNG icons and splash screens for PWA and Capacitor (iOS/Android).
  * Uses sharp to rasterize the Gather Lists logo SVG.
  *
- * Run: node scripts/generate-icons.js
+ * Run: node scripts/generate-icons.js            → regular brand icon
+ *      node scripts/generate-icons.js --holiday  → seasonal holiday icon
+ *
+ * The flag only swaps the icon-tile source SVGs (and public/icon.svg); the
+ * wordmark logos, splash screens, and launch logos are seasonal-invariant.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -13,7 +17,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = join(__dirname, '..');
 const PUBLIC = join(PROJECT_ROOT, 'public');
 const ASSETS = join(PROJECT_ROOT, 'assets');
-const LOGO_SVG_PATH = join(PUBLIC, 'logo', 'icon-only-full-bleed.svg');
+const HOLIDAY = process.argv.includes('--holiday');
+const LOGO_SVG_PATH = join(PUBLIC, 'logo', HOLIDAY ? 'icon-only-full-bleed-holiday.svg' : 'icon-only-full-bleed.svg');
+const FAVICON_SRC_PATH = join(PUBLIC, 'logo', HOLIDAY ? 'icon-only-holiday.svg' : 'icon-only.svg');
 const STACKED_SVG_PATH = join(PUBLIC, 'logo', 'stacked.svg');
 
 // Brand colors
@@ -277,9 +283,22 @@ const generateSplashScreens = async () => {
 /**
  * Main entry point. Generates all icons and splash screens.
  */
+/**
+ * Copy the active rounded-tile SVG over the served favicon.
+ */
+const writeFavicon = () => {
+  const outputPath = join(PUBLIC, 'icon.svg');
+  writeFileSync(outputPath, readFileSync(FAVICON_SRC_PATH, 'utf-8'));
+  console.log(`Wrote ${outputPath} from ${FAVICON_SRC_PATH}`);
+};
+
 const main = async () => {
+  console.log(HOLIDAY ? 'Holiday mode: seasonal icon sources.' : 'Regular brand icon sources.');
   console.log('Reading logo SVG...');
   const svgContent = readLogoSvg();
+
+  console.log('\nWriting favicon SVG...');
+  writeFavicon();
 
   console.log('\nGenerating PWA icons...');
   await generatePwaIcons(svgContent, [64, 192, 512]);
