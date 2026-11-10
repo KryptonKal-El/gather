@@ -5,8 +5,9 @@
  * Run: node scripts/generate-icons.js            → regular brand icon
  *      node scripts/generate-icons.js --holiday  → seasonal holiday icon
  *
- * The flag only swaps the icon-tile source SVGs (and public/icon.svg); the
- * wordmark logos, splash screens, and launch logos are seasonal-invariant.
+ * The flag swaps the icon-tile source SVGs (and public/icon.svg), and copies
+ * the seasonal wordmark logos into public/logo/active/ — the paths the web app
+ * references. Splash screens and launch logos are seasonal-invariant.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -35,7 +36,14 @@ const IOS_APPICON = join(IOS_ASSETS, 'AppIcon.appiconset', 'icon-foreground.png'
 const IOS_LAUNCH_LOGO_DIR = join(IOS_ASSETS, 'LaunchLogo.imageset');
 
 // Served logo SVGs that carry <text>: fonts must be embedded because SVG-in-<img> cannot load external fonts
-const TEXT_LOGO_SVGS = ['icon-name.svg', 'icon-name-dark.svg', 'icon-name-tagline.svg', 'stacked.svg', 'gather-logo-all-variants.svg'];
+const TEXT_LOGO_SVGS = [
+  'icon-name.svg', 'icon-name-dark.svg', 'icon-name-tagline.svg', 'stacked.svg', 'gather-logo-all-variants.svg',
+  'icon-name-dark-holiday.svg', 'icon-name-tagline-holiday.svg', 'stacked-holiday.svg',
+];
+
+// Wordmark logos the web app references via public/logo/active/<name>; the active
+// copy comes from the regular source, or the -holiday variant in holiday mode
+const WEB_LOGO_VARIANTS = ['stacked.svg', 'icon-name-dark.svg', 'icon-name-tagline.svg'];
 
 // Ensure assets directory exists
 if (!existsSync(ASSETS)) {
@@ -292,6 +300,23 @@ const writeFavicon = () => {
   console.log(`Wrote ${outputPath} from ${FAVICON_SRC_PATH}`);
 };
 
+/**
+ * Copy the season's wordmark logos to public/logo/active/, the paths the web app serves.
+ */
+const writeActiveWebLogos = () => {
+  const activeDir = join(PUBLIC, 'logo', 'active');
+  if (!existsSync(activeDir)) {
+    mkdirSync(activeDir, { recursive: true });
+  }
+  for (const name of WEB_LOGO_VARIANTS) {
+    const srcName = HOLIDAY ? name.replace(/\.svg$/, '-holiday.svg') : name;
+    const srcPath = join(PUBLIC, 'logo', srcName);
+    const outputPath = join(activeDir, name);
+    writeFileSync(outputPath, readFileSync(srcPath, 'utf-8'));
+    console.log(`Wrote ${outputPath} from ${srcPath}`);
+  }
+};
+
 const main = async () => {
   console.log(HOLIDAY ? 'Holiday mode: seasonal icon sources.' : 'Regular brand icon sources.');
   console.log('Reading logo SVG...');
@@ -311,6 +336,9 @@ const main = async () => {
 
   console.log('\nEmbedding fonts into served logo SVGs...');
   await embedFontsIntoLogoSvgs();
+
+  console.log('\nWriting active web logos...');
+  writeActiveWebLogos();
 
   console.log('\nGenerating splash screens...');
   await generateSplashScreens();

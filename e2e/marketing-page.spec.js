@@ -11,7 +11,7 @@ test.describe('Marketing page', () => {
     await page.goto('/');
     const logo = page.locator('header.site-header a.logo img');
     await expect(logo).toBeVisible();
-    await expect(logo).toHaveAttribute('src', '/logo/icon-name-dark.svg');
+    await expect(logo).toHaveAttribute('src', '/logo/active/icon-name-dark.svg');
     await expect(logo).toHaveAttribute('alt', 'Gather Lists');
     // The image actually loaded rather than showing a broken icon
     expect(await logo.evaluate((img) => img.naturalWidth)).toBeGreaterThan(0);

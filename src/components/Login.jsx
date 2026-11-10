@@ -99,7 +99,7 @@ export const Login = () => {
       <HeartfieldBackground />
       <div className={styles.card}>
         <div className={styles.logoStack}>
-          <img src="/logo/stacked.svg" alt="Gather Lists" className={styles.logoImg} />
+          <img src="/logo/active/stacked.svg" alt="Gather Lists" className={styles.logoImg} />
           <h1 className={styles.srOnly}>Gather Lists</h1>
         </div>
 

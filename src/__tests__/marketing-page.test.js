@@ -118,7 +118,7 @@ describe('marketing page (public/index-marketing.html)', () => {
 
   it('contains the dark-header logo in the header', () => {
     htmlContent = readFileSync(marketingPagePath, 'utf-8');
-    expect(htmlContent).toContain('<img src="/logo/icon-name-dark.svg"');
+    expect(htmlContent).toContain('<img src="/logo/active/icon-name-dark.svg"');
   });
 
   it('contains Support link in nav pill', () => {

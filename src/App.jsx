@@ -1101,7 +1101,7 @@ export const App = () => {
         {!isMobile && (
           <>
             <h1 className={styles.logoGroup}>
-              <img src="/logo/icon-name-tagline.svg" alt="Gather Lists" className={styles.headerLogo} />
+              <img src="/logo/active/icon-name-tagline.svg" alt="Gather Lists" className={styles.headerLogo} />
             </h1>
             <div className={styles.headerRight}>
               <div
