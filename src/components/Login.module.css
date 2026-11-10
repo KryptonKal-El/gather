@@ -194,6 +194,12 @@
   overflow-wrap: anywhere;
 }
 
+.newAccountHint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-placeholder);
+}
+
 .codeInput {
   text-align: center;
   font-size: 1.25rem;

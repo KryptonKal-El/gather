@@ -186,7 +186,7 @@ export const PasskeysSection = () => {
     if (passkeys.length === 0) {
       return (
         <div className={styles.message}>
-          Sign in with Face ID, Touch ID, or your device passcode instead of a password.
+          Sign in with Face ID, Touch ID, or your device passcode instead of waiting for an email code.
         </div>
       );
     }

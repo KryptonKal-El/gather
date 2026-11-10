@@ -22,7 +22,7 @@ const writeDismissed = (userId) => {
 };
 
 /**
- * One-time suggestion for email/password users to add a passkey.
+ * One-time suggestion for email sign-in users to add a passkey.
  * Hidden once dismissed, once a passkey exists, or when the browser can't use passkeys.
  */
 export const PasskeyPrompt = () => {
@@ -31,10 +31,10 @@ export const PasskeyPrompt = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState(null);
   const userId = user?.id ?? null;
-  const usesPassword = user?.app_metadata?.providers?.includes('email') ?? false;
+  const usesEmailSignIn = user?.app_metadata?.providers?.includes('email') ?? false;
 
   useEffect(() => {
-    if (!userId || !usesPassword || !isPasskeySupported() || readDismissed(userId)) return undefined;
+    if (!userId || !usesEmailSignIn || !isPasskeySupported() || readDismissed(userId)) return undefined;
     let cancelled = false;
     listPasskeys()
       .then((passkeys) => {
@@ -48,7 +48,7 @@ export const PasskeyPrompt = () => {
     };
     // listPasskeys is recreated on every AuthProvider render; check once per user.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId, usesPassword]);
+  }, [userId, usesEmailSignIn]);
 
   const handleDismiss = () => {
     writeDismissed(userId);
@@ -74,7 +74,7 @@ export const PasskeyPrompt = () => {
   return (
     <div className={styles.toast} role="dialog" aria-labelledby="passkey-prompt-title">
       <div className={styles.text}>
-        <p id="passkey-prompt-title" className={styles.title}>Skip the password next time</p>
+        <p id="passkey-prompt-title" className={styles.title}>Sign in faster next time</p>
         <p className={styles.message}>
           Add a passkey to sign in with Face ID, Touch ID, or your device passcode.
         </p>

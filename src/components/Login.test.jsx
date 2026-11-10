@@ -20,8 +20,8 @@ describe('Login passkey sign-in', () => {
     window.PublicKeyCredential = function PublicKeyCredential() {};
     auth = {
       signInWithApple: vi.fn(),
-      signInWithEmail: vi.fn(),
-      signUpWithEmail: vi.fn(),
+      sendEmailCode: vi.fn().mockResolvedValue(),
+      verifyEmailCode: vi.fn().mockResolvedValue(),
       signInWithPasskey: vi.fn().mockResolvedValue(),
     };
     useAuth.mockReturnValue(auth);
@@ -73,14 +73,16 @@ describe('Login passkey sign-in', () => {
     expect(screen.queryByText(/not available/)).not.toBeInTheDocument();
   });
 
-  it('switches to email-code sign-in, carrying over the typed email', async () => {
+  it('signs in with an emailed code and has no password field', async () => {
     const user = userEvent.setup();
     render(<Login />);
-    await user.type(screen.getByPlaceholderText('Email'), 'sam@example.com');
-    await user.click(screen.getByRole('button', { name: 'Email me a sign-in code instead' }));
-    expect(screen.getByRole('button', { name: 'Email me a sign-in code' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Email')).toHaveValue('sam@example.com');
     expect(screen.queryByPlaceholderText('Password')).not.toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText('Email'), 'sam@example.com');
+    await user.click(screen.getByRole('button', { name: 'Email me a sign-in code' }));
+    expect(auth.sendEmailCode).toHaveBeenCalledWith('sam@example.com');
+    await user.type(await screen.findByRole('textbox', { name: 'Sign-in code' }), '12345678');
+    await user.click(screen.getByRole('button', { name: 'Sign In' }));
+    expect(auth.verifyEmailCode).toHaveBeenCalledWith('sam@example.com', '12345678');
   });
 
   it('hides the passkey button when the browser has no passkey support', () => {

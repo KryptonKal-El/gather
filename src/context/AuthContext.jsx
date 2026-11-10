@@ -1,6 +1,6 @@
 /**
  * Authentication context using Supabase Auth.
- * Supports Apple sign-in, passkeys, email one-time codes, and email/password.
+ * Supports Apple sign-in, passkeys, and email one-time codes.
  * Provides user state, loading state, and auth actions to the component tree.
  * Exposes sessionVersion to signal downstream contexts when auth/token refreshes.
  */
@@ -143,34 +143,6 @@ export const AuthProvider = ({ children }) => {
    };
 
   /**
-   * Signs in with email and password.
-   * @param {string} email
-   * @param {string} password
-   * @returns {Promise<void>}
-   */
-  const signInWithEmail = async (email, password) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      console.error('Email sign-in failed:', error);
-      throw error;
-    }
-  };
-
-  /**
-   * Signs up with email and password.
-   * @param {string} email
-   * @param {string} password
-   * @returns {Promise<void>}
-   */
-  const signUpWithEmail = async (email, password) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      console.error('Email sign-up failed:', error);
-      throw error;
-    }
-  };
-
-  /**
    * Emails a one-time sign-in code. Creates the account if the email is new.
    * @param {string} email
    * @returns {Promise<void>}
@@ -304,8 +276,6 @@ export const AuthProvider = ({ children }) => {
       isLoading,
       sessionVersion,
       signInWithApple,
-      signInWithEmail,
-      signUpWithEmail,
       sendEmailCode,
       verifyEmailCode,
       signInWithPasskey,
@@ -324,7 +294,7 @@ export const AuthProvider = ({ children }) => {
 /**
  * Hook to access auth state and actions.
  * Must be used within an AuthProvider.
- * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, signInWithEmail: Function, signUpWithEmail: Function, sendEmailCode: Function, verifyEmailCode: Function, signInWithPasskey: Function, registerPasskey: Function, listPasskeys: Function, renamePasskey: Function, deletePasskey: Function, signOut: Function, refreshUser: Function }}
+ * @returns {{ user: Object|null, isLoading: boolean, sessionVersion: number, signInWithApple: Function, sendEmailCode: Function, verifyEmailCode: Function, signInWithPasskey: Function, registerPasskey: Function, listPasskeys: Function, renamePasskey: Function, deletePasskey: Function, signOut: Function, refreshUser: Function }}
  */
 export const useAuth = () => {
   const context = useContext(AuthContext);

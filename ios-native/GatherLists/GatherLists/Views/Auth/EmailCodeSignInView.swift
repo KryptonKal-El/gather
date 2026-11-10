@@ -6,7 +6,7 @@ import SwiftUI
 struct EmailCodeSignInView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.dismiss) private var dismiss
-    @State private var email: String
+    @State private var email = ""
     @State private var code = ""
     @State private var sentTo: String?
     @State private var isBusy = false
@@ -19,10 +19,6 @@ struct EmailCodeSignInView: View {
     private static let resendCooldown: TimeInterval = 60
     private static let minCodeLength = 6
     private static let maxCodeLength = 8
-
-    init(initialEmail: String = "") {
-        _email = State(initialValue: initialEmail)
-    }
 
     private var isEmailValid: Bool {
         let trimmed = email.trimmingCharacters(in: .whitespaces)

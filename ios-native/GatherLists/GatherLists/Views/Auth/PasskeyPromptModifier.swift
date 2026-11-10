@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Shows a one-time suggestion for email/password users to add a passkey.
+/// Shows a one-time suggestion for email sign-in users to add a passkey.
 /// Skipped once dismissed (per user), once a passkey exists, or while passkeys
 /// are off for the project.
 struct PasskeyPromptModifier: ViewModifier {
@@ -12,7 +12,7 @@ struct PasskeyPromptModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .task(id: authViewModel.currentUser?.id) { await checkEligibility() }
-            .alert("Skip the password next time", isPresented: $isPresented) {
+            .alert("Sign in faster next time", isPresented: $isPresented) {
                 Button("Not Now", role: .cancel) { markDismissed() }
                 Button("Add Passkey") { Task { await addPasskey() } }
             } message: {
@@ -34,7 +34,7 @@ struct PasskeyPromptModifier: ViewModifier {
 
     private func checkEligibility() async {
         guard let dismissedKey,
-              authViewModel.usesPassword,
+              authViewModel.usesEmailSignIn,
               !UserDefaults.standard.bool(forKey: dismissedKey) else { return }
         do {
             if try await PasskeyService.list().isEmpty {
@@ -66,7 +66,7 @@ struct PasskeyPromptModifier: ViewModifier {
 }
 
 extension View {
-    /// Offers email/password users a one-time prompt to add a passkey.
+    /// Offers email sign-in users a one-time prompt to add a passkey.
     func passkeyPrompt() -> some View {
         modifier(PasskeyPromptModifier())
     }

@@ -32,4 +32,11 @@ Gather uses Supabase Auth's built-in passkeys (beta since 2026-05). No custom We
 - `signInWithOtp({ email, options: { shouldCreateUser: true } })` then `verifyOtp({ email, token, type: 'email' })`. `type: 'email'` covers both new and existing users.
 - The email only shows a code if the Dashboard templates include `{{ .Token }}`: **Magic Link** (existing users) and **Confirm signup** (new users). With the default templates users get a link, not a code.
 - Code length is a hosted setting (6 by default, up to 8), so the UIs accept 6–8 digits instead of auto-submitting at 6.
+- Auth emails go through **Resend custom SMTP** (since 2026-11-09): sender `hello@gatherlists.com`, host `smtp.resend.com:465`, user `resend`, password = a sending-only Resend API key. DNS is at Namecheap: `send` (CNAME to Resend), `resend._domainkey` (DKIM TXT), `_dmarc` (`p=none`). The root MX/SPF are Namecheap email forwarding, so leave them alone. If code emails stop arriving, check the Resend Emails log first, then Supabase → Authentication → Rate Limits (emails per hour).
 - Wrong or expired codes come back as `otp_expired`; resending too soon is `over_email_send_rate_limit` (Supabase enforces ~60s between sends, which the UIs mirror with a countdown).
+
+## Passwords removed from the UI (Phase 3)
+- Sign-in is Passkey · Apple · Email code on web (`Login.jsx`), the OAuth consent page (`OAuthConsent.jsx`) and iOS (`LoginView.swift` → "Continue with Email" sheet). `EmailCodeForm` takes `onSendCode`/`onVerifyCode` props so the consent page (outside `AuthProvider`) can pass raw supabase calls.
+- **The email provider stays enabled on the server with passwords allowed.** Old password users just sign in with a code instead (same email = same account). Tests still use the e2e account's password:
+  - Playwright: `e2e/testAccount.js` → `signInTestAccount(page)` imports `/src/services/supabase.js` from the Vite dev server and calls `signInWithPassword`, so the app's own client instance signs in.
+  - iOS UI tests: Debug builds sign in automatically when `TEST_USER_EMAIL` + `TEST_USER_PASSWORD` are in the launch environment (`AuthViewModel.signInForUITestsIfRequested`).

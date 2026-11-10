@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabase.js';
+import { EmailCodeForm } from './EmailCodeForm.jsx';
+import { isPasskeyCancelled, isPasskeySupported, passkeyErrorMessage } from '../utils/passkeyErrors.js';
 import styles from './OAuthConsent.module.css';
 
 // Every connection can read and change the user's data (the MCP server acts
@@ -46,8 +48,6 @@ export function OAuthConsent() {
   const [errorMessage, setErrorMessage] = useState(
     authorizationId ? null : 'Missing authorization request. Open this page from the app you are connecting.',
   );
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
   const loadDetails = useCallback(async () => {
     setPhase('loading');
@@ -94,16 +94,26 @@ export function OAuthConsent() {
     window.location.href = data.redirect_url;
   }, [authorizationId]);
 
-  const handlePasswordSignIn = useCallback(async (event) => {
-    event.preventDefault();
+  const handleSendCode = useCallback(async (email) => {
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } });
+    if (error) throw error;
+  }, []);
+
+  const handleVerifyCode = useCallback(async (email, code) => {
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+    if (error) throw error;
+    await loadDetails();
+  }, [loadDetails]);
+
+  const handlePasskeySignIn = useCallback(async () => {
     setErrorMessage(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPasskey();
     if (error) {
-      setErrorMessage(error.message || 'Sign in failed.');
+      if (!isPasskeyCancelled(error)) setErrorMessage(passkeyErrorMessage(error));
       return;
     }
     await loadDetails();
-  }, [email, password, loadDetails]);
+  }, [loadDetails]);
 
   const handleAppleSignIn = useCallback(async () => {
     // Return to this same consent URL (with authorization_id) after Apple sign-in.
@@ -128,33 +138,16 @@ export function OAuthConsent() {
           <h1 className={styles.title}>Sign in to continue</h1>
           <p className={styles.subtitle}>Sign in to your Gather Lists account to connect it.</p>
           {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-          <form onSubmit={handlePasswordSignIn}>
-            <input
-              className={styles.field}
-              type="email"
-              placeholder="Email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              className={styles.field}
-              type="password"
-              placeholder="Password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button className={`${styles.button} ${styles.approve}`} type="submit">
-              Sign in
+          {isPasskeySupported() && (
+            <button className={`${styles.button} ${styles.approve} ${styles.passkeyButton}`} type="button" onClick={handlePasskeySignIn}>
+              Sign in with a passkey
             </button>
-          </form>
-          <div className={styles.divider}>or</div>
+          )}
           <button className={styles.appleButton} type="button" onClick={handleAppleSignIn}>
             Continue with Apple
           </button>
+          <div className={styles.divider}>or</div>
+          <EmailCodeForm onSendCode={handleSendCode} onVerifyCode={handleVerifyCode} />
         </>
       );
     }

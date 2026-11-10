@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { useAuth } from '../context/AuthContext.jsx';
 import styles from './Login.module.css';
 
 const RESEND_COOLDOWN_SECONDS = 60;
@@ -34,10 +33,12 @@ const emailCodeErrorMessage = (error) => {
 /**
  * Two-step passwordless sign-in: request a code by email, then enter it.
  * Also creates an account when the email is new.
+ * @param {Object} props
+ * @param {(email: string) => Promise<void>} props.onSendCode - Emails a code; throws on failure
+ * @param {(email: string, code: string) => Promise<void>} props.onVerifyCode - Signs in with the code; throws on failure
  */
-export const EmailCodeForm = ({ initialEmail = '', onUsePassword }) => {
-  const { sendEmailCode, verifyEmailCode } = useAuth();
-  const [email, setEmail] = useState(initialEmail);
+export const EmailCodeForm = ({ onSendCode, onVerifyCode }) => {
+  const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [sentTo, setSentTo] = useState(null);
   const [isBusy, setIsBusy] = useState(false);
@@ -54,7 +55,7 @@ export const EmailCodeForm = ({ initialEmail = '', onUsePassword }) => {
     setError(null);
     setIsBusy(true);
     try {
-      await sendEmailCode(address);
+      await onSendCode(address);
       setSentTo(address);
       setCode('');
       setCooldown(RESEND_COOLDOWN_SECONDS);
@@ -75,7 +76,7 @@ export const EmailCodeForm = ({ initialEmail = '', onUsePassword }) => {
     setError(null);
     setIsBusy(true);
     try {
-      await verifyEmailCode(sentTo, code);
+      await onVerifyCode(sentTo, code);
     } catch (err) {
       setError(emailCodeErrorMessage(err));
       setIsBusy(false);
@@ -101,15 +102,14 @@ export const EmailCodeForm = ({ initialEmail = '', onUsePassword }) => {
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
+          autoComplete="username webauthn"
+          aria-label="Email"
           required
         />
         <button type="submit" className={styles.emailBtn} disabled={isBusy}>
           {isBusy ? 'Sending…' : 'Email me a sign-in code'}
         </button>
-        <button type="button" className={styles.toggleMode} onClick={onUsePassword}>
-          Use a password instead
-        </button>
+        <p className={styles.newAccountHint}>New to Gather? This creates your account.</p>
         {error && <p className={styles.error}>{error}</p>}
       </form>
     );
@@ -158,6 +158,6 @@ export const EmailCodeForm = ({ initialEmail = '', onUsePassword }) => {
 };
 
 EmailCodeForm.propTypes = {
-  initialEmail: PropTypes.string,
-  onUsePassword: PropTypes.func.isRequired,
+  onSendCode: PropTypes.func.isRequired,
+  onVerifyCode: PropTypes.func.isRequired,
 };

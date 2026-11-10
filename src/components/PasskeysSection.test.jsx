@@ -44,7 +44,7 @@ describe('PasskeysSection', () => {
 
   it('shows an empty state when there are no passkeys', async () => {
     render(<PasskeysSection />);
-    expect(await screen.findByText(/instead of a password/)).toBeInTheDocument();
+    expect(await screen.findByText(/instead of waiting for an email code/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add a passkey' })).toBeEnabled();
   });
 

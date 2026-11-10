@@ -1,5 +1,5 @@
 /**
- * Login screen with passkey, Apple, email code, and email/password sign-in options.
+ * Login screen with passkey, Apple, and email code sign-in.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -7,26 +7,6 @@ import { HeartfieldBackground } from './HeartfieldBackground.jsx';
 import { EmailCodeForm } from './EmailCodeForm.jsx';
 import { isPasskeyCancelled, isPasskeySupported, passkeyErrorMessage } from '../utils/passkeyErrors.js';
 import styles from './Login.module.css';
-
-/**
- * Maps Supabase auth error messages to user-friendly messages.
- * @param {string} message - Supabase error message
- * @returns {string}
- */
-const friendlyError = (message) => {
-  switch (message) {
-    case 'Invalid login credentials':
-      return 'Incorrect email or password.';
-    case 'User already registered':
-      return 'An account with this email already exists.';
-    case 'Password should be at least 6 characters':
-      return 'Password must be at least 6 characters.';
-    case 'Email rate limit exceeded':
-      return 'Too many attempts. Please try again later.';
-    default:
-      return 'Something went wrong. Please try again.';
-  }
-};
 
 const AUTOFILL_REPORTABLE_CODES = new Set([
   'webauthn_credential_not_found',
@@ -50,13 +30,9 @@ const canUsePasskeyAutofill = async () => {
 
 /** Sign-in screen shown when no user session exists. */
 export const Login = () => {
-  const { signInWithApple, signInWithEmail, signUpWithEmail, signInWithPasskey } = useAuth();
+  const { signInWithApple, signInWithPasskey, sendEmailCode, verifyEmailCode } = useAuth();
   const [error, setError] = useState(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSignUpMode, setIsSignUpMode] = useState(false);
-  const [isCodeMode, setIsCodeMode] = useState(false);
   const autofillAbortRef = useRef(null);
   // The context recreates its actions on every render; keep the autofill effect
   // from restarting the passkey request each time.
@@ -67,7 +43,7 @@ export const Login = () => {
   // Offer saved passkeys from the email field's autofill menu. Aborted before any
   // modal passkey prompt so the browser never has two WebAuthn requests pending.
   useEffect(() => {
-    if (!hasPasskeySupport || isSignUpMode) return undefined;
+    if (!hasPasskeySupport) return undefined;
     let isActive = true;
     const controller = new AbortController();
     autofillAbortRef.current = controller;
@@ -89,7 +65,7 @@ export const Login = () => {
       isActive = false;
       controller.abort();
     };
-  }, [hasPasskeySupport, isSignUpMode]);
+  }, [hasPasskeySupport]);
 
   const handlePasskey = async () => {
     autofillAbortRef.current?.abort();
@@ -113,23 +89,6 @@ export const Login = () => {
       await signInWithApple();
     } catch {
       setError('Apple sign-in failed. Please try again.');
-    } finally {
-      setIsSigningIn(false);
-    }
-  };
-
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setIsSigningIn(true);
-    try {
-      if (isSignUpMode) {
-        await signUpWithEmail(email, password);
-      } else {
-        await signInWithEmail(email, password);
-      }
-    } catch (err) {
-      setError(friendlyError(err.message));
     } finally {
       setIsSigningIn(false);
     }
@@ -181,55 +140,7 @@ export const Login = () => {
             <span>or</span>
           </div>
 
-          {isCodeMode ? (
-            <EmailCodeForm
-              initialEmail={email}
-              onUsePassword={() => { setIsCodeMode(false); setError(null); }}
-            />
-          ) : (
-            <form className={styles.emailForm} onSubmit={handleEmailSubmit}>
-              <input
-                type="email"
-                className={styles.emailInput}
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete={isSignUpMode ? 'email' : 'username webauthn'}
-                required
-              />
-              <input
-                type="password"
-                className={styles.emailInput}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete={isSignUpMode ? 'new-password' : 'current-password'}
-                required
-                minLength={6}
-              />
-              <button
-                type="submit"
-                className={styles.emailBtn}
-                disabled={isSigningIn}
-              >
-                {isSignUpMode ? 'Create Account' : 'Sign In'}
-              </button>
-              <button
-                type="button"
-                className={styles.toggleMode}
-                onClick={() => { setIsSignUpMode(!isSignUpMode); setError(null); }}
-              >
-                {isSignUpMode ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
-              </button>
-              <button
-                type="button"
-                className={styles.toggleMode}
-                onClick={() => { setIsCodeMode(true); setIsSignUpMode(false); setError(null); }}
-              >
-                Email me a sign-in code instead
-              </button>
-            </form>
-          )}
+          <EmailCodeForm onSendCode={sendEmailCode} onVerifyCode={verifyEmailCode} />
 
         </div>
 

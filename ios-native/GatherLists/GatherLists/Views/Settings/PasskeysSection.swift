@@ -42,7 +42,7 @@ struct PasskeysSection: View {
                         .buttonStyle(.borderless)
                 }
             } else if passkeys.isEmpty {
-                Text("Sign in with Face ID, Touch ID, or your device passcode instead of a password.")
+                Text("Sign in with Face ID, Touch ID, or your device passcode instead of waiting for an email code.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             } else {

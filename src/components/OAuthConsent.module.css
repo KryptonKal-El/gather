@@ -99,15 +99,11 @@
   border-color: #d8d4cd;
 }
 
-.field {
+.passkeyButton {
   width: 100%;
-  padding: 11px 13px;
-  border: 1px solid #d8d4cd;
+  padding: 11px;
   border-radius: 10px;
-  font-size: 15px;
-  margin-bottom: 10px;
-  background: #ffffff;
-  color: #1c1b19;
+  margin-top: 6px;
 }
 
 .appleButton {
@@ -153,7 +149,6 @@
   .title { color: #f3f1ea; }
   .subtitle { color: #b7b2a6; }
   .scopes { background: #2a2820; }
-  .field { background: #17160f; color: #f3f1ea; border-color: #35322a; }
   .deny { color: #f3f1ea; border-color: #44413a; }
   .muted, .divider { color: #8b877c; }
 }

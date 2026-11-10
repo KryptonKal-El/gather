@@ -7,155 +7,69 @@ struct LoginView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @State private var currentNonce: String?
     @State private var isSigningIn = false
-    @State private var email = ""
-    @State private var password = ""
-    @State private var isSignUp = false
-    @State private var isEmailSigningIn = false
     @State private var isPasskeySigningIn = false
     @State private var isEmailCodeSheetPresented = false
-    @FocusState private var focusedField: Field?
-    
-    private enum Field {
-        case email, password
-    }
-    
-    
-    private var isEmailValid: Bool {
-        email.contains("@") && email.contains(".")
-    }
-    
-    private var isPasswordValid: Bool {
-        password.count >= 6
-    }
-    
-    private var isFormValid: Bool {
-        isEmailValid && isPasswordValid
-    }
-    
-    private var isEditing: Bool { focusedField != nil }
 
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView {
-                VStack(spacing: 24) {
-                    // Collapse the top spacing while typing so the fields and button clear the keyboard.
-                    Spacer().frame(height: isEditing ? 8 : 60)
+        ScrollView {
+            VStack(spacing: 24) {
+                Spacer().frame(height: 60)
 
-                    StackedLogoView()
+                StackedLogoView()
 
-                    Spacer().frame(height: isEditing ? 0 : 20)
+                Spacer().frame(height: 20)
 
-                    emailForm
+                passkeySignInButton
 
-                    orDivider
+                appleSignInButton
 
-                    passkeySignInButton
+                orDivider
 
-                    appleSignInButton
+                emailCodeButton
 
-                    if let error = authViewModel.error {
-                        Text(error)
-                            .foregroundColor(.red)
-                            .font(.quicksand(.caption))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                    }
-
-                    Spacer().frame(height: 40)
+                if let error = authViewModel.error {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.quicksand(.caption))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
-                .padding()
-                .animation(.easeOut(duration: 0.25), value: isEditing)
+
+                Spacer().frame(height: 40)
             }
-            .scrollDismissesKeyboard(.interactively)
-            .onChange(of: focusedField) { _, field in
-                guard field != nil else { return }
-                withAnimation(.easeOut(duration: 0.25)) {
-                    proxy.scrollTo(Self.submitButtonId, anchor: .bottom)
-                }
-            }
+            .padding()
         }
     }
 
-    private static let submitButtonId = "loginSubmit"
-
-    private var emailForm: some View {
-        VStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                TextField("Email", text: $email)
-                    .textFieldStyle(.roundedBorder)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .focused($focusedField, equals: .email)
-                    .onSubmit { focusedField = .password }
-
-                if !email.isEmpty && !isEmailValid {
-                    Text("Enter a valid email address")
-                        .font(.quicksand(.caption))
-                        .foregroundColor(.red)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
-                    .textContentType(isSignUp ? .newPassword : .password)
-                    .focused($focusedField, equals: .password)
-                    .onSubmit { handleEmailAuth() }
-
-                if !password.isEmpty && !isPasswordValid {
-                    Text("Password must be at least 6 characters")
-                        .font(.quicksand(.caption))
-                        .foregroundColor(.red)
-                }
-            }
-
+    private var emailCodeButton: some View {
+        VStack(spacing: 8) {
             Button {
-                handleEmailAuth()
-            } label: {
-                if isEmailSigningIn {
-                    ProgressView()
-                        .tint(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                } else {
-                    Text(isSignUp ? "Sign Up" : "Sign In")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                }
-            }
-            .background(isFormValid ? Color.brandGreen : Color.brandGreen.opacity(0.5))
-            .cornerRadius(10)
-            .disabled(!isFormValid || isEmailSigningIn)
-            .id(Self.submitButtonId)
-
-            Button {
-                withAnimation {
-                    isSignUp.toggle()
-                    authViewModel.error = nil
-                }
-            } label: {
-                Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
-                    .font(.quicksand(.subheadline))
-                    .foregroundColor(Color.brandGreen)
-            }
-
-            Button {
-                focusedField = nil
                 authViewModel.error = nil
                 isEmailCodeSheetPresented = true
             } label: {
-                Text("Email me a sign-in code instead")
-                    .font(.quicksand(.subheadline))
-                    .foregroundColor(Color.brandGreen)
+                HStack(spacing: 8) {
+                    Image(systemName: "envelope.fill")
+                    Text("Continue with Email")
+                        .fontWeight(.semibold)
+                }
+                .font(.quicksand(.body))
+                .foregroundColor(Color.brandGreen)
+                .frame(maxWidth: .infinity)
+                .frame(height: 50)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.brandGreen, lineWidth: 1.5)
+                )
             }
             .accessibilityIdentifier("emailCodeSignInButton")
             .sheet(isPresented: $isEmailCodeSheetPresented) {
-                EmailCodeSignInView(initialEmail: email)
+                EmailCodeSignInView()
             }
+
+            Text("New to Gather? Email sign-in creates your account.")
+                .font(.quicksand(.caption))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: 360)
     }
@@ -202,7 +116,6 @@ struct LoginView: View {
     }
 
     private func handlePasskeySignIn() {
-        focusedField = nil
         isPasskeySigningIn = true
         Task {
             await authViewModel.signInWithPasskey()
@@ -229,21 +142,6 @@ struct LoginView: View {
         }
     }
 
-    private func handleEmailAuth() {
-        guard isFormValid else { return }
-        focusedField = nil
-        isEmailSigningIn = true
-        
-        Task {
-            if isSignUp {
-                await authViewModel.signUpWithEmail(email: email, password: password)
-            } else {
-                await authViewModel.signInWithEmail(email: email, password: password)
-            }
-            isEmailSigningIn = false
-        }
-    }
-    
     private func handleAppleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):

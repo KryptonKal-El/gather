@@ -49,9 +49,29 @@ final class AuthViewModel {
             isAuthenticated = false
             currentUser = nil
             print("[AuthViewModel] No existing session: \(error.localizedDescription)")
+            #if DEBUG
+            await signInForUITestsIfRequested()
+            #endif
         }
         isLoading = false
     }
+
+    #if DEBUG
+    /// UI tests can't receive an emailed code, so debug builds sign in with the
+    /// test account's password when the test runner passes one. The server still
+    /// accepts passwords; only the app's sign-in screen dropped them.
+    private func signInForUITestsIfRequested() async {
+        let environment = ProcessInfo.processInfo.environment
+        guard let email = environment["TEST_USER_EMAIL"],
+              let password = environment["TEST_USER_PASSWORD"] else { return }
+        do {
+            try await SupabaseManager.shared.client.auth.signIn(email: email, password: password)
+            print("[AuthViewModel] Signed in the UI test account")
+        } catch {
+            print("[AuthViewModel] UI test sign-in failed: \(error)")
+        }
+    }
+    #endif
     
     func listenToAuthChanges() {
         authStateTask = Task {
@@ -158,40 +178,12 @@ final class AuthViewModel {
         }
     }
 
-    /// Whether the signed-in user has an email/password identity, and so could
-    /// benefit from adding a passkey.
-    var usesPassword: Bool {
+    /// Whether the signed-in user signs in by email (code or legacy password),
+    /// and so could benefit from adding a passkey.
+    var usesEmailSignIn: Bool {
         currentUser?.identities?.contains { $0.provider == "email" } ?? false
     }
 
-    func signInWithEmail(email: String, password: String) async {
-        error = nil
-        do {
-            try await SupabaseManager.shared.client.auth.signIn(
-                email: email,
-                password: password
-            )
-            print("[AuthViewModel] Email sign-in successful")
-        } catch {
-            self.error = error.localizedDescription
-            print("[AuthViewModel] Email sign-in failed: \(error.localizedDescription)")
-        }
-    }
-    
-    func signUpWithEmail(email: String, password: String) async {
-        error = nil
-        do {
-            try await SupabaseManager.shared.client.auth.signUp(
-                email: email,
-                password: password
-            )
-            print("[AuthViewModel] Email sign-up successful")
-        } catch {
-            self.error = error.localizedDescription
-            print("[AuthViewModel] Email sign-up failed: \(error.localizedDescription)")
-        }
-    }
-    
     /// Handle deep link URL for auth callbacks (OAuth, email confirmation).
     func handleDeepLink(url: URL) async {
         print("[AuthViewModel] Deep link received: \(url)")
