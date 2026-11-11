@@ -228,6 +228,7 @@ async function processReminders(
     const dueDate = new Date(item.due_date)
     const content = buildReminderMessage(item.name, dueDate, item.list_name)
     content.listId = item.list_id
+    content.itemId = item.id
 
     let itemSent = false
     for (const tokenRecord of tokens) {

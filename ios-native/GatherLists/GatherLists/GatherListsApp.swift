@@ -122,7 +122,7 @@ struct GatherListsApp: App {
         }
     }
     
-    /// Handles widget deep links (e.g., gatherlists://list/{listId}).
+    /// Handles widget deep links (e.g., gatherlists://list/{listId}, optionally with ?item={itemId}).
     private func handleWidgetDeepLink(_ url: URL) {
         let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
         let components = path.split(separator: "/")
@@ -157,6 +157,11 @@ struct GatherListsApp: App {
             }
             
             if let listId = UUID(uuidString: listIdString) {
+                // Optional ?item={itemId} scrolls to and highlights that item once the list opens.
+                let itemId = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                    .queryItems?.first { $0.name == "item" }?.value
+                    .flatMap(UUID.init(uuidString:))
+                notificationService.setPendingItem(itemId)
                 notificationService.pendingListId = listId
             }
         }

@@ -12,6 +12,11 @@ final class NotificationService: NSObject {
     /// List ID from a tapped notification, consumed by ListBrowserView for deep linking.
     var pendingListId: UUID?
 
+    /// Item ID from a tapped notification, consumed by ListDetailView to scroll to and
+    /// highlight that item. Expires on its own so a missing item can't trigger a later jump.
+    private(set) var pendingItemId: UUID?
+    @ObservationIgnored private var pendingItemExpiryTask: Task<Void, Never>?
+
     /// Recipe ID from a tapped cook Live Activity, consumed by CollectionBrowserView for deep linking.
     var pendingRecipeId: UUID?
 
@@ -94,6 +99,18 @@ final class NotificationService: NSObject {
         }
     }
     
+    /// Sets or clears the item a tapped notification points at.
+    func setPendingItem(_ itemId: UUID?) {
+        pendingItemExpiryTask?.cancel()
+        pendingItemId = itemId
+        guard itemId != nil else { return }
+        pendingItemExpiryTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(15))
+            guard !Task.isCancelled else { return }
+            self?.pendingItemId = nil
+        }
+    }
+
     /// Clear badge count when app becomes active.
     func clearBadge() {
         UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
@@ -126,7 +143,7 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         completionHandler([.banner, .sound, .badge])
     }
     
-    /// Handle notification tap — extract listId for deep linking.
+    /// Handle notification tap — extract listId (and itemId, when present) for deep linking.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
@@ -135,7 +152,9 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         let userInfo = response.notification.request.content.userInfo
         if let listIdString = userInfo["listId"] as? String,
            let listId = UUID(uuidString: listIdString) {
+            let itemId = (userInfo["itemId"] as? String).flatMap(UUID.init(uuidString:))
             Task { @MainActor in
+                self.setPendingItem(itemId)
                 self.pendingListId = listId
             }
         }

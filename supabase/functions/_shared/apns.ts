@@ -13,6 +13,7 @@ export interface NotificationContent {
   title: string
   body: string
   listId: string
+  itemId?: string
 }
 
 export interface DeviceToken {
@@ -132,6 +133,7 @@ export async function sendPushNotification(
       sound: 'default',
     },
     listId: content.listId,
+    ...(content.itemId ? { itemId: content.itemId } : {}),
   }
 
   const sendRequest = async (jwt: string): Promise<Response> => {

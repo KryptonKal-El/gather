@@ -51,6 +51,7 @@ interface NotificationContent {
   title: string
   body: string
   listId: string
+  itemId?: string
 }
 
 type EventType = 'item_added' | 'item_checked' | 'rsvp_changed' | 'collaborator_joined'
@@ -152,6 +153,7 @@ async function sendPushNotification(
       sound: 'default',
     },
     listId: content.listId,
+    ...(content.itemId ? { itemId: content.itemId } : {}),
   }
 
   const sendRequest = async (jwt: string): Promise<Response> => {
@@ -460,6 +462,7 @@ async function handleItemEvent(
     record.rsvp_status ?? undefined
   )
   content.listId = listId
+  content.itemId = record.id
 
   // Send to all recipients
   let sent = 0

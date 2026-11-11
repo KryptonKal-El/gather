@@ -358,6 +358,10 @@ allow_dynamic_registration = true
 [functions.mcp]
 verify_jwt = false
 
+# Called by database triggers, which authenticate with x-webhook-secret.
+[functions.send-notification]
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

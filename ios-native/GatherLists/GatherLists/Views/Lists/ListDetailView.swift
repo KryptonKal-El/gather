@@ -13,6 +13,7 @@ struct ListDetailView: View {
     @Environment(\.undoManager) private var undoManager
     @Environment(\.colorScheme) private var colorScheme
     @Environment(ToastController.self) private var toastController
+    @Environment(NotificationService.self) private var notificationService
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     @State private var detailViewModel: ListDetailViewModel?
@@ -23,6 +24,8 @@ struct ListDetailView: View {
     
     @State private var collapsedStores: Set<String> = []
     @State private var isCheckedCollapsed = false
+    @State private var revealTargetItemId: UUID?
+    @State private var highlightedItemId: UUID?
     @State private var showClearCheckedAlert = false
     
     // Notification sheet state
@@ -135,11 +138,14 @@ struct ListDetailView: View {
             loadCollapseState()
             viewModel.selectList(id: list.id)
             await initializeDetailViewModel()
+            revealPendingItem()
             await loadShareInfo()
             await loadSortPreferences()
             await subscribeToPreferences()
             await loadNotificationStatus()
         }
+        .onChange(of: notificationService.pendingItemId) { _, _ in revealPendingItem() }
+        .onChange(of: detailViewModel?.items.count) { _, _ in revealPendingItem() }
         .onChange(of: collapsedStores) { _, _ in saveCollapseState() }
         .onChange(of: isCheckedCollapsed) { _, _ in saveCollapseState() }
         .onChange(of: showNotificationSheet) { _, isShowing in
@@ -499,6 +505,23 @@ struct ListDetailView: View {
                 }
                 detailViewModel?.lastAddedItemId = nil
             }
+            .task(id: revealTargetItemId) {
+                guard let targetId = revealTargetItemId else { return }
+                // Lets a just-expanded section lay out its rows before scrolling to one.
+                try? await Task.sleep(for: .milliseconds(350))
+                guard !Task.isCancelled else { return }
+                // Cleared only now: a tap on a list that is already open replaces this screen with a
+                // fresh one, which must still find the pending item.
+                notificationService.setPendingItem(nil)
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.35)) {
+                    proxy.scrollTo(targetId, anchor: .center)
+                    highlightedItemId = targetId
+                }
+                try? await Task.sleep(for: .seconds(3))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.6)) { highlightedItemId = nil }
+                revealTargetItemId = nil
+            }
             .onChange(of: detailViewModel?.quantityBumpedItemId) { _, newId in
                 // Fires when a quantity highlight starts (id set), not when it clears (nil). Only a
                 // merge also shows the toast; a fresh add with a non-default quantity highlights only.
@@ -612,6 +635,24 @@ struct ListDetailView: View {
     // MARK: - Level 1 Header
     
     // Persists collapse/expand state per list so it's remembered across visits.
+    /// Picks up the item a tapped notification points at once it is loaded in this list:
+    /// expands whatever section hides it, then hands it to the list to scroll and highlight.
+    private func revealPendingItem() {
+        guard let itemId = notificationService.pendingItemId,
+              let vm = detailViewModel,
+              revealTargetItemId != itemId,
+              let item = vm.items.first(where: { $0.id == itemId }) else { return }
+
+        let showsCheckedSection = vm.typeConfig.fields.rsvpStatus != true
+        if vm.effectiveIsChecked(for: item), showsCheckedSection {
+            isCheckedCollapsed = false
+        } else if let groupKey = vm.pipelineResult(for: activeSortConfig).groups
+            .first(where: { collectAllItems(from: [$0]).contains { $0.id == itemId } })?.key {
+            collapsedStores.remove(groupKey)
+        }
+        revealTargetItemId = itemId
+    }
+
     private var collapseStateKey: String { "collapsedStores.\(list.id.uuidString)" }
     private var checkedCollapseStateKey: String { "checkedCollapsed.\(list.id.uuidString)" }
 
@@ -1010,6 +1051,10 @@ struct ListDetailView: View {
                     .padding(.leading, isRsvpList ? 44 : 0)
             }
         }
+        .overlay {
+            Color.brandGreen.opacity(highlightedItemId == item.id ? 0.22 : 0)
+                .allowsHitTesting(false)
+        }
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             guard canEdit else { return }
@@ -1338,6 +1383,7 @@ struct ListDetailView: View {
                 if !isCheckedCollapsed {
                     ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
                         itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
+                            .id(item.id)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
  if canEdit {
                                 Button(role: .destructive) {
