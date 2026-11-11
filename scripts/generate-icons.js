@@ -5,9 +5,10 @@
  * Run: node scripts/generate-icons.js            → regular brand icon
  *      node scripts/generate-icons.js --holiday  → seasonal holiday icon
  *
- * The flag swaps the icon-tile source SVGs (and public/icon.svg), and copies
- * the seasonal wordmark logos into public/logo/active/ — the paths the web app
- * references. Splash screens and launch logos are seasonal-invariant.
+ * The flag swaps the icon-tile source SVGs (and public/icon.svg), copies the
+ * seasonal wordmark logos into public/logo/active/ — the paths the web app
+ * references — and renders the splash screens and iOS launch logos from the
+ * seasonal stacked logo.
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -21,14 +22,16 @@ const ASSETS = join(PROJECT_ROOT, 'assets');
 const HOLIDAY = process.argv.includes('--holiday');
 const LOGO_SVG_PATH = join(PUBLIC, 'logo', HOLIDAY ? 'icon-only-full-bleed-holiday.svg' : 'icon-only-full-bleed.svg');
 const FAVICON_SRC_PATH = join(PUBLIC, 'logo', HOLIDAY ? 'icon-only-holiday.svg' : 'icon-only.svg');
-const STACKED_SVG_PATH = join(PUBLIC, 'logo', 'stacked.svg');
+const STACKED_SVG_PATH = join(PUBLIC, 'logo', HOLIDAY ? 'stacked-holiday.svg' : 'stacked.svg');
 
 // Brand colors
 const DARK_BACKGROUND = '#1a1a2e';
 const LIGHT_SPLASH_BG = '#FFFFFF';
 
-// Stacked logo viewBox dimensions
-const STACKED_VIEWBOX = { x: 0, y: 0, width: 400, height: 225 };
+// Frame of the stacked logo rasterized for splash screens and launch logos. The size is
+// fixed (the iOS launch storyboard lays the image out at this aspect ratio); the holiday
+// frame sits 8 units higher so the Santa hat clears the top edge at the same scale.
+const STACKED_VIEWBOX = { x: 0, y: HOLIDAY ? -8 : 0, width: 400, height: 225 };
 
 // iOS asset catalog targets (written directly so Xcode picks up regenerated art)
 const IOS_ASSETS = join(PROJECT_ROOT, 'ios-native', 'GatherLists', 'GatherLists', 'Assets.xcassets');
@@ -224,11 +227,23 @@ const generateAppleTouchIcon = async (svgContent) => {
 };
 
 /**
+ * Replace an SVG's root frame (viewBox and intrinsic size) with the given one.
+ * @param {string} svgContent - Full SVG content
+ * @param {{x: number, y: number, width: number, height: number}} frame - New frame
+ * @returns {string} SVG content with the new root tag
+ */
+const reframeSvg = (svgContent, { x, y, width, height }) =>
+  svgContent.replace(
+    /<svg[^>]*>/i,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x} ${y} ${width} ${height}" width="${width}" height="${height}">`
+  );
+
+/**
  * Generate the iOS launch-screen logo imageset (@1x/@2x/@3x) from the stacked logo.
  */
 const generateLaunchLogos = async () => {
   const stackedSvgRaw = readStackedSvg();
-  const stackedSvgWithFonts = await embedFontsInSvg(stackedSvgRaw);
+  const stackedSvgWithFonts = reframeSvg(await embedFontsInSvg(stackedSvgRaw), STACKED_VIEWBOX);
   for (const scale of [1, 2, 3]) {
     const width = STACKED_VIEWBOX.width * scale;
     const height = STACKED_VIEWBOX.height * scale;
