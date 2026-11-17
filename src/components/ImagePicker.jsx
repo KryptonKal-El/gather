@@ -6,13 +6,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { searchImages } from '../services/imageSearch.js';
+import { getEnabledImageSources, searchImageSource } from '../services/imageSearch.js';
 import { ImageCropDialog } from './ImageCropDialog.jsx';
 import styles from './ImagePicker.module.css';
 
+const LOADING_SECTION = { status: 'loading', results: [] };
+
+const buildLoadingSections = (sources) => Object.fromEntries(sources.map(({ key }) => [key, LOADING_SECTION]));
+
 /**
  * Modal overlay for picking an item image.
- * Supports file upload and Google image search with an editable query field.
+ * Supports file upload and online image search with an editable query field.
+ * Each enabled search source gets its own section that loads, fails, and retries independently.
  * @param {Object} props
  * @param {string} props.itemName - The item's name (used as initial search query)
  * @param {string|null} props.currentImageUrl - Currently assigned image URL
@@ -28,43 +33,63 @@ import styles from './ImagePicker.module.css';
 export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onUpload, onRemove, onClose, isUploading = false, uploadError = null, imageSearchSettings = null, onNavigateToSettings = null }) => {
   const [viewMode, setViewMode] = useState(!!currentImageUrl);
   const [searchQuery, setSearchQuery] = useState(itemName);
-  const [results, setResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [error, setError] = useState(null);
+  const [sections, setSections] = useState(() => (
+    !currentImageUrl && itemName.trim() ? buildLoadingSections(getEnabledImageSources(imageSearchSettings)) : {}
+  ));
+  const [collapsedSources, setCollapsedSources] = useState({});
   const [activeTab, setActiveTab] = useState('search');
   const [cropFile, setCropFile] = useState(null);
   const fileInputRef = useRef(null);
   const modalRef = useRef(null);
   const didAutoSearch = useRef(false);
-  const allSourcesOff = imageSearchSettings && Object.values(imageSearchSettings).every(v => !v);
-  const visibleGroups = results.filter((group) => group.results?.length > 0);
+  const searchIdRef = useRef(0);
+  const searchedQueryRef = useRef('');
+  const enabledSources = getEnabledImageSources(imageSearchSettings);
+  const allSourcesOff = enabledSources.length === 0;
+  const searchedSources = enabledSources.filter(({ key }) => sections[key]);
+  const isSearching = searchedSources.some(({ key }) => sections[key].status === 'loading');
 
-  const handleSearch = useCallback(async () => {
-    if (allSourcesOff) return;
+  const fetchSource = useCallback(async (source, query, searchId) => {
+    try {
+      const results = await searchImageSource(query, source);
+      if (searchIdRef.current !== searchId) return;
+      setSections((prev) => ({ ...prev, [source]: { status: 'done', results } }));
+    } catch (err) {
+      console.error(`Image search failed for ${source}:`, err);
+      if (searchIdRef.current !== searchId) return;
+      setSections((prev) => ({ ...prev, [source]: { status: 'error', results: [] } }));
+    }
+  }, []);
+
+  const fetchAllSources = useCallback((query) => {
+    didAutoSearch.current = true;
+    searchIdRef.current += 1;
+    searchedQueryRef.current = query;
+    getEnabledImageSources(imageSearchSettings).forEach(({ key }) => fetchSource(key, query, searchIdRef.current));
+  }, [fetchSource, imageSearchSettings]);
+
+  const handleSearch = useCallback(() => {
     const q = searchQuery.trim();
     if (!q) return;
-    setIsSearching(true);
-    setError(null);
-    try {
-      const groups = await searchImages(q, 25, imageSearchSettings);
-      setResults(groups);
-      setHasSearched(true);
-    } catch (err) {
-      setError(`Search failed: ${err.message}`);
-      setResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [allSourcesOff, imageSearchSettings, searchQuery]);
+    setSections(buildLoadingSections(getEnabledImageSources(imageSearchSettings)));
+    fetchAllSources(q);
+  }, [fetchAllSources, imageSearchSettings, searchQuery]);
 
+  const handleToggleSource = (source) => {
+    setCollapsedSources((prev) => ({ ...prev, [source]: !prev[source] }));
+  };
+
+  const handleRetrySource = (source) => {
+    setSections((prev) => ({ ...prev, [source]: LOADING_SECTION }));
+    fetchSource(source, searchedQueryRef.current, searchIdRef.current);
+  };
+
+  // Sections start in the loading state (see initial state), so the mount search only fires the requests.
   useEffect(() => {
-    if (viewMode) return;
-    if (!didAutoSearch.current && searchQuery.trim()) {
-      didAutoSearch.current = true;
-      handleSearch();
-    }
-  }, [handleSearch, searchQuery, viewMode]);
+    if (viewMode || didAutoSearch.current) return;
+    const q = searchQuery.trim();
+    if (q) fetchAllSources(q);
+  }, [fetchAllSources, searchQuery, viewMode]);
 
   const handleRemove = async () => {
     await onRemove();
@@ -179,36 +204,74 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
                       </button>
                     </div>
 
-                    {error && <p className={styles.error}>{error}</p>}
-
-                    {visibleGroups.map((group) => (
-                      <section key={group.source} className={styles.resultGroup}>
-                        <h4 className={styles.groupTitle}>{group.label}</h4>
-                        <div className={styles.grid}>
-                          {group.results.map((img) => (
-                            <div key={`${group.source}-${img.url}`} className={styles.gridCell}>
+                    {searchedSources.map(({ key, label }) => {
+                      const { status, results } = sections[key];
+                      const isCollapsed = !!collapsedSources[key];
+                      const bodyId = `image-search-section-${key}`;
+                      return (
+                        <section key={key} className={styles.resultGroup} aria-busy={status === 'loading'}>
+                          <h4 className={styles.groupTitle}>
+                            <button
+                              type="button"
+                              className={styles.groupToggle}
+                              onClick={() => handleToggleSource(key)}
+                              aria-expanded={!isCollapsed}
+                              aria-controls={bodyId}
+                            >
+                              <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronOpen}`} aria-hidden="true" />
+                              <span className={styles.groupLabel}>{label}</span>
+                              {status === 'loading' && <span className={styles.spinner} aria-hidden="true" />}
+                              {status === 'error' && <span className={styles.groupWarning} aria-hidden="true">!</span>}
+                              {status === 'done' && <span className={styles.groupCount} aria-hidden="true">{results.length}</span>}
+                            </button>
+                          </h4>
+                          <div id={bodyId} className={styles.groupBody} hidden={isCollapsed}>
+                          {status === 'loading' && (
+                            <div className={styles.sectionStatus} role="status">
+                              Searching {label}...
+                            </div>
+                          )}
+                          {status === 'error' && (
+                            <div className={styles.sectionStatus}>
+                              <span className={styles.sectionError}>Couldn&apos;t load {label} results.</span>
                               <button
                                 type="button"
-                                className={styles.gridItem}
-                                onClick={() => onSelectUrl(img.url)}
-                                title={img.title}
+                                className={styles.retryBtn}
+                                onClick={() => handleRetrySource(key)}
+                                aria-label={`Retry ${label}`}
                               >
-                                <img
-                                  src={img.thumbnail}
-                                  alt={img.title}
-                                  className={styles.gridImg}
-                                  onError={(e) => { e.target.closest('.' + styles.gridCell)?.style.setProperty('display', 'none'); }}
-                                />
+                                Retry
                               </button>
                             </div>
-                          ))}
-                        </div>
-                      </section>
-                    ))}
-
-                    {hasSearched && visibleGroups.length === 0 && !isSearching && !error && (
-                      <p className={styles.noResults}>No images found. Try a different search term.</p>
-                    )}
+                          )}
+                          {status === 'done' && results.length === 0 && (
+                            <p className={styles.sectionStatus}>No results</p>
+                          )}
+                          {results.length > 0 && (
+                            <div className={styles.grid}>
+                              {results.map((img) => (
+                                <div key={`${key}-${img.url}`} className={styles.gridCell}>
+                                  <button
+                                    type="button"
+                                    className={styles.gridItem}
+                                    onClick={() => onSelectUrl(img.url)}
+                                    title={img.title}
+                                  >
+                                    <img
+                                      src={img.thumbnail}
+                                      alt={img.title}
+                                      className={styles.gridImg}
+                                      onError={(e) => { e.target.closest('.' + styles.gridCell)?.style.setProperty('display', 'none'); }}
+                                    />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          </div>
+                        </section>
+                      );
+                    })}
                   </>
                 )}
               </div>

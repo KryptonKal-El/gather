@@ -1,8 +1,10 @@
 /**
- * Supabase Edge Function proxy for product search with fallback chain.
- * Primary: Walmart Affiliate API (RSA-SHA256 signed)
- * Secondary: Open Food Facts API
- * Tertiary: SerpAPI Google Images
+ * Supabase Edge Function proxy for product image search.
+ * Queries the sources named in `sources` (Walmart, Spoonacular, Open Food Facts,
+ * SerpAPI Google Images) in parallel. Clients normally send one source per request
+ * so each section loads on its own.
+ * Response: `groups` holds sources with results; `failed` lists sources that errored
+ * or timed out, so clients can tell a failure from an empty result.
  */
 
 interface ProductResult {
@@ -21,6 +23,8 @@ const SOURCE_LABELS: Record<SourceKey, string> = {
   openfoodfacts: 'Open Food Facts',
   serpapi: 'Google Images',
 };
+
+const SERPAPI_TIMEOUT_MS = 12000;
 
 interface ResultGroup {
   source: SourceKey;
@@ -97,14 +101,14 @@ async function generateWalmartSignature(
   return btoa(binary);
 }
 
-async function searchWalmart(query: string, numItems: string): Promise<ProductResult[]> {
+async function searchWalmart(query: string, numItems: string): Promise<ProductResult[] | null> {
   const consumerId = Deno.env.get('WALMART_CONSUMER_ID') ?? '';
   const privateKey = Deno.env.get('WALMART_PRIVATE_KEY') ?? '';
   const keyVersion = Deno.env.get('WALMART_KEY_VERSION') ?? '';
 
   if (!consumerId || !privateKey || !keyVersion) {
     console.error('Missing Walmart API credentials');
-    return [];
+    return null;
   }
 
   const timestamp = Date.now().toString();
@@ -136,7 +140,7 @@ async function searchWalmart(query: string, numItems: string): Promise<ProductRe
     if (!response.ok) {
       const text = await response.text();
       console.error(`Walmart API error: ${response.status} ${text}`);
-      return [];
+      return null;
     }
 
     const data = await response.json();
@@ -152,11 +156,11 @@ async function searchWalmart(query: string, numItems: string): Promise<ProductRe
     } else {
       console.error('Walmart search error:', err);
     }
-    return [];
+    return null;
   }
 }
 
-async function searchOpenFoodFacts(query: string, numItems: string): Promise<ProductResult[]> {
+async function searchOpenFoodFacts(query: string, numItems: string): Promise<ProductResult[] | null> {
   try {
     const offUrl = new URL('https://world.openfoodfacts.org/cgi/search.pl');
     offUrl.searchParams.set('search_terms', query);
@@ -178,7 +182,7 @@ async function searchOpenFoodFacts(query: string, numItems: string): Promise<Pro
 
     if (!response.ok) {
       console.error(`Open Food Facts API error: ${response.status}`);
-      return [];
+      return null;
     }
 
     const data = await response.json();
@@ -197,7 +201,7 @@ async function searchOpenFoodFacts(query: string, numItems: string): Promise<Pro
     } else {
       console.error('Open Food Facts search error:', err);
     }
-    return [];
+    return null;
   }
 }
 
@@ -210,12 +214,12 @@ async function searchOpenFoodFacts(query: string, numItems: string): Promise<Pro
  * - Cannot scrape/store data beyond caching; images referenced by URL only
  * - Source field in response identifies Spoonacular's contribution ('spoonacular' or 'merged')
  */
-async function searchSpoonacularProducts(query: string, numItems: string): Promise<ProductResult[]> {
+async function searchSpoonacularProducts(query: string, numItems: string): Promise<ProductResult[] | null> {
   const apiKey = Deno.env.get('SPOONACULAR_API_KEY') ?? '';
 
   if (!apiKey) {
     console.error('Missing SPOONACULAR_API_KEY');
-    return [];
+    return null;
   }
 
   try {
@@ -237,7 +241,7 @@ async function searchSpoonacularProducts(query: string, numItems: string): Promi
 
     if (!response.ok) {
       console.error(`Spoonacular API error: ${response.status}`);
-      return [];
+      return null;
     }
 
     const data = await response.json();
@@ -256,16 +260,16 @@ async function searchSpoonacularProducts(query: string, numItems: string): Promi
     } else {
       console.error('Spoonacular search error:', err);
     }
-    return [];
+    return null;
   }
 }
 
-async function searchSerpApi(query: string, numItems: string): Promise<ProductResult[]> {
+async function searchSerpApi(query: string, numItems: string): Promise<ProductResult[] | null> {
   const apiKey = Deno.env.get('SERPAPI_KEY') ?? '';
 
   if (!apiKey) {
     console.error('Missing SERPAPI_KEY');
-    return [];
+    return null;
   }
 
   try {
@@ -278,7 +282,7 @@ async function searchSerpApi(query: string, numItems: string): Promise<ProductRe
     });
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), SERPAPI_TIMEOUT_MS);
 
     const response = await fetch(`https://serpapi.com/search.json?${params}`, {
       method: 'GET',
@@ -289,7 +293,7 @@ async function searchSerpApi(query: string, numItems: string): Promise<ProductRe
 
     if (!response.ok) {
       console.error(`SerpAPI error: ${response.status}`);
-      return [];
+      return null;
     }
 
     const data = await response.json();
@@ -306,7 +310,7 @@ async function searchSerpApi(query: string, numItems: string): Promise<ProductRe
     } else {
       console.error('SerpAPI search error:', err);
     }
-    return [];
+    return null;
   }
 }
 
@@ -341,48 +345,30 @@ Deno.serve(async (req) => {
     ? new Set(sourcesParam.split(',').map(s => s.trim()).filter((s): s is SourceKey => SOURCE_ORDER.includes(s as SourceKey)))
     : new Set(SOURCE_ORDER);
 
-  const respond = (body: { groups: ResultGroup[] }) =>
-    new Response(JSON.stringify(body), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=3600' },
-    });
-
-  // Build primary search functions
-  const primaryKeys: SourceKey[] = ['walmart', 'spoonacular', 'openfoodfacts'];
-  const primarySearchFns: Record<string, () => Promise<ProductResult[]>> = {
+  const searchFns: Record<SourceKey, () => Promise<ProductResult[] | null>> = {
     walmart: () => searchWalmart(query, numItems),
     spoonacular: () => searchSpoonacularProducts(query, numItems),
     openfoodfacts: () => searchOpenFoodFacts(query, numItems),
+    serpapi: () => searchSerpApi(query, numItems),
   };
 
-  // Run only enabled primary sources in parallel
-  const primaryResults = await Promise.all(
-    primaryKeys
-      .filter(k => enabledSources.has(k))
-      .map(k => primarySearchFns[k]().then(results => ({ source: k as SourceKey, results })))
+  const requestedSources = SOURCE_ORDER.filter(key => enabledSources.has(key));
+  const settled = await Promise.all(
+    requestedSources.map(async key => ({ source: key, results: await searchFns[key]() }))
   );
 
-  // Determine if SerpAPI should be called
-  const serpResults: ProductResult[] =
-    enabledSources.has('serpapi')
-      ? await searchSerpApi(query, numItems)
-      : [];
+  const groups: ResultGroup[] = settled
+    .filter(({ results }) => results !== null && results.length > 0)
+    .map(({ source, results }) => ({ source, label: SOURCE_LABELS[source], results: results ?? [] }));
+  const failed: SourceKey[] = settled
+    .filter(({ results }) => results === null)
+    .map(({ source }) => source);
 
-  // Build result map
-  const allResults: Record<SourceKey, ProductResult[]> = {
-    walmart: [],
-    spoonacular: [],
-    openfoodfacts: [],
-    serpapi: serpResults,
-  };
-  for (const { source, results } of primaryResults) {
-    allResults[source] = results;
-  }
+  // A response with a failed source must not be cached, or retries keep replaying the gap.
+  const cacheControl = failed.length > 0 ? 'no-store' : 'public, max-age=3600';
 
-  // Build groups: only include sources with results, in defined order
-  const groups: ResultGroup[] = SOURCE_ORDER
-    .filter(key => allResults[key].length > 0)
-    .map(key => ({ source: key, label: SOURCE_LABELS[key], results: allResults[key] }));
-
-  return respond({ groups });
+  return new Response(JSON.stringify({ groups, failed }), {
+    status: 200,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': cacheControl },
+  });
 });

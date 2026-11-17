@@ -17,9 +17,11 @@ struct ItemImagePickerSheet: View {
     @State private var viewMode: Bool
     @State private var selectedTab = 0
     @State private var searchQuery: String
-    @State private var searchResultGroups: [ProductResultGroup] = []
-    @State private var isSearching = false
-    @State private var hasSearched = false
+    @State private var searchSections: [ImageSearchSource: SearchSectionState] = [:]
+    /// Bumped on every new search so late responses from an older query are ignored.
+    @State private var searchGeneration = 0
+    @State private var searchedQuery = ""
+    @State private var collapsedSources: Set<ImageSearchSource> = []
     @State private var isUploading = false
     @State private var isRemoving = false
     @State private var errorMessage: String?
@@ -175,11 +177,19 @@ struct ItemImagePickerSheet: View {
         }
     }
     
+    private var enabledSources: [ImageSearchSource] {
+        ImageSearchSource.enabled(in: imageSearchSettings)
+    }
+
+    private var isSearching: Bool {
+        searchSections.values.contains { state in
+            if case .loading = state { return true }
+            return false
+        }
+    }
+
     @ViewBuilder
     private var searchTabContent: some View {
-        let allSourcesOff = !imageSearchSettings.walmart && !imageSearchSettings.spoonacular && 
-                           !imageSearchSettings.openfoodfacts && !imageSearchSettings.serpapi
-        
         VStack(spacing: 12) {
             HStack {
                 TextField("Search...", text: $searchQuery)
@@ -195,7 +205,7 @@ struct ItemImagePickerSheet: View {
                 .disabled(searchQuery.trimmingCharacters(in: .whitespaces).isEmpty || isSearching)
             }
             
-            if allSourcesOff {
+            if enabledSources.isEmpty {
                 VStack(spacing: 12) {
                     Text("No image search sources enabled.")
                         .foregroundStyle(.secondary)
@@ -204,60 +214,150 @@ struct ItemImagePickerSheet: View {
                             .environment(authViewModel)
                     }
                 }
-            } else if isSearching {
-                ProgressView("Searching...")
-            } else if !searchResultGroups.isEmpty {
-                ScrollView {
-                    VStack(spacing: 16) {
-                        ForEach(searchResultGroups, id: \.source) { group in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(group.label)
-                                    .font(.quicksand(.caption))
-                                    .foregroundStyle(.secondary)
-                                
-                                LazyVGrid(
-                                    columns: Array(
-                                        repeating: GridItem(.flexible(), spacing: 8),
-                                        count: gridColumns
-                                    ),
-                                    spacing: 8
-                                ) {
-                                    ForEach(group.results, id: \.url) { result in
-                                        ZStack {
-                                            Color(.systemGray6)
-                                            AsyncImage(url: URL(string: result.url)) { phase in
-                                                switch phase {
-                                                case .success(let image):
-                                                    image
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                case .failure:
-                                                    Image(systemName: "photo")
-                                                        .foregroundStyle(.secondary)
-                                                case .empty:
-                                                    ProgressView()
-                                                @unknown default:
-                                                    EmptyView()
-                                                }
-                                            }
-                                            .padding(3)
-                                        }
-                                        .aspectRatio(1, contentMode: .fit)
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                        .onTapGesture {
-                                            selectSearchResult(result)
-                                        }
-                                    }
-                                }
-                            }
+            } else if !searchSections.isEmpty {
+                VStack(spacing: 16) {
+                    ForEach(enabledSources) { source in
+                        if let state = searchSections[source] {
+                            searchSection(source, state: state)
                         }
                     }
                 }
                 .simultaneousGesture(gridPinchGesture)
                 .sensoryFeedback(.selection, trigger: gridColumns)
-            } else if hasSearched {
-                Text("No images found")
+            }
+        }
+    }
+
+    /// One source's collapsible header plus its own loading, error, empty, or results state.
+    @ViewBuilder
+    private func searchSection(_ source: ImageSearchSource, state: SearchSectionState) -> some View {
+        let isCollapsed = collapsedSources.contains(source)
+        VStack(alignment: .leading, spacing: 8) {
+            searchSectionHeader(source, state: state, isCollapsed: isCollapsed)
+            if !isCollapsed {
+                searchSectionBody(source, state: state)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func searchSectionHeader(_ source: ImageSearchSource, state: SearchSectionState, isCollapsed: Bool) -> some View {
+        Button {
+            withAnimation(.snappy) {
+                if isCollapsed {
+                    collapsedSources.remove(source)
+                } else {
+                    collapsedSources.insert(source)
+                }
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(isCollapsed ? 0 : 90))
+                Text(source.label)
+                    .font(.quicksand(.subheadline, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Spacer()
+                searchSectionBadge(state)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+            .contentShape(RoundedRectangle(cornerRadius: 10))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(source.label)
+        .accessibilityValue(isCollapsed ? "Collapsed" : "Expanded")
+    }
+
+    /// Trailing status in a section header, so a collapsed section still shows what it holds.
+    @ViewBuilder
+    private func searchSectionBadge(_ state: SearchSectionState) -> some View {
+        switch state {
+        case .loading:
+            ProgressView()
+                .controlSize(.small)
+        case .failed:
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.footnote)
+                .foregroundStyle(.orange)
+                .accessibilityLabel("Couldn't load")
+        case .loaded(let results):
+            Text("\(results.count)")
+                .font(.quicksand(.caption, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(Color(.tertiarySystemFill), in: Capsule())
+                .accessibilityLabel("\(results.count) results")
+        }
+    }
+
+    @ViewBuilder
+    private func searchSectionBody(_ source: ImageSearchSource, state: SearchSectionState) -> some View {
+        switch state {
+        case .loading:
+            Text("Searching \(source.label)...")
+                .font(.quicksand(.footnote))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+        case .failed:
+            HStack(spacing: 8) {
+                Text("Couldn't load results.")
+                    .font(.quicksand(.footnote))
+                    .foregroundStyle(.secondary)
+                Button("Retry") {
+                    loadSource(source, query: searchedQuery, generation: searchGeneration)
+                }
+                .font(.quicksand(.footnote))
+                .accessibilityLabel("Retry \(source.label)")
+            }
+            .padding(.horizontal, 12)
+        case .loaded(let results) where results.isEmpty:
+            Text("No results")
+                .font(.quicksand(.footnote))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 12)
+        case .loaded(let results):
+            searchResultsGrid(results)
+        }
+    }
+
+    private func searchResultsGrid(_ results: [ProductResult]) -> some View {
+        LazyVGrid(
+            columns: Array(
+                repeating: GridItem(.flexible(), spacing: 8),
+                count: gridColumns
+            ),
+            spacing: 8
+        ) {
+            ForEach(results, id: \.url) { result in
+                ZStack {
+                    Color(.systemGray6)
+                    AsyncImage(url: URL(string: result.url)) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                        case .failure:
+                            Image(systemName: "photo")
+                                .foregroundStyle(.secondary)
+                        case .empty:
+                            ProgressView()
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .padding(3)
+                }
+                .aspectRatio(1, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .onTapGesture {
+                    selectSearchResult(result)
+                }
             }
         }
     }
@@ -318,15 +418,30 @@ struct ItemImagePickerSheet: View {
     }
     
     private func performSearch() {
-        guard !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        let query = searchQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return }
         errorMessage = nil
-        isSearching = true
-        
+        searchGeneration += 1
+        searchedQuery = query
+        searchSections = [:]
+        for source in enabledSources {
+            loadSource(source, query: query, generation: searchGeneration)
+        }
+    }
+
+    /// Loads one source's section; used for both the initial search and a per-section retry.
+    private func loadSource(_ source: ImageSearchSource, query: String, generation: Int) {
+        searchSections[source] = .loading
         Task {
-            let groups = await ProductSearchService.searchProducts(query: searchQuery, sources: imageSearchSettings)
-            searchResultGroups = groups
-            hasSearched = true
-            isSearching = false
+            let state: SearchSectionState
+            do {
+                state = .loaded(try await ProductSearchService.search(query: query, source: source))
+            } catch {
+                print("[ItemImagePickerSheet] \(source.rawValue) search failed for '\(query)': \(error)")
+                state = .failed
+            }
+            guard generation == searchGeneration else { return }
+            searchSections[source] = state
         }
     }
     
@@ -409,6 +524,13 @@ struct ItemImagePickerSheet: View {
             }
         }
     }
+}
+
+/// Load state of one image search source's section.
+private enum SearchSectionState {
+    case loading
+    case loaded([ProductResult])
+    case failed
 }
 
 /// A local image awaiting the crop step, wrapped for `fullScreenCover(item:)`.

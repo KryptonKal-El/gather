@@ -10,96 +10,122 @@ struct ProductSearchResult: Codable {
 /// Typealias for backward compatibility and cleaner naming.
 typealias ProductResult = ProductSearchResult
 
-/// Grouped results from image search, organized by source.
-struct ProductResultGroup: Codable {
-    let source: String
-    let label: String
-    let results: [ProductResult]
+/// An image search provider, in display order.
+enum ImageSearchSource: String, CaseIterable, Identifiable {
+    case walmart, spoonacular, openfoodfacts, serpapi
+
+    var id: String { rawValue }
+
+    /// Section title shown above this source's results.
+    var label: String {
+        switch self {
+        case .walmart: "Walmart"
+        case .spoonacular: "Spoonacular"
+        case .openfoodfacts: "Open Food Facts"
+        case .serpapi: "Google Images"
+        }
+    }
+
+    /// The sources the user has enabled, in display order.
+    static func enabled(in settings: ImageSearchSettings) -> [ImageSearchSource] {
+        allCases.filter { source in
+            switch source {
+            case .walmart: settings.walmart
+            case .spoonacular: settings.spoonacular
+            case .openfoodfacts: settings.openfoodfacts
+            case .serpapi: settings.serpapi
+            }
+        }
+    }
+}
+
+/// Why a single-source image search could not produce results.
+enum ProductSearchError: Error {
+    case invalidURL
+    case http(Int)
+    /// The edge function reported that the provider errored or timed out.
+    case sourceFailed
 }
 
 private actor SearchCache {
-    private var cache: [String: (groups: [ProductResultGroup], timestamp: Date)] = [:]
+    private var cache: [String: (results: [ProductResult], timestamp: Date)] = [:]
     private let ttl: TimeInterval = 300 // 5 minutes
-    
-    func get(_ key: String) -> [ProductResultGroup]? {
+
+    func get(_ key: String) -> [ProductResult]? {
         guard let entry = cache[key],
               Date().timeIntervalSince(entry.timestamp) < ttl else {
             return nil
         }
-        return entry.groups
+        return entry.results
     }
-    
-    func set(_ key: String, groups: [ProductResultGroup]) {
-        cache[key] = (groups: groups, timestamp: Date())
+
+    func set(_ key: String, results: [ProductResult]) {
+        cache[key] = (results: results, timestamp: Date())
     }
 }
 
 /// Client for the search-products Supabase edge function.
 struct ProductSearchService {
     fileprivate static let cache = SearchCache()
-    
-    /// Searches for product images online via the edge function.
-    /// Returns an empty array on failure (graceful degradation).
+
+    /// Searches one source for product images via the edge function, so each
+    /// source can load, fail, and be retried on its own.
+    /// Successful results (including empty ones) are cached for 5 minutes; failures never are.
     /// - Parameters:
     ///   - query: Search query string
-    ///   - count: Number of results per source (default 25)
-    ///   - sources: Image search settings determining which providers to query (default all enabled via defaultSettings)
-    /// - Returns: Grouped results organized by source, or empty array if all sources disabled or request fails
+    ///   - source: The provider to query
+    ///   - count: Number of results to request (default 25)
+    /// - Returns: The source's results; empty when it found nothing
+    /// - Throws: `ProductSearchError` or a transport error when the request or the provider failed
     @MainActor
-    static func searchProducts(query: String, count: Int = 25, sources: ImageSearchSettings = .defaultSettings) async -> [ProductResultGroup] {
-        // Early return if all sources are disabled
-        guard sources.walmart || sources.spoonacular || sources.openfoodfacts || sources.serpapi else {
-            return []
-        }
-        
-        let enabledSources = [
-            sources.walmart ? "walmart" : nil,
-            sources.spoonacular ? "spoonacular" : nil,
-            sources.openfoodfacts ? "openfoodfacts" : nil,
-            sources.serpapi ? "serpapi" : nil
-        ].compactMap { $0 }.joined(separator: ",")
-        
-        let cacheKey = "\(query.trimmingCharacters(in: .whitespaces).lowercased()):\(enabledSources)"
+    static func search(query: String, source: ImageSearchSource, count: Int = 25) async throws -> [ProductResult] {
+        let cacheKey = "\(source.rawValue):\(query.trimmingCharacters(in: .whitespaces).lowercased())"
         if let cached = await cache.get(cacheKey) {
             return cached
         }
-        
+
         let manager = SupabaseManager.shared
         let baseURL = manager.supabaseURL.absoluteString
-        let anonKey = manager.anonKey
-        
+
         guard var components = URLComponents(string: "\(baseURL)/functions/v1/search-products") else {
-            return []
+            throw ProductSearchError.invalidURL
         }
         components.queryItems = [
             URLQueryItem(name: "q", value: query),
             URLQueryItem(name: "num", value: String(count)),
-            URLQueryItem(name: "sources", value: enabledSources)
+            URLQueryItem(name: "sources", value: source.rawValue)
         ]
-        guard let url = components.url else { return [] }
-        
+        guard let url = components.url else { throw ProductSearchError.invalidURL }
+
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                print("[ProductSearchService] HTTP error for query '\(query)'")
-                return []
-            }
-            let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
-            if !decoded.groups.isEmpty {
-                await cache.set(cacheKey, groups: decoded.groups)
-            }
-            return decoded.groups
-        } catch {
-            print("[ProductSearchService] Search failed: \(error.localizedDescription)")
-            return []
+        request.setValue("Bearer \(manager.anonKey)", forHTTPHeaderField: "Authorization")
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw ProductSearchError.http(-1)
         }
+        guard (200...299).contains(httpResponse.statusCode) else {
+            throw ProductSearchError.http(httpResponse.statusCode)
+        }
+
+        let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
+        if decoded.failed?.contains(source.rawValue) == true {
+            throw ProductSearchError.sourceFailed
+        }
+
+        let results = decoded.groups.first { $0.source == source.rawValue }?.results ?? []
+        await cache.set(cacheKey, results: results)
+        return results
     }
 }
 
 private struct SearchResponse: Codable {
-    let groups: [ProductResultGroup]
+    let groups: [ResultGroup]
+    /// Sources that errored or timed out. Absent on older edge function deployments.
+    let failed: [String]?
+
+    struct ResultGroup: Codable {
+        let source: String
+        let results: [ProductResult]
+    }
 }

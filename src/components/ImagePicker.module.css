@@ -188,9 +188,133 @@
 
 .groupTitle {
   margin: 0;
-  color: var(--text-secondary);
   font-size: var(--font-sm);
+}
+
+.groupToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--bg-raised);
+  color: var(--text-primary);
+  font: inherit;
   font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.groupToggle:hover {
+  background: var(--bg-hover-strong);
+}
+
+.groupToggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.groupLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex-shrink: 0;
+  border-right: 2px solid var(--text-tertiary);
+  border-bottom: 2px solid var(--text-tertiary);
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(45deg);
+}
+
+.groupCount {
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: var(--text-secondary);
+  font-size: var(--font-xs, 0.75rem);
+  font-weight: 600;
+}
+
+.groupWarning {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--danger-tint);
+  color: var(--danger);
+  font-size: 0.75rem;
+}
+
+.groupBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.groupBody[hidden] {
+  display: none;
+}
+
+.sectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.25rem 0.75rem;
+  color: var(--text-tertiary);
+  font-size: var(--font-sm);
+}
+
+.sectionError {
+  color: var(--danger);
+}
+
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  border: 2px solid var(--border-default);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+.retryBtn {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  background: var(--bg-hover);
 }
 
 @media (max-width: 400px) {
