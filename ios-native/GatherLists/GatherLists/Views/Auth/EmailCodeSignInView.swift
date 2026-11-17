@@ -73,14 +73,19 @@ struct EmailCodeSignInView: View {
     }
 
     private func codeStep(sentTo: String) -> some View {
-        Section {
+        // The App Review account's fixed code may contain letters, so it skips the digits-only rules.
+        let isReviewAccount = AuthViewModel.isReviewAccount(sentTo)
+        return Section {
             TextField("Sign-in code", text: $code)
                 .textContentType(.oneTimeCode)
-                .keyboardType(.numberPad)
+                .keyboardType(isReviewAccount ? .asciiCapable : .numberPad)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
                 .font(.quicksand(.title3, weight: .semibold))
                 .multilineTextAlignment(.center)
                 .focused($focusedField, equals: .code)
                 .onChange(of: code) { _, newValue in
+                    guard !isReviewAccount else { return }
                     let digits = String(newValue.filter(\.isNumber).prefix(Self.maxCodeLength))
                     if digits != newValue { code = digits }
                 }
@@ -91,8 +96,10 @@ struct EmailCodeSignInView: View {
                 if isBusy { ProgressView() } else { Text("Sign In").fontWeight(.semibold) }
             }
             .disabled(code.count < Self.minCodeLength || isBusy)
-            TimelineView(.periodic(from: .now, by: 1)) { context in
-                resendButton(sentTo: sentTo, now: context.date)
+            if !isReviewAccount {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
+                    resendButton(sentTo: sentTo, now: context.date)
+                }
             }
             Button("Use a Different Email") {
                 self.sentTo = nil
@@ -101,7 +108,7 @@ struct EmailCodeSignInView: View {
                 focusedField = .email
             }
         } header: {
-            Text("Enter the code sent to \(sentTo)")
+            Text(isReviewAccount ? "Enter the sign-in code for \(sentTo)" : "Enter the code sent to \(sentTo)")
                 .textCase(nil)
         }
     }
@@ -146,7 +153,7 @@ struct EmailCodeSignInView: View {
 
     private static func message(for error: Error) -> String {
         switch (error as? AuthError)?.errorCode.rawValue {
-        case "otp_expired":
+        case "otp_expired", "invalid_credentials":
             "That code is incorrect or has expired. Check the latest email or request a new code."
         case "over_email_send_rate_limit", "over_request_rate_limit":
             "Too many codes requested. Please wait a minute and try again."

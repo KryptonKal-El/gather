@@ -154,13 +154,29 @@ final class AuthViewModel {
         }
     }
     
+    /// The demo account App Review signs in with. Reviewers can't receive an emailed code,
+    /// so this one account signs in with a fixed code, which the server stores as its password.
+    static let reviewAccountEmail = "e2e-test@gatherlists.com"
+
+    /// Whether `email` is the App Review demo account.
+    static func isReviewAccount(_ email: String) -> Bool {
+        email.trimmingCharacters(in: .whitespaces).lowercased() == reviewAccountEmail
+    }
+
     /// Emails a one-time sign-in code, creating the account if the email is new.
+    /// The App Review demo account uses a fixed code, so nothing is sent for it.
     func sendEmailCode(to email: String) async throws {
+        guard !Self.isReviewAccount(email) else { return }
         try await SupabaseManager.shared.client.auth.signInWithOTP(email: email, shouldCreateUser: true)
     }
 
     /// Signs in with a code from `sendEmailCode(to:)`.
     func verifyEmailCode(email: String, code: String) async throws {
+        if Self.isReviewAccount(email) {
+            try await SupabaseManager.shared.client.auth.signIn(email: Self.reviewAccountEmail, password: code)
+            print("[AuthViewModel] Review account sign-in successful")
+            return
+        }
         try await SupabaseManager.shared.client.auth.verifyOTP(email: email, token: code, type: .email)
         print("[AuthViewModel] Email code sign-in successful")
     }
