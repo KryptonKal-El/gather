@@ -226,9 +226,7 @@ struct ListDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbarBackground(listColor, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .modifier(ListNavigationBarStyle(color: listColor))
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 if isSharedList {
@@ -723,13 +721,14 @@ struct ListDetailView: View {
                     .frame(height: 1)
             }
             .contentShape(Rectangle())
+            // Pinned headers slide under the nav bar and inherit its forced-dark
+            // toolbarColorScheme; keep them on the screen's actual scheme. This must
+            // sit inside the label: iOS 27 ignores it when applied to the Button.
+            .environment(\.colorScheme, colorScheme)
         }
         .buttonStyle(.plain)
         .textCase(nil)
         .listRowInsets(EdgeInsets())
-        // Pinned headers slide under the nav bar and inherit its forced-dark
-        // toolbarColorScheme; keep them on the screen's actual scheme.
-        .environment(\.colorScheme, colorScheme)
     }
     
     // MARK: - Group Helpers
@@ -1438,11 +1437,11 @@ struct ListDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.secondarySystemGroupedBackground))
                     .contentShape(Rectangle())
+                    .environment(\.colorScheme, colorScheme)
                 }
                 .buttonStyle(.plain)
                 .textCase(nil)
                 .listRowInsets(EdgeInsets())
-                .environment(\.colorScheme, colorScheme)
             }
         }
     }
@@ -2060,5 +2059,29 @@ private struct ClaimControlsView: View {
             errorMessage = await action()
             isBusy = false
         }
+    }
+}
+
+/// Colours the navigation bar with the list colour and keeps its title and buttons white.
+private struct ListNavigationBarStyle: ViewModifier {
+    let color: Color
+
+    @State private var isResynced = false
+
+    private static let resyncDelay: Duration = .seconds(1)
+
+    func body(content: Content) -> some View {
+        content
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbarBackground(isResynced ? color : color.opacity(0.999), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            // A list pushed while a sheet is still animating away (the restored list
+            // right after email sign-in) never gets its bar styling applied, and the
+            // bar stays unstyled until the toolbar background next changes. Changing
+            // it imperceptibly once that animation is over makes SwiftUI apply it.
+            .task {
+                try? await Task.sleep(for: Self.resyncDelay)
+                isResynced = true
+            }
     }
 }
