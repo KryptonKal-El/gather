@@ -493,7 +493,6 @@ struct ListDetailView: View {
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
-            .readableContentWidth()
             .environment(\.defaultMinListRowHeight, 0)
             .refreshable {
                 await detailViewModel?.refresh()
