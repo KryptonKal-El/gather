@@ -40,8 +40,7 @@ final class MealPlanViewModel {
     /// Recipes already swapped out of each slot, so Swap keeps moving forward.
     private var swappedOut: [String: Set<UUID>] = [:]
 
-    nonisolated(unsafe) private var channel: RealtimeChannelV2?
-    nonisolated(unsafe) private var realtimeTasks: [Task<Void, Never>] = []
+    @ObservationIgnored private let realtime = RealtimeSubscriptions(label: "MealPlanViewModel")
 
     // MARK: - Computed
 
@@ -100,14 +99,8 @@ final class MealPlanViewModel {
         self.userEmail = userEmail
         Task {
             await load()
-            await subscribe()
+            subscribe()
         }
-    }
-
-    deinit {
-        realtimeTasks.forEach { $0.cancel() }
-        let channel = channel
-        Task { await channel?.unsubscribe() }
     }
 
     // MARK: - Loading
@@ -265,43 +258,26 @@ final class MealPlanViewModel {
 
     // No row filters: filters on non-PK columns silently drop UPDATE/DELETE events
     // (see docs/memory/supabase-realtime-replica-identity.md). RLS still scopes delivery.
-    private func subscribe() async {
-        guard channel == nil else { return }
-        let newChannel = SupabaseManager.shared.client.realtimeV2.channel("meal-plan-\(userId.uuidString)")
-        channel = newChannel
+    private func subscribe() {
+        guard !realtime.isStarted else { return }
+        let channel = realtime.channel("meal-plan-\(userId.uuidString)")
 
-        let entryChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_entries")
-        let planChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plans")
-        let shareChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_shares")
-        let dealChanges = newChannel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_deals")
-
-        do {
-            try await newChannel.subscribeWithError()
-        } catch {
-            print("[MealPlanViewModel] Subscription failed: \(error.localizedDescription)")
-            return
+        realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_entries")) { [weak self] in
+            try? await self?.refreshWeek()
+        }
+        realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: "meal_plans")) { [weak self] in
+            await self?.reloadPlansAndWeek()
+        }
+        realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_shares")) { [weak self] in
+            await self?.reloadPlansAndWeek()
+        }
+        realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: "meal_plan_deals")) { [weak self] in
+            await self?.refreshDeals()
         }
 
-        realtimeTasks.append(Task { [weak self] in
-            for await _ in entryChanges {
-                try? await self?.refreshWeek()
-            }
-        })
-        realtimeTasks.append(Task { [weak self] in
-            for await _ in planChanges {
-                await self?.reloadPlansAndWeek()
-            }
-        })
-        realtimeTasks.append(Task { [weak self] in
-            for await _ in shareChanges {
-                await self?.reloadPlansAndWeek()
-            }
-        })
-        realtimeTasks.append(Task { [weak self] in
-            for await _ in dealChanges {
-                await self?.refreshDeals()
-            }
-        })
+        realtime.start { [weak self] in
+            await self?.reloadPlansAndWeek()
+        }
     }
 
     private func reloadPlansAndWeek() async {

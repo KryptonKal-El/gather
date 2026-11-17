@@ -26,12 +26,7 @@ final class RecipeViewModel {
     let userEmail: String
     
     // MARK: - Realtime Channels
-    nonisolated(unsafe) private var collectionsChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var sharesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var recipesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var collectionsTask: Task<Void, Never>?
-    nonisolated(unsafe) private var sharesTask: Task<Void, Never>?
-    nonisolated(unsafe) private var recipesTask: Task<Void, Never>?
+    @ObservationIgnored private let realtime = RealtimeSubscriptions(label: "RecipeViewModel")
     
     // MARK: - Computed
     
@@ -86,7 +81,7 @@ final class RecipeViewModel {
         
         Task {
             await loadData()
-            await setupRealtimeSubscriptions()
+            setupRealtimeSubscriptions()
         }
     }
     
@@ -153,82 +148,23 @@ final class RecipeViewModel {
     
     // MARK: - Realtime Subscriptions
     
-    private func setupRealtimeSubscriptions() async {
-        guard collectionsChannel == nil else { return }
-        
-        let client = SupabaseManager.shared.client
-        
-        // Channel 1: collections (owned)
-        let collChannel = client.realtimeV2.channel("recipe-collections-\(userId.uuidString)")
-        collectionsChannel = collChannel
-        
-        let collChanges = collChannel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "collections",
-            filter: .eq("owner_id", value: userId)
-        )
-        
-        collectionsTask = Task {
-            do {
-                try await collChannel.subscribeWithError()
-            } catch {
-                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in collChanges {
-                await refetchAllData()
+    // No row filters: filters on non-PK columns silently drop UPDATE/DELETE events
+    // (see docs/memory/supabase-realtime-replica-identity.md). RLS still scopes delivery.
+    private func setupRealtimeSubscriptions() {
+        guard !realtime.isStarted else { return }
+
+        for table in ["collections", "collection_shares", "recipes"] {
+            let channel = realtime.channel("recipe-\(table)-\(userId.uuidString)")
+            realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: table)) { [weak self] in
+                await self?.refetchAllData()
             }
         }
-        
-        // Channel 2: collection_shares (for shared collections)
-        let normalizedEmail = userEmail.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let shareChannel = client.realtimeV2.channel("recipe-shares-\(normalizedEmail)")
-        sharesChannel = shareChannel
-        
-        let shareChanges = shareChannel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "collection_shares",
-            filter: .eq("shared_with_email", value: normalizedEmail)
-        )
-        
-        sharesTask = Task {
-            do {
-                try await shareChannel.subscribeWithError()
-            } catch {
-                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in shareChanges {
-                await refetchAllData()
-            }
-        }
-        
-        // Channel 3: recipes (owned)
-        let recipeChannel = client.realtimeV2.channel("recipes-\(userId.uuidString)")
-        recipesChannel = recipeChannel
-        
-        let recipeChanges = recipeChannel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "recipes",
-            filter: .eq("owner_id", value: userId)
-        )
-        
-        recipesTask = Task {
-            do {
-                try await recipeChannel.subscribeWithError()
-            } catch {
-                print("[RecipeViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in recipeChanges {
-                await refetchAllData()
-            }
+
+        realtime.start { [weak self] in
+            await self?.refetchAllData()
         }
     }
-    
+
     private func refetchAllData() async {
         do {
             async let owned = RecipeService.fetchCollections(userId: userId)
@@ -599,23 +535,5 @@ final class RecipeViewModel {
     
     func unshareCollection(id: UUID, email: String) async throws {
         try await RecipeService.unshareCollection(collectionId: id, email: email)
-    }
-    
-    // MARK: - Deinit
-    
-    deinit {
-        collectionsTask?.cancel()
-        sharesTask?.cancel()
-        recipesTask?.cancel()
-        
-        let collChannel = collectionsChannel
-        let shareChannel = sharesChannel
-        let recipeChannel = recipesChannel
-        
-        Task {
-            await collChannel?.unsubscribe()
-            await shareChannel?.unsubscribe()
-            await recipeChannel?.unsubscribe()
-        }
     }
 }

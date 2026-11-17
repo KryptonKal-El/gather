@@ -50,7 +50,7 @@ struct ListDetailView: View {
     // Sort preferences
     @State private var userPreferences: UserPreferences?
     @State private var activeSortConfig: [SortLevel] = SortPipeline.systemDefault
-    @State private var preferencesTask: Task<Void, Never>?
+    @State private var preferencesRealtime: RealtimeSubscriptions?
     @State private var showSortSheet = false
     
      // List options menu state
@@ -161,8 +161,8 @@ struct ListDetailView: View {
             }
         }
         .onDisappear {
-            preferencesTask?.cancel()
-            preferencesTask = nil
+            preferencesRealtime?.stop()
+            preferencesRealtime = nil
         }
         .sheet(isPresented: $showEditSheet) {
             EditListSheet(list: list, viewModel: viewModel, isOwned: isOwned)
@@ -1922,29 +1922,24 @@ struct ListDetailView: View {
     }
     
     private func subscribeToPreferences() async {
-        guard let userId = try? await SupabaseManager.shared.client.auth.session.user.id else { return }
-        let client = SupabaseManager.shared.client
-        let channel = client.realtimeV2.channel("user-preferences-\(userId.uuidString)")
-        
+        guard preferencesRealtime == nil,
+              let userId = try? await SupabaseManager.shared.client.auth.session.user.id else { return }
+
+        let subscriptions = RealtimeSubscriptions(label: "ListDetailView")
+        preferencesRealtime = subscriptions
+        let channel = subscriptions.channel("user-preferences-\(userId.uuidString)")
         let changes = channel.postgresChange(
             AnyAction.self,
             schema: "public",
             table: "user_preferences",
             filter: .eq("user_id", value: userId)
         )
-        
-        preferencesTask = Task {
-            do {
-                try await channel.subscribeWithError()
-            } catch {
-                print("[ListDetailView] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in changes {
-                PreferenceService.clearCache()
-                await loadSortPreferences()
-            }
+        let reload: @MainActor () async -> Void = {
+            PreferenceService.clearCache()
+            await loadSortPreferences()
         }
+        subscriptions.on(changes, perform: reload)
+        subscriptions.start(onCatchUp: reload)
     }
     
     // MARK: - Undo Registration

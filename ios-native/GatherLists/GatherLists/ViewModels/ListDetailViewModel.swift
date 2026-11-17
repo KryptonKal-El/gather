@@ -9,16 +9,6 @@ import WidgetKit
 @MainActor
 final class ListDetailViewModel {
     private final class RuntimeState {
-        var itemsChannel: RealtimeChannelV2?
-        var storesChannel: RealtimeChannelV2?
-        var historyChannel: RealtimeChannelV2?
-        var itemsTask: Task<Void, Never>?
-        var storesTask: Task<Void, Never>?
-        var sharedStoresChannel: RealtimeChannelV2?
-        var sharedStoresTask: Task<Void, Never>?
-        var historyTask: Task<Void, Never>?
-        var claimsChannel: RealtimeChannelV2?
-        var claimsTask: Task<Void, Never>?
         var pendingToggleTasks: [UUID: Task<Void, Never>] = [:]
         var pendingToggleOriginals: [UUID: Bool] = [:]
     }
@@ -58,6 +48,7 @@ final class ListDetailViewModel {
     let listType: String
     private var list: GatherList?
     @ObservationIgnored private let runtime = RuntimeState()
+    @ObservationIgnored private let realtime = RealtimeSubscriptions(label: "ListDetailViewModel")
 
     /// The environment undo manager, injected by the view so crossing an item
     /// off (or on) can register a shake-to-undo action.
@@ -151,10 +142,9 @@ final class ListDetailViewModel {
         
         Task {
             await loadData()
-            await setupRealtimeSubscriptions()
+            setupRealtimeSubscriptions()
             if list.type == "wish_list" {
                 await loadClaims()
-                await setupClaimsSubscription()
                 await loadCollaboratorNames()
             }
         }
@@ -178,25 +168,6 @@ final class ListDetailViewModel {
             }, uniquingKeysWith: { first, _ in first })
         } catch {
             print("[ListDetailViewModel] Failed to load collaborators: \(error.localizedDescription)")
-        }
-    }
-
-    /// Refetches on any claim change: realtime can't filter on list_id (non-PK).
-    private func setupClaimsSubscription() async {
-        guard runtime.claimsChannel == nil else { return }
-        let channel = SupabaseManager.shared.client.realtimeV2.channel("list-claims-\(listId.uuidString)")
-        runtime.claimsChannel = channel
-        let changes = channel.postgresChange(AnyAction.self, schema: "public", table: "item_claims")
-        runtime.claimsTask = Task {
-            do {
-                try await channel.subscribeWithError()
-            } catch {
-                print("[ListDetailViewModel] Claims subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in changes {
-                await loadClaims()
-            }
         }
     }
 
@@ -233,8 +204,8 @@ final class ListDetailViewModel {
     
     // MARK: - Data Loading
     
-    private func loadData() async {
-        isLoading = true
+    private func loadData(showsLoading: Bool = true) async {
+        if showsLoading { isLoading = true }
         error = nil
         
         // Load cached data first for instant display
@@ -272,6 +243,8 @@ final class ListDetailViewModel {
             // Sync items to shared container for widget access
             await SharedDataStore.shared.saveItems(itemsResult, for: listId)
             WidgetCenter.shared.reloadAllTimelines()
+        } catch is CancellationError {
+            print("[ListDetailViewModel] Load cancelled")
         } catch {
             self.error = error.localizedDescription
             isShowingCachedData = !items.isEmpty
@@ -282,85 +255,44 @@ final class ListDetailViewModel {
             }
         }
         
-        isLoading = false
+        if showsLoading { isLoading = false }
     }
     
     // MARK: - Realtime Subscriptions
     
-    private func setupRealtimeSubscriptions() async {
-        guard runtime.itemsChannel == nil else { return }
-        
-        let client = SupabaseManager.shared.client
-        
-        // Channel for items
-        let itemsCh = client.realtimeV2.channel("list-items-\(listId.uuidString)")
-        runtime.itemsChannel = itemsCh
-        
-        let itemsChanges = itemsCh.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "items"
-        )
-        
-        runtime.itemsTask = Task {
-            do {
-                try await itemsCh.subscribeWithError()
-            } catch {
-                print("[ListDetailViewModel] Items subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in itemsChanges {
-                await refetchItems()
-                clearStalePendingToggles()
+    // No row filters: filters on non-PK columns silently drop UPDATE/DELETE events
+    // (see docs/memory/supabase-realtime-replica-identity.md). RLS still scopes delivery.
+    private func setupRealtimeSubscriptions() {
+        guard !realtime.isStarted else { return }
+
+        let itemsChannel = realtime.channel("list-items-\(listId.uuidString)")
+        realtime.on(itemsChannel.postgresChange(AnyAction.self, schema: "public", table: "items")) { [weak self] in
+            await self?.refetchItems()
+            self?.clearStalePendingToggles()
+        }
+
+        let storesChannel = realtime.channel("list-stores-\(listId.uuidString)")
+        realtime.on(storesChannel.postgresChange(AnyAction.self, schema: "public", table: "stores")) { [weak self] in
+            await self?.refetchStores()
+        }
+
+        let historyChannel = realtime.channel("list-history-\(listId.uuidString)")
+        realtime.on(historyChannel.postgresChange(AnyAction.self, schema: "public", table: "history")) { [weak self] in
+            await self?.refetchHistory()
+        }
+
+        if listType == "wish_list" {
+            let claimsChannel = realtime.channel("list-claims-\(listId.uuidString)")
+            realtime.on(claimsChannel.postgresChange(AnyAction.self, schema: "public", table: "item_claims")) { [weak self] in
+                await self?.loadClaims()
             }
         }
-        
-        // Channel for stores
-         let storesCh = client.realtimeV2.channel("list-stores-\(listId.uuidString)")
-         runtime.storesChannel = storesCh
-         
-         let storesChanges = storesCh.postgresChange(
-             AnyAction.self,
-             schema: "public",
-             table: "stores"
-         )
-         
-         runtime.storesTask = Task {
-             do {
-                 try await storesCh.subscribeWithError()
-             } catch {
-                 print("[ListDetailViewModel] Stores subscription failed: \(error.localizedDescription)")
-                 return
-             }
-             for await _ in storesChanges {
-                 await refetchStores()
-             }
-         }
-         
-         // Channel for history
-        let historyCh = client.realtimeV2.channel("list-history-\(listId.uuidString)")
-        runtime.historyChannel = historyCh
-        
-        let historyChanges = historyCh.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "history",
-            filter: .eq("user_id", value: userId)
-        )
-        
-        runtime.historyTask = Task {
-            do {
-                try await historyCh.subscribeWithError()
-            } catch {
-                print("[ListDetailViewModel] History subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in historyChanges {
-                await refetchHistory()
-            }
+
+        realtime.start { [weak self] in
+            await self?.refresh()
         }
     }
-    
+
     // MARK: - Refetch Helpers
     
     private func refetchItems() async {
@@ -400,9 +332,18 @@ final class ListDetailViewModel {
         }
     }
     
-    /// Manual refresh — re-fetches all data.
+    /// Re-fetches all data in place, without swapping the list out for the loading state.
+    ///
+    /// Runs in its own task: a pull-to-refresh cancels its task as soon as the list re-renders,
+    /// which would abort the fetch midway.
     func refresh() async {
-        await loadData()
+        await Task {
+            await loadData(showsLoading: false)
+            clearStalePendingToggles()
+            if listType == "wish_list" {
+                await loadClaims()
+            }
+        }.value
     }
     
     // MARK: - Action Methods
@@ -873,26 +814,6 @@ final class ListDetailViewModel {
     deinit {
         for task in runtime.pendingToggleTasks.values {
             task.cancel()
-        }
-
-        runtime.itemsTask?.cancel()
-        runtime.storesTask?.cancel()
-        runtime.sharedStoresTask?.cancel()
-        runtime.historyTask?.cancel()
-        runtime.claimsTask?.cancel()
-        
-        let claimsCh = runtime.claimsChannel
-        let itemsCh = runtime.itemsChannel
-        let storesCh = runtime.storesChannel
-        let sharedStoresCh = runtime.sharedStoresChannel
-        let historyCh = runtime.historyChannel
-        
-        Task {
-            await itemsCh?.unsubscribe()
-            await storesCh?.unsubscribe()
-            await sharedStoresCh?.unsubscribe()
-            await historyCh?.unsubscribe()
-            await claimsCh?.unsubscribe()
         }
     }
 }

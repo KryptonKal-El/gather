@@ -35,10 +35,7 @@ final class ListViewModel {
     
     private static let listOrderKey = "gather_list_order"
     
-    nonisolated(unsafe) private var ownedListsChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var sharedListsChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var ownedListsTask: Task<Void, Never>?
-    nonisolated(unsafe) private var sharedListsTask: Task<Void, Never>?
+    @ObservationIgnored private let realtime = RealtimeSubscriptions(label: "ListViewModel")
     nonisolated(unsafe) private var persistListIdTask: Task<Void, Never>?
     nonisolated(unsafe) private var listOrderSyncTask: Task<Void, Never>?
 
@@ -119,7 +116,7 @@ final class ListViewModel {
         
         Task {
             await loadData()
-            await setupRealtimeSubscriptions()
+            setupRealtimeSubscriptions()
             await PreferenceRealtimeManager.shared.startSubscription(userId: userId)
         }
     }
@@ -238,60 +235,26 @@ final class ListViewModel {
     
     // MARK: - Realtime Subscriptions
     
-    private func setupRealtimeSubscriptions() async {
-        // Guard against duplicate channel setup
-        guard ownedListsChannel == nil else { return }
-        
-        let client = SupabaseManager.shared.client
-        
-        // Channel for owned lists
-        let ownedChannel = client.realtimeV2.channel("owned-lists-\(userId.uuidString)")
-        ownedListsChannel = ownedChannel
-        
-        let ownedChanges = ownedChannel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "lists",
-            filter: .eq("owner_id", value: userId)
-        )
-        
-        ownedListsTask = Task {
-            do {
-                try await ownedChannel.subscribeWithError()
-            } catch {
-                print("[ListViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in ownedChanges {
-                await refetchAllData()
-            }
+    // No row filters: filters on non-PK columns silently drop UPDATE/DELETE events
+    // (see docs/memory/supabase-realtime-replica-identity.md). RLS still scopes delivery.
+    private func setupRealtimeSubscriptions() {
+        guard !realtime.isStarted else { return }
+
+        let listsChannel = realtime.channel("lists-\(userId.uuidString)")
+        realtime.on(listsChannel.postgresChange(AnyAction.self, schema: "public", table: "lists")) { [weak self] in
+            await self?.refetchAllData()
         }
-        
-        // Channel for shared lists
-        let normalizedEmail = userEmail.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-        let sharedChannel = client.realtimeV2.channel("shared-lists-\(normalizedEmail)")
-        sharedListsChannel = sharedChannel
-        
-        let sharedChanges = sharedChannel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "list_shares",
-            filter: .eq("shared_with_email", value: normalizedEmail)
-        )
-        
-        sharedListsTask = Task {
-            do {
-                try await sharedChannel.subscribeWithError()
-            } catch {
-                print("[ListViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in sharedChanges {
-                await refetchAllData()
-            }
+
+        let sharesChannel = realtime.channel("list-shares-\(userId.uuidString)")
+        realtime.on(sharesChannel.postgresChange(AnyAction.self, schema: "public", table: "list_shares")) { [weak self] in
+            await self?.refetchAllData()
+        }
+
+        realtime.start { [weak self] in
+            await self?.refetchAllData()
         }
     }
-    
+
     private func refetchAllData() async {
         do {
             async let owned = ListService.fetchOwnedLists(userId: userId)
@@ -629,17 +592,10 @@ final class ListViewModel {
     }
     
     deinit {
-        ownedListsTask?.cancel()
-        sharedListsTask?.cancel()
         persistListIdTask?.cancel()
         listOrderSyncTask?.cancel()
-        
-        let ownedChannel = ownedListsChannel
-        let sharedChannel = sharedListsChannel
-        
+
         Task {
-            await ownedChannel?.unsubscribe()
-            await sharedChannel?.unsubscribe()
             await PreferenceRealtimeManager.shared.stopSubscription()
         }
     }

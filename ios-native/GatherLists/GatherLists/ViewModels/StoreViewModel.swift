@@ -15,8 +15,7 @@ final class StoreViewModel {
     
     private let listId: UUID
     
-    nonisolated(unsafe) private var storesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var storesTask: Task<Void, Never>?
+    @ObservationIgnored private let realtime = RealtimeSubscriptions(label: "StoreViewModel")
     
     init(listId: UUID) {
         self.listId = listId
@@ -25,7 +24,7 @@ final class StoreViewModel {
     /// Call this from the view's `.task` modifier to begin loading.
     func start() async {
         await loadData()
-        await setupRealtimeSubscription()
+        setupRealtimeSubscription()
     }
     
     // MARK: - Data Loading
@@ -57,33 +56,21 @@ final class StoreViewModel {
     
     // MARK: - Realtime
     
-    private func setupRealtimeSubscription() async {
-        guard storesChannel == nil else { return }
-        
-        let client = SupabaseManager.shared.client
-        let channel = client.realtimeV2.channel("stores-list-\(listId.uuidString)")
-        storesChannel = channel
-        
-        let changes = channel.postgresChange(
-            AnyAction.self,
-            schema: "public",
-            table: "stores",
-            filter: .eq("list_id", value: listId)
-        )
-        
-        storesTask = Task {
-            do {
-                try await channel.subscribeWithError()
-            } catch {
-                print("[StoreViewModel] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in changes {
-                await refetchStores()
-            }
+    // No row filter: filters on non-PK columns silently drop UPDATE/DELETE events
+    // (see docs/memory/supabase-realtime-replica-identity.md).
+    private func setupRealtimeSubscription() {
+        guard !realtime.isStarted else { return }
+
+        let channel = realtime.channel("stores-list-\(listId.uuidString)")
+        realtime.on(channel.postgresChange(AnyAction.self, schema: "public", table: "stores")) { [weak self] in
+            await self?.refetchStores()
+        }
+
+        realtime.start { [weak self] in
+            await self?.refetchStores()
         }
     }
-    
+
     private func refetchStores() async {
         do {
             stores = try await StoreService.fetchStores(listId: listId)
@@ -96,9 +83,9 @@ final class StoreViewModel {
         }
     }
     
-    /// Manual refresh.
+    /// Manual refresh, in place: flipping `isLoading` here would swap the list out mid-pull.
     func refresh() async {
-        await loadData()
+        await refetchStores()
     }
     
     // MARK: - Actions
@@ -159,15 +146,6 @@ final class StoreViewModel {
                 }
                 print("[StoreViewModel] Failed to save store order: \(error.localizedDescription)")
             }
-        }
-    }
-    
-    deinit {
-        storesTask?.cancel()
-        
-        let channel = storesChannel
-        Task {
-            await channel?.unsubscribe()
         }
     }
 }

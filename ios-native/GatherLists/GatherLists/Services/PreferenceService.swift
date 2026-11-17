@@ -167,8 +167,7 @@ final class PreferenceRealtimeManager {
     
     private var client: SupabaseClient { SupabaseManager.shared.client }
     
-    nonisolated(unsafe) private var preferencesChannel: RealtimeChannelV2?
-    nonisolated(unsafe) private var preferencesTask: Task<Void, Never>?
+    private var realtime: RealtimeSubscriptions?
     private var subscribedUserId: UUID?
     
     private init() {}
@@ -176,44 +175,31 @@ final class PreferenceRealtimeManager {
     /// Starts realtime subscription for user_preferences changes.
     /// Updates UserDefaults cache when last_list_id changes from another device.
     func startSubscription(userId: UUID) async {
-        guard preferencesChannel == nil else { return }
+        guard realtime == nil else { return }
         subscribedUserId = userId
-        
-        let channel = client.realtimeV2.channel("user-preferences-realtime-\(userId.uuidString)")
-        preferencesChannel = channel
-        
+
+        let subscriptions = RealtimeSubscriptions(label: "PreferenceService")
+        realtime = subscriptions
+        let channel = subscriptions.channel("user-preferences-realtime-\(userId.uuidString)")
         let changes = channel.postgresChange(
             AnyAction.self,
             schema: "public",
             table: "user_preferences",
             filter: .eq("user_id", value: userId)
         )
-        
-        preferencesTask = Task {
-            do {
-                try await channel.subscribeWithError()
-            } catch {
-                print("[PreferenceService] Subscription failed: \(error.localizedDescription)")
-                return
-            }
-            for await _ in changes {
-                await handlePreferenceChange()
-            }
+        subscriptions.on(changes) { [weak self] in
+            await self?.handlePreferenceChange()
+        }
+        subscriptions.start { [weak self] in
+            await self?.handlePreferenceChange()
         }
     }
     
     /// Stops the realtime subscription (call on sign-out).
     func stopSubscription() {
-        preferencesTask?.cancel()
-        preferencesTask = nil
-        
-        let channel = preferencesChannel
-        preferencesChannel = nil
+        realtime?.stop()
+        realtime = nil
         subscribedUserId = nil
-        
-        Task {
-            await channel?.unsubscribe()
-        }
     }
     
     private func handlePreferenceChange() async {
