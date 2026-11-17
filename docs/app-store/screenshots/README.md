@@ -1,39 +1,32 @@
-# App Store Screenshots Guide
+# App Store Screenshots
 
-## Required Sizes
+Screenshots come from the native app in the iOS Simulator, not the web app.
 
-| Device Class | Resolution | Required |
-|---|---|---|
-| 6.7" iPhone | 1290 × 2796 | ✅ Yes (primary) |
-| 6.5" iPhone | 1284 × 2778 | ✅ Yes |  
-| 12.9" iPad Pro | 2048 × 2732 | ✅ Yes (for universal app) |
+## Sizes
 
-## Recommended Screenshots (5-6 per device)
+| Folder | Device | Pixels | Status |
+|---|---|---|---|
+| `iphone-6.3/` | iPhone 18 Pro (iOS 27) | 1206 × 2622 | Required size ("Dynamic Island, medium"). App Store Connect scales it for other iPhones. |
+| `ipad-13/` | iPad Pro 13-inch | 2064 × 2752 | Required because the app runs on iPad. |
 
-1. **Shopping List** — Main list view with items
-2. **AI Image Search** — Camera/search feature in action
-3. **Shared List** — Collaborative list with avatars
-4. **Dark Mode** — List view in dark mode
-5. **Recipe Panel** — Recipe suggestions panel open
+PNG or JPEG, no alpha channel, up to 10 per size.
 
-## Capture Methods
+## How to capture
 
-### Method 1: Playwright Script (Web-Based)
-Run `node scripts/capture-screenshots.js` with the dev server running on port 5173.
-This captures the web version at exact device resolutions.
+1. Use the iOS 27 simulators signed in as `e2e-test@gatherlists.com`. That account holds the demo data
+   (six lists, six recipes, a week of meal plan, display name "Alex Morgan"). Sign in through
+   "Sign In with Email" and type the account's password as the code.
+2. Clean status bar:
+   `xcrun simctl status_bar <udid> override --time "9:41" --batteryState discharging --batteryLevel 100 --wifiBars 3 --cellularBars 4`
+3. Navigate to the screen, then `xcrun simctl io <udid> screenshot <file>.png`.
+4. Dark mode: `xcrun simctl ui <udid> appearance dark` (the app's Appearance setting must be System).
+5. Strip the alpha channel before uploading. `simctl` PNGs include one and App Store Connect rejects it.
+6. `xcrun simctl status_bar <udid> clear` when done.
 
-### Method 2: Xcode Simulator (Recommended for Final)
-1. Open project: `npm run cap:ios`
-2. Select device in Xcode (iPhone 15 Pro Max, iPad Pro 12.9")
-3. Build & Run (Cmd+R)
-4. Navigate to desired screen
-5. Capture: Cmd+S in Simulator or `xcrun simctl io booted screenshot filename.png`
+## Gotchas
 
-### Method 3: Physical Device
-Use QuickTime Player > File > New Movie Recording with an iOS device connected.
-
-## Notes
-- Screenshots must include the status bar
-- Use a realistic time (e.g., 9:41 AM — Apple's standard)
-- Ensure good sample data is visible in lists
-- Both light and dark mode shots recommended
+- A meal plan entry of kind `recipe` shows the literal word "Recipe" unless its `title` is also set.
+- Recipes without tags show an orange warning badge on the grid. The app auto-tags them the first time
+  the Recipes tab loads, so open that tab once and relaunch before capturing.
+- Grocery items with no store are grouped under "Unassigned". Assign a store for a cleaner header.
+- The demo recipes have no photos, so the Recipes grid is not captured yet.
