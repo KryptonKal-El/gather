@@ -22,6 +22,7 @@ export const MobileListDetail = ({
   listSortConfig = null,
   listCategories = null,
   getEffectiveChecked = (item) => item.isChecked,
+  getPlacementChecked = (item) => item.isChecked,
   _isGuest = false,
   onBack,
   onAddItem,
@@ -272,6 +273,7 @@ export const MobileListDetail = ({
         <ShoppingList
           claimContext={claimContext}
           getEffectiveChecked={getEffectiveChecked}
+          getPlacementChecked={getPlacementChecked}
           items={list.items}
           stores={stores}
           sortConfig={sortConfig}
@@ -392,6 +394,7 @@ MobileListDetail.propTypes = {
   listSortConfig: PropTypes.arrayOf(PropTypes.string),
   listCategories: PropTypes.array,
   getEffectiveChecked: PropTypes.func,
+  getPlacementChecked: PropTypes.func,
   isGuest: PropTypes.bool,
   onBack: PropTypes.func.isRequired,
   onAddItem: PropTypes.func.isRequired,

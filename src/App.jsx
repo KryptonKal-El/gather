@@ -176,7 +176,7 @@ export const App = () => {
     await actions.toggleItem(listId, itemId, nextChecked);
   }, [actions]);
 
-  const { getEffectiveChecked, handleToggle: handlePendingToggle } = usePendingToggles({
+  const { getEffectiveChecked, getPlacementChecked, handleToggle: handlePendingToggle } = usePendingToggles({
     items: activeList?.items ?? [],
     onCommitToggle: handleCommitToggleItem,
   });
@@ -625,6 +625,7 @@ export const App = () => {
                  listSortConfig={activeList?.sortConfig ?? null}
                  listCategories={listCategories}
                  getEffectiveChecked={getEffectiveChecked}
+                 getPlacementChecked={getPlacementChecked}
                  onBack={handleBack}
                  onAddItem={handleAddItem}
                  onToggle={handleToggleItem}
@@ -934,6 +935,7 @@ export const App = () => {
                 <ShoppingList
                   claimContext={claimContext}
                   getEffectiveChecked={getEffectiveChecked}
+                  getPlacementChecked={getPlacementChecked}
                   items={activeList.items}
                   isLoading={activeList.isLoadingItems}
                   stores={state.stores}

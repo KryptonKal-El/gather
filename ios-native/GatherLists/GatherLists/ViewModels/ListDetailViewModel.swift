@@ -9,8 +9,8 @@ import WidgetKit
 @MainActor
 final class ListDetailViewModel {
     private final class RuntimeState {
-        var pendingToggleTasks: [UUID: Task<Void, Never>] = [:]
-        var pendingToggleOriginals: [UUID: Bool] = [:]
+        var toggleCommitTasks: [UUID: Task<Void, Never>] = [:]
+        var holdReleaseTask: Task<Void, Never>?
     }
 
     // Published state
@@ -71,18 +71,23 @@ final class ListDetailViewModel {
     
     var typeConfig: ListTypeConfig { ListTypes.getConfig(listType) }
 
+    /// Target checked state of toggles whose database write is still in flight.
     private(set) var pendingToggleStates: [UUID: Bool] = [:]
+
+    /// Section (checked or not) each recently toggled item stays in until the shared
+    /// hold delay expires, so the list doesn't shift while more items are crossed off.
+    private(set) var heldPlacements: [UUID: Bool] = [:]
     
     // MARK: - Computed Properties
     
-    /// Items where isChecked is false, preserving fetch order.
+    /// Items shown in the active section, preserving fetch order.
     var uncheckedItems: [Item] {
-        items.filter { !$0.isChecked }
+        items.filter { !placementIsChecked(for: $0) }
     }
     
-    /// Items where isChecked is true, preserving fetch order.
+    /// Items shown in the crossed-off section, preserving fetch order.
     var checkedItems: [Item] {
-        items.filter { $0.isChecked }
+        items.filter { placementIsChecked(for: $0) }
     }
     
     /// A typeahead suggestion from history: an item name plus the store it was
@@ -268,7 +273,6 @@ final class ListDetailViewModel {
         let itemsChannel = realtime.channel("list-items-\(listId.uuidString)")
         realtime.on(itemsChannel.postgresChange(AnyAction.self, schema: "public", table: "items")) { [weak self] in
             await self?.refetchItems()
-            self?.clearStalePendingToggles()
         }
 
         let storesChannel = realtime.channel("list-stores-\(listId.uuidString)")
@@ -339,7 +343,6 @@ final class ListDetailViewModel {
     func refresh() async {
         await Task {
             await loadData(showsLoading: false)
-            clearStalePendingToggles()
             if listType == "wish_list" {
                 await loadClaims()
             }
@@ -502,70 +505,61 @@ final class ListDetailViewModel {
         }
     }
 
-    /// Returns the checked state used for rendering while a delayed toggle is pending.
+    /// Returns the checked state used for rendering a row, including toggles still being saved.
     func effectiveIsChecked(for item: Item) -> Bool {
         pendingToggleStates[item.id] ?? item.isChecked
     }
 
-    /// Schedules a delayed item toggle, or cancels the pending toggle if one already exists.
+    /// Returns which section an item belongs in right now: where it was when the
+    /// current hold started, or its real state once the hold has been released.
+    func placementIsChecked(for item: Item) -> Bool {
+        heldPlacements[item.id] ?? item.isChecked
+    }
+
+    /// Toggles an item, saving it right away but holding it in its current section.
+    /// Every call restarts one shared delay; when it expires all held items move together.
     func scheduleToggleItem(_ item: Item) {
-        if runtime.pendingToggleTasks[item.id] != nil {
-            clearPendingToggle(itemId: item.id)
-            return
+        let itemId = item.id
+        let targetChecked = !effectiveIsChecked(for: item)
+
+        if heldPlacements[itemId] == nil {
+            heldPlacements[itemId] = item.isChecked
+        }
+        pendingToggleStates[itemId] = targetChecked
+
+        // Chained per item so rapid re-toggles reach the database in tap order.
+        let previousCommit = runtime.toggleCommitTasks[itemId]
+        runtime.toggleCommitTasks[itemId] = Task { [weak self] in
+            await previousCommit?.value
+            await self?.commitToggle(item: item, targetChecked: targetChecked)
         }
 
-        pendingToggleStates[item.id] = !item.isChecked
-        runtime.pendingToggleOriginals[item.id] = item.isChecked
-
-        let itemId = item.id
-        runtime.pendingToggleTasks[itemId] = Task { [weak self] in
-            try? await Task.sleep(for: .milliseconds(1500))
+        runtime.holdReleaseTask?.cancel()
+        runtime.holdReleaseTask = Task { [weak self] in
+            try? await Task.sleep(for: Self.toggleHoldDelay)
             guard !Task.isCancelled else { return }
-            guard let self else { return }
-            await self.commitPendingToggle(itemId: itemId)
+            self?.heldPlacements.removeAll()
         }
     }
 
-    private func commitPendingToggle(itemId: UUID) async {
-        guard let index = items.firstIndex(where: { $0.id == itemId }) else {
-            clearPendingToggle(itemId: itemId)
-            return
-        }
+    private static let toggleHoldDelay: Duration = .milliseconds(1500)
 
-        let currentItem = items[index]
-        let nextChecked = pendingToggleStates[itemId] ?? !currentItem.isChecked
-
+    private func commitToggle(item: Item, targetChecked: Bool) async {
         do {
-            try await ItemService.toggleItem(itemId: itemId, isChecked: nextChecked)
-            if let updatedIndex = items.firstIndex(where: { $0.id == itemId }) {
-                items[updatedIndex].isChecked = nextChecked
+            try await ItemService.toggleItem(itemId: item.id, isChecked: targetChecked)
+            if let index = items.firstIndex(where: { $0.id == item.id }) {
+                items[index].isChecked = targetChecked
             }
-            registerToggleUndo(item: currentItem, newChecked: nextChecked)
+            registerToggleUndo(item: item, newChecked: targetChecked)
         } catch {
             self.error = error.localizedDescription
-            print("[ListDetailViewModel] Failed to commit pending toggle for item \(itemId): \(error.localizedDescription)")
+            print("[ListDetailViewModel] Failed to commit toggle for item \(item.id): \(error.localizedDescription)")
         }
 
-        clearPendingToggle(itemId: itemId)
-    }
-
-    private func clearPendingToggle(itemId: UUID) {
-        runtime.pendingToggleTasks[itemId]?.cancel()
-        runtime.pendingToggleTasks.removeValue(forKey: itemId)
-        runtime.pendingToggleOriginals.removeValue(forKey: itemId)
-        pendingToggleStates.removeValue(forKey: itemId)
-    }
-
-    /// Clears pending toggles whose item was changed remotely (or removed) while
-    /// the delay was running. A realtime echo of one item's own commit must not
-    /// cancel other items' still-pending toggles.
-    private func clearStalePendingToggles() {
-        for (itemId, originalChecked) in runtime.pendingToggleOriginals {
-            let currentItem = items.first(where: { $0.id == itemId })
-            if let currentItem, currentItem.isChecked == originalChecked {
-                continue
-            }
-            clearPendingToggle(itemId: itemId)
+        // A newer toggle of the same item owns the pending state until its own commit lands.
+        if pendingToggleStates[item.id] == targetChecked {
+            pendingToggleStates.removeValue(forKey: item.id)
+            runtime.toggleCommitTasks.removeValue(forKey: item.id)
         }
     }
 
@@ -812,8 +806,6 @@ final class ListDetailViewModel {
     }
     
     deinit {
-        for task in runtime.pendingToggleTasks.values {
-            task.cancel()
-        }
+        runtime.holdReleaseTask?.cancel()
     }
 }

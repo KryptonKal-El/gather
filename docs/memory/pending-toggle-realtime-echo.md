@@ -1,29 +1,39 @@
-# Pending cross-off toggles vs. realtime echo (iOS)
+# Cross-off: immediate commit, shared placement hold (web + iOS)
 
-## Problem
+## Behavior (since 2026-11-17)
 
-Double-tap cross-off uses a 1.5s delayed commit per item (`scheduleToggleItem` in
-`ios-native/GatherLists/GatherLists/ViewModels/ListDetailViewModel.swift`). When several
-items were crossed off in quick succession, only the first one stuck: the first item's
-commit wrote to the DB, Supabase realtime echoed that change back to the same device, and
-the items-channel handler called `cancelAllPendingToggles()` — wiping every other item's
-still-pending toggle.
+Double-tap cross-off writes to the DB **immediately**. What is delayed is only the
+*move* between the active and crossed sections: each toggled item is held in the section
+it was in, and every toggle restarts **one shared 1.5s timer**. When that timer finally
+expires, all held items move together. This keeps the list from shifting while the user
+is still crossing off a second or third item.
 
-## Rule
+- Web: `src/hooks/usePendingToggles.js` — `getEffectiveChecked` (row rendering) vs
+  `getPlacementChecked` (which section; used by `ShoppingList.jsx` to partition).
+- iOS: `ListDetailViewModel.scheduleToggleItem` — `effectiveIsChecked(for:)` vs
+  `placementIsChecked(for:)`; `uncheckedItems` / `checkedItems` partition by placement.
 
-**Never cancel all pending optimistic state on a realtime event — your own commits echo
-back through the channel.** Clear pending state per item, and only when that item's
-server state actually diverged from what it was when the user acted.
+Two separate pieces of state, do not merge them:
 
-The fix mirrors the web hook (`src/hooks/usePendingToggles.js`), which got this right from
-the start:
+- **placement hold** (`heldCheckedById` / `heldPlacements`): the section the item sat in
+  when the hold started. Cleared for all items at once when the shared timer fires.
+- **optimistic checked** (`optimisticCheckedById` / `pendingToggleStates`): the target
+  state, shown while the write is in flight so a refetch/realtime echo of *another*
+  item's commit can't flicker the row back.
 
-- record `originalChecked` at schedule time (`runtime.pendingToggleOriginals`)
-- on a realtime items change: refetch, then `clearStalePendingToggles()` — cancel a
-  pending toggle only if its item is gone or `isChecked` no longer matches the recorded
-  original (i.e. someone else really changed it; remote wins)
-- commit the stored **target** state (`pendingToggleStates[itemId]`), not a re-flip of
-  whatever the current state happens to be after a mid-delay refetch
+Toggling the same item again inside the hold commits the reversal (writes are chained
+per item so they land in tap order) and the item simply never moves.
 
-If the web and iOS delayed-toggle behaviors ever change, change both — they are meant to
-be semantically identical.
+## Rules that still apply
+
+- **Never clear all optimistic state on a realtime event** — your own commits echo back
+  through the channel. Clear per item.
+- The web has no local optimistic item update; it relies on the realtime echo. So the
+  web override is dropped only when the commit has settled, the hold is released, and
+  the items either already show the target or change again.
+- Web and iOS are meant to be semantically identical — change both.
+
+## History
+
+Before this, the DB write itself was delayed 1.5s per item (each with its own timer),
+which made rows jump one by one mid-interaction.

@@ -157,6 +157,7 @@ export const ShoppingList = ({
   listId = null,
   listCategories = null,
   getEffectiveChecked = (item) => item.isChecked,
+  getPlacementChecked = (item) => item.isChecked,
   onToggle,
   onRemove,
   onUpdateCategory,
@@ -240,8 +241,8 @@ export const ShoppingList = ({
     );
   }
 
-  const unchecked = items.filter((i) => !i.isChecked);
-  const checkedItems = items.filter((i) => i.isChecked);
+  const unchecked = items.filter((i) => !getPlacementChecked(i));
+  const checkedItems = items.filter((i) => getPlacementChecked(i));
 
   const config = sortConfig ?? SYSTEM_DEFAULT_SORT_CONFIG;
   const uncheckedResult = applySortPipeline(unchecked, config, stores, listType, listCategories);
@@ -414,6 +415,7 @@ ShoppingList.propTypes = {
   listId: PropTypes.string,
   listCategories: PropTypes.array,
   getEffectiveChecked: PropTypes.func,
+  getPlacementChecked: PropTypes.func,
   onToggle: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   onUpdateCategory: PropTypes.func.isRequired,
