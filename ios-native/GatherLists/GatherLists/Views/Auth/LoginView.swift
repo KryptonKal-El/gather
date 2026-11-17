@@ -11,34 +11,44 @@ struct LoginView: View {
     @State private var isEmailCodeSheetPresented = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
-                Spacer().frame(height: 60)
-
-                StackedLogoView()
-
-                Spacer().frame(height: 20)
-
-                passkeySignInButton
-
-                appleSignInButton
-
-                orDivider
-
-                emailCodeButton
-
-                if let error = authViewModel.error {
-                    Text(error)
-                        .foregroundColor(.red)
-                        .font(.quicksand(.caption))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                Spacer().frame(height: 40)
+        GeometryReader { proxy in
+            ScrollView {
+                loginContent
+                    .frame(maxWidth: .infinity, minHeight: proxy.size.height)
             }
-            .padding()
+            .scrollBounceBehavior(.basedOnSize)
         }
+    }
+
+    /// The top and bottom gaps give way first, so the whole screen fits short displays
+    /// (iPhone Duo unfolded) without scrolling.
+    private var loginContent: some View {
+        VStack(spacing: 24) {
+            Spacer().frame(minHeight: 8, maxHeight: 60)
+
+            StackedLogoView()
+
+            Spacer().frame(height: 20)
+
+            passkeySignInButton
+
+            appleSignInButton
+
+            orDivider
+
+            emailCodeButton
+
+            if let error = authViewModel.error {
+                Text(error)
+                    .foregroundColor(.red)
+                    .font(.quicksand(.caption))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+
+            Spacer(minLength: 8)
+        }
+        .padding()
     }
 
     private var emailCodeButton: some View {

@@ -12,7 +12,9 @@ private struct ReadableContentMargins: ViewModifier {
     func body(content: Content) -> some View {
         let inset = max(0, (containerWidth - READABLE_CONTENT_WIDTH) / 2)
         content
-            .contentMargins(.horizontal, horizontalSizeClass == .regular ? inset : 0, for: .scrollContent)
+            // Measured from the safe area, so the margin adds to the room iOS reserves
+            // for a side toolbar (iPhone Duo) instead of replacing it.
+            .safeAreaPadding(.horizontal, horizontalSizeClass == .regular ? inset : 0)
             .onGeometryChange(for: CGFloat.self) { proxy in
                 proxy.size.width
             } action: { width in

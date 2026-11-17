@@ -12,6 +12,7 @@ struct ListDetailView: View {
     @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.undoManager) private var undoManager
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.displayScale) private var displayScale
     @Environment(ToastController.self) private var toastController
     @Environment(NotificationService.self) private var notificationService
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -1046,7 +1047,7 @@ struct ListDetailView: View {
             if showSeparator {
                 Rectangle()
                     .fill(Color(.separator))
-                    .frame(height: 1 / UIScreen.main.scale)
+                    .frame(height: 1 / displayScale)
                     .padding(.leading, isRsvpList ? 44 : 0)
             }
         }

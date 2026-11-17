@@ -8,6 +8,7 @@ Screenshots come from the native app in the iOS Simulator, not the web app.
 |---|---|---|---|
 | `iphone-6.3/` | iPhone 18 Pro (iOS 27) | 1206 × 2622 | Required size ("Dynamic Island, medium"). App Store Connect scales it for other iPhones. |
 | `ipad-13/` | iPad Pro 13-inch | 2064 × 2752 | Required because the app runs on iPad. |
+| `iphone-duo/` | iPhone Duo, open (iOS 27.2) | 2853 × 2007 | Optional slot for the foldable's inner screen. |
 
 PNG or JPEG, no alpha channel, up to 10 per size.
 
@@ -22,6 +23,14 @@ PNG or JPEG, no alpha channel, up to 10 per size.
 4. Dark mode: `xcrun simctl ui <udid> appearance dark` (the app's Appearance setting must be System).
 5. Strip the alpha channel before uploading. `simctl` PNGs include one and App Store Connect rejects it.
 6. `xcrun simctl status_bar <udid> clear` when done.
+
+### iPhone Duo
+
+- The Duo simulator needs an iOS 27.1+ runtime (`xcodebuild -downloadPlatform iOS`).
+- Open the hinge first (Simulator hinge control, or the simulator tool's `duo_pose open`).
+- It has two displays, so `simctl io` needs one named: `--display=3` is the inner screen,
+  `--display=1` the outer (1398 × 2034). Check with `xcrun simctl io <udid> screenshot x.png`,
+  which lists them.
 
 ## Gotchas
 
