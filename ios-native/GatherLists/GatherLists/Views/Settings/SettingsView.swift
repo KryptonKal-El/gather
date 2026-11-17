@@ -16,6 +16,7 @@ struct SettingsView: View {
     @State private var editedName = ""
     @State private var isSavingName = false
     @State private var appearanceSetting = AppearanceManager.shared.setting
+    @State private var appIcon = AppIconOption.current
     @State private var categoryCounts: [String: Int] = [:]
     @State private var walmartEnabled = true
     @State private var spoonacularEnabled = false
@@ -86,6 +87,12 @@ struct SettingsView: View {
                     .pickerStyle(.segmented)
                     .onChange(of: appearanceSetting) { _, newValue in
                         AppearanceManager.shared.setting = newValue
+                    }
+
+                    NavigationLink {
+                        AppIconPickerView(selection: $appIcon)
+                    } label: {
+                        LabeledContent("App Icon", value: appIcon.displayName)
                     }
                 }
                 

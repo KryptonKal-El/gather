@@ -45,6 +45,10 @@ with `height: auto`, so the few extra pixels are harmless.
 - `assets/icon-only.png`, `assets/icon-foreground.png`
 - `assets/splash.png`, `assets/splash-dark.png`
 - `ios-native/GatherLists/GatherLists/Assets.xcassets/AppIcon.appiconset/icon-foreground.png`
+- `ios-native/GatherLists/GatherLists/Assets.xcassets/AppIconPreviewDefault.imageset/icon.png`
+  (Settings → App Icon preview for "Default"; the `AppIconClassic`/`AppIconHoliday`
+  alternate icons and their previews are written from both sources in either mode,
+  so they don't change)
 - `ios-native/GatherLists/GatherLists/Assets.xcassets/LaunchLogo.imageset/stacked-logo@1x.png`,
   `@2x.png`, `@3x.png` (iOS caches launch screens — a simulator may show the old
   one until it reboots; devices pick up the new one with the app update)
@@ -59,3 +63,11 @@ then commit the regenerated files above (suggested message:
 `chore(brand): restore regular app icon after the holidays`), push (web icons
 deploy via Vercel), and ship a TestFlight/App Store build so the iOS icon
 reverts too. Nothing else to undo.
+
+## Settings → App Icon picker
+
+Users can pick Default / Classic / Holiday (`AppIconPickerView`, `AppIconOption`).
+Default is the primary `AppIcon` above, so it follows this seasonal swap; Classic
+and Holiday are alternate icon sets named in the
+`ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` build setting. A user who picked
+Holiday keeps it after the January revert.

@@ -38,6 +38,19 @@ const IOS_ASSETS = join(PROJECT_ROOT, 'ios-native', 'GatherLists', 'GatherLists'
 const IOS_APPICON = join(IOS_ASSETS, 'AppIcon.appiconset', 'icon-foreground.png');
 const IOS_LAUNCH_LOGO_DIR = join(IOS_ASSETS, 'LaunchLogo.imageset');
 
+// Alternate iOS app icons the user can pick in Settings, plus small previews for the picker.
+// Written from both sources in either mode; `default` follows the active mode like AppIcon does.
+const IOS_ALTERNATE_ICONS = [
+  { name: 'AppIconClassic', source: 'icon-only-full-bleed.svg' },
+  { name: 'AppIconHoliday', source: 'icon-only-full-bleed-holiday.svg' },
+];
+const IOS_ICON_PREVIEWS = [
+  { name: 'AppIconPreviewDefault', source: HOLIDAY ? 'icon-only-full-bleed-holiday.svg' : 'icon-only-full-bleed.svg' },
+  { name: 'AppIconPreviewClassic', source: 'icon-only-full-bleed.svg' },
+  { name: 'AppIconPreviewHoliday', source: 'icon-only-full-bleed-holiday.svg' },
+];
+const IOS_ICON_PREVIEW_SIZE = 240;
+
 // Served logo SVGs that carry <text>: fonts must be embedded because SVG-in-<img> cannot load external fonts
 const TEXT_LOGO_SVGS = [
   'icon-name.svg', 'icon-name-dark.svg', 'icon-name-tagline.svg', 'stacked.svg', 'gather-logo-all-variants.svg',
@@ -304,6 +317,39 @@ const generateSplashScreens = async () => {
 };
 
 /**
+ * Write a single-image asset catalog set (appiconset or imageset) with its Contents.json.
+ * @param {string} setDir - Path to the .appiconset / .imageset directory
+ * @param {Buffer} png - PNG data
+ * @param {object} imageEntry - Contents.json image entry, without filename
+ */
+const writeAssetSet = async (setDir, png, imageEntry) => {
+  mkdirSync(setDir, { recursive: true });
+  const filename = 'icon.png';
+  await sharp(png).toFile(join(setDir, filename));
+  const contents = { images: [{ filename, ...imageEntry }], info: { author: 'xcode', version: 1 } };
+  writeFileSync(join(setDir, 'Contents.json'), `${JSON.stringify(contents, null, 2)}\n`);
+  console.log(`Generated ${setDir}`);
+};
+
+/**
+ * Generate the alternate iOS app icons and the picker previews in Settings.
+ */
+const generateIosAlternateIcons = async () => {
+  for (const { name, source } of IOS_ALTERNATE_ICONS) {
+    const svg = readFileSync(join(PUBLIC, 'logo', source));
+    const png = await sharp(svg).resize(1024, 1024).png().toBuffer();
+    await writeAssetSet(join(IOS_ASSETS, `${name}.appiconset`), png, {
+      idiom: 'universal', platform: 'ios', size: '1024x1024',
+    });
+  }
+  for (const { name, source } of IOS_ICON_PREVIEWS) {
+    const svg = readFileSync(join(PUBLIC, 'logo', source));
+    const png = await sharp(svg).resize(IOS_ICON_PREVIEW_SIZE, IOS_ICON_PREVIEW_SIZE).png().toBuffer();
+    await writeAssetSet(join(IOS_ASSETS, `${name}.imageset`), png, { idiom: 'universal' });
+  }
+};
+
+/**
  * Main entry point. Generates all icons and splash screens.
  */
 /**
@@ -345,6 +391,9 @@ const main = async () => {
 
   console.log('\nGenerating Capacitor icons...');
   await generateCapacitorIcons(svgContent);
+
+  console.log('\nGenerating iOS alternate app icons...');
+  await generateIosAlternateIcons();
 
   console.log('\nGenerating apple-touch-icon...');
   await generateAppleTouchIcon(svgContent);
