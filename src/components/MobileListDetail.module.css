@@ -37,7 +37,7 @@
 .navTitle {
   flex: 1;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -85,12 +85,12 @@
   width: 100%;
   margin-top: 1.5rem;
   padding: 0.85rem 1rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 600;
   color: var(--primary-deep);
   background: var(--primary-tint);
   border: 1px solid var(--primary-light);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -101,7 +101,7 @@
 }
 
 .recipeIcon {
-  font-size: 1.2rem;
+  font-size: var(--font-xl);
 }
 
 .recipeOverlay {
@@ -131,7 +131,7 @@
   width: 100%;
   max-height: 85vh;
   background: var(--bg-card);
-  border-radius: 16px 16px 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   display: flex;
   flex-direction: column;
   animation: slideUp 0.25s ease;
@@ -156,7 +156,7 @@
 }
 
 .sheetTitle {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -200,7 +200,7 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.3rem;
+  font-size: var(--font-xl);
   cursor: pointer;
   padding: 0;
   line-height: 1;
@@ -219,7 +219,7 @@
   min-width: 160px;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px var(--overlay-light);
   padding: 0.25rem 0;
   overflow: hidden;
@@ -233,7 +233,7 @@
   padding: 0.55rem 0.75rem;
   background: none;
   border: none;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
@@ -246,7 +246,7 @@
 }
 
 .menuIcon {
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   flex-shrink: 0;
   line-height: 1;
 }
@@ -272,13 +272,13 @@
 
 .actionSheetGroup {
   background: var(--bg-card);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .actionSheetTitle {
   padding: 0.75rem 1rem 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-muted);
   text-align: center;
@@ -297,7 +297,7 @@
   background: none;
   border: none;
   border-top: 1px solid var(--border-subtle);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 400;
   color: var(--primary);
   cursor: pointer;
@@ -321,8 +321,8 @@
   margin-top: 0.5rem;
   background: var(--bg-card);
   border: none;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--primary);
   cursor: pointer;
@@ -356,7 +356,7 @@
 
 .modalCard {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   width: 100%;
   max-width: 340px;
   box-shadow: 0 8px 32px var(--overlay-medium);
@@ -372,7 +372,7 @@
 
 .modalTitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -380,7 +380,7 @@
 .modalCloseBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-2xl);
   color: var(--text-muted);
   cursor: pointer;
   padding: 0;
@@ -398,9 +398,9 @@
 .editInput {
   width: 100%;
   padding: 0.75rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-input);
   color: var(--text-primary);
 }
@@ -422,7 +422,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 500;
 }
 
@@ -432,7 +432,7 @@
 
 .checkboxHelp {
   padding-left: 1.5rem;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
 }
 
@@ -445,12 +445,12 @@
 .saveBtn {
   flex: 1;
   padding: 0.75rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: white;
   background: var(--primary);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 
@@ -466,12 +466,12 @@
 .cancelBtn {
   flex: 1;
   padding: 0.75rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-page);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
 }
 

@@ -13,7 +13,7 @@
   z-index: 1;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 2.5rem 2rem;
   max-width: 400px;
   width: 100%;
@@ -62,8 +62,8 @@
   padding: 0.75rem 1rem;
   background: var(--primary);
   border: 1px solid var(--primary);
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   font-weight: 600;
   color: #fff;
   cursor: pointer;
@@ -94,8 +94,8 @@
   padding: 0.75rem 1rem;
   background: #000;
   border: 1px solid #000;
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   font-weight: 600;
   color: #fff;
   cursor: pointer;
@@ -128,8 +128,8 @@
   padding: 0.75rem 1rem;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
@@ -150,8 +150,8 @@
   padding: 0.75rem 1rem;
   background: var(--primary);
   border: 1px solid var(--primary);
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   font-weight: 600;
   color: #fff;
   cursor: pointer;
@@ -172,7 +172,7 @@
   background: none;
   border: none;
   padding: 0.25rem 0;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   color: var(--text-placeholder);
   cursor: pointer;
   transition: color 0.15s;
@@ -189,25 +189,25 @@
 
 .codeHint {
   margin: 0 0 0.25rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   overflow-wrap: anywhere;
 }
 
 .newAccountHint {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-placeholder);
 }
 
 .codeInput {
   text-align: center;
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   letter-spacing: 0.3em;
 }
 
 .codeInput::placeholder {
-  font-size: 1rem;
+  font-size: var(--font-base);
   letter-spacing: normal;
 }
 
@@ -222,7 +222,7 @@
   align-items: center;
   gap: 0.75rem;
   color: var(--text-ghost);
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
 }
 
 .divider::before,
@@ -238,8 +238,8 @@
   padding: 0.75rem 1rem;
   background: var(--bg-hover);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--text-secondary);
   cursor: pointer;
@@ -258,11 +258,11 @@
 .error {
   margin: 1rem 0 0;
   color: var(--danger);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
 }
 
 .note {
   margin: 1.5rem 0 0;
   color: var(--text-faint);
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
 }

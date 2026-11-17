@@ -14,21 +14,21 @@
   max-width: 420px;
   background: #ffffff;
   border: 1px solid #e7e4df;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 28px 24px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
 
 .brand {
   font-weight: 700;
-  font-size: 15px;
+  font-size: var(--font-md);
   color: #3d7a63;
   letter-spacing: 0.2px;
   margin-bottom: 18px;
 }
 
 .title {
-  font-size: 20px;
+  font-size: var(--font-xl);
   font-weight: 600;
   margin: 0 0 6px;
   line-height: 1.3;
@@ -40,7 +40,7 @@
 }
 
 .subtitle {
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: #6b675f;
   margin: 0 0 20px;
   line-height: 1.5;
@@ -51,14 +51,14 @@
   margin: 0 0 24px;
   padding: 14px 16px;
   background: #f4f2ee;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .scopeItem {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--font-sm);
   padding: 4px 0;
 }
 
@@ -76,8 +76,8 @@
 .button {
   flex: 1 1 0;
   padding: 12px 14px;
-  border-radius: 12px;
-  font-size: 15px;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-md);
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
@@ -102,19 +102,19 @@
 .passkeyButton {
   width: 100%;
   padding: 11px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   margin-top: 6px;
 }
 
 .appleButton {
   width: 100%;
   padding: 11px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: 1px solid #d8d4cd;
   background: #000000;
   color: #ffffff;
   font-weight: 600;
-  font-size: 15px;
+  font-size: var(--font-md);
   cursor: pointer;
   margin-top: 6px;
 }
@@ -122,21 +122,21 @@
 .divider {
   text-align: center;
   color: #9a968d;
-  font-size: 12px;
+  font-size: var(--font-xs);
   margin: 14px 0;
 }
 
 .error {
   background: #fcebea;
   color: #9b1c1c;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   padding: 10px 12px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   margin-bottom: 16px;
 }
 
 .muted {
-  font-size: 12px;
+  font-size: var(--font-xs);
   color: #9a968d;
   margin-top: 18px;
   text-align: center;

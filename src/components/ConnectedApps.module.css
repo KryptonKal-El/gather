@@ -1,5 +1,5 @@
 .sectionHeader {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -10,7 +10,7 @@
 
 .section {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   margin-bottom: 1.5rem;
   overflow: hidden;
@@ -37,7 +37,7 @@
 }
 
 .appName {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -45,7 +45,7 @@
 }
 
 .appMeta {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
 }
 
@@ -54,7 +54,7 @@
   background: none;
   border: none;
   padding: 0.25rem 0;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   color: var(--danger);
   cursor: pointer;
 }
@@ -69,25 +69,25 @@
   background: none;
   border: none;
   padding: 0.25rem 0;
-  font-size: 0.95rem;
-  color: var(--accent);
+  font-size: var(--font-md);
+  color: var(--primary);
   cursor: pointer;
 }
 
 .message {
   padding: 0.75rem 1rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-muted);
 }
 
 .errorText {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--danger);
 }
 
 .errorRow {
   padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
   border-top: 1px solid var(--border-subtle);
 }

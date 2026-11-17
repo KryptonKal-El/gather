@@ -6,7 +6,7 @@
   z-index: 9999;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   padding: 1rem 1.25rem;
   display: flex;
@@ -25,20 +25,20 @@
 
 .title {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .message {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
 }
 
 .error {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
 }
 
@@ -52,8 +52,8 @@
 .dismissBtn {
   padding: 0.5rem 0.9rem;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   cursor: pointer;
   transition: background 0.15s;
 }

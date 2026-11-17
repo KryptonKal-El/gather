@@ -10,7 +10,7 @@
 }
 
 .title {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-muted);
   letter-spacing: 0.05em;
@@ -22,7 +22,7 @@
   border: none;
   padding: 0.2rem 0;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--primary);
   cursor: pointer;
@@ -30,7 +30,7 @@
 
 .muted {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-hint);
 }
 
@@ -45,9 +45,9 @@
 
 .chip {
   padding: 0.25rem 0.7rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--primary-tint);
   color: var(--primary);
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 600;
 }

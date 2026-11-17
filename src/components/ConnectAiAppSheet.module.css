@@ -12,7 +12,7 @@
 
 .modal {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 440px;
@@ -23,14 +23,14 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 0.5rem;
 }
 
 .intro {
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   line-height: 1.5;
   color: var(--text-primary);
   margin: 0 0 1rem;
@@ -43,13 +43,13 @@
   padding: 0.5rem 0.5rem 0.5rem 0.75rem;
   background: var(--primary-surface);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .url {
   flex: 1;
   min-width: 0;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-primary);
   word-break: break-all;
   user-select: all;
@@ -58,11 +58,11 @@
 .copyBtn {
   flex-shrink: 0;
   padding: 0.4rem 0.85rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: none;
   background: var(--primary);
   color: #fff;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
 }
@@ -72,7 +72,7 @@
 }
 
 .errorText {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
   margin: 0.5rem 0 0;
 }
@@ -80,7 +80,7 @@
 .steps {
   margin: 1rem 0 0.5rem;
   padding-left: 1.25rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   line-height: 1.5;
   color: var(--text-primary);
 }
@@ -90,7 +90,7 @@
 }
 
 .note {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   line-height: 1.4;
   color: var(--text-muted);
   margin: 0 0 1.25rem;
@@ -105,8 +105,8 @@
 .cancelBtn,
 .primaryBtn {
   padding: 0.55rem 1.15rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   border: none;
   cursor: pointer;
   text-decoration: none;

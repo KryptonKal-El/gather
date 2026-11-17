@@ -28,7 +28,7 @@
   min-width: 220px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   z-index: 100;
   overflow: visible;
@@ -37,7 +37,7 @@
 
 .header {
   padding: 0.5rem 1rem;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -54,7 +54,7 @@
   display: block;
   width: 100%;
   padding: 0.65rem 1rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   color: var(--text-secondary);
   background: none;
   border: none;

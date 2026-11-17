@@ -11,7 +11,7 @@
 
 .modal {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 480px;
@@ -30,7 +30,7 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -39,7 +39,7 @@
 .closeBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-2xl);
   color: var(--text-placeholder);
   cursor: pointer;
   padding: 0;
@@ -66,17 +66,17 @@
   height: auto;
   aspect-ratio: 1;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 2px solid var(--border-default);
 }
 
 .removeBtn {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-family: inherit;
   color: var(--danger);
   background: none;
   border: 1px solid var(--danger);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.5rem 1rem;
   min-height: 44px;
   min-width: 44px;
@@ -96,7 +96,7 @@
 .tab {
   flex: 1;
   padding: 0.6rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-family: inherit;
   font-weight: 600;
   color: var(--text-hint);
@@ -132,8 +132,8 @@
   flex: 1;
   padding: 0.6rem 0.75rem;
   border: 2px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -148,10 +148,10 @@
 .searchBtn {
   padding: 0.6rem 1rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--primary);
   color: var(--bg-card);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-family: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -170,7 +170,7 @@
 
 .error {
   color: var(--danger);
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   margin: 0;
 }
 
@@ -189,7 +189,7 @@
 .groupTitle {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 700;
 }
 
@@ -208,7 +208,7 @@
 .gridItem {
   aspect-ratio: 1;
   border: 2px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   cursor: pointer;
   padding: 0;
@@ -231,7 +231,7 @@
 
 .noResults {
   color: var(--text-hint);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   text-align: center;
   margin: 0;
   padding: 1rem 0;
@@ -266,9 +266,9 @@
 .uploadBtn {
   padding: 0.75rem 1.5rem;
   border: 2px dashed var(--border-dashed);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-page);
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-family: inherit;
   color: var(--text-secondary);
   cursor: pointer;
@@ -282,7 +282,7 @@
 
 .uploadHint {
   color: var(--text-faint);
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   margin: 0;
 }
 

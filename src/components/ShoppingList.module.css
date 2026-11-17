@@ -13,13 +13,13 @@
 }
 
 .empty p:first-child {
-  font-size: 1.2rem;
+  font-size: var(--font-xl);
   font-weight: 500;
   margin-bottom: 0.5rem;
 }
 
 .hint {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
 }
 
 .loading {
@@ -34,7 +34,7 @@
 
 .topLevelSection {
   border: 1px solid var(--border-default);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   margin-bottom: 0.75rem;
 }
 
@@ -42,14 +42,14 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 700;
   color: var(--text-primary);
   padding: 0.75rem 1rem;
   margin: 0;
   background: var(--bg-raised);
   border-bottom: 1px solid var(--border-default);
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   cursor: pointer;
   user-select: none;
   position: sticky;
@@ -61,7 +61,7 @@
 
 .topLevelTitleCollapsed {
   border-bottom: none;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .chevron {
@@ -115,7 +115,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -129,7 +129,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--font-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -146,17 +146,17 @@
 }
 
 .count {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   background: var(--badge-bg);
   color: var(--text-muted);
   padding: 0.1rem 0.4rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   font-weight: 500;
 }
 
 .subtotal {
   margin-left: auto;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--primary-dark);
 }
@@ -164,21 +164,21 @@
 .checkedSection {
   margin-top: 1rem;
   border: 1px solid var(--border-default);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .checkedHeader {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 700;
   color: var(--text-primary);
   padding: 0.75rem 1rem;
   margin: 0;
   background: var(--bg-raised);
   border-bottom: 1px solid var(--border-default);
-  border-radius: 10px 10px 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   cursor: pointer;
   user-select: none;
   position: sticky;
@@ -189,11 +189,11 @@
 
 .checkedHeaderCollapsed {
   border-bottom: none;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 
 .crossedTitle {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -205,11 +205,11 @@
 
 .clearBtn {
   margin-left: auto;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--danger);
   background: none;
   border: 1px solid var(--danger);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.4rem 0.75rem;
   cursor: pointer;
   font-family: inherit;
@@ -229,8 +229,8 @@
   padding: 0.75rem 1rem;
   background: var(--bg-raised);
   border: 1px solid var(--border-default);
-  border-radius: 10px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-sm);
 }
 
 .rsvpSummaryStats {
@@ -241,7 +241,7 @@
 
 .rsvpSummaryTotal {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-primary);
   text-align: center;
   margin-top: 0.15rem;
@@ -255,13 +255,13 @@
 }
 
 .rsvpStatCount {
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   font-weight: 700;
   line-height: 1.2;
 }
 
 .rsvpStatLabel {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 500;
   line-height: 1.2;
   text-transform: capitalize;

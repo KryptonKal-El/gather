@@ -19,7 +19,7 @@
 .navTitle {
   flex: 1;
   margin: 0;
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -31,7 +31,7 @@
 .closeButton {
   border: none;
   background: none;
-  font-size: 18px;
+  font-size: var(--font-lg);
   color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
@@ -41,7 +41,7 @@
 .discardButton {
   border: none;
   background: none;
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--danger);
   cursor: pointer;
   padding: 8px;
@@ -55,7 +55,7 @@
 
 .phaseTitle {
   margin: 0 0 16px;
-  font-size: 24px;
+  font-size: var(--font-2xl);
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -71,7 +71,7 @@
   align-items: center;
   gap: 14px;
   padding: 12px 8px;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   cursor: pointer;
 }
 
@@ -93,12 +93,12 @@
 }
 
 .ingredientName {
-  font-size: 18px;
+  font-size: var(--font-lg);
   color: var(--text-primary);
 }
 
 .ingredientQuantity {
-  font-size: 14px;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
 }
 
@@ -113,14 +113,14 @@
 
 .progressTrack {
   height: 6px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   background: var(--border-light);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   background: var(--primary);
   transition: width 0.25s ease;
 }
@@ -129,7 +129,7 @@
   display: block;
   margin-top: 8px;
   text-align: center;
-  font-size: 14px;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -137,14 +137,14 @@
 .stepDoneBadge {
   display: inline-block;
   margin-bottom: 12px;
-  font-size: 15px;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--primary);
 }
 
 .stepInstruction {
   margin: 0;
-  font-size: 28px;
+  font-size: var(--font-3xl);
   font-weight: 500;
   line-height: 1.4;
   color: var(--text-primary);
@@ -174,14 +174,14 @@
 
 .finishTitle {
   margin: 0;
-  font-size: 30px;
+  font-size: var(--font-3xl);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .finishSubtitle {
   margin: 0;
-  font-size: 17px;
+  font-size: var(--font-lg);
   color: var(--text-secondary);
 }
 
@@ -197,9 +197,9 @@
 .primaryButton {
   flex: 1;
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 16px;
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: #fff;
   background: var(--primary);
@@ -212,9 +212,9 @@
 
 .backStepButton {
   border: none;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   padding: 16px 22px;
-  font-size: 17px;
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--text-primary);
   background: var(--bg-hover);
@@ -226,13 +226,13 @@
   margin-top: 28px;
   padding: 14px 16px;
   border: 1px solid var(--border-light);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: var(--bg-card);
 }
 
 .stepIngredientsTitle {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: var(--font-sm);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -251,7 +251,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 6px 0;
-  font-size: 19px;
+  font-size: var(--font-xl);
 }
 
 .stepIngredientRow + .stepIngredientRow {
@@ -287,7 +287,7 @@
   width: min(100%, 640px);
   max-height: 70vh;
   transform: translateX(-50%);
-  border-radius: 18px 18px 0 0;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   background: var(--bg-card);
   box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18);
 }
@@ -301,7 +301,7 @@
 
 .panelTitle {
   margin: 0;
-  font-size: 20px;
+  font-size: var(--font-xl);
   font-weight: 700;
   color: var(--text-primary);
 }

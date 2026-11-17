@@ -606,7 +606,7 @@ export const RecipeSelector = ({
       <>
         <span className={styles.collectionEmoji}>{collection.emoji}</span>
         <span className={styles.collectionHeaderName}>
-          {collection.name}
+          <span className={styles.collectionHeaderText}>{collection.name}</span>
           {collection.shared && <span className={styles.sharedBadge}>Shared</span>}
         </span>
         <span className={styles.collectionCount}>{countFor(collection)}</span>

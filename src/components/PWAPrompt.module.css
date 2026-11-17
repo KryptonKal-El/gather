@@ -6,7 +6,7 @@
   z-index: 10000;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   padding: 1rem 1.25rem;
   display: flex;
@@ -18,7 +18,7 @@
 }
 
 .message {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   margin: 0;
   flex: 1;
@@ -35,8 +35,8 @@
   background: var(--primary);
   color: var(--bg-card);
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
@@ -51,8 +51,8 @@
   background: var(--cancel-bg);
   color: var(--text-secondary);
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;

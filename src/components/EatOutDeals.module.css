@@ -11,7 +11,7 @@
 
 .modal {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 460px;
@@ -30,7 +30,7 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -39,7 +39,7 @@
 .closeBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-2xl);
   color: var(--text-placeholder);
   cursor: pointer;
   line-height: 1;
@@ -48,7 +48,7 @@
 .intro {
   margin: 0;
   padding: 0 1.25rem 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-hint);
 }
 
@@ -65,7 +65,7 @@
   gap: 0.75rem;
   padding: 0.6rem 0.5rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: none;
   color: var(--text-primary);
   font: inherit;
@@ -82,12 +82,12 @@
   width: 40px;
   height: 40px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--deal-tint);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
 }
 
 .dealIconOff {
@@ -107,12 +107,12 @@
 }
 
 .dealMeta {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-hint);
 }
 
 .dealWarn {
-  font-size: 0.78rem;
+  font-size: var(--font-xs);
   color: var(--deal);
 }
 
@@ -120,7 +120,7 @@
   padding: 1rem 1.25rem;
   text-align: center;
   color: var(--text-hint);
-  font-size: 0.9rem;
+  font-size: var(--font-md);
 }
 
 .section {
@@ -129,7 +129,7 @@
 
 .label {
   display: block;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--text-tertiary);
   margin-bottom: 0.4rem;
@@ -138,7 +138,7 @@
 
 .hint {
   margin: 0.35rem 0 0;
-  font-size: 0.78rem;
+  font-size: var(--font-xs);
   color: var(--text-hint);
 }
 
@@ -147,11 +147,11 @@
   box-sizing: border-box;
   padding: 0.55rem 0.75rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-input);
   color: var(--text-primary);
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
 }
 
 .input + .input {
@@ -177,10 +177,10 @@
   border: 1px solid var(--border-default);
   background: var(--bg-card);
   color: var(--text-primary);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 0.4rem 0.75rem;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   cursor: pointer;
 }
 
@@ -200,7 +200,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
 }
 
@@ -210,7 +210,7 @@
   justify-content: space-between;
   gap: 0.5rem;
   margin-top: 0.6rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-secondary);
 }
 
@@ -219,7 +219,7 @@
   border: none;
   padding: 0.25rem 0;
   font: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--primary);
   cursor: pointer;
@@ -231,7 +231,7 @@
 
 .error {
   margin: 0.25rem 1.25rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
 }
 
@@ -245,10 +245,10 @@
 .cancelBtn,
 .saveBtn {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 0.55rem 1.1rem;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   cursor: pointer;
 }
 

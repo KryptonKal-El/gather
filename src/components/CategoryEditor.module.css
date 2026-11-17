@@ -1,7 +1,7 @@
 .editor {
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1rem;
   margin-bottom: 1rem;
 }
@@ -26,7 +26,7 @@
 }
 
 .title {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
@@ -34,12 +34,12 @@
 
 .cancelBtn {
   padding: 0.35rem 0.65rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-secondary);
   background: none;
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
@@ -51,12 +51,12 @@
 
 .saveBtn {
   padding: 0.35rem 0.65rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: #fff;
   background: var(--primary);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
 }
@@ -77,12 +77,12 @@
   width: 28px;
   height: 28px;
   padding: 0;
-  font-size: 1.3rem;
+  font-size: var(--font-xl);
   font-weight: 400;
   color: var(--text-secondary);
   background: none;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s;
 }
@@ -99,11 +99,11 @@
 .searchBar {
   width: 100%;
   padding: 0.45rem 0.6rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   background: var(--bg-input);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-sizing: border-box;
 }
 
@@ -125,14 +125,14 @@
 .categoryItem {
   position: relative;
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 /* The open menu's dropdown must escape the card, so the row is only clipped
    on touch devices where swipe-to-delete (and its slide-out background) exists. */
 .swipeContainer {
   position: relative;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 @media (pointer: coarse) {
@@ -179,7 +179,7 @@
 .swipeDeleteText {
   color: white;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
 }
 
 .categoryRow {
@@ -218,7 +218,7 @@
 
 .categoryName {
   flex: 1;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--text-primary);
   min-width: 0;
@@ -230,12 +230,12 @@
 .nameInput {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-input);
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   outline: none;
   box-sizing: border-box;
   transition: border-color 0.15s;
@@ -246,12 +246,12 @@
 }
 
 .keywordCount {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: var(--text-muted);
   background: var(--badge-bg);
   padding: 0.15rem 0.4rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   flex-shrink: 0;
 }
 
@@ -265,10 +265,10 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   cursor: pointer;
   padding: 0.3rem 0.45rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: color 0.1s, background 0.1s;
   line-height: 1;
 }
@@ -276,7 +276,7 @@
 .menuBtn:hover {
   color: var(--text-primary);
   background: var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .menuDropdown {
@@ -287,7 +287,7 @@
   min-width: 170px;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px var(--overlay-light);
   padding: 0.25rem 0;
   overflow: hidden;
@@ -301,7 +301,7 @@
   padding: 0.55rem 0.75rem;
   background: none;
   border: none;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
@@ -329,7 +329,7 @@
   gap: 0.5rem;
   padding: 0.75rem;
   background: var(--bg-page);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .editColorPicker {
@@ -365,13 +365,13 @@
 
 .actionSheetGroup {
   background: var(--bg-card);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
 .actionSheetTitle {
   padding: 0.75rem 1rem 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   color: var(--text-muted);
   text-align: center;
@@ -389,7 +389,7 @@
   background: none;
   border: none;
   border-top: 1px solid var(--border-subtle);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 400;
   color: var(--primary);
   cursor: pointer;
@@ -418,8 +418,8 @@
   margin-top: 0.5rem;
   background: var(--bg-card);
   border: none;
-  border-radius: 14px;
-  font-size: 1.1rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-lg);
   font-weight: 600;
   color: var(--primary);
   cursor: pointer;
@@ -498,7 +498,7 @@
 
 .keywordLabel {
   display: block;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 0.35rem;
@@ -507,11 +507,11 @@
 .keywordInput {
   width: 100%;
   padding: 0.4rem 0.6rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   background: var(--bg-input);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-sizing: border-box;
 }
 
@@ -533,13 +533,13 @@
 }
 
 .description {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   margin: 0 0 0.75rem 0;
 }
 
 .sectionTitle {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -548,11 +548,11 @@
 }
 
 .newBtn {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--primary);
   background: none;
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.85rem;
   cursor: pointer;
   font-weight: 600;
@@ -577,8 +577,8 @@
   background: var(--primary);
   color: var(--bg-card);
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -609,11 +609,11 @@
   }
 
   .categoryName {
-    font-size: 1rem;
+    font-size: var(--font-base);
   }
 
   .nameInput {
-    font-size: 1rem;
+    font-size: var(--font-base);
   }
 
   .colorSwatch {
@@ -625,7 +625,7 @@
 
   .keywordInput {
     padding: 0.5rem 0.75rem;
-    font-size: 1rem;
+    font-size: var(--font-base);
     min-height: 44px;
   }
 
@@ -635,7 +635,7 @@
 
   .createBtn {
     min-height: 44px;
-    font-size: 0.9rem;
+    font-size: var(--font-md);
   }
 }
 
@@ -651,12 +651,12 @@
 
 .saveDefaultButton {
   padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
@@ -668,7 +668,7 @@
 }
 
 .saveDefaultSuccess {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--success, #2e7d32);
   padding: 0.25rem 0;
@@ -698,7 +698,7 @@
 
   .saveDefaultButton {
     padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    font-size: var(--font-md);
     min-height: 44px;
   }
 }
@@ -712,12 +712,12 @@
 
 .deleteAllButton {
   padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--danger);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
@@ -730,7 +730,7 @@
 @media (max-width: 700px) {
   .searchBar {
     padding: 0.5rem 0.75rem;
-    font-size: 1rem;
+    font-size: var(--font-base);
     min-height: 44px;
   }
 
@@ -741,7 +741,7 @@
 
   .deleteAllButton {
     padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    font-size: var(--font-md);
     min-height: 44px;
   }
 }
@@ -750,7 +750,7 @@
   .cancelBtn,
   .saveBtn {
     padding: 0.45rem 0.75rem;
-    font-size: 0.9rem;
+    font-size: var(--font-md);
     min-height: 36px;
   }
 

@@ -1,5 +1,5 @@
 .sectionHeader {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -10,7 +10,7 @@
 
 .section {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   margin-bottom: 1.5rem;
   overflow: hidden;
@@ -38,7 +38,7 @@
 }
 
 .name {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -46,7 +46,7 @@
 }
 
 .meta {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
 }
 
@@ -64,12 +64,12 @@
   background: none;
   border: none;
   padding: 0.25rem 0;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   cursor: pointer;
 }
 
 .linkButton {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .removeButton {
@@ -81,7 +81,7 @@
 }
 
 .saveButton {
-  color: var(--accent);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -98,8 +98,8 @@
   padding: 0.4rem 0.6rem;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   color: var(--text-primary);
   outline: none;
 }
@@ -110,7 +110,7 @@
 
 .message {
   padding: 0.75rem 1rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -120,13 +120,13 @@
 }
 
 .errorText {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--danger);
 }
 
 .errorRow {
   padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
   border-top: 1px solid var(--border-subtle);
 }

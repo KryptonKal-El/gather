@@ -9,10 +9,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   background: var(--bg-hover);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
   flex-shrink: 0;
@@ -38,11 +38,11 @@
   border-top: 1px solid var(--border-default);
   background: var(--bg-card);
   color: var(--danger);
-  font-size: 0.78rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .clearBtn:hover {
@@ -60,10 +60,10 @@
 .mobileInput {
   width: 10rem;
   padding: 0.6rem 0.75rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: var(--text-primary);
   outline: none;
@@ -75,5 +75,5 @@
 
 .mobileInput::placeholder {
   color: var(--text-tertiary);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
 }

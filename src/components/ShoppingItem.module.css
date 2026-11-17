@@ -31,7 +31,7 @@
 .thumbnail {
   width: 60px;
   height: 60px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   border: 2px dashed var(--thumbnail-border);
   background: var(--bg-page);
   cursor: pointer;
@@ -53,6 +53,15 @@
   border-style: solid;
 }
 
+/* An empty slot is a small "add photo" target centred in the same 60px
+   column, so names stay aligned with rows that have a photo */
+.thumbnail:not(.thumbnailHasImage):not(.thumbnailLoading) {
+  width: 36px;
+  height: 36px;
+  margin: 0 12px;
+  border-width: 1.5px;
+}
+
 .thumbnailImg {
   width: 100%;
   height: 100%;
@@ -61,7 +70,7 @@
 }
 
 .thumbnailPlaceholder {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--text-ghost);
   font-weight: 600;
   line-height: 1;
@@ -96,18 +105,18 @@
 }
 
 .name {
-  font-size: 1rem;
+  font-size: var(--font-base);
   transition: color 0.2s;
 }
 
 .qty {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   font-weight: 400;
 }
 
 .note {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   font-weight: 400;
   line-height: 1.3;
@@ -123,19 +132,19 @@
 }
 
 .storeBadgeCompact {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   color: white;
   padding: 0.2rem 0.45rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   font-weight: 600;
 }
 
 .categoryCompact {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   color: white;
   padding: 0.2rem 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   font-weight: 600;
   text-transform: uppercase;
@@ -143,7 +152,7 @@
 }
 
 .dueDateLabel {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   color: var(--text-muted);
   white-space: nowrap;
   display: flex;
@@ -152,7 +161,7 @@
 }
 
 .repeatIcon {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
 }
 
 .overdue {
@@ -167,11 +176,11 @@
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   font-weight: 600;
   color: #fff;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   text-transform: capitalize;
   font-family: inherit;
@@ -179,7 +188,7 @@
 }
 
 .price {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--primary-dark);
   white-space: nowrap;
@@ -196,7 +205,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: color 0.15s, background 0.15s;
 }
 
@@ -221,7 +230,7 @@
 }
 
 .editLabel {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--text-muted);
   min-width: 60px;
@@ -238,7 +247,7 @@
   align-items: center;
   gap: 0;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -247,7 +256,7 @@
   height: 2.5rem;
   border: none;
   background: var(--bg-page);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-family: inherit;
   color: var(--text-secondary);
   cursor: pointer;
@@ -263,7 +272,7 @@
 }
 
 .qtyValue {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 600;
   min-width: 2.5rem;
   text-align: center;
@@ -276,8 +285,8 @@
 .unitSelect {
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -293,8 +302,8 @@
 .rsvpSelect {
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -311,13 +320,13 @@
   display: flex;
   align-items: center;
   border: 1px solid var(--primary);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   height: 2.5rem;
 }
 
 .priceCurrency {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--text-hint);
   padding: 0 0.25rem 0 0.5rem;
   background: var(--bg-page);
@@ -330,7 +339,7 @@
   width: 5rem;
   height: 100%;
   border: none;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -353,8 +362,8 @@
   flex: 1;
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -372,11 +381,11 @@
 }
 
 .storeBadge {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   font-family: inherit;
   color: white;
   padding: 0.25rem 0.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   border: none;
   white-space: nowrap;
   font-weight: 600;
@@ -395,11 +404,11 @@
 }
 
 .category {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   font-family: inherit;
   color: white;
   padding: 0.25rem 0.55rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: none;
   white-space: nowrap;
   font-weight: 600;
@@ -424,7 +433,7 @@
   z-index: 20;
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px var(--overlay-medium);
   padding: 0.35rem 0;
   min-width: 180px;
@@ -441,7 +450,7 @@
   border: none;
   background: none;
   font-family: inherit;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
@@ -476,11 +485,11 @@
   background: none;
   border: none;
   color: var(--danger);
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   cursor: pointer;
   padding: 0.4rem 0.6rem;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transition: background 0.15s;
 }
 
@@ -505,7 +514,13 @@
   .thumbnail {
     width: 40px;
     height: 40px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
+  }
+
+  .thumbnail:not(.thumbnailHasImage):not(.thumbnailLoading) {
+    width: 32px;
+    height: 32px;
+    margin: 0 4px;
   }
 
   .picker {
@@ -514,7 +529,7 @@
   }
 
   .priceEditInput {
-    font-size: 1rem;
+    font-size: var(--font-base);
   }
 }
 
@@ -635,7 +650,7 @@
 .qtyBump {
   display: inline-block;
   padding: 0 3px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   transform-origin: left center;
   animation: qtyBump 1.1s ease-out forwards;
 }
@@ -682,7 +697,7 @@
 }
 
 .historyChevron {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   opacity: 0.6;
 }
 
@@ -698,7 +713,7 @@
   align-items: center;
   gap: 8px;
   padding: 4px 0;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary, #666);
 }
 
@@ -716,14 +731,14 @@
 }
 
 .historyEmpty {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary, #666);
   font-style: italic;
   margin: 4px 0;
 }
 
 .historyLoading {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary, #666);
   padding: 4px 0;
 }
@@ -739,10 +754,10 @@
   flex: 1;
   padding: 6px 8px;
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   background: var(--bg-input);
   color: inherit;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-family: inherit;
   height: 2.5rem;
   box-sizing: border-box;
@@ -758,10 +773,10 @@
   border: none;
   cursor: pointer;
   color: var(--text-secondary, #666);
-  font-size: 1rem;
+  font-size: var(--font-base);
   padding: 4px;
   line-height: 1;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: color 0.15s, background 0.15s;
 }
 
@@ -774,8 +789,8 @@
 .recurrenceSelect {
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -806,8 +821,8 @@
   width: 4rem;
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -830,8 +845,8 @@
 .recurrenceFrequencySelect {
   height: 2.5rem;
   border: 1px solid var(--border-default);
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   font-family: inherit;
   color: var(--text-primary);
   background: var(--bg-input);
@@ -858,7 +873,7 @@
   border-radius: 50%;
   background: var(--bg-input);
   color: var(--text-primary);
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -887,20 +902,20 @@
 }
 
 .receivedBadge {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   color: var(--primary-dark);
   border: 1px solid currentColor;
   padding: 0.15rem 0.45rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   font-weight: 600;
 }
 
 .priorityBadge {
-  font-size: 0.7rem;
+  font-size: var(--font-2xs);
   color: white;
   padding: 0.2rem 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   white-space: nowrap;
   font-weight: 600;
 }
@@ -912,7 +927,7 @@
   width: 32px;
   height: 32px;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--primary-dark);
 }
 
@@ -935,6 +950,6 @@
 }
 
 .fieldError {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   color: var(--danger);
 }

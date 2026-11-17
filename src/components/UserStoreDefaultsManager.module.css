@@ -13,7 +13,7 @@
 }
 
 .sectionTitle {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -22,11 +22,11 @@
 }
 
 .newBtn {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--primary);
   background: none;
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   padding: 0.45rem 0.85rem;
   cursor: pointer;
   font-weight: 600;
@@ -40,7 +40,7 @@
 
 /* Description text */
 .description {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   margin: 0 0 0.5rem 0;
 }
@@ -53,11 +53,11 @@
 .searchBar {
   width: 100%;
   padding: 0.45rem 0.6rem;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   background: var(--bg-input);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   box-sizing: border-box;
 }
 
@@ -76,12 +76,12 @@
 
 .deleteAllButton {
   padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--danger);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }
@@ -99,7 +99,7 @@
   padding: 0.75rem;
   background: var(--bg-input);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   margin-bottom: 0.5rem;
 }
 
@@ -107,8 +107,8 @@
   width: 100%;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--border-light);
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-base);
   background: var(--bg-input);
   color: var(--text-primary);
   font-family: inherit;
@@ -196,8 +196,8 @@
   background: var(--primary);
   color: var(--bg-card);
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -219,8 +219,8 @@
   background: var(--primary);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;
@@ -237,8 +237,8 @@
   background: var(--bg-card);
   color: var(--text-muted);
   border: 1px solid var(--border-medium);
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 400;
   cursor: pointer;
   font-family: inherit;
@@ -268,7 +268,7 @@
   padding: 0.75rem;
   background: var(--bg-card);
   border: 1px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   transition: background 0.15s;
 }
 
@@ -295,7 +295,7 @@
   touch-action: none;
   cursor: grab;
   padding: 0;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
 }
 
 .dragHandle:active {
@@ -314,7 +314,7 @@
 /* Store name */
 .name {
   flex: 1;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -338,8 +338,8 @@
   width: 100%;
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--border-light);
-  border-radius: 4px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-md);
   background: var(--bg-input);
   color: var(--text-primary);
   font-family: inherit;
@@ -367,10 +367,10 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   cursor: pointer;
   padding: 0.3rem 0.45rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: color 0.1s, background 0.1s;
   line-height: 1;
 }
@@ -378,7 +378,7 @@
 .menuBtn:hover {
   color: var(--text-primary);
   background: var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
 }
 
 .menuDropdown {
@@ -389,7 +389,7 @@
   min-width: 170px;
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   box-shadow: 0 4px 16px var(--overlay-light);
   padding: 0.25rem 0;
   overflow: hidden;
@@ -403,7 +403,7 @@
   padding: 0.55rem 0.75rem;
   background: none;
   border: none;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
@@ -424,7 +424,7 @@
 
 /* Empty state */
 .emptyMessage {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   margin: 0;
 }
@@ -442,14 +442,14 @@
 
 .confirmDialog {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   max-width: 300px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .confirmDialog p {
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   color: var(--text-primary);
   margin: 0 0 1rem 0;
 }
@@ -465,8 +465,8 @@
   background: var(--danger);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
   font-weight: 600;
   cursor: pointer;
   font-family: inherit;

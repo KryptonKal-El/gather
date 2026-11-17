@@ -4,14 +4,14 @@
 
 .section {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   margin-bottom: 1.5rem;
   overflow: hidden;
 }
 
 .sectionHeader {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -56,7 +56,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   font-weight: 600;
   flex-shrink: 0;
   overflow: hidden;
@@ -76,7 +76,7 @@
 }
 
 .displayName {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
@@ -85,7 +85,7 @@
 }
 
 .email {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -107,7 +107,7 @@
 }
 
 .toggleLabel {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--text-primary);
 }
 
@@ -134,7 +134,7 @@
   right: 0;
   bottom: 0;
   background-color: var(--border-default);
-  border-radius: 31px;
+  border-radius: var(--radius-pill);
   transition: background-color 0.2s ease;
 }
 
@@ -181,12 +181,12 @@
 
 .infoIcon {
   color: var(--info);
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   flex-shrink: 0;
 }
 
 .infoText {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--info);
 }
 
@@ -209,7 +209,7 @@
 }
 
 .destructiveText {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--danger);
   font-weight: 500;
 }
@@ -268,7 +268,7 @@
 
 .uploadError {
   padding: 0.5rem 1rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--danger);
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -284,7 +284,7 @@
   justify-content: space-between;
   width: 100%;
   padding: 0.75rem 1rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   background: none;
   border: none;
   border-bottom: 1px solid var(--border-light);
@@ -314,17 +314,17 @@
 }
 
 .categoryDefaultCount {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-secondary);
   background: var(--bg-secondary);
   padding: 0.15rem 0.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   min-width: 1.5rem;
   text-align: center;
 }
 
 .chevron {
-  font-size: 1.2rem;
+  font-size: var(--font-xl);
   color: var(--text-secondary);
   transition: transform 0.2s;
   transform: rotate(0deg);
@@ -352,12 +352,12 @@
 /* Reset defaults button */
 .resetDefaultsButton {
   padding: 0.4rem 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--bg-card);
   border: 1px solid var(--border-default);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
 }

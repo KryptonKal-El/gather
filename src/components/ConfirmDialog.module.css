@@ -14,7 +14,7 @@
 
 .dialog {
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 1.5rem 1.75rem;
   max-width: 360px;
   width: 90%;
@@ -23,14 +23,14 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   line-height: 1.3;
   color: var(--text-primary);
   margin: 0 0 0.75rem;
 }
 
 .message {
-  font-size: 1rem;
+  font-size: var(--font-base);
   line-height: 1.5;
   color: var(--text-primary);
   margin: 0 0 1.25rem;
@@ -46,8 +46,8 @@
 .confirmBtn,
 .confirmBtnNeutral {
   padding: 0.55rem 1.15rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
+  border-radius: var(--radius-md);
+  font-size: var(--font-md);
   font-weight: 600;
   cursor: pointer;
   border: none;

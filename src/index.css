@@ -40,7 +40,7 @@
   --text-tertiary: #666666;
   --text-muted: #777777;
   --text-hint: #888888;
-  --text-placeholder: #999999;
+  --text-placeholder: #737373;
   --text-faint: #aaaaaa;
   --text-ghost: #bbbbbb;
   --text-icon: #cccccc;
@@ -110,6 +110,24 @@
   --login-gradient-end: #E8F2EE;
   --thumbnail-border: #d0d0d0;
 
+  /* Type scale. Font sizes come from these tokens, not raw values. */
+  --font-2xs: 0.7rem;
+  --font-xs: 0.75rem;
+  --font-sm: 0.85rem;
+  --font-md: 0.95rem;
+  --font-base: 1rem;
+  --font-lg: 1.1rem;
+  --font-xl: 1.25rem;
+  --font-2xl: 1.5rem;
+  --font-3xl: 1.75rem;
+
+  /* Corner radii. Circles use 50%. */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
   /* Transition */
   --theme-transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 
@@ -122,7 +140,7 @@
    -------------------------------------------------------------------------- */
 [data-theme="dark"] {
   /* Surfaces */
-  --bg-page: #1a1a2e;
+  --bg-page: #121212;
   --bg-card: #1e1e1e;
   --bg-raised: #252525;
   --bg-hover: #2a2a2a;
@@ -135,7 +153,7 @@
   --text-tertiary: #a0a0a0;
   --text-muted: #909090;
   --text-hint: #808080;
-  --text-placeholder: #707070;
+  --text-placeholder: #8a8a8a;
   --text-faint: #606060;
   --text-ghost: #505050;
   --text-icon: #484848;

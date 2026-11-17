@@ -12,7 +12,7 @@
 
 .modal {
   background: var(--bg-card);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 400px;
@@ -30,7 +30,7 @@
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -39,7 +39,7 @@
 .closeBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: var(--font-2xl);
   color: var(--text-placeholder);
   cursor: pointer;
   padding: 0 0.25rem;
@@ -59,14 +59,14 @@
 }
 
 .summaryLabel {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0 0 0.35rem;
 }
 
 .recipeName {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 500;
   color: var(--text-primary);
   margin: 0;
@@ -83,20 +83,20 @@
 }
 
 .noCollectionsMsg {
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 0.5rem;
 }
 
 .noCollectionsHint {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-placeholder);
   margin: 0;
 }
 
 .chooseLabel {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -108,7 +108,7 @@
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid var(--border-default);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   margin-bottom: 1rem;
 }
 
@@ -143,14 +143,14 @@
 }
 
 .collectionEmoji {
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   margin-right: 0.75rem;
   flex-shrink: 0;
 }
 
 .collectionName {
   flex: 1;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
@@ -159,7 +159,7 @@
 }
 
 .checkmark {
-  font-size: 1rem;
+  font-size: var(--font-base);
   color: var(--primary);
   font-weight: 700;
   margin-left: 0.5rem;
@@ -168,7 +168,7 @@
 
 .error {
   color: var(--danger);
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   margin: 0 0 0.75rem;
 }
 
@@ -179,8 +179,8 @@
   background: var(--primary);
   color: var(--bg-card);
   border: none;
-  border-radius: 10px;
-  font-size: 1rem;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-base);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s, opacity 0.15s;
@@ -201,14 +201,14 @@
   justify-content: center;
   gap: 0.5rem;
   padding: 1rem;
-  font-size: 0.95rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--success, #22c55e);
   text-align: center;
 }
 
 .successIcon {
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
 }
 
 @media (max-width: 700px) {
@@ -220,7 +220,7 @@
   .modal {
     width: 100%;
     max-width: none;
-    border-radius: 16px 16px 0 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
     max-height: 90vh;
     animation: slideUp 0.2s ease;
   }

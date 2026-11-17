@@ -4,6 +4,7 @@ import { useShoppingList } from './hooks/useShoppingList.js';
 import { useRecipes } from './hooks/useRecipes.js';
 import { useSortPreferences } from './hooks/useSortPreferences.js';
 import { useAuth } from './context/AuthContext.jsx';
+import { useTheme } from './context/ThemeContext.jsx';
 import { useUndo } from './context/UndoContext.jsx';
 import { useToast } from './context/ToastContext.jsx';
 import { useIsMobile } from './hooks/useIsMobile.js';
@@ -59,6 +60,7 @@ const isLightColor = (hex) => {
  * recipe panel, store manager, and share modal.
  */
 export const App = () => {
+  const { theme } = useTheme();
   const { user, isLoading, signOut, refreshUser } = useAuth();
   const { state, actions, activeList } = useShoppingList();
   const claimContext = useClaimContext(activeList, user?.id ?? null, actions);
@@ -1090,7 +1092,7 @@ export const App = () => {
    };
 
   return (
-    <div className={styles.app}>
+    <div className={`${styles.app} ${!isMobile && isPlanTabOpen ? styles.appWide : ''}`}>
       <PWAInstallBanner
         showBanner={showBanner}
         platform={platform}
@@ -1101,7 +1103,11 @@ export const App = () => {
         {!isMobile && (
           <>
             <h1 className={styles.logoGroup}>
-              <img src="/logo/active/icon-name-tagline.svg" alt="Gather Lists" className={styles.headerLogo} />
+              <img
+                src={theme === 'dark' ? '/logo/active/icon-name-dark.svg' : '/logo/active/icon-name-tagline.svg'}
+                alt="Gather Lists"
+                className={styles.headerLogo}
+              />
             </h1>
             <div className={styles.headerRight}>
               <div

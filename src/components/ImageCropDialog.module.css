@@ -11,7 +11,7 @@
 
 .dialog {
   background: var(--bg-card);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px var(--overlay-strong);
   width: 100%;
   max-width: 440px;
@@ -55,7 +55,7 @@
 .modeToggle {
   display: inline-flex;
   border: 1px solid var(--border-default);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
@@ -63,7 +63,7 @@
   background: var(--bg-card);
   border: none;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-primary);
   padding: 0.3rem 0.75rem;
   cursor: pointer;
@@ -111,7 +111,7 @@
   height: 14px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.25);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   touch-action: none;
 }
 
@@ -124,6 +124,6 @@
   margin: 0;
   padding: 0.6rem 1rem 0.9rem;
   text-align: center;
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
   color: var(--text-hint);
 }

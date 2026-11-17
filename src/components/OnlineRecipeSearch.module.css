@@ -24,11 +24,11 @@
   background: none;
   border: none;
   color: var(--primary);
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 500;
   cursor: pointer;
   padding: 0.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   transition: background 0.15s;
   flex-shrink: 0;
 }
@@ -38,7 +38,7 @@
 }
 
 .headerTitle {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
@@ -69,10 +69,10 @@
   width: 100%;
   min-height: 44px;
   padding: 0.6rem 2.5rem 0.6rem 2.5rem;
-  font-size: 1rem;
+  font-size: var(--font-base);
   background: var(--bg-input);
   border: 1px solid var(--border-light);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   color: var(--text-primary);
   box-sizing: border-box;
 }
@@ -91,7 +91,7 @@
   right: 0.5rem;
   background: none;
   border: none;
-  font-size: 1.25rem;
+  font-size: var(--font-xl);
   line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
@@ -116,12 +116,12 @@
 
 .viewTab {
   padding: 0.4rem 0.9rem;
-  font-size: 0.82rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: var(--text-muted);
   background: var(--bg-input);
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
@@ -167,14 +167,14 @@
 }
 
 .stateTitle {
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
 }
 
 .stateSubtitle {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   color: var(--text-muted);
   margin: 0;
 }
@@ -195,7 +195,7 @@
 .gridCard {
   position: relative;
   background: var(--bg-input);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
   border: none;
@@ -241,7 +241,7 @@
 }
 
 .gridTitle {
-  font-size: 0.85rem;
+  font-size: var(--font-sm);
   font-weight: 600;
   color: white;
   display: -webkit-box;
@@ -257,7 +257,7 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   overflow: hidden;
 }
@@ -289,7 +289,7 @@
 .listThumbnail {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -297,7 +297,7 @@
 .listThumbnailPlaceholder {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-input);
   flex-shrink: 0;
   display: flex;
@@ -315,7 +315,7 @@
 }
 
 .listTitle {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 500;
   color: var(--text-primary);
   white-space: nowrap;
@@ -324,13 +324,13 @@
 }
 
 .listMeta {
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   color: var(--text-muted);
 }
 
 .listChevron {
   color: var(--text-ghost);
-  font-size: 1.2rem;
+  font-size: var(--font-xl);
   flex-shrink: 0;
   font-weight: 300;
   line-height: 1;
@@ -352,7 +352,7 @@
 .skeletonCard {
   aspect-ratio: 3 / 2;
   background: var(--bg-input);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;
 }
@@ -361,7 +361,7 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-card);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   overflow: hidden;
 }
@@ -381,7 +381,7 @@
 .skeletonThumbnail {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--bg-input);
   flex-shrink: 0;
 }
@@ -396,7 +396,7 @@
 .skeletonLine {
   height: 14px;
   background: var(--bg-input);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 .skeletonLineShort {
@@ -471,7 +471,7 @@
   }
 
   .gridTitle {
-    font-size: 0.8rem;
+    font-size: var(--font-sm);
   }
 
   .skeletonGrid {
@@ -484,7 +484,7 @@
 .attribution {
   text-align: center;
   padding: 1rem 0 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--font-xs);
   color: var(--text-muted);
 }
 
