@@ -79,16 +79,21 @@ test.describe.serial('Typing suggestions with stores', () => {
   test('adds the same item at two stores to build history', async () => {
     const input = page.getByPlaceholder('Add an item...');
     const storeSelect = page.getByRole('combobox', { name: 'Assign to store' });
+    const itemRows = page.locator('[class*="itemWrapper"]').filter({ hasText: ITEM_NAME });
 
-    for (const storeName of [STORE_A, STORE_B]) {
-      await input.fill(ITEM_NAME);
-      await storeSelect.selectOption({ label: storeName });
-      // Enter avoids the dropdown intercepting a click on the Add button
-      await input.press('Enter');
-      await expect(
-        page.locator('[class*="itemWrapper"]').filter({ hasText: ITEM_NAME })
-      ).toHaveCount(storeName === STORE_A ? 1 : 2);
-    }
+    await input.fill(ITEM_NAME);
+    await storeSelect.selectOption({ label: STORE_A });
+    // Enter avoids the dropdown intercepting a click on the Add button
+    await input.press('Enter');
+    await expect(itemRows).toHaveCount(1);
+
+    // Re-adding an unchecked item merges into the existing row and bumps its
+    // quantity; the purchase history still records the second store.
+    await input.fill(ITEM_NAME);
+    await storeSelect.selectOption({ label: STORE_B });
+    await input.press('Enter');
+    await expect(itemRows).toHaveCount(1);
+    await expect(itemRows).toContainText('(2)');
   });
 
   test('shows one suggestion row per store, labeled', async () => {
@@ -110,14 +115,17 @@ test.describe.serial('Typing suggestions with stores', () => {
     await expect(input).toHaveValue(ITEM_NAME);
     await input.press('Enter');
 
-    // The store group header carries the store name; the new item joins store A's group
+    // The store group header carries the store name. The add merges into the row
+    // already under store A, so nothing lands in a "no store" group. A suggestion
+    // re-adds its saved quantity, which the history trigger synced to 2, so 2 + 2.
     const storeAGroup = page
       .locator('section, div')
       .filter({ has: page.getByRole('heading', { name: STORE_A }) })
       .first();
-    await expect(
-      storeAGroup.locator('[class*="itemWrapper"]').filter({ hasText: ITEM_NAME })
-    ).toHaveCount(2);
+    const storeARows = storeAGroup.locator('[class*="itemWrapper"]').filter({ hasText: ITEM_NAME });
+    await expect(storeARows).toHaveCount(1);
+    await expect(storeARows).toContainText('(4)');
+    await expect(page.locator('[class*="itemWrapper"]').filter({ hasText: ITEM_NAME })).toHaveCount(1);
   });
 
   test('no-store history rows show no store label', async () => {
