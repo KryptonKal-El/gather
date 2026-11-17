@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -260,10 +260,33 @@ describe('marketing page (public/index-marketing.html)', () => {
     expect(htmlContent).toContain('linear-gradient(to bottom, rgba(10, 10, 10, 0), rgba(10, 10, 10, 1))');
   });
 
-  it('contains feature slide with emoji icon in slide 1', () => {
+  it('shows an app screenshot in each feature slide', () => {
     htmlContent = readFileSync(marketingPagePath, 'utf-8');
-    expect(htmlContent).toContain('class="hero-feature-slide"');
-    expect(htmlContent).toContain('<span class="hero-feature-icon">📋</span>');
+    const matches = htmlContent.match(/class="hero-phone-slide hero-screen-slide"/g) || [];
+    expect(matches.length).toBe(4);
+    for (const name of ['lists', 'grocery', 'plan', 'recipe']) {
+      expect(htmlContent).toContain(`src="/marketing/screen-${name}.jpg"`);
+      expect(existsSync(resolve(process.cwd(), `public/marketing/screen-${name}.jpg`))).toBe(true);
+    }
+  });
+
+  it('has a caption for each feature slide', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    for (let i = 1; i <= 4; i++) {
+      expect(htmlContent).toContain(`class="hero-caption" data-caption="${i}"`);
+    }
+  });
+
+  it('offers the web app next to the download buttons', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    const matches = htmlContent.match(/<a class="hero-cta-secondary" href="\/app">Open web app<\/a>/g) || [];
+    expect(matches.length).toBe(2);
+  });
+
+  it('stops the background animation when reduced motion is requested', () => {
+    htmlContent = readFileSync(marketingPagePath, 'utf-8');
+    expect(htmlContent).toContain("window.matchMedia('(prefers-reduced-motion: reduce)')");
+    expect(htmlContent).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
   it('contains feature slide titles with hero-feature-title class', () => {
@@ -331,7 +354,7 @@ describe('marketing page (public/index-marketing.html)', () => {
      htmlContent = readFileSync(marketingPagePath, 'utf-8');
      expect(htmlContent).toContain('INITIAL_WIDTH_VW = 0.80');
      expect(htmlContent).toContain('INITIAL_WIDTH_MAX = 920');
-     expect(htmlContent).toContain('FINAL_WIDTH = 380');
+     expect(htmlContent).toContain('FINAL_WIDTH_MAX = 380');
      expect(htmlContent).toContain('SHRINK_END = 0.2');
      expect(htmlContent).toContain('SLIDES_START = 0.18');
    });
