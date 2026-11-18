@@ -3,7 +3,7 @@
  * Writes one api_usage_events row per upstream call, off the response path.
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 /** One upstream call made while serving a request. */
 export interface UsageEvent {
@@ -17,9 +17,7 @@ export interface UsageEvent {
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
-type ServiceClient = ReturnType<typeof createClient>
-
-async function resolveUserId(req: Request, supabase: ServiceClient): Promise<string | null> {
+async function resolveUserId(req: Request, supabase: SupabaseClient): Promise<string | null> {
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '')
   if (!token || token === Deno.env.get('SUPABASE_ANON_KEY')) return null
 

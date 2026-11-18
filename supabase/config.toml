@@ -358,8 +358,17 @@ allow_dynamic_registration = true
 [functions.mcp]
 verify_jwt = false
 
+# Called by a database trigger, which authenticates with x-webhook-secret.
+[functions.send-share-invite]
+verify_jwt = false
+
 # Called by database triggers, which authenticate with x-webhook-secret.
 [functions.send-notification]
+verify_jwt = false
+
+# Called by Apple's servers (App Store Server Notifications V2), which send no
+# Supabase JWT. The function re-reads subscription state from Apple itself.
+[functions.apple-notifications]
 verify_jwt = false
 
 [edge_runtime]
