@@ -63,3 +63,9 @@ against a local StoreKit file never reach Apple, so they do not flip `isPro`.
 the plan picker (it does not scroll), so the paywall header is a title and four
 lines only; the stacked logo did not fit. `GatherLists.storekit` is synced from
 App Store Connect: re-sync it after changing products there.
+
+## "Subscription Unavailable" on a TestFlight build
+
+Build 137 showed this on a real device on 2026-11-18 because the Paid Apps
+Agreement (App Store Connect → Business) was still "Processing". No product
+loads in sandbox until it is "Active". Check that first before suspecting code.
