@@ -98,7 +98,7 @@ struct ProductSearchService {
         guard let url = components.url else { throw ProductSearchError.invalidURL }
 
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(manager.anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(await manager.edgeFunctionToken())", forHTTPHeaderField: "Authorization")
 
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {

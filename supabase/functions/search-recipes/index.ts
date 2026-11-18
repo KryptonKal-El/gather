@@ -3,6 +3,8 @@
  * Keeps API key server-side and provides search + detail endpoints.
  */
 
+import { logUsage } from '../_shared/usageLog.ts';
+
 interface RecipeSearchResult {
   id: number;
   title: string;
@@ -186,9 +188,13 @@ Deno.serve(async (req) => {
     );
   }
 
+  const operation = recipeId ? 'recipe_detail' : 'recipe_search';
+  const logCall = (ok: boolean) => logUsage(req, 'search-recipes', [{ source: 'spoonacular', operation, ok }]);
+
   try {
     if (recipeId) {
       const detail = await getRecipeDetail(recipeId);
+      logCall(true);
       return new Response(JSON.stringify(detail), {
         status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -196,11 +202,17 @@ Deno.serve(async (req) => {
     }
 
     const results = await searchRecipes(query!, number);
+    logCall(true);
     return new Response(JSON.stringify({ results, source: 'spoonacular' }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
+    // A missing key fails before any request is sent, so there is nothing to meter.
+    if (!(err instanceof Error && err.message === 'API_KEY_MISSING')) {
+      logCall(false);
+    }
+
     if (err instanceof DOMException && err.name === 'AbortError') {
       console.error('Spoonacular API request timed out');
       return new Response(

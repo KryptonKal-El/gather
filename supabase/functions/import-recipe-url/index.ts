@@ -7,6 +7,8 @@
  * straight into the recipe form. Nothing is stored; this is a pure proxy/parser.
  */
 
+import { logUsage } from '../_shared/usageLog.ts';
+
 interface ParsedRecipe {
   name: string;
   imageUrl: string;
@@ -279,6 +281,7 @@ Deno.serve(async (req) => {
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);
+  let imported = false;
   try {
     const response = await fetch(parsedUrl.toString(), {
       method: 'GET',
@@ -315,6 +318,7 @@ Deno.serve(async (req) => {
     if (!recipe) {
       return json({ error: 'NO_RECIPE_FOUND' }, 422);
     }
+    imported = true;
     return json(recipe, 200);
   } catch (err) {
     clearTimeout(timeoutId);
@@ -323,5 +327,7 @@ Deno.serve(async (req) => {
     }
     console.error('import-recipe-url error:', err);
     return json({ error: 'INTERNAL_ERROR' }, 500);
+  } finally {
+    logUsage(req, 'import-recipe-url', [{ source: 'web', operation: 'recipe_import', ok: imported }]);
   }
 });

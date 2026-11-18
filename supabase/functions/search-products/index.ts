@@ -7,6 +7,8 @@
  * or timed out, so clients can tell a failure from an empty result.
  */
 
+import { logUsage } from '../_shared/usageLog.ts';
+
 interface ProductResult {
   url: string;
   thumbnail: string;
@@ -356,6 +358,12 @@ Deno.serve(async (req) => {
   const settled = await Promise.all(
     requestedSources.map(async key => ({ source: key, results: await searchFns[key]() }))
   );
+
+  logUsage(req, 'search-products', settled.map(({ source, results }) => ({
+    source,
+    operation: 'product_search',
+    ok: results !== null,
+  })));
 
   const groups: ResultGroup[] = settled
     .filter(({ results }) => results !== null && results.length > 0)

@@ -3,6 +3,7 @@
  * Calls the Supabase Edge Function proxy once per source so each source's
  * results can load, fail, and be retried independently.
  */
+import { getEdgeAuthToken } from './edgeAuth.js';
 
 const CACHE_TTL = 5 * 60 * 1000;
 const searchCache = new Map();
@@ -49,10 +50,12 @@ export const searchImageSource = async (query, source, count = 25) => {
 
   const params = new URLSearchParams({ q: query, num: String(count), sources: source });
 
+  const token = await getEdgeAuthToken(anonKey);
+
   let res;
   try {
     res = await fetch(`${baseUrl}/search-products?${params}`, {
-      headers: { 'Authorization': `Bearer ${anonKey}` },
+      headers: { 'Authorization': `Bearer ${token}` },
     });
   } catch (err) {
     throw new Error(`Image search request for ${source} failed`, { cause: err });

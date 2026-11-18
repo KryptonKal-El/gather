@@ -1,6 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { getEnabledImageSources, searchImageSource } from './imageSearch.js';
+import { supabase } from './supabase.js';
+
+vi.mock('./supabase.js', () => ({
+  supabase: { auth: { getSession: vi.fn() } },
+}));
 
 const milkResults = [
   { url: 'https://example.com/milk.jpg', thumbnail: 'https://example.com/milk-thumb.jpg', title: 'Milk' },
@@ -33,6 +38,7 @@ describe('searchImageSource', () => {
   beforeEach(() => {
     vi.stubEnv('VITE_SUPABASE_EDGE_FUNCTION_URL', 'https://edge.example.com');
     vi.stubEnv('VITE_SUPABASE_ANON_KEY', 'anon-key');
+    supabase.auth.getSession.mockResolvedValue({ data: { session: { access_token: 'user-token' } }, error: null });
     fetchMock = vi.fn().mockResolvedValue(okResponse({
       groups: [{ source: 'walmart', label: 'Walmart', results: milkResults }],
       failed: [],
@@ -55,6 +61,16 @@ describe('searchImageSource', () => {
     expect(requestUrl.searchParams.get('q')).toBe('milk');
     expect(requestUrl.searchParams.get('num')).toBe('25');
     expect(requestUrl.searchParams.get('sources')).toBe('walmart');
+    expect(fetchMock).toHaveBeenCalledWith(expect.any(String), {
+      headers: { Authorization: 'Bearer user-token' },
+    });
+  });
+
+  it('falls back to the anon key when signed out', async () => {
+    supabase.auth.getSession.mockResolvedValueOnce({ data: { session: null }, error: null });
+
+    await searchImageSource('signed out milk', 'walmart');
+
     expect(fetchMock).toHaveBeenCalledWith(expect.any(String), {
       headers: { Authorization: 'Bearer anon-key' },
     });

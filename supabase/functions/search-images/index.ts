@@ -3,6 +3,8 @@
  * Migrated from Firebase Cloud Function.
  */
 
+import { logUsage } from '../_shared/usageLog.ts';
+
 const ALLOWED_ORIGINS = [
   'https://gatherlists.com',
   'https://gatherapp.vercel.app',
@@ -64,6 +66,7 @@ Deno.serve(async (req) => {
 
   try {
     const response = await fetch(`https://serpapi.com/search.json?${params}`);
+    logUsage(req, 'search-images', [{ source: 'serpapi', operation: 'image_search', ok: response.ok }]);
 
     if (!response.ok) {
       const text = await response.text();

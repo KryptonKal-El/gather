@@ -49,7 +49,7 @@ struct RecipeSearchService {
     static func searchRecipes(query: String, number: Int = 10) async -> [SpoonacularSearchResult] {
         let manager = SupabaseManager.shared
         let baseURL = manager.supabaseURL.absoluteString
-        let anonKey = manager.anonKey
+        let token = await manager.edgeFunctionToken()
         
         guard var components = URLComponents(string: "\(baseURL)/functions/v1/search-recipes") else {
             return []
@@ -61,7 +61,7 @@ struct RecipeSearchService {
         guard let url = components.url else { return [] }
         
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -84,7 +84,7 @@ struct RecipeSearchService {
     static func getRecipeDetail(id: Int) async -> SpoonacularRecipeDetail? {
         let manager = SupabaseManager.shared
         let baseURL = manager.supabaseURL.absoluteString
-        let anonKey = manager.anonKey
+        let token = await manager.edgeFunctionToken()
         
         guard var components = URLComponents(string: "\(baseURL)/functions/v1/search-recipes") else {
             return nil
@@ -95,7 +95,7 @@ struct RecipeSearchService {
         guard let url = components.url else { return nil }
         
         var request = URLRequest(url: url)
-        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
@@ -200,7 +200,7 @@ struct RecipeUrlImportService {
     static func importRecipe(from urlString: String) async throws -> ImportedRecipe {
         let manager = SupabaseManager.shared
         let baseURL = manager.supabaseURL.absoluteString
-        let anonKey = manager.anonKey
+        let token = await manager.edgeFunctionToken()
         let trimmed = urlString.trimmed
 
         guard !trimmed.isEmpty, URL(string: trimmed) != nil,
@@ -210,7 +210,7 @@ struct RecipeUrlImportService {
 
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: ["url": trimmed])
         request.timeoutInterval = 20

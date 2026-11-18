@@ -33,6 +33,13 @@ final class SupabaseManager {
         
         startAuthSessionSync()
     }
+
+    /// Bearer token for direct edge function calls: the signed-in user's access
+    /// token, so the function can attribute the call to them, or the anon key
+    /// when signed out.
+    func edgeFunctionToken() async -> String {
+        (try? await client.auth.session.accessToken) ?? anonKey
+    }
     
     /// Listens to auth state changes and syncs tokens to the shared App Group container.
     private func startAuthSessionSync() {

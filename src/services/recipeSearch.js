@@ -2,6 +2,7 @@
  * Recipe search service.
  * Calls the Supabase Edge Function proxy which searches Spoonacular for recipes.
  */
+import { getEdgeAuthToken } from './edgeAuth.js';
 
 /**
  * Searches for recipes matching the query.
@@ -29,9 +30,10 @@ export const searchRecipes = async (query, number = 10) => {
   });
 
   try {
+    const token = await getEdgeAuthToken(anonKey);
     const res = await fetch(`${baseUrl}/search-recipes?${params}`, {
       headers: {
-        'Authorization': `Bearer ${anonKey}`,
+        'Authorization': `Bearer ${token}`,
       },
     });
 
@@ -75,9 +77,10 @@ export const getRecipeDetail = async (recipeId) => {
   });
 
   try {
+    const token = await getEdgeAuthToken(anonKey);
     const res = await fetch(`${baseUrl}/search-recipes?${params}`, {
       headers: {
-        'Authorization': `Bearer ${anonKey}`,
+        'Authorization': `Bearer ${token}`,
       },
     });
 
