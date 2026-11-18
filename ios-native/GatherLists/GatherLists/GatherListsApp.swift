@@ -24,6 +24,7 @@ struct GatherListsApp: App {
     @State private var networkMonitor = NetworkMonitor()
     @State private var notificationService = NotificationService()
     @State private var toastController = ToastController()
+    @State private var proSubscription = ProSubscriptionManager()
     @State private var isShowingSnowfall = false
     @Environment(\.scenePhase) private var scenePhase
     private var appearanceManager = AppearanceManager.shared
@@ -75,6 +76,7 @@ struct GatherListsApp: App {
             .environment(appearanceManager)
             .environment(notificationService)
             .environment(toastController)
+            .environment(proSubscription)
             .environment(\.font, .quicksand(.body))
             .preferredColorScheme(appearanceManager.setting.colorScheme)
             .onAppear {
@@ -92,6 +94,13 @@ struct GatherListsApp: App {
             }
             .onOpenURL { url in
                 handleDeepLink(url)
+            }
+            .task(id: authViewModel.currentUser?.id) {
+                if let userId = authViewModel.currentUser?.id {
+                    await proSubscription.start(userId: userId)
+                } else {
+                    proSubscription.stop()
+                }
             }
         }
     }

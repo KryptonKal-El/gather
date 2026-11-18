@@ -7,32 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EMAILCODEVW0000000000002 /* EmailCodeSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */; };
-		PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */; };
-		PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSECT0000000000001 /* PasskeysSection.swift */; };
-		PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSVC00000000000001 /* PasskeyService.swift */; };
-		WEEKBRIEFSVC000000000002 /* WeekBriefService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */; };
-		DESCRIBEWEEKSHEET0000002 /* DescribeWeekSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */; };
-		MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANNERSVC0000000001 /* MealPlanner.swift */; };
-		RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */; };
-		RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */; };
-		RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */; };
-		RECIPEAUTOTAG00000000002 /* RecipeAutoTagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */; };
-		RECIPEATTRSECTION0000002 /* RecipeAttributesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */; };
-		RECIPEATTRSHEET000000002 /* RecipeAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */; };
-		MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANMODEL00000000001 /* MealPlan.swift */; };
-		MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANSVC0000000000001 /* MealPlanService.swift */; };
-		MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVM00000000000001 /* MealPlanViewModel.swift */; };
-		MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVIEW000000000001 /* MealPlanView.swift */; };
-		EATOUTDEALSSHEET00000002 /* EatOutDealsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */; };
-		MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTROW0000000000001 /* MealSlotRow.swift */; };
-		MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */; };
-		SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */; };
-		A1B2C3D4E5F6A7B8C9D0F001 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */; };
-		A1B2C3D4E5F6A7B8C9D0F005 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */; };
-		A1B2C3D4E5F6A7B8C9D0F006 /* AppFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E1F6 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */; };
 		A1B2C3D4E5F6A7B8C9D0E221 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E220 /* PrivacyInfo.xcprivacy */; };
 		A1B2C3D4E5F6A7B8C9D0E231 /* GatherList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */; };
@@ -45,10 +21,6 @@
 		A1B2C3D4E5F6A7B8C9D0E23F /* ColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E241 /* CreateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E243 /* EmojiPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */; };
-		A1B2C3D4E5F6A7B8C9D0F102 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */; };
-		C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A001 /* SnowfallView.swift */; };
-		C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A003 /* HolidaySeason.swift */; };
-		A1B2C3D4E5F6A7B8C9D0F202 /* ImageCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E245 /* EditListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E247 /* ShareListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E249 /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */; };
@@ -67,24 +39,14 @@
 		A1B2C3D4E5F6A7B8C9D0E268 /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E267 /* Recipe.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E26A /* RecipeIngredient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E269 /* RecipeIngredient.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E26C /* RecipeStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E26B /* RecipeStep.swift */; };
-		COOKSESSMODEL00000000002 /* CookSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSMODEL00000000001 /* CookSession.swift */; };
-		COOKATTR0000000000000002 /* CookActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKATTR0000000000000001 /* CookActivityAttributes.swift */; };
-		COOKATTR0000000000000003 /* CookActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKATTR0000000000000001 /* CookActivityAttributes.swift */; };
-		COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKACTCTRL0000000000001 /* CookActivityController.swift */; };
-		COOKACTWIDGET00000000002 /* CookActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKACTWIDGET00000000001 /* CookActivityWidget.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E26E /* RecipeCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E270 /* CollectionShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E272 /* RecipeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E271 /* RecipeService.swift */; };
-		COOKSESSSVC0000000000002 /* CookSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSSVC0000000000001 /* CookSessionService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E274 /* RecipeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E273 /* RecipeViewModel.swift */; };
-		COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSVM00000000000001 /* CookSessionViewModel.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E276 /* CollectionBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E275 /* CollectionBrowserView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E278 /* CreateCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E27C /* RecipeFormSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */; };
-		RECIPEIMPORTVIEW00000002 /* RecipeImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEIMPORTVIEW00000001 /* RecipeImportView.swift */; };
-		RECIPEURLIMPORT00000002 /* RecipeUrlImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEURLIMPORT00000001 /* RecipeUrlImportView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E27E /* RecipeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */; };
-		COOKMODEVIEW000000000002 /* CookModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKMODEVIEW000000000001 /* CookModeView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E280 /* ShareCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E27F /* ShareCollectionSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E282 /* EditCollectionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E281 /* EditCollectionSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E284 /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */; };
@@ -92,11 +54,8 @@
 		A1B2C3D4E5F6A7B8C9D0E289 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E293 /* AddToListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E297 /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */; };
-		CONNAPPMODEL000000000002 /* ConnectedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPMODEL000000000001 /* ConnectedApp.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */; };
-		CONNAPPSVC00000000000002 /* ConnectedAppService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSVC00000000000001 /* ConnectedAppService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */; };
-		A1B2C3D4E5F6A7B8C9D0F004 /* AppFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E29F /* ItemImagePickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2A1 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */; };
@@ -106,7 +65,6 @@
 		A1B2C3D4E5F6A7B8C9D0E2A9 /* OfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AB /* CachedDataBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */; };
-		A1B2C3D4E5F6A7B8C9D0E2F1 /* ZoomableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2AF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */; };
 		A1B2C3D4E5F6A7B8C9D0E2B2 /* EditItemSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2B4 /* ItemUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */; };
@@ -124,51 +82,99 @@
 		A1B2C3D4E5F6A7B8C9D0E2D5 /* UserCategoryDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D7 /* CategoryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2D9 /* UserCategoryDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */; };
-		A1B2C3D4E5F6A7B8C9D0E2DF /* UserStoreDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2DB /* DefaultCategoryEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2DD /* DefaultStoreEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2DF /* UserStoreDefaultService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E1 /* AvatarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */; };
 		A1B2C3D4E5F6A7B8C9D0E2E3 /* AvatarGroupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E2F1 /* ZoomableContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */; };
+		A1B2C3D4E5F6A7B8C9D0F001 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */; };
+		A1B2C3D4E5F6A7B8C9D0F004 /* AppFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */; };
+		A1B2C3D4E5F6A7B8C9D0F005 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */; };
+		A1B2C3D4E5F6A7B8C9D0F006 /* AppFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */; };
+		A1B2C3D4E5F6A7B8C9D0F102 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */; };
+		A1B2C3D4E5F6A7B8C9D0F202 /* ImageCropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */; };
+		ADAPTIVELAYOUT00000000002 /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAPTIVELAYOUT00000000001 /* AdaptiveLayout.swift */; };
 		ADDITEMINTENT0000000002 /* AddItemIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADDITEMINTENT0000000001 /* AddItemIntent.swift */; };
 		B1C2D3E4F5A6B7C8D9E0F1A2 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A3 /* Secrets.plist */; };
 		B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */; };
 		B1C2D3E4F5A6B7C8D9E0F1A6 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B1C2D3E4F5A6B7C8D9E0F1A7 /* Supabase */; };
+		C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A001 /* SnowfallView.swift */; };
+		C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A003 /* HolidaySeason.swift */; };
+		C0FFEE00000000000000B002 /* AppIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B001 /* AppIconPickerView.swift */; };
+		C0FFEE00000000000000B004 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B003 /* AppIconOption.swift */; };
 		C0FFEE00DEADBEEF12345679 /* CollaboratorsInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */; };
 		C2D3E4F5A6B7C8D9E0F1A2B3 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D3E4F5A6B7C8D9E0F1A2B4 /* AuthViewModel.swift */; };
 		COMPHISTORY00000000000002 /* CompletionHistorySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */; };
+		CONNAISHEET0000000000002 /* ConnectAiAppSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */; };
+		CONNAPPMODEL000000000002 /* ConnectedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPMODEL000000000001 /* ConnectedApp.swift */; };
+		CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */; };
+		CONNAPPSVC00000000000002 /* ConnectedAppService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSVC00000000000001 /* ConnectedAppService.swift */; };
+		COOKACTCTRL0000000000002 /* CookActivityController.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKACTCTRL0000000000001 /* CookActivityController.swift */; };
+		COOKACTWIDGET00000000002 /* CookActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKACTWIDGET00000000001 /* CookActivityWidget.swift */; };
+		COOKATTR0000000000000002 /* CookActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKATTR0000000000000001 /* CookActivityAttributes.swift */; };
+		COOKATTR0000000000000003 /* CookActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKATTR0000000000000001 /* CookActivityAttributes.swift */; };
+		COOKMODEVIEW000000000002 /* CookModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKMODEVIEW000000000001 /* CookModeView.swift */; };
+		COOKSESSMODEL00000000002 /* CookSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSMODEL00000000001 /* CookSession.swift */; };
+		COOKSESSSVC0000000000002 /* CookSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSSVC0000000000001 /* CookSessionService.swift */; };
+		COOKSESSVM00000000000002 /* CookSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = COOKSESSVM00000000000001 /* CookSessionViewModel.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C2 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C4 /* NotificationPreferenceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */; };
 		D1E2F3A4B5C6D7E8F9A0B1C6 /* ListNotificationSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */; };
 		D3E4F5A6B7C8D9E0F1A2B3C4 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4F5A6B7C8D9E0F1A2B3C5 /* LoginView.swift */; };
+		DESCRIBEWEEKSHEET0000002 /* DescribeWeekSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */; };
 		DUEITEMSLARGE00000000002 /* DueItemsLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */; };
 		DUEITEMSMEDIUM0000000002 /* DueItemsMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSMEDIUM0000000001 /* DueItemsMedium.swift */; };
 		DUEITEMSSMALL00000000002 /* DueItemsSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSSMALL00000000001 /* DueItemsSmall.swift */; };
 		DUEITEMSWIDGET0000000002 /* DueItemsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */; };
 		DUPLISTSHEET00000002 /* DuplicateListSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = DUPLISTSHEET00000001 /* DuplicateListSheet.swift */; };
 		E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */; };
+		EATOUTDEALSSHEET00000002 /* EatOutDealsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */; };
+		EMAILCODEVW0000000000002 /* EmailCodeSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */; };
 		F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */; };
-		C0FFEE00000000000000B002 /* AppIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B001 /* AppIconPickerView.swift */; };
-		C0FFEE00000000000000B004 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B003 /* AppIconOption.swift */; };
-		CONNAPPSECT0000000000002 /* ConnectedAppsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */; };
-		CONNAISHEET0000000000002 /* ConnectAiAppSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */; };
 		ITEMCOUNTLOCKSCREEN00002 /* ItemCountLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */; };
 		LISTQUICKVIEWLRG00000002 /* ListQuickViewLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */; };
 		LISTQUICKVIEWMED00000002 /* ListQuickViewMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */; };
 		LISTQUICKVIEWSMALL000002 /* ListQuickViewSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */; };
 		LISTQUICKVIEWWIDGET00002 /* ListQuickViewWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */; };
+		MEALPLANMODEL00000000002 /* MealPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANMODEL00000000001 /* MealPlan.swift */; };
+		MEALPLANNERSVC0000000002 /* MealPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANNERSVC0000000001 /* MealPlanner.swift */; };
+		MEALPLANSVC0000000000002 /* MealPlanService.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANSVC0000000000001 /* MealPlanService.swift */; };
+		MEALPLANVIEW000000000002 /* MealPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVIEW000000000001 /* MealPlanView.swift */; };
+		MEALPLANVM00000000000002 /* MealPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALPLANVM00000000000001 /* MealPlanViewModel.swift */; };
+		MEALSLOTROW0000000000002 /* MealSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTROW0000000000001 /* MealSlotRow.swift */; };
+		MEALSLOTSHEET00000000002 /* MealSlotSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */; };
 		NEXTDUELOCKSCREEN000002 /* NextDueLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */; };
+		PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */; };
+		PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSECT0000000000001 /* PasskeysSection.swift */; };
+		PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSVC00000000000001 /* PasskeyService.swift */; };
+		PROPAYWALL00000000000002 /* ProPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROPAYWALL00000000000001 /* ProPaywallView.swift */; };
+		PROSECTION00000000000002 /* ProSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROSECTION00000000000001 /* ProSection.swift */; };
+		PROSUBMGR000000000000002 /* ProSubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */; };
 		QUICKADDLARGE00000000002 /* QuickAddLarge.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDLARGE00000000001 /* QuickAddLarge.swift */; };
 		QUICKADDMEDIUM0000000002 /* QuickAddMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDMEDIUM0000000001 /* QuickAddMedium.swift */; };
 		QUICKADDSMALL00000000002 /* QuickAddSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDSMALL00000000001 /* QuickAddSmall.swift */; };
 		QUICKADDWIDGET0000000002 /* QuickAddWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = QUICKADDWIDGET0000000001 /* QuickAddWidget.swift */; };
+		RECIPEATTRMODEL000000002 /* RecipeAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */; };
+		RECIPEATTRSECTION0000002 /* RecipeAttributesSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */; };
+		RECIPEATTRSHEET000000002 /* RecipeAttributesSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */; };
+		RECIPEATTRSVC00000000002 /* RecipeAttributeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */; };
+		RECIPEAUTOTAG00000000002 /* RecipeAutoTagger.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */; };
+		RECIPEIMPORTVIEW00000002 /* RecipeImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEIMPORTVIEW00000001 /* RecipeImportView.swift */; };
+		RECIPETAGSVC000000000002 /* RecipeTaggingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */; };
+		RECIPEURLIMPORT00000002 /* RecipeUrlImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = RECIPEURLIMPORT00000001 /* RecipeUrlImportView.swift */; };
 		SELECTLISTINTENT00000002 /* SelectListIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTINTENT00000001 /* SelectListIntent.swift */; };
 		SELECTLISTORALL000000002 /* SelectListOrAllIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */; };
 		SHAREDDATASTORE000000002 /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDATASTORE000000001 /* SharedDataStore.swift */; };
 		SHAREDDEFAULTS0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
+		SHAREMEALPLAN00000000002 /* ShareMealPlanSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */; };
 		STRINGEMOJI0000000000002 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
 		STRINGEMOJI0000000000003 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
 		TOASTBANNER000000000002 /* ToastBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOASTBANNER000000000001 /* ToastBanner.swift */; };
-		ADAPTIVELAYOUT00000000002 /* AdaptiveLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADAPTIVELAYOUT00000000001 /* AdaptiveLayout.swift */; };
+		UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */; };
+		UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000002 /* LastListRestorationTests.swift */; };
+		UITESTBUILDFILE000000003 /* IPadOrientationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000003 /* IPadOrientationTests.swift */; };
+		WEEKBRIEFSVC000000000002 /* WeekBriefService.swift in Sources */ = {isa = PBXBuildFile; fileRef = WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */; };
 		WIDGETBUNDLE0000000000002 /* GatherListsWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */; };
 		WIDGETCOLOREXT0000000002 /* WidgetColorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */; };
 		WIDGETDATAPROV0000000002 /* WidgetDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */; };
@@ -180,25 +186,22 @@
 		WIDGETSHAREDDEF0000000002 /* SharedDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */; };
 		WIDGETSTORE0000000000002 /* Store.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E24E /* Store.swift */; };
 		WIDGETSUPABASECLIENT0002 /* WidgetSupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGETSUPABASECLIENT0001 /* WidgetSupabaseClient.swift */; };
-		UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */; };
-		UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000002 /* LastListRestorationTests.swift */; };
-		UITESTBUILDFILE000000003 /* IPadOrientationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000003 /* IPadOrientationTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = WIDGETTARGET0000000000001;
-			remoteInfo = GatherListsWidgetsExtension;
-		};
 		UITESTCONTAINERPROXY0001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = A1B2C3D4E5F6A7B8C9D0E205;
 			remoteInfo = GatherLists;
+		};
+		WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A1B2C3D4E5F6A7B8C9D0E209 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = WIDGETTARGET0000000000001;
+			remoteInfo = GatherListsWidgetsExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -217,38 +220,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailCodeSignInView.swift; sourceTree = "<group>"; };
-		PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyPromptModifier.swift; sourceTree = "<group>"; };
-		PASSKEYSECT0000000000001 /* PasskeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeysSection.swift; sourceTree = "<group>"; };
-		PASSKEYSVC00000000000001 /* PasskeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyService.swift; sourceTree = "<group>"; };
-		WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekBriefService.swift; sourceTree = "<group>"; };
-		DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescribeWeekSheet.swift; sourceTree = "<group>"; };
-		MEALPLANNERSVC0000000001 /* MealPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanner.swift; sourceTree = "<group>"; };
-		RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributes.swift; sourceTree = "<group>"; };
-		RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributeService.swift; sourceTree = "<group>"; };
-		RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTaggingService.swift; sourceTree = "<group>"; };
-		RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAutoTagger.swift; sourceTree = "<group>"; };
-		RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSection.swift; sourceTree = "<group>"; };
-		RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSheet.swift; sourceTree = "<group>"; };
-		MEALPLANMODEL00000000001 /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
-		MEALPLANSVC0000000000001 /* MealPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanService.swift; sourceTree = "<group>"; };
-		MEALPLANVM00000000000001 /* MealPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanViewModel.swift; sourceTree = "<group>"; };
-		MEALPLANVIEW000000000001 /* MealPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanView.swift; sourceTree = "<group>"; };
-		EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EatOutDealsSheet.swift; sourceTree = "<group>"; };
-		MEALSLOTROW0000000000001 /* MealSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotRow.swift; sourceTree = "<group>"; };
-		MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotSheet.swift; sourceTree = "<group>"; };
-		SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMealPlanSheet.swift; sourceTree = "<group>"; };
-		UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewCollaboratorMenuTests.swift; sourceTree = "<group>"; };
-		UITESTFILEREF00000000002 /* LastListRestorationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastListRestorationTests.swift; sourceTree = "<group>"; };
-		UITESTFILEREF00000000003 /* IPadOrientationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadOrientationTests.swift; sourceTree = "<group>"; };
-		UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherListsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AAF057D30AE44CF007B2E7F /* GatherLists.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = GatherLists.storekit; path = GatherLists/GatherLists.storekit; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F3 /* GatherListsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E1F8 /* GatherLists.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GatherLists.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1B2C3D4E5F6A7B8C9D0E1F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		VERSIONXCCONFIG00000001 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = SOURCE_ROOT; };
 		A1B2C3D4E5F6A7B8C9D0E1FA /* GatherLists.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GatherLists.entitlements; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E220 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E230 /* GatherList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherList.swift; sourceTree = "<group>"; };
@@ -261,10 +238,6 @@
 		A1B2C3D4E5F6A7B8C9D0E23E /* ColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtension.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E240 /* CreateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E242 /* EmojiPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiPickerView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
-		C0FFEE00000000000000A001 /* SnowfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnowfallView.swift; sourceTree = "<group>"; };
-		C0FFEE00000000000000A003 /* HolidaySeason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidaySeason.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCropView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E244 /* EditListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E246 /* ShareListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E248 /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
@@ -283,23 +256,14 @@
 		A1B2C3D4E5F6A7B8C9D0E267 /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E269 /* RecipeIngredient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeIngredient.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E26B /* RecipeStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeStep.swift; sourceTree = "<group>"; };
-		COOKSESSMODEL00000000001 /* CookSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSession.swift; sourceTree = "<group>"; };
-		COOKATTR0000000000000001 /* CookActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityAttributes.swift; sourceTree = "<group>"; };
-		COOKACTCTRL0000000000001 /* CookActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityController.swift; sourceTree = "<group>"; };
-		COOKACTWIDGET00000000001 /* CookActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityWidget.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E26D /* RecipeCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeCollection.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E26F /* CollectionShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionShare.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E271 /* RecipeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeService.swift; sourceTree = "<group>"; };
-		COOKSESSSVC0000000000001 /* CookSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSessionService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E273 /* RecipeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeViewModel.swift; sourceTree = "<group>"; };
-		COOKSESSVM00000000000001 /* CookSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSessionViewModel.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E275 /* CollectionBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionBrowserView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E277 /* CreateCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateCollectionSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E27B /* RecipeFormSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeFormSheet.swift; sourceTree = "<group>"; };
-		RECIPEIMPORTVIEW00000001 /* RecipeImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeImportView.swift; sourceTree = "<group>"; };
-		RECIPEURLIMPORT00000001 /* RecipeUrlImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeUrlImportView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E27D /* RecipeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeDetailView.swift; sourceTree = "<group>"; };
-		COOKMODEVIEW000000000001 /* CookModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookModeView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E27F /* ShareCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCollectionSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E281 /* EditCollectionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCollectionSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
@@ -307,11 +271,8 @@
 		A1B2C3D4E5F6A7B8C9D0E288 /* CameraPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E292 /* AddToListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddToListSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E296 /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
-		CONNAPPMODEL000000000001 /* ConnectedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedApp.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
-		CONNAPPSVC00000000000001 /* ConnectedAppService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceManager.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFont.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductSearchService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E29E /* ItemImagePickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemImagePickerSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2A0 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
@@ -321,7 +282,6 @@
 		A1B2C3D4E5F6A7B8C9D0E2A8 /* OfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineCache.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AA /* CachedDataBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedDataBanner.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackedLogoView.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2AE /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2B1 /* EditItemSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditItemSheet.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2B3 /* ItemUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemUnit.swift; sourceTree = "<group>"; };
@@ -339,49 +299,96 @@
 		A1B2C3D4E5F6A7B8C9D0E2D4 /* UserCategoryDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefault.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D6 /* CategoryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2D8 /* UserCategoryDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCategoryDefaultService.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStoreDefaultService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCategoryEditorView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultStoreEditorView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2DE /* UserStoreDefaultService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserStoreDefaultService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E0 /* AvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6A7B8C9D0E2E2 /* AvatarGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarGroupView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableContainer.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFont.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0F101 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0F201 /* ImageCropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCropView.swift; sourceTree = "<group>"; };
+		ADAPTIVELAYOUT00000000001 /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
 		ADDITEMINTENT0000000001 /* AddItemIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddItemIntent.swift; sourceTree = "<group>"; };
 		B1C2D3E4F5A6B7C8D9E0F1A3 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000A001 /* SnowfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnowfallView.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000A003 /* HolidaySeason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidaySeason.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000B001 /* AppIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconPickerView.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000B003 /* AppIconOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconOption.swift; sourceTree = "<group>"; };
 		C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaboratorsInfoSheet.swift; sourceTree = "<group>"; };
 		C2D3E4F5A6B7C8D9E0F1A2B4 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		COMPHISTORY00000000000001 /* CompletionHistorySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompletionHistorySheet.swift; sourceTree = "<group>"; };
+		CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectAiAppSheet.swift; sourceTree = "<group>"; };
+		CONNAPPMODEL000000000001 /* ConnectedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedApp.swift; sourceTree = "<group>"; };
+		CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppsSection.swift; sourceTree = "<group>"; };
+		CONNAPPSVC00000000000001 /* ConnectedAppService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppService.swift; sourceTree = "<group>"; };
+		COOKACTCTRL0000000000001 /* CookActivityController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityController.swift; sourceTree = "<group>"; };
+		COOKACTWIDGET00000000001 /* CookActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityWidget.swift; sourceTree = "<group>"; };
+		COOKATTR0000000000000001 /* CookActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookActivityAttributes.swift; sourceTree = "<group>"; };
+		COOKMODEVIEW000000000001 /* CookModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookModeView.swift; sourceTree = "<group>"; };
+		COOKSESSMODEL00000000001 /* CookSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSession.swift; sourceTree = "<group>"; };
+		COOKSESSSVC0000000000001 /* CookSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSessionService.swift; sourceTree = "<group>"; };
+		COOKSESSVM00000000000001 /* CookSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookSessionViewModel.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C1 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C3 /* NotificationPreferenceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferenceService.swift; sourceTree = "<group>"; };
 		D1E2F3A4B5C6D7E8F9A0B1C5 /* ListNotificationSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListNotificationSheet.swift; sourceTree = "<group>"; };
 		D3E4F5A6B7C8D9E0F1A2B3C5 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DescribeWeekSheet.swift; sourceTree = "<group>"; };
 		DUEITEMSLARGE00000000001 /* DueItemsLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsLarge.swift; sourceTree = "<group>"; };
 		DUEITEMSMEDIUM0000000001 /* DueItemsMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsMedium.swift; sourceTree = "<group>"; };
 		DUEITEMSSMALL00000000001 /* DueItemsSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsSmall.swift; sourceTree = "<group>"; };
 		DUEITEMSWIDGET0000000001 /* DueItemsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueItemsWidget.swift; sourceTree = "<group>"; };
 		DUPLISTSHEET00000001 /* DuplicateListSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateListSheet.swift; sourceTree = "<group>"; };
 		E4F5A6B7C8D9E0F1A2B3C4D6 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EatOutDealsSheet.swift; sourceTree = "<group>"; };
+		EMAILCODEVW0000000000001 /* EmailCodeSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailCodeSignInView.swift; sourceTree = "<group>"; };
 		F5A6B7C8D9E0F1A2B3C4D5E7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		C0FFEE00000000000000B001 /* AppIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconPickerView.swift; sourceTree = "<group>"; };
-		C0FFEE00000000000000B003 /* AppIconOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconOption.swift; sourceTree = "<group>"; };
-		CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedAppsSection.swift; sourceTree = "<group>"; };
-		CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectAiAppSheet.swift; sourceTree = "<group>"; };
 		ITEMCOUNTLOCKSCREEN00001 /* ItemCountLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemCountLockScreenWidget.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWLRG00000001 /* ListQuickViewLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewLarge.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWMED00000001 /* ListQuickViewMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewMedium.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWSMALL000001 /* ListQuickViewSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewSmall.swift; sourceTree = "<group>"; };
 		LISTQUICKVIEWWIDGET00001 /* ListQuickViewWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListQuickViewWidget.swift; sourceTree = "<group>"; };
+		MEALPLANMODEL00000000001 /* MealPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlan.swift; sourceTree = "<group>"; };
+		MEALPLANNERSVC0000000001 /* MealPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanner.swift; sourceTree = "<group>"; };
+		MEALPLANSVC0000000000001 /* MealPlanService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanService.swift; sourceTree = "<group>"; };
+		MEALPLANVIEW000000000001 /* MealPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanView.swift; sourceTree = "<group>"; };
+		MEALPLANVM00000000000001 /* MealPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealPlanViewModel.swift; sourceTree = "<group>"; };
+		MEALSLOTROW0000000000001 /* MealSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotRow.swift; sourceTree = "<group>"; };
+		MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealSlotSheet.swift; sourceTree = "<group>"; };
 		NEXTDUELOCKSCREEN000001 /* NextDueLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextDueLockScreenWidget.swift; sourceTree = "<group>"; };
+		PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyPromptModifier.swift; sourceTree = "<group>"; };
+		PASSKEYSECT0000000000001 /* PasskeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeysSection.swift; sourceTree = "<group>"; };
+		PASSKEYSVC00000000000001 /* PasskeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyService.swift; sourceTree = "<group>"; };
+		PROPAYWALL00000000000001 /* ProPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProPaywallView.swift; sourceTree = "<group>"; };
+		PROSECTION00000000000001 /* ProSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSection.swift; sourceTree = "<group>"; };
+		PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSubscriptionManager.swift; sourceTree = "<group>"; };
 		QUICKADDLARGE00000000001 /* QuickAddLarge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddLarge.swift; sourceTree = "<group>"; };
 		QUICKADDMEDIUM0000000001 /* QuickAddMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddMedium.swift; sourceTree = "<group>"; };
 		QUICKADDSMALL00000000001 /* QuickAddSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddSmall.swift; sourceTree = "<group>"; };
 		QUICKADDWIDGET0000000001 /* QuickAddWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddWidget.swift; sourceTree = "<group>"; };
+		RECIPEATTRMODEL000000001 /* RecipeAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributes.swift; sourceTree = "<group>"; };
+		RECIPEATTRSECTION0000001 /* RecipeAttributesSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSection.swift; sourceTree = "<group>"; };
+		RECIPEATTRSHEET000000001 /* RecipeAttributesSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributesSheet.swift; sourceTree = "<group>"; };
+		RECIPEATTRSVC00000000001 /* RecipeAttributeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAttributeService.swift; sourceTree = "<group>"; };
+		RECIPEAUTOTAG00000000001 /* RecipeAutoTagger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeAutoTagger.swift; sourceTree = "<group>"; };
+		RECIPEIMPORTVIEW00000001 /* RecipeImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeImportView.swift; sourceTree = "<group>"; };
+		RECIPETAGSVC000000000001 /* RecipeTaggingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeTaggingService.swift; sourceTree = "<group>"; };
+		RECIPEURLIMPORT00000001 /* RecipeUrlImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecipeUrlImportView.swift; sourceTree = "<group>"; };
 		SELECTLISTINTENT00000001 /* SelectListIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListIntent.swift; sourceTree = "<group>"; };
 		SELECTLISTORALL000000001 /* SelectListOrAllIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectListOrAllIntent.swift; sourceTree = "<group>"; };
 		SHAREDDATASTORE000000001 /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
 		SHAREDDEFAULTS0000000001 /* SharedDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDefaults.swift; sourceTree = "<group>"; };
+		SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMealPlanSheet.swift; sourceTree = "<group>"; };
 		STRINGEMOJI0000000000001 /* String+Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Emoji.swift"; sourceTree = "<group>"; };
 		TOASTBANNER000000000001 /* ToastBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBanner.swift; sourceTree = "<group>"; };
-		ADAPTIVELAYOUT00000000001 /* AdaptiveLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveLayout.swift; sourceTree = "<group>"; };
+		UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewCollaboratorMenuTests.swift; sourceTree = "<group>"; };
+		UITESTFILEREF00000000002 /* LastListRestorationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastListRestorationTests.swift; sourceTree = "<group>"; };
+		UITESTFILEREF00000000003 /* IPadOrientationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadOrientationTests.swift; sourceTree = "<group>"; };
+		UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GatherListsUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		VERSIONXCCONFIG00000001 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = SOURCE_ROOT; };
+		WEEKBRIEFSVC000000000001 /* WeekBriefService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekBriefService.swift; sourceTree = "<group>"; };
 		WIDGETBUNDLE0000000000001 /* GatherListsWidgetsBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GatherListsWidgetsBundle.swift; sourceTree = "<group>"; };
 		WIDGETCOLOREXT0000000001 /* WidgetColorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetColorExtension.swift; sourceTree = "<group>"; };
 		WIDGETDATAPROV0000000001 /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataProvider.swift; sourceTree = "<group>"; };
@@ -401,14 +408,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		WIDGETFRAMEWORKS0000000001 /* Frameworks */ = {
+		UITESTFRAMEWORKS00000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		UITESTFRAMEWORKS00000001 /* Frameworks */ = {
+		WIDGETFRAMEWORKS0000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -418,24 +425,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9AAF057C30AE4422007B2E7F /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				VERSIONXCCONFIG00000001 /* Version.xcconfig */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		A1B2C3D4E5F6A7B8C9D0E201 = {
 			isa = PBXGroup;
 			children = (
+				9AAF057D30AE44CF007B2E7F /* GatherLists.storekit */,
 				A1B2C3D4E5F6A7B8C9D0E202 /* GatherLists */,
 				WIDGETGROUP0000000000001 /* GatherListsWidgets */,
 				UITESTGROUP0000000000001 /* GatherListsUITests */,
 				A1B2C3D4E5F6A7B8C9D0E203 /* Products */,
+				9AAF057C30AE4422007B2E7F /* Recovered References */,
 			);
-			sourceTree = "<group>";
-		};
-		UITESTGROUP0000000000001 /* GatherListsUITests */ = {
-			isa = PBXGroup;
-			children = (
-				UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */,
-				UITESTFILEREF00000000002 /* LastListRestorationTests.swift */,
-				UITESTFILEREF00000000003 /* IPadOrientationTests.swift */,
-			);
-			path = GatherListsUITests;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F6A7B8C9D0E202 /* GatherLists */ = {
@@ -533,6 +540,7 @@
 				A1B2C3D4E5F6A7B8C9D0E283 /* StorageService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E298 /* ProfileService.swift */,
 				CONNAPPSVC00000000000001 /* ConnectedAppService.swift */,
+				PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */,
 				PASSKEYSVC00000000000001 /* PasskeyService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B5 /* RecipeSearchService.swift */,
@@ -607,19 +615,6 @@
 			path = Lists;
 			sourceTree = "<group>";
 		};
-		MEALPLANGROUP00000000001 /* Plan */ = {
-			isa = PBXGroup;
-			children = (
-				DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */,
-				MEALPLANVIEW000000000001 /* MealPlanView.swift */,
-				EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */,
-				MEALSLOTROW0000000000001 /* MealSlotRow.swift */,
-				MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */,
-				SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */,
-			);
-			path = Plan;
-			sourceTree = "<group>";
-		};
 		A1B2C3D4E5F6A7B8C9D0E217 /* Recipes */ = {
 			isa = PBXGroup;
 			children = (
@@ -659,6 +654,8 @@
 				C0FFEE00000000000000B001 /* AppIconPickerView.swift */,
 				CONNAPPSECT0000000000001 /* ConnectedAppsSection.swift */,
 				PASSKEYSECT0000000000001 /* PasskeysSection.swift */,
+				PROSECTION00000000000001 /* ProSection.swift */,
+				PROPAYWALL00000000000001 /* ProPaywallView.swift */,
 				CONNAISHEET0000000000001 /* ConnectAiAppSheet.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DA /* DefaultCategoryEditorView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2DC /* DefaultStoreEditorView.swift */,
@@ -706,6 +703,29 @@
 				STRINGEMOJI0000000000001 /* String+Emoji.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		MEALPLANGROUP00000000001 /* Plan */ = {
+			isa = PBXGroup;
+			children = (
+				DESCRIBEWEEKSHEET0000001 /* DescribeWeekSheet.swift */,
+				MEALPLANVIEW000000000001 /* MealPlanView.swift */,
+				EATOUTDEALSSHEET00000001 /* EatOutDealsSheet.swift */,
+				MEALSLOTROW0000000000001 /* MealSlotRow.swift */,
+				MEALSLOTSHEET00000000001 /* MealSlotSheet.swift */,
+				SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */,
+			);
+			path = Plan;
+			sourceTree = "<group>";
+		};
+		UITESTGROUP0000000000001 /* GatherListsUITests */ = {
+			isa = PBXGroup;
+			children = (
+				UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */,
+				UITESTFILEREF00000000002 /* LastListRestorationTests.swift */,
+				UITESTFILEREF00000000003 /* IPadOrientationTests.swift */,
+			);
+			path = GatherListsUITests;
 			sourceTree = "<group>";
 		};
 		WIDGETDUEITEMSGROUP00001 /* DueItems */ = {
@@ -791,7 +811,7 @@
 				A1B2C3D4E5F6A7B8C9D0E200 /* Frameworks */,
 				A1B2C3D4E5F6A7B8C9D0E208 /* Resources */,
 				WIDGETCOPYFILES0000000001 /* Embed Foundation Extensions */,
-				BUMPBUILDPHASE0000000001 /* Bump Build Number */,
+				BUMPBUILDPHASE0000000001 /* Bump Build Number (Archive Only) */,
 			);
 			buildRules = (
 			);
@@ -805,23 +825,6 @@
 			productName = GatherLists;
 			productReference = A1B2C3D4E5F6A7B8C9D0E1F8 /* GatherLists.app */;
 			productType = "com.apple.product-type.application";
-		};
-		WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */;
-			buildPhases = (
-				WIDGETSOURCES0000000000001 /* Sources */,
-				WIDGETFRAMEWORKS0000000001 /* Frameworks */,
-				WIDGETRESOURCES0000000001 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = GatherListsWidgetsExtension;
-			productName = GatherListsWidgetsExtension;
-			productReference = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 		UITESTTARGET000000000001 /* GatherListsUITests */ = {
 			isa = PBXNativeTarget;
@@ -841,6 +844,23 @@
 			productReference = UITESTPRODUCTREF00000001 /* GatherListsUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */;
+			buildPhases = (
+				WIDGETSOURCES0000000000001 /* Sources */,
+				WIDGETFRAMEWORKS0000000001 /* Frameworks */,
+				WIDGETRESOURCES0000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = GatherListsWidgetsExtension;
+			productName = GatherListsWidgetsExtension;
+			productReference = WIDGETEXTENSION0000000001 /* GatherListsWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -854,12 +874,12 @@
 					A1B2C3D4E5F6A7B8C9D0E205 = {
 						CreatedOnToolsVersion = 15.4;
 					};
-					WIDGETTARGET0000000000001 = {
-						CreatedOnToolsVersion = 15.4;
-					};
 					UITESTTARGET000000000001 = {
 						CreatedOnToolsVersion = 15.4;
 						TestTargetID = A1B2C3D4E5F6A7B8C9D0E205;
+					};
+					WIDGETTARGET0000000000001 = {
+						CreatedOnToolsVersion = 15.4;
 					};
 				};
 			};
@@ -900,6 +920,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		UITESTRESOURCES000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		WIDGETRESOURCES0000000001 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -908,17 +935,10 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		UITESTRESOURCES000000001 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		BUMPBUILDPHASE0000000001 /* Bump Build Number */ = {
+		BUMPBUILDPHASE0000000001 /* Bump Build Number (Archive Only) */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -935,18 +955,7 @@
 		};
 /* End PBXShellScriptBuildPhase section */
 
-
 /* Begin PBXSourcesBuildPhase section */
-		UITESTSOURCES00000000001 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */,
-				UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */,
-				UITESTBUILDFILE000000003 /* IPadOrientationTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		A1B2C3D4E5F6A7B8C9D0E207 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -986,6 +995,8 @@
 				EMAILCODEVW0000000000002 /* EmailCodeSignInView.swift in Sources */,
 				PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */,
 				PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */,
+				PROSECTION00000000000002 /* ProSection.swift in Sources */,
+				PROPAYWALL00000000000002 /* ProPaywallView.swift in Sources */,
 				PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */,
 				E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */,
 				F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */,
@@ -1042,6 +1053,7 @@
 				CONNAPPMODEL000000000002 /* ConnectedApp.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E299 /* ProfileService.swift in Sources */,
 				CONNAPPSVC00000000000002 /* ConnectedAppService.swift in Sources */,
+				PROSUBMGR000000000000002 /* ProSubscriptionManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29B /* AppearanceManager.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0F004 /* AppFont.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E29D /* ProductSearchService.swift in Sources */,
@@ -1087,6 +1099,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		UITESTSOURCES00000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */,
+				UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */,
+				UITESTBUILDFILE000000003 /* IPadOrientationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		WIDGETSOURCES0000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1128,15 +1150,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		WIDGETTARGETDEP0000000001 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */;
-			targetProxy = WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */;
-		};
 		UITESTTARGETDEP000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A1B2C3D4E5F6A7B8C9D0E205 /* GatherLists */;
 			targetProxy = UITESTCONTAINERPROXY0001 /* PBXContainerItemProxy */;
+		};
+		WIDGETTARGETDEP0000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = WIDGETTARGET0000000000001 /* GatherListsWidgetsExtension */;
+			targetProxy = WIDGETCONTAINERPROXY00001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1330,6 +1352,40 @@
 			};
 			name = Release;
 		};
+		UITESTCONFIGDEBUG0000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GatherLists;
+			};
+			name = Debug;
+		};
+		UITESTCONFIGRELEASE00001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = GatherLists;
+			};
+			name = Release;
+		};
 		WIDGETCONFIG0000000DEBUG /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1382,40 +1438,6 @@
 			};
 			name = Release;
 		};
-		UITESTCONFIGDEBUG0000001 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GatherLists;
-			};
-			name = Debug;
-		};
-		UITESTCONFIGRELEASE00001 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gatherlists.uitests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GatherLists;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1437,20 +1459,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				WIDGETCONFIG0000000DEBUG /* Debug */,
-				WIDGETCONFIG000000RELEASE /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		UITESTCONFIGLIST00000001 /* Build configuration list for PBXNativeTarget "GatherListsUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				UITESTCONFIGDEBUG0000001 /* Debug */,
 				UITESTCONFIGRELEASE00001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		WIDGETCONFIGLIST0000000001 /* Build configuration list for PBXNativeTarget "GatherListsWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				WIDGETCONFIG0000000DEBUG /* Debug */,
+				WIDGETCONFIG000000RELEASE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

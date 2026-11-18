@@ -76,6 +76,8 @@ struct SettingsView: View {
                     .foregroundStyle(.primary)
                 }
 
+                ProSection()
+
                 PasskeysSection()
 
                 Section("Appearance") {
