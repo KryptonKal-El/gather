@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// Everything that can change whether the active plan is locked.
+private struct LockInputs: Equatable {
+    let planId: UUID?
+    let isPro: Bool
+    let isEnforced: Bool
+}
+
 /// Identifies the slot being edited in the slot sheet.
 private struct SlotSelection: Identifiable {
     let day: Date
@@ -10,6 +17,7 @@ private struct SlotSelection: Identifiable {
 /// The Plan tab: a shared weekly meal plan with breakfast, lunch and dinner for each day.
 struct MealPlanView: View {
     @Environment(AuthViewModel.self) private var authViewModel
+    @Environment(ProSubscriptionManager.self) private var proSubscription
 
     @State private var viewModel: MealPlanViewModel?
     @State private var recipeViewModel: RecipeViewModel?
@@ -88,10 +96,17 @@ struct MealPlanView: View {
 
     private func planContent(_ viewModel: MealPlanViewModel) -> some View {
         List {
+            if viewModel.isLocked {
+                Section {
+                    lockedPrompt(viewModel)
+                }
+            }
             Section {
                 WeekSwitcherView(viewModel: viewModel)
                     .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
                 PlanBarView(viewModel: viewModel, onDescribe: { showDescribeWeek = true })
+                    .disabled(viewModel.isLocked)
+                    .opacity(viewModel.isLocked ? 0.4 : 1)
                 if let note = viewModel.libraryNote {
                     Label(note, systemImage: "info.circle")
                         .font(.quicksand(.subheadline))
@@ -111,6 +126,7 @@ struct MealPlanView: View {
                 Section {
                     ForEach(viewModel.enabledMeals) { meal in
                         slotRow(viewModel: viewModel, day: day, meal: meal)
+                            .disabled(viewModel.isLocked)
                     }
                 } header: {
                     DayHeaderView(day: day)
@@ -119,7 +135,28 @@ struct MealPlanView: View {
         }
         .listStyle(.insetGrouped)
         .readableContentWidth()
-        .refreshable { await viewModel.refresh() }
+        .refreshable {
+            await viewModel.refresh()
+            await viewModel.refreshLock()
+        }
+        .task(id: LockInputs(planId: viewModel.activePlanId, isPro: proSubscription.isPro, isEnforced: proSubscription.isEnforced)) {
+            await viewModel.refreshLock()
+        }
+    }
+
+    private func lockedPrompt(_ viewModel: MealPlanViewModel) -> some View {
+        if viewModel.isOwner {
+            ProUpgradePrompt(
+                title: "Meal planning is part of Gather Lists Pro",
+                message: "Your plan is still here to read. Subscribe to change it, and everyone you share it with can edit too."
+            )
+        } else {
+            ProUpgradePrompt(
+                title: "This plan is read-only",
+                message: "The plan's owner needs Gather Lists Pro before anyone can change it.",
+                showsUpgradeButton: false
+            )
+        }
     }
 
     private func slotRow(viewModel: MealPlanViewModel, day: Date, meal: MealType) -> some View {
@@ -245,6 +282,7 @@ struct MealPlanView: View {
             } label: {
                 Label("Eat-out Deals", systemImage: "tag")
             }
+            .disabled(viewModel.isLocked)
 
             Menu {
                 ForEach(MealType.allCases) { meal in
@@ -256,6 +294,7 @@ struct MealPlanView: View {
             } label: {
                 Label("Meals Shown", systemImage: "slider.horizontal.3")
             }
+            .disabled(viewModel.isLocked)
 
             if viewModel.plans.count > 1 {
                 Picker("Plan", selection: planBinding(viewModel)) {

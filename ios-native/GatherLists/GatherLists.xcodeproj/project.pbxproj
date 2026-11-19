@@ -171,6 +171,7 @@
 		STRINGEMOJI0000000000002 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
 		STRINGEMOJI0000000000003 /* String+Emoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = STRINGEMOJI0000000000001 /* String+Emoji.swift */; };
 		TOASTBANNER000000000002 /* ToastBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = TOASTBANNER000000000001 /* ToastBanner.swift */; };
+		PROUPGRADE00000000000002 /* ProUpgradePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROUPGRADE00000000000001 /* ProUpgradePrompt.swift */; };
 		UITESTBUILDFILE000000001 /* ListDetailViewCollaboratorMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */; };
 		UITESTBUILDFILE000000002 /* LastListRestorationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000002 /* LastListRestorationTests.swift */; };
 		UITESTBUILDFILE000000003 /* IPadOrientationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = UITESTFILEREF00000000003 /* IPadOrientationTests.swift */; };
@@ -383,6 +384,7 @@
 		SHAREMEALPLAN00000000001 /* ShareMealPlanSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareMealPlanSheet.swift; sourceTree = "<group>"; };
 		STRINGEMOJI0000000000001 /* String+Emoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Emoji.swift"; sourceTree = "<group>"; };
 		TOASTBANNER000000000001 /* ToastBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastBanner.swift; sourceTree = "<group>"; };
+		PROUPGRADE00000000000001 /* ProUpgradePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProUpgradePrompt.swift; sourceTree = "<group>"; };
 		UITESTFILEREF00000000001 /* ListDetailViewCollaboratorMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailViewCollaboratorMenuTests.swift; sourceTree = "<group>"; };
 		UITESTFILEREF00000000002 /* LastListRestorationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastListRestorationTests.swift; sourceTree = "<group>"; };
 		UITESTFILEREF00000000003 /* IPadOrientationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadOrientationTests.swift; sourceTree = "<group>"; };
@@ -682,6 +684,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2AC /* StackedLogoView.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2F0 /* ZoomableContainer.swift */,
 				TOASTBANNER000000000001 /* ToastBanner.swift */,
+				PROUPGRADE00000000000001 /* ProUpgradePrompt.swift */,
 				ADAPTIVELAYOUT00000000001 /* AdaptiveLayout.swift */,
 			);
 			path = Components;
@@ -1073,6 +1076,7 @@
 				A1B2C3D4E5F6A7B8C9D0E2AD /* StackedLogoView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2F1 /* ZoomableContainer.swift in Sources */,
 				TOASTBANNER000000000002 /* ToastBanner.swift in Sources */,
+				PROUPGRADE00000000000002 /* ProUpgradePrompt.swift in Sources */,
 				ADAPTIVELAYOUT00000000002 /* AdaptiveLayout.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2BE /* UserPreferences.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E2C0 /* PreferenceService.swift in Sources */,

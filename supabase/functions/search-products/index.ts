@@ -3,10 +3,12 @@
  * Queries the sources named in `sources` (Walmart, Spoonacular, Open Food Facts,
  * SerpAPI Google Images) in parallel. Clients normally send one source per request
  * so each section loads on its own.
- * Response: `groups` holds sources with results; `failed` lists sources that errored
+ * Response: `groups` holds sources with results; `limited` lists paid sources skipped
+ * because the caller is over their free allowance; `failed` lists sources that errored
  * or timed out, so clients can tell a failure from an empty result.
  */
 
+import { accessDeniedResponse, checkAccess, PAID_IMAGE_SOURCES } from '../_shared/entitlement.ts';
 import { logUsage } from '../_shared/usageLog.ts';
 
 interface ProductResult {
@@ -354,7 +356,17 @@ Deno.serve(async (req) => {
     serpapi: () => searchSerpApi(query, numItems),
   };
 
-  const requestedSources = SOURCE_ORDER.filter(key => enabledSources.has(key));
+  const enabledInOrder = SOURCE_ORDER.filter(key => enabledSources.has(key));
+  const paidRequested = enabledInOrder.filter(key => PAID_IMAGE_SOURCES.includes(key));
+  const access = paidRequested.length > 0 ? await checkAccess(req, 'image_lookup') : null;
+  const limited: SourceKey[] = access && !access.allowed ? paidRequested : [];
+
+  // A request for nothing but paid sources gets the refusal itself; a mixed one
+  // (older app builds ask for every source at once) still gets the free sources.
+  if (access && limited.length === enabledInOrder.length) {
+    return accessDeniedResponse(access, corsHeaders);
+  }
+  const requestedSources = enabledInOrder.filter(key => !limited.includes(key));
   const settled = await Promise.all(
     requestedSources.map(async key => ({ source: key, results: await searchFns[key]() }))
   );
@@ -373,9 +385,9 @@ Deno.serve(async (req) => {
     .map(({ source }) => source);
 
   // A response with a failed source must not be cached, or retries keep replaying the gap.
-  const cacheControl = failed.length > 0 ? 'no-store' : 'public, max-age=3600';
+  const cacheControl = failed.length > 0 || limited.length > 0 ? 'no-store' : 'public, max-age=3600';
 
-  return new Response(JSON.stringify({ groups, failed }), {
+  return new Response(JSON.stringify({ groups, failed, limited }), {
     status: 200,
     headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Cache-Control': cacheControl },
   });

@@ -155,6 +155,8 @@ enum RecipeUrlImportError: Error {
     /// The site is behind bot protection (e.g. Cloudflare) and can't be fetched.
     case blocked
     case network
+    /// The user has used their free imports for the month.
+    case limitReached
 }
 
 /// Client for the import-recipe-url Supabase edge function, which fetches a
@@ -187,6 +189,7 @@ struct RecipeUrlImportService {
             }
         }
         switch statusCode {
+        case 402: return .limitReached
         case 403: return .blocked
         case 422: return .noRecipeFound
         case 400: return .invalidUrl

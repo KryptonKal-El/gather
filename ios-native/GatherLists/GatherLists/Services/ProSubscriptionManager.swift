@@ -22,6 +22,14 @@ final class ProSubscriptionManager {
         return proUntil > .now
     }
 
+    /// Whether Pro limits apply to this account (the server's `pro_enforced()`):
+    /// off for everyone until launch, except accounts listed as testers.
+    /// While off, every feature behaves as it did before Pro existed.
+    private(set) var isEnforced = UserDefaults.standard.bool(forKey: enforcementCacheKey)
+
+    /// Whether the user may use Pro-only features of their own right now.
+    var hasProAccess: Bool { !isEnforced || isPro }
+
     /// Ties a purchase to the signed-in account so the server can attribute it
     /// even if the app never gets to report the transaction itself.
     var purchaseOptions: Set<Product.PurchaseOption> {
@@ -103,8 +111,21 @@ final class ProSubscriptionManager {
         }
     }
 
+    private func loadEnforcement() async {
+        do {
+            isEnforced = try await SupabaseManager.shared.client
+                .rpc("pro_enforced")
+                .execute()
+                .value
+            UserDefaults.standard.set(isEnforced, forKey: Self.enforcementCacheKey)
+        } catch {
+            print("[ProSubscriptionManager] Loading the enforcement switch failed: \(error)")
+        }
+    }
+
     private func loadServerState() async {
         guard let userId else { return }
+        await loadEnforcement()
         do {
             let rows: [EntitlementRow] = try await SupabaseManager.shared.client
                 .from("subscriptions")
@@ -124,6 +145,8 @@ final class ProSubscriptionManager {
             print("[ProSubscriptionManager] Loading Pro status failed: \(error)")
         }
     }
+
+    private static let enforcementCacheKey = "proEnforced"
 
     private static func cacheKey(for userId: UUID) -> String {
         "proUntil.\(userId.uuidString)"

@@ -6,7 +6,9 @@ struct OnlineRecipeSearchView: View {
     let userEmail: String
     let collections: [RecipeCollection]
     let activeCollectionId: UUID?
-    
+
+    @Environment(ProSubscriptionManager.self) private var proSubscription
+
     @State private var searchText = ""
     @State private var results: [SpoonacularSearchResult] = []
     @State private var isLoading = false
@@ -27,7 +29,14 @@ struct OnlineRecipeSearchView: View {
     
     var body: some View {
         Group {
-            if isLoading {
+            if !proSubscription.hasProAccess {
+                ProUpgradePrompt(
+                    title: "Online recipe search is part of Gather Lists Pro",
+                    message: "Search thousands of recipes and save them to your collections. You can still add recipes yourself or import them from a link."
+                )
+                .padding(24)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            } else if isLoading {
                 loadingView
             } else if let errorMessage = error {
                 errorView(message: errorMessage)
@@ -57,6 +66,7 @@ struct OnlineRecipeSearchView: View {
         .searchable(text: $searchText, prompt: "Search recipes")
         .onChange(of: searchText) { _, newValue in
             searchTask?.cancel()
+            guard proSubscription.hasProAccess else { return }
             guard !newValue.trimmingCharacters(in: .whitespaces).isEmpty else {
                 results = []
                 hasSearched = false

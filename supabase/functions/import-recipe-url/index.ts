@@ -7,6 +7,7 @@
  * straight into the recipe form. Nothing is stored; this is a pure proxy/parser.
  */
 
+import { accessDeniedResponse, checkAccess } from '../_shared/entitlement.ts';
 import { logUsage } from '../_shared/usageLog.ts';
 
 interface ParsedRecipe {
@@ -278,6 +279,9 @@ Deno.serve(async (req) => {
   if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
     return json({ error: 'INVALID_URL' }, 400);
   }
+
+  const access = await checkAccess(req, 'recipe_import');
+  if (!access.allowed) return accessDeniedResponse(access, corsHeaders);
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000);

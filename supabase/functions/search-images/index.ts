@@ -3,6 +3,7 @@
  * Migrated from Firebase Cloud Function.
  */
 
+import { accessDeniedResponse, checkAccess } from '../_shared/entitlement.ts';
 import { logUsage } from '../_shared/usageLog.ts';
 
 const ALLOWED_ORIGINS = [
@@ -47,6 +48,9 @@ Deno.serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
+
+  const access = await checkAccess(req, 'image_lookup');
+  if (!access.allowed) return accessDeniedResponse(access, corsHeaders);
 
   const apiKey = Deno.env.get('SERPAPI_KEY') ?? '';
   if (!apiKey) {

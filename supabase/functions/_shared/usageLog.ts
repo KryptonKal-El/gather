@@ -17,7 +17,13 @@ export interface UsageEvent {
 
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined
 
-async function resolveUserId(req: Request, supabase: SupabaseClient): Promise<string | null> {
+/**
+ * Returns the signed-in caller's user id, or null when the request carries only
+ * the anon key or an invalid token.
+ * @param req - The incoming request
+ * @param supabase - A service-role client
+ */
+export async function resolveUserId(req: Request, supabase: SupabaseClient): Promise<string | null> {
   const token = (req.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '')
   if (!token || token === Deno.env.get('SUPABASE_ANON_KEY')) return null
 

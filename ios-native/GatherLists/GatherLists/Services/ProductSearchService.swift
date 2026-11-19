@@ -45,6 +45,8 @@ enum ProductSearchError: Error {
     case http(Int)
     /// The edge function reported that the provider errored or timed out.
     case sourceFailed
+    /// The user is over their free monthly allowance for paid image sources.
+    case limitReached
 }
 
 private actor SearchCache {
@@ -104,11 +106,17 @@ struct ProductSearchService {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw ProductSearchError.http(-1)
         }
+        if httpResponse.statusCode == 402 {
+            throw ProductSearchError.limitReached
+        }
         guard (200...299).contains(httpResponse.statusCode) else {
             throw ProductSearchError.http(httpResponse.statusCode)
         }
 
         let decoded = try JSONDecoder().decode(SearchResponse.self, from: data)
+        if decoded.limited?.contains(source.rawValue) == true {
+            throw ProductSearchError.limitReached
+        }
         if decoded.failed?.contains(source.rawValue) == true {
             throw ProductSearchError.sourceFailed
         }
@@ -123,6 +131,8 @@ private struct SearchResponse: Codable {
     let groups: [ResultGroup]
     /// Sources that errored or timed out. Absent on older edge function deployments.
     let failed: [String]?
+    /// Paid sources skipped because the user is over their free allowance.
+    let limited: [String]?
 
     struct ResultGroup: Codable {
         let source: String

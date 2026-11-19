@@ -14,6 +14,8 @@ struct RecipeUrlImportView: View {
     @State private var draft: ImportedRecipe?
     @State private var showForm = false
     @State private var errorMessage: String?
+    @State private var isLimitAlertPresented = false
+    @State private var isPaywallPresented = false
 
     private var trimmedUrl: String {
         urlText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -88,6 +90,15 @@ struct RecipeUrlImportView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        .alert("Monthly limit reached", isPresented: $isLimitAlertPresented) {
+            Button("Not Now", role: .cancel) {}
+            Button("See Plans") { isPaywallPresented = true }
+        } message: {
+            Text("Free accounts can import 5 recipes from links each month. Gather Lists Pro removes the limit. \"Import from Text\" is always free.")
+        }
+        .sheet(isPresented: $isPaywallPresented) {
+            ProPaywallView()
+        }
         .sheet(isPresented: $showForm) {
             if let draft {
                 RecipeFormSheet(
@@ -122,6 +133,8 @@ struct RecipeUrlImportView: View {
             errorMessage = "That doesn't look like a valid recipe link. Check the address and try again."
         } catch RecipeUrlImportError.noRecipeFound {
             errorMessage = "We couldn't find a recipe on that page. Some sites don't publish a readable recipe — try the \"Import from Text\" option instead."
+        } catch RecipeUrlImportError.limitReached {
+            isLimitAlertPresented = true
         } catch RecipeUrlImportError.blocked {
             errorMessage = "This site blocks automated recipe imports. Open the recipe in your browser, copy the text, and use the \"Import from Text\" option instead."
         } catch {

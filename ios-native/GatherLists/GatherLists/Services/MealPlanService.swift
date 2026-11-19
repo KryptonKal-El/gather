@@ -17,6 +17,15 @@ struct MealPlanService {
             .value
     }
 
+    /// Whether the plan can be edited as far as Gather Lists Pro goes: true while
+    /// limits are off, or while the plan's owner (not necessarily the caller) has Pro.
+    static func fetchHasPro(planId: UUID) async throws -> Bool {
+        try await client
+            .rpc("meal_plan_has_pro", params: ["plan_uuid": planId])
+            .execute()
+            .value
+    }
+
     /// Creates a new plan owned by the user.
     static func createPlan(userId: UUID) async throws -> MealPlan {
         try await client

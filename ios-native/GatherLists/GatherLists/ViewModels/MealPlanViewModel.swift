@@ -28,6 +28,8 @@ final class MealPlanViewModel {
     var isShowingCachedData = false
     var isPlanning = false
     var libraryNote: String?
+    /// True when the plan is read-only because its owner doesn't have Gather Lists Pro.
+    private(set) var isLocked = false
 
     let userId: UUID
     let userEmail: String
@@ -100,6 +102,21 @@ final class MealPlanViewModel {
         Task {
             await load()
             subscribe()
+        }
+    }
+
+    // MARK: - Pro
+
+    /// Re-reads whether the active plan is editable. Keeps the last answer on
+    /// failure, so going offline never locks a plan that was open.
+    func refreshLock() async {
+        guard let planId = activePlanId else { return }
+        do {
+            let hasPro = try await MealPlanService.fetchHasPro(planId: planId)
+            guard planId == activePlanId else { return }
+            isLocked = !hasPro
+        } catch {
+            print("[MealPlanViewModel] Failed to check Pro status: \(error.localizedDescription)")
         }
     }
 

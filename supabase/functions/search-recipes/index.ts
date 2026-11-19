@@ -3,6 +3,7 @@
  * Keeps API key server-side and provides search + detail endpoints.
  */
 
+import { accessDeniedResponse, checkAccess } from '../_shared/entitlement.ts';
 import { logUsage } from '../_shared/usageLog.ts';
 
 interface RecipeSearchResult {
@@ -187,6 +188,9 @@ Deno.serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
+
+  const access = await checkAccess(req, 'recipe_search');
+  if (!access.allowed) return accessDeniedResponse(access, corsHeaders);
 
   const operation = recipeId ? 'recipe_detail' : 'recipe_search';
   const logCall = (ok: boolean) => logUsage(req, 'search-recipes', [{ source: 'spoonacular', operation, ok }]);

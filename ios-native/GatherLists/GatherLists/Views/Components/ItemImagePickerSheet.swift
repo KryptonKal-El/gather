@@ -284,6 +284,11 @@ struct ItemImagePickerSheet: View {
                 .font(.footnote)
                 .foregroundStyle(.orange)
                 .accessibilityLabel("Couldn't load")
+        case .limitReached:
+            Image(systemName: "lock.fill")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .accessibilityLabel("Monthly limit reached")
         case .loaded(let results):
             Text("\(results.count)")
                 .font(.quicksand(.caption, weight: .semibold))
@@ -314,6 +319,12 @@ struct ItemImagePickerSheet: View {
                 .font(.quicksand(.footnote))
                 .accessibilityLabel("Retry \(source.label)")
             }
+            .padding(.horizontal, 12)
+        case .limitReached:
+            ProUpgradePrompt(
+                title: "Monthly limit reached",
+                message: "Free accounts get 25 Google Images and Spoonacular lookups a month. Walmart and Open Food Facts stay unlimited."
+            )
             .padding(.horizontal, 12)
         case .loaded(let results) where results.isEmpty:
             Text("No results")
@@ -436,6 +447,8 @@ struct ItemImagePickerSheet: View {
             let state: SearchSectionState
             do {
                 state = .loaded(try await ProductSearchService.search(query: query, source: source))
+            } catch ProductSearchError.limitReached {
+                state = .limitReached
             } catch {
                 print("[ItemImagePickerSheet] \(source.rawValue) search failed for '\(query)': \(error)")
                 state = .failed
@@ -531,6 +544,7 @@ private enum SearchSectionState {
     case loading
     case loaded([ProductResult])
     case failed
+    case limitReached
 }
 
 /// A local image awaiting the crop step, wrapped for `fullScreenCover(item:)`.
