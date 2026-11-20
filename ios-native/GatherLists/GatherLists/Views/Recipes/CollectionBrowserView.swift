@@ -219,10 +219,18 @@ struct CollectionBrowserView: View {
                         } label: {
                             Label("New Collection", systemImage: "folder.badge.plus")
                         }
+                        // Menu section titles aren't shown here, so the options name the setting themselves.
+                        Picker("Group By", selection: $allGrouping) {
+                            Label("Group by Collection", systemImage: RecipeGrouping.collection.systemImage)
+                                .tag(RecipeGrouping.collection)
+                            Label("No Grouping", systemImage: RecipeGrouping.ungrouped.systemImage)
+                                .tag(RecipeGrouping.ungrouped)
+                        }
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "ellipsis")
                             .foregroundStyle(Color.brandGreen)
                     }
+                    .accessibilityLabel("Recipe options")
                     // The app-wide brand-green tint renders menu text too low-contrast
                     // to read; force standard high-contrast label text in the popup.
                     .tint(.primary)
@@ -375,7 +383,6 @@ struct CollectionBrowserView: View {
                     if groups.isEmpty {
                         gridEmptyState(vm: vm)
                     } else {
-                        groupByRow
                         if allGrouping == .collection {
                             // Groups ordered A–Z, each in its collection's sort order.
                             ForEach(groups, id: \.collection.id) { group in
@@ -479,32 +486,6 @@ struct CollectionBrowserView: View {
                 } label: { Label("Delete", systemImage: "trash") }
             }
         }
-    }
-
-    // MARK: - Group-by control
-
-    private var groupByRow: some View {
-        HStack {
-            Spacer()
-            Menu {
-                Picker("Group By", selection: $allGrouping) {
-                    ForEach(RecipeGrouping.allCases) { option in
-                        Label(option.label, systemImage: option.systemImage).tag(option)
-                    }
-                }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("Group: \(allGrouping.label)")
-                    Image(systemName: "chevron.down")
-                        .font(.quicksand(.caption2))
-                }
-                .font(.quicksand(.subheadline, weight: .medium))
-                .foregroundStyle(Color.brandGreen)
-            }
-            .tint(.primary)
-            .accessibilityLabel("Group by \(allGrouping.label)")
-        }
-        .padding(.horizontal, 16)
     }
 
     // MARK: - Collection header
