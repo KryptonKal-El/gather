@@ -12,19 +12,19 @@ Last synced with App Store Connect: 2026-11-20 (version 1.0, build 144).
 Gather Lists
 
 ## Subtitle (30 chars max)
-Smart lists for every occasion
+Grocery, recipes & meal plans
 
 ## Category
-Food & Drink
+Primary: Food & Drink. Secondary: Productivity.
 
 ## Promotional Text (170 chars max)
 Shared grocery lists that sort by store, a weekly meal plan built from your own recipes, and wish lists, guest lists and packing lists in one place.
 
 ## Keywords (100 chars max)
-grocery,shopping,shared,meal,planner,recipes,packing,todo,reminders,pantry,family,wish,gift,rsvp
+shopping,shared,planner,packing,todo,reminders,pantry,family,wish,gift,rsvp,guest,party,checklist
 
-Don't repeat words from the app name or subtitle ("lists", "smart"): Apple
-indexes those already.
+Don't repeat words from the app name or subtitle ("lists", "grocery",
+"recipes", "meal", "plans"): Apple indexes those already.
 
 ## Description (4000 chars max)
 
@@ -92,8 +92,17 @@ Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 - "No ads, no tracking" must agree with `app-privacy-labels.md`.
 - Every bullet should be something a reviewer can find in the build submitted.
 
-## Content Rating
-4+ (No objectionable content)
+## Age Rating
+4+ (every questionnaire answer is None or No).
+
+## Content Rights
+"Yes, this app has the necessary rights to its third-party content." The
+third-party content is product photos from image search (Walmart, Open Food
+Facts, Spoonacular, Google Images) and recipes from online recipe search
+(Spoonacular). Revisit this answer if an image or recipe source is added.
+
+## License Agreement
+Apple's Standard License Agreement (the Terms of Use link in the description).
 
 ## Support URL
 https://gatherlists.com/support
