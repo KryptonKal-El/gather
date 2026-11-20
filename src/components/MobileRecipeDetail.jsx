@@ -14,6 +14,7 @@ import {
 import { useIsMobile } from '../hooks/useIsMobile.js';
 import styles from './MobileRecipeDetail.module.css';
 import { RecipeAttributesSection } from './RecipeAttributesSection.jsx';
+import { ProUpgradeNotice } from './ProUpgradeNotice.jsx';
 
 /**
  * Full-screen mobile recipe detail view.
@@ -33,6 +34,7 @@ export const MobileRecipeDetail = ({
   onEdit,
   onDelete,
   onAddToList,
+  hasProAccess = true,
 }) => {
   // Collaborators on a write-shared collection can edit/delete without owning
   // the recipe; callers that don't pass canEdit keep the owner-only behavior.
@@ -409,7 +411,14 @@ export const MobileRecipeDetail = ({
           <p className={styles.description}>{recipe.description}</p>
         )}
 
-        {userId && (
+        {userId && !hasProAccess && !activeCookSession && (
+          <ProUpgradeNotice
+            title="Cook mode is part of Gather Lists Pro"
+            message="Follow the recipe one step at a time and keep a history of what you've cooked."
+          />
+        )}
+
+        {userId && (hasProAccess || activeCookSession) && (
           <button
             type="button"
             className={`${styles.cookButton} ${activeCookSession ? styles.cookButtonResume : ''}`}
@@ -425,6 +434,7 @@ export const MobileRecipeDetail = ({
             recipeName={recipe.name}
             canEdit={Boolean(allowEdit)}
             userId={userId}
+            hasProAccess={hasProAccess}
           />
         )}
 
@@ -654,4 +664,5 @@ MobileRecipeDetail.propTypes = {
   onEdit: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onAddToList: PropTypes.func.isRequired,
+  hasProAccess: PropTypes.bool,
 };

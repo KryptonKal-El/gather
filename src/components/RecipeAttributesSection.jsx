@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { fetchRecipeAttributes, saveRecipeAttributes } from '../services/recipeAttributesDatabase.js';
 import { attributeChips, emptyAttributes } from '../utils/recipeAttributes.js';
 import { RecipeAttributesEditor } from './RecipeAttributesEditor.jsx';
+import { ProUpgradeNotice } from './ProUpgradeNotice.jsx';
 import styles from './RecipeAttributesSection.module.css';
 
 /**
@@ -16,8 +17,9 @@ import styles from './RecipeAttributesSection.module.css';
  * @param {string} props.recipeName
  * @param {boolean} props.canEdit
  * @param {string} props.userId
+ * @param {boolean} [props.hasProAccess=true] - False hides editing; existing details stay visible
  */
-export const RecipeAttributesSection = ({ recipeId, recipeName, canEdit, userId }) => {
+export const RecipeAttributesSection = ({ recipeId, recipeName, canEdit, userId, hasProAccess = true }) => {
   const [attributes, setAttributes] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
@@ -52,14 +54,20 @@ export const RecipeAttributesSection = ({ recipeId, recipeName, canEdit, userId 
     <div className={styles.section}>
       <div className={styles.header}>
         <h2 className={styles.title}>DETAILS</h2>
-        {canEdit && isLoaded && !error && (
+        {canEdit && hasProAccess && isLoaded && !error && (
           <button type="button" className={styles.editBtn} onClick={() => setIsEditing(true)}>
             {attributes ? 'Edit' : 'Add'}
           </button>
         )}
       </div>
       {error && <p className={styles.muted}>{error}</p>}
-      {!error && isLoaded && chips.length === 0 && (
+      {!error && isLoaded && chips.length === 0 && canEdit && !hasProAccess && (
+        <ProUpgradeNotice
+          title="Details are part of Gather Lists Pro"
+          message="Meal, protein, cuisine and effort help the Plan tab suggest a balanced week."
+        />
+      )}
+      {!error && isLoaded && chips.length === 0 && (hasProAccess || !canEdit) && (
         <p className={styles.muted}>Meal, protein, cuisine and effort help the Plan tab suggest a balanced week.</p>
       )}
       {chips.length > 0 && (
@@ -84,4 +92,5 @@ RecipeAttributesSection.propTypes = {
   recipeName: PropTypes.string.isRequired,
   canEdit: PropTypes.bool.isRequired,
   userId: PropTypes.string.isRequired,
+  hasProAccess: PropTypes.bool,
 };

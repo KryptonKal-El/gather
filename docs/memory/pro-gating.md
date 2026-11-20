@@ -46,4 +46,8 @@ The e2e test account is a tester, so it always sees the locked experience.
   user from the iOS tester account and is NOT a tester, because the Playwright
   meal plan spec writes to its plan. To see the locked web UI, add it to
   `pro_enforcement_testers` temporarily and remove it afterwards.
-- Cook mode and recipe tagging are marked Pro in the plan but are not locked.
+- Cook mode and recipe details (tags) are locked in the clients only; no
+  server rule backs them. A cook already in progress can always be finished,
+  existing tags stay visible, and automatic tagging on iPhone stops.
+  `RecipeAutoTagger` runs outside the view tree, so it reads
+  `ProSubscriptionManager.cachedHasProAccess(for:)`.

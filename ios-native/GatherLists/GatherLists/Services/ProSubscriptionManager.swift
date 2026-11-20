@@ -30,6 +30,14 @@ final class ProSubscriptionManager {
     /// Whether the user may use Pro-only features of their own right now.
     var hasProAccess: Bool { !isEnforced || isPro }
 
+    /// The last known answer for `userId`, for code that runs outside the view
+    /// tree. Limits count as off until the server has said otherwise.
+    static func cachedHasProAccess(for userId: UUID) -> Bool {
+        guard UserDefaults.standard.bool(forKey: enforcementCacheKey) else { return true }
+        guard let proUntil = cachedProUntil(for: userId) else { return false }
+        return proUntil > .now
+    }
+
     /// Ties a purchase to the signed-in account so the server can attribute it
     /// even if the app never gets to report the transaction itself.
     var purchaseOptions: Set<Product.PurchaseOption> {

@@ -5,6 +5,7 @@ struct RecipeDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @Environment(NotificationService.self) private var notificationService
+    @Environment(ProSubscriptionManager.self) private var proSubscription
 
     let recipe: Recipe
     let viewModel: RecipeViewModel
@@ -348,6 +349,20 @@ struct RecipeDetailView: View {
     private var startCookingButton: some View {
         let hasActiveCook = cookViewModel?.activeSession != nil
 
+        // A cook already under way can always be finished.
+        if !proSubscription.hasProAccess && !hasActiveCook {
+            ProUpgradePrompt(
+                title: "Cook mode is part of Gather Lists Pro",
+                message: "Follow the recipe one step at a time with the screen kept on, and keep a history of what you've cooked."
+            )
+            .padding(14)
+            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+        } else {
+            startCookingAction(hasActiveCook: hasActiveCook)
+        }
+    }
+
+    private func startCookingAction(hasActiveCook: Bool) -> some View {
         Button {
             if hasActiveCook {
                 showCookMode = true

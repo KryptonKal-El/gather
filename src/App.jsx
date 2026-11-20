@@ -805,6 +805,7 @@ export const App = () => {
             <section className={getRecipeDetailScreenClass()}>
               <div className={styles.mobileFullScreen}>
                 <MobileRecipeDetail
+                  hasProAccess={hasProAccess}
                   recipe={detailRecipe}
                   userId={user.id}
                   isOwner={detailRecipe.ownerId === user.id}
@@ -1034,6 +1035,7 @@ export const App = () => {
           ) : recipeState.activeRecipe ? (
             <div className={styles.recipeCard}>
               <MobileRecipeDetail
+                hasProAccess={hasProAccess}
                 recipe={recipeState.activeRecipe}
                 userId={user.id}
                 isOwner={recipeState.activeRecipe.ownerId === user.id}

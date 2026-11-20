@@ -6,6 +6,8 @@ struct RecipeAttributesSection: View {
     let canEdit: Bool
     let userId: UUID
 
+    @Environment(ProSubscriptionManager.self) private var proSubscription
+
     @State private var attributes: RecipeAttributes?
     @State private var didLoad = false
     @State private var showEditor = false
@@ -17,7 +19,7 @@ struct RecipeAttributesSection: View {
                 Text("Tags")
                     .font(.quicksand(.headline, weight: .bold))
                 Spacer()
-                if canEdit && didLoad {
+                if canEdit && didLoad && proSubscription.hasProAccess {
                     Button(attributes == nil ? "Add" : "Edit") { showEditor = true }
                         .font(.quicksand(.subheadline, weight: .semibold))
                         .tint(Color.brandGreen)
@@ -30,6 +32,13 @@ struct RecipeAttributesSection: View {
                 Label("Adding details on this iPhone…", systemImage: "sparkles")
                     .font(.quicksand(.subheadline))
                     .foregroundStyle(.secondary)
+            } else if didLoad && canEdit && !proSubscription.hasProAccess {
+                ProUpgradePrompt(
+                    title: "Tags are part of Gather Lists Pro",
+                    message: "Meal, protein, cuisine and effort are filled in for you and help the Plan tab suggest a balanced week."
+                )
+                .padding(14)
+                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
             } else if didLoad {
                 Text("Meal, protein, cuisine and effort help the Plan tab suggest a balanced week.")
                     .font(.quicksand(.subheadline))
@@ -53,7 +62,7 @@ struct RecipeAttributesSection: View {
             print("[RecipeAttributesSection] Failed to load: \(error.localizedDescription)")
         }
         didLoad = true
-        if attributes == nil, canEdit, RecipeTaggingService.isAvailable {
+        if attributes == nil, canEdit, proSubscription.hasProAccess, RecipeTaggingService.isAvailable {
             await tagNow()
         }
     }

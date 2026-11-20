@@ -2,7 +2,8 @@ import Foundation
 
 /// Tags the user's recipes in the background with the on-device model: recipes with no
 /// attributes yet, and recipes whose text changed since they were last tagged. Runs one
-/// recipe at a time, a bounded batch per pass, and does nothing where the model is unavailable.
+/// recipe at a time, a bounded batch per pass, and does nothing where the model is unavailable
+/// or the user lacks Pro access.
 @MainActor
 final class RecipeAutoTagger {
     static let shared = RecipeAutoTagger()
@@ -17,7 +18,8 @@ final class RecipeAutoTagger {
     /// Starts a pass over `recipes` (those the user can edit). If a pass is already running,
     /// the latest request runs once it finishes.
     func run(recipes: [Recipe], userId: UUID) {
-        guard RecipeTaggingService.isAvailable, !recipes.isEmpty else { return }
+        guard RecipeTaggingService.isAvailable, !recipes.isEmpty,
+              ProSubscriptionManager.cachedHasProAccess(for: userId) else { return }
         if isRunning {
             pendingRun = (recipes, userId)
             return
