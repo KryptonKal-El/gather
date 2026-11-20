@@ -150,6 +150,7 @@
 		PASSKEYPRMT0000000000002 /* PasskeyPromptModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */; };
 		PASSKEYSECT0000000000002 /* PasskeysSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSECT0000000000001 /* PasskeysSection.swift */; };
 		PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = PASSKEYSVC00000000000001 /* PasskeyService.swift */; };
+		APPLEREAUTH0000000000002 /* AppleReauthorizationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = APPLEREAUTH0000000000001 /* AppleReauthorizationService.swift */; };
 		PROPAYWALL00000000000002 /* ProPaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROPAYWALL00000000000001 /* ProPaywallView.swift */; };
 		PROSECTION00000000000002 /* ProSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROSECTION00000000000001 /* ProSection.swift */; };
 		PROSUBMGR000000000000002 /* ProSubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */; };
@@ -366,6 +367,7 @@
 		PASSKEYPRMT0000000000001 /* PasskeyPromptModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyPromptModifier.swift; sourceTree = "<group>"; };
 		PASSKEYSECT0000000000001 /* PasskeysSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeysSection.swift; sourceTree = "<group>"; };
 		PASSKEYSVC00000000000001 /* PasskeyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasskeyService.swift; sourceTree = "<group>"; };
+		APPLEREAUTH0000000000001 /* AppleReauthorizationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleReauthorizationService.swift; sourceTree = "<group>"; };
 		PROPAYWALL00000000000001 /* ProPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProPaywallView.swift; sourceTree = "<group>"; };
 		PROSECTION00000000000001 /* ProSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSection.swift; sourceTree = "<group>"; };
 		PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProSubscriptionManager.swift; sourceTree = "<group>"; };
@@ -549,6 +551,7 @@
 				CONNAPPSVC00000000000001 /* ConnectedAppService.swift */,
 				PROSUBMGR000000000000001 /* ProSubscriptionManager.swift */,
 				PASSKEYSVC00000000000001 /* PasskeyService.swift */,
+				APPLEREAUTH0000000000001 /* AppleReauthorizationService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E29C /* ProductSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2B5 /* RecipeSearchService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2A4 /* SuggestionEngine.swift */,
@@ -1009,6 +1012,7 @@
 				PROSECTION00000000000002 /* ProSection.swift in Sources */,
 				PROPAYWALL00000000000002 /* ProPaywallView.swift in Sources */,
 				PASSKEYSVC00000000000002 /* PasskeyService.swift in Sources */,
+				APPLEREAUTH0000000000002 /* AppleReauthorizationService.swift in Sources */,
 				E4F5A6B7C8D9E0F1A2B3C4D5 /* MainTabView.swift in Sources */,
 				F5A6B7C8D9E0F1A2B3C4D5E6 /* SettingsView.swift in Sources */,
 				C0FFEE00000000000000B002 /* AppIconPickerView.swift in Sources */,

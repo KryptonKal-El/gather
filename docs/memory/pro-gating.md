@@ -4,7 +4,7 @@
 Limits apply to an account when `pro_enforced_for(user)` is true: either
 `app_settings.pro_enforcement` is `true` (global, the launch switch) or the user
 id is in the `pro_enforcement_testers` JSON array. Both start off/empty. The global switch was turned on 2026-11-20,
-when version 1.0 (build 144) was submitted to App Review.
+when version 1.0 was submitted to App Review (first as build 144, resubmitted as build 145 with account deletion).
 
 ```sql
 -- launch

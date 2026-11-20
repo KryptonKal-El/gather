@@ -122,9 +122,16 @@ final class AuthViewModel {
         }
     }
     
+    /// Whether the signed-in user has signed in with Apple, so deleting the
+    /// account should also revoke their Apple tokens.
+    var usesAppleSignIn: Bool {
+        currentUser?.identities?.contains { $0.provider == "apple" } ?? false
+    }
+
     /// Permanently deletes the account on the server, then clears the local session.
+    /// - Parameter appleAuthorizationCode: A fresh Sign in with Apple code, when the account uses it.
     /// - Returns: `true` when the account was deleted.
-    func deleteAccount() async -> Bool {
+    func deleteAccount(appleAuthorizationCode: String? = nil) async -> Bool {
         do {
             let manager = SupabaseManager.shared
             let session = try await manager.client.auth.session
@@ -134,7 +141,11 @@ final class AuthViewModel {
             request.httpMethod = "POST"
             request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try JSONEncoder().encode(["confirm": true])
+            var body: [String: Any] = ["confirm": true]
+            if let appleAuthorizationCode {
+                body["appleAuthorizationCode"] = appleAuthorizationCode
+            }
+            request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
             let (_, response) = try await URLSession.shared.data(for: request)
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0

@@ -17,9 +17,17 @@ When adding a table that references `auth.users` or `profiles`, give the foreign
 key CASCADE or SET NULL, or add a cleanup step to the function. Otherwise
 account deletion starts failing for anyone with a row in it.
 
-Not done: revoking Sign in with Apple tokens (Apple asks for this when deleting
-an account created with Sign in with Apple). It needs a Sign in with Apple key
-on the server and a fresh authorization code from the client.
+Sign in with Apple: when the account has an `apple` identity, the iOS app shows
+Apple's confirmation sheet to get a fresh authorization code and sends it as
+`appleAuthorizationCode`. The function exchanges it and revokes the refresh
+token (`_shared/appleSignIn.ts`). It is best effort: a failed revocation is
+logged and returned as `appleRevoked: false`, and the account is still deleted.
+Cancelling Apple's sheet cancels the deletion. The client secret is signed with
+`APPLE_SIGNIN_KEY_ID` / `APPLE_SIGNIN_PRIVATE_KEY` (base64 of the .p8) when set,
+otherwise the APNs key, which only works if Sign in with Apple is enabled on
+that key in the developer portal. An `invalid_client` error in the function log
+means the key is not enabled for Sign in with Apple. The web app cannot obtain
+an authorization code (Supabase consumes it), so web deletions skip revocation.
 
 Test with a throwaway account only (see `rls-testing-via-db-query.md` for the
 rolled-back pattern). Never run it against a real account.

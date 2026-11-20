@@ -1,7 +1,8 @@
 /**
  * Supabase Edge Function: permanently deletes the signed-in user's account.
  *
- * Removes the user's stored photos, the shares and activity that point at them
+ * Revokes Sign in with Apple when the app sends an authorization code, removes
+ * the user's stored photos, the shares and activity that point at them
  * from other people's content, then the auth user. Everything the user owns
  * (lists, recipes, collections, meal plans) goes with the auth user through
  * ON DELETE CASCADE. Subscription rows are kept, unlinked, so later App Store
@@ -9,6 +10,7 @@
  */
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { revokeAppleSignIn } from '../_shared/appleSignIn.ts'
 
 const PHOTO_BUCKETS = ['recipe-images', 'item-images', 'profile-images']
 const SHARE_TABLES = ['list_shares', 'collection_shares', 'meal_plan_shares']
@@ -79,12 +81,27 @@ Deno.serve(async (req) => {
   const { id: userId, email } = auth.user
 
   let confirmed = false
+  let appleAuthorizationCode = ''
   try {
-    confirmed = (await req.json())?.confirm === true
+    const body = await req.json()
+    confirmed = body?.confirm === true
+    appleAuthorizationCode = typeof body?.appleAuthorizationCode === 'string' ? body.appleAuthorizationCode : ''
   } catch {
     confirmed = false
   }
   if (!confirmed) return json({ error: 'Confirmation required' }, 400)
+
+  // Best effort: a failed revocation must not leave someone unable to delete their account.
+  let appleRevoked: boolean | null = null
+  if (appleAuthorizationCode) {
+    try {
+      await revokeAppleSignIn(appleAuthorizationCode)
+      appleRevoked = true
+    } catch (err) {
+      appleRevoked = false
+      console.error(`Sign in with Apple revocation failed for ${userId}:`, err)
+    }
+  }
 
   try {
     for (const bucket of PHOTO_BUCKETS) {
@@ -95,7 +112,7 @@ Deno.serve(async (req) => {
     const { error: deleteError } = await supabase.auth.admin.deleteUser(userId)
     if (deleteError) throw new Error('Deleting the auth user failed', { cause: deleteError })
 
-    return json({ deleted: true }, 200)
+    return json({ deleted: true, appleRevoked }, 200)
   } catch (err) {
     console.error(`Account deletion failed for ${userId}:`, err)
     return json({ error: 'Deletion failed' }, 500)

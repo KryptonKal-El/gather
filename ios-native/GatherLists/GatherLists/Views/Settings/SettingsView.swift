@@ -26,6 +26,7 @@ struct SettingsView: View {
     @State private var showDeleteAccountConfirm = false
     @State private var showDeleteAccountError = false
     @State private var isDeletingAccount = false
+    @State private var appleReauthorization = AppleReauthorizationService()
     
     private let listTypes: [(id: String, name: String)] = [
         ("grocery", "Grocery"),
@@ -304,7 +305,20 @@ struct SettingsView: View {
     
     private func deleteAccount() async {
         isDeletingAccount = true
-        let isDeleted = await authViewModel.deleteAccount()
+        var appleAuthorizationCode: String?
+        if authViewModel.usesAppleSignIn {
+            switch await appleReauthorization.requestAuthorizationCode() {
+            case .code(let code):
+                appleAuthorizationCode = code
+            case .cancelled:
+                isDeletingAccount = false
+                return
+            case .unavailable:
+                // Deleting the account matters more than revoking the Apple token.
+                break
+            }
+        }
+        let isDeleted = await authViewModel.deleteAccount(appleAuthorizationCode: appleAuthorizationCode)
         isDeletingAccount = false
         if !isDeleted {
             showDeleteAccountError = true
