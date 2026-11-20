@@ -507,10 +507,12 @@ struct ListDetailView: View {
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
+            .listSectionSpacing(0)
             // Same side gutters as the Lists tab, so the two screens line up.
             .contentMargins(.horizontal, Self.sideGutter, for: .scrollContent)
             // Leaves the last card the same breathing room below as the first has above.
             .contentMargins(.bottom, Self.sideGutter, for: .scrollContent)
+            .contentMargins(.top, 0, for: .scrollContent)
             .environment(\.defaultMinListRowHeight, 0)
             .refreshable {
                 await detailViewModel?.refresh()
@@ -563,6 +565,8 @@ struct ListDetailView: View {
 
     private static let cardCornerRadius: CGFloat = 16
     private static let sideGutter: CGFloat = 16
+    /// Space above every card, added by its header; the list's own section spacing is turned off.
+    private static let cardGap: CGFloat = 16
 
     /// The outline of one piece of a group's card: its header rounds the top
     /// corners and its last row the bottom ones, so the group reads as one card.
@@ -781,7 +785,7 @@ struct ListDetailView: View {
             // Section headers ignore the list's content margins, so the header
             // adds its own gutter; the opaque band hides rows passing under it.
             .padding(.horizontal, Self.sideGutter)
-            .padding(.top, 12)
+            .padding(.top, Self.cardGap)
             .background(Color(.systemGroupedBackground))
             .contentShape(Rectangle())
             // Pinned headers slide under the nav bar and inherit its forced-dark
@@ -1449,13 +1453,6 @@ struct ListDetailView: View {
             let result = vm.checkedPipelineResult(for: activeSortConfig)
             let allChecked = result.items ?? collectAllItems(from: result.groups) + result.ungrouped
             
-            // Spacer to create visual gap before crossed section
-            Color.clear
-                .frame(height: 16)
-                .listRowInsets(EdgeInsets())
-                .listRowSeparator(.hidden)
-                .listRowBackground(Color.clear)
-            
             Section {
                 if !isCheckedCollapsed || vm.isSearching {
                     ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
@@ -1522,6 +1519,7 @@ struct ListDetailView: View {
                     .background(Color(.secondarySystemGroupedBackground))
                     .clipShape(Self.cardShape(top: true, bottom: isCheckedCollapsed && !vm.isSearching))
                     .padding(.horizontal, Self.sideGutter)
+                    .padding(.top, Self.cardGap)
                     .background(Color(.systemGroupedBackground))
                     .contentShape(Rectangle())
                     .environment(\.colorScheme, colorScheme)
