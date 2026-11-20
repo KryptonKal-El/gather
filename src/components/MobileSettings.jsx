@@ -1,6 +1,6 @@
 /**
  * Mobile settings screen styled as an iOS grouped table view.
- * Displays account info, dark mode toggle, and sign out action.
+ * Displays account info, dark mode toggle, and the sign out and delete account actions.
  */
 import { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
@@ -8,6 +8,7 @@ import { useTheme } from '../context/ThemeContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { uploadProfileImage } from '../services/imageStorage.js';
 import { updateImageSearchSettings } from '../services/database.js';
+import { deleteAccount } from '../services/accountDeletion.js';
 import { useShoppingList } from '../hooks/useShoppingList.js';
 import { CategoryEditor } from './CategoryEditor.jsx';
 import { UserStoreDefaultsManager } from './UserStoreDefaultsManager.jsx';
@@ -49,6 +50,9 @@ export const MobileSettings = ({ user, onSignOut }) => {
    const [localImageSearchSettings, setLocalImageSearchSettings] = useState(null);
    const [expandedListType, setExpandedListType] = useState(null);
    const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showDeleteAccountConfirm, setShowDeleteAccountConfirm] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [deleteAccountError, setDeleteAccountError] = useState(null);
    const fileInputRef = useRef(null);
 
   const isDark = theme === 'dark';
@@ -56,6 +60,20 @@ export const MobileSettings = ({ user, onSignOut }) => {
   const imageSearchSettings = localImageSearchSettings
     ?? user?.profile?.imageSearchSettings
     ?? DEFAULT_IMAGE_SEARCH_SETTINGS;
+
+  const handleDeleteAccount = async () => {
+    setShowDeleteAccountConfirm(false);
+    setDeleteAccountError(null);
+    setIsDeletingAccount(true);
+    try {
+      await deleteAccount();
+      await onSignOut();
+    } catch (err) {
+      console.error('Account deletion failed:', err);
+      setDeleteAccountError('Your account could not be deleted. Please try again.');
+      setIsDeletingAccount(false);
+    }
+  };
 
    const listTypes = [
      { value: 'grocery', label: 'Grocery' },
@@ -356,6 +374,34 @@ export const MobileSettings = ({ user, onSignOut }) => {
           <span className={styles.destructiveText}>Sign Out</span>
         </button>
       </div>
+
+      <div className={styles.section}>
+        <button
+          type="button"
+          className={styles.destructiveRow}
+          onClick={() => setShowDeleteAccountConfirm(true)}
+          disabled={isDeletingAccount}
+        >
+          <span className={styles.destructiveText}>
+            {isDeletingAccount ? 'Deleting Account…' : 'Delete Account'}
+          </span>
+        </button>
+        {deleteAccountError && (
+          <div className={styles.uploadError} role="alert">
+            <span>{deleteAccountError}</span>
+          </div>
+        )}
+      </div>
+
+      {showDeleteAccountConfirm && (
+        <ConfirmDialog
+          title="Delete Account?"
+          message="This permanently deletes your account, your lists, recipes, meal plans and photos, including anything you have shared with other people. It cannot be undone. A Gather Lists Pro subscription is not cancelled by this; cancel it in your Apple account settings."
+          confirmLabel="Delete Account"
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteAccountConfirm(false)}
+        />
+      )}
     </div>
   );
 };

@@ -122,6 +122,41 @@ final class AuthViewModel {
         }
     }
     
+    /// Permanently deletes the account on the server, then clears the local session.
+    /// - Returns: `true` when the account was deleted.
+    func deleteAccount() async -> Bool {
+        do {
+            let manager = SupabaseManager.shared
+            let session = try await manager.client.auth.session
+            var request = URLRequest(
+                url: manager.supabaseURL.appendingPathComponent("functions/v1/delete-account")
+            )
+            request.httpMethod = "POST"
+            request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONEncoder().encode(["confirm": true])
+
+            let (_, response) = try await URLSession.shared.data(for: request)
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            guard (200..<300).contains(status) else {
+                print("[AuthViewModel] Account deletion refused with status \(status)")
+                return false
+            }
+        } catch {
+            print("[AuthViewModel] Account deletion failed: \(error.localizedDescription)")
+            return false
+        }
+
+        // The server session and device tokens are already gone with the account, so only the local one needs clearing.
+        try? await SupabaseManager.shared.client.auth.signOut(scope: .local)
+        isAuthenticated = false
+        currentUser = nil
+        profile = nil
+        SharedDefaults.clearAuthSession()
+        await SharedDataStore.shared.clearAll()
+        return true
+    }
+
     func signInWithApple(idToken: String, nonce: String, fullName: PersonNameComponents?) async {
         error = nil
         do {

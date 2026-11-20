@@ -131,6 +131,8 @@ How to sign in:
 The fixed code contains letters, so that screen shows a full keyboard for this account. Please do not use "Sign in with Apple" or a passkey, as those would create a separate, empty account.
 
 The Gather Lists Pro subscription is under Settings > Gather Lists Pro > Upgrade to Pro.
+
+Account deletion is under Settings > Delete Account, at the bottom of the screen. Please do not delete the demo account while reviewing, as its sample data cannot be restored.
 ```
 
 ## What's New in This Version

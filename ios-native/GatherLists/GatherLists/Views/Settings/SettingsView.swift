@@ -23,6 +23,9 @@ struct SettingsView: View {
     @State private var openfoodfactsEnabled = false
     @State private var serpApiEnabled = false
     @State private var imageSearchError: String?
+    @State private var showDeleteAccountConfirm = false
+    @State private var showDeleteAccountError = false
+    @State private var isDeletingAccount = false
     
     private let listTypes: [(id: String, name: String)] = [
         ("grocery", "Grocery"),
@@ -162,6 +165,25 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+                Section {
+                    Button(role: .destructive) {
+                        showDeleteAccountConfirm = true
+                    } label: {
+                        HStack {
+                            Spacer()
+                            if isDeletingAccount {
+                                ProgressView()
+                            } else {
+                                Text("Delete Account")
+                            }
+                            Spacer()
+                        }
+                    }
+                    .disabled(isDeletingAccount)
+                } footer: {
+                    Text("Permanently deletes your account and everything in it.")
+                }
             }
             .readableContentWidth()
             .navigationTitle("Settings")
@@ -173,6 +195,19 @@ struct SettingsView: View {
                     serpApiEnabled = settings.serpapi
                 }
                 Task { await loadCategoryCounts() }
+            }
+            .alert("Delete Account?", isPresented: $showDeleteAccountConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Account", role: .destructive) {
+                    Task { await deleteAccount() }
+                }
+            } message: {
+                Text("This permanently deletes your account, your lists, recipes, meal plans and photos, including anything you have shared with other people. It cannot be undone.\n\nA Gather Lists Pro subscription is not cancelled by this. Cancel it in your Apple account settings.")
+            }
+            .alert("Couldn't Delete Account", isPresented: $showDeleteAccountError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Your account could not be deleted. Check your connection and try again.")
             }
             .alert("Image Search Error", isPresented: Binding(
                 get: { imageSearchError != nil },
@@ -267,6 +302,15 @@ struct SettingsView: View {
             )
     }
     
+    private func deleteAccount() async {
+        isDeletingAccount = true
+        let isDeleted = await authViewModel.deleteAccount()
+        isDeletingAccount = false
+        if !isDeleted {
+            showDeleteAccountError = true
+        }
+    }
+
     private func uploadAvatar(imageData: Data) async {
         guard let userId = authViewModel.currentUser?.id else { return }
         isUploading = true
