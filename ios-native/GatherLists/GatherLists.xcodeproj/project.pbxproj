@@ -101,6 +101,8 @@
 		B1C2D3E4F5A6B7C8D9E0F1A6 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = B1C2D3E4F5A6B7C8D9E0F1A7 /* Supabase */; };
 		C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A001 /* SnowfallView.swift */; };
 		C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000A003 /* HolidaySeason.swift */; };
+		C0FFEE00000000000000C002 /* SleighBellsPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000C001 /* SleighBellsPlayer.swift */; };
+		C0FFEE00000000000000C004 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000C003 /* Sounds */; };
 		C0FFEE00000000000000B002 /* AppIconPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B001 /* AppIconPickerView.swift */; };
 		C0FFEE00000000000000B004 /* AppIconOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00000000000000B003 /* AppIconOption.swift */; };
 		C0FFEE00DEADBEEF12345679 /* CollaboratorsInfoSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */; };
@@ -316,6 +318,8 @@
 		B1C2D3E4F5A6B7C8D9E0F1A5 /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		C0FFEE00000000000000A001 /* SnowfallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnowfallView.swift; sourceTree = "<group>"; };
 		C0FFEE00000000000000A003 /* HolidaySeason.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidaySeason.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000C001 /* SleighBellsPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleighBellsPlayer.swift; sourceTree = "<group>"; };
+		C0FFEE00000000000000C003 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		C0FFEE00000000000000B001 /* AppIconPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconPickerView.swift; sourceTree = "<group>"; };
 		C0FFEE00000000000000B003 /* AppIconOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconOption.swift; sourceTree = "<group>"; };
 		C0FFEE00DEADBEEF12345678 /* CollaboratorsInfoSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollaboratorsInfoSheet.swift; sourceTree = "<group>"; };
@@ -458,6 +462,7 @@
 				A1B2C3D4E5F6A7B8C9D0E213 /* ViewModels */,
 				A1B2C3D4E5F6A7B8C9D0E214 /* Views */,
 				A1B2C3D4E5F6A7B8C9D0F002 /* Fonts */,
+				C0FFEE00000000000000C003 /* Sounds */,
 				A1B2C3D4E5F6A7B8C9D0E1F5 /* Assets.xcassets */,
 				A1B2C3D4E5F6A7B8C9D0E1F9 /* Info.plist */,
 				A1B2C3D4E5F6A7B8C9D0E1FA /* GatherLists.entitlements */,
@@ -696,6 +701,7 @@
 				A1B2C3D4E5F6A7B8C9D0E29A /* AppearanceManager.swift */,
 				A1B2C3D4E5F6A7B8C9D0F003 /* AppFont.swift */,
 				C0FFEE00000000000000A003 /* HolidaySeason.swift */,
+				C0FFEE00000000000000C001 /* SleighBellsPlayer.swift */,
 				C0FFEE00000000000000B003 /* AppIconOption.swift */,
 				A1B2C3D4E5F6A7B8C9D0E286 /* ImageCompressor.swift */,
 				A1B2C3D4E5F6A7B8C9D0E2D0 /* ListTypeConfig.swift */,
@@ -919,6 +925,7 @@
 				A1B2C3D4E5F6A7B8C9D0E221 /* PrivacyInfo.xcprivacy in Resources */,
 				A1B2C3D4E5F6A7B8C9D0E2AF /* LaunchScreen.storyboard in Resources */,
 				A1B2C3D4E5F6A7B8C9D0F001 /* Fonts in Resources */,
+				C0FFEE00000000000000C004 /* Sounds in Resources */,
 				B1C2D3E4F5A6B7C8D9E0F1A2 /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -990,6 +997,7 @@
 				A1B2C3D4E5F6A7B8C9D0F102 /* ConfettiView.swift in Sources */,
 				C0FFEE00000000000000A002 /* SnowfallView.swift in Sources */,
 				C0FFEE00000000000000A004 /* HolidaySeason.swift in Sources */,
+				C0FFEE00000000000000C002 /* SleighBellsPlayer.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0F202 /* ImageCropView.swift in Sources */,
 				A1B2C3D4E5F6A7B8C9D0E1F2 /* GatherListsApp.swift in Sources */,
 				B1C2D3E4F5A6B7C8D9E0F1A4 /* SupabaseManager.swift in Sources */,

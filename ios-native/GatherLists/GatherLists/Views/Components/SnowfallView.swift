@@ -3,7 +3,8 @@ import SwiftUI
 /// A gentle holiday snowfall overlay.
 ///
 /// Snowflakes drift down with a soft side-to-side sway, mixed with a few red,
-/// gold and green sparkles. It plays for a few seconds, fades out, then calls
+/// gold and green sparkles, while Santa's sleigh and reindeer fly across to a
+/// sleigh-bells jingle. It plays for a few seconds, fades out, then calls
 /// `onFinish`. Non-interactive, and renders nothing under Reduce Motion.
 struct SnowfallView: View {
     /// Total length of the effect, including the fade-out, in seconds.
@@ -14,10 +15,12 @@ struct SnowfallView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
 
-    // Built up front: a Canvas inside TimelineView keeps drawing with the
-    // values it first captured, so flakes assigned later in `.task` never appear.
-    private let flakes: [Snowflake]
-    private let startDate = Date.now
+    // Seeded with real values (not filled in later from `.task`): a Canvas inside
+    // TimelineView keeps the values it first captured. As @State they also survive
+    // the parent re-creating this view mid-effect, which would otherwise restart it.
+    @State private var flakes: [Snowflake]
+    @State private var startDate = Date.now
+    @State private var bells = SleighBellsPlayer()
 
     private static let fadeDuration = 1.4
 
@@ -25,7 +28,7 @@ struct SnowfallView: View {
     init(duration: Double = 7, count: Int = 90, onFinish: @escaping () -> Void = {}) {
         self.duration = duration
         self.onFinish = onFinish
-        self.flakes = (0..<count).map { _ in Snowflake() }
+        _flakes = State(initialValue: (0..<count).map { _ in Snowflake() })
     }
 
     var body: some View {
@@ -35,6 +38,7 @@ struct SnowfallView: View {
                 let elapsed = timeline.date.timeIntervalSince(startDate)
                 context.opacity = max(0, min(1, (duration - elapsed) / Self.fadeDuration))
                 draw(in: &context, size: size, elapsed: elapsed)
+                SantaSleighTeam.draw(in: &context, size: size, elapsed: elapsed)
             }
         }
         .allowsHitTesting(false)
@@ -42,10 +46,12 @@ struct SnowfallView: View {
         .ignoresSafeArea()
         .task {
             if !reduceMotion {
+                bells.play()
                 try? await Task.sleep(for: .seconds(duration))
             }
             onFinish()
         }
+        .onDisappear { bells.stop() }
     }
 
     private func draw(in context: inout GraphicsContext, size: CGSize, elapsed: Double) {
@@ -125,6 +131,65 @@ private struct Snowflake {
             kind = .sparkle(Int.random(in: 0..<Self.sparkleColors.count))
             size = .random(in: 9...14)
             opacity = .random(in: 0.8...1)
+        }
+    }
+}
+
+/// Santa's sleigh pulled by four galloping reindeer (Rudolph leading), flying
+/// left to right across the upper part of the screen.
+private enum SantaSleighTeam {
+    static let start = 0.6
+    static let crossDuration = 5.0
+
+    private static let sleighSize = CGSize(width: 78, height: 50)
+    private static let reindeerSize = CGSize(width: 48, height: 38)
+    private static let reindeerCount = 4
+    private static let firstReindeerX: CGFloat = 74
+    private static let reindeerSpacing: CGFloat = 40
+    private static let teamWidth = firstReindeerX + CGFloat(reindeerCount - 1) * reindeerSpacing + reindeerSize.width
+
+    static func draw(in context: inout GraphicsContext, size: CGSize, elapsed: Double) {
+        let progress = (elapsed - start) / crossDuration
+        guard progress > 0, progress < 1 else { return }
+
+        let sleigh = context.resolve(Image("SantaSleigh"))
+        let reindeer = context.resolve(Image("Reindeer"))
+
+        // The team climbs gently as it crosses, with a slight upward tilt to match.
+        let x = -teamWidth + progress * (size.width + teamWidth + 20)
+        let y = size.height * 0.3 + 30 - progress * 60
+        var team = context
+        team.translateBy(x: x, y: y)
+        team.rotate(by: .radians(-0.08))
+
+        let sleighBob = sin(elapsed * 5) * 1.2
+        let hand = CGPoint(x: sleighSize.width * 0.585, y: sleighSize.height * 0.31 + sleighBob)
+        let reindeerRects = (0..<reindeerCount).map { index in
+            let gallop = sin(elapsed * 10 + Double(index) * 1.1) * 2.5
+            return CGRect(
+                x: firstReindeerX + CGFloat(index) * reindeerSpacing,
+                y: -10 - CGFloat(index) * 4 + gallop,
+                width: reindeerSize.width,
+                height: reindeerSize.height
+            )
+        }
+
+        var reins = Path()
+        reins.move(to: hand)
+        for rect in reindeerRects {
+            reins.addLine(to: CGPoint(x: rect.minX + rect.width * 0.62, y: rect.minY + rect.height * 0.55))
+        }
+        team.stroke(reins, with: .color(Color(red: 0.36, green: 0.23, blue: 0.12)), lineWidth: 1)
+        team.draw(sleigh, in: CGRect(origin: CGPoint(x: 0, y: sleighBob), size: sleighSize))
+        for rect in reindeerRects {
+            team.draw(reindeer, in: rect)
+        }
+
+        if let lead = reindeerRects.last {
+            let nose = CGPoint(x: lead.minX + lead.width * 0.9, y: lead.minY + lead.height * 0.29)
+            let red = Color(red: 0.88, green: 0.22, blue: 0.24)
+            team.fill(Path(ellipseIn: CGRect(x: nose.x - 5, y: nose.y - 5, width: 10, height: 10)), with: .color(red.opacity(0.3)))
+            team.fill(Path(ellipseIn: CGRect(x: nose.x - 2.4, y: nose.y - 2.4, width: 4.8, height: 4.8)), with: .color(red))
         }
     }
 }
