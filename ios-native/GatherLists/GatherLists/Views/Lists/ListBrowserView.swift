@@ -54,6 +54,13 @@ struct ListBrowserView: View {
             }
             .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.large)
+            // Attached beside the title, not to the loaded list: added later, the
+            // large title comes back collapsed (see docs/memory/ios26-searchable-always-title-bug.md).
+            .searchable(
+                text: Binding(get: { viewModel?.searchQuery ?? "" }, set: { viewModel?.searchQuery = $0 }),
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search lists"
+            )
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
@@ -296,10 +303,6 @@ struct ListBrowserView: View {
         .refreshable {
             await vm.refresh()
         }
-        .searchable(text: Binding(
-            get: { vm.searchQuery },
-            set: { vm.searchQuery = $0 }
-        ), placement: .navigationBarDrawer(displayMode: .always), prompt: "Search lists")
         .navigationDestination(for: GatherList.self) { list in
             ListDetailView(
                 list: list,
