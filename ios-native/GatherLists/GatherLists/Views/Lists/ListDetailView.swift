@@ -671,7 +671,7 @@ struct ListDetailView: View {
                 categoryHeader(label: group.label, color: barColor, itemCount: itemCount)
                     .listRowInsets(EdgeInsets())
                     .listRowSeparator(.hidden)
-                    .listRowBackground(Color(.systemBackground))
+                    .listRowBackground(Color(.secondarySystemGroupedBackground))
 
                 if let subGroups = group.subGroups {
                     pipelineGroupsView(groups: subGroups, level: level + 1, endsCard: endsCard && isLastGroup)
@@ -1140,7 +1140,7 @@ struct ListDetailView: View {
             }
         }
         .padding(.leading, 16)
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .overlay(alignment: .bottom) {
             if showSeparator {
                 Rectangle()
@@ -1844,7 +1844,7 @@ struct ListDetailView: View {
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .overlay(alignment: .top) {
             Divider()
         }
@@ -1879,7 +1879,7 @@ struct ListDetailView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .overlay(alignment: .top) {
             Divider()
         }
