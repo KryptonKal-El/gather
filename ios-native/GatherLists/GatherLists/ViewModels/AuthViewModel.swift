@@ -154,17 +154,22 @@ final class AuthViewModel {
         }
     }
     
-    /// The demo account App Review signs in with. Reviewers can't receive an emailed code,
-    /// so this one account signs in with a fixed code, which the server stores as its password.
-    static let reviewAccountEmail = "e2e-test@gatherlists.com"
+    /// Accounts that sign in with a fixed code, which the server stores as the account's
+    /// password: the App Review demo account (reviewers can't receive an emailed code)
+    /// and the e2e test account.
+    static let fixedCodeAccountEmails: Set<String> = ["review@gatherlists.com", "e2e-test@gatherlists.com"]
 
-    /// Whether `email` is the App Review demo account.
+    private static func normalized(_ email: String) -> String {
+        email.trimmingCharacters(in: .whitespaces).lowercased()
+    }
+
+    /// Whether `email` signs in with a fixed code instead of an emailed one.
     static func isReviewAccount(_ email: String) -> Bool {
-        email.trimmingCharacters(in: .whitespaces).lowercased() == reviewAccountEmail
+        fixedCodeAccountEmails.contains(normalized(email))
     }
 
     /// Emails a one-time sign-in code, creating the account if the email is new.
-    /// The App Review demo account uses a fixed code, so nothing is sent for it.
+    /// Fixed-code accounts get nothing sent.
     func sendEmailCode(to email: String) async throws {
         guard !Self.isReviewAccount(email) else { return }
         try await SupabaseManager.shared.client.auth.signInWithOTP(email: email, shouldCreateUser: true)
@@ -173,7 +178,7 @@ final class AuthViewModel {
     /// Signs in with a code from `sendEmailCode(to:)`.
     func verifyEmailCode(email: String, code: String) async throws {
         if Self.isReviewAccount(email) {
-            try await SupabaseManager.shared.client.auth.signIn(email: Self.reviewAccountEmail, password: code)
+            try await SupabaseManager.shared.client.auth.signIn(email: Self.normalized(email), password: code)
             print("[AuthViewModel] Review account sign-in successful")
             return
         }
