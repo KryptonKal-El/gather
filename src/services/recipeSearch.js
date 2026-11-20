@@ -9,7 +9,8 @@ import { getEdgeAuthToken } from './edgeAuth.js';
  * Uses the Supabase Edge Function endpoint.
  * @param {string} query - The search term
  * @param {number} [number=10] - Number of results to return
- * @returns {Promise<{ results: Array, source: string }>}
+ * @returns {Promise<{ results: Array, source: string }>} `source` is 'error' on failure and
+ *   'pro_required' when the server refuses because the account needs Gather Lists Pro
  */
 export const searchRecipes = async (query, number = 10) => {
   const baseUrl = import.meta.env.VITE_SUPABASE_EDGE_FUNCTION_URL;
@@ -36,6 +37,10 @@ export const searchRecipes = async (query, number = 10) => {
         'Authorization': `Bearer ${token}`,
       },
     });
+
+    if (res.status === 402) {
+      return { results: [], source: 'pro_required' };
+    }
 
     if (!res.ok) {
       console.error(`Recipe search failed: ${res.status} ${res.statusText}`);

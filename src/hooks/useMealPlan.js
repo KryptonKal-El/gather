@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   fetchMealPlans,
+  fetchMealPlanHasPro,
   createMealPlan,
   updateEnabledMeals,
   fetchMealPlanEntries,
@@ -103,6 +104,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
   const [error, setError] = useState(null);
   const [isPlanning, setIsPlanning] = useState(false);
   const [libraryNote, setLibraryNote] = useState(null);
+  const [proStatus, setProStatus] = useState({ planId: null, hasPro: true });
   // Recipes already swapped out of each slot this session, so Swap keeps moving forward.
   const swappedOutRef = useRef(new Map());
   // This device's writes: how many have started and how many are still running. A refetch
@@ -129,6 +131,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
     () => MEAL_TYPES.filter((m) => (activePlan?.enabledMeals ?? MEAL_TYPES.map((t) => t.id)).includes(m.id)),
     [activePlan],
   );
+  const isLocked = proStatus.planId === activePlanId && !proStatus.hasPro;
   const isCurrentWeek = toDateKey(weekStart) === toDateKey(startOfWeek(new Date()));
   const recipesById = useMemo(() => new Map(recipes.map((r) => [r.id, r])), [recipes]);
 
@@ -272,6 +275,23 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       onDeals: () => loadDeals(activePlanIdRef.current),
     });
   }, [isActive, userId, loadPlans, loadWeek, loadCollaborators, loadDeals]);
+
+  // Rechecked each time the tab opens. A failed check leaves the plan editable;
+  // the database still refuses the write.
+  useEffect(() => {
+    if (!isActive || !isOpen || !activePlanId) return undefined;
+    let isCurrent = true;
+    const load = async () => {
+      try {
+        const hasPro = await fetchMealPlanHasPro(activePlanId);
+        if (isCurrent) setProStatus({ planId: activePlanId, hasPro });
+      } catch (err) {
+        console.error('[useMealPlan] Failed to check the plan\'s Pro status:', err);
+      }
+    };
+    load();
+    return () => { isCurrent = false; };
+  }, [isActive, isOpen, activePlanId]);
 
   const changeWindow = useCallback(async (nextStart, nextCount = dayCountRef.current) => {
     setWeekStart(nextStart);
@@ -632,6 +652,7 @@ export const useMealPlan = (userId, userEmail, isOpen) => {
       activePlan,
       activePlanId,
       isOwner,
+      isLocked,
       weekStart,
       days,
       dayCount,

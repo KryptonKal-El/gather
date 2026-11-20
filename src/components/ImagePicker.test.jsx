@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { searchImageSource } from '../services/imageSearch.js';
+import { searchImageSource, ImageSearchLimitError } from '../services/imageSearch.js';
 import { ImagePicker } from './ImagePicker.jsx';
 
 vi.mock('../services/imageSearch.js', async (importOriginal) => ({
@@ -144,6 +144,19 @@ describe('ImagePicker image search sources', () => {
 
     expect(await screen.findByText('No results')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Walmart' })).toBeInTheDocument();
+  });
+
+  it('shows the Pro notice, without a retry, for a source over the free limit', async () => {
+    searchImageSource.mockImplementation(async (_query, source) => {
+      if (source === 'serpapi') throw new ImageSearchLimitError(source);
+      return [milkResult];
+    });
+
+    renderImagePicker({ imageSearchSettings: { walmart: true, spoonacular: false, openfoodfacts: false, serpapi: true } });
+
+    expect(await screen.findByText('Monthly limit reached')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry Google Images' })).not.toBeInTheDocument();
+    expect(await screen.findByRole('img', { name: 'Milk carton' })).toBeInTheDocument();
   });
 
   it('shows an error with retry for a failed source and reloads only that source', async () => {

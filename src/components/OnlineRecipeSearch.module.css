@@ -496,3 +496,7 @@
 .attributionLink:hover {
   color: var(--text-secondary);
 }
+
+.lockedNotice {
+  padding: 1rem;
+}

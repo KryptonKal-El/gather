@@ -415,3 +415,7 @@
     max-width: 100%;
   }
 }
+
+.sectionNotice {
+  padding: 0.25rem 0.75rem;
+}

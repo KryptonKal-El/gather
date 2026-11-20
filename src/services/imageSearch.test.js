@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getEnabledImageSources, searchImageSource } from './imageSearch.js';
+import { getEnabledImageSources, searchImageSource, ImageSearchLimitError } from './imageSearch.js';
 import { supabase } from './supabase.js';
 
 vi.mock('./supabase.js', () => ({
@@ -108,6 +108,24 @@ describe('searchImageSource', () => {
     fetchMock.mockResolvedValueOnce({ ok: false, status: 500, statusText: 'Server Error' });
 
     await expect(searchImageSource('edge failure', 'walmart')).rejects.toThrow(/500/);
+  });
+
+  it('throws a limit error when the server refuses with 402', async () => {
+    fetchMock.mockResolvedValueOnce({ ok: false, status: 402, statusText: 'Payment Required' });
+
+    await expect(searchImageSource('capped query', 'serpapi')).rejects.toBeInstanceOf(ImageSearchLimitError);
+  });
+
+  it('throws a limit error when the source is listed as limited, without caching it', async () => {
+    fetchMock.mockResolvedValueOnce(okResponse({ groups: [], failed: [], limited: ['spoonacular'] }));
+
+    await expect(searchImageSource('limited query', 'spoonacular')).rejects.toBeInstanceOf(ImageSearchLimitError);
+
+    fetchMock.mockResolvedValueOnce(okResponse({
+      groups: [{ source: 'spoonacular', label: 'Spoonacular', results: milkResults }],
+      failed: [],
+    }));
+    expect(await searchImageSource('limited query', 'spoonacular')).toEqual(milkResults);
   });
 
   it('throws with the original error as cause when fetch rejects', async () => {

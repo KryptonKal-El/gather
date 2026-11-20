@@ -265,8 +265,13 @@
   min-width: 0;
 }
 
-.slot:hover {
+.slot:hover:not(:disabled) {
   background: var(--bg-hover);
+}
+
+.slot:disabled {
+  cursor: default;
+  color: inherit;
 }
 
 .slotSkipped {
@@ -514,8 +519,13 @@
   white-space: nowrap;
 }
 
-.dealBadgeBtn:hover {
+.dealBadgeBtn:hover:not(:disabled) {
   filter: brightness(0.96);
+}
+
+.dealBadgeBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .slotReason {

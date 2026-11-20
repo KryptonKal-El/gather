@@ -6,7 +6,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
-import { getEnabledImageSources, searchImageSource } from '../services/imageSearch.js';
+import { getEnabledImageSources, searchImageSource, ImageSearchLimitError } from '../services/imageSearch.js';
+import { ProUpgradeNotice } from './ProUpgradeNotice.jsx';
 import { ImageCropDialog } from './ImageCropDialog.jsx';
 import styles from './ImagePicker.module.css';
 
@@ -55,8 +56,12 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
       if (searchIdRef.current !== searchId) return;
       setSections((prev) => ({ ...prev, [source]: { status: 'done', results } }));
     } catch (err) {
-      console.error(`Image search failed for ${source}:`, err);
       if (searchIdRef.current !== searchId) return;
+      if (err instanceof ImageSearchLimitError) {
+        setSections((prev) => ({ ...prev, [source]: { status: 'limited', results: [] } }));
+        return;
+      }
+      console.error(`Image search failed for ${source}:`, err);
       setSections((prev) => ({ ...prev, [source]: { status: 'error', results: [] } }));
     }
   }, []);
@@ -221,7 +226,7 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
                               <span className={`${styles.chevron} ${isCollapsed ? '' : styles.chevronOpen}`} aria-hidden="true" />
                               <span className={styles.groupLabel}>{label}</span>
                               {status === 'loading' && <span className={styles.spinner} aria-hidden="true" />}
-                              {status === 'error' && <span className={styles.groupWarning} aria-hidden="true">!</span>}
+                              {(status === 'error' || status === 'limited') && <span className={styles.groupWarning} aria-hidden="true">!</span>}
                               {status === 'done' && <span className={styles.groupCount} aria-hidden="true">{results.length}</span>}
                             </button>
                           </h4>
@@ -242,6 +247,14 @@ export const ImagePicker = ({ itemName, currentImageUrl = null, onSelectUrl, onU
                               >
                                 Retry
                               </button>
+                            </div>
+                          )}
+                          {status === 'limited' && (
+                            <div className={styles.sectionNotice}>
+                              <ProUpgradeNotice
+                                title="Monthly limit reached"
+                                message="Free accounts get 25 Google Images and Spoonacular lookups a month. Walmart and Open Food Facts stay unlimited."
+                              />
                             </div>
                           )}
                           {status === 'done' && results.length === 0 && (

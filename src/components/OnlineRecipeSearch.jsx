@@ -1,19 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { searchRecipes } from '../services/recipeSearch.js';
+import { ProUpgradeNotice } from './ProUpgradeNotice.jsx';
 import styles from './OnlineRecipeSearch.module.css';
 
 /**
  * Full search UI component for online recipe search.
  * Allows searching recipes via Spoonacular API with debounced input,
  * list/grid view toggle, and loading/error/empty states.
+ * @param {Object} props
+ * @param {Function} props.onSelectRecipe - Called with the chosen search result
+ * @param {Function} props.onBack
+ * @param {boolean} [props.hasProAccess=true] - False shows the Pro notice instead of searching
  */
-export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
+export const OnlineRecipeSearch = ({ onSelectRecipe, onBack, hasProAccess = true }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(false);
+  const [isRefused, setIsRefused] = useState(false);
+  const isLocked = !hasProAccess || isRefused;
   const [viewMode, setViewMode] = useState('list');
   const debounceRef = useRef(null);
   const inputRef = useRef(null);
@@ -35,7 +42,10 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
     setIsLoading(false);
     setHasSearched(true);
 
-    if (source === 'error') {
+    if (source === 'pro_required') {
+      setIsRefused(true);
+      setResults([]);
+    } else if (source === 'error') {
       setError(true);
       setResults([]);
     } else {
@@ -48,7 +58,7 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
       clearTimeout(debounceRef.current);
     }
 
-    if (!query.trim()) {
+    if (!query.trim() || isLocked) {
       return;
     }
 
@@ -61,7 +71,7 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [query, performSearch]);
+  }, [query, performSearch, isLocked]);
 
   const handleClear = useCallback(() => {
     setQuery('');
@@ -224,6 +234,17 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
   );
 
   const renderResults = () => {
+    if (isLocked) {
+      return (
+        <div className={styles.lockedNotice}>
+          <ProUpgradeNotice
+            title="Online recipe search is part of Gather Lists Pro"
+            message="Search thousands of recipes and save them to your collections. You can still add recipes yourself."
+          />
+        </div>
+      );
+    }
+
     if (isLoading) {
       return viewMode === 'list' ? renderSkeletonList() : renderSkeletonGrid();
     }
@@ -293,6 +314,7 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
             placeholder="Search recipes..."
             value={query}
             onChange={handleInputChange}
+            disabled={isLocked}
           />
           {query && (
             <button
@@ -347,4 +369,5 @@ export const OnlineRecipeSearch = ({ onSelectRecipe, onBack }) => {
 OnlineRecipeSearch.propTypes = {
   onSelectRecipe: PropTypes.func.isRequired,
   onBack: PropTypes.func.isRequired,
+  hasProAccess: PropTypes.bool,
 };

@@ -36,7 +36,14 @@ The e2e test account is a tester, so it always sees the locked experience.
 ## Clients
 - iOS: `ProSubscriptionManager.isEnforced` / `hasProAccess`; `ProUpgradePrompt`
   is the shared inline notice and owns its paywall sheet.
-- Web has no gating UI and no way to subscribe yet (Stripe not built). The
-  server still enforces, so a capped or locked web user currently just sees a
-  failed action.
+- Web: `useProAccess(userId)` (App.jsx) and `state.isLocked` from `useMealPlan`;
+  `ProUpgradeNotice` is the shared inline notice. There is no way to subscribe
+  on the web yet (Stripe not built), so the notice points to the iPhone app
+  instead of a button. The web has no recipe URL import, so that cap has no
+  web notice. `searchImageSource` throws `ImageSearchLimitError`; `searchRecipes`
+  returns `source: 'pro_required'` on a 402.
+- The web e2e account (`e2e/.env.test`, a gatherapp.dev address) is a different
+  user from the iOS tester account and is NOT a tester, because the Playwright
+  meal plan spec writes to its plan. To see the locked web UI, add it to
+  `pro_enforcement_testers` temporarily and remove it afterwards.
 - Cook mode and recipe tagging are marked Pro in the plan but are not locked.

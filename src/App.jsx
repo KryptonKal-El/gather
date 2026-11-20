@@ -40,6 +40,7 @@ import { SortPicker } from './components/SortPicker.jsx';
 import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import { MealPlanView } from './components/MealPlanView.jsx';
 import { useMealPlan } from './hooks/useMealPlan.js';
+import { useProAccess } from './hooks/useProAccess.js';
 import { useClaimContext } from './hooks/useClaimContext.js';
 import styles from './App.module.css';
 
@@ -107,6 +108,7 @@ export const App = () => {
   });
   const isPlanTabOpen = isMobile ? activeTab === 'plan' : desktopView === 'plan';
   const { state: mealPlanState, actions: mealPlanActions } = useMealPlan(user?.id ?? null, user?.email ?? null, isPlanTabOpen);
+  const hasProAccess = useProAccess(user?.id ?? null);
   // Persist the desktop tab to the same key the mobile nav uses, so the chosen
   // section (Lists/Recipes/Plan) is restored on the next reload.
   const handleDesktopViewChange = useCallback((view) => {
@@ -723,6 +725,7 @@ export const App = () => {
             <OnlineRecipeSearch
               onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
               onBack={() => setShowOnlineSearch(false)}
+              hasProAccess={hasProAccess}
             />
           </div>
         );
@@ -1014,6 +1017,7 @@ export const App = () => {
               <OnlineRecipeSearch
                 onSelectRecipe={(recipe) => setOnlinePreviewRecipe(recipe)}
                 onBack={() => setShowOnlineSearch(false)}
+                hasProAccess={hasProAccess}
               />
             </div>
           ) : desktopRecipeFormId ? (

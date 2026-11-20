@@ -73,6 +73,18 @@ export const fetchMealPlans = async () => {
 };
 
 /**
+ * Reports whether a plan can be edited under the Pro rules: true when limits
+ * don't apply to the plan's owner, or the owner has Gather Lists Pro.
+ * @param {string} planId
+ * @returns {Promise<boolean>}
+ */
+export const fetchMealPlanHasPro = async (planId) => {
+  const { data, error } = await supabase.rpc('meal_plan_has_pro', { plan_uuid: planId });
+  if (error) fail('check the meal plan\'s Pro status', error);
+  return data === true;
+};
+
+/**
  * Creates a plan owned by the user.
  * @param {string} userId
  * @returns {Promise<object>}

@@ -16,6 +16,15 @@ export const IMAGE_SOURCES = [
   { key: 'serpapi', label: 'Google Images' },
 ];
 
+/** Thrown when a source is skipped because the free monthly lookup limit is used up. */
+export class ImageSearchLimitError extends Error {
+  /** @param {string} source - Source key from IMAGE_SOURCES */
+  constructor(source) {
+    super(`Image search for ${source} is over the free monthly limit`);
+    this.name = 'ImageSearchLimitError';
+  }
+}
+
 /**
  * Lists the sources a user has enabled, in display order.
  * @param {Object|null} [enabledSources] - Map of source key to enabled flag; null/undefined enables all
@@ -33,6 +42,7 @@ export const getEnabledImageSources = (enabledSources) => (
  * @param {string} source - Source key from IMAGE_SOURCES
  * @param {number} [count=25] - Number of results to return
  * @returns {Promise<Array<{ url: string, thumbnail: string, title: string }>>}
+ * @throws {ImageSearchLimitError} When the free monthly limit for this source is used up
  * @throws {Error} When the request fails or the source errored or timed out
  */
 export const searchImageSource = async (query, source, count = 25) => {
@@ -61,11 +71,17 @@ export const searchImageSource = async (query, source, count = 25) => {
     throw new Error(`Image search request for ${source} failed`, { cause: err });
   }
 
+  if (res.status === 402) {
+    throw new ImageSearchLimitError(source);
+  }
   if (!res.ok) {
     throw new Error(`Image search for ${source} failed: ${res.status} ${res.statusText}`);
   }
 
   const data = await res.json();
+  if (Array.isArray(data.limited) && data.limited.includes(source)) {
+    throw new ImageSearchLimitError(source);
+  }
   if (Array.isArray(data.failed) && data.failed.includes(source)) {
     throw new Error(`Image search source ${source} errored or timed out`);
   }

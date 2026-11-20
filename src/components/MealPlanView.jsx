@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { AvatarGroup } from './AvatarGroup.jsx';
 import { MealSlotEditor } from './MealSlotEditor.jsx';
 import { EatOutDealsDialog } from './EatOutDealsDialog.jsx';
+import { ProUpgradeNotice } from './ProUpgradeNotice.jsx';
 import { MEAL_TYPES, ENTRY_KINDS, toDateKey, fromDateKey, entryDisplayTitle, dealBadgeText } from '../utils/mealPlan.js';
 import styles from './MealPlanView.module.css';
 
@@ -281,6 +282,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                   role="menuitem"
                   className={styles.menuItem}
                   onClick={() => { setIsMenuOpen(false); setIsShowingDeals(true); }}
+                  disabled={state.isLocked}
                 >
                   Eat-out deals
                 </button>
@@ -293,7 +295,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                         <input
                           type="checkbox"
                           checked={checked}
-                          disabled={checked && state.enabledMeals.length === 1}
+                          disabled={state.isLocked || (checked && state.enabledMeals.length === 1)}
                           onChange={(e) => actions.setMealEnabled(meal.id, e.target.checked)}
                         />
                         {meal.label}
@@ -334,17 +336,30 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
         </div>
       </div>
 
+      {state.isLocked && (state.isOwner ? (
+        <ProUpgradeNotice
+          title="Meal planning is part of Gather Lists Pro"
+          message="Your plan is still here to read. Subscribe to change it, and everyone you share it with can edit too."
+        />
+      ) : (
+        <ProUpgradeNotice
+          title="This plan is read-only"
+          message="The plan's owner needs Gather Lists Pro before anyone can change it."
+          showsUpgradeHint={false}
+        />
+      ))}
+
       <div className={styles.planBar}>
         <button
           type="button"
           className={styles.planBtn}
           onClick={actions.planMyWeek}
-          disabled={state.isPlanning || !state.activePlan}
+          disabled={state.isPlanning || !state.activePlan || state.isLocked}
         >
           {state.isPlanning ? 'Planning...' : `✨ ${state.isCustomRange ? 'Plan these days' : 'Plan my week'}`}
         </button>
         {state.hasReplaceableSuggestions && (
-          <button type="button" className={styles.secondaryBtn} onClick={actions.regenerate} disabled={state.isPlanning}>
+          <button type="button" className={styles.secondaryBtn} onClick={actions.regenerate} disabled={state.isPlanning || state.isLocked}>
             Regenerate
           </button>
         )}
@@ -391,6 +406,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                           type="button"
                           className={`${styles.slot} ${entry?.kind === 'skip' ? styles.slotSkipped : ''}`}
                           onClick={() => setEditing({ day, dateKey, meal })}
+                          disabled={state.isLocked}
                           aria-label={`${meal.label}: ${entry ? entryDisplayTitle(entry) : 'add a meal'}`}
                         >
                           {recipe?.imageUrl ? (
@@ -412,7 +428,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                           </span>
                           {entry?.cookedAt && <span className={styles.cooked} aria-label="Cooked">✓</span>}
                         </button>
-                        {entry?.source === 'suggested' && (
+                        {entry?.source === 'suggested' && !state.isLocked && (
                           <span className={styles.slotActions}>
                             <button
                               type="button"
@@ -444,6 +460,7 @@ export const MealPlanView = ({ state, actions, userId, onViewRecipe, onAddWeekTo
                               type="button"
                               className={styles.dealBadgeBtn}
                               onClick={() => actions.eatHere(deal, dateKey, meal.id)}
+                              disabled={state.isLocked}
                               aria-label={`Eat at ${deal.restaurant} instead for ${meal.label}`}
                             >
                               Eat here instead
@@ -504,6 +521,7 @@ MealPlanView.propTypes = {
     activePlan: PropTypes.object,
     activePlanId: PropTypes.string,
     isOwner: PropTypes.bool.isRequired,
+    isLocked: PropTypes.bool.isRequired,
     weekStart: PropTypes.instanceOf(Date).isRequired,
     days: PropTypes.arrayOf(PropTypes.instanceOf(Date)).isRequired,
     dayCount: PropTypes.number.isRequired,
