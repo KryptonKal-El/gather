@@ -41,6 +41,7 @@ import { ConfirmDialog } from './components/ConfirmDialog.jsx';
 import { MealPlanView } from './components/MealPlanView.jsx';
 import { useMealPlan } from './hooks/useMealPlan.js';
 import { useProAccess } from './hooks/useProAccess.js';
+import { ProUpgradeNotice } from './components/ProUpgradeNotice.jsx';
 import { useClaimContext } from './hooks/useClaimContext.js';
 import styles from './App.module.css';
 
@@ -1214,6 +1215,12 @@ export const App = () => {
             ? 'Everyone you add sees and edits the same weekly plan.'
             : 'Everyone on this plan sees and edits the same week.'}
           canManage={mealPlanState.isOwner}
+          addBlockedNotice={mealPlanState.isLocked ? (
+            <ProUpgradeNotice
+              title="Sharing a meal plan is part of Gather Lists Pro"
+              message="Subscribe to add people to your plan. Everyone you add can edit it too, without needing Pro themselves."
+            />
+          ) : null}
           onShare={mealPlanActions.share}
           onUnshare={mealPlanActions.unshare}
           getShares={mealPlanActions.getShares}

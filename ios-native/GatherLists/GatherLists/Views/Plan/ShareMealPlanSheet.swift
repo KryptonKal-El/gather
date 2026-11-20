@@ -16,7 +16,14 @@ struct ShareMealPlanSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if viewModel.isOwner {
+                if viewModel.isOwner && viewModel.isLocked {
+                    Section {
+                        ProUpgradePrompt(
+                            title: "Sharing a meal plan is part of Gather Lists Pro",
+                            message: "Subscribe to add people to your plan. Everyone you add can edit it too, without needing Pro themselves."
+                        )
+                    }
+                } else if viewModel.isOwner {
                     addSection
                 }
                 if let errorMessage {

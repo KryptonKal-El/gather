@@ -32,6 +32,10 @@ The e2e test account is a tester, so it always sees the locked experience.
   be Pro when limits apply to the owner, for every writer. Reads are never
   blocked. Every meal plan write policy goes through that function, so new
   meal plan tables must use it too. Clients ask `meal_plan_has_pro(plan)`.
+- Adding a member to a plan (`meal_plan_shares` insert) also requires
+  `can_write_meal_plan`, so a free owner can't invite people to a read-only
+  plan. Removing a member and leaving stay open. Custom Range is view-only and
+  stays free.
 
 ## Clients
 - iOS: `ProSubscriptionManager.isEnforced` / `hasProAccess`; `ProUpgradePrompt`

@@ -19,6 +19,7 @@ import styles from './ShareCollectionModal.module.css';
  * @param {Function} props.onClose - Called to close the modal
  * @param {string} [props.description] - Explanation shown under the title
  * @param {boolean} [props.canManage] - False shows a read-only member list (for non-owners)
+ * @param {React.ReactNode} [props.addBlockedNotice] - Shown in place of the add form when adding isn't allowed; removing still works
  * @param {string} [props.ownerLabel] - Name shown on the Owner row (defaults to ownerEmail)
  */
 export const ShareCollectionModal = ({
@@ -30,6 +31,7 @@ export const ShareCollectionModal = ({
   onClose,
   description = 'People you share with can add and view recipes in this collection.',
   canManage = true,
+  addBlockedNotice = null,
   ownerLabel,
 }) => {
   const [email, setEmail] = useState('');
@@ -141,7 +143,8 @@ export const ShareCollectionModal = ({
 
         <p className={styles.subtitle}>{description}</p>
 
-        {canManage && <form className={styles.form} onSubmit={handleShare}>
+        {canManage && addBlockedNotice}
+        {canManage && !addBlockedNotice && <form className={styles.form} onSubmit={handleShare}>
           <input
             className={styles.emailInput}
             type="email"
@@ -210,5 +213,6 @@ ShareCollectionModal.propTypes = {
   onClose: PropTypes.func.isRequired,
   description: PropTypes.string,
   canManage: PropTypes.bool,
+  addBlockedNotice: PropTypes.node,
   ownerLabel: PropTypes.string,
 };
