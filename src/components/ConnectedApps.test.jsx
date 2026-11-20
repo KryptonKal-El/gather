@@ -39,6 +39,13 @@ describe('ConnectedApps', () => {
     expect(screen.getByText(/Connected Oct 26, 2026/)).toBeInTheDocument();
   });
 
+  it('shows when an app was last used, when known', async () => {
+    fetchConnectedApps.mockResolvedValue([{ ...CLAUDE, lastUsedAt: '2026-11-20T13:45:00Z' }]);
+    render(<ConnectedApps />);
+
+    expect(await screen.findByText(/Connected Oct 26, 2026 · Last used Nov 20, 2026/)).toBeInTheDocument();
+  });
+
   it('disconnects an app only after confirming', async () => {
     const user = userEvent.setup();
     fetchConnectedApps.mockResolvedValue([CLAUDE]);

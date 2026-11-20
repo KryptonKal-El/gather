@@ -7,6 +7,8 @@ struct ConnectedApp: Identifiable, Hashable {
     let name: String
     let scopes: [String]
     let grantedAt: Date
+    /// When the app last renewed its access, or nil if unknown.
+    var lastUsedAt: Date?
 
     var id: String { clientId }
 }

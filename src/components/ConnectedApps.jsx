@@ -95,7 +95,10 @@ export const ConnectedApps = () => {
       <div className={styles.row} key={app.clientId}>
         <div className={styles.appInfo}>
           <span className={styles.appName}>{app.name}</span>
-          <span className={styles.appMeta}>Connected {formatConnectedDate(app.grantedAt)}</span>
+          <span className={styles.appMeta}>
+            Connected {formatConnectedDate(app.grantedAt)}
+            {app.lastUsedAt && ` · Last used ${formatConnectedDate(app.lastUsedAt)}`}
+          </span>
         </div>
         <button
           type="button"

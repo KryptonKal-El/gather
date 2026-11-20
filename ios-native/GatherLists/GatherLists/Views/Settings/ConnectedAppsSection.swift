@@ -37,7 +37,7 @@ struct ConnectedAppsSection: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(app.name)
                                 .lineLimit(1)
-                            Text("Connected \(app.grantedAt.formatted(date: .abbreviated, time: .omitted))")
+                            Text(detail(for: app))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -116,5 +116,11 @@ struct ConnectedAppsSection: View {
             actionError = "Couldn’t disconnect \(app.name). Please try again."
         }
         disconnectingId = nil
+    }
+
+    private func detail(for app: ConnectedApp) -> String {
+        let connected = "Connected \(app.grantedAt.formatted(date: .abbreviated, time: .omitted))"
+        guard let lastUsed = app.lastUsedAt else { return connected }
+        return "\(connected) · Last used \(lastUsed.formatted(date: .abbreviated, time: .omitted))"
     }
 }

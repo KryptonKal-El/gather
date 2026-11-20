@@ -33,3 +33,12 @@ directly (bypasses auth).
 
 Test fixtures need real RFC-4122 UUIDs (version/variant nibbles); `0000…0001`
 fails validation. Real ids from `gen_random_uuid()` are fine.
+
+## Connected Apps "last used" comes from auth.sessions
+
+Supabase's grants API only returns `granted_at`. `connected_app_last_used()`
+(security definer) reads `auth.sessions` for the caller, where
+`oauth_client_id` marks an app's session and `refreshed_at` / `updated_at`
+move each time the app renews its access (about hourly while in use). It is
+"last active", not per-request, and it depends on Supabase's auth schema, so
+both clients treat a failed call as "unknown" and still list the apps.

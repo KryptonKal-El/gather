@@ -25,16 +25,46 @@ struct ConnectedAppService {
         let (data, response) = try await URLSession.shared.data(for: request)
         try check(response)
         let grants = try JSONDecoder().decode([OAuthGrantDTO].self, from: data)
+        let lastUsedByClient = await fetchLastUsedByClient()
         return grants
             .map { grant in
                 ConnectedApp(
                     clientId: grant.client.id,
                     name: grant.client.name?.isEmpty == false ? grant.client.name! : "Unnamed app",
                     scopes: grant.scopes ?? [],
-                    grantedAt: parseDate(grant.grantedAt) ?? .distantPast
+                    grantedAt: parseDate(grant.grantedAt) ?? .distantPast,
+                    lastUsedAt: lastUsedByClient[grant.client.id.lowercased()]
                 )
             }
             .sorted { $0.grantedAt > $1.grantedAt }
+    }
+
+    private struct LastUsedRow: Decodable {
+        let clientId: String
+        let lastUsedAt: String
+
+        enum CodingKeys: String, CodingKey {
+            case clientId = "client_id"
+            case lastUsedAt = "last_used_at"
+        }
+    }
+
+    /// Best-effort: the list is still useful without activity times.
+    private static func fetchLastUsedByClient() async -> [String: Date] {
+        do {
+            let rows: [LastUsedRow] = try await SupabaseManager.shared.client
+                .rpc("connected_app_last_used")
+                .execute()
+                .value
+            return rows.reduce(into: [:]) { result, row in
+                // Postgres sends microseconds, which ISO8601DateFormatter can't be relied on to read.
+                let seconds = row.lastUsedAt.replacing(/\.\d+/, with: "")
+                result[row.clientId.lowercased()] = parseDate(seconds)
+            }
+        } catch {
+            print("[ConnectedAppService] Loading app activity failed: \(error)")
+            return [:]
+        }
     }
 
     /// Revokes an app's access. Supabase ends its sessions and invalidates its
