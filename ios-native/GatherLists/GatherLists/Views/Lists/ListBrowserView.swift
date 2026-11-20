@@ -55,11 +55,6 @@ struct ListBrowserView: View {
             .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if let vm = viewModel, !vm.allLists.isEmpty {
-                        EditButton()
-                    }
-                }
                 ToolbarItem(placement: .primaryAction) {
                     Button {
                         showCreateSheet = true
