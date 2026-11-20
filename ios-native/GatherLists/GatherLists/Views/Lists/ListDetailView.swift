@@ -1128,7 +1128,6 @@ struct ListDetailView: View {
             Color.brandGreen.opacity(highlightedItemId == item.id ? 0.22 : 0)
                 .allowsHitTesting(false)
         }
-        .clipShape(Self.cardShape(top: roundsTop, bottom: roundsBottom))
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             guard canEdit else { return }
@@ -1152,6 +1151,8 @@ struct ListDetailView: View {
                     .frame(width: 3)
             }
         }
+        // Last, so the category bar is clipped to the card's corners too.
+        .clipShape(Self.cardShape(top: roundsTop, bottom: roundsBottom))
     }
     
     // MARK: - Item Thumbnail
