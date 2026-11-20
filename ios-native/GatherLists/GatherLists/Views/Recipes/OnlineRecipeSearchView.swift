@@ -63,7 +63,7 @@ struct OnlineRecipeSearchView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search recipes")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search recipes")
         .onChange(of: searchText) { _, newValue in
             searchTask?.cancel()
             guard proSubscription.hasProAccess else { return }

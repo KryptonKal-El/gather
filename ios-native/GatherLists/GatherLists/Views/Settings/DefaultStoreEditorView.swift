@@ -59,7 +59,7 @@ struct DefaultStoreEditorView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search stores")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search stores")
         .tint(Color.brandGreen)
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)

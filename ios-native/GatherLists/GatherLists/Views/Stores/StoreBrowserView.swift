@@ -133,7 +133,7 @@ struct StoreBrowserView: View {
         .refreshable {
             await viewModel.refresh()
         }
-        .searchable(text: $searchQuery, prompt: "Search stores")
+        .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search stores")
     }
     
     private func storeRow(_ store: Store) -> some View {

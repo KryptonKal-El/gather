@@ -68,7 +68,7 @@ struct EmojiPickerView: View {
                 }
                 .padding(.vertical)
             }
-            .searchable(text: $searchQuery, prompt: "Search emojis")
+            .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search emojis")
             .navigationTitle("Choose Emoji")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

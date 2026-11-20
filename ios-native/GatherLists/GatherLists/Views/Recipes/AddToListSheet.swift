@@ -555,7 +555,7 @@ struct AddToListSheet: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .searchable(text: $remapSearchText, prompt: "Search items")
+            .searchable(text: $remapSearchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search items")
             .navigationTitle("Merge with...")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

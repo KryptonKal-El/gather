@@ -69,7 +69,7 @@ struct DefaultCategoryEditorView: View {
                 }
             }
         }
-        .searchable(text: $searchText, prompt: "Search categories")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search categories")
         .tint(Color.brandGreen)
         .navigationTitle(displayTitle)
         .navigationBarTitleDisplayMode(.inline)

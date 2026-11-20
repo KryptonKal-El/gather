@@ -85,7 +85,7 @@ struct CategoryEditorSheet: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .searchable(text: $searchText, prompt: "Search categories")
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search categories")
             .navigationTitle("Categories")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
