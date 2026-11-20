@@ -226,6 +226,11 @@ struct ListDetailView: View {
         .background(Color(.systemGroupedBackground))
         .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .searchable(
+            text: Binding(get: { detailViewModel?.searchQuery ?? "" }, set: { detailViewModel?.searchQuery = $0 }),
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: "Search items"
+        )
         .modifier(ListNavigationBarStyle(color: listColor))
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
@@ -482,8 +487,18 @@ struct ListDetailView: View {
                 
                 sortedUncheckedSection
                 
-                if let vm = detailViewModel, !vm.checkedItems.isEmpty, detailViewModel?.typeConfig.fields.rsvpStatus != true {
+                if let vm = detailViewModel, hasCheckedMatches(vm), detailViewModel?.typeConfig.fields.rsvpStatus != true {
                     sortedCheckedSection
+                }
+
+                if let vm = detailViewModel, vm.isSearching, !hasAnyMatches(vm) {
+                    Text("No items match “\(vm.searchQuery.trimmingCharacters(in: .whitespaces))”")
+                        .font(.quicksand(.subheadline))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
                 
                 Color.clear.frame(height: 1).id("list-bottom")
@@ -492,6 +507,8 @@ struct ListDetailView: View {
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
+            // Same side gutters as the Lists tab, so the two screens line up.
+            .contentMargins(.horizontal, Self.sideGutter, for: .scrollContent)
             .environment(\.defaultMinListRowHeight, 0)
             .refreshable {
                 await detailViewModel?.refresh()
@@ -530,6 +547,32 @@ struct ListDetailView: View {
         }
     }
     
+    private func isEmpty(_ result: SortPipeline.PipelineResult) -> Bool {
+        (result.items ?? []).isEmpty && result.groups.isEmpty && result.ungrouped.isEmpty
+    }
+
+    private func hasCheckedMatches(_ vm: ListDetailViewModel) -> Bool {
+        vm.isSearching ? !isEmpty(vm.checkedPipelineResult(for: activeSortConfig)) : !vm.checkedItems.isEmpty
+    }
+
+    private func hasAnyMatches(_ vm: ListDetailViewModel) -> Bool {
+        !isEmpty(vm.pipelineResult(for: activeSortConfig)) || !isEmpty(vm.checkedPipelineResult(for: activeSortConfig))
+    }
+
+    private static let cardCornerRadius: CGFloat = 16
+    private static let sideGutter: CGFloat = 16
+
+    /// The outline of one piece of a group's card: its header rounds the top
+    /// corners and its last row the bottom ones, so the group reads as one card.
+    private static func cardShape(top: Bool, bottom: Bool) -> UnevenRoundedRectangle {
+        UnevenRoundedRectangle(
+            topLeadingRadius: top ? cardCornerRadius : 0,
+            bottomLeadingRadius: bottom ? cardCornerRadius : 0,
+            bottomTrailingRadius: bottom ? cardCornerRadius : 0,
+            topTrailingRadius: top ? cardCornerRadius : 0
+        )
+    }
+
     // MARK: - Sorted Unchecked Section
     
     @ViewBuilder
@@ -551,18 +594,27 @@ struct ListDetailView: View {
     
     // MARK: - Pipeline Groups View
     
-    private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int) -> AnyView {
-        AnyView(ForEach(Array(groups.enumerated()), id: \.element.key) { _, group in
+    /// `endsCard` is true when these groups are the last thing in their level-1 card,
+    /// so the final row of the final group rounds the card's bottom corners.
+    private func pipelineGroupsView(groups: [SortPipeline.SortGroup], level: Int, endsCard: Bool = false) -> AnyView {
+        AnyView(ForEach(Array(groups.enumerated()), id: \.element.key) { groupIndex, group in
+            let isLastGroup = groupIndex == groups.count - 1
             if level == 1 {
                 Section {
                     let groupKey = group.key
-                    let isCollapsed = collapsedStores.contains(groupKey)
+                    // A search looks inside collapsed groups too.
+                    let isCollapsed = collapsedStores.contains(groupKey) && detailViewModel?.isSearching != true
                     if !isCollapsed {
                         if let subGroups = group.subGroups {
-                            pipelineGroupsView(groups: subGroups, level: level + 1)
+                            pipelineGroupsView(groups: subGroups, level: level + 1, endsCard: true)
                         } else if let items = group.items {
                             ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
-                                itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+                                itemRow(
+                                    item: item,
+                                    isChecked: false,
+                                    showSeparator: idx < items.count - 1,
+                                    roundsBottom: idx == items.count - 1
+                                )
                                     .id(item.id)
                                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
  if canEdit {
@@ -597,14 +649,15 @@ struct ListDetailView: View {
                     .listRowBackground(Color(.systemBackground))
 
                 if let subGroups = group.subGroups {
-                    pipelineGroupsView(groups: subGroups, level: level + 1)
+                    pipelineGroupsView(groups: subGroups, level: level + 1, endsCard: endsCard && isLastGroup)
                 } else if let items = group.items {
                     ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
                         itemRow(
                             item: item,
                             isChecked: false,
                             showSeparator: idx < items.count - 1,
-                            leadingBar: barColor
+                            leadingBar: barColor,
+                            roundsBottom: endsCard && isLastGroup && idx == items.count - 1
                         )
                         .id(item.id)
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -671,7 +724,7 @@ struct ListDetailView: View {
     @ViewBuilder
     private func level1Header(group: SortPipeline.SortGroup) -> some View {
         let groupKey = group.key
-        let isCollapsed = collapsedStores.contains(groupKey)
+        let isCollapsed = collapsedStores.contains(groupKey) && detailViewModel?.isSearching != true
         let itemCount = group.type == .rsvp ? countHeadCount(in: group) : countItems(in: group)
         let total = totalPrice(in: group)
         
@@ -716,10 +769,18 @@ struct ListDetailView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemGroupedBackground))
             .overlay(alignment: .bottom) {
-                Rectangle()
-                    .fill(Color(.separator))
-                    .frame(height: 1)
+                if !isCollapsed {
+                    Rectangle()
+                        .fill(Color(.separator))
+                        .frame(height: 1 / displayScale)
+                }
             }
+            .clipShape(Self.cardShape(top: true, bottom: isCollapsed))
+            // Section headers ignore the list's content margins, so the header
+            // adds its own gutter; the opaque band hides rows passing under it.
+            .padding(.horizontal, Self.sideGutter)
+            .padding(.top, 12)
+            .background(Color(.systemGroupedBackground))
             .contentShape(Rectangle())
             // Pinned headers slide under the nav bar and inherit its forced-dark
             // toolbarColorScheme; keep them on the screen's actual scheme. This must
@@ -777,7 +838,13 @@ struct ListDetailView: View {
     @ViewBuilder
     private func flatItemsSection(items: [Item]) -> some View {
         ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
-            itemRow(item: item, isChecked: false, showSeparator: idx < items.count - 1)
+            itemRow(
+                item: item,
+                isChecked: false,
+                showSeparator: idx < items.count - 1,
+                roundsTop: idx == 0,
+                roundsBottom: idx == items.count - 1
+            )
                 .id(item.id)
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
  if canEdit {
@@ -904,7 +971,14 @@ struct ListDetailView: View {
         .accessibilityLabel("Open link for \(itemName), \(ItemLink.hostLabel(link.absoluteString))")
     }
 
-    private func itemRow(item: Item, isChecked: Bool, showSeparator: Bool = true, leadingBar: String? = nil) -> some View {
+    private func itemRow(
+        item: Item,
+        isChecked: Bool,
+        showSeparator: Bool = true,
+        leadingBar: String? = nil,
+        roundsTop: Bool = false,
+        roundsBottom: Bool = false
+    ) -> some View {
         let isRsvpList = detailViewModel?.typeConfig.fields.rsvpStatus == true
         let isWishList = detailViewModel?.typeConfig.fields.priority == true
         let effectiveIsChecked = detailViewModel?.effectiveIsChecked(for: item) ?? item.isChecked
@@ -1054,6 +1128,7 @@ struct ListDetailView: View {
             Color.brandGreen.opacity(highlightedItemId == item.id ? 0.22 : 0)
                 .allowsHitTesting(false)
         }
+        .clipShape(Self.cardShape(top: roundsTop, bottom: roundsBottom))
         .contentShape(Rectangle())
         .onTapGesture(count: 2) {
             guard canEdit else { return }
@@ -1379,9 +1454,14 @@ struct ListDetailView: View {
                 .listRowBackground(Color.clear)
             
             Section {
-                if !isCheckedCollapsed {
+                if !isCheckedCollapsed || vm.isSearching {
                     ForEach(Array(allChecked.enumerated()), id: \.element.id) { idx, item in
-                        itemRow(item: item, isChecked: true, showSeparator: idx < allChecked.count - 1)
+                        itemRow(
+                            item: item,
+                            isChecked: true,
+                            showSeparator: idx < allChecked.count - 1,
+                            roundsBottom: idx == allChecked.count - 1
+                        )
                             .id(item.id)
                             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
  if canEdit {
@@ -1424,7 +1504,8 @@ struct ListDetailView: View {
                         
                         Spacer()
                         
-                        if canEdit {
+                        // Hidden during a search: it clears every crossed item, not just the matches shown.
+                        if canEdit && !vm.isSearching {
                             Button(isWishListType ? "Clear received" : "Clear crossed") {
                                 showClearCheckedAlert = true
                             }
@@ -1436,6 +1517,9 @@ struct ListDetailView: View {
                     .padding(.vertical, 12)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(.secondarySystemGroupedBackground))
+                    .clipShape(Self.cardShape(top: true, bottom: isCheckedCollapsed && !vm.isSearching))
+                    .padding(.horizontal, Self.sideGutter)
+                    .background(Color(.systemGroupedBackground))
                     .contentShape(Rectangle())
                     .environment(\.colorScheme, colorScheme)
                 }

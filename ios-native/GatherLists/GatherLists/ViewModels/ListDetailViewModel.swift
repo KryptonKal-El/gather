@@ -85,6 +85,22 @@ final class ListDetailViewModel {
         items.filter { !placementIsChecked(for: $0) }
     }
     
+    /// Text typed into the list's search field. It only narrows what the two
+    /// pipeline results show; `uncheckedItems` and `checkedItems` stay complete
+    /// because actions such as clearing crossed items rely on them.
+    var searchQuery = ""
+
+    var isSearching: Bool {
+        !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func matchesSearch(_ item: Item) -> Bool {
+        let query = searchQuery.trimmingCharacters(in: .whitespaces)
+        guard !query.isEmpty else { return true }
+        return item.name.localizedCaseInsensitiveContains(query)
+            || (item.note?.localizedCaseInsensitiveContains(query) ?? false)
+    }
+
     /// Items shown in the crossed-off section, preserving fetch order.
     var checkedItems: [Item] {
         items.filter { placementIsChecked(for: $0) }
@@ -127,12 +143,12 @@ final class ListDetailViewModel {
     
     /// Applies the sort pipeline to unchecked items with the given effective config.
     func pipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: uncheckedItems, config: config, stores: stores, listCategories: listCategories, listType: listType)
+        SortPipeline.apply(items: uncheckedItems.filter(matchesSearch), config: config, stores: stores, listCategories: listCategories, listType: listType)
     }
     
     /// Applies the sort pipeline to checked items with the given effective config.
     func checkedPipelineResult(for config: [SortLevel]) -> SortPipeline.PipelineResult {
-        SortPipeline.apply(items: checkedItems, config: config, stores: stores, listCategories: listCategories, listType: listType)
+        SortPipeline.apply(items: checkedItems.filter(matchesSearch), config: config, stores: stores, listCategories: listCategories, listType: listType)
     }
     
     // MARK: - Initialization
