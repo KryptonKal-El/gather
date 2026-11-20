@@ -490,7 +490,7 @@ struct ListDetailView: View {
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: Self.cardCornerRadius))
                         .padding(.top, Self.cardGap)
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(Self.rowInsets)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 }
@@ -499,7 +499,7 @@ struct ListDetailView: View {
                         .background(Color(.secondarySystemGroupedBackground))
                         .clipShape(RoundedRectangle(cornerRadius: Self.cardCornerRadius))
                         .padding(.top, Self.cardGap)
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(Self.rowInsets)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                 }
@@ -522,13 +522,11 @@ struct ListDetailView: View {
                 
                 Color.clear.frame(height: 1).id("list-bottom")
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
+                    .listRowInsets(Self.rowInsets)
                     .listRowBackground(Color.clear)
             }
             .listStyle(.plain)
             .listSectionSpacing(0)
-            // Same side gutters as the Lists tab, so the two screens line up.
-            .contentMargins(.horizontal, Self.sideGutter, for: .scrollContent)
             // Leaves the last card the same breathing room below as the first has above.
             .contentMargins(.bottom, Self.sideGutter, for: .scrollContent)
             .contentMargins(.top, 0, for: .scrollContent)
@@ -584,6 +582,10 @@ struct ListDetailView: View {
 
     private static let cardCornerRadius: CGFloat = 16
     private static let sideGutter: CGFloat = 16
+    /// Rows carry the same side gutter as the headers pad themselves with. Content
+    /// margins on the list were not applied on the trailing edge of the iPhone Duo,
+    /// where the tab bar sits beside the content.
+    private static let rowInsets = EdgeInsets(top: 0, leading: sideGutter, bottom: 0, trailing: sideGutter)
     /// Space above every card, added by its header; the list's own section spacing is turned off.
     private static let cardGap: CGFloat = 16
 
@@ -655,7 +657,7 @@ struct ListDetailView: View {
                                         .tint(.red)
                                     }
 }
-                                    .listRowInsets(EdgeInsets())
+                                    .listRowInsets(Self.rowInsets)
                                     .listRowSeparator(.hidden)
                                     .listRowBackground(Color.clear)
                             }
@@ -669,7 +671,7 @@ struct ListDetailView: View {
                 let itemCount = (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0)
 
                 categoryHeader(label: group.label, color: barColor, itemCount: itemCount)
-                    .listRowInsets(EdgeInsets())
+                    .listRowInsets(Self.rowInsets)
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color(.secondarySystemGroupedBackground))
 
@@ -699,7 +701,7 @@ struct ListDetailView: View {
                             .tint(.red)
                         }
 }
-                        .listRowInsets(EdgeInsets())
+                        .listRowInsets(Self.rowInsets)
                         .listRowSeparator(.hidden)
                         .listRowBackground(Color.clear)
                     }
@@ -885,7 +887,7 @@ struct ListDetailView: View {
                     .tint(.red)
                 }
 }
-                .listRowInsets(EdgeInsets())
+                .listRowInsets(Self.rowInsets)
                 .listRowSeparator(.hidden)
                 .listRowBackground(Color.clear)
         }
@@ -1496,7 +1498,7 @@ struct ListDetailView: View {
                                 .tint(.red)
                             }
 }
-                            .listRowInsets(EdgeInsets())
+                            .listRowInsets(Self.rowInsets)
                             .listRowSeparator(.hidden)
                             .listRowBackground(Color.clear)
                     }
