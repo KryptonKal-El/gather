@@ -400,7 +400,8 @@ struct CollectionBrowserView: View {
                     CachedDataBanner(cachedAt: vm.cachedAt)
                 }
             }
-            .background(Color(.systemGroupedBackground))
+            // Kept inside the safe area: a background that bleeds upward covers the large title.
+            .background(Color(.systemGroupedBackground), ignoresSafeAreaEdges: [])
         }
         .task {
             await loadAllSharedRecipes()
