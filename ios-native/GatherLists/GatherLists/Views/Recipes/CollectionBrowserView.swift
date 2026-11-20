@@ -65,7 +65,7 @@ struct CollectionBrowserView: View {
     private static let sortKeyPrefix = "gather.recipeSort."
 
     private let gridColumns = [
-        GridItem(.adaptive(minimum: 160, maximum: 260), spacing: 14)
+        GridItem(.adaptive(minimum: 160, maximum: 260), spacing: 14, alignment: .top)
     ]
 
     private var hasNoCollections: Bool {
@@ -660,7 +660,8 @@ struct CollectionBrowserView: View {
                     .font(.quicksand(.subheadline))
                     .fontWeight(.semibold)
                     .foregroundStyle(.primary)
-                    .lineLimit(2)
+                    // Space for two lines even when the name is short, so every card in a row is the same height.
+                    .lineLimit(2, reservesSpace: true)
                 Text("\(recipe.ingredientCount) ingredients · \(recipe.stepCount) steps")
                     .font(.quicksand(.caption))
                     .foregroundStyle(.secondary)
