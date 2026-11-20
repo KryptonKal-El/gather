@@ -509,6 +509,8 @@ struct ListDetailView: View {
             .listStyle(.plain)
             // Same side gutters as the Lists tab, so the two screens line up.
             .contentMargins(.horizontal, Self.sideGutter, for: .scrollContent)
+            // Leaves the last card the same breathing room below as the first has above.
+            .contentMargins(.bottom, Self.sideGutter, for: .scrollContent)
             .environment(\.defaultMinListRowHeight, 0)
             .refreshable {
                 await detailViewModel?.refresh()
