@@ -196,6 +196,16 @@ struct CollectionBrowserView: View {
                 }
             }
             .navigationTitle("Recipes")
+            // Always visible, so the field stays above the sticky collection headers.
+            // Attached here rather than to the grid so it exists before the content
+            // loads; added afterwards, the title starts out collapsed.
+            .searchable(
+                text: Binding(get: { viewModel?.searchQuery ?? "" }, set: { viewModel?.searchQuery = $0 }),
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Search recipes & collections"
+            )
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
@@ -391,15 +401,6 @@ struct CollectionBrowserView: View {
             await vm.refresh()
             await loadAllSharedRecipes()
         }
-        // Always visible, so the field stays above the sticky collection headers
-        // instead of hiding until the user pulls down.
-        .searchable(
-            text: Binding(get: { vm.searchQuery }, set: { vm.searchQuery = $0 }),
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "Search recipes & collections"
-        )
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
         .task {
             await loadAllSharedRecipes()
         }
