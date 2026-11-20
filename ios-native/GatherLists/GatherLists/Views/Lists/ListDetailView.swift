@@ -670,10 +670,12 @@ struct ListDetailView: View {
                 let barColor = group.color ?? "#9e9e9e"
                 let itemCount = (group.items?.count ?? 0) + (group.subGroups?.flatMap { $0.items ?? [] }.count ?? 0)
 
+                // The fill sits on the content, not the row: a row background ignores the side gutter.
                 categoryHeader(label: group.label, color: barColor, itemCount: itemCount)
+                    .background(Color(.secondarySystemGroupedBackground))
                     .listRowInsets(Self.rowInsets)
                     .listRowSeparator(.hidden)
-                    .listRowBackground(Color(.secondarySystemGroupedBackground))
+                    .listRowBackground(Color.clear)
 
                 if let subGroups = group.subGroups {
                     pipelineGroupsView(groups: subGroups, level: level + 1, endsCard: endsCard && isLastGroup)
