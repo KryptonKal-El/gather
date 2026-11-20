@@ -6,6 +6,7 @@
  */
 import { createContext, useState, useEffect, useContext, useRef } from 'react';
 import { supabase } from '../services/supabase.js';
+import { deviceTypeLabel, passkeyNameWithDevice } from '../utils/passkeyName.js';
 
 export const AuthContext = createContext(null);
 
@@ -188,7 +189,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   /**
-   * Registers a new passkey for the signed-in user.
+   * Registers a new passkey for the signed-in user and names it after where it
+   * is stored plus this device's type, e.g. "Apple Passwords (Mac)".
    * @returns {Promise<{ id: string, friendly_name?: string, created_at: string }>}
    */
   const registerPasskey = async () => {
@@ -197,7 +199,14 @@ export const AuthProvider = ({ children }) => {
       console.error('Passkey registration failed:', error);
       throw error;
     }
-    return data;
+    // The passkey already works; a failed rename only leaves the server's default name.
+    const friendlyName = passkeyNameWithDevice(data.friendly_name, deviceTypeLabel());
+    const { error: renameError } = await supabase.auth.passkey.update({ passkeyId: data.id, friendlyName });
+    if (renameError) {
+      console.error('Naming the new passkey failed:', renameError);
+      return data;
+    }
+    return { ...data, friendly_name: friendlyName };
   };
 
   /**

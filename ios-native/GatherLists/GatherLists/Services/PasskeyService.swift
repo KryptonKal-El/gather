@@ -14,12 +14,34 @@ enum PasskeyService {
         )
     }
 
-    /// Registers a new passkey for the signed-in user.
+    /// Registers a new passkey for the signed-in user and names it after where it
+    /// is stored plus this device's type, e.g. "Apple Passwords (iPhone)".
     @discardableResult
     static func register() async throws -> PasskeyListItem {
-        try await SupabaseManager.shared.client.auth.registerPasskey(
+        let passkey = try await SupabaseManager.shared.client.auth.registerPasskey(
             presentationAnchor: try presentationAnchor()
         )
+        do {
+            return try await rename(id: passkey.id, to: defaultName(provider: passkey.friendlyName))
+        } catch {
+            // The passkey already works; a failed rename only leaves the server's default name.
+            print("[PasskeyService] Naming the new passkey failed: \(error)")
+            return passkey
+        }
+    }
+
+    static let maxNameLength = 120
+
+    private static var deviceType: String {
+        if ProcessInfo.processInfo.isiOSAppOnMac { return "Mac" }
+        return UIDevice.current.userInterfaceIdiom == .pad ? "iPad" : "iPhone"
+    }
+
+    private static func defaultName(provider: String?) -> String {
+        let suffix = " (\(deviceType))"
+        let trimmed = provider?.trimmingCharacters(in: .whitespaces) ?? ""
+        let base = trimmed.isEmpty ? "Passkey" : trimmed
+        return String(base.prefix(maxNameLength - suffix.count)) + suffix
     }
 
     /// Lists the signed-in user's passkeys, most recently added first.
