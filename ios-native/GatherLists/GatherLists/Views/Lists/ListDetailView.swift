@@ -241,13 +241,24 @@ struct ListDetailView: View {
                         Image(systemName: hasNotificationsEnabled ? "bell.fill" : "bell")
                     }
                 }
-                sortMenu
                 if isOwned {
                     listOptionsMenu
                 } else if canEdit {
                     collaboratorOptionsMenu
+                } else {
+                    viewerOptionsMenu
                 }
             }
+        }
+        .sheet(isPresented: $showSortSheet) {
+            SortConfigSheet(
+                activeSortConfig: $activeSortConfig,
+                hasOverride: isOwned ? list.sortConfig != nil : shareSortConfig != nil,
+                onConfigChange: { config in
+                    await selectSortConfig(config)
+                },
+                listType: list.type
+            )
         }
         .alert(isWishListType ? "Clear received items?" : "Clear crossed items?", isPresented: $showClearCheckedAlert) {
             Button("Cancel", role: .cancel) { }
@@ -1571,32 +1582,36 @@ struct ListDetailView: View {
     
     // MARK: - Sort Menu
     
-    private var sortMenu: some View {
+    /// Opens the Organize sheet; the first entry in every list options menu.
+    private var organizeMenuItem: some View {
         Button {
             showSortSheet = true
         } label: {
-            Image(systemName: "arrow.up.arrow.down")
+            Label("Organize", systemImage: "arrow.up.arrow.down")
+        }
+        .accessibilityIdentifier("listMenu-organize")
+    }
+
+    /// For people who can only view the list: organizing is the one thing they can change.
+    private var viewerOptionsMenu: some View {
+        Menu {
+            organizeMenuItem
+        } label: {
+            Image(systemName: "ellipsis")
                 .font(.quicksand(.subheadline))
                 .foregroundStyle(.white)
-        }
-        .sheet(isPresented: $showSortSheet) {
-            SortConfigSheet(
-                activeSortConfig: $activeSortConfig,
-                hasOverride: isOwned ? list.sortConfig != nil : shareSortConfig != nil,
-                onConfigChange: { config in
-                    await selectSortConfig(config)
-                },
-                listType: list.type
-            )
+                .accessibilityLabel("List options")
         }
     }
-    
+
     // MARK: - List Options Menu
     
     @Environment(\.dismiss) private var dismiss
     
       private var listOptionsMenu: some View {
           Menu {
+              organizeMenuItem
+
               Button {
                   showEditSheet = true
               } label: {
@@ -1740,6 +1755,8 @@ struct ListDetailView: View {
      
       private var collaboratorOptionsMenu: some View {
           Menu {
+              organizeMenuItem
+
               Button {
                   showEditSheet = true
               } label: {
