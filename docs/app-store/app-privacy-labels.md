@@ -1,45 +1,42 @@
-# Gather — App Privacy Labels
+# Gather Lists — App Privacy Labels
 
-*For App Store Connect submission*
+This file mirrors the App Privacy answers published in App Store Connect on
+2026-11-20. When the app starts or stops collecting something, change the
+answers in App Store Connect and update this file in the same change.
 
-## Data Types Collected
+## Data types collected
 
-### Contact Info
-| Data Type | Collected | Linked to Identity | Used for Tracking |
-|-----------|-----------|-------------------|-------------------|
-| Email Address | Yes | Yes | No |
-| Name | Yes | Yes | No |
+Every type is linked to the user's identity and none is used for tracking.
 
-### User Content
-| Data Type | Collected | Linked to Identity | Used for Tracking |
-|-----------|-----------|-------------------|-------------------|
-| Photos or Videos | Yes* | No | No |
-| Other User Content | Yes** | Yes | No |
+| Section | Data type | Purposes | What it is in the app |
+|---------|-----------|----------|-----------------------|
+| Contact Info | Name | App Functionality | Display name on the account |
+| Contact Info | Email Address | App Functionality | Sign-in and share invitations |
+| User Content | Photos or Videos | App Functionality | Recipe and item photos saved to the account |
+| User Content | Other User Content | App Functionality, Product Personalization | Lists, items, recipes, meal plans; past items and choices drive suggestions |
+| Identifiers | Device ID | App Functionality | Push notification token (`device_tokens`) |
+| Purchases | Purchase History | App Functionality | Subscription status (`subscriptions`) |
+| Usage Data | Product Interaction | App Functionality | Counts of image lookups and recipe imports for the monthly limits (`api_usage_events`) |
 
-*Photos are processed for product identification and not stored.
-**Shopping list items and list data.
+Device ID and Product Interaction are cautious answers: a push token is not
+strictly a device identifier, and the usage counts exist only to enforce limits.
 
-## Data NOT Collected
+## Data not collected
 
-The following data types are NOT collected:
-- Health & Fitness data
-- Financial info
-- Location
-- Contacts
+- Location, contacts, health and fitness, financial info, sensitive info
 - Browsing history
-- Search history (searches are not logged)
-- Identifiers (device ID, advertising ID)
-- Diagnostics (crash data, performance data)
-- Usage data (analytics, product interaction)
-- Purchases
+- Search history (queries are passed on to fetch results and not saved)
+- User ID (the account is identified by email, declared above)
+- Diagnostics (no crash or performance reporting SDK)
+- Advertising data and other usage data (no analytics SDK)
 
-## Purposes
+## Tracking
 
-| Purpose | Data Used |
-|---------|-----------|
-| App Functionality | Email, Name, Shopping List Content, Photos |
-| Account Management | Email, Name |
+The app does not track users. No data is shared with advertisers or data brokers.
 
-## Tracking Declaration
+## Related compliance answers (App Compliance page)
 
-**This app does NOT track users.** No data is shared with third-party advertisers or data brokers.
+- Security Assessment (China mainland): No
+- AI Generated or Synthetic Content (China mainland): No. The only AI features
+  use Apple's on-device model and are hidden where it is unavailable.
+- Digital Services Act: non-trader (owner's decision, 2026-11-20)
