@@ -487,13 +487,21 @@ struct ListDetailView: View {
             List {
                 if let summary = rsvpSummary {
                     rsvpSummaryView(summary)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: Self.cardCornerRadius))
+                        .padding(.top, Self.cardGap)
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
                 if let summary = wishSummary {
                     wishSummaryView(summary)
+                        .background(Color(.secondarySystemGroupedBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: Self.cardCornerRadius))
+                        .padding(.top, Self.cardGap)
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
+                        .listRowBackground(Color.clear)
                 }
                 
                 sortedUncheckedSection
