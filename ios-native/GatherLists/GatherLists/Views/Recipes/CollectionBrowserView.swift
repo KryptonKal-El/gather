@@ -495,9 +495,12 @@ struct CollectionBrowserView: View {
     /// around the inset card. The band matches the scroll view's background.
     @ViewBuilder
     private func stickyCollectionHeader(_ collection: RecipeCollection, isCollapsible: Bool) -> some View {
+        // More space above than below ties the title to its own recipes
+        // rather than to the collection before it.
         collectionHeaderCard(collection, isCollapsible: isCollapsible)
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 20)
+            .padding(.top, 14)
+            .padding(.bottom, 2)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.systemGroupedBackground))
     }
@@ -545,10 +548,6 @@ struct CollectionBrowserView: View {
             }
             .accessibilityLabel("Options for \(collection.name)")
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
-        .background(Color(.secondarySystemGroupedBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     /// Emoji, name and count; `collapsed` non-nil adds a disclosure chevron and
@@ -565,7 +564,7 @@ struct CollectionBrowserView: View {
             Text((collection.emoji?.containsVisualEmoji == true ? collection.emoji : nil) ?? "📁")
                 .font(.quicksand(.title3))
             Text(collection.name)
-                .font(.quicksand(.headline))
+                .font(.quicksand(.title3, weight: .bold))
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             Text("\(recipeCount(for: collection))")
