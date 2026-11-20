@@ -34,6 +34,11 @@ PNG or JPEG, no alpha channel, up to 10 per size.
 
 ## Gotchas
 
+- The demo account is on the Pro limits tester list (`docs/memory/pro-gating.md`), so the meal plan and
+  recipe screens show lock notices. Take it off `pro_enforcement_testers` for the shoot and put it back after.
+- The simulator panel shows one device at a time, so each simulator needs its own sign-in.
+- Relaunching the app reopens the last list. Check where each device is before capturing.
+
 - A meal plan entry of kind `recipe` shows the literal word "Recipe" unless its `title` is also set.
 - Recipes without tags show an orange warning badge on the grid. The app auto-tags them the first time
   the Recipes tab loads, so open that tab once and relaunch before capturing.
